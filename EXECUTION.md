@@ -13,7 +13,7 @@
 | The goal and claims | `/NORTH-STAR.md` | Mission in owner words; C1–C5; the seven-layer contract; non-goals |
 | Owner intent | `/INTENT-LEDGER.md` | Owner words, verbatim, statused — the ONLY intent authority |
 | Owner laws | `/PRINCIPLES.md` | P-01..P-17: WORDS / MEANING / MECHANISM / FAILURE MODE / GROWTH |
-| Decisions | `/DECISIONS.md` | D-001..D-023, statused; open owner questions Q1–Q3 |
+| Decisions | `/DECISIONS.md` | D-001..D-024, statused; open owner questions Q1–Q3 |
 | Executable law | `/LAWS.md` | The 29 laws: statement, ladder level, check, live-at; LAD rules; proactive set |
 | Doctrine | `/ENGINEERING.md` | Why the laws are what they are (transcript + upstream) |
 | Roles, loop, growth, healing, verification | `/OPERATING-MODEL.md` | The slice loop; six operating models; memory-update protocol; self-healing; the verification stack |
@@ -74,7 +74,7 @@ Rules:
 ## 5. How this contract changes
 
 - **Append-only.** Ledgers, laws, and decisions supersede by reference; text is never rewritten; numbering never recycles. A status marker plus a pointer is the only permitted in-place change (the repo's supersession convention).
-- **The change channel (D-024).** Memory deltas land on `main` per P-15. Analysis, review, and proposal artifacts never land on `main` directly — they arrive by pull request and merge only with the owner's explicit authorization; a review request authorizes inspection and reporting, never edits. `main` is protected (PR-only, no force push, applies to admins): the host rejects direct pushes, so the discipline is checked in the workflow, not remembered in prose. Process detail: `context/reviews/REVIEW-PROTOCOL-PROPOSAL.md` (accepted, subordinate to this section).
+- **The change channel (D-024).** Memory deltas land by PR under P-15's standing continuous-commit authorization (merged without per-merge owner approval — the owner reviews at gates, P-13). Analysis, review, and proposal artifacts never merge themselves: they require the owner's explicit authorization per merge; a review request authorizes inspection and reporting, never edits. `main` is protected (PR-only, no force push, applies to admins): the host rejects direct pushes, so the discipline is checked in the workflow, not remembered in prose. Process detail: `context/reviews/REVIEW-PROTOCOL-PROPOSAL.md` (accepted, subordinate to this section).
 - **Who changes what.** The owner directly for NORTH-STAR and the INTENT-LEDGER; doc slices with owner approval for other root documents once walls are live (LAW-07 protected paths); the orchestrator for worklog/registers within protocol.
 - **The update invariants bind every change.** The eight invariants in `/OPERATING-MODEL.md` §7 (cold start never regresses; read order acyclic and total; no orphan authority; no silent supersession; corpus closed; plans yield to evidence; memory deltas atomic with commits; context budget is a budget) apply to this file and to every edit made under this contract.
 - **The corpus stays closed.** A new root-level document requires folding its concern into §1's map in the same commit (FX-07 discipline). One canonical home per concern, forever.

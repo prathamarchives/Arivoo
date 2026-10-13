@@ -514,7 +514,7 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
         lambda r: _edit(
             r,
             "AGENTS.md",
-            "- **Change channel (D-024): findings are recorded; changes are applied only through reviewed branches.** Analysis, review, and proposal artifacts NEVER land on `main` directly — they arrive on a branch, through a pull request, and merge only with the owner's explicit authorization. Memory deltas (owner words, decisions, ledgers, worklog, plan, session records) continue to land per P-15. With walls stage-1 live, direct pushes to `main` are rejected by the host.\n",
+            "- **Change channel (D-024): findings are recorded; changes are applied only through reviewed branches.** Analysis, review, and proposal artifacts NEVER land on `main` directly — they arrive on a branch, through a pull request, and merge only with the owner's explicit authorization. Memory deltas (owner words, decisions, ledgers, worklog, plan, session records) land per P-15: branch + PR + merge under the standing authorization of P-13/P-15 (the owner reviews at gates, not per-merge). With walls stage-1 live, direct pushes to `main` are rejected by the host.\n",
             "",
         ),
         "VER-107",

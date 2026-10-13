@@ -13,6 +13,8 @@
   - Q2 — purge vs backups (D-011). Blocks only the Phase 3 storage/purge schema lock.
   - Q3 — fact-tag meaning (re-scoped by INT-069). Blocks only the fact-tag vocabulary freeze; custom tags are unaffected.
   - D-014 — calculation engine. Non-blocking for capture.
+  - F-06 — cloud vs local-first vs cross-device-sync deployment precision (stress-review F-06). Owner ratification needed; blocks only the deployment-precision statement — nothing current.
+  - Phase 1 go/no-go — the owner's explicit go for W-02..W-04. Blocks Phase 1 execution only.
 - **Outstanding reviews:** none pending. Latest: `context/reviews/2026-10-13-goal-aligned-architecture-review.md` (merged via PR #2); its open findings F-06, F-08 (second half), F-09, F-10, F-11 are tracked in the session-11 record with owners and gates.
 - **Verification state (never trust prose over runs):**
   - **verified (run):** `python3 tools/verify_canonical_layer.py` GREEN on this tree, including `--self-test` known-bad mutations caught (see session-11 record for the count).

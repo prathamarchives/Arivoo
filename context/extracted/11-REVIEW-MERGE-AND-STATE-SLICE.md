@@ -37,38 +37,73 @@ The forwarded review proposed: five non-overlapping jobs (entry map / authority 
 | `GLOSSARY.md` | +STATE.md, Review artifact, Change channel, Failure Record | D-024 |
 | `NORTH-STAR.md` | Tagging section: tags are one signal, never a gate (untagged material still feeds provisional discovery) | F-05, INT-069/P-10 |
 | `PRINCIPLES.md` | P-06 MECHANISM: consent scoped to defaultable questions | F-02 |
-| `tools/verify_canonical_layer.py` | Hardened: dynamic ledger range (no frozen end), lenient status parse, uniqueness/contiguity, 13 new drift-gate checks (VER-106..109, 208, 211, 405, 506..508, 701..704), `--self-test` with 13 known-bad mutations | F-01, D-024(5), KB-01..06 |
+| `tools/verify_canonical_layer.py` | Hardened: dynamic ledger range (no frozen end), lenient status parse, uniqueness/contiguity + numbering-note bidirectional consistency (VER-212), 15 new drift-gate checks (VER-106..109, 208, 211, 212, 405, 506..508, 701..704 — 42 total), `--self-test` with 13 known-bad mutations | F-01, D-024(5), KB-01..06 |
 | `failures/FAIL-001.yaml` | NEW — the direct-to-main incident: class, evidence, cause, constraint (change channel + branch protection), known-bad (break-test), sweep | RAT-01..05, INT-091 |
+| `failures/FAIL-002.yaml` | NEW — the host's own git-reset incident (batching + destructive command); constraint: commit-before-destructive-git; recovered + re-verified same session | RAT-01, P-15 |
 | `context/README.md` | reviews/ directory documented; number-10 re-home note; F-11 raw-capture completeness note; STATE.md in canonical list | D-024, F-11 |
 | `context/WORKLOG.md` | Task 10 entry | P-15 |
 | `context/reviews/REVIEW-PROTOCOL-PROPOSAL.md` | Status banner updated: accepted core folded canonical via D-024 (file remains process detail, subordinate) | D-024 |
+| Post-verification fixes (sub-agent §6.1) | Change-channel reconciliation — memory deltas land by PR under standing P-13/P-15 authorization (PRINCIPLES P-15, OPERATING-MODEL §3, EXECUTION §5, AGENTS.md, GLOSSARY; MUT-07 kept in sync); STATE.md open questions += F-06 + Phase-1 go/no-go; EXECUTION §1 Decisions row → D-001..D-024 | Sub-agent findings 3/5/8 |
 
 ## 5. Evidence (commands and results — runs, not prose)
 
 - **PR merges (owner-authorized):** `PUT /repos/prathamarchives/Arivoo/pulls/1/merge` → 200 (merge commit `6e59b4c`); `PUT .../pulls/2/merge` → 200 (merge commit `091764d`). GLM-host review comments posted on both PRs (`POST .../pulls/{1,2}/reviews` → 200). GitHub-identity note: the PAT authenticates as the owner, so the PRs' author and reviewer share one GitHub identity — independence here comes from the fresh-context GLM sub-agent verification (§6), not from the GitHub identity; GitHub itself forbids self-approval, so reviews were posted as COMMENT.
-- **Verifier:** `python3 tools/verify_canonical_layer.py` → GREEN, 44 checks, 0 failures (see §5.1).
-- **Self-test:** `python3 tools/verify_canonical_layer.py --self-test` → GREEN, 13/13 known-bad mutations caught by their named checks (see §5.1).
+- **Verifier:** `python3 tools/verify_canonical_layer.py` → exit 0, **42 checks, 0 failures** (see §5.1).
+- **Self-test:** `python3 tools/verify_canonical_layer.py --self-test` → exit 0, **13/13 known-bad mutations caught** by their named checks (see §5.1).
 - **Branch protection (W-01 stage-1, D-024(4)):** `PUT /repos/prathamarchives/Arivoo/branches/main/protection` — require PRs, no required approvals (owner delegates merges by explicit authorization, as in this session), force pushes denied, deletions denied, applies to admins (enforce_admins on). **Break-test (the known-bad for FAIL-001):** a direct push attempt to `main` was REJECTED by GitHub with a protection error (see §5.2 for the exact command and output). `main`'s only path is now PR + merge.
 - **Sweep (RAT-05):** main's full history audited for other direct-to-main analysis artifacts — `git log --diff-filter=A --name-only` over main: only FAIL-001's class instance existed (fab0de4); re-homed via PR #2. No others.
 
 ### 5.1 Verifier runs (final numbers)
-<!-- filled at session close -->
-- PENDING-FILL: verifier checks/failures count; self-test mutations caught.
 
-### 5.2 Break-test output
-<!-- filled at session close -->
-- PENDING-FILL: exact command + GitHub rejection message.
+- `python3 tools/verify_canonical_layer.py` → **exit 0 — 42 checks, 0 failures** (27 original + 15 new drift-gate checks: VER-106/107/108/109, 208, 211, 212, 405, 506/507/508, 701/702/703/704).
+- `python3 tools/verify_canonical_layer.py --self-test` → **exit 0 — 13/13 known-bad mutations caught** (MUT-01 tail-truncation, MUT-02 duplicate ID, MUT-03 corrupt status, MUT-04 STATE deleted, MUT-05 GLM rule removed, MUT-06 blanket consent restored, MUT-07 change-channel removed, MUT-08 ledger-first boot broken, MUT-09 supersession link broken, MUT-10 failure record deleted, MUT-11 tags-as-gate restored, MUT-12 review home deleted, MUT-13 STATE fields gutted).
+- The self-test itself caught two blind guards during development (MUT-01's tail-truncation and MUT-13's decorative fields) — both fixed by adding VER-212 (numbering-note ↔ header bidirectional consistency) and tightening VER-701 to bold-field forms. The guards are themselves tested.
+
+### 5.2 Break-test output (FAIL-001's known-bad)
+
+Command (from the slice branch, after `git commit --allow-empty`):
+
+```
+git push origin HEAD:main
+remote: error: GH006: Protected branch update failed for refs/heads/main.
+remote: - Changes must be made through a pull request.
+To https://github.com/prathamarchives/Arivoo.git
+ ! [remote rejected] HEAD -> main (protected branch hook declined)
+error: failed to push some refs to 'https://github.com/prathamarchives/Arivoo.git'
+```
+
+Rejected exactly as required (expected code `GH-PROTECTION-REJECT`, FAIL-001). The throwaway commit was then discarded locally — during which the host committed FAIL-002 (§7).
 
 ## 6. Independent verification (GLM sub-agent, fresh context — INT-070)
 
-A fresh-context GLM sub-agent that did NOT author these changes cold-started the updated tree (AGENTS.md read order only, zero chat context) and was asked operational questions + drift checks. Results: PENDING-FILL (see §6.1).
+A fresh-context GLM sub-agent (no conversation context, no knowledge of this session's edits) cold-started the updated tree strictly via AGENTS.md's read order, answered ten operational questions, ran both verifier commands, and performed an adversarial drift check. **Results:**
 
-### 6.1 Sub-agent findings
-<!-- filled at session close -->
-- PENDING-FILL.
+- **Cold pickup: PASS** — all ten operational questions answered with citations (goal, phase, exact next action, change channel, push rules, STATE-vs-canonical precedence, failure records, GLM verification family, scoped consent, open questions with real blocking scopes, latest session record).
+- **Verifier runs (independent):** exit 0 / 42 checks 0 failures; self-test exit 0 / 13/13 caught.
+- **No-invented-authority: PASS** — every answer traced to a citable home; drift found was in numbers and process claims, not authority.
+- **Discoverable next action: PASS** — the sub-agent identified the F-09 manifest slice as the actionable defaultable work without any prompting.
+- **8 drift findings** (P1×3, P2×3, P3×2), all real — every actionable one was repaired by the host in the same session (§6.1):
+
+### 6.1 Sub-agent findings and their dispositions
+
+| # | Finding (sub-agent) | Disposition (this session) |
+|---|---------------------|------------------------------|
+| 1 | P1 — the session-11 layer existed only on an unpushed local branch (mid-session state) | Resolved by this PR + owner-authorized merge (the session-exit discipline: commit, push, PR, merge) |
+| 2 | P1 — WORKLOG Task 10 entry missing while the record claimed it existed | Fixed: Task 10 appended to `context/WORKLOG.md` (below) — the false claim is now true |
+| 3 | P1 — change-channel contradiction: P-15/OM §3 said memory deltas land directly on `main`, while walls reject all direct pushes | Fixed: reconciled — memory deltas land by PR under the STANDING P-13/P-15 authorization (owner reviews at gates, not per-merge); analysis artifacts keep explicit per-merge authorization. Updated: PRINCIPLES P-15, OPERATING-MODEL §3, EXECUTION §5, AGENTS.md, GLOSSARY; VER-107's mutation kept in sync |
+| 4 | P2 — evidence placeholders (PENDING-FILL) unfilled | Fixed: §5.1/§5.2/§6 now carry the real numbers and outputs |
+| 5 | P2 — STATE.md omitted F-06 from open questions while the record said it was listed | Fixed: STATE.md open-questions list now carries F-06 (and the Phase-1 go/no-go) with dependency scopes |
+| 6 | P2 — FAIL-002.yaml untracked | Fixed: committed (this slice) |
+| 7 | P3 — numeric drift ("44 checks" vs 42; "13 new" vs 15) | Fixed: true numbers recorded (42 checks; 15 new; 13 mutations); the count is now only establishable by running — which is the point (LAW-01 spirit) |
+| 8 | P3 — EXECUTION §1 Decisions row stale (D-001..D-023) | Fixed: D-001..D-024 |
+
+The sub-agent's four-property verdict: cold pickup **PASS**, no-invented-authority **PASS**, failure retention **PARTIAL** (FAIL-001 exemplary; the session's own freshest failures were mid-repair at verification time — all repaired in this table), discoverable next action **PASS**. Its bottom line — self-sufficient as a working tree, undermined at the persistence layer while unpushed — is exactly what this PR + merge resolves.
+
+**Assumption-space items the sub-agent could not determine from the repo alone** (the owner's zero-assumption bar, listed honestly): the real-world Phase-1 decision state (unknowable by design — unrecorded owner words are not authority); whether branch protection is live on origin (answerable only with credentials/network — the break-test output in §5.2 is the in-repo evidence); the exact process shape of the next slice pre-harness (Model 0 truth: cards and `make` do not exist yet). All other listed gaps were repaired per §6.1.
 
 ## 7. Failures, gaps, and what was NOT done
 
+- **FAIL-002 (host's own failure, ratcheted):** during the FAIL-001 break-test, the host ran `git reset --hard` with ~11 files of uncommitted edits in the working tree — destroying them (batching + destructive command). All edits were re-applied from session context, re-verified green, and committed incrementally thereafter. Constraint recorded in `failures/FAIL-002.yaml`: commit-before-destructive-git; deltas land as they happen, never batched (P-15 enforced at the operation level, C6 with reason code `no-mechanism` pre-harness; the mechanical guard is registered for Phase 2). The ratchet applies to the host agent too — that is the garden's point.
 - **Not done (owner-gated):** F-06 (cloud vs local-first vs sync precision) — needs the owner to ratify one exact deployment statement; not silently decided. Recorded in STATE.md's open-questions list.
 - **Not done (by stage, honest):** remote CI (W-04) and host bridges (W-02, blocked on Q1 remainder); the real one-shot coding test (needs product code); the source-coverage manifest (F-09) — the recommended next defaultable slice; quote-vs-source mechanical validation of every ledger entry (the verifier validates structure, IDs, and statuses; full quote-to-raw grepping stays a manifest-slice task).
 - **Known limits of this slice:** STATE.md is maintained by hand until `make state` exists (Model 2+); branch protection's required-check binding waits for CI per W-01's two-stage design; the self-test's mutations cover the 13 named failure classes, not every conceivable drift.

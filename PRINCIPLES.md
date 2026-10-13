@@ -180,9 +180,9 @@ Append-only: new laws get new numbers. Superseded laws keep their text and statu
 
 **MEANING.** Every reasoning delta — a decision, a law, a tension, an extraction, a plan change, a failure, a question — becomes a file update, then a commit, then a push. Same-session. Chat is where understanding is built; the repo is where it lives.
 
-**MECHANISM.** The commit protocol in OPERATING-MODEL (the delta → file → commit → push pipeline, with the worklog append). From Phase 1, the walls make this safe (protected main, PR-only) — memory commits are still direct to main by the owner's design (doc-only commits; code goes through the slice gate once code exists).
+**MECHANISM.** The commit protocol in OPERATING-MODEL (the delta → file → commit → push pipeline, with the worklog append). From walls stage-1 (2026-10-13, D-024/FAIL-001), `main` is PR-only for everyone — memory deltas land same-session as branch + PR + merge under the STANDING authorization of this law and P-13 (the owner reviews at gates, not per-merge); analysis/review/proposal artifacts additionally require explicit per-merge owner authorization (the change channel, D-024). The continuous part is unchanged and literal: every delta commits and lands in the same session, never batched for later (FAIL-002 records what batching costs).
 
-**FAILURE MODE.** The lost conclusion: a brilliant session that ends unpushed. It never happened (P-02).
+**FAILURE MODE.** The lost conclusion: a brilliant session that ends unpushed. It never happened (P-02). The batched conclusion is its twin — edits held uncommitted for "later" are one `reset --hard` away from never having existed (FAIL-002).
 
 **GROWTH.** Once code exists, commits split: memory deltas (doc commits, immediate) vs code changes (slice-gated, PR + CI). Both remain continuous — neither kind waits for a batch.
 

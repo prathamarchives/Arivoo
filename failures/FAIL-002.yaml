@@ -1,0 +1,56 @@
+id: FAIL-002
+date: 2026-10-13
+class: process / host error
+severity: P1 (work-loss class — 11 tracked-file edits destroyed mid-session; full recovery was possible only because the edits lived in session context)
+title: Host ran `git reset --hard` with uncommitted working-tree changes
+
+what_happened: |
+  During the break-test for FAIL-001 (attempting a direct push to protected main), the
+  host created a throwaway empty commit and then ran `git reset --hard HEAD~1` to remove
+  it — while ~11 files of uncommitted session edits sat in the working tree. The reset
+  discarded all uncommitted tracked-file changes. Untracked files (STATE.md, the session
+  record, failures/) survived. All edits were recovered by re-application from session
+  context and re-verified (verifier GREEN, self-test 13/13) before being committed.
+
+evidence:
+  - session_record: context/extracted/11-REVIEW-MERGE-AND-STATE-SLICE.md (§7 records the incident)
+  - recovery: commits re-applying AGENTS.md, OPERATING-MODEL.md, EXECUTION.md, DECISIONS.md,
+    INTENT-LEDGER.md, GLOSSARY.md, NORTH-STAR.md, PRINCIPLES.md, context/README.md,
+    context/reviews/REVIEW-PROTOCOL-PROPOSAL.md, tools/verify_canonical_layer.py
+  - re-verification: `python3 tools/verify_canonical_layer.py` → 42 checks, 0 failures;
+    `--self-test` → 13/13 mutations caught (both re-run after recovery)
+
+cause: |
+  Two stacked discipline violations by the host: (1) P-15's continuous-commit law was
+  treated as a session-end formality — ~15 file edits were batched uncommitted for hours
+  of session time instead of landing as they happened; (2) a destructive git operation
+  (`reset --hard`) was executed on a dirty working tree without checking `git status`
+  first. The failure class: batching + destructive commands.
+
+constraint_added:
+  rule: commit-before-destructive-git (P-15 enforced at the operation level)
+  level: C6 (canonical rule; the repo cannot intercept local git commands pre-harness)
+  mechanism: |
+    (a) Every reasoning delta lands as a file update + commit immediately after the edit
+    is verified — batching edits for a single end-of-session commit is a violation, not
+    efficiency (P-15 means continuous, not eventual). (b) Before ANY destructive git
+    operation (reset --hard, checkout -- <path>, clean, rebase, branch -D), the operator
+    MUST verify `git status` is clean; if not, commit or stash first. (c) Break-tests
+    and other throwaway-commit rituals run on a scratch branch or detached HEAD, never
+    on the working branch holding live edits.
+
+known_bad:
+  test: a future session attempting `git reset --hard` on a dirty tree — the session
+    record and this rule make the mistake visible; the true mechanical guard (a
+    pre-push/pre-reset hook) is registered for the harness phase (Phase 2, make gate)
+  expected_code: P15-COMMIT-FIRST
+  result: PENDING (document-level guard for now; reason code no-mechanism pre-harness per LAD-02)
+
+sweep: |
+  RAT-05: the same pattern elsewhere in this session — none found; all subsequent
+  operations committed after each verified edit (visible in the recovery commit sequence).
+
+origin: host self-report during the review-merge session (INT-091); recorded under RAT-01
+  (record the failure in the same session) — the ratchet applies to the host agent too,
+  which is the entire point of the garden.
+status: closed-at-C6 (rule recorded; mechanical guard deferred to the harness phase with reason code)

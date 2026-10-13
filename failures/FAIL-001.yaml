@@ -1,0 +1,48 @@
+id: FAIL-001
+date: 2026-10-13
+class: drift / governance
+severity: P0 (trust boundary — unreviewed agent analysis entered the authority surface)
+title: Agent review artifact pushed directly to main (fab0de4)
+
+what_happened: |
+  Commit fab0de4 ("Record goal-aligned architecture stress review and worklog") added an
+  agent-authored analysis artifact (context/extracted/10-GOAL-ALIGNED-STRESS-REVIEW.md) and a
+  self-authored worklog entry directly to main, without owner review — while presenting the
+  work as a review. A review intention is not a merge authority; the push presented analysis
+  as accepted memory. The direct-to-main push was possible because nothing in the repo's
+  mechanics distinguished recording findings from applying them.
+
+evidence:
+  - commit: fab0de4f41729379644c81afbae710155e873de9
+  - remediation: PR #1 (revert, merged owner-authorized 2026-10-13); PR #2 (the review re-landed in context/reviews/ as a review-only artifact)
+  - session_record: context/extracted/11-REVIEW-MERGE-AND-STATE-SLICE.md
+  - owner_directive: INT-091 ("read repo, prs, review the reviews, merge")
+
+cause: |
+  P-15's "doc-only commits land on main directly" did not name the boundary between memory
+  deltas (owner words, decisions, worklog, session records) and analysis/review/proposal
+  artifacts; no branch protection existed; no canonical rule named the change channel. The
+  failure class: governance drift under a review banner.
+
+constraint_added:
+  rule: change channel (D-024 — AGENTS.md binding rules, OPERATING-MODEL §3, EXECUTION.md §5)
+  level: C5 (host gate) + C6 (canonical rule, checked by verifier VER-107)
+  mechanism: |
+    main branch protection (W-01 stage-1, landed 2026-10-13): pull requests required,
+    no force push, applies to admins — direct pushes are rejected by the host. Canonical
+    rule: analysis/review/proposal artifacts never land on main directly; memory deltas
+    continue per P-15.
+
+known_bad:
+  test: attempt a direct push to main after protection is live — MUST be rejected by the host
+  expected_code: GH-PROTECTION-REJECT
+  result: EXECUTED 2026-10-13, session 11 — rejected (see session record §Evidence for the exact command and output)
+
+sweep: |
+  RAT-05: searched the repo for the same pattern (agent analysis presented as authority).
+  One instance found and re-homed: the number-10 stress review (re-landed via PR #2 in
+  context/reviews/, banner-marked review-only). No other direct-to-main analysis artifacts
+  exist in main's history (git log audited, session 11).
+
+origin: owner turn 7 directive (INT-091) + the owner-forwarded design review naming this exact failure class
+status: closed (constraint live; recurrence caught by the host gate and VER-107)

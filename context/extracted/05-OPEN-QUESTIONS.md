@@ -4,6 +4,38 @@ Status: awaiting the owner's answers. Each is classified per the Question Record
 
 ---
 
+## UPDATE 2026-10-13 (owner turn 3.txt — verdict review + decisions)
+
+Resolved by owner decisions and the owner-presented verdict:
+- QA-1 → RESOLVED (D-001: "you run, i review")
+- QB-1 → RESOLVED (D-002: product Arivo, repo Arivoo)
+- QA-2 → SUPERSEDED by protocol: the verdict's phase order removes the Understanding-Session-first gate; cold-start proof moves to the Context Exam / phase discipline (revisit when the canonical spec is reconciled)
+- QB-2 → ABSORBED into PLAN Phase 1 (W-01 walls; restricted required check + FACT entry)
+- QB-3 → ABSORBED into PLAN Phase 1 (W-04 CI, Linux, owner-controlled)
+- QB-4 → STANDS (arivo-owner stays owner-only, outside the repo; redacted isolation check replaces env dump — R-06)
+- QC-1 / QC-2 → RESOLVED (D-003 / D-004 / D-008: Postgres + pgvector, local-first now, cloud sync on The List; Windows + WSL dev, Linux CI)
+- QD-1 → OPEN (import format priority; non-blocking until capture slices)
+- QD-2 → OPEN (agent journal-token scope day one; non-blocking)
+- QD-3 → ABSORBED into PLAN Phase 5 (agent reads/API-MCP with D-019 surface)
+- QE-2 → RESOLVED (owner set the reasoning order by directive; first layer built)
+- QE-1 / QE-3 → OPEN (non-blocking calibration)
+
+New owner questions (blocking for their named locks; defaults stand until overridden):
+
+**Q1 — Host decision (blocks PLAN Phase 1 W-02 + builder setup).**
+Which host is "Other"? Which is the primary builder for the first slices?
+Default: primary builder = the orchestrator + its fresh-context subagents (predictable, whole-context); a verifier from a different model family (Claude Code or Codex CLI) once the host contract is verified; other hosts join by passing the host contract.
+
+**Q2 — Purge vs backups (blocks storage/purge schema lock, PLAN Phase 3).**
+What does purge mean for existing backups?
+Default: immediate removal from live system + active derived stores; documented backup-expiry retention; purge ledger applied on restore so purged content never silently resurfaces. Per-owner encryption + key destruction only if physical erasure of every backup is required.
+
+**Q3 — fact tag semantics (blocks vocabulary + Scribe/Planner rules).**
+Does `fact` mean (a) "a statement intended to be factual, with evidence and verification status recorded separately" or (b) "a statement the system treats as verified true"?
+Default: (a) — supports disagreement and uncertainty without losing the source claim. Note: the owner's original corpus wording points to (b); the architecture's later hardening (P-08: a fact tag classifies, never certifies) points to (a). The owner decides.
+
+---
+
 ## A. Role and execution of THIS session (Blocking for repo start)
 
 **QA-1. What is my exact role in the build?**

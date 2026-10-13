@@ -100,3 +100,21 @@ Stage Summary:
 - Repo memory is LIVE: any fresh agent cold-starts from AGENTS.md → context/. Session-start protocol from now on: read repo AGENTS.md + worklog tail first.
 - Plan mode for code still holds — memory seeding was the single authorized piece (D-006).
 - Open with owner: T-4 (playbook in repo? default NO, one-word override), next session = engineering architecture + current decisions.
+
+---
+
+Task ID: 4
+Agent: Super Z (orchestrator)
+Task: Ingest owner turn 3.txt (verdict review + directives + vision) verbatim; reason through it; record dispositions
+
+Work Log:
+- Owner protocol directive registered: continuous commit — every reasoning delta → file update → commit → push (P-15, new law)
+- Ingested context/raw/3.txt verbatim (session protocol + 11-section verdict review + first-layer directive + doctrine quotes + raw vision narrative)
+- Wrote context/extracted/08-RECONCILIATION-BRIEF.md: dispositions R-01..R-11, spec deltas 1-12, orchestrator position (verdict ENDORSED — it is the doctrine's own ratchet applied to the plan; the F-band drifted from "start small, one complete reliable path")
+- Updated 05-OPEN-QUESTIONS.md: resolved/absorbed QA-1, QB-1..3, QC-1/2, QD-3, QE-2; staged new Q1 (host), Q2 (purge-backups), Q3 (fact-tag) with defaults
+- Marked context/extracted/00-PRINCIPLES.md SUPERSEDED by root /PRINCIPLES.md (first layer, next task)
+- Commit A (this commit) records the ingestion + reasoning delta
+
+Stage Summary:
+- Verdict fully dispositioned: D-007..D-019 staged for DECISIONS.md; phase order reconciled (D-016); semantic-in-sequence locked by owner words (D-015, P-16); product-first codified (P-17)
+- Next: Task 5 — build the first layer (root canonical files: NORTH-STAR, INTENT-LEDGER, DECISIONS, PRINCIPLES, GLOSSARY, OPERATING-MODEL, PLAN, AGENTS.md v1) → Commit B

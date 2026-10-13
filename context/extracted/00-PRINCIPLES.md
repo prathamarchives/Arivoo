@@ -1,5 +1,7 @@
 # Arivoo — Principles Ledger (Laws of Execution)
 
+> SUPERSEDED 2026-10-13 by the canonical root `/PRINCIPLES.md` (first layer). This file is kept as extraction history; the root file governs. Do not update this copy.
+
 Source of truth: the user's explicit statements, verbatim. Nothing here is assumed.
 Status legend: CONFIRMED = user said it directly. PENDING = awaiting deeper context.
 

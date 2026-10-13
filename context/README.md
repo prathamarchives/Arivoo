@@ -20,4 +20,4 @@ Status: TEMPORARY. At playbook Step 2 / slice F-01 this material is restructured
 
 ## Canonical
 
-This repo copy is the canonical memory from 2026-10-13 onward. The cold-start read order is defined in `/AGENTS.md`.
+The ROOT canonical files created 2026-10-13 as the repo's first layer GOVERN where they overlap with these briefs: `/NORTH-STAR.md`, `/INTENT-LEDGER.md`, `/DECISIONS.md`, `/PRINCIPLES.md`, `/GLOSSARY.md`, `/OPERATING-MODEL.md`, `/PLAN.md`, `/AGENTS.md`. The briefs in `extracted/` are point-in-time process artifacts (extraction and reasoning history) — `00-PRINCIPLES.md` is already marked superseded; the rest remain valid history until the canonical EXECUTION.md rewrite folds their deltas (see `08-RECONCILIATION-BRIEF.md`). The cold-start read order is defined in `/AGENTS.md`.

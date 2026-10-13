@@ -118,3 +118,27 @@ Work Log:
 Stage Summary:
 - Verdict fully dispositioned: D-007..D-019 staged for DECISIONS.md; phase order reconciled (D-016); semantic-in-sequence locked by owner words (D-015, P-16); product-first codified (P-17)
 - Next: Task 5 — build the first layer (root canonical files: NORTH-STAR, INTENT-LEDGER, DECISIONS, PRINCIPLES, GLOSSARY, OPERATING-MODEL, PLAN, AGENTS.md v1) → Commit B
+
+---
+
+Task ID: 5
+Agent: Super Z (orchestrator)
+Task: Build the first layer of the repo — the base foundation: rules, principles, intent, aligned goal, operating model (owner directive INT-042)
+
+Work Log:
+- Created root canonical files:
+  - /NORTH-STAR.md — the goal in the owner's verbatim words; claims C1-C5; first usable workflow; architecture commitments; non-goals (calculation engine OPEN)
+  - /INTENT-LEDGER.md — INT-035..INT-045 verbatim with status (continuous commit, governing loop, harness-serves-product, the experience, no-deferral, backend-only, persistence, first-layer directive, agent-with-my-context, notes-not-sticky-notes, concepts-grow)
+  - /DECISIONS.md — D-001..D-019 statused (LOCKED / PRESENTED-LOCKED / ADOPTED) + open Q1-Q3 with defaults
+  - /PRINCIPLES.md — P-01..P-17 (adds P-15 continuous-commit, P-16 architecture-evolution/no-deferral, P-17 product-first); supersedes context/extracted/00
+  - /GLOSSARY.md — controlled vocabulary: identity, product objects (minimum durable model incl. Anchor, @-reference, two outboxes, durability ladder, tombstone/purge), execution terms, language rules
+  - /OPERATING-MODEL.md — roles, slice loop, commit protocol, morals, beliefs, question classes, security standing rules, host discipline, language discipline
+  - /PLAN.md — 5-phase reconciled sequence (trust env → min harness → durable capture → reader+journal → retrieval+compounding), proactive set from day one, Phase 1 detailed (W-01..W-04), F-band superseded note
+- Rewrote /AGENTS.md to v1 (cold-start map pointing at root canonical files)
+- Updated context/README.md canonical section (root governs; briefs = history)
+- Commit B (this commit) records the first layer
+
+Stage Summary:
+- THE FIRST LAYER IS LIVE: a fresh agent cold-starts from AGENTS.md → 6 root files → worklog tail. Rules, principles, intent, aligned goal, operating model — all canonical, all committed.
+- Plan mode for CODE still holds. Phase 1 (walls/bridges/isolation/CI) starts after owner answers Q1-Q3 and approves the execution plan.
+- Open with owner: Q1 host, Q2 purge-backups, Q3 fact-tag (defaults staged); then the canonical EXECUTION.md reconciliation pass (12 spec deltas staged in 08-RECONCILIATION-BRIEF.md)

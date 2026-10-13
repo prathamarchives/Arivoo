@@ -1,0 +1,32 @@
+# DECISIONS — Arivo
+
+Statused decision records. Append-only: supersede by adding a new entry that references the old; never rewrite.
+
+Status legend: **LOCKED** = owner words directly · **PRESENTED-LOCKED** = owner-presented review table (2026-10-13) · **ADOPTED** = review recommendation aligned with owner intent, challengeable · **OPEN** = owner answer pending.
+
+| ID | Date | Status | Decision |
+|----|------|--------|----------|
+| D-001 | 2026-10-13 | LOCKED | Operating mode: "you run, i review." Orchestrator executes; owner reviews at gates. Owner-only: signing key, exam keys, arivo-owner folder. |
+| D-002 | 2026-10-13 | LOCKED | Naming: product = **Arivo**; repo = **Arivoo**. |
+| D-003 | 2026-10-13 | LOCKED | Data layer: Postgres + pgvector; local-first now; cloud sync later. |
+| D-004 | 2026-10-13 | LOCKED | Cloud + sync, semantic search + retrieval, pgvector, vector search are NEEDED → The List (`context/extracted/07-ON-THE-LIST.md`). |
+| D-005 | 2026-10-13 | LOCKED | Piece-by-piece approach (P-14): architecture first, then small pieces, iterate each until exact. |
+| D-006 | 2026-10-13 | LOCKED | Repo memory seeded; the repo is the canonical memory. |
+| D-007 | 2026-10-13 | PRESENTED-LOCKED | Coding-agent hosts: GLM-based agent/CLI, Claude Code, Codex CLI, + hosts passing the host contract. "Other" is not a host → Q1. |
+| D-008 | 2026-10-13 | PRESENTED-LOCKED | Environment: Windows + Linux/WSL development; Linux CI. |
+| D-009 | 2026-10-13 | PRESENTED-LOCKED | Trusted verification: local checks + owner-controlled remote CI; remote CI is authoritative. |
+| D-010 | 2026-10-13 | PRESENTED-LOCKED | Durable behavior data: explicit actions + reading sessions + coarse position/dwell. No keystroke/mouse traces. No search-query or agent-prompt history. |
+| D-011 | 2026-10-13 | PRESENTED-LOCKED | Purge: deliberate, owner-authorized operation with erasure contract. Ordinary delete = tombstone. Runtime agents cannot purge. Purge removes content + derived material + unreferenced blobs; leaves minimal audit record; restore applies the purge ledger. Backup policy OPEN → Q2. |
+| D-012 | 2026-10-13 | PRESENTED-LOCKED | Question classes: blocking / defaultable / non-blocking. |
+| D-013 | 2026-10-13 | PRESENTED-LOCKED | First usable workflow: read a source, capture highlights/bookmarks, add a note, journal with `@` references — the reader-capture-journal milestone, several small slices. |
+| D-014 | 2026-10-13 | PRESENTED-LOCKED | Calculation engine: OPEN (NG-05 default removed). Revisit at math workflow design. |
+| D-015 | 2026-10-13 | LOCKED | Semantic indexing, vector retrieval, relationship processing, concept formation are core capabilities IN the implementation sequence (INT-039). Incremental implementation, not deferral. |
+| D-016 | 2026-10-13 | ADOPTED | Phase order: trust env → minimum harness → durable capture → reader+journal → retrieval+compounding. Vertical slice forward; initial harness = proactive guardrails only; constraints grow with the system. |
+| D-017 | 2026-10-13 | ADOPTED | Durability ladder: local-durable → server-durable → keyword-searchable → semantically indexed → linked. Capture-safety claims never exceed the current rung. |
+| D-018 | 2026-10-13 | ADOPTED | Two outboxes: client outbox (offline durability + sync) and server outbox (post-commit enrichment). Separate designs for separate problems. |
+| D-019 | 2026-10-13 | ADOPTED | Agent-authored material: attributed durable layer (annotations, links, concept proposals); zero belief weight; evidence for inferred relations only from grounded text-pair decisions or structural facts. API/MCP surface: scoped reads, attributed writes, idempotency, bounded responses, stable error codes; one command registry behind all adapters. |
+
+## Open owner decisions
+- **Q1** — Which host is "Other"; which is the primary builder. Default: orchestrator + fresh subagents build; cross-family verifier (Claude Code or Codex CLI) once the host contract is verified.
+- **Q2** — Purge vs backups. Default: live + active removal, documented backup expiry, purge ledger applied on restore; per-owner encryption + key destruction only if physical erasure is required.
+- **Q3** — fact-tag meaning: (a) intended-factual with separately recorded verification status, vs (b) system-verified true. Default: (a).

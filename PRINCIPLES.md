@@ -72,7 +72,7 @@ Append-only: new laws get new numbers. Superseded laws keep their text and statu
 
 **MEANING.** No review queue in any form. No pipeline stage ever waits for an owner action. The system runs; the owner observes at gates, not at approval steps.
 
-**MECHANISM.** NG-01 as a law: LAW-27 (no stage waits for an owner action; NG-01 scan, live Phase 3–5). Question classes keep autonomy honest without approval steps: blocking questions stop only the affected slice; defaultable questions proceed on a recorded default that the owner can override at the next touchpoint; silence past a named gate is consent (D-012).
+**MECHANISM.** NG-01 as a law: LAW-27 (no stage waits for an owner action; NG-01 scan, live Phase 3–5). Question classes keep autonomy honest without approval steps: blocking questions stop only the affected slice; defaultable questions proceed on a recorded default that the owner can override at the next touchpoint; silence past a named gate is consent for DEFAULTABLE questions only (D-012, QST-03 — scoped per the F-02 correction, 2026-10-13); blocking questions — owner intent, irreversible actions, security, data loss — stay open until the owner answers.
 
 **FAILURE MODE.** The approval trap — a "quick sign-off" stage that quietly becomes a queue, and the build stalls exactly when the owner is busy. Autonomy designed as reversibility: every state change is reversible, so acting is safe without permission.
 

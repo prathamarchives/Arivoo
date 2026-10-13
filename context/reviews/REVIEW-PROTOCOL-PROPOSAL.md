@@ -1,6 +1,6 @@
 # Review Protocol Proposal
 
-> **Status:** Proposed process, submitted through a docs-only PR. Not canonical until the owner accepts it. This file must not become a parallel authority: if accepted, fold the approved rules into the existing canonical home named in `EXECUTION.md`, then remove or mark this proposal as historical.
+> **Status:** ACCEPTED CORE FOLDED CANONICAL (2026-10-13, D-024) — the non-negotiables (review is read-only; findings never merge themselves; PR + explicit owner authorization; severity discipline; verification architecture) now live in `/AGENTS.md` binding rules, `/OPERATING-MODEL.md` §3, and `/EXECUTION.md` §5. This file remains as accepted process DETAIL (channel table, finding format, severity rules, PR contract), subordinate to those canonical homes — never a parallel authority. Supersession follows D-021/D-024: further changes to these rules happen in the canonical homes, not here.
 
 ## 1. Non-negotiable default: review is read-only
 

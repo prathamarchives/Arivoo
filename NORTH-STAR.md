@@ -32,7 +32,7 @@ Read a source → capture highlights/bookmarks → add a note → journal, refer
 
 **Import is day-one intake (INT-019).** The first usable path includes importing existing material — text/Markdown and conversation exports first (QD-1 default), books and articles per the durability ladder, external-platform integrations incrementally (INT-024). Capture never waits for import intelligence (layer-2 contract).
 
-**Tagging is custom (INT-069).** Highlights carry owner-authored custom tags when the owner chooses — the owner manually writes what kind of highlight it is, if they want; there is NO default fact/concept classification. The fact/concept/quote vocabulary remains available, never imposed (P-10 MECHANISM, updated 2026-10-13; Q3 re-scoped accordingly). Concept formation (C4) reads owner-authored tags.
+**Tagging is custom (INT-069).** Highlights carry owner-authored custom tags when the owner chooses — the owner manually writes what kind of highlight it is, if they want; there is NO default fact/concept classification. The fact/concept/quote vocabulary remains available, never imposed (P-10 MECHANISM, updated 2026-10-13; Q3 re-scoped accordingly). Concept formation (C4) reads owner-authored tags as ONE signal, never a gate: untagged highlights still feed provisional discovery — auto-detected concepts are instant and provisional (P-10), graduation on out-of-sample evidence is the junk gate, and no system-owned label is ever imposed to compensate (F-05 wording fix, 2026-10-13).
 
 ## The seven layers (the substrate contract)
 

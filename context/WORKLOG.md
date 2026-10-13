@@ -213,3 +213,26 @@ Stage Summary:
 - The Intent Ledger now carries the owner's full day of reasoning (72 entries); ledger discipline held — owner words only
 - Custom tags (INT-069) and GLM verification (INT-070) are live decisions, reconciled across P-10/GLOSSARY/Q1/Q3 with pointers
 - Next: owner reviews 09-ARCHITECTURE-REVIEW.md; answers Q1-remainder/Q2/Q3 (Q1 now half-answered: GLM runs test/verification); approves Phase 1 → walls (W-01..W-04). R-01 (owner-turn ingestion checklist) and R-02 (verifier extensions) are the recommended next doc slices.
+
+
+---
+
+Task ID: 10
+Agent: Super Z (orchestrator, GLM host) + 1 GLM-based verification subagent
+Task: Owner directive INT-091 (owner turn 7) — "read repo, prs, review the reviews, merge": cold-start read; review PRs #1/#2 and every review (Codex bot reviews, the goal-aligned stress review F-01..F-12, the review-protocol proposal, the owner-forwarded design review); merge the PRs that pass review; then fold the accepted design into the canonical layer (STATE.md, change channel, walls stage-1, verifier hardening).
+
+Work Log:
+- Full cold-start read first: AGENTS v2.2 → ledger (72 entries) → all 10 canonical files → worklog tail → both PR diffs + review artifacts + Codex reviews → verifier source (F-01 confirmed first-hand: hard-coded INT-068 range; status regex blind to invalid statuses)
+- Reviewed + merged PR #1 (revert fab0de4, the unreviewed direct-to-main review commit) and PR #2 (review artifacts re-landed in context/reviews/) — owner-authorized (INT-091); GLM-host review comments posted on both PRs
+- Implemented the D-024 slice on branch slice/state-index-and-review-discipline: /STATE.md (the five-jobs current-state index); AGENTS v2.3 (STATE read-order step 2, change channel, session-exit broadening); OPERATING-MODEL §3/§7/Model 0/§9; EXECUTION §1/§5/§6/§7; DECISIONS D-024 + D-007/INT-070 annotation; INTENT-LEDGER INT-091 + audit note 3; GLOSSARY +4 terms; NORTH-STAR F-05 fix (tags: one signal, never a gate); PRINCIPLES P-06 scoped consent; context/README reviews/+F-11
+- Hardened tools/verify_canonical_layer.py (F-01): dynamic ledger range, lenient status parse, numbering-note bidirectional consistency (VER-212), 15 new drift-gate checks (42 total), --self-test with 13 known-bad mutations — self-test caught 2 blind guards during development, both fixed
+- Landed walls stage-1 (W-01 first stage): branch protection on main (PR-only, no force push, applies to admins) via API; break-test executed — direct push REJECTED (GH006) — recorded in FAIL-001's known_bad
+- Recorded failures/FAIL-001.yaml (direct-to-main incident: change channel + protection + VER-107, four-way guard) and failures/FAIL-002.yaml (host's own git reset --hard on a dirty tree — 11 uncommitted edits destroyed, recovered from session context, re-verified; constraint: commit-before-destructive-git, never batch deltas)
+- Ran 1 fresh-context GLM verification subagent (INT-070): cold-started the tree via the read order alone, answered 10 operational questions, ran both verifier commands green (42/0; 13/13), adversarial drift check found 8 real findings (P1x3, P2x3, P3x2) — all actionable ones repaired in the same session (worklog entry, change-channel memory-delta reconciliation via standing P-13/P-15 authorization, placeholders filled, STATE F-06 + Phase-1 gates, EXECUTION D-024 map row, FAIL-002 committed)
+- Verifier re-run after all repairs: exit 0 (42 checks, 0 failures); self-test: 13/13
+
+Stage Summary:
+- PRs #1/#2 merged owner-authorized; the review set is review-the-reviewed and dispositioned (F-01..F-12 mapped: 7 repaired, 3 deferred with gates, F-06 owner-gated, F-10 Phase 5)
+- The repo now answers the owner's three properties: memory retrieval (AGENTS → STATE → authority cold start, sub-agent-verified), behavioral consistency (no-invented-authority PASS), learning from failure (FAIL-001 + FAIL-002 with guards; the failure-to-regression loop is real and ran twice this session — once on the incident, once on the host)
+- Next: owner go/no-go on Phase 1 (STATE.md exact next action); defaultable independent work meanwhile: F-09 source-coverage manifest slice
+- Session record: context/extracted/11-REVIEW-MERGE-AND-STATE-SLICE.md

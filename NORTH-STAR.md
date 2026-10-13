@@ -1,6 +1,6 @@
 # NORTH-STAR — Arivo
 
-The goal, in the owner's words (verbatim, 2026-10-13, `context/raw/3.txt`). Everything in this repo traces here. Authority: owner words (INTENT-LEDGER) > this file > PRINCIPLES > DECISIONS > PLAN > agent judgment.
+The goal, in the owner's words (verbatim, 2026-10-13, `context/raw/3.txt`). Everything in this repo traces here. Authority: owner words (INTENT-LEDGER) > this file > LAWS > ENGINEERING > PRINCIPLES > DECISIONS > PLAN > agent judgment.
 
 ## Mission
 
@@ -27,6 +27,22 @@ The goal, in the owner's words (verbatim, 2026-10-13, `context/raw/3.txt`). Ever
 
 ## First usable workflow (D-013)
 Read a source → capture highlights/bookmarks → add a note → journal, referencing material with `@`. The complete reader-capture-journal path is the first usable milestone, built from several small slices (never one enormous slice, never deferred). The durability ladder makes C1 testable: `local-durable → server-durable → keyword-searchable → semantically indexed → linked`.
+
+## The seven layers (the substrate contract)
+
+Each layer carries a must-be-true contract — this is how the goal decomposes into checkable structure. Layers 1–3 are the build's center of gravity (Phases 2–3); layer 6 is the product surface; layers 4–5 arrive with retrieval and compounding (Phase 5) through the evidence rules.
+
+| # | Layer | Must be true |
+|---|-------|--------------|
+| 1 | Ground truth | Evidence, behavior, and agent contributions are immutable and attributed; recovery limits stated honestly |
+| 2 | Ingestion | Any readable file becomes work, version, and passages atomically, deduped by work; a bookmark is just a position you return to |
+| 3 | Memory index | Keyword immediately, semantic later, all rebuildable |
+| 4 | Structure | Evidence means decisions on text pairs or structural facts; everything else is discovery |
+| 5 | Concept formation | Provisional concepts mint from independent sources and graduate on out-of-sample evidence |
+| 6 | Agent surface | One API core, MCP as an adapter, scoped tokens, context packs, untrusted-content marking |
+| 7 | Retrieval | Hybrid, why-payloads, temporal and behavioral queries, response budgets that fit an agent's context window |
+
+**The compounding probe ladder (how C3 is tested, separately per strength):** deterministic probe (a known alias or explicit relationship makes an old highlight retrievable) → semantic probe (a new related work causes saved material to resurface through semantic retrieval) → graph probe (automatic relationship creation adds useful connections without violating the evidence rules). Progressively stronger claims, tested separately — never bundled into one "it compounds" assertion.
 
 ## Architecture commitments (P-16)
 Semantic indexing, vector retrieval, relationship processing, and concept formation are core capabilities of the architecture, reached through small tested slices in the active sequence — never deferred as architecture, never a "version 2" bolt-on. The backend must evolve cleanly into future versions: agent-native, VR/3D/hardware.

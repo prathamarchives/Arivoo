@@ -142,3 +142,25 @@ Stage Summary:
 - THE FIRST LAYER IS LIVE: a fresh agent cold-starts from AGENTS.md → 6 root files → worklog tail. Rules, principles, intent, aligned goal, operating model — all canonical, all committed.
 - Plan mode for CODE still holds. Phase 1 (walls/bridges/isolation/CI) starts after owner answers Q1-Q3 and approves the execution plan.
 - Open with owner: Q1 host, Q2 purge-backups, Q3 fact-tag (defaults staged); then the canonical EXECUTION.md reconciliation pass (12 spec deltas staged in 08-RECONCILIATION-BRIEF.md)
+
+---
+
+Task ID: 6
+Agent: Super Z (orchestrator)
+Task: Owner directive INT-046 — re-read the raw corpus in multiple passes; tighten the first layer from summaries into depth and specifications; make the engineering principles and repo laws visible; design multiple operating models for the repo's whole growth; specify how context and repo memory update without breaking; specify verifications and self-healing.
+
+Work Log:
+- Raw re-read, full: engineering transcript.txt, upstream of engineering transcripts.txt, Arivo Agent Execution Specification.md (all 719 lines), 2.txt, 3.txt; structural + key-section passes over 0.txt and 1.txt (value-ladder spine, autonomy model, layer table, verdicts)
+- Created /ENGINEERING.md (5,773 words, 15 sections): the full agentic-repo doctrine — thesis, the two cuts, agent-native repository + five memory systems + authoritative homes, constraint ladder + constraints-as-products, every-failure-an-asset, proof-carrying changes + test validity, protect the verifier, diagnostics contract, locality/search-space/kernel, repo GC + ratchet, harness regression, growth stages, metrics, the 12 wall principles, first-day discipline. Each section: principle, failure it kills, mechanism here, source.
+- Created /LAWS.md: the 29 laws (Truth/Scope/Method/Product) with level, check, and live-at REMAPPED to the reconciled phases (Phase 1: LAW-07/08/28; Phase 2: method + toolchain laws; Phase 3: substrate laws; Phase 5: agent-surface laws); LAD rules; proactive set; activation rule (KB-04); law-adjacent rules (QST, STOP, actor classes, KER/BND, AFA, RAT); phase gates and signing.
+- Rewrote /PRINCIPLES.md: every owner law P-01..P-17 now carries WORDS / MEANING / MECHANISM (ladder level, laws, phase) / FAILURE MODE / GROWTH — no more 2-line summaries.
+- Rewrote /OPERATING-MODEL.md (316 lines): role matrix incl. future roles (runtime agent, worker, gardener/GC agent); 11-step slice loop specified; commit protocol; question classes; morals 1-10 + beliefs with operational meaning; **six operating models by growth stage** (Model 0 first layer → Model 6 self-improving harness; each: who runs, what is enforced, how memory updates, how failures heal, graduation predicate); **the memory update protocol** (append-only semantics, one-fact-one-home, authority order, 8 update invariants = "nothing breaks" mechanically, cold-start protocol); **the self-healing system** (ratchet RAT-01..08, known-bad rules, repo GC, diagnostics contract, failure classification, drift symptoms); the verification stack (commands, Proof Sheet, verifier, walls, exams); discipline sections.
+- Updated /NORTH-STAR.md: authority chain includes LAWS + ENGINEERING; added the seven-layer substrate contract and the compounding-probe ladder.
+- Updated /GLOSSARY.md: +17 doctrine terms (trust ladder, five memory systems, authoritative home, constraint ladder, Design D, proof-carrying change, test validity, oracle, protect-the-verifier, diagnostics contract, gardener, repo GC, harness regression suite, growth stages, locality, one-shot, anti-pattern virus).
+- Updated /AGENTS.md to v2 (read order includes ENGINEERING + LAWS; binding rules add one-fact-one-home and contradiction protocol); /PLAN.md (doctrine references + growth-model mapping section); /INTENT-LEDGER.md (INT-046 verbatim); context/README.md (canonical list + supersession marks on briefs 01 and 03).
+- Commit C (this commit) records the deepened first layer.
+
+Stage Summary:
+- The first layer is now depth-first: doctrine (ENGINEERING.md), law book (LAWS.md), owner laws with mechanisms (PRINCIPLES.md), operating models + memory-update + self-healing + verification (OPERATING-MODEL.md). Nothing in the root layer is a summary anymore; every rule carries its mechanism, failure mode, and phase.
+- Plan mode for CODE still holds. Next: owner reviews this layer; answers Q1-Q3; then the canonical EXECUTION.md reconciliation pass (12 spec deltas staged in 08-RECONCILIATION-BRIEF.md) and Phase 1 (walls).
+- The growth story is explicit: six operating models, graduated by predicates, each paid for with the previous stage's enforcement machinery — autonomy purchased with verification, never granted on credit.

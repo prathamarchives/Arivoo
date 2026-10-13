@@ -47,6 +47,25 @@ Controlled vocabulary. One concept, one name — no synonyms. Terms used in ledg
 - **Kev** — the decision/classification machinery (kernel port; policy + evaluation gates at its band).
 - **Compounding probes** — the C3 test series, tested separately: deterministic → semantic → graph.
 
+## Doctrine (from the transcripts and upstream — full text in /ENGINEERING.md)
+- **Trust ladder** — the escape from 1:1 babysitting via verification, not confidence. Trust continuum strongest-first: codebase → static analysis → rules/skills → style guide (human-only, the big hole).
+- **Five memory systems** — a repo is an executable memory system: intent, structural, verification, operational, evolutionary. They must agree; the objective is to minimize the distance between what the system should do, what the code does, and what the agent can establish about that difference.
+- **Authoritative home** — the single file where a fact lives. Every duplicated fact creates a synchronization obligation.
+- **Constraint ladder (C1–C6)** — type system → database → lint/architecture → executable test → gate/CI → document. Choose the highest level that works (LAD-01); repeated mistakes move up (LAD-03).
+- **Design D (restricted capability)** — components that don't need a capability never receive it; the accidental access path does not exist. "Do not ask an agent to remember a property that the architecture can enforce."
+- **Proof-carrying change** — every meaningful change carries an evidence package: intended behavior, reproduction, what changed, independent observation that it works.
+- **Test execution vs test validity** — satisfying the assertions vs the assertions expressing the correct requirements. The shared-misunderstanding trap; oracles must be independent.
+- **Oracle** — the independent authority a test's assertions are checked against: product contract, reference implementation, known example, mutation test, external observation.
+- **Protect the verifier** — agents must not weaken tests, gates, suppressions, or acceptance criteria; "the system can gradually learn to look correct without becoming more correct."
+- **Diagnostics contract** — every check failure prints: rule ID, violation + location, invariant protected, repair path, contract reference (WHAT/FIX/REF + WHY). An error is an instruction to the next reasoning step.
+- **Gardener** — the standing role that nips anti-patterns before they propagate; keep the codebase in a state you would be happy to have an agent copy — because it will.
+- **Repo GC** — recurring maintenance that scans the drift classes and submits narrow, verifiable cleanup changes; the baseline only moves up.
+- **Harness regression suite** — representative engineering tasks that test the engineering environment itself: did our latest change make the repo easier or harder for agents to modify correctly?
+- **Growth stages** — first layer → reliable foundation → legible system → enforced architecture → evidence-driven changes → self-maintaining → self-improving harness. Progress on observed failures, not calendar. Each stage's operating model is specified in /OPERATING-MODEL.md §6.
+- **Locality** — a change's footprint: how many modules a typical change touches. Growing footprint = coupling evidence = architectural investigation.
+- **One-shot** — a fresh agent with AGENTS.md + a card passes the gate on cycle 1 with zero owner edits. Two in a row end the foundation.
+- **Anti-pattern virus** — agents copy every pattern present; one innocent workaround becomes the de facto pattern for all agents within days.
+
 ## Language
 - Canonical language: English. Tailored, technical, easy to understand, machine-readable, optimized for agents, clean.
 - Every rule/decision/fact carries a stable ID; every check failure carries a reason code.

@@ -1,5 +1,7 @@
 # 01 — Engineering Doctrine (from the transcripts + upstream)
 
+> SUPERSEDED by root /ENGINEERING.md (2026-10-13) — the full doctrine with mechanisms, failure modes, and sources. This brief remains as extraction history.
+
 Source: engineering transcript.txt, upstream of engineering transcripts.txt
 Status: INTERNALIZED — this is the mindset the orchestrator operates from.
 

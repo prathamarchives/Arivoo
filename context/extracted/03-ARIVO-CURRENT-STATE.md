@@ -1,5 +1,7 @@
 # 03 — Arivo Current State (the two Arivoo docs, distilled)
 
+> PARTIALLY SUPERSEDED (2026-10-13): the 29 laws, constraint ladder, and phase mapping now live canonically at root /LAWS.md. This brief remains as extraction history.
+
 Source: Arivo Agent Execution Specification.md (v2, agent-facing, → docs/agent/EXECUTION.md), Arivo Build Playbook How You Run the Build.md (owner-facing, kept OUTSIDE the repo)
 Date of docs: October 13, 2026 — same day the Arivoo repo was created (private, empty).
 

@@ -43,3 +43,7 @@ Earlier corpus intents (INT-001..INT-034) are distilled in `context/extracted/02
 
 **INT-045 — CONCEPTS GROW AND LINK — active**
 > "About concepts, they should be growing... Imagine I'm reading an article about personal intelligence: I just highlight and add it to concepts. It's just a concept and it links to other books."
+
+**INT-046 — DEPTH OF THE FIRST LAYER — active (2026-10-13, owner turn 4)**
+> "go through the context again and tighten this first layer. like i can't see the engineering principles, and the repo laws, how it grows with you and that whole engineering principles for agentic repo from transcript and its upstreams so first of all do that. design multiple operating model not just this phase but how this repo keeps growing... how context gets updated repo memory gets updated and nothing breaks. verifications, self-healing. first again go through the context raw multiple pass extract understand and update in depth rightnow it feels like summaries but we need depth and specifcations on things and stuff not vauge or breif.."
+Means: the first layer must carry the engineering doctrine and the repo laws in full depth — visible, specified, mechanism-level — not summaries. Multiple operating models for the repo's whole growth, the memory-update protocol with update invariants, and the self-healing/verification machinery. Raw multi-pass re-extraction before writing. (Executed 2026-10-13: ENGINEERING.md + LAWS.md created; PRINCIPLES/OPERATING-MODEL deepened; growth models + memory update protocol + self-healing specified.)

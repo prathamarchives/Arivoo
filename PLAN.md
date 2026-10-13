@@ -1,9 +1,9 @@
 # PLAN — Arivo
 
-One phase deep (NG-04). The next phase is planned only when current-phase evidence says what's needed. Predicates close phases, not dates. The slice cycle (OPERATING-MODEL) is the unit of execution inside every phase.
+One phase deep (NG-04). The next phase is planned only when current-phase evidence says what's needed. Predicates close phases, not dates. The slice cycle (OPERATING-MODEL §2) is the unit of execution inside every phase. The growth model (OPERATING-MODEL §6) defines the operating model per stage: how the repo runs, how its memory updates, and how its failures heal at each level of maturity. The law activation map is in LAWS.md (the proactive set and the live-at phase of each law).
 
 ## Guardrails from day one (proactive set — never deferred)
-Isolated credentials · protected gates · real database test · idempotent writes · immutable evidence · owner scoping · independent state read. Everything else arrives through the ratchet, when it protects a concrete contract. The harness must never postpone the product (P-17).
+Isolated credentials · protected gates · real database test · idempotent writes · immutable evidence · owner scoping · independent state read. Everything else arrives through the ratchet, when it protects a concrete contract. The harness must never postpone the product (P-17). Full doctrine: ENGINEERING.md §4–§10.
 
 ## Phase 1 — Execution environment and trust (NEXT)
 Purpose: the repo is safe to build in, and the trust model is real.
@@ -33,4 +33,7 @@ Exit: C3 demonstrable with reasons and provenance — new inputs resurface old m
 Q1 primary host + "Other" · Q2 purge-backup policy · Q3 fact-tag meaning. Calculation engine: open, non-blocking for capture. The List (cloud sync et al.) carries reopening triggers.
 
 ## Supersession note
-The F-00..F-09 foundation-slice order from the original execution spec is SUPERSEDED by this phase sequence (D-016; reconciliation brief R-02/R-10). The slice cycle, size limits, proof discipline, and laws carry over unchanged into the new phases. The canonical EXECUTION.md rewrite (after Q1-Q3) folds the 12 spec deltas from `context/extracted/08-RECONCILIATION-BRIEF.md`.
+The F-00..F-09 foundation-slice order from the original execution spec is SUPERSEDED by this phase sequence (D-016; reconciliation brief R-02/R-10). The slice cycle, size limits, proof discipline, and laws carry over unchanged into the new phases — now codified at root: LAWS.md (the 29 laws, phase-mapped) and ENGINEERING.md (the doctrine). The canonical EXECUTION.md rewrite (after Q1-Q3) folds the 12 spec deltas from `context/extracted/08-RECONCILIATION-BRIEF.md`.
+
+## Growth-model mapping (how this plan grows the repo)
+Phase 1 → operating Model 1 (trust environment) · Phase 2 → Model 2 (build loop: harness core, builders, verifier) · Phase 3 → Models 2→3 (substrate laws live; enforced architecture begins) · foundation exit → Model 3 stable · Phases 4–5 → Model 4 (evidence-driven) · post-foundation recurring agents → Model 5 (self-maintaining) · harness evals → Model 6 (self-improving). Each model's full specification (who runs, what's enforced, how memory updates, how failures heal, graduation predicate): OPERATING-MODEL.md §6.

@@ -17,6 +17,7 @@ Status: TEMPORARY. At the designed-memory migration (corpus closure, FX-07 / OPE
   - `06-REASONING-LOG.md` — historical (append-only reasoning sessions; the record of owner words from the build sessions)
   - `07-ON-THE-LIST.md` — **ACTIVE: the refinement-debt register (D-020)** — the one live mechanism in this directory, referenced by P-07, DECISIONS, and PLAN
   - `08-RECONCILIATION-BRIEF.md` — historical (its 12 spec deltas are folded into the root layer or owner-gated; see `/PLAN.md` supersession note)
+  - `09-ARCHITECTURE-REVIEW.md` — historical **session engineering record** (INT-072 convention, OPERATING-MODEL §3): the 2026-10-13 stress-test review — findings register G-01..G-14, ledger/PLAN/OPERATING-MODEL reviews, recommendations R-01..R-05. Analysis only; never authority.
 - `WORKLOG.md` — the agent coordination log, append-only (Task IDs)
 
 ## Canonical

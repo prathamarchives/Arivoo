@@ -6,7 +6,7 @@ Controlled vocabulary. One concept, one name — no synonyms. **Scope: this poli
 - **Arivo** — the product: the owner's reading/study/reflection environment. (The owner also says "Ivo" casually; Arivo is canonical per D-002.)
 - **Arivoo** — this repository.
 - **Owner** — prathamarchives. The only authority on intent; words recorded verbatim.
-- **Orchestrator** — the coordinating agent (Super Z lineage): holds corpus understanding, enforces laws, gates artifacts, runs the ratchet, commits.
+- **Orchestrator** — the coordinating agent (Super Z lineage): holds corpus understanding, enforces laws, gates artifacts, runs the ratchet, commits. **Super Z** — the GLM-based host agent family that runs the orchestrator role (INT-070: GLM also runs the test/verification subagents).
 - **Builder** — fresh-context subagent working from a self-contained card. Never verifies its own work.
 - **Verifier** — fresh-context subagent: reads card + proof sheet + diff only; writes failing tests only; advisory — the gate decides.
 - **Host** — a coding-agent environment operating on this repo (GLM-based agent/CLI, Claude Code, Codex CLI). Supported = passed the Host Contract.
@@ -23,7 +23,7 @@ Controlled vocabulary. One concept, one name — no synonyms. **Scope: this poli
 - **Journal block** — a revisioned writing unit of the day-page journal.
 - **@-reference** — a stable reference to another object (highlight, note, work, concept). Survives renames. Not text that happens to look like a reference.
 - **Reading session** — a period of reading a Source; emits coarse position/dwell checkpoints as behavior events.
-- **Fact tag / Concept / Quote** — the v1 capture tag vocabulary. **fact meaning: OPEN (Q3)** — (a) intended-factual with separately recorded verification status, vs (b) system-verified true. **Concept** — a growing entity that links to works and carries provenance. **Quote** — creative/writing the owner liked.
+- **Fact tag / Concept / Quote** — the owner's available capture-tag vocabulary (from the original narrative; "v1" = the first execution spec's name for it). **Never system-imposed defaults (INT-069, 2026-10-13): capture tags are custom, owner-authored, and optional — the owner manually writes what kind of highlight it is, if they want; there is no default fact/concept classification.** **fact meaning: OPEN (Q3)** — (a) intended-factual with separately recorded verification status, vs (b) system-verified true — applies only when the owner uses a `fact` tag. **Concept** — a growing entity that links to works and carries provenance. **Quote** — creative/writing the owner liked.
 
 ## Substrate
 - **Ground truth** — append-only evidence (highlights, revisions, behavior events, tag events). Edit = new revision; delete = tombstone.

@@ -191,3 +191,25 @@ Stage Summary:
 - Plan mode for CODE still holds. Next: owner answers Q1-Q3, approves the execution plan → Phase 1 (walls, host bridges, isolation check, CI), then the first durable-capture slice
 
 Task 7 addendum: commit 758b7de is local; the push to origin/main is PENDING — no GitHub credential survived into this session (gh logged out, no GH_TOKEN/GITHUB_TOKEN in env). Awaiting owner token or re-auth; push immediately when available (P-15). No false "pushed" claim recorded here (LAW-04 discipline).
+
+---
+
+Task ID: 8
+Agent: Super Z (orchestrator, GLM host) + 3 GLM-based subagents
+Task: Owner directives INT-069..076 — push the pending canonicalization commit; read the whole repo; deep-review the architecture against Arivo's goal and the owner's words; stress-test the zero-context agentic-repo property; test the drift gates; extract the full-day-of-reasoning corpus into the Intent Ledger; record the custom-tags and GLM-verification decisions; push everything.
+
+Work Log:
+- PUSHED the pending feac373 to origin/main (owner provided a token this session — the Task 7 addendum's "PUSH PENDING" line is now resolved; note it cited 758b7de, a hash orphaned by the amend; G-02 in the review register)
+- Full repo re-read first (INT-068 discipline): 11 root files, context/README, full WORKLOG, 2.txt and 3.txt in full
+- Ran 3 GLM-based subagents (INT-070's model, executed): extraction agents over wrapped 0.txt/1.txt (owner-voice mapping: 0.txt:4/7/33/37/800/1258/1323; 1.txt:1/27/106/280/437-451/1368/1462/1911/1973-1985) + one zero-context cold-start stress test (12 questions + adversarial drift report)
+- Verified all 18 new corpus quotes verbatim by grep before ledgering (one extraction typo corrected: "every decions", 1.txt:1462); re-checked the stress agent's git findings against git log
+- INTENT-LEDGER: 50 → 72 statused entries — INT-069..076 (owner turn 6 verbatim: custom tags, GLM verification, zero-context pickup, session documentation, garden, drift-gate testing, extraction+owner-only-ledger, review directive) + INT-077..090 (full-day-of-reasoning backfill); two audit notes
+- Reconciliations per EXR-08: P-10 MECHANISM + GLOSSARY (custom tags, INT-069); DECISIONS Q1/Q3 + EXECUTION §6 Q1 annotations (INT-069/070); NORTH-STAR tagging note; GLOSSARY Super Z + "v1" defined; AGENTS v2.2 (host-bridges future tense, step-12 reference tier, session-exit rule, GLM verifier rule, phase line); EXECUTION §1 rule-families + session-records rows, §6 QD-1 row (orphan fixed); OPERATING-MODEL Model 0 who-runs (GLM subagents), §3 session engineering records (INT-072), §7 cold-start item 6
+- Created context/extracted/09-ARCHITECTURE-REVIEW.md — the first numbered session engineering record: mandate, method, stress-test results, findings register G-01..G-14 (7 fixed, 3 partial, rest accepted/info), ledger/PLAN/OPERATING-MODEL reviews, layer-by-layer goal alignment, owner profile (assistant observations — NOT ledgered), recommendations R-01..R-05, not-verified list
+- Ran tools/verify_canonical_layer.py on the edited tree: GREEN (checks re-run at session end before commit)
+
+Stage Summary:
+- The zero-context stress test PASSED with edge failures found and repaired: read-order ambiguity (raw corpus was readable as boot material — a ~76K-word trap), QD-1 orphan, stale worklog tail, phantom host bridges, rule-families gap. All fixed; the drift-gate answer: gates exist (ledger-first boot, STOP conditions, verifier, append-only) and the missing gates are now named with owners (R-01/R-02)
+- The Intent Ledger now carries the owner's full day of reasoning (72 entries); ledger discipline held — owner words only
+- Custom tags (INT-069) and GLM verification (INT-070) are live decisions, reconciled across P-10/GLOSSARY/Q1/Q3 with pointers
+- Next: owner reviews 09-ARCHITECTURE-REVIEW.md; answers Q1-remainder/Q2/Q3 (Q1 now half-answered: GLM runs test/verification); approves Phase 1 → walls (W-01..W-04). R-01 (owner-turn ingestion checklist) and R-02 (verifier extensions) are the recommended next doc slices.

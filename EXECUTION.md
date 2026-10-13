@@ -21,6 +21,8 @@
 | Vocabulary | `/GLOSSARY.md` | Term definitions — the definitional authority (§4) |
 | Entry map | `/AGENTS.md` | Cold-start read order; binding rules (≤80 lines) |
 | Coordination log | `context/WORKLOG.md` | Append-only task log (operational memory) |
+| Rule families (LOOP/QST/STOP/KB/RED/PRF/RAT/WALL/UNS/MEM/FX/AFA/KER/BND/AUT/LAD) | `context/raw/Arivo Agent Execution Specification.md` (Tier 0 — full definitions, immutable) + inline restatements at citation points in LAWS/OPERATING-MODEL | Stable rule IDs; root documents restate a family's meaning at every citation — a bare ID with no meaning inline is a defect |
+| Session engineering records | `context/extracted/09+` (numbered session records) | Per-session self-contained engineering docs (INT-072): what was asked, what was done, evidence, what changed, what's open |
 | Refinement debt | `context/extracted/07-ON-THE-LIST.md` | The refinement-debt register (D-020) — the one live mechanism in `extracted/` |
 
 **The rule:** each concern has exactly ONE authoritative home. Other files may summarize, but a summary must point at the authority and never become a second specification. Every duplicated fact creates a synchronization obligation — duplication is a defect to be paid down, not convenience.
@@ -78,9 +80,10 @@ Rules:
 
 | ID | Question | Default (stands until overridden) | Locks at |
 |----|----------|-----------------------------------|----------|
-| Q1 | Which host is "Other"; which is the primary builder | Orchestrator + fresh subagents build; cross-family verifier once the host contract is verified | Phase 1 W-02 |
+| Q1 | Which host is "Other"; which is the primary builder | Orchestrator + fresh subagents build; cross-family verifier once the host contract is verified. *Update 2026-10-13 (INT-070): partially answered — test/verification runs on GLM-based subagents; GLM is the verification host. Primary builder tool + "Other" still to name* | Phase 1 W-02 |
 | Q2 | Purge vs backups (D-011) | Live + active-derivative removal; documented backup expiry; purge ledger applied on restore; per-owner encryption + key destruction only if physical erasure is required | Phase 3 (storage/purge schema lock) |
-| Q3 | fact-tag meaning (P-08, INT-025) | (a) intended-factual, with verification status recorded separately — supports disagreement without losing the source claim | Phase 3 (vocabulary freeze, LAW-25 codegen) |
+| Q3 | fact-tag meaning (P-08, INT-025; re-scoped by INT-069) | (a) intended-factual, with verification status recorded separately — supports disagreement without losing the source claim. INT-069: no default tag classification — tags are custom, owner-authored, optional; Q3 applies only when the owner uses a `fact` tag | Phase 3 (vocabulary freeze, LAW-25 codegen) |
+| QD-1 | First import formats — exact priority (cited by NORTH-STAR, D-023, PLAN) | Text/Markdown and conversation exports (JSON) first; richer formats per the durability ladder; external-platform integrations incremental (INT-024) | Phase 4 (import slice design) |
 | D-014 | Calculation engine scope | OPEN, non-blocking for capture; revisit at math workflow design | Math workflow design |
 
 These stay open until their named gates. Silence past a named gate is consent (QST-03); an agent never closes them by interpretation.

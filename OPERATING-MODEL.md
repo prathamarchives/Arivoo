@@ -56,6 +56,8 @@ Every reasoning delta becomes a file update, then a commit, then a push — same
 
 **The worklog law:** every agent reads the worklog before working and appends after — Task ID, agent, task, work log, stage summary. The worklog is the operational memory of coordination; the ledgers are the canonical memory of record. Neither substitutes for the other.
 
+**The session engineering record (INT-072):** every working session that changes root documents, ledgers, or the extraction state ALSO leaves a numbered, self-contained record — `context/extracted/NN-<NAME>.md` — holding: what the owner asked (verbatim), what was done, the evidence (runs, verifications, citations), what changed (files + IDs), and what remains open. Any later agent reads ONE file instead of reconstructing the session from the worklog tail alone; the worklog entry points at it. `09-ARCHITECTURE-REVIEW.md` (2026-10-13 stress-test session) is the first. Numbering continues the extracted-brief sequence; records are banner-marked historical process artifacts (D-022) — analysis lives there, never in the ledgers.
+
 ---
 
 ## 4. Question classes and records (D-012)
@@ -106,7 +108,7 @@ The repo does not have one operating model. It has six, one per maturity stage (
 
 ### Model 0 — First Layer (NOW: repo has memory, zero code)
 
-- **Who runs:** the orchestrator alone, in continuous-commit mode; the owner reviews at touchpoints. No builders, no code, no CI yet.
+- **Who runs:** the orchestrator with GLM-based research/verification subagents (INT-070: test and verification loops run on GLM subagents — the 2026-10-13 stress-test session used them for corpus extraction and the cold-start stress test), in continuous-commit mode; the owner reviews at touchpoints. No product-code builders, no code, no CI yet.
 - **What is enforced:** prose at C6 with reason codes (`waiting-for-slice` on every law — the codebase is empty; that is honest, not weak). Enforced NOW: append-only ledgers, verbatim owner words, the worklog protocol, the read order, no-product-code-without-approved-plan.
 - **How memory updates:** every reasoning delta → authoritative home → append with ID → commit → push (§3). Contradictions become Question Records with defaults; silence past a named gate is consent.
 - **How failures heal:** process failures (a misread, a drift, a tension) become Reasoning Log entries, reconciliation briefs, and superseded files. Structural failure is impossible — there is no structure yet.
@@ -198,6 +200,7 @@ These hold at every stage, checked by audit where mechanical and by review where
 3. Read the worklog tail (last 3–5 entries) — what just happened, what's open.
 4. When `make state` exists (Model 2+): run it; trust it over any agent's recollection.
 5. Never rely on chat history or session recall for anything (P-02, MEM-01, LAW-17's spirit pre-code).
+6. `context/raw/` and the historical briefs are reference material, never boot material — read them only when a task requires it (quote verification, intent backfill). The Intent Ledger is the intent authority; the raw corpus is not.
 
 ---
 

@@ -120,7 +120,7 @@ Append-only: new laws get new numbers. Superseded laws keep their text and statu
 
 **MEANING.** Two formation speeds, one junk gate. Owner-declared and owner-tagged concepts are instant and authoritative. Auto-detected concepts are also instant (not slow — the assumption of slow compounding is removed) but provisional. The junk gate lives at graduation, not birth: provisional concepts graduate on out-of-sample evidence, never on volume.
 
-**MECHANISM.** C6 now (model semantics in GLOSSARY); C4 from Phase 5: concept induction with provenance, graduation tests, and the Kev classifier behind policy/eval gates. Capture-time typed tags (`fact`, `concept`, free) from the first capture slice.
+**MECHANISM.** C6 now (model semantics in GLOSSARY); C4 from Phase 5: concept induction with provenance, graduation tests, and the Kev classifier behind policy/eval gates. Capture-time tags are custom and owner-authored (INT-069, 2026-10-13): the owner manually writes what kind of highlight it is, if they want — there is NO default fact/concept classification; the fact/concept/quote vocabulary stays available to the owner, never imposed, and the system trains on owner-authored tags when good enough (INT-028, INT-088). *(Supersedes the earlier "typed tags (`fact`, `concept`, free)" mechanism per EXR-08 — the latest owner statement governs; the WORDS above are history.)*
 
 **FAILURE MODE.** Two symmetric failures: concepts lost after a reasoning session (owner's stated worst-of-class), and junk concepts minted automatically with no graduation discipline.
 

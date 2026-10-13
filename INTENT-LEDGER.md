@@ -7,6 +7,8 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-019..INT-034** — canonical IDs from the execution spec's Appendix C (`context/raw/Arivo Agent Execution Specification.md`). Backfilled 2026-10-13 (canonicalization slice); each quote verified against `context/raw/`.
 - **INT-035..INT-046** — owner turn `3.txt` (the v1 entries).
 - **INT-047..INT-068** — backfill from the raw corpus and session records (2026-10-13 audit): every active product requirement must trace to owner intent or an adopted decision (LOOP-05).
+- **INT-069..INT-076** — owner turn 6 (session record, 2026-10-13 stress-test session): custom tags, GLM verification host, zero-context pickup, session documentation, garden law, drift-gate testing, extraction directive, review directive.
+- **INT-077..INT-090** — backfill round 2 from the full corpus re-extraction (2026-10-13 stress-test session; GLM subagent extraction + verbatim grep verification): the full-day-of-reasoning intents — division of labor, layer-1 experience, smallest daily loop, reconciliation method, docs-first, and more.
 
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
@@ -279,9 +281,140 @@ Means (owner-endorsed review, this session): read the repo first; then execute t
 
 ---
 
+## Owner turn 6 — session record 2026-10-13 (INT-069..INT-076; the stress-test session)
+
+**INT-069 — CUSTOM TAGS, NO DEFAULT CLASSIFICATION — active (refines INT-028)**
+> "let it be custom tags. i manually write what kind of highlight it is if i want to... so no by deafualt concept/fact tag"
+
+Source: session record 2026-10-13 (owner turn 6, chat — tag/concept/fact future discussion). Grounds: P-10 MECHANISM (updated this session), GLOSSARY (Custom tag), Q3 (re-scoped — see DECISIONS annotation). Means: the capture-time tag vocabulary is custom and owner-authored; tagging is optional; there is NO default concept/fact classification. The fact/concept/quote vocabulary stays available to the owner — never imposed. The system trains on owner-authored tags when good enough (INT-028, INT-088).
+
+**INT-070 — GLM RUNS TEST AND VERIFICATION — active (partially answers Q1)**
+> "the test and verification all wil be done by glm based sub agents. so host agent would be glm ig for verification testing loops and iteration"
+
+Source: session record 2026-10-13 (owner turn 6). Grounds: Q1 (verification family = GLM; the exact primary builder host tool and the "Other" host remain to name), D-007, OPERATING-MODEL §9 Verifier (VRF-05) — the cross-family-verifier recommendation is superseded in practice by this statement. Facts: the stress-test session itself ran GLM-based subagents for extraction and the cold-start stress test; this is the operating model the owner is choosing for verification/testing loops.
+
+**INT-071 — ZERO-CONTEXT PICKUP — active**
+> "i should not give an agent context in the prompt it should read the repo and just know what to do, pick up, just know tall the rules, how to operate, and everything in depth, and precision and sepcificity and make it immposible to make them there own assumption"
+
+Source: session record 2026-10-13 (owner turn 6). Grounds: P-02, P-11, the cold-start protocol (OPERATING-MODEL §7), update invariant 1. This is the operating bar for the agentic repo: a fresh agent cold-starts from the repo alone, with no prompt context, and the repo leaves no room for the agent's own assumptions. Tested this session by the cold-start stress test (context/extracted/09-ARCHITECTURE-REVIEW.md).
+
+**INT-072 — SESSION DOCUMENTATION FOR EVERY AGENT — active**
+> "doesnt matter how many agents work on it.. like whatever they do gets documented each session somwhere so the other agent can read it as in engineering doc"
+
+Source: session record 2026-10-13 (owner turn 6). Grounds: the worklog law (OPERATING-MODEL §3), P-15, the session engineering record convention (OPERATING-MODEL §3, added this session; context/extracted/09 is the first numbered session record). Multi-agent indifferent: any number of agents may work on the repo; every session leaves a durable, self-contained record.
+
+**INT-073 — THE GARDEN LAW — active**
+> "ai extends what alreayd is in codebase like a garden so treat it like that"
+
+Source: session record 2026-10-13 (owner turn 6). Grounds: ENGINEERING §2 cut two ("agents extend what already exists"), §9 (the gardener, anti-pattern virus), the ratchet, append-only ledgers, supersession. The repo is tended, not rewritten: agents grow what already is; every pattern present teaches every future agent.
+
+**INT-074 — DRIFT-GATE TESTING — active**
+> "and then test against if there are gates and ways for agents to drift away"
+
+Source: session record 2026-10-13 (owner turn 6, part of the review directive). Grounds: the verification stack, known-bad builds, tools/verify_canonical_layer.py, the drift-symptoms table (OPERATING-MODEL §8). The repo must be actively tested for drift paths — not assumed drift-free. Executed this session: the cold-start stress test + the findings register (context/extracted/09-ARCHITECTURE-REVIEW.md).
+
+**INT-075 — FULL-CORPUS EXTRACTION + OWNER-ONLY LEDGER — active**
+> "you can add more of everything you have observed about me in intent ledger dont add yourslef"
+
+> "theres so much data on context that should be get extracted... the full day of reasoninggg... through what i want.."
+
+Source: session record 2026-10-13 (owner turn 6). Grounds: backfill rounds INT-047..068 + INT-077..090, D-022 source tiers, AUT-02/04. Two rules in one: (1) the full-day-of-reasoning corpus must be extracted into this ledger (executed this session); (2) this ledger carries ONLY owner words — the assistant's observations about the owner live in session records and reviews, never here.
+
+**INT-076 — GOAL-ALIGNED ARCHITECTURE REVIEW — active (executed 2026-10-13)**
+> "read the repo... push and give me a report of review it find the gaps to make the artitechture strong, maybe more goal aligned review and reason through the layer... stress test if the repo is like that. and reason through with the goal of arivo. and my words. my judgement and typa person im and everything you got."
+
+Source: session record 2026-10-13 (owner turn 6). Grounds: context/extracted/09-ARCHITECTURE-REVIEW.md (this session's review), INT-081 (the reconciliation method), the reasoning-log protocol. Means: review the repo against Arivo's goal and the owner's own words/judgment/person; stress-test the agentic-repo property; find the gaps; push the result.
+
+---
+
+## Backfill round 2 — corpus intents (INT-077..INT-090; 2026-10-13 stress-test session; GLM subagent extraction, quotes grep-verified in `context/raw/`)
+
+**INT-077 — THE DIVISION OF LABOR — active**
+> "and then its arivo's work the capture, the semnatic indexing (in which kev can help too) and then kev decides and knowledge graph expands and then retrieval the semnatic search.... so reason through that harder..."
+
+Source: `context/raw/0.txt:37`; `1.txt:106`. Grounds: layers 3–5, D-015, P-16, GLOSSARY Kev. The owner's own pipeline statement: layer 1 is the owner's work (INT-078); capture, semantic indexing, Kev decisions, graph expansion, and retrieval are Arivo's work.
+
+**INT-078 — THE LAYER-1 EXPERIENCE — active**
+> "layer 1 i do the work means consumption and creation i read, highlight sentences, bookmark pages, take notes on side, open journal and start writing down how the day went (what i researched, read, learned and refrence those @) (even tho i can refrence @ things while reading in books) thats the experince i want... a learning enviroment that gives me leverage everything gets compounded and does not dissapear.."
+
+Source: `context/raw/0.txt:37`; `1.txt:106`. Grounds: D-013, NORTH-STAR mission, INT-038, INT-083. The desired daily experience in the owner's words — the origin of the reader-capture-journal milestone.
+
+**INT-079 — AI REASONING SECONDARY NOW — active**
+> "this will be like a baseline in future i would adding ai reasoning in the loop and stuff like that. rightnow i would keep reasoning secondry."
+
+Source: `context/raw/0.txt:37`; `1.txt:106`. Grounds: NG-03, LAW-29, P-09. AI reasoning enters the loop as a future capability (the agent-native evolution, P-16) — the pipeline computes now, the owner's external agents reason.
+
+**INT-080 — VERIFY AI-AGENT WORK, DON'T HOLD BACK — active**
+> "and lay down the verifications, evaluations as a world class verification engineer dont hold back so i can verify the outputs and work by ai agents on this backend execution and phases i should execute this backend on."
+
+Source: `context/raw/0.txt:37`; `1.txt:106`. Grounds: the verification stack (OPERATING-MODEL §9), D-009, LAW-01/13, the Proof Sheet. The origin demand for the entire verification machinery: the owner must be able to verify the outputs of AI agents working on this backend.
+
+**INT-081 — THE RECONCILIATION METHOD — active**
+> "reason through it 7 times, follow it, understand it, compare it to decisions and design we made, redesign, reconciliate, close the gap between my vision and what i want, make it more aligned to the goal, lay down layers which are solid, which still needs work, lay down gaps, decisons to be made, my judgement gaps, and more questions to reshape to my goals"
+
+> "ask questions for my judgement to make it better" (`0.txt:1323`) · "reason harder through it, reason with that one goal and question i gave you." (`1.txt:1911`)
+
+Source: `context/raw/1.txt:280`; `0.txt:1323`; `1.txt:1911`. Grounds: the reasoning-log protocol (06-REASONING-LOG), the reconciliation briefs, INT-046, INT-076. The owner's standing method for multi-pass review: re-reason repeatedly, compare against decisions made, surface the gaps AND the owner's own judgment gaps, ask targeted questions for the owner's judgment.
+
+**INT-082 — DOCS-FIRST — active**
+> "we'll figure out in the way we build those layers. so i would start with designing the docs rightnow. layer down the docs layer with deep decisons, artitechture, and goal and alignment and every decions and shit. and everything we need to get started"
+
+Source: `context/raw/1.txt:1462`. Grounds: P-14 (architecture first), INT-042, the entire first layer. The origin directive of the docs layer: start by designing the documents with deep decisions, architecture, and alignment; everything needed to get started.
+
+**INT-083 — THE SMALLEST DAILY LOOP — active**
+> "1 - smallest daily loop. i read books, i import articles, posts, writings, research paper, pdfs, md's and any thing readable. reason through it take notes on it, and jounral about my learnings, reasoning, and reading journey how it is going and everything, and like everything compounds thats the goal since the start.. notes get compounded, everything i can comeback to, revise, and like actually learn things, develop..."
+
+Source: `context/raw/1.txt:444` (answer to the day-30 daily-loop question). Grounds: D-013, D-023, PLAN Phase 4 exit, INT-019. The smallest daily loop the system must support: read/import → reason → note → journal, compounding.
+
+**INT-084 — COMPOUNDING MEASURED BY ARTIFACTS — active**
+> "5- number wont tell its compounding, but new concepts, my notes, my jorunal pages, and when my agent gets everything i would say its compounding...."
+
+Source: `context/raw/1.txt:450` (answer to the what-shows-compounding question). Grounds: C3, the compounding probes, ENGINEERING §13. Compounding is judged by produced artifacts (concepts, notes, journal pages, agent context), not by KPI numbers.
+
+**INT-085 — A SERVICE AGENTS INVOKE, NOT A MODEL RIVAL — active**
+> "6-- lol as i said my agnet-first, agent-native like were not working agaisnt personal-agents/ai better model. imagine it as a service/experince agents can invoke.."
+
+Source: `context/raw/1.txt:451` (answer to the better-model question). Grounds: NG-03, layer 6, INT-048/058. Arivo does not compete with better models; it is the service/experience any agent invokes — which is why a better model makes Arivo more valuable, not obsolete.
+
+**INT-086 — THE AGENT DOES ALL JOBS, JOURNAL ACCESS DAY ONE — active**
+> "q4 - all of em ig... is it even a question.." [answering: the agent's first job — memory queries, pre-digestion, interlocutor, digest reader: all of them]
+
+> "q5- yes" [answering: do agents get journal access from day one]
+
+Source: `context/raw/1.txt:1977, 1979`. Grounds: C2, D-019, layer 6, context packs. The connected agent does every job (query, pre-digest, converse, digests) and reads the journal from day one — attributed, scoped, zero belief weight (P-08).
+
+**INT-087 — PULL UP WHEN I READ THAT — active**
+> "4- suppose i red whatever number of books reasoned through countless papers, articles, writings take hours of notes and journaled almost daily. along the way. my agents? would have all the context, my bheaviour, my thinking, my progress, and they can take action, i can just say to my agent pull up when i red that thing, or smh..."
+
+Source: `context/raw/1.txt:448` (answer to the agent's-first-proving-task question). Grounds: C2, layer 7 (temporal and behavioral queries), INT-057. The natural-language memory query over the owner's history: "pull up when i read that".
+
+**INT-088 — TRAIN ON MY MEASUREMENT — active (refines INT-028)**
+> "J2 - while refining and executing system we can train it and keep refiening on my measurement and like this one time thing.." [answering a judgment-gap question on labeling and measurement]
+
+Source: `context/raw/1.txt:439`. Grounds: P-10 (the system trains on owner-authored tags when good enough), Kev policy/eval gates, INT-028/069. The system refines on the owner's measurements over time.
+
+**INT-089 — REJECT THE SLOW-CONCEPTS FRAMING — active (refines INT-027/061)**
+> "i dont get your reasoning of slow concepts/months i mean if im reading books.researching like wahtever i write like my notes, i mention @, i highlight it."
+
+Source: `context/raw/1.txt:1975` (opening of the fact/concept answer). Grounds: P-10. The owner explicitly rejects slow-concepts/months reasoning — concepts are immediate at capture, provisional at graduation.
+
+**INT-090 — THE COMPOUNDING KNOWLEDGE BASE — active**
+> "what i want is an compounding knowledge base of whatever i read, write, research, study and everything... like you get that."
+
+Source: `context/raw/0.txt:37`; `1.txt:106`. Grounds: C3, INT-047/050. The product named in the owner's own words: a compounding knowledge base of everything read, written, researched, studied.
+
+---
+
 ## Audit note (2026-10-13 — the canonicalization slice)
 
 - **Active** owner intent now covers every claim the root layer makes: goal (INT-047), claims C1–C5 (INT-047, INT-057, INT-050, INT-026/028, C5 via the substrate line), workflow (INT-019/038), backend-only (INT-040), autonomy (INT-049), no-later (INT-060/039), epistemics (INT-025/026/027/028), agent-client (INT-030/058), two-speed concepts (INT-027/061), memory law (INT-031), operating mode (INT-065), language (INT-063/064), growth (INT-048/066).
 - **Superseded:** INT-051 (AIOS-to-DB) — the only owner statement the corpus records as corrected; kept verbatim with its `superseded_by` link.
 - **Open owner gates (never silently closed):** Q1 (host), Q2 (purge vs backups — D-011), Q3 (fact-tag meaning — INT-025), D-014 (calculation engine).
 - **AI-proposal material is not promoted here.** This ledger contains only owner words (or owner-presented statements labeled as such — INT-053's interpretation label, INT-054, INT-068). Assistant recommendations and review verdicts live in DECISIONS as ADOPTED/PRESENTED-LOCKED at most, and in `context/extracted/` as history.
+
+## Audit note (2026-10-13, session 2 — the stress-test session; supersedes the open-gates line above)
+
+- **Coverage extended (INT-075):** the ledger grew from 50 to 72 statused entries. Backfill round 2 (INT-077..090) closes the full-day-of-reasoning gap — the corpus's owner-voice lines are `0.txt:4/7/33/37`, `0.txt:800`, `0.txt:1258`, `0.txt:1323`, `1.txt:1/27/106`, `1.txt:280`, `1.txt:437–451`, `1.txt:1368`, `1.txt:1462`, `1.txt:1911`, `1.txt:1973–1985`; every substantive statement at those positions is now ledgered. All 18 new corpus quotes were grep-verified against `context/raw/` (one extraction typo corrected: "every decions" at `1.txt:1462`). Owner turn 6 (INT-069..076) records this session's directives verbatim.
+- **Ledger discipline held (INT-075):** this ledger still carries ONLY owner words. The assistant's observations about the owner (profile, judgment style) live in the session record `context/extracted/09-ARCHITECTURE-REVIEW.md`, never here.
+- **Open owner gates (updated):** Q1 (host — PARTIALLY answered by INT-070: GLM runs test/verification; the primary builder tool and the "Other" host remain to name), Q2 (purge vs backups — D-011, unchanged), Q3 (fact-tag meaning — RE-SCOPED by INT-069: no default tag classification; the question applies only when the owner uses a `fact` tag), D-014 (calculation engine, unchanged).
+- **Reconciliations executed this session (per EXR-08, latest owner statement governs):** P-10 MECHANISM + GLOSSARY + DECISIONS Q3 annotation (INT-069, custom tags); DECISIONS Q1 annotation + OPERATING-MODEL Model 0 (INT-070, GLM verification); AGENTS.md v2.2 + EXECUTION.md §1/§6 (INT-071/072: cold-start reference tier, session engineering records, QD-1 home, rule-families row).

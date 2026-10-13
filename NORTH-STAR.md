@@ -32,6 +32,8 @@ Read a source → capture highlights/bookmarks → add a note → journal, refer
 
 **Import is day-one intake (INT-019).** The first usable path includes importing existing material — text/Markdown and conversation exports first (QD-1 default), books and articles per the durability ladder, external-platform integrations incrementally (INT-024). Capture never waits for import intelligence (layer-2 contract).
 
+**Tagging is custom (INT-069).** Highlights carry owner-authored custom tags when the owner chooses — the owner manually writes what kind of highlight it is, if they want; there is NO default fact/concept classification. The fact/concept/quote vocabulary remains available, never imposed (P-10 MECHANISM, updated 2026-10-13; Q3 re-scoped accordingly). Concept formation (C4) reads owner-authored tags.
+
 ## The seven layers (the substrate contract)
 
 Each layer carries a must-be-true contract — this is how the goal decomposes into checkable structure. Layers 1–3 are the build's center of gravity (Phases 2–3); layer 6 is the product surface; layers 4–5 arrive with retrieval and compounding (Phase 5) through the evidence rules.

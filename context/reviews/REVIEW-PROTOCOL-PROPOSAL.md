@@ -1,12 +1,12 @@
 # Review Protocol Proposal
 
-> **Status:** Proposed process, submitted through a docs-only PR. Not canonical until the owner accepts it. This file must not become a parallel authority: if accepted, fold the approved rules into the existing canonical home named in \`EXECUTION.md\`, then remove or mark this proposal as historical.
+> **Status:** Proposed process, submitted through a docs-only PR. Not canonical until the owner accepts it. This file must not become a parallel authority: if accepted, fold the approved rules into the existing canonical home named in `EXECUTION.md`, then remove or mark this proposal as historical.
 
 ## 1. Non-negotiable default: review is read-only
 
 A review request authorizes inspection and reporting, not edits to the reviewed branch.
 
-- Never commit, push, or write directly to \`main\`. All file changes are proposed on a branch and presented in a pull request. Do not merge a PR unless the owner explicitly authorizes that merge.
+- Never commit, push, or write directly to `main`. All file changes are proposed on a branch and presented in a pull request. Do not merge a PR unless the owner explicitly authorizes that merge.
 - For a review-only request, do not change repository files. Use inline comments on an existing PR when the finding concerns its diff; use an issue when the finding concerns the baseline architecture, policy, or backlog. Avoid opening duplicate issues for the same finding.
 - Create a review-report Markdown file only when the owner asks for a durable report or the findings are too interconnected for useful inline comments. Add or update that report in a separate, reviewable docs-only PR. Never treat the report itself as permission to change the reviewed system.
 - Honor explicit limits literally. If the owner says not to code or execute, do not run commands, tests, builds, migrations, scripts, or the application; do not make implementation changes. GitHub metadata reads and proposed review documentation are not product execution.
@@ -18,7 +18,7 @@ A review request authorizes inspection and reporting, not edits to the reviewed 
 |---|---|---|
 | A proposed code/doc diff has a localized defect | Inline PR review comment | Comment only; no file edit |
 | A baseline architecture, policy, or missing capability needs tracking | GitHub issue | Issue/comment only |
-| A connected audit needs a durable, multi-finding record and the owner asked for one | Docs-only PR with a review \`.md\` | New/updated review artifact only |
+| A connected audit needs a durable, multi-finding record and the owner asked for one | Docs-only PR with a review `.md` | New/updated review artifact only |
 | A review rule or canonical policy needs to change | Explicit policy-proposal PR | Proposed docs only; do not edit the canonical source silently |
 | An implementation or correction is approved | Separate implementation/revert PR | One coherent, approved change with evidence |
 
@@ -26,7 +26,7 @@ Use one PR per coherent purpose. In particular, do not bundle a review report, p
 
 ## 3. Review lifecycle
 
-1. **Intake and authority.** Read \`AGENTS.md\` in its prescribed order, especially \`INTENT-LEDGER.md\`, then the relevant canonical sources and worklog tail. Capture the exact base commit SHA, owner request, relevant INT IDs, allowed scope, explicit exclusions, and any owner-gated questions.
+1. **Intake and authority.** Read `AGENTS.md` in its prescribed order, especially `INTENT-LEDGER.md`, then the relevant canonical sources and worklog tail. Capture the exact base commit SHA, owner request, relevant INT IDs, allowed scope, explicit exclusions, and any owner-gated questions.
 2. **Freeze scope.** State what is and is not being reviewed. Do not expand a review into implementation, policy adoption, schema changes, or unrelated cleanup.
 3. **Inspect without writing.** Collect specific file/line/commit evidence. Separate what the source explicitly says from interpretation, hypothesis, and unknowns. Do not make claims about commands or tests that were not actually run.
 4. **Report actionable findings.** Lead with the consequence and location, not a tour of the repository. Explain how the defect can fail, why it conflicts with the product goal or an accepted rule, and what evidence would falsify the finding.
@@ -84,7 +84,7 @@ A green test suite proves only the behaviors covered by those tests. A passing p
 
 Use this skeleton for a substantial report:
 
-\`\`\`markdown
+```markdown
 # [Target] — Review
 
 > Status: REVIEW ONLY. Target SHA: [full SHA]. Scope: [scope]. Not in scope: [exclusions].
@@ -111,7 +111,7 @@ Use this skeleton for a substantial report:
 
 ## Proposed sequence
 [Smallest safe order, including dependencies and independent work.]
-\`\`\`
+```
 
 Do not force a report when inline comments or one issue are clearer. Do not turn every observation into a finding. Avoid filler, vague claims like “architecture needs work,” and unsupported statements such as “fully verified.”
 
@@ -133,9 +133,9 @@ Keep PRs small enough for the owner to inspect. No quiet canonicalization, no fo
 
 ## 9. Repository-specific guardrails
 
-- \`INTENT-LEDGER.md\` is owner intent, not an assistant’s analysis log. Never add an inference, recommendation, or observation about the owner as if it were their words.
+- `INTENT-LEDGER.md` is owner intent, not an assistant’s analysis log. Never add an inference, recommendation, or observation about the owner as if it were their words.
 - Preserve raw source material unchanged. Extracted/review documents remain lower-authority analysis, not decisions.
 - Do not close Q1/Q2/Q3 or any owner-gated question by inference or silence. Respect the named gate and dependency scope.
 - GLM-based fresh-context subagents own the test/verification/retest loop. Builders and verifiers have separate task roles; a verifier does not repair its own reviewed implementation.
 - Product code and UI are outside a review unless expressly included in the task scope. UI remains outside this backend repository.
-- A review should make the next decision or smallest next slice clearer. It should not become a permanent parallel doctrine. Adopted process belongs in the existing canonical home identified by \`EXECUTION.md\`.
+- A review should make the next decision or smallest next slice clearer. It should not become a permanent parallel doctrine. Adopted process belongs in the existing canonical home identified by `EXECUTION.md`.

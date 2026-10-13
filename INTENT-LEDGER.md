@@ -9,6 +9,7 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-047..INT-068** — backfill from the raw corpus and session records (2026-10-13 audit): every active product requirement must trace to owner intent or an adopted decision (LOOP-05).
 - **INT-069..INT-076** — owner turn 6 (session record, 2026-10-13 stress-test session): custom tags, GLM verification host, zero-context pickup, session documentation, garden law, drift-gate testing, extraction directive, review directive.
 - **INT-077..INT-090** — backfill round 2 from the full corpus re-extraction (2026-10-13 stress-test session; GLM subagent extraction + verbatim grep verification): the full-day-of-reasoning intents — division of labor, layer-1 experience, smallest daily loop, reconciliation method, docs-first, and more.
+- **INT-091** — owner turn 7 (session record, 2026-10-13 review-merge session): the review-merge directive.
 
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
@@ -405,6 +406,15 @@ Source: `context/raw/0.txt:37`; `1.txt:106`. Grounds: C3, INT-047/050. The produ
 
 ---
 
+## Owner turn 7 — session record 2026-10-13 (INT-091; the review-merge session)
+
+**INT-091 — REVIEW-THE-REVIEWS AND MERGE — active**
+> "read repo, prs, review the reviews, merge"
+
+Source: session record 2026-10-13 (owner turn 7, chat — accompanied by the owner forwarding an agent design review proposing: the repo must make the correct next action discoverable, preserve why it is correct, and prevent known failures from recurring; a compact current-state index; a failure-to-regression loop; session handoffs; branch-and-PR discipline checked in the workflow). Grounds: PRs #1/#2 (reviewed and merged under this authorization), D-024, /STATE.md, FAIL-001, `context/extracted/11-REVIEW-MERGE-AND-STATE-SLICE.md`. Means (interpretation, labeled): cold-start read first; review the open PRs and every attached or forwarded review; merge the PRs that pass review — this is an explicit merge authorization; then strengthen the architecture per the gaps the reviews expose. The forwarded review's content is owner-forwarded AGENT recommendation — adopted via D-024 (ADOPTED, challengeable), never auto-promoted to owner intent.
+
+---
+
 ## Audit note (2026-10-13 — the canonicalization slice)
 
 - **Active** owner intent now covers every claim the root layer makes: goal (INT-047), claims C1–C5 (INT-047, INT-057, INT-050, INT-026/028, C5 via the substrate line), workflow (INT-019/038), backend-only (INT-040), autonomy (INT-049), no-later (INT-060/039), epistemics (INT-025/026/027/028), agent-client (INT-030/058), two-speed concepts (INT-027/061), memory law (INT-031), operating mode (INT-065), language (INT-063/064), growth (INT-048/066).
@@ -418,3 +428,9 @@ Source: `context/raw/0.txt:37`; `1.txt:106`. Grounds: C3, INT-047/050. The produ
 - **Ledger discipline held (INT-075):** this ledger still carries ONLY owner words. The assistant's observations about the owner (profile, judgment style) live in the session record `context/extracted/09-ARCHITECTURE-REVIEW.md`, never here.
 - **Open owner gates (updated):** Q1 (host — PARTIALLY answered by INT-070: GLM runs test/verification; the primary builder tool and the "Other" host remain to name), Q2 (purge vs backups — D-011, unchanged), Q3 (fact-tag meaning — RE-SCOPED by INT-069: no default tag classification; the question applies only when the owner uses a `fact` tag), D-014 (calculation engine, unchanged).
 - **Reconciliations executed this session (per EXR-08, latest owner statement governs):** P-10 MECHANISM + GLOSSARY + DECISIONS Q3 annotation (INT-069, custom tags); DECISIONS Q1 annotation + OPERATING-MODEL Model 0 (INT-070, GLM verification); AGENTS.md v2.2 + EXECUTION.md §1/§6 (INT-071/072: cold-start reference tier, session engineering records, QD-1 home, rule-families row).
+
+## Audit note (2026-10-13, session 3 — the review-merge session; appends, supersedes nothing)
+
+- **INT-091 records owner turn 7 verbatim** ("read repo, prs, review the reviews, merge") — 73 statused entries, INT-019..INT-091, contiguous and unique.
+- **Ledger discipline held (INT-075):** the owner-forwarded design review (five jobs / STATE.md / failure loop / branch discipline) is recorded as GROUNDS on INT-091 only, and adopted through D-024 (ADOPTED status — challengeable, severable). Its words are NOT ledgered as owner intent; this ledger still carries only owner words.
+- **Open owner gates (unchanged in scope, dependency-annotated per F-07):** Q1 remainder (blocks only W-02 host bridges), Q2 (Phase 3 storage/purge lock), Q3 (fact-tag vocabulary freeze — custom tags unaffected), D-014 (non-blocking).

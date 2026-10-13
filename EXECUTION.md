@@ -20,10 +20,12 @@
 | Phase sequence | `/PLAN.md` | One phase deep (NG-04); guardrails; Phase 1 detail |
 | Vocabulary | `/GLOSSARY.md` | Term definitions — the definitional authority (§4) |
 | Entry map | `/AGENTS.md` | Cold-start read order; binding rules (≤80 lines) |
+| Current-state index | `/STATE.md` | Where things stand NOW: phase, active task, exact next action, blocking open questions, verification state. A navigation snapshot pointing at authority — never a second authority; canonical wins on conflict (D-024) |
 | Coordination log | `context/WORKLOG.md` | Append-only task log (operational memory) |
 | Rule families (LOOP/QST/STOP/KB/RED/PRF/RAT/WALL/UNS/MEM/FX/AFA/KER/BND/AUT/LAD) | `context/raw/Arivo Agent Execution Specification.md` (Tier 0 — full definitions, immutable) + inline restatements at citation points in LAWS/OPERATING-MODEL | Stable rule IDs; root documents restate a family's meaning at every citation — a bare ID with no meaning inline is a defect |
 | Session engineering records | `context/extracted/09+` (numbered session records) | Per-session self-contained engineering docs (INT-072): what was asked, what was done, evidence, what changed, what's open |
 | Refinement debt | `context/extracted/07-ON-THE-LIST.md` | The refinement-debt register (D-020) — the one live mechanism in `extracted/` |
+| Review artifacts | `context/reviews/` | Agent-authored reviews and protocol proposals — banner-marked review-only documents. They land on a branch via PR and merge only with the owner's explicit authorization; accepted rules fold into their canonical home, never stay a parallel authority (D-024) |
 
 **The rule:** each concern has exactly ONE authoritative home. Other files may summarize, but a summary must point at the authority and never become a second specification. Every duplicated fact creates a synchronization obligation — duplication is a defect to be paid down, not convenience.
 
@@ -72,6 +74,7 @@ Rules:
 ## 5. How this contract changes
 
 - **Append-only.** Ledgers, laws, and decisions supersede by reference; text is never rewritten; numbering never recycles. A status marker plus a pointer is the only permitted in-place change (the repo's supersession convention).
+- **The change channel (D-024).** Memory deltas land on `main` per P-15. Analysis, review, and proposal artifacts never land on `main` directly — they arrive by pull request and merge only with the owner's explicit authorization; a review request authorizes inspection and reporting, never edits. `main` is protected (PR-only, no force push, applies to admins): the host rejects direct pushes, so the discipline is checked in the workflow, not remembered in prose. Process detail: `context/reviews/REVIEW-PROTOCOL-PROPOSAL.md` (accepted, subordinate to this section).
 - **Who changes what.** The owner directly for NORTH-STAR and the INTENT-LEDGER; doc slices with owner approval for other root documents once walls are live (LAW-07 protected paths); the orchestrator for worklog/registers within protocol.
 - **The update invariants bind every change.** The eight invariants in `/OPERATING-MODEL.md` §7 (cold start never regresses; read order acyclic and total; no orphan authority; no silent supersession; corpus closed; plans yield to evidence; memory deltas atomic with commits; context budget is a budget) apply to this file and to every edit made under this contract.
 - **The corpus stays closed.** A new root-level document requires folding its concern into §1's map in the same commit (FX-07 discipline). One canonical home per concern, forever.
@@ -86,10 +89,10 @@ Rules:
 | QD-1 | First import formats — exact priority (cited by NORTH-STAR, D-023, PLAN) | Text/Markdown and conversation exports (JSON) first; richer formats per the durability ladder; external-platform integrations incremental (INT-024) | Phase 4 (import slice design) |
 | D-014 | Calculation engine scope | OPEN, non-blocking for capture; revisit at math workflow design | Math workflow design |
 
-These stay open until their named gates. Silence past a named gate is consent (QST-03); an agent never closes them by interpretation.
+These stay open until their named gates. Defaults lock at their named gates; silence past a named gate is consent for DEFAULTABLE questions only (QST-03). Blocking questions — owner intent, irreversible actions, security, data-loss — stay open until the owner answers; an agent never closes them by interpretation or elapsed time. Each open question blocks ONLY the work that depends on it; independent safe work continues (F-07).
 
 ## 7. Verifying this layer
 
-`python3 tools/verify_canonical_layer.py` checks the canonicalization conditions against the real repository files: the read order, the ledger's coverage and statuses, decision supersession, the register's semantics, the archive's historical marking, this file's singular authority, and the visible openness of Q1–Q3. Exit 0 = green; every failure prints rule ID, violation, and repair (diagnostics contract, C6 with reason code `waiting-for-harness`).
+`python3 tools/verify_canonical_layer.py` checks the canonicalization conditions against the real repository files: the read order, the ledger's coverage and statuses, decision supersession, the register's semantics, the archive's historical marking, this file's singular authority, and the visible openness of Q1–Q3. Run it with `--self-test` to apply its known-bad mutations and prove the guards catch the failure classes they exist for (F-01: a green checker with untested blind spots gives agents unjustified confidence). Exit 0 = green; every failure prints rule ID, violation, and repair (diagnostics contract, C6 with reason code `waiting-for-harness`).
 
 This is the Layer-0 precursor of `make audit` (Phase 2): the proof is the run, not the prose (LAW-01's spirit applied to documents). When the harness exists, these checks move up the ladder (LAD-01) into the gate.

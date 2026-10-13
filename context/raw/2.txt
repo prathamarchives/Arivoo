@@ -1,0 +1,123 @@
+okay so im building a research/reading/study enviroment where i can study/read/reason/research and everything compounds and nothing gets disappear this really will put me in leverage comparing to just copying and calling it notes in notebooks... and like i reasoned through a clean backend for this. let me share the whole architecture, divide it by layers it kinda alreayd is. and harden each laye reason extra through each.. Arivo V4 is a continuously enriching research and thinking environment. Reading is one input. Writing, journaling, research, highlights, notes, bookmarks and spontaneous thoughts are other inputs. The system preserves those objects, discovers relationships across them, and makes the resulting knowledge available while you work.
+The architecture needs to support this from the beginning. Semantic indexing, vector search, Kev and automatic relationship expansion are foundational capabilities, not optional upgrades for some distant version.
+We have locked the architectural direction. We have not prematurely locked every library, table, API or deployment choice.
+Arivo V4 — Architecture and learning map
+Foundation explored
+1. Domain model and identity
+Entities, stable IDs, primary keys, foreign keys, relationships and invariants.
+Architecture direction established
+2. Semantic memory and enrichment
+Embeddings, candidate retrieval, Kev decisions, concept discovery, relationship creation and background processing.
+Next to reason through
+3. Storage, ingestion and consistency
+How information enters the system, becomes durable, gets processed and stays correct when things fail.
+4. Retrieval, graph queries and recall
+How Arivo finds the right passage, connection or past thought from a natural-language query.
+5. Reader, journal and knowledge workspace
+The actual experience of reading, writing, mentioning objects and thinking across sources.
+6. Application architecture and desktop integration
+Frontend state, electron, filesystem access and native application behavior.
+7. Sync, security and data ownership
+Local/cloud boundaries, Supabase, offline operation, privacy, authentication and conflict handling.
+8. Testing, reliability and evaluation
+Proving that imports, references, retrieval and AI-generated relationships actually work.
+9. Performance, packaging and lifecycle
+Responsiveness, resource usage, backups, migrations, installation, updates and recovery.
+
+ i have reasoned through the backnd part where i add a non generative type 1 model that helps in evaluation, making relationships between sources, highlights, bookmarks, and journal and whatnot we have to strenghten the backend and make it solid. like dividing the identities, and candidates, entities, and the id system.. like as a world class data and information engineer. 
+
+note : kev is the type 1 non generative open source alternative of models like typesafe ai jev and openai decisions
+
+Used Claude Docs integration
+
+Arivo Execution System: Specification for Agents
+Claude Docs·Only you 
+https://claude.ai/code/artifact/aa88bade-2c7b-4fe7-970f-bbbc8ef85521
+
+That’s the execution system as a spec written for agents. It covers the laws, the phase protocol, the slice loop, the verification rulebook, the harness, the language profile, templates, exams and roles, with Phase 0 and Phase 1 in full. Appendix A seeds an Intent Ledger with 18 of your own statements, quoted word for word.
+
+Here is how it answers “phase by phase, refine until it matches”:
+
+A phase ends on a predicate, not a date. The exam must pass twice in a row on different seeds, you complete a Demo Review, and you sign the gate. A loop budget stops wasted work without limiting time.
+Alignment is measured in both directions. Every requirement traces to your words or a recorded decision, and every statement of yours traces to tests. A requirement with no intent behind it fails the audit, which targets the spec accretion we hit before. Your reactions in the demo go back into the ledger verbatim.
+The harness is built and proven first. Phase 0 builds no product feature. It builds the verifier and shows it catches 17 planted faults, because an agent can write code and tests that agree with each other and are both wrong.
+Every failure becomes a permanent defense. That means a law, a test, or a planted-fault build. Metrics tell the Planner when a doc needs refining.
+Only Phases 0 and 1 are detailed. Later phases are titles only, matching your “not a whole plan” rule.
+Two things to know about what I verified:
+
+Language. The current standard is Issue 9, from January 2025, and it has 53 writing rules and a dictionary of about 900 approved words. ASD owns the copyright, so the doc paraphrases the rules and doesn’t include the dictionary. I applied the rules by hand and no lint has run, so it isn’t certified. No one has shown that STE improves agent output either. The doc has an A/B experiment (LNG-19) in Phase 0 and a fallback to keep only the structure (IDs, reject examples, glossary) if plain prose scores better. 
+About ASD-STE100 +2
+Entry file. Reports conflict on whether Claude Code reads AGENTS.md. A September 2026 guide says it does natively from version 2.1.277, but an August 2026 comparison says it reads only CLAUDE.md. Spike S-01 settles it on your actual hosts. 
+eesel
+getunblocked
+Part 18 lists six open decisions, each with a default. The one that blocks Phase 0 is which agent hosts will build the code, because it decides S-01 and the first Context Exam. Once you answer, I can write the H-01 to H-14 slice cards in the doc’s format.
+
+
+Verdict first: this document is the process half of the seed pack I wrote last round — same lineage, same C1–C5, same non-goals, same compounding probe, same four TLA+ machines — but strictly more mechanical than my versions of everything it covers. It doesn't compete with the product design (it exp
+
+pasted
+
+
+# Arivo execution system — engineering review My verdict: the execution system has the right core philosophy, but I would not freeze it yet. The strongest parts are the intent-to-test traceability, small slices, independent verification, real-stack tests, and the requirement that every phase end
+
+pasted
+
+reasoned through it so like it actually strong now the goal is there the direction is there. now actually lets talk about how we are gonna engineer that. i want you to act as a world classs swe. and design an exectuion plan... step by step not for agents but for me.. starting from straight 0 and founation first giving execution agent whole context in plan mode what arivo is and making them reason through everything we have done to starting the repo. so i want you to reason through this. the repo is the memory for agents.. actually design 2 in depth docs one for me one for agent execution. for me state step by step process. as i said how i am approaching this.
+
+"something that keeps bothering me is how some people see slop as something that is happening to them, like they're some kind of helpless bystander powerless to do anything about it
+
+excuse me but you are a software engineer, you literally learned how to make sand think and make computers do your bidding?! and now you can't do anything about it? please
+
+the 2 things you should know to cut through all the noise:
+
+you need to give your agent a way to verify its own work (i just posted about this so won't rehash)
+your codebase is memory
+the 2nd is not new either, we have always had lint rules, compilers with good diagnostics and strong type systems, LSPs, etc to help us write better code. there is no difference when agents write the code instead, you just need more of them, and stronger ones.
+
+forget rules and skills. you can add those later.
+
+yes, your codebase is a form of memory to agents! agents love extending what already exists. so every nit and every annoyance you've ever seen, every mistake and bad pattern you observe from agents, needs to turn into a constraint, or the agents will just keep repeating those same mistakes like a virus in your code. then you keep observing and repeating this process until your codebase is locked down enough that even agents with little context can one shot a high quality PR.
+
+an even better direction is to refactor/rewrite your code such that agent anti-patterns become categorically impossible. use type systems to your advantage, use libraries/frameworks that reduce the architectural search space, or heck, create your own framework like we did for grok bot and design high quality primitives and well thought out APIs"
+
+"it's very interesting how many replies i've gotten about maintainability and clean code being still important. i would argue that that is no longer true and we all need to update our priors on what Good Code really means in 2026.
+
+clean code has always come at a cost - performance. indirection and making code readable/understandable for a human is not free, it often comes at the cost of worse performance. we have historically been okay with this because of Moore's Law and the fact that most code is not on the hot path. 
+
+these principles also came from a time where humans maintained code. it made sense to optimize for humans then, but it makes less sense now when agents are already writing all the code. we will in fact probably discover and come up with new principles: principles of agent friendly architecture (i plan to write more thoughts about this soon)"
+
+reason through thsi and design the execution plan on the principles of this.. to get exactly what we want. the repo is the memory. define laws. strict so agent does not drift or fuck up anything and just keep at it until what we need is achieved
+
+Used Claude Docs integration, searched the web
+Verifying claims about Claude Code's plan mode permissions.
+Processing document identifiers and structural metadata.
+
+Arivo Build Playbook: How You Run the Build
+Claude Docs·Only you 
+
+Arivo: Agent Execution Specification
+Claude Docs·Only you 
+https://claude.ai/code/artifact/b6e94caf-9e71-4aaa-90d3-c038c599784f
+https://claude.ai/code/artifact/13c7a7a9-a28b-4cef-8644-07bf054b2f08
+
+The first is your playbook, which you keep out of the agent repo. The second is the agent spec, which goes in docs/agent/EXECUTION.md.
+
+The playbook gives you 13 steps from zero: your desk, the walls, the memory, the plan-mode Understanding Session, decisions, and then the foundation slices. It also has your break tests, a table of drift symptoms, seven copy-paste prompts, and the Context Check answer key. The agent spec holds the context brief, 29 laws (each with an enforcement level and a check), a ten-primitive kernel, and slices F-00 to F-09.
+
+Your two posts shaped it in three ways:
+
+Verification comes before features. F-02 to F-04 build the loop, and you watch it fail on purpose before any product behavior exists.
+Constraints replace prose rules. Every law sits on a ladder: type, database, lint, test, gate, and prose only last. The kernel makes the worst mistakes impossible instead of forbidden. The foundation ends when a fresh agent with only a card passes the gate on the first try, twice.
+Mistakes feed a ratchet. You never hand-fix anything. The agent writes a failing known-bad build first, then the constraint, then sweeps the repo so old instances don’t teach new agents.
+Four calls I made that you should check:
+
+Real first behavior. Capturing a highlight is a real slice, not a toy, because agents extend whatever exists.
+No skills or rules files. None until the toolchain can’t hold a lesson.
+Review fixes folded in. These cover separate builder and runtime agent permissions, intent statuses, three question classes, known-bad builds that activate when their behavior exists, owner-signed gates, and test-size caps.
+Stack is a default. TypeScript on Postgres is a default the agent must challenge in the Understanding Session, not a decision.
+Here is what I checked and what I didn’t. Plan mode in Claude Code is a read-only permission mode, enforced by a system instruction plus permissions rather than a hard sandbox, so the playbook has you check git status afterward. Approving a plan exits plan mode and switches to the mode you pick, so you choose one that still asks before commands. Third-party summaries of OpenAI’s harness engineering describe the same pattern: repo as system of record, a short AGENTS.md map, and mechanical enforcement. 
+plan mode claude code complex tasks +2
+
+I did not verify library choices, or whether your git host’s token and branch settings behave as I assumed. Steps 1 and 5 make you test the walls rather than trust them. The numeric limits (8 files, 400 lines, 60 seconds) are starting values.
+
+Run Steps 0 to 3, then paste the Understanding Report here and I’ll grade it against the Context Check.

@@ -1,6 +1,6 @@
 # GLOSSARY — Arivo
 
-Controlled vocabulary. One concept, one name — no synonyms. Terms used in ledgers, laws, cards, and code must come from here. New terms enter by append; renames supersede by reference.
+Controlled vocabulary. One concept, one name — no synonyms. **Scope: this policy governs the repo's documentation and architecture vocabulary only.** Arivo's knowledge graph deliberately supports synonyms, aliases, and multiple surface forms for the same concept (P-10: concept pages carry aliases) — no agent may enforce the documentation-vocabulary policy against user material. Terms used in ledgers, laws, cards, and code must come from here. New terms enter by append; renames supersede by reference.
 
 ## Identity
 - **Arivo** — the product: the owner's reading/study/reflection environment. (The owner also says "Ivo" casually; Arivo is canonical per D-002.)
@@ -33,7 +33,7 @@ Controlled vocabulary. One concept, one name — no synonyms. Terms used in ledg
 - **Client outbox** — on-device durability queue; preserves new work offline and replays to the cloud when available.
 - **Server outbox** — post-commit job scheduler for enrichment. A different problem from the client outbox.
 - **Durability ladder** — `local-durable → server-durable → keyword-searchable → semantically indexed → linked`. Safety claims never exceed the current rung.
-- **The List** — confirmed-but-deferred capabilities with reopening triggers (`context/extracted/07-ON-THE-LIST.md`).
+- **The List** — the refinement-debt register (`context/extracted/07-ON-THE-LIST.md`, D-020): implementation slices sequenced out of the active order, each with a reopening trigger. NOT "confirmed-but-deferred capabilities": a capability confirmed by owner words never leaves the active sequence, and architecture-level commitments (P-16) can never enter the register at all. The register shrinks as items enter the sequence; it never becomes a graveyard.
 
 ## Execution
 - **Slice** — one behavior, size-limited, one card. The unit of build.
@@ -46,6 +46,8 @@ Controlled vocabulary. One concept, one name — no synonyms. Terms used in ledg
 - **Proactive set** — the guardrails present from day one: isolated credentials · protected gates · real database test · idempotent writes · immutable evidence · owner scoping · independent state read.
 - **Kev** — the decision/classification machinery (kernel port; policy + evaluation gates at its band).
 - **Compounding probes** — the C3 test series, tested separately: deterministic → semantic → graph.
+- **EXECUTION.md** — the canonical execution-contract authority: the contract map (one authoritative home per concern), the source tiers, the authority order, and the change protocol. Other files point to it; no parallel execution spec exists (D-021).
+- **Source tiers** — the five source classes (raw archive / intent ledger / decision ledger / root canonical docs / extracted briefs) and their authority roles. Defined in `/EXECUTION.md` §2.
 
 ## Doctrine (from the transcripts and upstream — full text in /ENGINEERING.md)
 - **Trust ladder** — the escape from 1:1 babysitting via verification, not confidence. Trust continuum strongest-first: codebase → static analysis → rules/skills → style guide (human-only, the big hole).

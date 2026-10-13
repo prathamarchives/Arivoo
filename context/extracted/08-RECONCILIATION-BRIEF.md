@@ -1,5 +1,7 @@
 # 08 — Reconciliation Brief (owner turn 3.txt: verdict review + directives + vision)
 
+> STATUS: HISTORICAL process artifact (marked 2026-10-13, canonicalization slice). Its 12 spec deltas are FOLDED into the root layer or explicitly OWNER-GATED (Q1–Q3) — see `/PLAN.md` supersession note and `/EXECUTION.md` provenance. Nothing waits on a further agent-side rewrite. It does not outrank the root documents.
+
 Source: context/raw/3.txt (verbatim, 2026-10-13)
 Status: REASONED — each review item carries a disposition: ADOPTED / REGISTERED / OWNER-OPEN. Owner words from the vision narrative are LOCKED intent.
 

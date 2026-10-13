@@ -1,6 +1,6 @@
 # 03 — Arivo Current State (the two Arivoo docs, distilled)
 
-> PARTIALLY SUPERSEDED (2026-10-13): the 29 laws, constraint ladder, and phase mapping now live canonically at root /LAWS.md. This brief remains as extraction history.
+> STATUS: HISTORICAL process artifact (marked 2026-10-13, canonicalization slice). Superseded by root `/LAWS.md` + `/PLAN.md` + `/EXECUTION.md` — the 29 laws, the phase mapping, and the kernel/boundary rules now live canonically at root. Kept as extraction history; it does not outrank the root documents.
 
 Source: Arivo Agent Execution Specification.md (v2, agent-facing, → docs/agent/EXECUTION.md), Arivo Build Playbook How You Run the Build.md (owner-facing, kept OUTSIDE the repo)
 Date of docs: October 13, 2026 — same day the Arivoo repo was created (private, empty).

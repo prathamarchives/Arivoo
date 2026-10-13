@@ -84,7 +84,7 @@ Append-only: new laws get new numbers. Superseded laws keep their text and statu
 
 **MEANING.** Dependency-ordered, never calendar-ordered, never deferral-ordered. "Later" is not an answer; it is a refinement-debt entry with a reopening trigger. Phases sequence work by dependency and evidence — they do not postpone it.
 
-**MECHANISM.** The List (`context/extracted/07-ON-THE-LIST.md`): confirmed-but-deferred capabilities each carry a reopening trigger. NG-04 (no detailed plan beyond the next phase) — one phase deep, because deep planning of unpromised future work is deferral in disguise. Audit: a capability confirmed by owner words that appears nowhere in the active sequence is a drift finding.
+**MECHANISM.** The List — the refinement-debt register (`context/extracted/07-ON-THE-LIST.md`, D-020): implementation slices sequenced out of the active order, each with a reopening trigger; core capabilities can never leave the active sequence through it. NG-04 (no detailed plan beyond the next phase) — one phase deep, because deep planning of unpromised future work is deferral in disguise. Audit: a capability confirmed by owner words that appears nowhere in the active sequence is a drift finding.
 
 **FAILURE MODE.** The "V2 parking lot": core capabilities quietly reclassified as future enhancements, then silently dropped (the exact failure the verdict's §4 attacked: "Meaning-based search comes later" contradicting the locked architecture).
 

@@ -1,5 +1,7 @@
 # 05 — Open Questions for the Owner
 
+> STATUS: HISTORICAL process artifact (marked 2026-10-13, canonicalization slice). The live open questions are Q1–Q3 + D-014, carried in `/DECISIONS.md`, `/PLAN.md` (standing open), and `/EXECUTION.md` §6 — visibly open until their named gates. This file remains as the question-resolution history. It does not outrank the root documents.
+
 Status: awaiting the owner's answers. Each is classified per the Question Record protocol. Defaults exist where marked; silence past the named gate = consent.
 
 ---

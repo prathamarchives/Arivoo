@@ -2,7 +2,7 @@
 
 Provenance: `context/raw/engineering transcript.txt` (the trust/verification talk), `context/raw/upstream of engineering transcripts.txt` (the agent-native repository treatise), `context/raw/3.txt` (owner doctrine quotes), `context/raw/Arivo Agent Execution Specification.md` (the law book the doctrine produced). Every section below states the principle, the failure it kills, the mechanism that enforces it here, and where it lives in this repo.
 
-This file is the WHY. `/LAWS.md` is the WHAT (the executable rules). `/OPERATING-MODEL.md` is the HOW (who runs what, and how the system grows). When they disagree: INTENT-LEDGER > NORTH-STAR > LAWS > this file > DECISIONS > PLAN > agent judgment. A disagreement is a Question Record, never a silent choice (AUT-05).
+This file is the WHY. `/LAWS.md` is the WHAT (the executable rules). `/OPERATING-MODEL.md` is the HOW (who runs what, and how the system grows). When they disagree, the authority order in `/EXECUTION.md` §3 (the canonical home, D-021) resolves it. A disagreement is a Question Record, never a silent choice (AUT-05).
 
 ---
 

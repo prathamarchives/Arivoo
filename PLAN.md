@@ -21,19 +21,19 @@ Exit: the harness proves scope, evidence immutability, idempotency, and independ
 Schema v0+ per the minimum durable model (GLOSSARY): Work/Source split; highlight with stable identity + anchor + immutable revision; bookmark; note; owner scope + actor on every write; idempotent commands; client outbox; recovery. Server outbox wired for future enrichment.
 Exit: capture survives kill -9, restart, replay, offline; keyword search finds it; fault trials lose zero; durability ladder holds to server-durable.
 
-## Phase 4 — Reader and journal path (first usable milestone, D-013)
-Open PDF/EPUB → highlight → bookmark → margin notes → durable journal blocks → stable `@` references. Each behavior gets its own small card and verified result.
-Exit: the owner's day-one workflow (read → capture → note → journal with references) runs end-to-end, proven on the real stack.
+## Phase 4 — Reader and journal path (first usable milestone, D-013, D-023)
+Open PDF/EPUB → highlight → bookmark → margin notes → durable journal blocks → stable `@` references — **plus the first import path: text/Markdown and conversation exports (INT-019 day-one intake; QD-1 default; books/articles per the durability ladder)**. Each behavior gets its own small card and verified result.
+Exit: the owner's day-one workflow (import → read → capture → note → journal with references) runs end-to-end on the real stack, proven through a real client path with a documented integration boundary to the reader/journal clients (the UI itself is outside this repo).
 
 ## Phase 5 — Retrieval and compounding
 Keyword lookup → agent reads (API/MCP surface per D-019) → semantic indexing + vector retrieval → relationship candidates → concept formation → Kev policy/eval gates. Compounding probes tested separately: deterministic → semantic → graph.
 Exit: C3 demonstrable with reasons and provenance — new inputs resurface old material; automatic relations add value without violating evidence rules.
 
 ## Standing open (owner)
-Q1 primary host + "Other" · Q2 purge-backup policy · Q3 fact-tag meaning. Calculation engine: open, non-blocking for capture. The List (cloud sync et al.) carries reopening triggers.
+Q1 primary host + "Other" · Q2 purge-backup policy · Q3 fact-tag meaning. Calculation engine: open, non-blocking for capture. The List is the refinement-debt register (D-020) — cloud sync (L-001) is its live entry; semantic search, pgvector, and vector search are in the active sequence (Phase 5), never on the register.
 
 ## Supersession note
-The F-00..F-09 foundation-slice order from the original execution spec is SUPERSEDED by this phase sequence (D-016; reconciliation brief R-02/R-10). The slice cycle, size limits, proof discipline, and laws carry over unchanged into the new phases — now codified at root: LAWS.md (the 29 laws, phase-mapped) and ENGINEERING.md (the doctrine). The canonical EXECUTION.md rewrite (after Q1-Q3) folds the 12 spec deltas from `context/extracted/08-RECONCILIATION-BRIEF.md`.
+The F-00..F-09 foundation-slice order from the original execution spec is SUPERSEDED by this phase sequence (D-016; reconciliation brief R-02/R-10). The slice cycle, size limits, proof discipline, and laws carry over unchanged into the new phases — now codified at root: LAWS.md (the 29 laws, phase-mapped) and ENGINEERING.md (the doctrine). The execution contract's canonical home is `/EXECUTION.md` (created by the canonicalization slice, 2026-10-13, D-021): the 12 spec deltas staged in `context/extracted/08-RECONCILIATION-BRIEF.md` are folded into the root layer or explicitly owner-gated (Q1–Q3) — nothing waits on a further agent-side rewrite.
 
 ## Growth-model mapping (how this plan grows the repo)
 Phase 1 → operating Model 1 (trust environment) · Phase 2 → Model 2 (build loop: harness core, builders, verifier) · Phase 3 → Models 2→3 (substrate laws live; enforced architecture begins) · foundation exit → Model 3 stable · Phases 4–5 → Model 4 (evidence-driven) · post-foundation recurring agents → Model 5 (self-maintaining) · harness evals → Model 6 (self-improving). Each model's full specification (who runs, what's enforced, how memory updates, how failures heal, graduation predicate): OPERATING-MODEL.md §6.

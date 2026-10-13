@@ -31,7 +31,7 @@ One behavior, one card, one loop. Steps 3–8 are a **cycle**; after 3 failed cy
 | # | Step | Specification |
 |---|------|---------------|
 | 1 | `make state` → read the card | The repo's generated status (phase, open slices, open questions, constraint status, last gate) — never an agent's memory of it (P-02) |
-| 2 | Write `understanding.yaml` | Slice ID, intent restated, scope restated, must-reject restated, **unknowns: []** — meaning zero *unclassified or unresolved blocking* unknowns (D-012; the correction of the original "zero unknowns"). Facts used, plan. A non-empty blocking list stops the slice |
+| 2 | Write `understanding.yaml` | Slice ID, **intent IDs (INT-*) with the owner quotes**, intent restated, scope restated, must-reject restated, **unknowns: []** — meaning zero *unclassified or unresolved blocking* unknowns (D-012; the correction of the original "zero unknowns"). Facts used, plan. A non-empty blocking list stops the slice |
 | 3 | Write the tests from the card. Commit them ALONE. `make red` | Each test MUST fail for the stated reason (LAW-11). The harness hashes the red tests and freezes the record (RED-01/02). Amendments add assertions, never remove (RED-03) |
 | 4 | Write code inside card scope. `make fast` after each change | ≤60s (AFA-07). SIZE and SCOPE limits apply (LAW-05/06) |
 | 5 | `make real-run` | Start the real stack, drive it as a user, record the transcript + state snapshots (LAW-12). Real stack, never a mock that looks successful |
@@ -110,7 +110,7 @@ The repo does not have one operating model. It has six, one per maturity stage (
 - **What is enforced:** prose at C6 with reason codes (`waiting-for-slice` on every law — the codebase is empty; that is honest, not weak). Enforced NOW: append-only ledgers, verbatim owner words, the worklog protocol, the read order, no-product-code-without-approved-plan.
 - **How memory updates:** every reasoning delta → authoritative home → append with ID → commit → push (§3). Contradictions become Question Records with defaults; silence past a named gate is consent.
 - **How failures heal:** process failures (a misread, a drift, a tension) become Reasoning Log entries, reconciliation briefs, and superseded files. Structural failure is impossible — there is no structure yet.
-- **Graduation (→ Model 1):** the owner approves the execution plan and answers Q1–Q3; the canonical EXECUTION.md reconciliation pass folds the 12 staged spec deltas; Phase 1 (walls) begins.
+- **Graduation (→ Model 1):** the owner approves the execution plan and answers Q1–Q3; the execution contract's canonical home (`/EXECUTION.md`) exists — the 12 spec deltas are folded or owner-gated; Phase 1 (walls) begins.
 
 ### Model 1 — Trust Environment (walls live, CI authority)
 
@@ -176,7 +176,7 @@ When two files disagree: they disagree BECAUSE of a missing question record or a
 
 ### The authority order (conflict resolution)
 
-Owner words (Intent Ledger) > North Star > LAWS > ENGINEERING > Decision Records > PLAN > slice cards > agent judgment. A higher level overrides a lower level (AUT-01). A default never overrides a law or a higher level (AUT-06). Two active items at the SAME level conflict → blocking Question Record; do not choose (AUT-05).
+The authority order, the source tiers, and all conflict-resolution rules live in `/EXECUTION.md` §2–§3 — the canonical home (D-021). Carried over unchanged: a default never overrides a law or a higher level (AUT-06); two active items at the SAME level conflict → blocking Question Record; do not choose (AUT-05); the latest explicit owner decision governs, earlier text stays as history (AUT-03).
 
 ### Update invariants — what "nothing breaks" means, mechanically
 

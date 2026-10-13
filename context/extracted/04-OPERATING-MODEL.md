@@ -1,5 +1,7 @@
 # 04 — Orchestrator Operating Model (Super Z, aligned to Arivo)
 
+> STATUS: HISTORICAL process artifact (marked 2026-10-13, canonicalization slice). Superseded by root `/OPERATING-MODEL.md` (roles, morals, beliefs, the loop — at specification depth). Kept as the session-era commitment record. It does not outrank the root documents.
+
 The pairing of world-class capabilities with the engineering doctrine (01) and the owner's intent (02). This file governs how I reason and execute for the rest of this build. It is my standing commitment, in writing, per the Memory Law.
 
 ---

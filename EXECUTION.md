@@ -1,0 +1,92 @@
+# EXECUTION — The Execution Contract, Canonically
+
+**What this file is.** The single canonical home of Arivoo's execution contract: which files constitute the contract, which sources exist and how they rank, how conflicts resolve, and how the contract changes. It is an **authority map** — it creates no new rules; it states where every kind of rule lives. No other file may define execution authority, and no parallel execution specification may be created (D-021). Every authority-order statement elsewhere in the repo points here.
+
+**Provenance.** Created by the canonicalization slice, 2026-10-13, executing the owner-endorsed review (INT-068). It replaces the three divergent authority-order statements previously embedded in NORTH-STAR, ENGINEERING, and OPERATING-MODEL. The 12 spec deltas staged in `context/extracted/08-RECONCILIATION-BRIEF.md` are either folded into the root layer already or explicitly owner-gated (§6) — none waits on a further agent-side rewrite.
+
+---
+
+## 1. The execution contract — what it consists of
+
+| Concern | Authoritative home | Holds |
+|---------|--------------------|-------|
+| The goal and claims | `/NORTH-STAR.md` | Mission in owner words; C1–C5; the seven-layer contract; non-goals |
+| Owner intent | `/INTENT-LEDGER.md` | Owner words, verbatim, statused — the ONLY intent authority |
+| Owner laws | `/PRINCIPLES.md` | P-01..P-17: WORDS / MEANING / MECHANISM / FAILURE MODE / GROWTH |
+| Decisions | `/DECISIONS.md` | D-001..D-023, statused; open owner questions Q1–Q3 |
+| Executable law | `/LAWS.md` | The 29 laws: statement, ladder level, check, live-at; LAD rules; proactive set |
+| Doctrine | `/ENGINEERING.md` | Why the laws are what they are (transcript + upstream) |
+| Roles, loop, growth, healing, verification | `/OPERATING-MODEL.md` | The slice loop; six operating models; memory-update protocol; self-healing; the verification stack |
+| Phase sequence | `/PLAN.md` | One phase deep (NG-04); guardrails; Phase 1 detail |
+| Vocabulary | `/GLOSSARY.md` | Term definitions — the definitional authority (§4) |
+| Entry map | `/AGENTS.md` | Cold-start read order; binding rules (≤80 lines) |
+| Coordination log | `context/WORKLOG.md` | Append-only task log (operational memory) |
+| Refinement debt | `context/extracted/07-ON-THE-LIST.md` | The refinement-debt register (D-020) — the one live mechanism in `extracted/` |
+
+**The rule:** each concern has exactly ONE authoritative home. Other files may summarize, but a summary must point at the authority and never become a second specification. Every duplicated fact creates a synchronization obligation — duplication is a defect to be paid down, not convenience.
+
+## 2. Source tiers (what sources exist — and what they are NOT)
+
+| Tier | Source | What it is |
+|------|--------|-----------|
+| 0 | `context/raw/` | The verbatim corpus **as received from the owner** — a MIXED archive: owner statements, AI analysis and proposals, pasted documents and reviews, repeated across files. Immutable (AUT-02). **Not owner-only material**: no sentence in `raw/` is an owner decision by virtue of being there. |
+| 1 | `/INTENT-LEDGER.md` | Owner words, verbatim, with source and status. The only path by which owner intent becomes authority. |
+| 2 | `/DECISIONS.md` | Explicit decisions, statused (LOCKED / PRESENTED-LOCKED / ADOPTED / OPEN). AI recommendations rank ADOPTED at most — challengeable, never silently requirements. |
+| 3 | Root canonical documents | The derived authority layer (NORTH-STAR, PRINCIPLES, LAWS, ENGINEERING, OPERATING-MODEL, PLAN, GLOSSARY). |
+| 4 | `context/extracted/` | Historical process artifacts — extraction and reasoning history, banner-marked. They never outrank root documents. Exception: `07-ON-THE-LIST.md` is the live register (D-020). |
+
+**The intent rule.** Owner intent enters this repo ONLY through INTENT-LEDGER entries — owner words, verbatim, statused. A raw-corpus sentence, an AI proposal, or an extracted-brief statement is NOT intent until it is a ledger entry or an adopted decision (LOOP-05: a requirement with no intent behind it fails the audit). A fresh agent loads the Intent Ledger **before** forming any understanding of the task, and every slice card / context pack carries its INT- IDs and the owner quotes.
+
+## 3. The authority order (conflict resolution)
+
+| Rank | Source | Notes |
+|------|--------|-------|
+| 1 | Owner words — INTENT-LEDGER entries | Verbatim; the highest authority |
+| 2 | NORTH-STAR | Owner words compiled; claims and layers derived from them |
+| 3 | PRINCIPLES — the WORDS fields | Verbatim owner law text (MEANING/MECHANISM/GROWTH are labeled interpretation and rank with the derived layer) |
+| 4 | DECISIONS — LOCKED and PRESENTED-LOCKED entries | Owner-ratified decisions |
+| 5 | LAWS | Derived executable law book — must trace upward (update invariant 3) |
+| 6 | ENGINEERING | Doctrine (the why) |
+| 7 | OPERATING-MODEL | Execution-contract detail |
+| 8 | PLAN | One phase deep — most volatile |
+| 9 | Slice cards / context packs | Concretize; never broaden |
+| 10 | Agent judgment | Last |
+
+Rules:
+
+- **EXR-01** — Verbatim owner text at any level outranks ALL derived text: a PRINCIPLES WORDS quote beats a LAWS row; a NORTH-STAR quote beats a DECISIONS entry.
+- **EXR-02** — DECISIONS entries with status ADOPTED rank BELOW LAWS. A conflict between an ADOPTED decision and a law or owner word is a blocking Question Record — never a silent pick, never an average (AUT-05).
+- **EXR-03** — A default never overrides a law or a higher level (AUT-06).
+- **EXR-04** — Two active items at the SAME level conflict → blocking Question Record; do not choose (AUT-05).
+- **EXR-05** — GLOSSARY resolves conflicts about what a term MEANS (§4), regardless of the rank of the files using it.
+- **EXR-06** — Plans are not permanent truth: when implementation evidence disagrees with PLAN, the plan yields — via a Question Record that names the disagreement, then a plan update (update invariant 6).
+- **EXR-07** — When a law and a file disagree, report the drift — never resolve it silently (LAWS.md preamble).
+- **EXR-08** — The latest explicit owner decision that supersedes an earlier one governs; the earlier entry stays as history with its `superseded_by` link (AUT-03).
+
+## 4. Term meaning
+
+`/GLOSSARY.md` is the definitional authority for vocabulary. Its "one concept, one name — no synonyms" policy governs the repo's **documentation and architecture vocabulary only**: Arivo's knowledge graph deliberately supports synonyms, aliases, and multiple surface forms for the same concept (P-10: concept pages carry aliases). No agent may enforce the documentation-vocabulary policy against user material.
+
+## 5. How this contract changes
+
+- **Append-only.** Ledgers, laws, and decisions supersede by reference; text is never rewritten; numbering never recycles. A status marker plus a pointer is the only permitted in-place change (the repo's supersession convention).
+- **Who changes what.** The owner directly for NORTH-STAR and the INTENT-LEDGER; doc slices with owner approval for other root documents once walls are live (LAW-07 protected paths); the orchestrator for worklog/registers within protocol.
+- **The update invariants bind every change.** The eight invariants in `/OPERATING-MODEL.md` §7 (cold start never regresses; read order acyclic and total; no orphan authority; no silent supersession; corpus closed; plans yield to evidence; memory deltas atomic with commits; context budget is a budget) apply to this file and to every edit made under this contract.
+- **The corpus stays closed.** A new root-level document requires folding its concern into §1's map in the same commit (FX-07 discipline). One canonical home per concern, forever.
+
+## 6. Open owner decisions (visibly open — gates, not gaps)
+
+| ID | Question | Default (stands until overridden) | Locks at |
+|----|----------|-----------------------------------|----------|
+| Q1 | Which host is "Other"; which is the primary builder | Orchestrator + fresh subagents build; cross-family verifier once the host contract is verified | Phase 1 W-02 |
+| Q2 | Purge vs backups (D-011) | Live + active-derivative removal; documented backup expiry; purge ledger applied on restore; per-owner encryption + key destruction only if physical erasure is required | Phase 3 (storage/purge schema lock) |
+| Q3 | fact-tag meaning (P-08, INT-025) | (a) intended-factual, with verification status recorded separately — supports disagreement without losing the source claim | Phase 3 (vocabulary freeze, LAW-25 codegen) |
+| D-014 | Calculation engine scope | OPEN, non-blocking for capture; revisit at math workflow design | Math workflow design |
+
+These stay open until their named gates. Silence past a named gate is consent (QST-03); an agent never closes them by interpretation.
+
+## 7. Verifying this layer
+
+`python3 tools/verify_canonical_layer.py` checks the canonicalization conditions against the real repository files: the read order, the ledger's coverage and statuses, decision supersession, the register's semantics, the archive's historical marking, this file's singular authority, and the visible openness of Q1–Q3. Exit 0 = green; every failure prints rule ID, violation, and repair (diagnostics contract, C6 with reason code `waiting-for-harness`).
+
+This is the Layer-0 precursor of `make audit` (Phase 2): the proof is the run, not the prose (LAW-01's spirit applied to documents). When the harness exists, these checks move up the ladder (LAD-01) into the gate.

@@ -1,6 +1,6 @@
 # NORTH-STAR — Arivo
 
-The goal, in the owner's words (verbatim, 2026-10-13, `context/raw/3.txt`). Everything in this repo traces here. Authority: owner words (INTENT-LEDGER) > this file > LAWS > ENGINEERING > PRINCIPLES > DECISIONS > PLAN > agent judgment.
+The goal, in the owner's words (verbatim, 2026-10-13, `context/raw/3.txt`). Everything in this repo traces here. Authority: owner words (INTENT-LEDGER) first — the full precedence order and conflict rules live in `/EXECUTION.md` §3, the canonical home (D-021).
 
 ## Mission
 
@@ -25,8 +25,12 @@ The goal, in the owner's words (verbatim, 2026-10-13, `context/raw/3.txt`). Ever
 - **C4** Concepts form with provenance, from tags.
 - **C5** Every derived claim is explainable and reversible.
 
-## First usable workflow (D-013)
+## First usable workflow (D-013, D-023)
 Read a source → capture highlights/bookmarks → add a note → journal, referencing material with `@`. The complete reader-capture-journal path is the first usable milestone, built from several small slices (never one enormous slice, never deferred). The durability ladder makes C1 testable: `local-durable → server-durable → keyword-searchable → semantically indexed → linked`.
+
+**Backend contract vs product workflow (D-023).** Arivoo implements and verifies the *backend contracts* — source/import, anchor, highlight, bookmark, note, journal block, `@`-reference, retrieval — through its API. The complete reader-capture-journal path is the *product-level acceptance target*: each backend slice is tested through a real client path with a documented integration boundary to the reader and journal clients. No UI is built in this repository; a CLI can test and inspect the API, but it is not the reading experience.
+
+**Import is day-one intake (INT-019).** The first usable path includes importing existing material — text/Markdown and conversation exports first (QD-1 default), books and articles per the durability ladder, external-platform integrations incrementally (INT-024). Capture never waits for import intelligence (layer-2 contract).
 
 ## The seven layers (the substrate contract)
 

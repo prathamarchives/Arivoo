@@ -1,7 +1,9 @@
 # 02 — The Owner's Voice and Evolution (convos 0 → 1 → 2)
 
+> STATUS: HISTORICAL process artifact (marked 2026-10-13, canonicalization slice). Superseded by root `/INTENT-LEDGER.md` — the backfilled ledger carries these intents verbatim with sources and statuses. This brief remains as the distilled reading history. It does not outrank the root documents, and its content must never be promoted into requirements (LOOP-05).
+
 Source: 0.txt, 1.txt, 2.txt
-Method: owner statements extracted verbatim-first (typos preserved — provenance). This file is the predecessor of the repo's INTENT-LEDGER.
+Method: owner statements extracted verbatim-first (typos preserved — provenance).
 
 ---
 

@@ -1,5 +1,7 @@
 # 06 — Reasoning Log (one-by-one sessions)
 
+> STATUS: HISTORICAL process artifact (marked 2026-10-13, canonicalization slice) — append-only and still APPENDED to for new reasoning sessions. The owner words recorded here (session turns not present in `context/raw/`) are preserved verbatim and are backfilled into root `/INTENT-LEDGER.md` (INT-053, INT-064..INT-067). It does not outrank the root documents.
+
 Append-only. One section per reasoning session over the corpus. Owner words are verbatim, typos preserved (AUT-02/04). Proposals carry IDs (PROP-*); decisions carry IDs (D-*). Nothing is locked without the owner's words; defaults stand unless overridden at their gate.
 
 ---

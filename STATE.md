@@ -18,7 +18,7 @@
 - **Outstanding reviews:** none pending. The stress review's findings are fully dispositioned: F-01..F-08 repaired (F-08 second half impossible until product code — by stage), F-09 DONE (this session), F-10 rides to Phase 5 (belief-policy simulator gate), F-11 noted in the manifest (E-3), F-12 held by claim-scoped verification state below.
 - **Verification state (never trust prose over runs):**
   - **verified (run):** `python3 tools/verify_canonical_layer.py` GREEN on this tree — 46 checks, 0 failures (C1–C8 incl. mechanical quote fidelity of all 74 ledger entries); `--self-test` 20/20 known-bad mutations caught; `tools/isolation_check.py` GREEN (conditions-only) with its known-bad caught.
-  - **verified (observed):** remote CI ran the `verify` workflow on the session-12 PR — both jobs green — and the `verify / canonical-layer` check is bound as required on `main` (merge-blocking); branch protection rejects direct pushes (break-test, session 11).
+  - **verified (observed):** remote CI ran the `verify` workflow on the session-12 PR — both jobs green — and the `canonical-layer` check is bound as required on `main` (merge-blocking, strict, admin-included); branch protection rejects direct pushes (break-test, session 11).
   - **not verified:** host bridges unwritten (W-02, blocked on Q1 remainder); the real one-shot coding test is impossible until product code exists (F-08 second half — by stage, not by omission); quote fidelity covers E-2 chat-sourced turns only via session-record cross-checks, not raw (manifest §7).
 
 ## How to use this file

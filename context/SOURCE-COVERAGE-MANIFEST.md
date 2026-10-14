@@ -48,6 +48,7 @@ upstream of engineering transcripts.txt    29cf75295d2c81169435489642c6788aab434
 | Owner turn 7 | 2026-10-13 | `context/extracted/11-REVIEW-MERGE-AND-STATE-SLICE.md` §1 + ledger | INT-091 |
 | Owner turn 8 | 2026-10-14 | `context/extracted/12-GAP-CLOSURE-AND-WALLS-STAGE-2.md` §1 + ledger | INT-092 |
 | Owner turn 9 | 2026-10-14 | `context/extracted/13-AUTHORITY-DECISIONS-CHANGE-DISCIPLINE.md` §1 + ledger | INT-093–099 |
+| Owner turn 10 | 2026-10-14 | `context/extracted/14-NAVIGATION-HANDOFFS-READ-PATH.md` §1 + ledger | INT-100–109 |
 | Reasoning-log session owner words | 2026-10-13 | `context/extracted/06-REASONING-LOG.md` | INT-053, 064–067 |
 
 **Boundary, stated honestly:** owner words that arrived in chat before this control existed are verbatim-preserved where the ledger or a session record holds them; the raw corpus never received them. From turn 8 onward, the numbered session record's §1 is the required verbatim preservation home for every owner turn, BEFORE the ledger entry is written (OPERATING-MODEL §3 session-record requirement; this closes the INT-046/068 class — a quote whose only home is the ledger itself).
@@ -57,7 +58,7 @@ upstream of engineering transcripts.txt    29cf75295d2c81169435489642c6788aab434
 | ID | Class | Applies to | Reason |
 |----|-------|-----------|--------|
 | **E-1** | Elided excerpt (`...`) | INT-040, INT-045 | The ledger quote skips raw text between two verbatim segments of the same owner passage. Both fragments must match raw (the verifier enforces exactly this). |
-| **E-2** | Chat-sourced quote | INT-046, INT-068, INT-069–076, INT-091, INT-092, INT-093–099 | The owner's words arrived in chat, not in `context/raw/`. The durable home is the ledger entry + the named session record. Not mechanically validatable against raw — the session record's §1 quote is the cross-check. |
+| **E-2** | Chat-sourced quote | INT-046, INT-068, INT-069–076, INT-091, INT-092, INT-093–099, INT-100–109 | The owner's words arrived in chat, not in `context/raw/`. The durable home is the ledger entry + the named session record. Not mechanically validatable against raw — the session record's §1 quote is the cross-check. |
 | **E-3** | Incomplete source capture | `engineering transcript.txt` | Ends mid-sentence (F-11). Kept as-is (AUT-02). Do not describe as complete. |
 | **E-4** | Owner-presented (not owner-authored) | INT-036, INT-037, INT-054, INT-068 (forwarded-review portion) | Text the owner pasted/forwarded approvingly. Labeled "owner-presented" in the ledger per AUT-04; never treated as the owner's own words. |
 | **E-5** | Inner-quote style normalization | INT-039 | The raw uses double quotes inside the sentence; the ledger renders them single. Fragments match after quote-style normalization (verifier normalizes `"`/`'`/curly variants on both sides). |

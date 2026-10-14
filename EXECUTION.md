@@ -20,7 +20,7 @@
 | Phase sequence | `/PLAN.md` | One phase deep (NG-04); guardrails; Phase 1 detail |
 | Vocabulary | `/GLOSSARY.md` | Term definitions — the definitional authority (§4) |
 | Entry map | `/AGENTS.md` | Cold-start read order; binding rules (≤80 lines) |
-| Current-state index | `/STATE.md` | Where things stand NOW: phase, active task, exact next action, blocking open questions, verification state. A navigation snapshot pointing at authority — never a second authority; canonical wins on conflict (D-024) |
+| Current-state index | `/STATE.md` | Where things stand NOW: the five-area contract (D-027) — position, work (active task ≠ exact next action), dependencies (every unresolved owner question, repo-wide), evidence (label + one direct pointer per claim), coordination (snapshot at last update, never live). A navigation snapshot pointing at authority — never a second authority, ledger, or plan; canonical wins on conflict (D-024/D-027) |
 | Coordination log | `context/WORKLOG.md` | Append-only task log (operational memory) |
 | Rule families (LOOP/QST/STOP/KB/RED/PRF/RAT/WALL/UNS/MEM/FX/AFA/KER/BND/AUT/LAD) | `context/raw/Arivo Agent Execution Specification.md` (Tier 0 — full definitions, immutable) + inline restatements at citation points in LAWS/OPERATING-MODEL | Stable rule IDs; root documents restate a family's meaning at every citation — a bare ID with no meaning inline is a defect |
 | Session engineering records | `context/extracted/09+` (numbered session records) | Per-session self-contained engineering docs (INT-072): what was asked, what was done, evidence, what changed, what's open |

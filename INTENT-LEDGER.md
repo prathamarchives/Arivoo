@@ -12,6 +12,7 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-091** — owner turn 7 (session record, 2026-10-13 review-merge session): the review-merge directive.
 - **INT-092** — owner turn 8 (session record, 2026-10-14 gap-closure + walls session): close the gaps, find the drift, build the walls (credential redacted; Phase-1 walls go for W-03/W-04/W-01-stage-2).
 - **INT-093..INT-099** — owner turn 9 (session record 13, 2026-10-14 three-slices session): the agent objective; build-first/two-jobs documentation law; refinement-never-rewrites; builder identity not a blocker; the four decision states; the change-authority workflow; refine-and-iterate directive.
+- **INT-100..INT-109** — owner turn 10 (session record 14, 2026-10-14 layer-1.2 session): slices 4–6 as Phase 1's 1.2 layer; the STATE contract (whole-repo long-term memory, evidence pointers, snapshot semantics); the session-record event-type policy; the selective cold-start read path; replicability of the whole system.
 
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
@@ -474,7 +475,66 @@ Source: owner turn 9, chat 2026-10-14 (session record 13 §1, E-2 class). Ground
 
 Source: owner turn 9, chat 2026-10-14 (session record 13 §1, E-2 class; typos preserved). Grounds: D-024 (change channel), D-026 (bounded-diff rules, PR template, separate reverts), EXECUTION §5, `context/reviews/REVIEW-PROTOCOL-PROPOSAL.md` §8, branch protection + required CI check (observed working 2026-10-14: direct-push rejection, broken-PR merge-block — session record 13 §5.2), FAIL-001. The closing directive: refine and iterate until aligned and strong, then reason through next steps with the owner.
 
+## Owner turn 10 — session record 2026-10-14 (INT-100..INT-109; the layer-1.2 session)
+
+**INT-100 — SLICES 4–6 ARE PHASE 1 LAYER 1.2 — active**
+> "No. It's still Phase 1. It's not Phase 2. It's just the 1.2 layer of Phase 1. It's just the next layer of Phase 1. After executing from the first slice to the third slice, the next layer contains slice 4, slice 5, and slice 6. That's how we are going to execute this." · "No, bro, we are still executing this, and phase two is not in planning mode, pretty much. Everything is done, and we just have to execute that." · "Should state explicitly that phase two is in the planning stage and that product implementation still requires the approved execution plan. I guess yes. It's not in the planning stage. We are executing it. We are just at phase one right now, and it's being planned as we go. We execute, we iterate, and we refine each layer, so it will just be done there."
+
+Source: owner turn 10, chat 2026-10-14 (session record `context/extracted/14-NAVIGATION-HANDOFFS-READ-PATH.md` §1, E-2 class). Grounds: PLAN (Phase 1 layer 1.2), STATE position line, D-027. Phase 2 product work begins only with the owner-approved execution plan; each layer is planned as it executes.
+
+**INT-101 — STATE LISTS EVERY UNRESOLVED OWNER QUESTION — active**
+> "The state should list every unresolved owner question because it's not about phases. It's about the whole repo, bro. It's not even about the long phases. The phases will just be done in a week, so it doesn't matter. The state should be like the repo: not short-term memory, but long-term memory. Treat it like that."
+
+Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class). Grounds: STATE dependencies contract (D-027(1)), EXECUTION §6 (the open-decision register STATE mirrors in full), F-07. STATE is repo-scale long-term memory, never phase-scoped short-term memory.
+
+**INT-102 — ACTIVE TASK IS NOT THE EXACT NEXT ACTION — active**
+> "Yes, we should draw a line between the exact next action and the active task: the last agent that was doing, failed, or did, whatever. There should be a difference, you get me?"
+
+Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class). Grounds: STATE work fields (D-027(1)): active task = what the current or last agent is doing, failed at, or left unfinished; exact next action = the one deterministic continuation point at session close. Two lines, never merged.
+
+**INT-103 — EVERY VERIFICATION CLAIM CARRIES ONE DIRECT EVIDENCE POINTER — active**
+> "Should every verification claim in state lead directly to one PR or session record? Yeah, it should."
+
+Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class). Grounds: STATE evidence contract (D-027(1)): label plus ONE direct PR/session-record pointer per claim — no adjective-only verification.
+
+**INT-104 — PR/REVIEW STATUS IS A SNAPSHOT, NOT LIVE — active**
+> "Should the PR review section be a snapshot of the state at the last repository update with evidence links, rather than something presented as live status? Yes, of course. A committed file cannot guarantee that external PR status has not changed since its last update."
+
+Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class). Grounds: STATE coordination contract (D-027(1)): snapshot-at-last-update with evidence links, explicitly never live status.
+
+**INT-105 — DO NOT OVERENGINEER; THE AGENT MUST GET TO THE WORK — active**
+> "I mean, bro, just don't overengineer it, insert, and write bullshit things in it that aren't necessary or don't make an impact. In the long term, don't treat this as a short-term memory, though. You get that?" · "Bro, just don't overengineer shit. Just make it a bit token-efficient, and don't put that much pressure on the agent that it just keeps reading the repo and never gets on the work. It spends half of its usage on reading the repo and everything, so you get that: optimize. Add these optimization verifications, optimization sessions, and everything."
+
+Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class). Grounds: STATE one-screen/pointer discipline (D-027(1)), the cold-start read-scope measure (D-027(4)), P-18, MEM-03 (AGENTS stays a map). Optimization is itself a requirement: reading cost is a budget, not a virtue.
+
+**INT-106 — SESSION RECORDS: EVENT-TYPED, EXACT COMMANDS — active**
+> "Yes, it is what I want." · "I would not base this on the number of tokens or minutes because that's dumb." · "Yes, the must exact commands will be recorded for all local verification. preserve the actual command, the revision tested, the exit status and any material result. Keep raw output elsewhere if it is large, and link it. Do not reconstruct commands later from memory." · "You and I would prefer this one."
+
+Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class; owner answers to the session-record policy questions — the endorsed event-type definitions and the 100–250-word worklog target live in §1). Grounds: OPERATING-MODEL §3 (the meaningful/substantial tiers, D-027(2)), `context/TEMPLATES.md` (the standardized record fields — actual commands, revisions, exit statuses, results; never reconstructed; no fictional command logs). Session-record size is event-typed, never time- or token-based.
+
+**INT-107 — THE COLD-START READ PATH (SELECTIVE) — active**
+> "The cold-start path should be predictable: Read AGENTS.md. Read the current-state index and recent worklog entries. Read only the canonical documents relevant to the task. Follow the references to earlier sessions or raw material when necessary. Verify that any decision relevant to a consequential change is still current. The raw corpus remains immutable reference material, not mandatory startup reading." · "Proof: A cold-start test demonstrates both correctness and reasonable scope: the agent finds the relevant context without reading tens of thousands of unrelated words."
+
+Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class). Grounds: AGENTS read order (D-027(3)), EXECUTION §2 (the selective intent rule — the blanket ledger-first BOOT requirement is superseded; the ledger's authority is unchanged), OPERATING-MODEL §7 (the cold-start protocol). In the owner's own words, this is the supersession decision for slice 6.
+
+**INT-108 — MAKE THE SYSTEM REPLICABLE — active**
+> "Make this whole system replicable. Do not make this whole system just for Arivo. I should be able to migrate and replicate it to my other projects, so take care."
+
+Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class). Grounds: `context/TEMPLATES.md` + `context/REPLICATION-GUIDE.md` (D-027(5)): the pattern layer (entry map, ledgers, STATE, session records, read path, proofs) is portable to other projects; Arivo-specific content stays in this repo. Nothing in the system's mechanics may hardcode this repo as the only possible home.
+
+**INT-109 — STATE IS A POINTER AND STATUS SNAPSHOT — active**
+> "Create one compact STATE.md as the proposed index for the current working position." · "STATE.md is a pointer and status snapshot, not a second Intent Ledger or a second plan."
+
+Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class). Grounds: STATE contract (D-027(1)), GLOSSARY STATE.md entry. The index answers the owner's eight questions (phase, active task, next action, just-completed, open decisions, latest evidence, pending PRs/reviews, verified/proposed/not-checked) and never copies history, architecture, or plan.
+
 ---
+
+## Audit note (2026-10-14, session 6 — the layer-1.2 session; appends, supersedes nothing)
+
+- **INT-100..INT-109 record owner turn 10 verbatim** — 91 statused entries, INT-019..INT-109, contiguous and unique. Session record 14 §1 is the verbatim-preservation home (written before these entries, per the closed INT-046/068 class).
+- **Ledger discipline held (INT-075):** owner words only. Turn 10 interleaves owner voice with owner-forwarded analysis (E-4 class material); the forwarded recommendation text is NOT ledgered — it is adopted through D-027 (ADOPTED, severable) and executed through the layer-1.2 slices. The ledgered fragments are the owner-voiced statements and answers.
+- **Boot-order supersession (INT-107, D-027(3)):** the blanket ledger-first BOOT requirement is superseded by the owner's selective read path; the ledger's authority (EXECUTION §2 source tiers, §3 rank 1) is unchanged — only WHEN it must be read changed. Reconciled canonically in AGENTS/EXECUTION/OPERATING-MODEL, never as an implicit exception.
+- **Open owner gates (unchanged in scope):** Q1 remainder (instantiation-only), Q2 (Phase 3), Q3 (Phase 3), QD-1 (Phase 4), D-014 (non-blocking), F-06 (deployment precision), Q-IDENT (default (a) documented). No new open questions this turn; the two defaultable choices in D-027 (read-scope budget baseline-first; one representative cold-start test initially) stand as defaults, overridable at any touchpoint.
 
 ## Audit note (2026-10-13 — the canonicalization slice)
 

@@ -35,9 +35,11 @@ Conditions checked:
       real ledger entry or decision row (VER-901); the stated statused-intent count
       agrees with the observed ledger (VER-902); the entry splitter and the strict
       header view see the same entries — a malformed header cannot hide an entry
-      from status checks (VER-903). VER-504 re-targeted the same session: the
-      open-owner-question register must agree across its four mirrors (DECISIONS /
-      EXECUTION §6 / PLAN / STATE) — closures land as D-rows, never silent removal.
+      from status checks (VER-903); the known-conflict normative markers hold — a
+      reintroduced superseded rule is caught (VER-904, slice 9's class (d)). VER-504
+      re-targeted the same session: the open-owner-question register must agree
+      across its four mirrors (DECISIONS / EXECUTION §6 / PLAN / STATE) — closures
+      land as D-rows, never silent removal.
 
 Ref: /EXECUTION.md §7. When the harness exists (Phase 2), these checks move up the
 ladder into `make audit` (LAD-01).
@@ -90,6 +92,25 @@ ROOT_DOCS = (
 
 # An open-owner-question identifier (the register VER-504 checks across mirrors).
 OPEN_QID = re.compile(r"(?:Q\d+|QD-\d+|D-\d{3}|F-\d+|Q-IDENT)")
+
+# VER-904's normative-marker register — each entry is a KNOWN conflict surface: a
+# locked decision or supersession whose current-truth phrase must remain present in
+# the document that restates the rule. A reintroduced superseded rule (slice 9's
+# class (d), sub-agent finding 1: the tag system rewritten back into NORTH-STAR)
+# removes the current-truth phrase, so the check fails. Presence-of-current-truth,
+# not absence-of-old-truth: historical/superseded text legitimately carries the old
+# wording (the mission quote, P-10's history cell), so forbidden-phrase scans would
+# false-positive — the required marker is the safe anchor. Extension rule: a new
+# entry lands when a decision closure or supersession creates a new live
+# restatement surface — enumerated, never generalized (slice 7: no universal
+# policy engine; paraphrase-evasive reintroductions that keep every marker are the
+# recorded residual limitation, record 15 §9).
+NORMATIVE_MARKERS = [
+    ("NORTH-STAR.md", "no tag field", "D-030/INT-112 — the tag-system removal"),
+    ("NORTH-STAR.md", "tag system removed", "D-030/INT-112 — the C4 claim line"),
+    ("INTENT-LEDGER.md", "superseded (superseded_by: INT-112)", "D-030 — INT-069's supersession link"),
+    ("DECISIONS.md", "SUPERSEDED (partial: deployment ordering) by D-032", "D-032 — D-003's partial supersession"),
+]
 
 
 class Layer:
@@ -751,6 +772,23 @@ class Layer:
             f"the two entry views disagree (strict-only: {sorted(strict_ids - loose_ids)}; loose-only: {sorted(loose_ids - strict_ids)}) — an entry header lost its status segment or separator shape; repair it to the INT_HEADER form so every entry is status-checked",
         )
 
+        # VER-904: known-conflicting-rule reintroduction guard (slice 9, class (d),
+        # sub-agent finding 1 — the P1 blind guard). Each register entry holds while
+        # its authority holds; a missing marker means the current-truth phrase was
+        # removed — the superseded rule rewritten back in, or the supersession link
+        # severed — a live contradiction with a LOCKED decision.
+        missing_markers = [
+            f"{doc}: '{marker}' absent while {authority} stands"
+            for doc, marker, authority in NORMATIVE_MARKERS
+            if marker not in self.read(doc)
+        ]
+        self.check(
+            "VER-904",
+            not missing_markers,
+            f"every known-conflict normative marker is present ({len(NORMATIVE_MARKERS)} registered surfaces: tag removal, deployment supersession) — a reintroduced superseded rule is caught",
+            f"normative markers missing: {missing_markers} — a LOCKED decision's current-truth phrase was removed from its restatement surface (the reintroduced-superseded-rule class, slice 9 finding 1); restore the current wording or supersede the decision properly — never both",
+        )
+
     def run(self) -> list[tuple[str, bool, str]]:
         for fn in (self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7, self.c8, self.c9):
             fn()
@@ -926,6 +964,12 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
         "VER-504",
     ),
     (
+        "MUT-27",
+        "reintroduce the superseded tag rule — rewrite NORTH-STAR's 'no tag field' into the optional-tag form while the C4 marker stays (slice 9's class (d), sub-agent finding 1: the P1 blind guard this mutation proved)",
+        lambda r: _reintroduce_superseded_rule(r),
+        "VER-904",
+    ),
+    (
         "MUT-12",
         "delete the review protocol proposal — review artifacts lose their home",
         lambda r: _rm(r, "context/reviews/REVIEW-PROTOCOL-PROPOSAL.md"),
@@ -1023,6 +1067,19 @@ def _open_set_drift(repo: Path) -> None:
         return
     text = text.replace(rows[0] + "\n", "", 1)
     ex.write_text(text, encoding="utf-8")
+
+
+def _reintroduce_superseded_rule(repo: Path) -> None:
+    """MUT-27 (slice 9, class (d) — sub-agent finding 1): rewrite NORTH-STAR's
+    current-truth phrase 'no tag field' into the superseded optional-tag form. This
+    is the reintroduced-known-conflicting-rule class: the mutation leaves the C4
+    marker line intact and keeps the F-05 qualifier, so every substring guard
+    except the normative-marker register stays green — VER-904 must fail."""
+    ns = repo / "NORTH-STAR.md"
+    text = ns.read_text(encoding="utf-8")
+    if "no tag field" not in text:
+        return
+    ns.write_text(text.replace("no tag field", "optional tag field", 1), encoding="utf-8")
 
 
 def _blanket_ledger_boot(repo: Path) -> None:

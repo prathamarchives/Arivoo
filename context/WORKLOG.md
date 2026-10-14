@@ -304,3 +304,23 @@ Stage Summary:
 - Unresolved: Q1 remainder, Q2, Q3, QD-1, D-014, F-06, Q-IDENT — none blocks the Phase 2 harness; verify.yml step label P-18-deferred; PR #15's own post-merge run = the named gap for session 15's preflight
 - Next: session 15 — intake owner turn 11 (the detailed Phase 1&2 execution plan supplied in chat), then Phase 2 Layer 2.1 per that plan
 - Session record: context/extracted/14-NAVIGATION-HANDOFFS-READ-PATH.md
+
+---
+Task ID: 14
+Agent: Super Z (main, GLM host) + 1 uncoached fresh-context GLM verification sub-agent (the slice-9 falsification loop)
+Task: Owner turn 12 (INT-110..INT-117): close the answered open questions (Q1/Q2/Q3/QD-1/F-06/Q-IDENT → D-028..D-033; D-014 reaffirmed) and execute the plan's Integrity-and-evidence layer — slices 7 (repair the checker), 8 (prove it catches defects), 9 (the independent verification loop).
+
+Work Log:
+- Preflight on `main` @ `3dbc88d` (PR #15's merge): verifier 47/0, self-test 22/22, isolation green; record 14's named gap closed (post-merge run 38532752005); record 15 §1 written and committed BEFORE the ledger entries
+- Turn-12 intake: INT-110..INT-117 (99 statused entries); DECISIONS D-028..D-033 (LOCKED, owner words); INT-069 superseded by INT-112 (tag system removed); D-003's ordering partially superseded by D-032 (Supabase, cloud + local synced); open register = D-014 only, mirrored across DECISIONS/EXECUTION §6/PLAN/STATE
+- Slice 7: VER-504 re-target (open-question register agreement — the old hard-coded form would false-RED the closures) + C9 family: VER-901 (dangling INT/D references), VER-902 (count drift), VER-903 (malformed headers)
+- Slice 8: MUT-23..26 + MUT-11 genericization; 26/26 at completion
+- Slice 9: fresh-context GLM sub-agent ran the falsification loop (own mutations on temp copies + the wall probe — direct push to `main` rejected GH006). It FOUND a real P1 blind guard: class (d) reintroduced known-conflicting rule (the tag system rewritten back) passed GREEN — repaired same-session as VER-904 (normative-marker register) + MUT-27; re-tested 51/0 + 27/27. Its findings 2/3 (premature §7.1/WORKLOG claims at the intermediate commit) repaired in the close commit
+
+Stage Summary:
+- Outcome: Integrity-and-evidence layer EXECUTED and PROVEN — the checker catches deliberately introduced defects (deletion, duplication, status corruption, conflicting-rule reintroduction), each with attributable failures; the falsification loop's own defect find is repaired and guarded
+- Evidence: `python3 tools/verify_canonical_layer.py` 51/0 + `--self-test` 27/27 + isolation green on this head (exit 0 each); wall-probe rejection quoted in record 15 §7.1
+- Pointer: record 15 (COMPLETE; the sub-agent's verbatim report in §7.1)
+- Unresolved: D-014 (non-blocking); this PR's own post-merge run = the named gap for session 16
+- Next: session 16 — preflight at the merge, then Phase 2 Layer 2.1 when the owner supplies/confirms that plan section
+- Session record: context/extracted/15-INTEGRITY-AND-EVIDENCE.md

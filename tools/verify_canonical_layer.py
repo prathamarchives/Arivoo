@@ -156,6 +156,25 @@ class Layer:
             "AGENTS.md: test/verification loops run on GLM-based subagents (INT-070 governing)",
             "restore the GLM verification rule (INT-070; F-03)",
         )
+        # VER-110 (D-027(3)/INT-107, session 14): the selective read path. The blanket
+        # ledger-first boot rule is superseded — the ledger step must be marked SELECTIVE
+        # (verified per consequential change, never blanket boot reading), and the worklog
+        # tail must be an early numbered boot step. A silent regression to ledger-first
+        # blanket boot, or a boot path without the worklog tail, fails here.
+        ledger_steps = [
+            ln for ln in agents.splitlines()
+            if re.match(r"^\s*\d+\.\s", ln) and "INTENT-LEDGER.md" in ln
+        ]
+        worklog_step = any(
+            re.match(r"^\s*\d+\.\s", ln) and "context/WORKLOG.md" in ln
+            for ln in agents.splitlines()
+        )
+        self.check(
+            "VER-110",
+            bool(ledger_steps) and "selective" in ledger_steps[0].lower() and worklog_step,
+            "read order: the Intent Ledger step is SELECTIVE (verified per consequential change, not blanket boot reading) and the worklog tail is an early boot step (INT-107/D-027(3))",
+            "the ledger-first blanket boot rule is superseded — mark the INTENT-LEDGER read-order step selective and keep the context/WORKLOG.md tail as an early numbered step (INT-107/D-027(3))",
+        )
 
     # ------------------------------------------------------------ C2: ledger
     def c2(self) -> None:
@@ -694,6 +713,18 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
         "VER-101",
     ),
     (
+        "MUT-21",
+        "regress AGENTS to blanket ledger-first boot — rewrite the numbered INTENT-LEDGER read-order step into the pre-supersession form, whatever its current wording (the INT-107/D-027(3) supersession silently undone)",
+        lambda r: _blanket_ledger_boot(r),
+        "VER-110",
+    ),
+    (
+        "MUT-22",
+        "drop the worklog tail from the boot path — the early coordination step disappears (the INT-107 read path broken)",
+        lambda r: _drop_read_order_step(r, "context/WORKLOG.md"),
+        "VER-110",
+    ),
+    (
         "MUT-09",
         "break INT-051's superseded_by link (silent supersession)",
         lambda r: _edit(r, "INTENT-LEDGER.md", "superseded (superseded_by: INT-030)", "superseded"),
@@ -733,6 +764,36 @@ def _edit(repo: Path, rel: str, old: str, new: str) -> None:
 
 def _rm(repo: Path, rel: str) -> None:
     (repo / rel).unlink()
+
+
+def _blanket_ledger_boot(repo: Path) -> None:
+    """MUT-21, content-generic: rewrite the numbered read-order line naming
+    INTENT-LEDGER.md into the blanket ledger-first form — whatever the line currently
+    says (old order or selective order), the SELECTIVE marker must disappear so VER-110
+    catches the silent regression. Content-generic for the same reason as MUT-08/MUT-17:
+    a hard-coded current string would no-op after any future rewording."""
+    agents = repo / "AGENTS.md"
+    text = agents.read_text(encoding="utf-8")
+    out = []
+    for ln in text.splitlines(keepends=True):
+        if re.match(r"^\s*\d+\.\s", ln) and "INTENT-LEDGER.md" in ln:
+            num = ln.split(".")[0]
+            ln = f"{num}. `/INTENT-LEDGER.md` — owner words, verbatim, statused. The highest authority. Load it BEFORE forming any understanding of the task.\n"
+        out.append(ln)
+    agents.write_text("".join(out), encoding="utf-8")
+
+
+def _drop_read_order_step(repo: Path, marker: str) -> None:
+    """MUT-22: remove the numbered read-order line containing `marker` (the worklog-tail
+    boot step). Generic over the line's current wording."""
+    agents = repo / "AGENTS.md"
+    text = agents.read_text(encoding="utf-8")
+    out = [
+        ln
+        for ln in text.splitlines(keepends=True)
+        if not (re.match(r"^\s*\d+\.\s", ln) and marker in ln)
+    ]
+    agents.write_text("".join(out), encoding="utf-8")
 
 
 def _drop_ledger_step(repo: Path) -> None:

@@ -13,6 +13,7 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-092** — owner turn 8 (session record, 2026-10-14 gap-closure + walls session): close the gaps, find the drift, build the walls (credential redacted; Phase-1 walls go for W-03/W-04/W-01-stage-2).
 - **INT-093..INT-099** — owner turn 9 (session record 13, 2026-10-14 three-slices session): the agent objective; build-first/two-jobs documentation law; refinement-never-rewrites; builder identity not a blocker; the four decision states; the change-authority workflow; refine-and-iterate directive.
 - **INT-100..INT-109** — owner turn 10 (session record 14, 2026-10-14 layer-1.2 session): slices 4–6 as Phase 1's 1.2 layer; the STATE contract (whole-repo long-term memory, evidence pointers, snapshot semantics); the session-record event-type policy; the selective cold-start read path; replicability of the whole system.
+- **INT-110..INT-117** — owner turn 12 (session record 15, 2026-10-14 integrity-and-evidence session): the open-question answers — agent-agnostic design (Q1), purge top option (Q2), tag system removed (Q3), any readable format (QD-1), math deferred (D-014 reaffirmed), Supabase synced deployment (F-06), identity boundary accepted (Q-IDENT) — plus the Integrity-and-evidence directive (slices 7–9).
 
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
@@ -50,7 +51,7 @@ Source: `context/raw/1.txt:1973`. Grounds: GLOSSARY Journal block, Phase 4.
 
 Source: `context/raw/1.txt:1973`. Grounds: incremental intake (QD-1: external-platform integrations arrive incrementally; not day-one).
 
-**INT-025 — FACT/CONCEPT DIVISION — active (meaning OPEN: Q3)**
+**INT-025 — FACT/CONCEPT DIVISION — active (Q3 closed by removal — INT-112/D-030: no capture tags exist; the division lives in the knowledge model — concept formation on grounded evidence — not in highlight metadata)**
 > "it should be divided into facts and concepts. Facts are objective statements that can be verified and are known to be true, while concepts are abstract ideas that help us categorize and understand those facts."
 
 Source: `context/raw/1.txt:1975`. Grounds: P-08, the typed tag vocabulary, Q3 (the fact-tag meaning is an explicit owner decision gate — default (a), never silently locked).
@@ -298,7 +299,7 @@ Means (owner-endorsed review, this session): read the repo first; then execute t
 
 ## Owner turn 6 — session record 2026-10-13 (INT-069..INT-076; the stress-test session)
 
-**INT-069 — CUSTOM TAGS, NO DEFAULT CLASSIFICATION — active (refines INT-028)**
+**INT-069 — CUSTOM TAGS, NO DEFAULT CLASSIFICATION — superseded (superseded_by: INT-112)**
 > "let it be custom tags. i manually write what kind of highlight it is if i want to... so no by deafualt concept/fact tag"
 
 Source: session record 2026-10-13 (owner turn 6, chat — tag/concept/fact future discussion). Grounds: P-10 MECHANISM (updated this session), GLOSSARY (Custom tag), Q3 (re-scoped — see DECISIONS annotation). Means: the capture-time tag vocabulary is custom and owner-authored; tagging is optional; there is NO default concept/fact classification. The fact/concept/quote vocabulary stays available to the owner — never imposed. The system trains on owner-authored tags when good enough (INT-028, INT-088).
@@ -527,7 +528,56 @@ Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class). Groun
 
 Source: owner turn 10, chat 2026-10-14 (session record 14 §1, E-2 class). Grounds: STATE contract (D-027(1)), GLOSSARY STATE.md entry. The index answers the owner's eight questions (phase, active task, next action, just-completed, open decisions, latest evidence, pending PRs/reviews, verified/proposed/not-checked) and never copies history, architecture, or plan.
 
+## Owner turn 12 — session record 2026-10-14 (INT-110..INT-117; the integrity-and-evidence session)
+
+**INT-110 — THE REPO IS AGENT-AGNOSTIC; NO PRIMARY BUILDER — active (closes Q1 → D-028)**
+> "i mean it doesnt have to specifc?? theres not one agent that would work on it. there could be plenty, there could be one.. so design it that way.. like same with testing/verification im using glm for rightnow might use sm another tommrow and sm other day after that. so does it matter? idts this even affects. the repo is desinged for any agent right? so close this dumb question"
+
+Source: owner turn 12, chat 2026-10-14 (session record `context/extracted/15-INTEGRITY-AND-EVIDENCE.md` §1, E-2 class). Grounds: DECISIONS D-028 (Q1 closed); the Host Contract (GLOSSARY); W-02 (D-026). One agent or many may build; verification hosts may vary over time (GLM current, INT-070); per-host bridges instantiate at adoption — never an architectural gate.
+
+**INT-111 — PURGE: GO WITH THE TOP OPTION — active (closes Q2 → D-029)**
+> "go with whateveres the top option. the best one and close"
+
+Source: owner turn 12, chat 2026-10-14 (session record 15 §1, E-2 class). Grounds: DECISIONS D-029; the Q2 default as recorded (D-011/Q2: live + active removal, documented backup expiry, purge ledger applied on restore; per-owner encryption + key destruction only if physical erasure is required) — the owner's choice adopts that option.
+
+**INT-112 — REMOVE THE TAG SYSTEM COMPLETELY — active (supersedes INT-069; closes Q3 → D-030)**
+> "this was discussed i said there would be like no specific tags. i might give it name like suppose i highlight a quantum emenchain introduction concept para and i can highligh it and just tag the highligt and write manually concept. or ykw remove this tag system honestly.... doesnt need... remove this completely"
+
+Source: owner turn 12, chat 2026-10-14 (session record 15 §1, E-2 class). Grounds: DECISIONS D-030; NORTH-STAR (the no-tag paragraph superseding the INT-069 tagging paragraph; C4 reworded to grounded evidence); GLOSSARY (Fact tag entry superseded); PRINCIPLES P-08/P-10/P-12 annotations. Highlights carry no tag field; a classification word ("concept", etc.) is free text the owner writes manually, never a structured feature.
+
+**INT-113 — IMPORT: ANY READABLE FORMAT — active (closes QD-1 → D-031)**
+> "qd1) any readable format... not even a question like pdf/txt/md/epub/json liek every readable format.."
+
+Source: owner turn 12, chat 2026-10-14 (session record 15 §1, E-2 class). Grounds: DECISIONS D-031; NORTH-STAR day-one intake (INT-019, D-023); PLAN Phase 4. Import targets every readable format — pdf/txt/md/epub/json and the rest; implementation sequencing still follows the durability ladder.
+
+**INT-114 — CALCULATION ENGINE: SEE WHEN FACED — active (D-014 reaffirmed OPEN)**
+> "d-014) will see in future when we face maths and calculations"
+
+Source: owner turn 12, chat 2026-10-14 (session record 15 §1, E-2 class). Grounds: DECISIONS D-014 (update note). Non-blocking for capture; the question stays open at its named gate (math workflow design).
+
+**INT-115 — DEPLOYMENT: SUPABASE, SYNCED CLOUD + LOCAL — active (ratifies F-06 → D-032)**
+> "f-06) hosted on supabase. synced, cloud, local-second. i mean it gets synced local and cloud."
+
+Source: owner turn 12, chat 2026-10-14 (session record 15 §1, E-2 class). Grounds: DECISIONS D-032 (F-06 closed; D-003's "local-first now; cloud sync later" ordering partially superseded — Postgres + pgvector stands, Supabase provides both); NORTH-STAR layer contract; the durability ladder (unchanged — rung semantics, not hosting).
+
+**INT-116 — Q-IDENT: ACCEPT AND DOCUMENT — active (closes Q-IDENT → D-033)**
+> "q-IDENT) a accept it and document it"
+
+Source: owner turn 12, chat 2026-10-14 (session record 15 §1, E-2 class). Grounds: DECISIONS D-033 (option (a): single-identity boundary stays canonical — change channel + session-record quotes; revisited only on an unauthorized-merge incident); EXECUTION §5 (the known-boundary note).
+
+**INT-117 — INTEGRITY AND EVIDENCE (SLICES 7–9) — active**
+> "now. again read repo and then Integrity and evidence" · "Purpose: Prevent the repository from becoming more confident than its checks justify." (the full slices 7–9 text — checker repair, known-bad proofs, the independent verification loop — is preserved verbatim in record 15 §1)
+
+Source: owner turn 12, chat 2026-10-14 (session record 15 §1, E-2 class; the embedded Integrity-and-evidence section of the owner-supplied Phase 1 & 2 execution plan, owner turn 11). Grounds: tools/verify_canonical_layer.py (the C9 family + VER-504 re-target, this session), the self-test known-bad suite, OPERATING-MODEL §9 (the slice-9 loop: GLM fresh-context subagents test/falsify/retest; the verifier never implements what it evaluates; a second model family is optional adversarial coverage, never an unexplained prerequisite).
+
 ---
+
+## Audit note (2026-10-14, session 15 — the integrity-and-evidence session; appends, supersedes nothing)
+
+- **INT-110..INT-117 record owner turn 12 verbatim** — 99 statused entries, INT-019..INT-117, contiguous and unique. Session record 15 §1 is the verbatim-preservation home (written and committed BEFORE these entries, per the closed INT-046/068 class).
+- **Question closures (owner words → LOCKED rows, never silent removal):** Q1 → D-028 (agent-agnostic; no primary builder host); Q2 → D-029 (the documented default adopted); Q3 → D-030 (the tag system REMOVED — INT-069 superseded by INT-112); QD-1 → D-031 (any readable format); F-06 → D-032 (Supabase-hosted, cloud + local synced; D-003's ordering partially superseded); Q-IDENT → D-033 (option (a) accepted and documented). D-014 stays OPEN (INT-114). The open register is D-014 only.
+- **Ledger discipline held (INT-075):** owner words only. The owner-supplied plan text embedded in turn 12 is preserved verbatim in record 15 §1; only the owner-voiced answers and the directive are ledgered. Turn 11's remaining sections are taken as supplied — nothing is ledgered from memory or summary.
+- **Open owner gates (after this turn):** D-014 (non-blocking, math workflow design). No other open question remains repo-wide.
 
 ## Audit note (2026-10-14, session 6 — the layer-1.2 session; appends, supersedes nothing)
 

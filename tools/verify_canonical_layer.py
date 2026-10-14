@@ -21,8 +21,8 @@ Conditions checked:
       INT-068 can no longer vanish, and a truncated tail cannot pass)
   C3  D-004 and the old The List wording no longer conflict with D-015 and P-16
   C4  the archive is clearly historical; raw is not mistaken for owner-only intent
-  C5  one canonical home; Q1–Q3 visibly open; consent is scoped; GLM verification is
-      governing (F-02/F-03); D-024 recorded
+  C5  one canonical home; the open-question register agrees across its mirrors;
+      consent is scoped; GLM verification is governing (F-02/F-03); D-024 recorded
   C6  this verifier proves it on the real files (this run IS the proof)
   C7  the garden: STATE.md live and pointing at real targets, FAIL-001 recorded with a
       known-bad, review artifacts in context/reviews/ (D-024)
@@ -30,6 +30,14 @@ Conditions checked:
       SHA-256-anchored (AUT-02 at C3); every ledger quote mechanically validated against
       its cited raw source (fabrication and transcription drift are caught); STATE.md's
       record pointer is fresh (never stale)
+  C9  cross-document integrity (owner turn 12, INT-117 — the Integrity-and-evidence
+      slice): every INT-/D- reference in a root canonical document resolves to a
+      real ledger entry or decision row (VER-901); the stated statused-intent count
+      agrees with the observed ledger (VER-902); the entry splitter and the strict
+      header view see the same entries — a malformed header cannot hide an entry
+      from status checks (VER-903). VER-504 re-targeted the same session: the
+      open-owner-question register must agree across its four mirrors (DECISIONS /
+      EXECUTION §6 / PLAN / STATE) — closures land as D-rows, never silent removal.
 
 Ref: /EXECUTION.md §7. When the harness exists (Phase 2), these checks move up the
 ladder into `make audit` (LAD-01).
@@ -62,6 +70,26 @@ EXPECTED_RAW = [
 
 STATUSES = ("active", "clarified", "superseded", "historical")
 INT_HEADER = re.compile(r"^\*\*INT-(\d{3})\s+—\s+(.*?)\s+—\s+(.*?)\*\*\s*$", re.M)
+
+# Root canonical documents — the current authority layer whose ID references must
+# resolve (C9/VER-901). Historical records (context/extracted) and raw/ are NOT
+# scanned: they reference IDs as they were at their time of writing.
+ROOT_DOCS = (
+    "AGENTS.md",
+    "STATE.md",
+    "DECISIONS.md",
+    "EXECUTION.md",
+    "PLAN.md",
+    "NORTH-STAR.md",
+    "PRINCIPLES.md",
+    "LAWS.md",
+    "ENGINEERING.md",
+    "OPERATING-MODEL.md",
+    "GLOSSARY.md",
+)
+
+# An open-owner-question identifier (the register VER-504 checks across mirrors).
+OPEN_QID = re.compile(r"(?:Q\d+|QD-\d+|D-\d{3}|F-\d+|Q-IDENT)")
 
 
 class Layer:
@@ -382,20 +410,34 @@ class Layer:
         )
         decisions = self.read("DECISIONS.md")
         plan = self.read("PLAN.md")
+        # VER-504 (re-targeted session 15, owner turn 12/INT-117 — the same repair
+        # class as the MUT-08/MUT-17 gate re-targets): the old form hard-coded
+        # "Q1/Q2/Q3 remain visibly open" — it would false-RED the legitimate closure
+        # of an answered question. The check now verifies the REGISTER itself: the
+        # four mirrors (DECISIONS' open section, EXECUTION §6's table, PLAN's
+        # standing-open, STATE's blocking-questions) must name the SAME open set;
+        # a question closes ONLY by a LOCKED decision row carrying the owner's
+        # words — never by silent removal from one mirror's prose.
+        sets = {
+            "DECISIONS": self._open_set_decisions(),
+            "EXECUTION": self._open_set_execution(),
+            "PLAN": self._open_set_plan(),
+            "STATE": self._open_set_state(),
+        }
+        agree = len({frozenset(s) for s in sets.values()}) == 1
         open_ok = (
             "## Open owner decisions" in decisions
-            and "**Q1**" in decisions
-            and "**Q2**" in decisions
-            and "**Q3**" in decisions
             and "Standing open" in plan
             and "## 6" in ex
-            and "Q3" in ex
+        )
+        summary = "; ".join(
+            f"{k}={{{', '.join(sorted(v)) or '∅'}}}" for k, v in sets.items()
         )
         self.check(
             "VER-504",
-            open_ok,
-            "Q1/Q2/Q3 remain visibly open in DECISIONS, PLAN, and EXECUTION §6 (with gates and defaults)",
-            "open owner decisions must stay visible until their named gates — never closed by interpretation",
+            agree and open_ok,
+            f"the open-owner-question register agrees across its four mirrors ({summary}) — closures land as D-rows, never silent removal",
+            f"the open-question mirrors disagree ({summary}) — a question closes ONLY by a LOCKED decision row carrying the owner's words (owner decision, D-026's four states); restore the removed mirror entry or record the closure in DECISIONS — never close by interpretation, elapsed time, or one-sided prose edits",
         )
         self.check(
             "VER-505",
@@ -592,8 +634,125 @@ class Layer:
             "update /STATE.md at session exit to point at the newest numbered session record (AGENTS.md session-exit rule; a stale STATE.md is a drift finding)",
         )
 
+    # ------------------------------------------------------------ open-question register mirrors (VER-504)
+    def _open_set_decisions(self) -> set[str]:
+        decisions = self.read("DECISIONS.md")
+        parts = decisions.split("## Open owner decisions", 1)
+        if len(parts) < 2:
+            return set()
+        out: set[str] = set()
+        for ln in parts[1].splitlines():
+            m = re.match(r"^\s*-\s+\*\*([^*]+?)\*\*", ln)
+            if m and "CLOSED" not in ln.upper():
+                qid = m.group(1).strip()
+                if OPEN_QID.fullmatch(qid):
+                    out.add(qid)
+        return out
+
+    def _open_set_execution(self) -> set[str]:
+        ex = self.read("EXECUTION.md")
+        m = re.search(r"^## 6\.(.*?)(?=^## \d\.|\Z)", ex, re.S | re.M)
+        if not m:
+            return set()
+        out: set[str] = set()
+        for ln in m.group(1).splitlines():
+            if ln.lstrip().startswith("|"):
+                cells = [c.strip() for c in ln.strip().strip("|").split("|")]
+                if cells and "CLOSED" not in ln.upper() and OPEN_QID.fullmatch(cells[0]):
+                    out.add(cells[0])
+        return out
+
+    def _open_set_plan(self) -> set[str]:
+        plan = self.read("PLAN.md")
+        m = re.search(r"^## Standing open.*?(?=^## |\Z)", plan, re.S | re.M)
+        if not m:
+            return set()
+        out: set[str] = set()
+        for ln in m.group(0).splitlines():
+            b = re.match(r"^\s*-\s+([^—\n]+?)\s+—", ln)
+            if b and "CLOSED" not in ln.upper():
+                qid = b.group(1).strip()
+                if OPEN_QID.fullmatch(qid):
+                    out.add(qid)
+        return out
+
+    def _open_set_state(self) -> set[str]:
+        state = self.read("STATE.md")
+        m = re.search(r"\*\*Blocking open questions.*?(?=\n- \*\*|\n## |\Z)", state, re.S)
+        if not m:
+            return set()
+        out: set[str] = set()
+        for ln in m.group(0).splitlines():
+            b = re.match(r"^\s*-\s+([^—\n]+?)\s+—", ln)
+            if b and "CLOSED" not in ln.upper():
+                qid = b.group(1).strip()
+                if OPEN_QID.fullmatch(qid):
+                    out.add(qid)
+        return out
+
+    # ------------------------------------------------------------ C9: cross-document integrity (owner turn 12, INT-117)
+    def c9(self) -> None:
+        """Slice 7: prevent the repository from becoming more confident than its
+        checks justify — referenced IDs resolve, stated counts agree with the
+        observed ledger, and the two entry views cannot disagree."""
+        ledger = self.read("INTENT-LEDGER.md")
+        strict_ids = {int(i) for i, _, _ in INT_HEADER.findall(ledger)}
+        decisions = self.read("DECISIONS.md")
+        decision_ids = set(re.findall(r"^\| (D-\d{3}) ", decisions, re.M))
+
+        # VER-901: every INT-/D- reference in a root canonical document resolves.
+        # Range declarations (INT-100..INT-109, D-028..D-033) are span forms, not
+        # references — excluded from the scan. A dangling reference is an authority
+        # pointer to nothing: the exact false-green class this slice exists for.
+        dangling: list[str] = []
+        for doc in ROOT_DOCS:
+            text = self.read(doc)
+            if not text:
+                continue
+            scanned = re.sub(r"INT-\d{3}(?:\.\.(?:INT-)?\d{1,3})", " ", text)
+            scanned = re.sub(r"D-\d{3}(?:\.\.(?:D-)?\d{1,3})", " ", scanned)
+            for ref in re.findall(r"INT-(\d{3})", scanned):
+                if int(ref) not in strict_ids:
+                    dangling.append(f"{doc}: INT-{ref}")
+            for ref in re.findall(r"\bD-(\d{3})", scanned):
+                if f"D-{ref}" not in decision_ids:
+                    dangling.append(f"{doc}: D-{ref}")
+        self.check(
+            "VER-901",
+            not dangling,
+            f"every INT-/D- reference in the {len(ROOT_DOCS)} root canonical documents resolves to a real ledger entry or decision row (ranges are span declarations, not references)",
+            f"dangling references — nothing exists behind the ID: {dangling[:8]} — repair the reference or ledger the entry/decision it names (a citation of a non-existent ID is a fabricated-authority class)",
+        )
+
+        # VER-902: the stated statused-intent count agrees with the observed ledger.
+        counts = [
+            (doc, int(n))
+            for doc in ("AGENTS.md", "STATE.md")
+            for n in re.findall(r"(\d+) statused intents", self.read(doc))
+        ]
+        self.check(
+            "VER-902",
+            bool(counts) and all(n == len(strict_ids) for _, n in counts),
+            f"the stated statused-intent count agrees with the observed ledger ({len(strict_ids)} entries; {len(counts)} statement(s) checked)",
+            f"stated counts disagree with the ledger (stated: {counts}; observed: {len(strict_ids)}) — a stale count is a contradiction, not a snapshot; update every statement of it",
+        )
+
+        # VER-903: the loose entry view (the VER-803 splitter) and the strict header
+        # view (VER-201/202) see the same entries. A header that loses its status
+        # segment or separator shape vanishes from status checks while remaining
+        # visible to fidelity checks — the malformed-header blind spot.
+        loose_ids = {
+            int(m.group(1)) for m in re.finditer(r"^\*\*INT-(\d{3})(?!\d)", ledger, re.M)
+        }
+        self.check(
+            "VER-903",
+            strict_ids == loose_ids,
+            f"the entry splitter and the strict header view see the same entries ({len(strict_ids)} strict / {len(loose_ids)} loose) — a malformed header cannot hide an entry from status checks",
+            f"the two entry views disagree (strict-only: {sorted(strict_ids - loose_ids)}; loose-only: {sorted(loose_ids - strict_ids)}) — an entry header lost its status segment or separator shape; repair it to the INT_HEADER form so every entry is status-checked",
+        )
+
     def run(self) -> list[tuple[str, bool, str]]:
-        for fn in (self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7, self.c8):
+        for fn in (self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7, self.c8, self.c9):
             fn()
         return self.results
 
@@ -743,6 +902,30 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
         "VER-211",
     ),
     (
+        "MUT-23",
+        "malform the newest entry header (strip its status segment) — the entry vanishes from the strict status view while the entry splitter still sees it",
+        lambda r: _malform_header(r),
+        "VER-903",
+    ),
+    (
+        "MUT-24",
+        "cite a non-existent ledger entry and a non-existent decision in a root document — dangling authority references",
+        lambda r: _dangling_ref(r),
+        "VER-901",
+    ),
+    (
+        "MUT-25",
+        "drift the stated statused-intent count (content-generic: adjusts whatever count AGENTS.md currently states)",
+        lambda r: _count_drift(r),
+        "VER-902",
+    ),
+    (
+        "MUT-26",
+        "silently drop an EXECUTION §6 open-question row — the register disagrees across its mirrors (a closure by prose removal, never by a D-row)",
+        lambda r: _open_set_drift(r),
+        "VER-504",
+    ),
+    (
         "MUT-12",
         "delete the review protocol proposal — review artifacts lose their home",
         lambda r: _rm(r, "context/reviews/REVIEW-PROTOCOL-PROPOSAL.md"),
@@ -778,6 +961,68 @@ def _tag_gate_regression(repo: Path) -> None:
     if "never a gate" not in text:
         return
     ns.write_text(text.replace("never a gate", "the deciding gate", 1), encoding="utf-8")
+
+
+def _malform_header(repo: Path) -> None:
+    """MUT-23, content-generic: strip the status segment from the highest-numbered
+    well-formed entry header. The strict INT_HEADER view stops seeing the entry
+    (VER-201/202 go blind for it) while the loose entry splitter still finds it —
+    VER-903 must catch the two-view disagreement (the malformed-header blind spot
+    the slice-7 audit found: the two parsing patterns disagreed silently)."""
+    ledger = repo / "INTENT-LEDGER.md"
+    text = ledger.read_text(encoding="utf-8")
+    headers = list(INT_HEADER.finditer(text))
+    if not headers:
+        return
+    last = headers[-1]
+    rebuilt = f"**INT-{last.group(1)} — {last.group(2)}**"
+    ledger.write_text(text[: last.start()] + rebuilt + text[last.end():], encoding="utf-8")
+
+
+def _dangling_ref(repo: Path) -> None:
+    """MUT-24: append a probe line to PLAN.md citing INT-199 and D-999 — neither
+    exists. VER-901 must fail on the dangling references (the referenced-IDs-must-
+    exist requirement, slice 7)."""
+    plan = repo / "PLAN.md"
+    plan.write_text(
+        plan.read_text(encoding="utf-8")
+        + "\nProbe line (known-bad mutation): see INT-199 and D-999.\n",
+        encoding="utf-8",
+    )
+
+
+def _count_drift(repo: Path) -> None:
+    """MUT-25, content-generic: decrement the first stated statused-intent count in
+    AGENTS.md — the summary drifts from the observed ledger; VER-902 must catch the
+    contradiction (a stale count is not a snapshot)."""
+    agents = repo / "AGENTS.md"
+    text = agents.read_text(encoding="utf-8")
+    m = re.search(r"(\d+) statused intents", text)
+    if not m:
+        return
+    agents.write_text(
+        text[: m.start(1)] + str(int(m.group(1)) - 1) + text[m.end(1):],
+        encoding="utf-8",
+    )
+
+
+def _open_set_drift(repo: Path) -> None:
+    """MUT-26, content-generic: remove the FIRST open-question table row in
+    EXECUTION §6 — the open register disagrees across its mirrors; the re-targeted
+    VER-504 must catch it (a closure by silent removal, never by a D-row). If the
+    §6 table ever legitimately changes shape, this no-ops and the self-test reports
+    a blind guard — the designed re-target alarm."""
+    ex = repo / "EXECUTION.md"
+    text = ex.read_text(encoding="utf-8")
+    rows = [
+        ln
+        for ln in text.splitlines()
+        if re.match(r"^\|\s*(?:Q\d+|QD-\d+|D-\d{3}|F-\d+|Q-IDENT)\s*\|", ln)
+    ]
+    if not rows:
+        return
+    text = text.replace(rows[0] + "\n", "", 1)
+    ex.write_text(text, encoding="utf-8")
 
 
 def _blanket_ledger_boot(repo: Path) -> None:
@@ -941,6 +1186,7 @@ def main() -> int:
     print("  C5 one home; consent scoped; GLM governing; D-024  C6 proven by this run")
     print("  C7 garden: STATE live, FAIL-001 + known-bad, review artifacts in context/reviews/")
     print("  C8 coverage: manifest + raw immutability + quote fidelity + STATE freshness (F-09/D-025)")
+    print("  C9 cross-doc integrity: ID references resolve + counts agree + entry views agree (INT-117)")
     print("Run with --self-test to prove the guards catch the failure classes (F-01).")
     return 0
 

@@ -94,9 +94,9 @@ Append-only: new laws get new numbers. Superseded laws keep their text and statu
 
 **WORDS.** "the system must not miss or loose concepts after a session of resoning through research, and studying" + the fact/concept definition (INT-025).
 
-**MEANING.** Discovery is not evidence. Attention is not truth. A fact tag classifies a statement type; it never certifies truth — truth lives in relations between fragments, decided by Kev policy on grounded evidence. Auto-detected concepts are provisional until out-of-sample evidence graduates them.
+**MEANING.** Discovery is not evidence. Attention is not truth. A classification word (free text, since the tag system's removal — INT-112/D-030) classifies a statement type; it never certifies truth — truth lives in relations between fragments, decided by Kev policy on grounded evidence. Auto-detected concepts are provisional until out-of-sample evidence graduates them.
 
-**MECHANISM.** C6 now; C4/C5 from Phase 5: agent-authored material carries zero belief weight (D-019) — it is stored as attributed information about what the agent said, never as corroboration; evidence for inferred relations comes only from grounded text-pair decisions or structural facts. Fact-tag semantics: OPEN (Q3) — intended-factual with separate verification status is the staged default.
+**MECHANISM.** C6 now; C4/C5 from Phase 5: agent-authored material carries zero belief weight (D-019) — it is stored as attributed information about what the agent said, never as corroboration; evidence for inferred relations comes only from grounded text-pair decisions or structural facts. Fact-tag semantics: Q3 closed by removal (INT-112/D-030, 2026-10-14) — no tag system exists; the epistemic boundary stands: an owner's free-text classification word never certifies truth.
 
 **FAILURE MODE.** The system that manufactures truth: agent assertions counted as evidence, popularity counted as confirmation, junk concepts minted automatically and never pruned.
 
@@ -120,7 +120,7 @@ Append-only: new laws get new numbers. Superseded laws keep their text and statu
 
 **MEANING.** Two formation speeds, one junk gate. Owner-declared and owner-tagged concepts are instant and authoritative. Auto-detected concepts are also instant (not slow — the assumption of slow compounding is removed) but provisional. The junk gate lives at graduation, not birth: provisional concepts graduate on out-of-sample evidence, never on volume.
 
-**MECHANISM.** C6 now (model semantics in GLOSSARY); C4 from Phase 5: concept induction with provenance, graduation tests, and the Kev classifier behind policy/eval gates. Capture-time tags are custom and owner-authored (INT-069, 2026-10-13): the owner manually writes what kind of highlight it is, if they want — there is NO default fact/concept classification; the fact/concept/quote vocabulary stays available to the owner, never imposed, and the system trains on owner-authored tags when good enough (INT-028, INT-088). *(Supersedes the earlier "typed tags (`fact`, `concept`, free)" mechanism per EXR-08 — the latest owner statement governs; the WORDS above are history.)*
+**MECHANISM.** C6 now (model semantics in GLOSSARY); C4 from Phase 5: concept induction with provenance, graduation tests, and the Kev classifier behind policy/eval gates. Capture-time tags are custom and owner-authored (INT-069, 2026-10-13): the owner manually writes what kind of highlight it is, if they want — there is NO default fact/concept classification; the fact/concept/quote vocabulary stays available to the owner, never imposed, and the system trains on owner-authored tags when good enough (INT-028, INT-088). *(Supersedes the earlier "typed tags (`fact`, `concept`, free)" mechanism per EXR-08 — the latest owner statement governs; the WORDS above are history.)* *(Superseded again 2026-10-14 — INT-112/D-030: the tag system is REMOVED entirely; concept formation runs on grounded text-pair evidence and structural facts alone; the owner's free-text words, if any, are one signal, never a gate.)*
 
 **FAILURE MODE.** Two symmetric failures: concepts lost after a reasoning session (owner's stated worst-of-class), and junk concepts minted automatically with no graduation discipline.
 
@@ -142,7 +142,7 @@ Append-only: new laws get new numbers. Superseded laws keep their text and statu
 
 **WORDS.** (from the architecture line the owner locked): ground truth is append-only; everything else is derived and rebuildable; capture never waits for intelligence; every derived claim is explainable and reversible.
 
-**MEANING.** The data substrate is a two-tier architecture: an append-only evidence tier (highlights, notes, journal revisions, bookmarks, tags, behavior events, source snapshots — edit = new revision, delete = tombstone) and a derived tier that is entirely rebuildable (every derived row carries provenance: run ID, versions, input hash).
+**MEANING.** The data substrate is a two-tier architecture: an append-only evidence tier (highlights, notes, journal revisions, bookmarks, behavior events, source snapshots — edit = new revision, delete = tombstone; the tag system is removed, INT-112/D-030 — tag events no longer exist) and a derived tier that is entirely rebuildable (every derived row carries provenance: run ID, versions, input hash).
 
 **MECHANISM.** The substrate laws: LAW-19 (evidence immutable, C1+C2: no update/delete function exists; triggers reject both), LAW-20 (provenance on derived rows, C1), LAW-23 (commands atomic + idempotent + acknowledged after commit, C1), LAW-21/22 (owner scope + actor on every write; RLS; two-owner test). The standing design test for ANY schema change: **can every derived row be deleted and rebuilt with zero loss?** If not, derived state has leaked into ground truth — a design defect.
 

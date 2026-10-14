@@ -22,7 +22,7 @@ The goal, in the owner's words (verbatim, 2026-10-13, `context/raw/3.txt`). Ever
 - **C1** Nothing the owner does is lost. Worst failure: losing a highlight.
 - **C2** The owner's agents have the owner's context.
 - **C3** Old inputs gain value from new inputs.
-- **C4** Concepts form with provenance, from tags.
+- **C4** Concepts form with provenance, from grounded evidence (tag system removed — INT-112/D-030, 2026-10-14).
 - **C5** Every derived claim is explainable and reversible.
 
 ## First usable workflow (D-013, D-023)
@@ -30,9 +30,9 @@ Read a source → capture highlights/bookmarks → add a note → journal, refer
 
 **Backend contract vs product workflow (D-023).** Arivoo implements and verifies the *backend contracts* — source/import, anchor, highlight, bookmark, note, journal block, `@`-reference, retrieval — through its API. The complete reader-capture-journal path is the *product-level acceptance target*: each backend slice is tested through a real client path with a documented integration boundary to the reader and journal clients. No UI is built in this repository; a CLI can test and inspect the API, but it is not the reading experience.
 
-**Import is day-one intake (INT-019).** The first usable path includes importing existing material — text/Markdown and conversation exports first (QD-1 default), books and articles per the durability ladder, external-platform integrations incrementally (INT-024). Capture never waits for import intelligence (layer-2 contract).
+**Import is day-one intake (INT-019).** The first usable path includes importing existing material — any readable format (INT-113/D-031: pdf/txt/md/epub/json and every readable format), sequenced per the durability ladder, external-platform integrations incrementally (INT-024). Capture never waits for import intelligence (layer-2 contract).
 
-**Tagging is custom (INT-069).** Highlights carry owner-authored custom tags when the owner chooses — the owner manually writes what kind of highlight it is, if they want; there is NO default fact/concept classification. The fact/concept/quote vocabulary remains available, never imposed (P-10 MECHANISM, updated 2026-10-13; Q3 re-scoped accordingly). Concept formation (C4) reads owner-authored tags as ONE signal, never a gate: untagged highlights still feed provisional discovery — auto-detected concepts are instant and provisional (P-10), graduation on out-of-sample evidence is the junk gate, and no system-owned label is ever imposed to compensate (F-05 wording fix, 2026-10-13).
+**No tag system (INT-112/D-030 — supersedes the INT-069 custom-tag paragraph, 2026-10-14).** Highlights carry no tag field; a classification word ("concept", "fact", "quote") is free text the owner writes manually if they want — never a structured feature, never imposed. Concept formation (C4) works from grounded text-pair evidence and structural facts alone — the owner's free-text words, if present, are one signal, never a gate: unclassified highlights still feed provisional discovery — auto-detected concepts are instant and provisional (P-10), graduation on out-of-sample evidence is the junk gate, and no system-owned label is ever imposed to compensate (F-05 wording fix, 2026-10-13; tag removal 2026-10-14).
 
 ## The seven layers (the substrate contract)
 

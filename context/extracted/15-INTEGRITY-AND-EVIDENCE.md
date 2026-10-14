@@ -193,7 +193,7 @@
 - **Slice-9 findings (the falsification loop's purpose — found by the subagent, dispositioned this session):**
   1. **P1 blind guard — class (d) reintroduced known-conflicting rule not caught** → REPAIRED: VER-904 (the normative-marker register — presence-of-current-truth anchored to each LOCKED decision/supersession, enumerated surfaces, extension rule documented in the code) + MUT-27 (the mutation reproduces the subagent's attack and must fail VER-904). Post-repair: 51/0 + 27/27. Residual limitation recorded (§9).
   2. **P2 — premature evidence claims in this record and STATE** (§7 pre-stated the slice-9 outcome and cited a §7.1 that did not yet exist; STATE pre-cited the WORKLOG entry at the intermediate commit `3fe1dd3`) → REPAIRED in this close commit: §7 now records the ACTUAL outcome, §7.1 holds the verbatim report, the WORKLOG Task 14 entry lands with this commit. Root cause: the record's result sections were drafted before the subagent ran instead of after — an honesty-discipline slip, not a checker gap.
-  3. **P2 (same root as 2)** — the exit artifacts (WORKLOG entry, §7.1, §12 merge data) pending at the intermediate commit → REPAIRED: all land before the PR; the merged tree carries true claims.
+  3. **P2 (same root as 2)** — the exit artifacts pending at the intermediate commit → REPAIRED: the WORKLOG Task 14 entry and §7.1 landed before the PR; §12's merge data is the standing named gap BY CONSTRUCTION (a file cannot contain its own merge's evidence — session 16's first preflight act, the records 13/14 pattern), stated as such, never as a pending promise.
 - Regression guards: the five new mutations (MUT-23..27) + the re-targeted VER-504 are the guards; the self-test exercises them on every run (local preflight + remote CI).
 
 ## 9. Unverified items
@@ -216,4 +216,4 @@
 
 ## 12. Session close
 
-- To be completed at merge: merge SHA, post-merge run ID, final tree state.
+- Merge evidence follows the standing named-gap pattern (records 13/14): a committed file cannot contain its own merge's evidence — the merge SHA and post-merge run ID are session 16's FIRST preflight act, recorded there. Final tree state at PR close: branch `slice/session-15-integrity-evidence` @ `e46fbc7` (rebased onto main @ `4212ae8`, PR #17's gate re-target), local 51/0 + 27/27 + isolation green; CI run on this head: 38552107238 (both jobs, success).

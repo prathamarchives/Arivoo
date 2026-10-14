@@ -1,6 +1,6 @@
 # 14 — Navigation, Handoffs, Read Path: The Layer-1.2 Slices (STATE index · session records · cold start · replication)
 
-> STATUS: **SESSION ENGINEERING RECORD (IN PROGRESS — 2026-10-14, the layer-1.2 session — INT-100..109/D-027).** Historical process artifact per D-022: assistant analysis and work record; NOT owner intent, outranks nothing. Owner words live only in `/INTENT-LEDGER.md` (INT-100..109 added this session; §1 below is their verbatim preservation home, written BEFORE the ledger entries — the closed INT-046/068 class). Worklog entry: Task 13 (appended at close). Verifier: `tools/verify_canonical_layer.py` + `tools/isolation_check.py` — runs recorded in §8. Sections §3+ are appended as each slice lands; the banner flips to complete at the close PR. PRs this session: #10 (this PR — turn-10 intake + slice 4), #11 (slice 5), #12 (slice-6 gate re-target), #13 (slice-6 read path + cold-start proof), #14 (replication kit), #15 (close). Branches `slice/*`; all merges under the standing P-13/P-15 authorization with this record as the change-channel basis.
+> STATUS: **SESSION ENGINEERING RECORD (COMPLETE — 2026-10-14, the layer-1.2 session — INT-100..109/D-027; closed at PR #15; PRs #10–#14 all merged green, full chain in §14).** Historical process artifact per D-022: assistant analysis and work record; NOT owner intent, outranks nothing. Owner words live only in `/INTENT-LEDGER.md` (INT-100..109 added this session; §1 below is their verbatim preservation home, written BEFORE the ledger entries — the closed INT-046/068 class). Worklog entry: Task 13 (appended at close). Verifier: `tools/verify_canonical_layer.py` + `tools/isolation_check.py` — runs recorded in §8. Sections §3+ are appended as each slice lands; the banner flips to complete at the close PR. PRs this session: #10 (this PR — turn-10 intake + slice 4), #11 (slice 5), #12 (slice-6 gate re-target), #13 (slice-6 read path + cold-start proof), #14 (replication kit), #15 (close). Branches `slice/*`; all merges under the standing P-13/P-15 authorization with this record as the change-channel basis.
 
 ## 1. What the owner asked (verbatim — owner turn 10, 2026-10-14)
 
@@ -294,3 +294,63 @@
 - **Seam rule (the owner's INT-108 made testable):** nothing in the system's mechanics may hardcode this repo as the only possible home — any mechanism that only works here is a defect in the mechanism.
 - **Companion folds:** GLOSSARY +Pattern layer (the portable half vs content; homes: TEMPLATES + the guide); EXECUTION §1 +Replication guide row (a guide, never a second specification); context/README structure line + tools count synced 46/20 → 47/22 (VER-110/MUT-21/22, PR #13 `87e5cf0`) — the README lag was the same class as the grader's verify.yml label finding; the workflow label itself stays a P-18 deferral to the next workflow-touching PR (§6.2 disposition; the step name is not the check).
 - **Verified on the tree:** verifier 47/0 + self-test 22/22 + isolation green on this branch head before the PR (§8 at close).
+- **Merged:** PR #14 `ce7d81a` — CI run `38531935939` both jobs green; post-merge run on `main` `38532014775` green @ `ce7d81a` (§14). D-027(5) is standing from this merge; with it the ENTIRE D-027 corpus (STATE contract · session-record policy · read path · replication kit) is merged standing — the layer-1.2 deliverable set is complete.
+
+## 8. Commands and external actions (ACTUAL — never reconstructed; slice-local commands live in their sections)
+
+- Preflight @ `main` `e8a8259` (§2, pre-edit): verifier 46/0 · self-test 20/20 · isolation green — exit 0 each.
+- Proof (§6.2/§6.3): two uncoached fresh-context GLM sub-agents (`glm-5.3`) — task agent + separate grader; the grader's own ACTUAL runs: verifier 47/0 (exit 0), self-test 22/22 (temp-dir-based), `wc -w` on every manifest file and cited range, git-state reproduction.
+- Post-proof tree @ `3c2f94b`: `python3 tools/verify_canonical_layer.py` → GREEN 47/0 (exit 0) after the §6.2–§6.4 + STATE edits.
+- `wc -w context/raw/*` → **75,735** (the §6.4 corpus denominator).
+- PR #13 (API): push `slice/read-path-supersession`; create PR (201); poll check-runs → run `38531302130` (canonical-layer success · head-tools success); merge (200, `87e5cf0`); `actions/runs?branch=main` → post-merge `38531369782` success @ `87e5cf0`.
+- Kit tree @ `fc7e256`: verifier 47/0 · self-test 22/22 · isolation green — exit 0 each, post-edit.
+- PR #14 (API): push `slice/replication-kit`; create PR (201); poll → run `38531935939` (both jobs success); merge (200, `ce7d81a`); post-merge `38532014775` success.
+- Close preflight @ `main` `ce7d81a`: verifier 47/0 (exit 0) · self-test 22/22 · isolation green.
+- Close-evidence chain: `scripts/close_chain.py` (API reads; PRs #10–#14 merge SHAs + head runs + post-merge runs; saved `scripts/close_chain.json` — host-side artifact, not repo content).
+
+## 9. Evidence
+
+- **The proof:** task-agent report + independent grading PASS 96.8/100 (§6.2/§6.3) — 28/28 pointers, manifest exact, fail conditions 5/5.
+- **The PR chain (all observed via API this session):**
+
+| PR | head | merged | head CI run (both jobs) | post-merge run on main |
+|---|---|---|---|---|
+| #10 | `043e19f` | `7ec4c89` | `38521337785` success | `38521445871` success |
+| #11 | `25bf467` | `e08af51` | `38522152771` success | `38522257069` success |
+| #12 | `1f98c1d` | `15bae62` | `38522398530` success | `38522484815` success |
+| #13 | `3c2f94b` | `87e5cf0` | `38531302130` success | `38531369782` success |
+| #14 | `fc7e256` | `ce7d81a` | `38531935939` success | `38532014775` success |
+
+- **Verifier/self-test/isolation runs:** §2, §6.3, §8 (actual exits recorded at each point).
+- **Behavioral proofs this session:** handoff proof (slice 5, §4) + cold-start proof (§6.2/§6.3).
+
+## 10. Failures and found defects
+
+- **No FAIL-record-class failure occurred this session** (no red CI, no rejected merge, no lost work, no direct-to-main attempt).
+- **Found defect 1 (P-18 deferral):** `verify.yml` step label says "(46 checks: C1–C8)" vs 47 actual — cosmetic; folds into the next workflow-touching PR (§6.2 disposition; the step name is not the check).
+- **Found defect 2 (repaired):** `context/README.md` tools count 46/20 lagged the real 47/22 — synced in PR #14.
+- **Disruption, honestly recorded:** the orchestrating host lost its chat context mid-session (external event, between PR #12 and the proof run). Resumption followed STATE's exact-next-action line + this record's §6.0 protocol and §6.2–§6.4 placeholders — no chat history, repo-only recovery. Disposition: none needed — this is the cold-start property working on its own operator; recorded here because a session record reports what actually happened (LAW-04).
+
+## 11. Unverified items
+
+- **PR #15's own post-merge run** — cannot exist inside the PR that merges it; the named gap: session 15's first act records it (STATE's exit line carries the pointer). The record-13 §10 class of silent close-gaps is closed by NAMING it, not by pretending.
+- The replication guide's real use in a second project (proven only at instantiation — the guide's own acceptance criterion, §7).
+- The `verify.yml` step-label sync (P-18 deferral, §10).
+- Live branch-protection re-observation at close (last re-observed 2026-10-14, §2/§6.5 — snapshot discipline, INT-104).
+- Per-host file-import bridges (land at host adoption, Q1 remainder).
+
+## 12. Open decisions
+
+- Unchanged from session 13's register, none new this session: **Q1 remainder** (blocks only per-host bridge instantiation) · **Q2** (Phase-3 storage/purge lock) · **Q3** (fact-tag vocabulary) · **QD-1** (Phase-4 import formats) · **D-014** (calculation engine, non-blocking for capture) · **F-06** (deployment-precision statement, pre-Phase-3 gate) · **Q-IDENT** (identity merge boundary, default (a), blocks nothing current).
+- **None of them blocks the Phase 2 minimum harness** (P-17 scope; record 13 §9, re-confirmed by the cold-start proof's blocks-only table, §6.2).
+
+## 13. Next action
+
+- **Session 15 — intake owner turn 11 (the detailed Phase 1 & 2 execution plan, supplied in chat 2026-10-14):** preserve the turn verbatim in record 15 §1 BEFORE any ledger entry (the INT-046/068 class), ledger the owner-voiced directives (INT-110..), adopt the plan via D-028 with the provenance discipline for any forwarded-recommendation material (the INT-091/D-024 and INT-100/D-027 pattern) — then begin **Phase 2 Layer 2.1 per that plan** (the storage decisions slice first, per its own ordering).
+- Session 15's FIRST act: preflight (verifier + self-test + isolation on `main` @ PR #15's merge) and record PR #15's post-merge run ID (the §11 named gap).
+
+## 14. Session close
+
+- **All session PRs merged green:** #10 `7ec4c89` · #11 `e08af51` · #12 `15bae62` · #13 `87e5cf0` · #14 `ce7d81a` (runs in §9's table; each post-merge run green).
+- **PR #15 (this close):** merged as the session's final act; its merge SHA + post-merge run land in STATE's exit position and session 15's preflight (the §11 named gap — never left silent).
+- **Final tree state after this PR merges:** `main` = PR #15's merge commit; verifier 47/0 + self-test 22/22 + isolation green expected on it (CI observes); 0 open PRs; D-027 fully standing; record 14 complete (this file); WORKLOG Task 13 appended (compact form, its first live use — §4.2).

@@ -689,8 +689,8 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
     ),
     (
         "MUT-08",
-        "drop INTENT-LEDGER.md from read-order step 1 (boot-sequence regression)",
-        lambda r: _edit(r, "AGENTS.md", "1. `/INTENT-LEDGER.md` — owner words, verbatim, statused. The highest authority. Load it BEFORE forming any understanding of the task.", "1. `/GLOSSARY.md` — vocabulary"),
+        "drop the INTENT-LEDGER.md step from the read order (boot-sequence regression) — content-generic since 2026-10-14: removes whichever numbered read-order line names the ledger, so the mutation cannot silently no-op when the boot order changes (the base-anchored self-test RED-flags a no-op as a blind guard)",
+        lambda r: _drop_ledger_step(r),
         "VER-101",
     ),
     (
@@ -733,6 +733,25 @@ def _edit(repo: Path, rel: str, old: str, new: str) -> None:
 
 def _rm(repo: Path, rel: str) -> None:
     (repo / rel).unlink()
+
+
+def _drop_ledger_step(repo: Path) -> None:
+    """MUT-08, content-generic (2026-10-14, session-14 gate re-target): remove the numbered
+    read-order line that names /INTENT-LEDGER.md. The earlier form replaced a hard-coded
+    ledger-first step-1 string; once AGENTS' read order moves the ledger off step 1 (the
+    slice-6 supersession, D-027(3)/INT-107), that string stops matching, the mutation
+    silently no-ops, VER-101 does not fail, and the base-anchored self-test reports a blind
+    guard — RED-blocking the very PR that legitimately changes the boot order. Generic form:
+    works on every read order that keeps a numbered INTENT-LEDGER step, current or future
+    (the same repair class as MUT-17's genericization, PR #6)."""
+    agents = repo / "AGENTS.md"
+    text = agents.read_text(encoding="utf-8")
+    out = [
+        ln
+        for ln in text.splitlines(keepends=True)
+        if not (re.match(r"^\s*\d+\.\s", ln) and "INTENT-LEDGER.md" in ln)
+    ]
+    agents.write_text("".join(out), encoding="utf-8")
 
 
 def _stale_state_pointer(repo: Path) -> None:

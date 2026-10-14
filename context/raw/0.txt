@@ -1626,4 +1626,4 @@ Before creating the H-01 to H-14 slice cards, I would revise the execution spec 
 
 Then start with Phase 0 as a sequence of small slices, not one large harness project. Prove the instruction loader, test runner, protected-path gate, real-stack runner, independent state read and Proof Sheet generation. Add each product-specific known-bad test when its corresponding contract exists. This keeps the harness-first principle while allowing Arivo to become useful as each verified behavior lands.
 
-The goal is not an impressive execution document. It is a process that helps agents deliver Arivo faster without allowing them to silently change what Arivo is supposed to be.
+The goal is not an impressive execution document. It is a process that helps agents deliver Arivo faster without allowing them to silently change what Arivo is supposed to be. 

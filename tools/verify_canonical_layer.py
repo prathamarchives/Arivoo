@@ -106,11 +106,23 @@ OPEN_QID = re.compile(r"(?:Q\d+|QD-\d+|D-\d{3}|F-\d+|Q-IDENT)")
 # restatement surface — enumerated, never generalized (slice 7: no universal
 # policy engine; paraphrase-evasive reintroductions that keep every marker are the
 # recorded residual limitation, record 15 §9).
+# Session 16 (D-034 — the Arivoo review's two P1 findings) extends the register
+# with the CLOSED-DECISION surfaces: a closed question reintroduced as open in a
+# current canonical document (the drift class), and the verification protocol's
+# host-agnostic propagation (D-028) — narrow to known closure surfaces, exactly as
+# the review's recommended repair prescribes.
 NORMATIVE_MARKERS = [
     ("NORTH-STAR.md", "no tag field", "D-030/INT-112 — the tag-system removal"),
     ("NORTH-STAR.md", "tag system removed", "D-030/INT-112 — the C4 claim line"),
     ("INTENT-LEDGER.md", "superseded (superseded_by: INT-112)", "D-030 — INT-069's supersession link"),
     ("DECISIONS.md", "SUPERSEDED (partial: deployment ordering) by D-032", "D-032 — D-003's partial supersession"),
+    # closed-decision drift surfaces (session 16, D-034):
+    ("DECISIONS.md", "Update 2026-10-14 (D-028)", "D-028 — D-007's stale Q1-open note superseded"),
+    ("DECISIONS.md", "Update 2026-10-14 (D-031)", "D-031 — D-023's stale QD-1 default superseded"),
+    ("PLAN.md", "Q1–Q3 closed 2026-10-14", "D-028..D-030 — the supersession note's closure pointer"),
+    ("AGENTS.md", "host-agnostic by design (D-028)", "D-028 — the verification-protocol line's agent-agnostic form"),
+    ("OPERATING-MODEL.md", "host-agnostic (D-028)", "D-028 — §9's verifier-family rule"),
+    ("OPERATING-MODEL.md", "current default family", "D-028/INT-070 — Model 1/§9's current-default naming (host-agnostic form: whichever family is the named default, it is stated as a default, never a requirement)"),
 ]
 
 
@@ -500,13 +512,22 @@ class Layer:
             "scope the consent rule — blocking questions (owner intent, irreversible, security, data loss) never close by silence or elapsed time",
         )
         om = self.read("OPERATING-MODEL.md")
+        # VER-507 final form (session 16, D-034 — two-phase re-target complete: the
+        # PR-#19 bridge form accepted 'governing' OR 'current default' while the
+        # rewording landed; this form requires the §9-scoped host-agnostic protocol
+        # with a named current default — a regression to the superseded GLM-governing
+        # wording fails here, and a valid alternative-host declaration passes).
+        sec9 = re.search(r"^## 9\..*?(?=^## \d|\Z)", om, re.S | re.M)
+        sec9_text = sec9.group(0) if sec9 else ""
         self.check(
             "VER-507",
-            "INT-070" in om
-            and ("governing" in om or "current default" in om)
+            bool(sec9_text)
+            and "INT-070" in sec9_text
+            and "host-agnostic" in sec9_text
+            and "current default" in sec9_text
             and "recommended where possible" not in om,
-            "OPERATING-MODEL §9: the verification protocol names its current host (INT-070) and never the cross-family 'recommended where possible' form (F-03) — host-generic per D-028: 'current default' or the standing 'governing' wording both pass while the agent-agnostic rewording lands (re-targeted session 16, D-034)",
-            "make the verifier-family rule consistent with INT-070/D-028 across DECISIONS/EXECUTION/OPERATING-MODEL — the protocol is the invariant; the named host is a default, never a requirement",
+            "OPERATING-MODEL §9: the verification protocol is host-agnostic (D-028) with a named current default (INT-070) — never the cross-family 'recommended where possible' form (F-03); the named host is a default, never a requirement",
+            "restore the §9 host-agnostic verification-protocol wording (D-028/INT-070): the protocol is the invariant, the named host is the current default — a host change is a default change, never a redesign",
         )
         d024 = next((ln for ln in decisions.splitlines() if ln.startswith("| D-024 ")), "")
         self.check(
@@ -999,6 +1020,18 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
         "VER-904",
     ),
     (
+        "MUT-28",
+        "strip a closed question's closure pointer — D-007's Q1-closure annotation loses its D-028 reference, so the closed question reads as OPEN again in a current canonical document (the Arivoo review's first P1 finding, the drift class)",
+        lambda r: _strip_closure_annotation(r),
+        "VER-904",
+    ),
+    (
+        "MUT-29",
+        "regress §9 to the superseded GLM-governing form — the verification family becomes a host requirement again while D-028 stands (the Arivoo review's second P1 finding, the agent-agnostic propagation class)",
+        lambda r: _glm_governing_regression(r),
+        "VER-507",
+    ),
+    (
         "MUT-30",
         "move the worklog-tail boot step BELOW the ledger step — the coordination context no longer loads before the selective authority dive; the directory-separator path was INVISIBLE to the old parser (the Arivoo review's P3 finding), so this mutation no-ops the old VER-110 — the repaired parser must catch it",
         lambda r: _worklog_after_ledger(r),
@@ -1160,6 +1193,46 @@ def _drop_verification_rule(repo: Path) -> None:
     text = agents.read_text(encoding="utf-8")
     out = [ln for ln in text.splitlines(keepends=True) if "INT-070" not in ln]
     agents.write_text("".join(out), encoding="utf-8")
+
+
+def _strip_closure_annotation(repo: Path) -> None:
+    """MUT-28 (session 16, D-034 — the Arivoo review's first P1 finding): strip the
+    D-028 closure pointer from D-007's update note in DECISIONS.md. The closed
+    question then reads as OPEN again in a current canonical document (the drift
+    class the review found); VER-904's closure-marker register must catch it."""
+    d = repo / "DECISIONS.md"
+    text = d.read_text(encoding="utf-8")
+    if "Update 2026-10-14 (D-028)" not in text:
+        return
+    d.write_text(
+        text.replace("Update 2026-10-14 (D-028)", "Update 2026-10-14", 1),
+        encoding="utf-8",
+    )
+
+
+def _glm_governing_regression(repo: Path) -> None:
+    """MUT-29 (session 16, D-034 — the Arivoo review's second P1 finding): revert
+    OPERATING-MODEL §9's host-agnostic verification-protocol sentence to the
+    superseded GLM-governing form, while D-028 (agent-agnostic) still stands — the
+    reintroduced-known-conflicting-rule class. The strict §9-scoped VER-507 must
+    catch it; a valid alternative-host declaration (the positive case) passes."""
+    om = repo / "OPERATING-MODEL.md"
+    text = om.read_text(encoding="utf-8")
+    NEW = (
+        "The verification protocol is host-agnostic (D-028): the current default "
+        "family is GLM (INT-070); any capable model family may run it — a host "
+        "change requires no redesign and contradicts no authority rule. A different "
+        "model family CAN add optional adversarial coverage, but it is never a "
+        "required gate."
+    )
+    OLD = (
+        "The verification family is GLM-based subagents (INT-070, governing): a "
+        "different model family CAN add optional adversarial coverage, but it is "
+        "never a required gate and never overrides the declared GLM workflow."
+    )
+    if NEW not in text:
+        return
+    om.write_text(text.replace(NEW, OLD, 1), encoding="utf-8")
 
 
 def _worklog_after_ledger(repo: Path) -> None:

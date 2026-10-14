@@ -6,7 +6,7 @@ Controlled vocabulary. One concept, one name — no synonyms. **Scope: this poli
 - **Arivo** — the product: the owner's reading/study/reflection environment. (The owner also says "Ivo" casually; Arivo is canonical per D-002.)
 - **Arivoo** — this repository.
 - **Owner** — prathamarchives. The only authority on intent; words recorded verbatim.
-- **Orchestrator** — the coordinating agent (Super Z lineage): holds corpus understanding, enforces laws, gates artifacts, runs the ratchet, commits. **Super Z** — the GLM-based host agent family that runs the orchestrator role (INT-070: GLM also runs the test/verification subagents).
+- **Orchestrator** — the coordinating agent (Super Z lineage): holds corpus understanding, enforces laws, gates artifacts, runs the ratchet, commits. **Super Z** — the GLM-based host agent family that runs the orchestrator role (the current default per D-028/INT-070 — agent-agnostic by design: GLM also runs the test/verification subagents as the current default, never a requirement; a host change is a default change, never a redesign).
 - **Builder** — fresh-context subagent working from a self-contained card. Never verifies its own work.
 - **Verifier** — fresh-context subagent: reads card + proof sheet + diff only; writes failing tests only; advisory — the gate decides.
 - **Host** — a coding-agent environment operating on this repo (GLM-based agent/CLI, Claude Code, Codex CLI). Supported = passed the Host Contract.

@@ -13,7 +13,7 @@
 | The goal and claims | `/NORTH-STAR.md` | Mission in owner words; C1–C5; the seven-layer contract; non-goals |
 | Owner intent | `/INTENT-LEDGER.md` | Owner words, verbatim, statused — the ONLY intent authority |
 | Owner laws | `/PRINCIPLES.md` | P-01..P-17: WORDS / MEANING / MECHANISM / FAILURE MODE / GROWTH |
-| Decisions | `/DECISIONS.md` | D-001..D-024, statused; open owner questions Q1–Q3 |
+| Decisions | `/DECISIONS.md` | D-001..D-025, statused; open owner questions Q1–Q3, Q-IDENT, F-06, QD-1, D-014 (gates in §6) |
 | Executable law | `/LAWS.md` | The 29 laws: statement, ladder level, check, live-at; LAD rules; proactive set |
 | Doctrine | `/ENGINEERING.md` | Why the laws are what they are (transcript + upstream) |
 | Roles, loop, growth, healing, verification | `/OPERATING-MODEL.md` | The slice loop; six operating models; memory-update protocol; self-healing; the verification stack |

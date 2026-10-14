@@ -225,7 +225,7 @@ Source: `context/raw/0.txt:34`; `2.txt:29`. Grounds: GLOSSARY Kev, NG-03, K2.
 Source: `context/raw/1.txt:441`. Grounds: D-010, layer 1 (behavior events in ground truth).
 
 **INT-057 — MY AGENT GETS ALL OF IT — active**
-> "my agent gets all of it. all my contextm what im doing, what im reading and every thing. my reading beahvoir, what im studying, what notes, my thinking and everything"
+> "my agent gets all of it. all my contextm what im doing, what im reading and every thing. my reading beahvoir, what im studying, what notes , my thinking and everything"
 
 Source: `context/raw/1.txt:444`. Grounds: C2, D-010, context packs.
 

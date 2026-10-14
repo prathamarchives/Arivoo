@@ -14,7 +14,7 @@ You are an agent in this repository. This file is your map. Read it fully, then 
 4. `/PRINCIPLES.md` — the owner's laws P-01..P-17 (each with mechanism, failure mode, growth)
 5. `/LAWS.md` — the executable law book: the 29 laws, ladder C1–C6, phase mapping
 6. `/ENGINEERING.md` — the doctrine: why the laws are what they are (transcripts + upstream)
-7. `/DECISIONS.md` — statused decisions D-001..D-024 + open Q1–Q3
+7. `/DECISIONS.md` — statused decisions D-001..D-025 + open Q1–Q3, Q-IDENT
 8. `/EXECUTION.md` — the execution contract's one canonical home: the contract map, the source tiers, the authority order, the change protocol
 9. `/PLAN.md` — one phase deep; guardrails; Phase 1 detail
 10. `/GLOSSARY.md` — controlled vocabulary (use these exact names)

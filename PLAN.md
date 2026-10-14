@@ -7,7 +7,7 @@ Isolated credentials · protected gates · real database test · idempotent writ
 
 ## Phase 1 — Execution environment and trust (NEXT)
 Purpose: the repo is safe to build in, and the trust model is real.
-- **W-01 Walls**: protect main (PR-only, no force push, applies to admins); CODEOWNERS on protected paths; required check restricted to the expected source application (mechanism verified + FACT entry — not assumed from docs). Two-stage: rules land now, required-check binding when CI runs.
+- **W-01 Walls**: protect main (PR-only, no force push, applies to admins); CODEOWNERS on protected paths (deliberately deferred — rides Q-IDENT option (b): with a single identity it would convert every standing-authorization merge into an owner web-UI approval, violating P-06/P-15; session 12 §3 surface #11); required check restricted to the expected source application (mechanism verified + FACT entry — not assumed from docs). Two-stage: rules land now, required-check binding when CI runs.
 - **W-02 Host contract + bridges**: verify on installed versions how Codex CLI loads `AGENTS.md` and how Claude Code loads `CLAUDE.md` (`@path` imports); write the canonical bridge(s); FACT entries for verified behavior. Depends on Q1 (primary host).
 - **W-03 Isolation check**: redacted verification that the agent environment exposes no personal secrets — conditions printed, values never.
 - **W-04 CI**: Linux runner, `verify` workflow, owner-controlled; remote CI is authoritative (D-009).

@@ -217,6 +217,8 @@ Stage Summary:
 
 ---
 
+*(Numbering note, added 2026-10-14: Task ID 9 was reverted with fab0de4 per FAIL-001 — its entry is preserved in git history; see failures/FAIL-001.yaml. Session records ↔ Task IDs map off-by-one from here because extracted number 10 was re-homed to context/reviews/: records 11/12 ↔ Tasks 10/11.)*
+
 Task ID: 10
 Agent: Super Z (orchestrator, GLM host) + 1 GLM-based verification subagent
 Task: Owner directive INT-091 (owner turn 7) — "read repo, prs, review the reviews, merge": cold-start read; review PRs #1/#2 and every review (Codex bot reviews, the goal-aligned stress review F-01..F-12, the review-protocol proposal, the owner-forwarded design review); merge the PRs that pass review; then fold the accepted design into the canonical layer (STATE.md, change channel, walls stage-1, verifier hardening).
@@ -251,12 +253,12 @@ Work Log:
 - Verifier C8 family: VER-801..804 (manifest structure, raw immutability at C3, MECHANICAL QUOTE FIDELITY, STATE freshness) + MUT-14..18. The control's first run FOUND 7 REAL DEFECTS the prior 42 checks and 2 stress tests never caught: 6 ledger entries with NO Source line (INT-035/036/037/038/046/068) and INT-045's fabricated terminal period (mid-sentence truncation presented as a complete sentence). All repaired; layer green only after the corpus was actually clean
 - Built W-03 tools/isolation_check.py (LAW-28 redacted secret scan: conditions printed, values never; known-bad self-test) and W-04 .github/workflows/verify.yml (required job runs the verifier anchored FROM MAIN over the PR head — a PR cannot weaken its own judge; informational head-tools job)
 - Doc fold: INT-092, D-025 (severable: coverage control / isolation / CI / required-check / credentials hygiene), EXECUTION §1/§5/§6/§7 (manifest row, seam fix, Q-IDENT/F-06 rows, CI authority), AGENTS v2.4, GLOSSARY +3 terms, OPERATING-MODEL Model 0 + §3 verbatim-first session-record rule, STATE refresh, README, session record 12, this worklog entry
-- Opened PR #4; CI observed green on both jobs; required status check "verify / canonical-layer" bound to main (W-01 stage-2); merged under standing P-13/P-15 authorization (memory deltas + owner-directed wall construction, INT-092)
-- Fresh-context GLM subagent verification (INT-070): cold-started the tree via the read order alone, 12 operational questions, independent verifier runs (46/0, 18/18, isolation green), adversarial drift probes — findings and dispositions in session record 12 §6.2
+- Opened PR #4; CI observed green on both jobs; required status check "verify / canonical-layer" bound to main AFTER the green run was observed (W-01 stage-2); PR #4 merges under standing P-13/P-15 authorization (memory deltas + owner-directed wall construction, INT-092) — the merge SHA and post-merge main re-run land in the session-close PR
+- Fresh-context GLM subagent verification (INT-070): cold-started the tree via the read order alone, 12 operational questions, independent verifier runs (46/0, 20/20 after repairs, isolation green), adversarial drift probes — 8 findings, all real, all repaired same-session (session record 12 §6.1); its line-window finding (7b) strengthened VER-803 and immediately surfaced defect #8 (INT-057)
 
 Stage Summary:
-- Walls stage-2 LIVE: protected main + required CI check + isolation check + source-coverage control; verifier 46 checks / 18 mutations; quote fidelity and raw immutability are now MECHANICAL properties (C3), not prose
-- The 7-defect catch is the session's strongest result: structure-checking without fidelity-checking was the repo's largest blind spot — "verbatim, statused" is now verified, not asserted
+- Walls stage-2 LIVE: protected main + required CI check + isolation check + source-coverage control; verifier 46 checks / 18 mutations; quote fidelity (line-window scoped) and raw immutability are now MECHANICAL properties (C3), not prose
+- The 8-defect catch is the session's strongest result: structure-checking without fidelity-checking was the repo's largest blind spot — "verbatim, statused" is now verified, not asserted
 - Drift surfaces remaining: W-02 host bridges (owner-gated Q1 remainder — the LAST Phase-1 wall), Q-IDENT single-identity boundary (owner-gated, default documented), by-stage items tracked honestly
 - Next: owner answers the compact Decision Review (session record 12 §8); then W-02; then Phase 2 harness
 - Session record: context/extracted/12-GAP-CLOSURE-AND-WALLS-STAGE-2.md

@@ -40,10 +40,11 @@ SECRET_ENV_NAMES = re.compile(r"(?i)(^|_)(TOKEN|PAT|SECRET|PASSWORD|PASSWD|API_?
 # env vars expected on a GitHub Actions runner
 CI_EXPECTED_ENV = {"GITHUB_TOKEN", "CI", "GITHUB_SHA", "GITHUB_REF", "GITHUB_REPOSITORY", "GITHUB_ACTIONS", "GITHUB_EVENT_NAME", "RUNNER_OS", "GITHUB_HEAD_REF", "GITHUB_BASE_REF", "GITHUB_RUN_ID", "GITHUB_JOB", "GITHUB_WORKSPACE", "GITHUB_EVENT_PATH", "GITHUB_API_URL", "GITHUB_GRAPHQL_URL", "GITHUB_SERVER_URL", "GITHUB_ACTOR", "GITHUB_REPOSITORY_OWNER", "GITHUB_RUN_NUMBER", "GITHUB_STEP_SUMMARY", "GITHUB_OUTPUT", "GITHUB_ENV", "GITHUB_PATH"}
 
-# repo locations a credential could leak into
+# repo locations a credential could leak into (raw/ included since 2026-10-14 —
+# sub-agent finding 7a: the scan claimed tracked-file coverage it did not deliver)
 TRACKED_SCAN_PATHS = ["AGENTS.md", "STATE.md", "INTENT-LEDGER.md", "DECISIONS.md", "EXECUTION.md",
                        "PLAN.md", "PRINCIPLES.md", "LAWS.md", "NORTH-STAR.md", "OPERATING-MODEL.md",
-                       "ENGINEERING.md", "GLOSSARY.md", "context/README.md", "context/WORKLOG.md"]
+                       "ENGINEERING.md", "GLOSSARY.md", "context/README.md", "context/WORKLOG.md"]  # superseded by the dynamic git-ls-files scan; kept as documentation of intent
 
 
 def check(ci_mode: bool) -> int:
@@ -81,19 +82,13 @@ def check(ci_mode: bool) -> int:
     else:
         print(f"  [PASS] no unexpected secret-named environment variables ({len(secret_env)} secret-named total, {len(expected)} CI-expected)")
 
-    # 3. tracked files: secret VALUES must not exist in repo content
+    # 3. tracked files: secret VALUES must not exist in repo content (context/raw/
+    #    included — a live credential in the owner-received corpus is a P0 leak even
+    #    though removal needs an owner decision because raw is VER-802-anchored)
     leaked = []
-    for rel in TRACKED_SCAN_PATHS:
-        p = REPO / rel
-        if not p.is_file():
-            continue
-        text = p.read_text(encoding="utf-8", errors="replace")
-        for label, pat in SECRET_VALUE_PATTERNS:
-            for _ in pat.findall(text):
-                leaked.append(rel)
     git_tracked = subprocess.run(["git", "ls-files"], cwd=REPO, capture_output=True, text=True, timeout=10).stdout.splitlines()
     for rel in git_tracked:
-        if rel.startswith("context/raw/") or rel in TRACKED_SCAN_PATHS or not rel.endswith((".md", ".txt", ".py", ".yml", ".yaml", ".json", ".toml", ".cfg", ".ini")):
+        if not rel.endswith((".md", ".txt", ".py", ".yml", ".yaml", ".json", ".toml", ".cfg", ".ini")):
             continue
         p = REPO / rel
         try:
@@ -105,11 +100,12 @@ def check(ci_mode: bool) -> int:
                 leaked.append(f"{rel} ({label})")
     if leaked:
         for rel in leaked:
-            findings.append(f"secret VALUE pattern found in tracked file: {rel} — remove it, rotate the credential, and scrub git history if it was ever pushed")
+            raw_note = " — RAW CORPUS HIT: rotate the credential immediately; removal requires an owner decision (raw is VER-802-anchored — scrub with a manifest re-anchor)" if rel.startswith("context/raw/") else ""
+            findings.append(f"secret VALUE pattern found in tracked file: {rel} — remove it, rotate the credential, and scrub git history if it was ever pushed{raw_note}")
         unexpected += 1
         print(f"  [FAIL] secret value pattern(s) in tracked files: {', '.join(leaked)}")
     else:
-        print("  [PASS] no secret value patterns in tracked repo files (canonical docs, tools, workflows, context)")
+        print("  [PASS] no secret value patterns in tracked repo files (all tracked text files incl. context/raw/)")
 
     # 4. .env files must never be tracked
     if (REPO / ".env").exists() and ".env" in git_tracked:

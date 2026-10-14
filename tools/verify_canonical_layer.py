@@ -608,13 +608,8 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
     ),
     (
         "MUT-17",
-        "stale STATE pointer — point Last-completed at an old record while a newer one exists",
-        lambda r: _edit(
-            r,
-            "STATE.md",
-            "context/extracted/12-GAP-CLOSURE-AND-WALLS-STAGE-2.md",
-            "context/extracted/11-REVIEW-MERGE-AND-STATE-SLICE.md",
-        ),
+        "stale STATE pointer — rewrite the highest session-record reference in STATE.md to a lower record on disk",
+        lambda r: _stale_state_pointer(r),
         "VER-804",
     ),
     (
@@ -738,6 +733,36 @@ def _edit(repo: Path, rel: str, old: str, new: str) -> None:
 
 def _rm(repo: Path, rel: str) -> None:
     (repo / rel).unlink()
+
+
+def _stale_state_pointer(repo: Path) -> None:
+    """MUT-17, content-generic (repaired 2026-10-14): rewrite STATE.md's highest
+    session-record reference to the highest LOWER-numbered record that exists on
+    disk. The earlier hard-coded pointer (12-GAP-CLOSURE...) would silently no-op
+    the moment STATE advanced to record 13 — the mutation would not apply, VER-804
+    would not fail, and the self-test would report a blind guard, RED-blocking the
+    very PRs that legitimately advance the record sequence. Generic form: works on
+    every future tree, exercises exactly the stale-pointer failure class."""
+    state = repo / "STATE.md"
+    text = state.read_text(encoding="utf-8")
+    refs = sorted(
+        (int(m.group(1)), m.group(0))
+        for m in re.finditer(r"context/extracted/(\d+)-[\w.\-]+\.md", text)
+    )
+    if not refs:
+        return
+    hi_num, hi_ref = refs[-1]
+    lower = [
+        p
+        for p in (repo / "context" / "extracted").glob("*.md")
+        if (m := re.match(r"^(\d+)-", p.name)) and int(m.group(1)) < hi_num
+    ]
+    if not lower:
+        return
+    lo = max(lower, key=lambda p: int(re.match(r"^(\d+)-", p.name).group(1)))
+    state.write_text(
+        text.replace(hi_ref, f"context/extracted/{lo.name}"), encoding="utf-8"
+    )
 
 
 def _normalize_for_fidelity(text: str) -> str:

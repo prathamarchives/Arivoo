@@ -738,8 +738,8 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
     ),
     (
         "MUT-11",
-        "remove the F-05 qualifier — tags become a gate for concept formation again",
-        lambda r: _edit(r, "NORTH-STAR.md", "Concept formation (C4) reads owner-authored tags as ONE signal, never a gate:", "Concept formation (C4) reads owner-authored tags."),
+        "regress the F-05 qualifier — classification words become a gate for concept formation again (content-generic: targets the 'never a gate' qualifier, whatever the surrounding wording)",
+        lambda r: _tag_gate_regression(r),
         "VER-211",
     ),
     (
@@ -764,6 +764,20 @@ def _edit(repo: Path, rel: str, old: str, new: str) -> None:
 
 def _rm(repo: Path, rel: str) -> None:
     (repo / rel).unlink()
+
+
+def _tag_gate_regression(repo: Path) -> None:
+    """MUT-11, content-generic (re-targeted 2026-10-14, session 15 — the same repair
+    class as MUT-08/MUT-17, PRs #6/#12): rewrite the first 'never a gate' occurrence
+    in NORTH-STAR into a gate form, whatever the surrounding sentence says. The
+    earlier hard-coded string would silently no-op after the tag-removal rewording
+    (INT-112/D-030) — a no-op mutation reads as a blind guard and RED-blocks the
+    legitimate rewording PRs."""
+    ns = repo / "NORTH-STAR.md"
+    text = ns.read_text(encoding="utf-8")
+    if "never a gate" not in text:
+        return
+    ns.write_text(text.replace("never a gate", "the deciding gate", 1), encoding="utf-8")
 
 
 def _blanket_ledger_boot(repo: Path) -> None:

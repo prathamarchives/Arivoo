@@ -68,7 +68,8 @@ Also reviewed and NOT found drifting this session: worklog↔record double-bookk
 ### 5.1 CI observation and required-check binding (PR-time evidence; the merge SHA and post-merge main re-run land in the session-close PR immediately after this one)
 
 - PR #4 (`slice/gap-closure-and-walls-stage-2`): `verify / canonical-layer` — green (verifier anchored from main, run over the PR head); `verify / head-tools` — green (head verifier, self-test, isolation check CI-mode).
-- Required status check bound AFTER the PR run was observed green: `PUT /repos/prathamarchives/Arivoo/branches/main/protection` — required_status_checks = [`verify / canonical-layer`] (W-01 stage-2). The merge that lands this record happens under that check; the merge commit and main's post-merge re-run are GitHub-visible artifacts recorded in the session-close PR.
+- Required status check bound AFTER the PR run was observed green: `PUT /repos/prathamarchives/Arivoo/branches/main/protection` — required_status_checks = [`canonical-layer`] (the exact check-run name the workflow reported; strict; enforce_admins on) — W-01 stage-2.
+- **Session-close evidence (the actual artifacts):** PR #4 merged as `74ba888` ("Merge PR #4: session 12 — gap closure + walls stage-2...") under the bound check; the post-merge push to `main` re-ran the workflow — run `38510120398`: `verify / push / success`. One CI defect was found and fixed en route: the workflow's first YAML had an unquoted colon in a step name (parse error → zero jobs → red with no diagnostics); fixed, re-run green — CI debugging is now part of the repo's operational memory.
 
 ## 6. Independent verification (GLM sub-agent, fresh context — INT-070)
 

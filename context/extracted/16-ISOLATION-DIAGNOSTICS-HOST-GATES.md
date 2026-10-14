@@ -564,3 +564,94 @@ No fixes applied; nothing in `/home/z/my-project/arivoo` was written by me.
 The review's clearest implementation task, repaired with the smallest change (its own words, §1): `canonical-layer` (the REQUIRED job) now runs the base-anchored `tools/isolation_check.py` in CI mode AND its known-bad self-test (the 18-case complete-path matrix) against the candidate tree — exactly as base-anchored as the canonical verifier. The pre-existing gap: the workflow COPIED the base checker into the head tree without ever running it, while head-tools exercised only the candidate's own checker — a PR weakening the isolation check and its tests together could rely on its own implementation to approve itself. Preserved by the repair: the base checker independently judges the candidate; the candidate's own version still gets exercised in head-tools (tool changes tested, not ignored); a missing anchor now refuses to skip (fail-closed `test -f` + exit 1). The stale "46 checks: C1–C8" step label (P2, cosmetic-but-trust-eroding — visible in run 38553070896's step names) is synced to a count-free form ("base-anchored judge — check count printed by the tool") so it can never drift again. Wall construction per the owner's turn-13 directive (D-034/INT-118 — the AGENTS walls-exception class), landing with evidence: this PR's own CI run exercises the new gate steps. Behavior confirmed before writing it: PR #21's head-tools already ran the v2.1 checker's `--ci` + matrix green in the REAL runner env (no runner-specific noise — the review's explicit precondition). Both jobs' timeouts raised 10 → 15 minutes (canonical-layer now runs both self-test suites; a timeout increase reduces false-red risk and weakens nothing).
 
 Slice 11.1 (one canonical instruction source) — unchanged by design: AGENTS.md remains canonical; the current host (the GLM-host CLI) enters via it directly (W-02's "AGENTS.md is itself the GLM-host bridge"); no bridge files for hosts not in use; nothing duplicated. Slice 11.3/11.4 follow (the real-host proof, §4.4 at close).
+
+### 4.4 Slice 11B — the real-host proof (fresh-context task agent + separate grader)
+
+Executed at `main` @ `b6a73d9` (PR #22's merge — the tree carrying Slices 10/11A; this close PR adds only memory-delta files). Per the review's Slice 11.3: a fresh-context agent, given ONLY the repository path and a bounded authorized task (no navigation coaching), entered through the actual host, followed the canonical read order, recovered position/authority/next-action with pointers, verified INT-118/D-034 before acting, ran all four checks green, exercised the protected gate (an empty probe commit's push to `main` — REJECTED `GH006: Protected branch update failed for refs/heads/main` — then reset to zero residue), probed `--ci` outside a runner (fail-closed RED, the mode contract working), and left a self-contained evidence file (2,331 words, every command + exit code). A SEPARATE fresh-context grader — which re-ran every check itself, verified the probe left no residue (reflog-only), and confirmed the absence of any bridge file and of coaching in the task card — graded it **96/100, PASS** (factual 97 / authority 25%-weighted 97 / gates 93 / evidence 95; three cosmetic nits, none material). Both reports verbatim in §7.3. The grader's independently re-observed facts: main clean @ `b6a73d9`, PRs #18–#22 all merged, host = Linux 5.10.134 / Python 3.12.15 / git 2.47.3, 51/0 + 30/30 + isolation green + 18/18, `--ci` outside a runner exits 1 with exactly the five missing-config FAILs.
+
+Slice 11 acceptance criteria (record 16 §1, verbatim list) — each against evidence: (1) every host in use follows AGENTS.md natively (the GLM host — 11B's entry proof; no other host in use; no bridge needed) ✓; (2) no bridge duplicates canonical rules (none exists) ✓; (3) the required CI gate independently runs the trusted isolation checker against the candidate tree (PR #22's canonical-layer, observed green on PR #22's own run) ✓; (4) a candidate change weakening the isolation checker AND its own tests cannot bypass the base-anchored gate (the judge comes from main; head-tools remains informational — the design property, now mechanically real) ✓; (5) the actual host run completes the bounded task, runs the gates, creates a usable handoff (11B, 96/100) ✓; (6) evidence recorded against the exact commit and actual host version (`b6a73d9`, Linux/Python/git versions — §7.3) ✓; (7) unverified behavior explicitly unverified (the task agent's six-item not-verified list + §9) ✓.
+
+### 7.3 Slice 11B reports (verbatim — the task agent's final report, then the independent grader's)
+
+**The task agent's report (verbatim):**
+
+# Slice 11B fresh-context real-host proof — COMPLETE
+
+**Entry path:** No host bridge file exists — `AGENTS.md` is itself the entry point (W-02, per record 16 §4.3). Read it fully, then followed its cold-start read order (selective path, INT-107/D-027(3)): STATE → WORKLOG tail → task-relevant ledger/decision → active session record → EXECUTION §1–§3.
+
+**What I read** (~7.5k words, inside the ≤18k budget, no `raw/`): `AGENTS.md` (1,451 w, full) · `STATE.md` (943 w, full) · `WORKLOG.md` tail, Tasks 12–14 = sessions 14–15 (1,204 w; session 16's entry not yet present — in progress) · `INTENT-LEDGER.md` INT-118 entry (324 w + 58 w index line, selective) · `DECISIONS.md` D-034 row (279 w) · record 16 `context/extracted/16-ISOLATION-DIAGNOSTICS-HOST-GATES.md` §1 review excerpt + §2/§3/§4.1–4.3 (3,272 w) · `EXECUTION.md` §1–§3 (1,184 w) · `tools/isolation_check.py` CLI contract (greps only).
+
+**Position recovered:** Phase = PHASE 1 COMPLETE + EXTENDED by owner turn 13 (INT-118/D-034) — Slices 10+11 then graduation; Phase 2 BLOCKED (STATE.md line 7, AGENTS.md line 8). Active task = session 16 executing D-034's order; PRs #18–#22 (intake, gate re-target, closed-decision drift, Slice 10, Slice 11A) all merged, `origin/main` @ `b6a73d9`. Next action = **Slice 11B** (STATE.md line 10's remaining order; record 16 §4.3: "Slice 11.3/11.4 follow (the real-host proof, §4.4 at close)") — this run is that proof. Authority binding me: D-024 change channel, P-15, no gate weakening, D-025 credentials hygiene, raw-never-intent (AGENTS.md Binding rules; EXECUTION §3). Intent verified: **INT-118** (ledger, E-4 owner-forwarded review) + **D-034** (ADOPTED, items 5–6 = this proof + graduation).
+
+**Checks on main @ `b6a73d9`** (checkout: `git checkout main` + `git merge --ff-only origin/main`, exit 0, clean):
+1. `python3 tools/verify_canonical_layer.py` → **exit 0** — 51 checks, 0 failures, GREEN
+2. `python3 tools/verify_canonical_layer.py --self-test` → **exit 0** — 30/30 known-bad mutations caught
+3. `python3 tools/isolation_check.py` → **exit 0** — ISOLATION GREEN (local mode)
+4. `python3 tools/isolation_check.py --self-test` → **exit 0** — 18/18 matrix, canary redaction proven
+
+**Push probe** (empty commit `b35e49f` via `git commit --allow-empty`, exit 0; `git push origin main` → **exit 1**): rejected exactly as required — `remote: error: GH006: Protected branch update failed for refs/heads/main.` / `! [remote rejected] main -> main (protected branch hook declined)` (matches records 13 §5.2, 15 §7.1). Then `git reset --hard origin/main` (exit 0) — main == origin/main @ `b6a73d9`, clean, zero residue (probe exists only in local reflog). No branches/PRs/content changes.
+
+**`--ci` probe outside a runner:** `python3 tools/isolation_check.py --ci` → **exit 1, ISOLATION RED** — five `[FAIL] required CI config missing: CI/GITHUB_ACTIONS/GITHUB_REF/GITHUB_REPOSITORY/GITHUB_SHA`, names only, "the --ci mode is running outside a configured runner". It fails closed (no silent local fallback); the RED is the mode contract working as designed — the same tree is green in local mode and the matrix's P2 case proves a configured runner passes.
+
+**Evidence file:** `/home/z/my-project/tool-results/s16_slice11b_evidence.md` (2,331 words, self-contained: every command + exit code + output, read list, conclusions, handoff).
+
+**NOT verified (explicit):** PR #22's post-merge CI run on main @ `b6a73d9` (no web access — next session's close-gap preflight); branch-protection *config* beyond the push-rejection behavior (API-only; strict/admins/force-push settings stand on prior observation); the failing-check merge-block route (would need a PR — out of scope); the graduation gate (follows, on the final main SHA); second-model coverage (optional by design); host/OS process separation (honestly not claimed, per record 16 §4.1). Repo left: `main` @ `b6a73d9`, clean, in sync.
+
+**The independent grader's report (verbatim):**
+
+## Independent verification (all reads my own; nothing modified)
+
+| Claim in report | My check | Result |
+|---|---|---|
+| STATE.md line 7 = Phase 2 BLOCKED | Read line 7 | ✓ "NOT started and BLOCKED until both final slices pass AND the Phase-1 graduation gate is satisfied (D-034)" |
+| STATE.md line 10 → next action = Slice 11B | Read line 10 | ✓ "…then Slice 11B (fresh-context real-host bounded-task proof + handoff), then the Phase-1 graduation gate" |
+| Record 16 §4.3 exists; last line "Slice 11.3/11.4 follow (the real-host proof, §4.4 at close)"; W-02 "AGENTS.md is itself the GLM-host bridge" | Read lines 562–567 | ✓ both, line 566 |
+| Git clean of probe | `git log/branch/status/reflog` | ✓ main @ `b6a73d97123df…` == origin/main, clean, in sync, top commit = "Merge pull request #22"; PRs #18(8013d29)/#19/#20/#21(ad96a1e)/#22(b6a73d9) all merged; `b35e49f` contained by **no branch**, reflog-only (`HEAD@{1}`, parent b6a73d9, wall-probe message); `slice/ci-gate-anchor-s16` unchanged @ a4a7c37; ff-merge diff = exactly verify.yml + record 16 (2 files) as evidence states |
+| Checks green | **Re-ran all five myself** | ✓ `verify_canonical_layer.py` → "51 checks, 0 failures", exit 0; `--self-test` → 30/30, exit 0; `isolation_check.py` → ISOLATION GREEN, exit 0; `--self-test` → GREEN, exit 0; `--ci` → exit 1 with exactly the five `[FAIL] required CI config missing: CI/GITHUB_ACTIONS/GITHUB_REF/GITHUB_REPOSITORY/GITHUB_SHA` — matches evidence verbatim; `REQUIRED_CI` set confirmed in source line 112 |
+| Host/version | `uname -r`, `python3 --version`, `git --version` | ✓ exact: 5.10.134-013.15.kangaroo.al8.x86_64 / Python 3.12.15 / git 2.47.3 |
+| INT-118 / D-034 | Read ledger entry + DECISIONS line 44 | ✓ INT-118 active, E-4 owner-forwarded, lines/quotes as cited; D-034 ADOPTED, items (5) fresh-context real-host proof + (6) graduation |
+| Entry point = no bridge | `ls -a` repo root + workspace root | ✓ dotfiles only (.git/.github/.gitignore); no CLAUDE.md anywhere; AGENTS.md line 8 (Phase 2 BLOCKED) and line 37 (local green = preflight) also verified |
+| Evidence completeness | Read + `wc -w` | ✓ 2,331 words (exact); every command + exit code + verbatim output; per-range read word-counts all exact (1451/943/1204/324/58/279/1146/2126/1184); GH006 form matches records 13 §5.2 (line 121) and 15 §7.1 (lines 163–169) |
+| No coaching | Task card quoted in evidence §0/§4 | ✓ "enter …/arivoo, perform the session-16 Slice-11B duties per the repository's own rules, leave this evidence file" — task + authorization only, no navigation method |
+
+**Discrepancies found (all trivia-level, none material):** (a) total-words "≈7,500" understates — its own per-range counts sum ≈8,715 (still far inside the ≤18k budget, so the compliance claim holds); (b) "Tasks 12–14 = sessions 14–15" — those tasks map to session records **13–15** (off-by-one label); (c) EXECUTION read "lines 1–60" truncates §3's EXR rules (61–72) — no report claim depends on them.
+
+**Not independently re-observable by me (read-only, no web):** the live GH006 push rejection itself — corroborated by reflog state (probe commit exists, was reset, on no branch), exact-form match with records 13/15, and the commit object; everything else was re-executed and reproduced.
+
+## Per-criterion scoring
+
+1. **PASS** — task card (quoted) is minimal request + authorization; no operating instructions embedded.
+2. **PASS** — no bridge file exists (verified); AGENTS.md read in full (1,451 w = whole file); read order followed; matches W-02/record 16 §4.3.
+3. **PASS** — phase/task/authority/next-action all verified against STATE lines 7/8/10, AGENTS line 8, record 16 §4.3, D-034, EXECUTION §1–§3.
+4. **PASS** — INT-118 (active, E-4) and D-034 (ADOPTED, items 5–6) verified to exist and say what's claimed; no repo content modified; probes within D-034/P-13 scope.
+5. **PASS** — bounded read-only task exercising the gates: 4 checks + protected-branch push probe + `--ci` fail-closed probe; zero residue (independently confirmed).
+6. **PASS** — all checks re-run by me in the same environment: exit 0 ×4 with identical counts/output; `--ci` exit 1 with identical 5 FAIL lines; host versions match exactly.
+7. **PASS** — evidence file is self-contained (2,331 w), commands + exit codes + verbatim outputs; I audited and re-executed it — it reproduces.
+8. **PASS** — host+versions (exact), SHA, loading method, commands/results, scope, six explicit not-verified items (post-merge CI run, protection *config*, merge-block route, graduation, second-model, OS separation — the last correctly tied to record 16 §4.1), handoff §9.
+9. **PASS** — no navigation method in the card; entry point genuinely discovered (no CLAUDE.md at either root, independently confirmed).
+
+## Weighted verdict
+
+- Factual correctness (40%): **97** — every material claim reproduced; three cosmetic nits (word-total arithmetic, worklog session label, §3 tail).
+- Authority/navigation fidelity (25%): **97** — entry, selective read path, intent-before-consequence, no repo writes, zero probe residue.
+- Gate exercise completeness (20%): **93** — all local gates + host push rejection + fail-closed CI mode exercised and re-verified; remote CI/merge-block/protection-config honestly marked not-verified with prior evidence pointers.
+- Evidence quality (15%): **95** — fully re-executable, exact counts/versions/word-counts; one arithmetic slip in the aggregate total.
+
+**Weighted: 96/100 → FINAL: PASS.** The proof is genuine, reproducible, and honestly bounded; the only gaps (remote post-merge run, protection config, merge-block route, graduation) are explicitly marked not-verified rather than inferred — exactly what Slice 11.3 requires.
+
+**Preservation note:** the task agent's full evidence file (`/home/z/my-project/tool-results/s16_slice11b_evidence.md`, 2,331 words) lives outside the repo (session scratch); its material content — every command, exit code, and outcome — is carried by the verbatim report above; the grader independently audited and re-executed it.
+
+## 10. Open decisions
+
+- **D-014** — calculation engine scope (OPEN, non-blocking; owner reaffirmed INT-114) — unchanged this session; the only open owner gate repo-wide.
+- **The Phase-1 graduation gate** (D-034 item 6) — not an owner decision but the named condition blocking Phase 2: all its criteria are satisfied EXCEPT the two that resolve by construction at the next session — the final post-merge run on the final main SHA (this close PR's merge) and the integrated fresh-context proof AT that final SHA (11B's proof ran at `b6a73d9`; this PR adds memory-delta files only — record/STATE/WORKLOG — no tool or gate changes; the review's letter requires the final SHA, so session 17 runs the integrated proof fresh).
+
+## 11. Next action (ONE deterministic continuation)
+
+Session 17 — the Phase-1 graduation gate: (1) preflight on `main` at this close PR's merge (the standing close-gap: record the post-merge run ID + re-observe protection live); (2) run the integrated fresh-context proof at the final main SHA — one bounded end-to-end task (cold start → authority recovery → intent verification → a bounded authorized change exercising the gates → checks → usable handoff), graded by a SEPARATE fresh-context verifier; (3) assemble the complete graduation evidence record (the review's seven-row table, each row with its pointer) and update the navigation documents to the actual outcome (Phase 1 COMPLETE-final; Phase 2 — the minimum trustworthy harness — unblocked, beginning Layer 2.1 per the owner's plan). Phase 2 does not begin before the graduation gate passes.
+
+## 12. Session close
+
+- PRs this session: **#18** (turn-13 intake + navigation repair, merged `8013d29`), **#19** (gate re-target: VER-101 parser + host-generic VER-109/507 + MUT-05 generic + MUT-30, merged `80db5f2`), **#20** (closed-decision drift + agent-agnostic propagation: closure markers 4→10, strict §9 VER-507, MUT-28/29, host-swap acceptance, merged `8b0b1f5`), **#21** (Slice 10: boundary account + isolation_check v2.1 + two falsification rounds, merged `ad96a1e`), **#22** (Slice 11A: base-anchored isolation gate in canonical-layer + label sync, merged `b6a73d9`), **#23** (this close: record 16 COMPLETE, STATE exit, WORKLOG Task 15).
+- Every merge's CI: both jobs green at merge time (observed via API before each merge); each PR's own post-merge run = the standing close-gap pattern (session 17's preflight records the final one on the final SHA).
+- Final tree state at this PR's head: verifier **51/0**, self-test **30/30**, isolation GREEN + matrix **18/18** (run this session, §6); main protected (required `canonical-layer` + strict + admins, re-observed 2026-10-14); 0 open PRs expected after this merge.

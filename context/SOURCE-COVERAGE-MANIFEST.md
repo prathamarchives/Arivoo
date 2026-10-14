@@ -75,7 +75,7 @@ upstream of engineering transcripts.txt    29cf75295d2c81169435489642c6788aab434
 
 - **VER-801 — manifest structure:** this file exists, carries all seven raw-file rows with classification, lines, reviewed range, INT coverage, SHA-256, and the required sections (§2 provenance, §E exceptions, §X exclusions).
 - **VER-802 — raw immutability:** each raw file's current SHA-256 equals the anchored hash above. Any edit to `context/raw/` — even a whitespace change — fails the layer (AUT-02 at C3, was C6-prose).
-- **VER-803 — quote fidelity:** every ledger entry that cites a raw source must have its quote fragments found in the cited file(s), after E-1/E-5/E-6 normalizations; entries with no raw citation must name a durable home (session record / reasoning log / chat-turn label per §2/E-2). A missing Source line fails (this caught the five real defects repaired 2026-10-14, §6).
+- **VER-803 — quote fidelity:** every ledger entry that cites a raw source must have its quote fragments found in the cited file(s), after E-1/E-5/E-6 normalizations; entries with no raw citation must name a durable home (session record / reasoning log / chat-turn label per §2/E-2). A missing Source line fails (this caught the seven real defects repaired 2026-10-14, §6).
 - **VER-804 — STATE freshness:** `/STATE.md`'s last-completed session record must be the highest-numbered record in `context/extracted/` (staleness is caught, not remembered).
 
 ## 6. Provenance repairs executed under this control (2026-10-14, session 12)
@@ -85,10 +85,12 @@ upstream of engineering transcripts.txt    29cf75295d2c81169435489642c6788aab434
 | INT-035 Source line | missing entirely | `context/raw/3.txt:5` (located by search; quote matches) |
 | INT-036 Source line | missing entirely | `context/raw/3.txt:13` (owner-presented; E-4) |
 | INT-037 Source line | missing entirely | `context/raw/3.txt:15` (owner-presented; E-4) |
+| INT-038 Source line | missing entirely (only a parenthetical note) | `context/raw/3.txt:223-232` (narrative region; all five quotes fragment-verified) |
 | INT-046 Source line | missing entirely | owner turn 4, chat — §E-2 (no earlier durable record; session-record rule now closes the class) |
 | INT-068 Source line | missing entirely | owner turn 5, chat — §E-2 (same closure) |
+| INT-045 quote fidelity | terminal period NOT in raw (the quote presented a mid-sentence truncation as a complete sentence: raw continues "...and we can do this in this stage") | period replaced with an elision marker `...` — verbatim-fragment-exact, truncation signaled honestly |
 
-Quote fidelity at repair time: 54/58 raw-citable quotes matched on first probe; the 4 deviations are exactly classes E-1/E-5 — no fabricated quote, no silent mismatch. After repairs: every ledger entry carries a Source line; every raw-citable quote validates mechanically.
+Quote fidelity at repair time: 54/58 raw-citable quotes matched on first probe; the 4 deviations decomposed into classes E-1/E-5 plus two REAL defects (INT-045's fabricated period; and the missing-Source class below) — no fabricated quote, no silent mismatch. After repairs: every ledger entry carries a Source line; every raw-citable quote validates mechanically (VER-803 proves it on every run; its first run is what FOUND these defects — seven entries had drifted undetected through 13 prior verifier checks and 3 stress tests).
 
 ## 7. Known limits (honest)
 

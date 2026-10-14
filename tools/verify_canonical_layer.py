@@ -26,6 +26,10 @@ Conditions checked:
   C6  this verifier proves it on the real files (this run IS the proof)
   C7  the garden: STATE.md live and pointing at real targets, FAIL-001 recorded with a
       known-bad, review artifacts in context/reviews/ (D-024)
+  C8  the coverage control (F-09/D-025): source-coverage manifest complete; raw corpus
+      SHA-256-anchored (AUT-02 at C3); every ledger quote mechanically validated against
+      its cited raw source (fabrication and transcription drift are caught); STATE.md's
+      record pointer is fresh (never stale)
 
 Ref: /EXECUTION.md §7. When the harness exists (Phase 2), these checks move up the
 ladder into `make audit` (LAD-01).
@@ -457,8 +461,106 @@ class Layer:
             "review artifacts belong in context/reviews/ with the canonical pointer in EXECUTION.md §1",
         )
 
+    # ------------------------------------------------------------ C8: coverage control (manifest, fidelity, immutability, freshness)
+    def c8(self) -> None:
+        """F-09/D-025: the source-coverage control. Quote fidelity, raw immutability,
+        manifest structure, and STATE freshness are CHECKED properties, not prose."""
+        manifest = self.read("context/SOURCE-COVERAGE-MANIFEST.md")
+        self.check(
+            "VER-801",
+            bool(manifest)
+            and "SOURCE-COVERAGE-MANIFEST" in manifest
+            and all(f"`{name}`" in manifest for name in EXPECTED_RAW)
+            and "## 2. Non-raw owner-turn provenance" in manifest
+            and "## 3. Exception register" in manifest
+            and "## 4. Exclusion register" in manifest
+            and len(re.findall(r"[0-9a-f]{64}", manifest)) >= len(EXPECTED_RAW),
+            f"the source-coverage manifest exists with all {len(EXPECTED_RAW)} raw files classified, INT-mapped, SHA-256-anchored, with provenance/exception/exclusion registers (F-09, D-025)",
+            "restore context/SOURCE-COVERAGE-MANIFEST.md per D-025 — every raw file classified and anchored; exceptions and exclusions enumerated, never silent",
+        )
+
+        # VER-802: raw immutability (AUT-02 at C3 — was prose-only)
+        import hashlib
+
+        mismatches = []
+        for name in EXPECTED_RAW:
+            p = self.repo / "context" / "raw" / name
+            if not p.is_file():
+                mismatches.append(f"{name} (missing)")
+                continue
+            digest = hashlib.sha256(p.read_bytes()).hexdigest()
+            if digest not in manifest:
+                mismatches.append(name)
+        self.check(
+            "VER-802",
+            not mismatches,
+            f"every raw file's SHA-256 matches the manifest anchor — context/raw/ is mechanically immutable ({len(EXPECTED_RAW)} files)",
+            f"context/raw/ was edited (mismatched: {', '.join(mismatches)}) — AUT-02 forbids raw edits; restore the file from git history and record intent through the ledger instead",
+        )
+
+        # VER-803: quote fidelity — every raw-cited ledger quote validates against its source
+        ledger = self.read("INTENT-LEDGER.md")
+        entries = [e for e in re.split(r"(?=^\*\*INT-\d+)", ledger, flags=re.M) if re.match(r"^\*\*INT-\d+", e)]
+        fidelity_failures: list[str] = []
+        for entry in entries:
+            # an entry ends at the first section boundary (--- or ## header) — audit notes
+            # and section commentary after the boundary are NOT part of the entry
+            entry = re.split(r"^---\s*$|^## ", entry, maxsplit=1, flags=re.M)[0]
+            iid = re.match(r"^\*\*(INT-\d+)", entry).group(1)
+            src_m = re.search(r"^Source: (.+)$", entry, flags=re.M)
+            if not src_m:
+                fidelity_failures.append(f"{iid}: no Source line (the INT-035 defect class)")
+                continue
+            source_text = src_m.group(1)
+            # raw citations = backtick spans naming context/raw files (txt or md) with line refs
+            raw_files: list[str] = []
+            for span in re.findall(r"`([^`]+)`", entry):
+                for m in re.finditer(r"(?:context/raw/)?([\w .\-]+\.(?:txt|md)):\d", span):
+                    fname = m.group(1)
+                    if (self.repo / "context" / "raw" / fname).is_file() and fname in EXPECTED_RAW:
+                        raw_files.append(fname)
+            raw_files = sorted(set(raw_files))
+            # quotes: block-quote lines — extract each "..." span (a line may carry inline
+            # citations between spans, e.g. INT-081: `> "quote" (`0.txt:1323`) · "quote2"`)
+            quotes: list[str] = []
+            for ln in entry.splitlines():
+                if ln.startswith("> ") or ln.startswith(">"):
+                    quotes.extend(re.findall(r'"([^"]+)"', ln))
+            if raw_files:
+                corpus = "\n".join((self.repo / "context" / "raw" / f).read_text(encoding="utf-8", errors="replace") for f in raw_files)
+                norm_corpus = _normalize_for_fidelity(corpus)
+                for q in quotes:
+                    for frag in _fragments(q):
+                        if len(frag) >= 20 and frag not in norm_corpus:
+                            fidelity_failures.append(f"{iid}: quote fragment not found in cited raw ({', '.join(raw_files)})")
+                            break
+            else:
+                # non-raw source: must name a durable home (session record / chat turn / extracted path)
+                if not re.search(r"session record|owner turn|chat|06-REASONING-LOG|context/extracted/", source_text):
+                    fidelity_failures.append(f"{iid}: Source names no raw file and no durable home (E-2 discipline)")
+        self.check(
+            "VER-803",
+            not fidelity_failures,
+            f"every ledger entry carries a Source line; every raw-cited quote validates mechanically against its source ({len(entries)} entries checked; exceptions E-1/E-5/E-6 normalized per the manifest)",
+            f"quote-fidelity failures: {'; '.join(fidelity_failures[:6])} — repair per SOURCE-COVERAGE-MANIFEST §3/§6 (fabrication and transcription drift are caught here, never trusted)",
+        )
+
+        # VER-804: STATE freshness — the pointer must reference the highest-numbered session record
+        state = self.read("STATE.md")
+        records = sorted(
+            (int(m.group(1)) for m in (re.match(r"^(\d+)-", p.name) for p in (self.repo / "context" / "extracted").glob("*.md") if m)),
+        )
+        highest = records[-1] if records else -1
+        state_refs = [int(m.group(1)) for m in re.finditer(r"context/extracted/(\d+)-", state)]
+        self.check(
+            "VER-804",
+            bool(state_refs) and max(state_refs) == highest,
+            f"STATE.md's session-record pointer ({max(state_refs) if state_refs else 'none'}) equals the highest-numbered record on disk ({highest}) — staleness is caught, not remembered",
+            "update /STATE.md at session exit to point at the newest numbered session record (AGENTS.md session-exit rule; a stale STATE.md is a drift finding)",
+        )
+
     def run(self) -> list[tuple[str, bool, str]]:
-        for fn in (self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7):
+        for fn in (self.c1, self.c2, self.c3, self.c4, self.c5, self.c6, self.c7, self.c8):
             fn()
         return self.results
 
@@ -467,6 +569,51 @@ class Layer:
 # Each mutation breaks ONE protected property on a temp copy; the named check MUST fail.
 
 MUTATIONS: list[tuple[str, str, callable, str]] = [
+    (
+        "MUT-14",
+        "tamper a raw corpus file (append whitespace to 0.txt) — AUT-02 was prose-only before the manifest",
+        lambda r: _edit(r, "context/raw/0.txt", "\\n", "\\n "),
+        "VER-802",
+    ),
+    (
+        "MUT-15",
+        "fabricate a ledger quote (mutate INT-083's words into text that is not in raw)",
+        lambda r: _edit(
+            r,
+            "INTENT-LEDGER.md",
+            "1 - smallest daily loop. i read books, i import articles, posts, writings, research paper, pdfs, md's and any thing readable.",
+            "1 - biggest quarterly waterfall. i sail boats, i export articles, posts, writings, research paper, pdfs, md's and any thing readable.",
+        ),
+        "VER-803",
+    ),
+    (
+        "MUT-16",
+        "delete the source-coverage manifest — the coverage control disappears",
+        lambda r: _rm(r, "context/SOURCE-COVERAGE-MANIFEST.md"),
+        "VER-801",
+    ),
+    (
+        "MUT-17",
+        "stale STATE pointer — point Last-completed at an old record while a newer one exists",
+        lambda r: _edit(
+            r,
+            "STATE.md",
+            "context/extracted/12-GAP-CLOSURE-AND-WALLS-STAGE-2.md",
+            "context/extracted/11-REVIEW-MERGE-AND-STATE-SLICE.md",
+        ),
+        "VER-804",
+    ),
+    (
+        "MUT-18",
+        "strip a restored Source line from INT-035 — the no-provenance defect class returns",
+        lambda r: _edit(
+            r,
+            "INTENT-LEDGER.md",
+            "Source: `context/raw/3.txt:5` (Source line restored 2026-10-14 — was missing; located by search, quote matches verbatim; see `context/SOURCE-COVERAGE-MANIFEST.md` §6). Grounds: P-15, OPERATING-MODEL §3 (the commit protocol), FAIL-002.",
+            "",
+        ),
+        "VER-803",
+    ),
     (
         "MUT-01",
         "remove the newest ledger entry (INT-091) — the F-01 class: entries vanish past a frozen bound",
@@ -567,6 +714,27 @@ def _rm(repo: Path, rel: str) -> None:
     (repo / rel).unlink()
 
 
+def _normalize_for_fidelity(text: str) -> str:
+    """VER-803 normalization (manifest exceptions E-5/E-6): whitespace collapsed,
+    quote characters (straight and curly, single and double) removed SYMMETRICALLY
+    from both the corpus and the fragment, em/en dashes unified. Symmetric removal
+    keeps fidelity: a fabricated quote still cannot match text that does not exist."""
+    text = text.replace("\u201c", '"').replace("\u201d", '"').replace("\u2018", "'").replace("\u2019", "'")
+    text = text.replace("\u2014", "-").replace("\u2013", "-").replace("\u2026", "...")
+    text = text.replace('"', "").replace("'", "")
+    return re.sub(r"\s+", " ", text)
+
+
+def _fragments(quote_line: str) -> list[str]:
+    """Split a ledger quote into validation fragments: strip the outer quote marks,
+    remove bracketed editorial glosses (E-6: '[answering: ...]'), split on ellipsis
+    (E-1: elided excerpts), normalize each fragment for fidelity matching."""
+    q = quote_line.strip().strip('"').strip()
+    q = re.sub(r"\[[^\]]*\]", " ", q)  # E-6: editorial brackets are not owner text
+    parts = re.split(r"\.\.\.|\u2026", q)  # E-1: elisions produce fragments
+    return [_normalize_for_fidelity(p) for p in parts if p.strip()]
+
+
 def self_test(repo: Path) -> int:
     caught, missed = [], []
     print(f"known-bad self-test — {len(MUTATIONS)} mutations, each must FAIL its named check\n")
@@ -623,6 +791,7 @@ def main() -> int:
     print("  C3 D-004/D-015/P-16 reconciled  C4 archive historical, raw mixed, reviews re-homed")
     print("  C5 one home; consent scoped; GLM governing; D-024  C6 proven by this run")
     print("  C7 garden: STATE live, FAIL-001 + known-bad, review artifacts in context/reviews/")
+    print("  C8 coverage: manifest + raw immutability + quote fidelity + STATE freshness (F-09/D-025)")
     print("Run with --self-test to prove the guards catch the failure classes (F-01).")
     return 0
 

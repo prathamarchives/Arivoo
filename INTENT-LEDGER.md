@@ -123,7 +123,8 @@ Source: `context/raw/3.txt:15` (Source line restored 2026-10-14 — was missing;
 > "Suppose I highlight a sentence and then I have to take a note on that certain page: what I think about it, what I learned with it, and all. Just like how you study and take notes in your notebooks, just like that. Bookmarks, a raw pen, pencils, and that shit, so I can take some markings and make some art on the books and have this experience."
 > "If there's a certain passage that clicks something in my brain and makes me remember that I read a few moments ago, a week ago, or whatever, I can reference that... reference the article to the book, or the book to the article."
 > "It's not just a set of text notes, but diagrams."
-(Full narrative verbatim in NORTH-STAR.md and context/raw/3.txt:223-232.)
+
+Source: `context/raw/3.txt:223-232` (Source line restored 2026-10-14 — was missing; the full narrative region, quotes fragment-verified per E-1; see `context/SOURCE-COVERAGE-MANIFEST.md` §6). Grounds: NORTH-STAR Mission (same narrative), D-013, D-023.
 
 **INT-039 — NO DEFERRAL OF ARCHITECTURE — active**
 > "I don't want it to be like, 'Okay let's ship version 1 and version 2 can come later (like semantic search, vector search, those cases).' No I don't want to compromise that. I really want to have this solid updated backend that can evolve into future versions, like an agent-native version or a VR 3D hardware version. Keep that vision in mind."
@@ -156,9 +157,9 @@ Source: `context/raw/3.txt:233`. Grounds: C2, D-019.
 Source: `context/raw/3.txt:230`. Grounds: GLOSSARY Note.
 
 **INT-045 — CONCEPTS GROW AND LINK — active**
-> "About concepts, they should be growing... Imagine I'm reading an article about personal intelligence: I just highlight and add it to concepts. It's just a concept and it links to other books."
+> "About concepts, they should be growing... Imagine I'm reading an article about personal intelligence: I just highlight and add it to concepts. It's just a concept and it links to other books..."
 
-Source: `context/raw/3.txt:239`. Grounds: P-10, layer 5.
+Source: `context/raw/3.txt:239`. Grounds: P-10, layer 5. (Terminal period corrected to an elision marker 2026-10-14: the raw continues "...and we can do this in this stage" — the quote is a mid-sentence truncation and must not present a period the owner never wrote there; repair recorded in the manifest §6.)
 
 **INT-046 — DEPTH OF THE FIRST LAYER — active (2026-10-13, owner turn 4; executed)**
 > "go through the context again and tighten this first layer. like i can't see the engineering principles, and the repo laws, how it grows with you and that whole engineering principles for agentic repo from transcript and its upstreams so first of all do that. design multiple operating model not just this phase but how this repo keeps growing... how context gets updated repo memory gets updated and nothing breaks. verifications, self-healing. first again go through the context raw multiple pass extract understand and update in depth rightnow it feels like summaries but we need depth and specifcations on things and stuff not vauge or breif.."

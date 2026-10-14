@@ -10,6 +10,7 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-069..INT-076** — owner turn 6 (session record, 2026-10-13 stress-test session): custom tags, GLM verification host, zero-context pickup, session documentation, garden law, drift-gate testing, extraction directive, review directive.
 - **INT-077..INT-090** — backfill round 2 from the full corpus re-extraction (2026-10-13 stress-test session; GLM subagent extraction + verbatim grep verification): the full-day-of-reasoning intents — division of labor, layer-1 experience, smallest daily loop, reconciliation method, docs-first, and more.
 - **INT-091** — owner turn 7 (session record, 2026-10-13 review-merge session): the review-merge directive.
+- **INT-092** — owner turn 8 (session record, 2026-10-14 gap-closure + walls session): close the gaps, find the drift, build the walls (credential redacted; Phase-1 walls go for W-03/W-04/W-01-stage-2).
 
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
@@ -104,11 +105,17 @@ Source: `context/raw/2.txt:65`. Grounds: the owner playbook (kept OUTSIDE the ag
 **INT-035 — CONTINUOUS COMMIT — active**
 > "In this session every time you reason and something changes, you add new information, and something changes, you update your memory and repo. Log that in and you commit it so it really pushes on the repo."
 
+Source: `context/raw/3.txt:5` (Source line restored 2026-10-14 — was missing; located by search, quote matches verbatim; see `context/SOURCE-COVERAGE-MANIFEST.md` §6). Grounds: P-15, OPERATING-MODEL §3 (the commit protocol), FAIL-002.
+
 **INT-036 — GOVERNING LOOP — active (owner-presented review)**
 > "Build a small, real slice of Arivo. Verify it independently. Refine it until it matches the intended behavior. Turn the lessons into constraints. Repeat."
 
+Source: `context/raw/3.txt:13` (Source line restored 2026-10-14 — was missing; owner-presented material, E-4 in the manifest). Grounds: OPERATING-MODEL preamble, P-17.
+
 **INT-037 — HARNESS SERVES THE PRODUCT — active (owner-presented review)**
 > "The harness and repository memory make this loop safer. They must not become reasons to postpone the product."
+
+Source: `context/raw/3.txt:15` (Source line restored 2026-10-14 — was missing; owner-presented material, E-4 in the manifest). Grounds: P-17, D-016, LAWS proactive set.
 
 **INT-038 — THE EXPERIENCE — active**
 > "I have lists, a library, and lists of what I'm currently reading."
@@ -116,7 +123,8 @@ Source: `context/raw/2.txt:65`. Grounds: the owner playbook (kept OUTSIDE the ag
 > "Suppose I highlight a sentence and then I have to take a note on that certain page: what I think about it, what I learned with it, and all. Just like how you study and take notes in your notebooks, just like that. Bookmarks, a raw pen, pencils, and that shit, so I can take some markings and make some art on the books and have this experience."
 > "If there's a certain passage that clicks something in my brain and makes me remember that I read a few moments ago, a week ago, or whatever, I can reference that... reference the article to the book, or the book to the article."
 > "It's not just a set of text notes, but diagrams."
-(Full narrative verbatim in NORTH-STAR.md and context/raw/3.txt:223-232.)
+
+Source: `context/raw/3.txt:223-232` (Source line restored 2026-10-14 — was missing; the full narrative region, quotes fragment-verified per E-1; see `context/SOURCE-COVERAGE-MANIFEST.md` §6). Grounds: NORTH-STAR Mission (same narrative), D-013, D-023.
 
 **INT-039 — NO DEFERRAL OF ARCHITECTURE — active**
 > "I don't want it to be like, 'Okay let's ship version 1 and version 2 can come later (like semantic search, vector search, those cases).' No I don't want to compromise that. I really want to have this solid updated backend that can evolve into future versions, like an agent-native version or a VR 3D hardware version. Keep that vision in mind."
@@ -149,12 +157,14 @@ Source: `context/raw/3.txt:233`. Grounds: C2, D-019.
 Source: `context/raw/3.txt:230`. Grounds: GLOSSARY Note.
 
 **INT-045 — CONCEPTS GROW AND LINK — active**
-> "About concepts, they should be growing... Imagine I'm reading an article about personal intelligence: I just highlight and add it to concepts. It's just a concept and it links to other books."
+> "About concepts, they should be growing... Imagine I'm reading an article about personal intelligence: I just highlight and add it to concepts. It's just a concept and it links to other books..."
 
-Source: `context/raw/3.txt:239`. Grounds: P-10, layer 5.
+Source: `context/raw/3.txt:239`. Grounds: P-10, layer 5. (Terminal period corrected to an elision marker 2026-10-14: the raw continues "...and we can do this in this stage" — the quote is a mid-sentence truncation and must not present a period the owner never wrote there; repair recorded in the manifest §6.)
 
 **INT-046 — DEPTH OF THE FIRST LAYER — active (2026-10-13, owner turn 4; executed)**
 > "go through the context again and tighten this first layer. like i can't see the engineering principles, and the repo laws, how it grows with you and that whole engineering principles for agentic repo from transcript and its upstreams so first of all do that. design multiple operating model not just this phase but how this repo keeps growing... how context gets updated repo memory gets updated and nothing breaks. verifications, self-healing. first again go through the context raw multiple pass extract understand and update in depth rightnow it feels like summaries but we need depth and specifcations on things and stuff not vauge or breif.."
+
+Source: owner turn 4, chat 2026-10-13 (Source line restored 2026-10-14 — was missing; E-2: the ledger entry is the first durable verbatim preservation, no earlier record exists; the session-record rule added 2026-10-14 closes this class for future turns). Grounds: ENGINEERING.md, LAWS.md, OPERATING-MODEL §6 (all three executed from this directive).
 
 Means: the first layer must carry the engineering doctrine and the repo laws in full depth — visible, specified, mechanism-level — not summaries. Multiple operating models for the repo's whole growth, the memory-update protocol with update invariants, and the self-healing/verification machinery. Raw multi-pass re-extraction before writing. (Executed 2026-10-13: ENGINEERING.md + LAWS.md created; PRINCIPLES/OPERATING-MODEL deepened.)
 
@@ -215,7 +225,7 @@ Source: `context/raw/0.txt:34`; `2.txt:29`. Grounds: GLOSSARY Kev, NG-03, K2.
 Source: `context/raw/1.txt:441`. Grounds: D-010, layer 1 (behavior events in ground truth).
 
 **INT-057 — MY AGENT GETS ALL OF IT — active**
-> "my agent gets all of it. all my contextm what im doing, what im reading and every thing. my reading beahvoir, what im studying, what notes, my thinking and everything"
+> "my agent gets all of it. all my contextm what im doing, what im reading and every thing. my reading beahvoir, what im studying, what notes , my thinking and everything"
 
 Source: `context/raw/1.txt:444`. Grounds: C2, D-010, context packs.
 
@@ -277,6 +287,8 @@ Source: session record `context/extracted/06-REASONING-LOG.md:11`. Grounds: the 
 
 **INT-068 — CANONICALIZATION DIRECTIVE — active (2026-10-13, owner turn 5)**
 > "repo is your memory read the repo... so do this before everything then Yes. Arivoo is a good start as a repository-memory and engineering-foundation layer. It is not yet a complete, internally consistent execution authority."
+
+Source: owner turn 5, chat 2026-10-13 (Source line restored 2026-10-14 — was missing; E-2: first durable preservation is this entry; the owner's own words are the first sentence — the following sentences are the owner-forwarded review's verdict, quoted as part of the turn, labeled here). Grounds: /EXECUTION.md (D-021), the canonicalization slice, INT-075.
 
 Means (owner-endorsed review, this session): read the repo first; then execute the canonicalization slice — (1) the Intent Ledger loads before anything else in the boot sequence; (2) every active requirement traces to owner intent or an adopted decision, historical AI proposals carry explicit status; (3) D-004 and the old The List wording no longer conflict with D-015/P-16; (4) the archive is clearly historical, raw material is not mistaken for owner-only intent, the stale file count is corrected; (5) the execution contract has one canonical home, and the purge (Q2) and fact-tag (Q3) decisions remain visibly open; (6) a verifier proves these conditions using the real repository files, not a manually written report. Grounds: D-020..D-023, /EXECUTION.md, tools/verify_canonical_layer.py.
 
@@ -415,6 +427,15 @@ Source: session record 2026-10-13 (owner turn 7, chat — accompanied by the own
 
 ---
 
+## Owner turn 8 — session record 2026-10-14 (INT-092; the gap-closure + walls session)
+
+**INT-092 — CLOSE THE GAPS, FIND THE DRIFT, BUILD THE WALLS — active**
+> "recover, do you still got acesss or workspace got reset if not heres the key [REDACTED — access credential supplied in chat; credentials are never ledgered]. read the repo arivoo and lets close any open gaps and questions and reason through it find gaps where agents can still drift.. and then we start building the walls"
+
+Source: owner turn 8, chat 2026-10-14 (verbatim per the session-record rule, E-2 class; the access credential in the same turn is deliberately excluded — see AGENTS.md credentials-hygiene rule added this session). Grounds: `context/extracted/12-GAP-CLOSURE-AND-WALLS-STAGE-2.md` §1, D-025, `context/SOURCE-COVERAGE-MANIFEST.md`, walls stage-2 (W-01 stage-2/W-03/W-04, PLAN Phase 1). Means (interpretation, labeled): cold-start read the repo again as a fresh agent; close the closable gaps and open questions under recorded defaults (owner-gated items get a compact Decision Review, never silent closure — F-07/EXECUTION §6); reason through where agents can still drift and disposition each surface; then proceed with Phase 1 walls construction (the owner's "we start building the walls" is the Phase-1 walls go for W-03/W-04/W-01-stage-2; W-02 host bridges remain gated on the Q1 remainder — primary builder host + "Other").
+
+---
+
 ## Audit note (2026-10-13 — the canonicalization slice)
 
 - **Active** owner intent now covers every claim the root layer makes: goal (INT-047), claims C1–C5 (INT-047, INT-057, INT-050, INT-026/028, C5 via the substrate line), workflow (INT-019/038), backend-only (INT-040), autonomy (INT-049), no-later (INT-060/039), epistemics (INT-025/026/027/028), agent-client (INT-030/058), two-speed concepts (INT-027/061), memory law (INT-031), operating mode (INT-065), language (INT-063/064), growth (INT-048/066).
@@ -434,3 +455,10 @@ Source: session record 2026-10-13 (owner turn 7, chat — accompanied by the own
 - **INT-091 records owner turn 7 verbatim** ("read repo, prs, review the reviews, merge") — 73 statused entries, INT-019..INT-091, contiguous and unique.
 - **Ledger discipline held (INT-075):** the owner-forwarded design review (five jobs / STATE.md / failure loop / branch discipline) is recorded as GROUNDS on INT-091 only, and adopted through D-024 (ADOPTED status — challengeable, severable). Its words are NOT ledgered as owner intent; this ledger still carries only owner words.
 - **Open owner gates (unchanged in scope, dependency-annotated per F-07):** Q1 remainder (blocks only W-02 host bridges), Q2 (Phase 3 storage/purge lock), Q3 (fact-tag vocabulary freeze — custom tags unaffected), D-014 (non-blocking).
+
+## Audit note (2026-10-14, session 4 — the gap-closure + walls session; appends, supersedes nothing)
+
+- **INT-092 records owner turn 8 verbatim** (credential redacted) — 74 statused entries, INT-019..INT-092, contiguous and unique.
+- **Ledger discipline held (INT-075):** owner words only. The five provenance repairs this session (INT-035/036/037/046/068 Source lines) add MISSING required fields — quotes and statuses untouched; this is defect repair under the source-coverage control (D-025, F-09), not history rewriting. The repairs were found BY the control's first run: 5 entries carried quotes with no Source line at all — the exact fabrication-adjacent class VER-803 now catches mechanically.
+- **Open owner gates (unchanged unless the Decision Review answers them):** Q1 remainder (primary builder host + "Other" — blocks W-02 only), Q2 (Phase 3), Q3 (Phase 3, applies only if the owner uses a `fact` tag), D-014 (non-blocking), F-06 (deployment precision — needs owner ratification), Q-IDENT (new: single-identity merge boundary — the agent PAT authenticates as the owner, so per-merge authorization for analysis artifacts is canonical + CI-gated, not mechanically attributed; options recorded in session record 12 §8).
+- **Walls stage-2 is owner-authorized this turn** (INT-092's "we start building the walls"): CI verify workflow + required-check binding + isolation check + source-coverage control — see D-025.

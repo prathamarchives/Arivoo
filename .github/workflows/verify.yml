@@ -1,0 +1,70 @@
+# verify — W-04: owner-controlled remote CI (D-009: remote CI is authoritative).
+#
+# Wall design (D-025, PLAN Phase 1 W-01 stage-2 + W-04):
+#   Job "canonical-layer" (the REQUIRED check) runs the verifier FROM MAIN over the
+#   PR head's corpus: a PR that weakens the verifier and the documents together cannot
+#   pass — the judge is anchored outside the change under review.
+#   Job "head-tools" (informational) runs the HEAD tree's own verifier, self-test,
+#   and isolation check — so verifier/tool changes ARE exercised in their own PR.
+#
+# Never weaken this gate (LAW-09): removing the base-anchoring, the self-test, or the
+# isolation step is a constraint-weakening change requiring an owner decision.
+
+name: verify
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  canonical-layer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout main (base — the anchored judge)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: base
+      - name: Checkout head (the corpus under review)
+        uses: actions/checkout@v4
+        with:
+          path: head
+      - name: Anchor the verifier from main into the head tree
+        run: |
+          cp base/tools/verify_canonical_layer.py head/tools/verify_canonical_layer.py
+          if [ -f base/tools/isolation_check.py ]; then cp base/tools/isolation_check.py head/tools/isolation_check.py; fi
+      - name: "Verify the canonical layer (46 checks: C1–C8)"
+        run: python3 tools/verify_canonical_layer.py
+        working-directory: head
+      - name: Self-test — known-bad mutations must FAIL their named checks
+        run: python3 tools/verify_canonical_layer.py --self-test
+        working-directory: head
+
+  head-tools:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout head
+        uses: actions/checkout@v4
+      - name: Verify with the head tree's own verifier (exercises in-PR tool changes)
+        run: python3 tools/verify_canonical_layer.py
+      - name: Self-test (head)
+        run: python3 tools/verify_canonical_layer.py --self-test
+      - name: Isolation check — conditions printed, values never (W-03, LAW-28)
+        run: |
+          if [ -f tools/isolation_check.py ]; then
+            python3 tools/isolation_check.py --ci
+            python3 tools/isolation_check.py --self-test
+          else
+            echo "isolation_check.py not present in this tree (pre-W-03 commit range) — skipped, not assumed"
+          fi

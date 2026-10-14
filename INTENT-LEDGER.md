@@ -14,6 +14,7 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-093..INT-099** — owner turn 9 (session record 13, 2026-10-14 three-slices session): the agent objective; build-first/two-jobs documentation law; refinement-never-rewrites; builder identity not a blocker; the four decision states; the change-authority workflow; refine-and-iterate directive.
 - **INT-100..INT-109** — owner turn 10 (session record 14, 2026-10-14 layer-1.2 session): slices 4–6 as Phase 1's 1.2 layer; the STATE contract (whole-repo long-term memory, evidence pointers, snapshot semantics); the session-record event-type policy; the selective cold-start read path; replicability of the whole system.
 - **INT-110..INT-117** — owner turn 12 (session record 15, 2026-10-14 integrity-and-evidence session): the open-question answers — agent-agnostic design (Q1), purge top option (Q2), tag system removed (Q3), any readable format (QD-1), math deferred (D-014 reaffirmed), Supabase synced deployment (F-06), identity boundary accepted (Q-IDENT) — plus the Integrity-and-evidence directive (slices 7–9).
+- **INT-118** — owner turn 13 (session record 16, 2026-10-14 isolation-diagnostics-host-gates session): the owner-forwarded Arivoo review — the final two Phase-1 slices (10: isolation and diagnostics; 11: real host bridges and automated gates) + the Phase-1 graduation gate, with the findings that closed decision language and the GLM-host assumption have not fully propagated (owner-forwarded text, E-4 class, labeled).
 
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
@@ -570,7 +571,19 @@ Source: owner turn 12, chat 2026-10-14 (session record 15 §1, E-2 class). Groun
 
 Source: owner turn 12, chat 2026-10-14 (session record 15 §1, E-2 class; the embedded Integrity-and-evidence section of the owner-supplied Phase 1 & 2 execution plan, owner turn 11). Grounds: tools/verify_canonical_layer.py (the C9 family + VER-504 re-target, this session), the self-test known-bad suite, OPERATING-MODEL §9 (the slice-9 loop: GLM fresh-context subagents test/falsify/retest; the verifier never implements what it evaluates; a second model family is optional adversarial coverage, never an unexplained prerequisite).
 
+**INT-118 — ARIVOO REVIEW: FINAL TWO SLICES + PHASE-1 GRADUATION — active (owner-forwarded review text, E-4 class — the full turn is preserved verbatim in record 16 §1)**
+> "These are the final two slices of Phase 1. They should close the safe-working-environment layer and prove the entire operating loop works in the actual agent environment. Phase 2 stays blocked until both slices pass and the Phase 1 graduation gate is satisfied." · "Your newly supplied plan is the authoritative continuation: those navigation instructions need a targeted correction before another agent can safely resume."
+
+Source: owner turn 13, chat 2026-10-14 (session record 16 §1, E-2 class for the turn's preservation; the quoted lines are owner-FORWARDED review text, labeled per the INT-053/068 owner-presented-statement convention — never silently treated as the owner's own words). Grounds: DECISIONS D-034 (the review's adoption — findings repair + Slices 10–11 + the graduation gate, severable and challengeable); D-028 (agent-agnostic — the review's second P1 finding propagates it); D-026/D-024 (bounded diffs, change channel); P-13/P-15 (standing authorization for the memory-delta + owner-directed execution work this turn directs). The owner's act is the forwarding itself: no owner-voiced words accompany the review text this turn.
+
 ---
+
+## Audit note (2026-10-14, session 16 — the isolation-diagnostics-host-gates session; appends, supersedes nothing)
+
+- **INT-118 records owner turn 13** — 100 statused entries, INT-019..INT-118, contiguous and unique. Session record 16 §1 is the verbatim-preservation home (written and committed BEFORE the entry, per the closed INT-046/068 class).
+- **Ledger discipline held (INT-075):** owner words only — and this turn carries NO owner-voiced words; it is the owner forwarding the complete Arivoo review (findings + Slices 10–11 + the graduation gate). The review text is preserved verbatim in record 16 §1; only its two governing lines are quoted on INT-118, explicitly labeled owner-forwarded (E-4 class, the INT-053/068 owner-presented-statement convention). The plan is adopted through D-034 (ADOPTED, severable, challengeable) and executed through this session's slices — never ledgered as owner intent.
+- **Turn 11's remaining sections stay taken-as-supplied** (unchanged policy): the turn-13 review extends the same owner-supplied Phase 1&2 plan lineage; nothing is ledgered from memory or summary.
+- **Open owner gates (after this turn):** D-014 (non-blocking, math workflow design) — unchanged; the register is not touched by this intake.
 
 ## Audit note (2026-10-14, session 15 — the integrity-and-evidence session; appends, supersedes nothing)
 

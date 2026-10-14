@@ -50,6 +50,7 @@ upstream of engineering transcripts.txt    29cf75295d2c81169435489642c6788aab434
 | Owner turn 9 | 2026-10-14 | `context/extracted/13-AUTHORITY-DECISIONS-CHANGE-DISCIPLINE.md` §1 + ledger | INT-093–099 |
 | Owner turn 10 | 2026-10-14 | `context/extracted/14-NAVIGATION-HANDOFFS-READ-PATH.md` §1 + ledger | INT-100–109 |
 | Owner turn 12 | 2026-10-14 | `context/extracted/15-INTEGRITY-AND-EVIDENCE.md` §1 + ledger | INT-110–117 |
+| Owner turn 13 | 2026-10-14 | `context/extracted/16-ISOLATION-DIAGNOSTICS-HOST-GATES.md` §1 (the full owner-forwarded Arivoo review) + ledger | INT-118 (E-4 class: owner-forwarded text, labeled; adopted via D-034) |
 | Reasoning-log session owner words | 2026-10-13 | `context/extracted/06-REASONING-LOG.md` | INT-053, 064–067 |
 
 **Boundary, stated honestly:** owner words that arrived in chat before this control existed are verbatim-preserved where the ledger or a session record holds them; the raw corpus never received them. From turn 8 onward, the numbered session record's §1 is the required verbatim preservation home for every owner turn, BEFORE the ledger entry is written (OPERATING-MODEL §3 session-record requirement; this closes the INT-046/068 class — a quote whose only home is the ledger itself).

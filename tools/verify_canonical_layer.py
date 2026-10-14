@@ -22,7 +22,8 @@ Conditions checked:
   C3  D-004 and the old The List wording no longer conflict with D-015 and P-16
   C4  the archive is clearly historical; raw is not mistaken for owner-only intent
   C5  one canonical home; the open-question register agrees across its mirrors;
-      consent is scoped; GLM verification is governing (F-02/F-03); D-024 recorded
+      consent is scoped; the verification protocol is stated host-generically
+      (F-02/F-03, D-028 — any capable host may be the named current default)
   C6  this verifier proves it on the real files (this run IS the proof)
   C7  the garden: STATE.md live and pointing at real targets, FAIL-001 recorded with a
       known-bad, review artifacts in context/reviews/ (D-024)
@@ -135,7 +136,12 @@ class Layer:
     # ------------------------------------------------------------ C1: boot
     def c1(self) -> None:
         agents = self.read("AGENTS.md")
-        order = [m.group(1) for m in re.finditer(r"^\s*\d+\.\s+`/?([^`/]+\.md)`", agents, re.M)]
+        # (parser re-targeted 2026-10-14, session 16 / D-034 — the Arivoo review's P3
+        # finding: the old [^`/]+ group could not match paths containing a directory
+        # separator, so `context/WORKLOG.md` was invisible and the reported positions
+        # were wrong (ledger "#3" / NORTH-STAR "#4" while the real steps are #4/#5).
+        # Interior slashes are now captured; positions are accurate.)
+        order = [m.group(1) for m in re.finditer(r"^\s*\d+\.\s+`(/?[^`]+\.md)`", agents, re.M)]
 
         def pos(name: str) -> int:
             for i, entry in enumerate(order):
@@ -201,9 +207,11 @@ class Layer:
         )
         self.check(
             "VER-109",
-            "GLM-based subagents" in agents and "INT-070" in agents,
-            "AGENTS.md: test/verification loops run on GLM-based subagents (INT-070 governing)",
-            "restore the GLM verification rule (INT-070; F-03)",
+            "verification" in agents
+            and "INT-070" in agents
+            and ("GLM-based subagents" in agents or "fresh-context subagents" in agents),
+            f"AGENTS.md: the verification protocol is stated (fresh-context subagents, a named current host, INT-070) — host-generic per D-028, so a legitimate host rewording cannot false-RED (re-targeted session 16, D-034)",
+            "restore the verification-protocol statement (INT-070; F-03) — the PROTOCOL is the invariant; any capable host may be named as the current default (D-028)",
         )
         # VER-110 (D-027(3)/INT-107, session 14): the selective read path. The blanket
         # ledger-first boot rule is superseded — the ledger step must be marked SELECTIVE
@@ -218,11 +226,30 @@ class Layer:
             re.match(r"^\s*\d+\.\s", ln) and "context/WORKLOG.md" in ln
             for ln in agents.splitlines()
         )
+        # (strengthened session 16, D-034 — the parser repair makes the worklog
+        # step's POSITION visible: the coordination context loads BEFORE the selective
+        # authority dive, per the D-027(3) read-order design (AGENTS → STATE → worklog
+        # tail → INTENT-LEDGER). The old parser was blind to directory-separator paths,
+        # so this ordering was unenforceable.)
+        def _step_num(marker: str):
+            for ln in agents.splitlines():
+                m = re.match(r"^\s*(\d+)\.\s", ln)
+                if m and marker in ln:
+                    return int(m.group(1))
+            return None
+        wl_num = _step_num("context/WORKLOG.md")
+        lg_num = _step_num("INTENT-LEDGER.md")
+        worklog_before_ledger = (
+            wl_num is not None and lg_num is not None and wl_num < lg_num
+        )
         self.check(
             "VER-110",
-            bool(ledger_steps) and "selective" in ledger_steps[0].lower() and worklog_step,
-            "read order: the Intent Ledger step is SELECTIVE (verified per consequential change, not blanket boot reading) and the worklog tail is an early boot step (INT-107/D-027(3))",
-            "the ledger-first blanket boot rule is superseded — mark the INTENT-LEDGER read-order step selective and keep the context/WORKLOG.md tail as an early numbered step (INT-107/D-027(3))",
+            bool(ledger_steps)
+            and "selective" in ledger_steps[0].lower()
+            and worklog_step
+            and worklog_before_ledger,
+            "read order: the Intent Ledger step is SELECTIVE (verified per consequential change, not blanket boot reading) and the worklog tail is an early boot step BEFORE it (INT-107/D-027(3))",
+            "the ledger-first blanket boot rule is superseded — mark the INTENT-LEDGER read-order step selective and keep the context/WORKLOG.md tail as an early numbered step BEFORE it (INT-107/D-027(3))",
         )
 
     # ------------------------------------------------------------ C2: ledger
@@ -475,9 +502,11 @@ class Layer:
         om = self.read("OPERATING-MODEL.md")
         self.check(
             "VER-507",
-            "INT-070, governing" in om and "recommended where possible" not in om,
-            "OPERATING-MODEL §9: GLM-based verification is governing (INT-070); cross-family is optional coverage, never the default (F-03)",
-            "make the verifier family rule consistent with INT-070 across DECISIONS/EXECUTION/OPERATING-MODEL",
+            "INT-070" in om
+            and ("governing" in om or "current default" in om)
+            and "recommended where possible" not in om,
+            "OPERATING-MODEL §9: the verification protocol names its current host (INT-070) and never the cross-family 'recommended where possible' form (F-03) — host-generic per D-028: 'current default' or the standing 'governing' wording both pass while the agent-agnostic rewording lands (re-targeted session 16, D-034)",
+            "make the verifier-family rule consistent with INT-070/D-028 across DECISIONS/EXECUTION/OPERATING-MODEL — the protocol is the invariant; the named host is a default, never a requirement",
         )
         d024 = next((ln for ln in decisions.splitlines() if ln.startswith("| D-024 ")), "")
         self.check(
@@ -882,8 +911,8 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
     ),
     (
         "MUT-05",
-        "remove the GLM verification rule from AGENTS.md (INT-070)",
-        lambda r: _edit(r, "AGENTS.md", "- Test and verification loops run on GLM-based subagents; GLM is the host agent for verification/testing (INT-070).\n", ""),
+        "remove the verification-protocol rule from AGENTS.md — content-generic since 2026-10-14 (session 16 / D-034): removes whichever line(s) carry INT-070, so the mutation cannot no-op when the host wording legitimately changes (the base-anchored self-test RED-flags a no-op as a blind guard — the PR #6/#12/#17 re-target class)",
+        lambda r: _drop_verification_rule(r),
         "VER-109",
     ),
     (
@@ -968,6 +997,12 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
         "reintroduce the superseded tag rule — rewrite NORTH-STAR's 'no tag field' into the optional-tag form while the C4 marker stays (slice 9's class (d), sub-agent finding 1: the P1 blind guard this mutation proved)",
         lambda r: _reintroduce_superseded_rule(r),
         "VER-904",
+    ),
+    (
+        "MUT-30",
+        "move the worklog-tail boot step BELOW the ledger step — the coordination context no longer loads before the selective authority dive; the directory-separator path was INVISIBLE to the old parser (the Arivoo review's P3 finding), so this mutation no-ops the old VER-110 — the repaired parser must catch it",
+        lambda r: _worklog_after_ledger(r),
+        "VER-110",
     ),
     (
         "MUT-12",
@@ -1112,6 +1147,49 @@ def _drop_read_order_step(repo: Path, marker: str) -> None:
     agents.write_text("".join(out), encoding="utf-8")
 
 
+def _drop_verification_rule(repo: Path) -> None:
+    """MUT-05, content-generic (re-targeted 2026-10-14, session 16 / D-034 — the same
+    repair class as MUT-08/MUT-11/MUT-17, PRs #6/#12/#17): remove every AGENTS.md line
+    carrying INT-070, whatever the line currently says. The earlier hard-coded string
+    ("Test and verification loops run on GLM-based subagents; ...") would silently
+    no-op the moment the agent-agnostic rewording lands (D-028's propagation, the
+    Arivoo review's P1 finding) — a no-op mutation reads as a blind guard and
+    RED-blocks the legitimate rewording PR. Generic form: works on every wording
+    that keeps the verification protocol's INT-070 reference."""
+    agents = repo / "AGENTS.md"
+    text = agents.read_text(encoding="utf-8")
+    out = [ln for ln in text.splitlines(keepends=True) if "INT-070" not in ln]
+    agents.write_text("".join(out), encoding="utf-8")
+
+
+def _worklog_after_ledger(repo: Path) -> None:
+    """MUT-30 (session 16, D-034 — the Arivoo review's P3 finding): swap the bodies of
+    the context/WORKLOG.md and INTENT-LEDGER.md read-order steps (numbers stay
+    well-formed), so the ledger step loads BEFORE the worklog tail — the coordination
+    context no longer precedes the selective authority dive. The old read-order
+    parser could not match paths containing a directory separator, so the worklog
+    step was invisible to position checks — this ordering regression was unenforceable
+    (a blind guard). The repaired parser + strengthened VER-110 must catch it."""
+    agents = repo / "AGENTS.md"
+    text = agents.read_text(encoding="utf-8")
+    lines = text.splitlines(keepends=True)
+    wl = [i for i, ln in enumerate(lines)
+          if re.match(r"^\s*\d+\.\s", ln) and "context/WORKLOG.md" in ln]
+    lg = [i for i, ln in enumerate(lines)
+          if re.match(r"^\s*\d+\.\s", ln) and "INTENT-LEDGER.md" in ln]
+    if not wl or not lg:
+        return
+    wl_i, lg_i = wl[0], lg[0]
+    if wl_i == lg_i:
+        return
+    wl_line, lg_line = lines[wl_i], lines[lg_i]
+    wl_num = re.match(r"^\s*(\d+\.)\s", wl_line).group(1)
+    lg_num = re.match(r"^\s*(\d+\.)\s", lg_line).group(1)
+    lines[wl_i] = lg_line.replace(lg_num, wl_num, 1)
+    lines[lg_i] = wl_line.replace(wl_num, lg_num, 1)
+    agents.write_text("".join(lines), encoding="utf-8")
+
+
 def _drop_ledger_step(repo: Path) -> None:
     """MUT-08, content-generic (2026-10-14, session-14 gate re-target): remove the numbered
     read-order line that names /INTENT-LEDGER.md. The earlier form replaced a hard-coded
@@ -1240,7 +1318,7 @@ def main() -> int:
     print("GREEN — the canonicalization conditions hold on the real repository files:")
     print("  C1 boot: Ledger first + STATE.md step 2  C2 traceability: dynamic ledger range + statuses + banners")
     print("  C3 D-004/D-015/P-16 reconciled  C4 archive historical, raw mixed, reviews re-homed")
-    print("  C5 one home; consent scoped; GLM governing; D-024  C6 proven by this run")
+    print("  C5 one home; consent scoped; verification protocol stated (host-generic, D-028); D-024  C6 proven by this run")
     print("  C7 garden: STATE live, FAIL-001 + known-bad, review artifacts in context/reviews/")
     print("  C8 coverage: manifest + raw immutability + quote fidelity + STATE freshness (F-09/D-025)")
     print("  C9 cross-doc integrity: ID references resolve + counts agree + entry views agree (INT-117)")

@@ -324,3 +324,24 @@ Stage Summary:
 - Unresolved: D-014 (non-blocking); this PR's own post-merge run = the named gap for session 16
 - Next: session 16 — preflight at the merge, then Phase 2 Layer 2.1 when the owner supplies/confirms that plan section
 - Session record: context/extracted/15-INTEGRITY-AND-EVIDENCE.md
+
+---
+Task ID: 15
+Agent: Super Z (main orchestrator, GLM host) + 4 uncoached fresh-context GLM sub-agents (slice-10 falsifier, round-2 re-verification; slice-11B task agent; separate 11B grader)
+Task: Owner turn 13 (INT-118/D-034 — the owner-forwarded Arivoo review): intake + navigation repair, the two P1 finding repairs (closed-decision drift; agent-agnostic verification policy), Slice 10 (isolation and diagnostics), Slice 11A (the base-anchored CI isolation gate), Slice 11B (the real-host proof); graduation staged.
+
+Work Log:
+- Preflight on `main` @ `e34dcb3` (51/0 + 27/27 + isolation green; run 38553070896 + protection observed live — every review claim verified against the tree first); PR #18: record 16 §1 verbatim BEFORE the ledger entry, INT-118 (E-4-labeled), D-034, navigation repaired (Phase 2 blocked until graduation; phase naming fixed); manifest turn-13 row
+- PR #19 (gate re-target, the PR #6/#12/#17 class): VER-101 parser repair (directory-separator paths — the review's P3), VER-110 worklog-before-ledger ordering enforceable, VER-109/VER-507 host-generic, MUT-05 content-generic, MUT-30; positive acceptance test: agent-agnostic rewording AND alternative-host declaration both GREEN
+- PR #20 (the review's two P1 repairs): D-007/D-023/PLAN/Model 1 closure pointers, §9 host-agnostic protocol, GLOSSARY/AGENTS propagation; NORMATIVE_MARKERS 4→10 (host-agnostic marker form), strict §9-scoped VER-507, MUT-28 (closure-strip) + MUT-29 (GLM-governing regression); 30/30
+- PR #21 (Slice 10): record 16 §4.1 boundary account (mechanically prevented / detected / agent-discipline — the no-OS-separation limit stated); isolation_check.py v2.1 (remote-credential FAILS incl. scp/multi-@; mode-required config; 18-case complete-path matrix with canary-redaction asserts on stdout+stderr; every-extension scan; fail-closed vacuity guards); TWO falsification rounds — 3 P1 false-greens + 7 P2/P3 + round-2 residuals ALL repaired (reports verbatim, record 16 §7.1/§7.2); .pyc artifact incident caught by the new guard → untracked + .gitignore
+- PR #22 (Slice 11A): canonical-layer now runs the BASE-ANCHORED isolation checker (--ci + matrix) — the isolation gate exactly as independently anchored as the canonical verifier; fail-closed anchor; stale "46 checks" label synced count-free
+- Slice 11B (evidence in PR #23): fresh-context task agent at `b6a73d9` — entry via AGENTS.md, selective read (~8.7k words, zero raw/), all four checks green, push probe REJECTED GH006 + zero residue, `--ci` fail-closed; SEPARATE grader re-ran everything: 96/100 PASS
+
+Stage Summary:
+- Outcome: D-034's execution order complete through Slice 11B — the review's P1/P2/P3 findings all dispositioned and repaired; the isolation layer is now a tested property (18-case matrix, two adversarial rounds) and an independently anchored CI gate; the real-host loop is proven (graded)
+- Evidence: 51/0 + 30/30 + isolation 18/18 at every PR head (each CI green at merge: #18 8013d29, #19 80db5f2, #20 8b0b1f5, #21 ad96a1e, #22 b6a73d9, #23 this merge); 11B PASS 96/100 (record 16 §4.4/§7.3)
+- Pointer: record 16 (COMPLETE)
+- Unresolved: D-014 (non-blocking); PR #23's post-merge run + the integrated graduation proof at the final SHA (session 17's preflight + gate); tag-semantics rule at its named pre-Phase-5 gate
+- Next: session 17 — the Phase-1 graduation gate (record 16 §11 verbatim)
+- Session record: context/extracted/16-ISOLATION-DIAGNOSTICS-HOST-GATES.md

@@ -11,6 +11,7 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-077..INT-090** — backfill round 2 from the full corpus re-extraction (2026-10-13 stress-test session; GLM subagent extraction + verbatim grep verification): the full-day-of-reasoning intents — division of labor, layer-1 experience, smallest daily loop, reconciliation method, docs-first, and more.
 - **INT-091** — owner turn 7 (session record, 2026-10-13 review-merge session): the review-merge directive.
 - **INT-092** — owner turn 8 (session record, 2026-10-14 gap-closure + walls session): close the gaps, find the drift, build the walls (credential redacted; Phase-1 walls go for W-03/W-04/W-01-stage-2).
+- **INT-093..INT-099** — owner turn 9 (session record 13, 2026-10-14 three-slices session): the agent objective; build-first/two-jobs documentation law; refinement-never-rewrites; builder identity not a blocker; the four decision states; the change-authority workflow; refine-and-iterate directive.
 
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
@@ -436,6 +437,45 @@ Source: owner turn 8, chat 2026-10-14 (verbatim per the session-record rule, E-2
 
 ---
 
+## Owner turn 9 — session record 2026-10-14 (INT-093..INT-099; the three-slices session)
+
+**INT-093 — THE AGENT OBJECTIVE — active**
+> "Objective: Any capable agent can enter Arivo's repository, understand the project, identify the next correct action, work within its authority, verify its work, and leave the repository easier to continue from."
+
+Source: owner turn 9, chat 2026-10-14 (session record `context/extracted/13-AUTHORITY-DECISIONS-CHANGE-DISCIPLINE.md` §1, E-2 class). Grounds: AGENTS.md "What this is" objective line (v2.5), EXECUTION §1 (the authority map this objective presupposes), STATE.md (next-action discovery, VER-804-guarded), P-02/P-11. The repo's own success criterion, in the owner's words — the property every wall, ledger, and proof exists to make true.
+
+**INT-094 — BUILD FIRST, REFINE AFTER — active**
+> "We should build Arivo first, let implementation and real usage expose what the architecture actually needs, and do the comprehensive refinement pass once the product exists. We shouldn't spend the next few weeks making the repository's documentation internally perfect while the product remains unbuilt."
+
+Source: owner turn 9, chat 2026-10-14 (session record 13 §1, E-2 class). Grounds: P-18 (recorded this session), P-17 (the product-first law — this sharpens it onto documentation work specifically), PLAN (post-product comprehensive refinement pass), D-026. The documentation layer serves the build; it is never a phase of its own while the product is unbuilt.
+
+**INT-095 — THE TWO JOBS / EVOLVING TRUTH — active**
+> "There are two separate jobs here. During execution: preserve the evolving truth." · "But that doesn't mean every insight requires a broad documentation reconciliation. Update what the current task needs. If an existing decision becomes wrong, supersede it properly. If a future architectural question doesn't affect the current slice, leave it open." · "Most importantly, don't let stale documentation cause a real implementation mistake. Fix contradictions that affect the current work; leave unrelated editorial debt for later."
+
+Source: owner turn 9, chat 2026-10-14 (session record 13 §1, E-2 class). Grounds: P-18 (MECHANISM: the write path, supersession discipline, update invariants; the audit flags doc-reconciliation work with no current-work contradiction to repair), OPERATING-MODEL §3/§7, D-026. During execution the canonical layer evolves only as far as current work requires — superseding properly, leaving non-affecting questions open.
+
+**INT-096 — REFINEMENT NEVER REWRITES HISTORY — active**
+> "Historical owner statements should remain intact. Refinement means clarifying the current direction and marking superseded decisions—not rewriting history to pretend you always knew the answer." · "Capture continuously. Correct what can mislead today's work. Defer comprehensive refinement until implementation gives you evidence."
+
+Source: owner turn 9, chat 2026-10-14 (session record 13 §1, E-2 class). Grounds: P-18, AUT-02/03/04 (append-only, supersede-by-reference, never reword), the ledger's superseded_by convention, D-026. The post-product comprehensive refinement pass clarifies direction and marks supersessions; it never edits the historical record to match present knowledge.
+
+**INT-097 — BUILDER IDENTITY IS NOT AN ARCHITECTURAL BLOCKER — active**
+> "The identity of the builder is not an architectural blocker. The system must define responsibilities and verification obligations, not require a particular named agent to remain available."
+
+Source: owner turn 9, chat 2026-10-14 (session record 13 §1, E-2 class). Grounds: OPERATING-MODEL §1 (role table — responsibilities, not names), W-02 host-agnostic form (D-026: Q1's remainder gates per-host bridge instantiation only, never the wall), GLOSSARY Host Contract. Walls, phases, and contracts depend on roles and verification obligations — never on a particular named agent or host remaining available.
+
+**INT-098 — THE FOUR DECISION STATES — active**
+> "An agent must distinguish four states: owner decision, adopted decision, proposed recommendation, and unresolved question." · "When something is unresolved, the agent records the question, its consequence, and exactly which work depends on the answer. Unrelated safe work can continue."
+
+Source: owner turn 9, chat 2026-10-14 (session record 13 §1, E-2 class). Grounds: DECISIONS legend (the four-state mapping, D-026), EXECUTION §2/§6 (status semantics, open gates with defaults and lock-at), OPERATING-MODEL §4 (question classes; QST-03 — elapsed time is never approval), context/reviews/ (the home of proposed recommendations), D-012/F-07. Unresolved questions record consequence and dependent work; each blocks only what depends on it.
+
+**INT-099 — THE CHANGE-AUTHORITY WORKFLOW — active**
+> "Establish the actual branch-and-PR workflow. No direct commits to main. Each change has a coherent purpose and a bounded diff. Review-only requests result in findings, comments, issues, or a report—not unsolicited implementation changes. Implementation and revert changes are proposed separately when appropriate. Merging remains owner-controlled unless explicitly delegated. The repository's access settings, branch protection, and required checks must be observed working rather than described as if they already exist." · "refine and iterate until algined and strong and then we'll reason through nexts"
+
+Source: owner turn 9, chat 2026-10-14 (session record 13 §1, E-2 class; typos preserved). Grounds: D-024 (change channel), D-026 (bounded-diff rules, PR template, separate reverts), EXECUTION §5, `context/reviews/REVIEW-PROTOCOL-PROPOSAL.md` §8, branch protection + required CI check (observed working 2026-10-14: direct-push rejection, broken-PR merge-block — session record 13 §5.2), FAIL-001. The closing directive: refine and iterate until aligned and strong, then reason through next steps with the owner.
+
+---
+
 ## Audit note (2026-10-13 — the canonicalization slice)
 
 - **Active** owner intent now covers every claim the root layer makes: goal (INT-047), claims C1–C5 (INT-047, INT-057, INT-050, INT-026/028, C5 via the substrate line), workflow (INT-019/038), backend-only (INT-040), autonomy (INT-049), no-later (INT-060/039), epistemics (INT-025/026/027/028), agent-client (INT-030/058), two-speed concepts (INT-027/061), memory law (INT-031), operating mode (INT-065), language (INT-063/064), growth (INT-048/066).
@@ -462,3 +502,10 @@ Source: owner turn 8, chat 2026-10-14 (verbatim per the session-record rule, E-2
 - **Ledger discipline held (INT-075):** owner words only. The five provenance repairs this session (INT-035/036/037/046/068 Source lines) add MISSING required fields — quotes and statuses untouched; this is defect repair under the source-coverage control (D-025, F-09), not history rewriting. The repairs were found BY the control's first run: 5 entries carried quotes with no Source line at all — the exact fabrication-adjacent class VER-803 now catches mechanically.
 - **Open owner gates (unchanged unless the Decision Review answers them):** Q1 remainder (primary builder host + "Other" — blocks W-02 only), Q2 (Phase 3), Q3 (Phase 3, applies only if the owner uses a `fact` tag), D-014 (non-blocking), F-06 (deployment precision — needs owner ratification), Q-IDENT (new: single-identity merge boundary — the agent PAT authenticates as the owner, so per-merge authorization for analysis artifacts is canonical + CI-gated, not mechanically attributed; options recorded in session record 12 §8).
 - **Walls stage-2 is owner-authorized this turn** (INT-092's "we start building the walls"): CI verify workflow + required-check binding + isolation check + source-coverage control — see D-025.
+
+## Audit note (2026-10-14, session 5 — the three-slices session; appends, supersedes nothing)
+
+- **INT-093..INT-099 record owner turn 9 verbatim** — 81 statused entries, INT-019..INT-099, contiguous and unique. Session record 13 §1 is the verbatim-preservation home (written before these entries, per the closed INT-046/068 class).
+- **Ledger discipline held (INT-075):** owner words only. The turn's directive structure (three slices + proofs) is executed through D-026 (ADOPTED, severable) and P-18 — never ledgered as agent interpretation.
+- **Open owner gates (Q1 re-scoped by INT-097, not closed):** Q1 remainder gates per-host bridge instantiation only — never a wall or a phase (W-02 landed host-agnostically, D-026); Q2 (Phase 3), Q3 (Phase 3, only if the owner uses a `fact` tag), D-014 (non-blocking), F-06 (deployment precision — needs owner ratification), Q-IDENT (single-identity boundary — default documented acceptance).
+- **P-18 recorded this session** (the evolving-truth law: INT-094/095/096 verbatim) — the documentation-layer form of P-17.

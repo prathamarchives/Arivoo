@@ -262,3 +262,25 @@ Stage Summary:
 - Drift surfaces remaining: W-02 host bridges (owner-gated Q1 remainder — the LAST Phase-1 wall), Q-IDENT single-identity boundary (owner-gated, default documented), by-stage items tracked honestly
 - Next: owner answers the compact Decision Review (session record 12 §8); then W-02; then Phase 2 harness
 - Session record: context/extracted/12-GAP-CLOSURE-AND-WALLS-STAGE-2.md
+
+---
+
+Task ID: 12
+Agent: Super Z (orchestrator, GLM host) + 2 GLM-based verification subagents (behavioral proofs)
+Task: Owner directive INT-093..099 (owner turn 9) — the three slices: (1) authority map at the entry point with a conflict proof; (2) unresolved decisions safe (four states, identity not a blocker) with a decision proof; (3) enforced branch-and-PR change authority with observed-working settings and path proofs. Then refine-and-iterate until aligned and strong.
+
+Work Log:
+- Cold-start read as a fresh agent (AGENTS v2.4 read order); verified starting state by runs: verifier 46/0, self-test 20/20, isolation green; branch protection + all PRs (#1-#5 merged, 0 open) observed via API
+- Found and defused the session's landmine FIRST: MUT-17's stale-STATE self-test mutation was content-coupled to the record-12 pointer — the base-anchored required check would have RED-blocked the next legitimate record-adding PR; genericized it (PR #6, merged fdeeebe, both CI jobs green — the two-sided proof)
+- Ran the two live Slice-3 path proofs: direct push to main REJECTED (protected branch hook declined); known-bad probe PR #7 (raw tamper) → canonical-layer RED via VER-802 (run 115684453018) + merge API 405 — closed unmerged, branch deleted, main untouched
+- Ledgered owner turn 9 verbatim (INT-093..099; session record 13 §1 written FIRST per the INT-046/068-class rule; manifest turn-9 row + E-2 extension; audit note 5 — 81 entries)
+- Corpus refinements: P-18 (evolving-truth law); DECISIONS four-state legend + D-026 (severable) + Q1 re-scope; EXECUTION §1/§5/§6 syncs + bounded-diff + separate-revert rules; PLAN W-02 host-agnostic + Phase-1 exit OBSERVED + post-product refinement pass; OPERATING-MODEL Model 0→1 + §3 P-18 line + §9 behavioral proofs; AGENTS v2.5 (objective line INT-093, walls complete); GLOSSARY +3 terms; README rows; NEW .github/PULL_REQUEST_TEMPLATE.md
+- Ran the two behavioral proofs as uncoached fresh-context GLM sub-agents (read-only, no hints): authority-conflict test PASS (D-020 reconciliation identified; averaging AND last-read-wins both rejected; EXR-08's recorded-supersession vs reading-recency correctly distinguished; the VER-804 transient found and handled per doctrine); unresolved-decision test PASS (all three approval shortcuts refused with exact rules; four states + homes exact; closing recommendations matched the session plan)
+- Session exit: record 13 complete (§1-§9), STATE.md refreshed (Phase 1 COMPLETE, Model 1, next: Phase 2 harness planning), this worklog entry; verifier + self-test re-run green on the final tree
+
+Stage Summary:
+- Slice 1: authority map confirmed built + objective line landed + conflict proof PASS; Slice 2: four states explicit + W-02 unblocked (identity not a blocker) + decision proof PASS; Slice 3: bounded-diff rules + PR template + both prohibited routes observed rejected live — Phase 1 exit criteria all OBSERVED, Phase 1 COMPLETE
+- The repo now satisfies its own objective test for the agent layer: two zero-context agents under social pressure navigated authority correctly and refused every shortcut — while the gate layer mechanically rejects both prohibited merge routes
+- Open (all non-blocking): Q1 remainder (per-host instantiation), F-06, Q-IDENT, Q2/Q3 (Phase-3 gates); Decision Review = record 13 §8
+- Next: Phase 2 planning (minimum harness, P-17-scoped); per-host bridges at adoption; session-close PR records the merge SHAs
+- Session record: context/extracted/13-AUTHORITY-DECISIONS-CHANGE-DISCIPLINE.md

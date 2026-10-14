@@ -154,3 +154,11 @@ PASS on both means: a zero-context agent under social pressure toward averaging,
 1. Phase 2 planning begins (Phase 1 exit observed): the minimum trustworthy harness, P-17-scoped — one real-stack test, Proof Sheets from run records, scope enforcement, representative known-bads for the proactive set only. Q1/Q2/Q3/F-06/Q-IDENT block none of it.
 2. The owner answers the Decision Review (§8) whenever convenient — one line per item; STATE.md carries the pointer.
 3. Per-host host bridges land at adoption triggers (Q1 remainder), each with FACT entries verified on installed versions.
+
+## 10. Session close (merge evidence — the verify→merge→record-SHAs discipline, session-12 pattern)
+
+- PR #6 (verifier repair, MUT-17 genericization) merged as **`fdeeebe`**; post-merge push run on `main` green (run `38512622928`: verify / push / success).
+- PR #8 (this session's corpus) merged as **`8019d70`**; post-merge push run on `main` green (run `38514052251`: verify / push / success @ 8019d70). Both PR-time jobs green on both PRs (canonical-layer — the main-anchored judge — and head-tools).
+- PR #7 (the known-bad probe) closed unmerged BY DESIGN — its red run (`115684453018`, VER-802) and the merge-block 405 are the Slice-3 route-2 evidence; the probe never touched `main`.
+- Final state of `main` at session close: `8019d70`; verifier 46/0, self-test 20/20, isolation green (runs above). 0 open PRs; branches `slice/verifier-mutation-genericization`, `slice/authority-decisions-change-discipline`, `slice/session-13-close` merged; `probe/known-bad-raw-tamper` deleted after closure.
+- The record's header line "PRs this session: #6/#7/#8/#9" resolves: #9 is this close PR.

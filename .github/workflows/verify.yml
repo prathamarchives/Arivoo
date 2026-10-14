@@ -43,7 +43,7 @@ jobs:
         run: |
           cp base/tools/verify_canonical_layer.py head/tools/verify_canonical_layer.py
           if [ -f base/tools/isolation_check.py ]; then cp base/tools/isolation_check.py head/tools/isolation_check.py; fi
-      - name: Verify the canonical layer (46 checks: C1–C8)
+      - name: "Verify the canonical layer (46 checks: C1–C8)"
         run: python3 tools/verify_canonical_layer.py
         working-directory: head
       - name: Self-test — known-bad mutations must FAIL their named checks

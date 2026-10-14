@@ -4,22 +4,23 @@
 
 ## Where things stand
 
-- **Phase:** Model 0 — first layer canonicalized + stress-tested, **walls stage-2 live** (protected `main` with PR-only/no-force-push/admin-included since stage-1, D-024; remote CI `verify` workflow + `verify / canonical-layer` required check + isolation check + source-coverage control since stage-2, D-025). Phase 1's remaining wall: W-02 host bridges — blocked ONLY on Q1's remainder (primary builder host + "Other" host). Then Phase 2 (minimum harness).
+- **Phase:** **PHASE 1 COMPLETE — exit observed 2026-10-14 (D-026); Model 1 (Trust Environment) active.** All four Phase-1 walls live: W-01 (protected `main`: PR-only, no force push, admins included, `canonical-layer` required + strict), W-02 (host-agnostic since D-026: Host Contract + bridge pattern; Q1's remainder gates per-host instantiation only, never the wall), W-03 (isolation check), W-04 (remote CI, authoritative). 81 statused intents. **Next: Phase 2 — the minimum trustworthy harness (P-17-scoped).**
 - **Active task:** none open mid-session. (When a slice is open, this line names its card, scope, and cycle count.)
-- **Exact next action:** the owner answers the compact Decision Review in the session-12 record §8 — Q1 remainder (primary builder host + "Other": needed for W-02, the last Phase-1 wall), F-06 (one deployment-precision statement), Q-IDENT (accept documented single-identity boundary or create a bot identity). Defaultable meanwhile: none urgent — F-09 is DONE (this session); the next defaultable slice is Phase-2 preparation reading only if the owner defers W-02.
-- **Last completed:** session 12 — `context/extracted/12-GAP-CLOSURE-AND-WALLS-STAGE-2.md` (gap closure + walls stage-2: source-coverage control with mechanical quote fidelity — 7 ledger defects found and repaired; CI live + required check bound; isolation check; drift analysis with dispositions; D-025, INT-092).
+- **Exact next action:** Phase 2 planning — the minimum trustworthy harness slice per PLAN Phase 2 (one real-stack test, Proof Sheets from run records, scope enforcement, representative known-bads for the proactive set only). No open question blocks it (Q1 re-scoped to instantiation-only, INT-097/D-026). The owner may answer the compact Decision Review in the session-13 record §8 (Q1 remainder — non-blocking; F-06; Q-IDENT) whenever convenient.
+- **Last completed:** session 13 — `context/extracted/13-AUTHORITY-DECISIONS-CHANGE-DISCIPLINE.md` (the three-slices session: INT-093..099 + P-18 + D-026; four decision states; W-02 host-agnostic → Phase-1 exit observed; bounded-diff change rules + PR template; MUT-17 genericized; the two behavioral proofs and two live path proofs, all PASS).
 - **Blocking open questions (each blocks ONLY its dependent work):**
-  - Q1 remainder — primary builder host + "Other" host. Blocks only W-02 host bridges (the last Phase-1 wall).
+  - Q1 remainder — primary builder host + "Other" host. Blocks only per-host bridge instantiation (adoption-time) — never a wall or a phase (INT-097, D-026).
   - Q2 — purge vs backups (D-011). Blocks only the Phase 3 storage/purge schema lock.
   - Q3 — fact-tag meaning (re-scoped by INT-069). Blocks only the fact-tag vocabulary freeze; custom tags are unaffected.
   - D-014 — calculation engine. Non-blocking for capture.
-  - F-06 — cloud vs local-first vs cross-device-sync deployment precision. Blocks only the deployment-precision statement — nothing current.
-  - Q-IDENT — single-identity merge boundary (new, DECISIONS). Blocks nothing under the default (documented acceptance).
-- **Outstanding reviews:** none pending. The stress review's findings are fully dispositioned: F-01..F-08 repaired (F-08 second half impossible until product code — by stage), F-09 DONE (this session), F-10 rides to Phase 5 (belief-policy simulator gate), F-11 noted in the manifest (E-3), F-12 held by claim-scoped verification state below.
+  - F-06 — deployment precision. Blocks only the deployment-precision statement — nothing current.
+  - Q-IDENT — single-identity merge boundary. Blocks nothing under the default (documented acceptance).
+- **Outstanding reviews:** none pending. All prior review findings fully dispositioned (F-01..F-11 repaired or gated; F-08 second half by stage; F-10 rides to Phase 5; F-12 held by claim-scoped verification state below).
 - **Verification state (never trust prose over runs):**
-  - **verified (run):** `python3 tools/verify_canonical_layer.py` GREEN on this tree — 46 checks, 0 failures (C1–C8 incl. mechanical quote fidelity of all 74 ledger entries); `--self-test` 20/20 known-bad mutations caught; `tools/isolation_check.py` GREEN (conditions-only) with its known-bad caught.
-  - **verified (observed):** remote CI ran the `verify` workflow on the session-12 PR — both jobs green — and the `canonical-layer` check is bound as required on `main` (merge-blocking, strict, admin-included); branch protection rejects direct pushes (break-test, session 11).
-  - **not verified:** host bridges unwritten (W-02, blocked on Q1 remainder); the real one-shot coding test is impossible until product code exists (F-08 second half — by stage, not by omission); quote fidelity covers E-2 chat-sourced turns only via session-record cross-checks, not raw (manifest §7).
+  - **verified (run):** `python3 tools/verify_canonical_layer.py` GREEN on this tree — 46 checks, 0 failures; `--self-test` 20/20 known-bad mutations caught (MUT-17 now content-generic); `tools/isolation_check.py` GREEN (conditions-only, remote de-credentialed).
+  - **verified (observed, this session):** direct push to `main` REJECTED by protection (route 1); a deliberately broken PR REJECTED — `canonical-layer` red via VER-802 naming the tampered file, merge API 405 "Required status check failing" (route 2, probe PR #7, closed unmerged); PR #6's CI green both jobs; protection config observed via API (0 required approvals — Q-IDENT-compatible).
+  - **verified (behavioral, fresh-context sub-agents):** authority-conflict test PASS (identifies EXECUTION §3 / D-020; rejects averaging AND last-read-wins); unresolved-decision test PASS (four states + homes; refuses recommendation/presence/elapsed-time as approval).
+  - **not verified:** per-host file-import bridges (land at host adoption with FACT entries); the real one-shot coding test (impossible until product code exists — F-08 second half, by stage); the PR template's first live use (the next session's PRs).
 
 ## How to use this file
 

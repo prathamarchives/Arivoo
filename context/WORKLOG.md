@@ -284,3 +284,23 @@ Stage Summary:
 - Open (all non-blocking): Q1 remainder (per-host instantiation), F-06, Q-IDENT, Q2/Q3 (Phase-3 gates); Decision Review = record 13 §8
 - Next: Phase 2 planning (minimum harness, P-17-scoped); per-host bridges at adoption; session-close PR records the merge SHAs
 - Session record: context/extracted/13-AUTHORITY-DECISIONS-CHANGE-DISCIPLINE.md
+
+---
+Task ID: 13
+Agent: Super Z (main, GLM host) + 3 uncoached fresh-context GLM sub-agents (handoff-proof agent; cold-start task agent; separate grader)
+Task: Owner turn 10 (INT-100..109/D-027): execute layer 1.2 — the STATE contract, session handoffs, read path, cold-start proof, replication kit.
+
+Work Log:
+- Preflight green @ e8a8259 (46/0 + 20/20 + isolation); PR #10 7ec4c89: STATE five-area contract + turn-10 intake (INT-100..109); PR #11 e08af51: event-typed two-tier handoffs + TEMPLATES + handoff proof PASS (record 13 §9 staleness handled correctly)
+- PR #12 15bae62: MUT-08 genericized (gate re-target — main's judge would have RED-blocked the supersession PR; two-sided proof)
+- PR #13 87e5cf0: read-path supersession (AGENTS v2.6 selective order, VER-110/MUT-21/22, 47 checks/22 mutations) + the cold-start proof: uncoached task agent (3/3 owner questions, 8-row blocks-only table, 10 files / 14,975 words = 20% of the 75,735-word raw corpus, zero raw/) + SEPARATE grader: 28/28 pointers, manifest exact, fail conditions 5/5, weighted 96.8/100 PASS
+- PR #14 ce7d81a: REPLICATION-GUIDE.md (INT-108 — the pattern layer travels, Arivo content stays; 8 instantiation steps, replication proof = the copy's own cold-start) + GLOSSARY/EXECUTION/README folds
+- PR #15: this close — record 14 complete (§8–§14), this compact entry (the form's first live use), STATE exit
+
+Stage Summary:
+- Outcome: LAYER 1.2 COMPLETE — D-027 fully merged standing: STATE contract, two-tier session records, selective read path (blanket ledger-first boot superseded), cold-start proof PASS with measured baseline + budget (≤12 files / ≤18k words), replication kit
+- Evidence: verifier 47/0 + self-test 22/22 + isolation green at every tree point (§8); CI chain all green — 38521337785/38521445871 (#10), 38522152771/38522257069 (#11), 38522398530/38522484815 (#12), 38531302130/38531369782 (#13), 38531935939/38532014775 (#14)
+- Pointer: record 14 (COMPLETE)
+- Unresolved: Q1 remainder, Q2, Q3, QD-1, D-014, F-06, Q-IDENT — none blocks the Phase 2 harness; verify.yml step label P-18-deferred; PR #15's own post-merge run = the named gap for session 15's preflight
+- Next: session 15 — intake owner turn 11 (the detailed Phase 1&2 execution plan supplied in chat), then Phase 2 Layer 2.1 per that plan
+- Session record: context/extracted/14-NAVIGATION-HANDOFFS-READ-PATH.md

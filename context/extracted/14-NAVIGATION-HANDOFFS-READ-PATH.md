@@ -233,4 +233,31 @@
 
 - **The landmine (found by pre-implementation reasoning, the MUT-17 class):** the required `canonical-layer` job runs MAIN's verifier — including its SELF-TEST — over every PR head. MUT-08 (the boot-sequence guard) mutates a hard-coded ledger-first step-1 string in AGENTS.md. PR #13 moves the ledger OFF step 1 (the supersession); on that head, main's MUT-08 string would stop matching, the mutation would silently no-op, and the self-test would report a blind guard — RED-blocking the exact PR the owner's slice 6 authorizes. The repo's own gate blocking its own legitimate next change.
 - **The repair (the session-13 PR #6 pattern):** MUT-08 genericized — `_drop_ledger_step` removes whichever numbered read-order line names `/INTENT-LEDGER.md`, old order or selective order. VER-101 itself is unchanged (presence + before-NORTH-STAR holds in both orders); the guard's COVERAGE is what was repaired. The workflow file is untouched; the change strengthens a guard and lands as its own PR with evidence.
-- **Two-sided proof (both CI jobs on this PR):** `canonical-layer` (main's pre-repair MUT-08 over this head — AGENTS unchanged here, the old string still applies) must stay green; `head-tools` (this head's new generic mutation) must stay green. After this merges, main's judge carries the generic form and PR #13 can change the read order.
+- **Two-sided proof (both CI jobs on this PR):** `canonical-layer` (main's pre-repair MUT-08 over this head — AGENTS unchanged here, the old string still applies) must stay green; `head-tools` (this head's new generic mutation) must stay green. After this merges, main's judge carries the generic form and PR #13 can change the read order. **Observed: run `38522398530` both jobs green; merged `15bae62`; post-merge run `38522484815` green.**
+
+## 6. Slice 6, step 2 — the read-path supersession + the bounded cold-start proof (PR #13)
+
+### 6.0 The protocol and rubric — FIXED BEFORE LAUNCH (D-027(4); form: `context/TEMPLATES.md` §4)
+
+- **Task agent:** uncoached, fresh-context GLM sub-agent; given ONLY the repository path, the owner's question (a realistic task with two built-in challenges: notice an open dependency and what it blocks; distinguish an observed-live result from a not-checked claim), read-only constraints, the instruction to follow the repository's own startup instructions, and the requirement to produce (1) an answer with a source pointer per claim, (2) the ONE exact next action, (3) a read manifest (every file opened, in order, with approximate word counts and the total). No hints about which files to read; no conversation context.
+- **Verifier:** SEPARATE fresh-context GLM sub-agent (did not write the docs, did not run the task); given the rubric + the task agent's full report + read-only repo access; grades each criterion, spot-checks pointers, cross-checks the manifest's word counts against the real files (`wc -w`); final verdict PASS/FAIL. The task agent never grades itself.
+- **Rubric (weights fixed before launch):** factual correctness 40% · authority + unresolved-decision handling 25% (four states; recommendations/presence/elapsed time never approval; blocks-only-dependents scoping) · deterministic continuation 15% · evidence citations 10% · measured read scope 10%.
+- **FAIL conditions (any one):** reads any `context/raw/` file; reads unrelated historical records (pre-session-13) without a task-specific reason; claims without pointers; treats proposed/observed as owner-approved; wrong phase or wrong next action.
+- **Scope policy:** record the measured baseline (files + total words); the read-scope budget is SET FROM the baseline (defaultable default — the owner's open question 21 answered "baseline first" by non-objection; overridable at any touchpoint). The owner's principle: "the agent finds the relevant context without reading tens of thousands of unrelated words."
+- **The owner's question given to the task agent:** "Before we begin Phase 2 product work: where exactly does the repo stand, is anything in the open owner decisions blocking the harness work, and can I trust that branch protection actually rejects a bad merge? Point me at the evidence."
+
+### 6.1 The supersession corpus (this PR)
+
+- `AGENTS.md` v2.6: the read order is now the owner's five-step selective path — this file → `/STATE.md` → worklog tail (last 3 compact entries) → `/INTENT-LEDGER.md` marked SELECTIVE (verify the entries behind the task and any CONSEQUENTIAL change; it remains the ONLY intent path; blanket boot reading superseded, INT-107/D-027(3)) → `/NORTH-STAR.md` + `/EXECUTION.md`-mapped task-relevant sources only → reference tier on demand. The ambiguity rule lands too ("report the ambiguity — never compensate by reading the whole repository").
+- `EXECUTION.md` §2: the intent rule rewritten as selective verification (the supersession reconciled canonically — never an implicit exception; LOOP-05 unchanged).
+- `OPERATING-MODEL.md` §7: the cold-start protocol rewritten to the selective path; invariant 1's parenthetical synced; §9: the cold-start resumption test added as the third standing behavioral proof (rerun triggers: entry point / read order / STATE schema / worklog protocol / authority structure changes + phase gates — never every doc edit).
+- `STATE.md`: the how-to-use line now states the supersession; position lines updated to the true mid-session state (slices 4–5 merged with SHAs; slice 6 in progress).
+- `GLOSSARY.md`: +Selective intent verification, +Read manifest.
+- Verifier: **VER-110** (the supersession guard: the ledger step must carry the SELECTIVE marker AND the worklog tail must be an early numbered boot step) + **MUT-21** (regress to blanket ledger-first boot — content-generic) + **MUT-22** (drop the worklog-tail boot step — content-generic). 47 checks / 22 mutations. Both mutations generic by construction (the MUT-08 lesson applied prospectively).
+- The canonical read order on `main` changes only when this PR merges — AFTER the proof below passes on this branch (the owner's rule: "Update the canonical read order only after the behavior is proven").
+
+### 6.2 The proof run (task agent) — [RESULTS APPENDED AFTER THE RUN]
+
+### 6.3 Independent grading (verifier agent) — [RESULTS APPENDED AFTER THE RUN]
+
+### 6.4 Scope baseline + budget — [APPENDED AFTER THE RUN]

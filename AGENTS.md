@@ -1,27 +1,21 @@
-# AGENTS.md — Arivoo (product: Arivo) — v2.5
+# AGENTS.md — Arivoo (product: Arivo) — v2.6
 
 You are an agent in this repository. This file is your map. Read it fully, then follow the read order. Host bridges (e.g. CLAUDE.md) import this file at host adoption (W-02, host-agnostic per D-026 — the Host Contract + bridge pattern; Q1's remainder gates per-host instantiation only, never the wall; verified on installed hosts, never assumed); this file remains canonical.
 
 ## What this is
 - **Objective (INT-093):** any capable agent can enter this repository, understand the project, identify the next correct action, work within its authority, verify its work, and leave the repository easier to continue from. Every structure below exists to make that true without the agent supplying its own assumptions.
 - **Arivo**: the owner's reading/study/reflection environment — backend only (base, foundation, mechanism; no UI/UX). Repo: **Arivoo**. Owner: prathamarchives.
-- Phase: **PHASE 1 — LAYER 1.2 IN EXECUTION (v2.5+) — the STATE index, session handoffs, read path, replication (owner turn 10, INT-100/D-027)** — memory, doctrine, law book, decisions, plan, operating models, the execution contract's one canonical home (`/EXECUTION.md`), the current-state index (`/STATE.md`, five-area contract), and the source-coverage control (`context/SOURCE-COVERAGE-MANIFEST.md`) live at the repo root/tree; 91 statused intents; Phase-1 exit criteria remain OBSERVED (2026-10-14, D-026); remote CI (`verify` workflow, D-009/D-025) runs the verifier on every PR with the required check bound to `main`; all four Phase-1 walls live. Next: Phase 2 — the minimum trustworthy harness (P-17-scoped), which begins only with the owner-approved execution plan.
+- Phase: **PHASE 1 — LAYER 1.2 IN EXECUTION (v2.6) — the STATE index, session handoffs, read path, replication (owner turn 10, INT-100/D-027)** — memory, doctrine, law book, decisions, plan, operating models, the execution contract's one canonical home (`/EXECUTION.md`), the current-state index (`/STATE.md`, five-area contract), and the source-coverage control (`context/SOURCE-COVERAGE-MANIFEST.md`) live at the repo root/tree; 91 statused intents; Phase-1 exit criteria remain OBSERVED (2026-10-14, D-026); remote CI (`verify` workflow, D-009/D-025) runs the verifier on every PR with the required check bound to `main`; all four Phase-1 walls live. Next: Phase 2 — the minimum trustworthy harness (P-17-scoped), which begins only with the owner-approved execution plan.
 - Operating mode: the orchestrator runs, the owner reviews (P-13). Commit protocol: memory deltas land as a commit and a push (P-15); analysis/review/proposal artifacts land by PR, merged only with the owner's explicit authorization (D-024).
 
-## Read order (cold start)
-1. `/INTENT-LEDGER.md` — owner words, verbatim, statused. The highest authority. Load it BEFORE forming any understanding of the task.
-2. `/STATE.md` — where things stand NOW: current phase, active task, exact next action, blocking open questions, verification state. A navigation snapshot, NOT authority — on any disagreement the canonical document wins.
-3. `/NORTH-STAR.md` — the goal in the owner's words; claims C1–C5; the seven-layer contract
-4. `/PRINCIPLES.md` — the owner's laws P-01..P-18 (each with mechanism, failure mode, growth)
-5. `/LAWS.md` — the executable law book: the 29 laws, ladder C1–C6, phase mapping
-6. `/ENGINEERING.md` — the doctrine: why the laws are what they are (transcripts + upstream)
-7. `/DECISIONS.md` — statused decisions D-001..D-026 + open Q1–Q3, Q-IDENT (the four decision states: owner / adopted / proposed / unresolved — legend)
-8. `/EXECUTION.md` — the execution contract's one canonical home: the contract map, the source tiers, the authority order, the change protocol
-9. `/PLAN.md` — one phase deep; guardrails; Phase 1 detail
-10. `/GLOSSARY.md` — controlled vocabulary (use these exact names)
-11. `/OPERATING-MODEL.md` — roles, the slice loop, the growth models (6 stages), the memory update protocol, self-healing, verification
-12. `context/WORKLOG.md` (tail — last 3–5 entries) — what just happened, what's open
-13. Reference tier — task-scoped, never boot material: `context/extracted/` historical briefs and numbered session engineering records (banner-marked; 07 = the live register), `context/reviews/` review-only artifacts, and `context/raw/` — the verbatim mixed corpus, never edit. Read raw files only when a task requires it (quote verification, intent backfill); owner intent is NOT taken from raw (source tiers: `/EXECUTION.md` §2).
+## Read order (cold start — selective: position first, authority on demand; INT-107/D-027(3))
+1. `/AGENTS.md` — this file: read it fully (purpose, binding rules, entry contract).
+2. `/STATE.md` — where things stand NOW: the five-area contract — phase, active task, exact next action, every open owner question, evidence labels with pointers. A navigation snapshot, NOT authority — on any disagreement the canonical document wins. If the next action is ambiguous, report the ambiguity — never compensate by reading the whole repository.
+3. `context/WORKLOG.md` (tail — last 3 compact entries; follow the latest session-record pointer) — what just happened, what's open.
+4. `/INTENT-LEDGER.md` — SELECTIVE, not blanket: verify the entries behind your task and any CONSEQUENTIAL change. It remains the highest authority and the ONLY path by which owner intent enters this repo — but blanket ledger-first boot reading is superseded (INT-107/D-027(3)): knowing the task does not require all owner words; changing something consequential does.
+5. `/NORTH-STAR.md` — the goal in the owner's words; claims C1–C5; the seven-layer contract (read when the task touches the goal or claims).
+6. `/EXECUTION.md` — the contract map (§1) and authority order (§3): use them to identify the task-relevant canonical sources, then read ONLY those — `/DECISIONS.md`, `/PLAN.md`, `/LAWS.md`, `/ENGINEERING.md`, `/PRINCIPLES.md`, `/GLOSSARY.md`, `/OPERATING-MODEL.md` — what the task touches, not everything.
+7. Reference tier — only when the task requires the underlying evidence or original source: numbered session records, `context/reviews/`, `context/extracted/` briefs, and `context/raw/` (the verbatim mixed corpus as received — never edit it; owner intent is NOT taken from raw, INT-068/D-022). Historical records and raw are reference material, never boot reading.
 
 ## Binding rules
 - The repo is the memory. Chat history is not (P-02). Every reasoning delta → file → commit → push (P-15).

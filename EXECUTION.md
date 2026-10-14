@@ -41,7 +41,7 @@
 | 3 | Root canonical documents | The derived authority layer (NORTH-STAR, PRINCIPLES, LAWS, ENGINEERING, OPERATING-MODEL, PLAN, GLOSSARY). |
 | 4 | `context/extracted/` | Historical process artifacts — extraction and reasoning history, banner-marked. They never outrank root documents. Exception: `07-ON-THE-LIST.md` is the live register (D-020). |
 
-**The intent rule.** Owner intent enters this repo ONLY through INTENT-LEDGER entries — owner words, verbatim, statused. A raw-corpus sentence, an AI proposal, or an extracted-brief statement is NOT intent until it is a ledger entry or an adopted decision (LOOP-05: a requirement with no intent behind it fails the audit). A fresh agent loads the Intent Ledger **before** forming any understanding of the task, and every slice card / context pack carries its INT- IDs and the owner quotes.
+**The intent rule (selective verification — D-027(3)/INT-107, 2026-10-14).** Owner intent enters this repo ONLY through INTENT-LEDGER entries — owner words, verbatim, statused. A raw-corpus sentence, an AI proposal, or an extracted-brief statement is NOT intent until it is a ledger entry or an adopted decision (LOOP-05: a requirement with no intent behind it fails the audit). A fresh agent verifies the intent entries RELEVANT to its task **before any consequential change**: the ledger is the highest authority, but blanket ledger-first BOOT reading is superseded by the owner's selective read path (AGENTS → STATE → worklog tail → task-relevant sources; INT-107) — knowing the task does not require all owner words; changing something consequential does require the owner words behind it. Every slice card / context pack still carries its INT- IDs and the owner quotes.
 
 ## 3. The authority order (conflict resolution)
 

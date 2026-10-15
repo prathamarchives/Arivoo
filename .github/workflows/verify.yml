@@ -1,20 +1,27 @@
 # verify — W-04: owner-controlled remote CI (D-009: remote CI is authoritative).
 #
-# Wall design (D-025, PLAN Phase 1 W-01 stage-2 + W-04; extended session 16, D-034 —
-#   the owner-forwarded Arivoo review's Slice 11.2, the smallest change):
-#   Job "canonical-layer" (the REQUIRED check) runs the verifier AND the isolation
-#   checker FROM MAIN over the PR head's corpus: a PR that weakens the verifier, the
-#   isolation check, or the documents together cannot pass — the judges are anchored
-#   outside the change under review. The isolation gate is base-anchored exactly like
-#   the canonical verifier: it runs in CI mode (required runner config) and executes
-#   its known-bad self-test (the complete diagnostic-path matrix), so a PR weakening
-#   both the isolation check and its own tests cannot rely on its own implementation
-#   to approve itself.
-#   Job "head-tools" (informational) runs the HEAD tree's own verifier, self-test,
-#   and isolation check — so verifier/tool changes ARE exercised in their own PR.
+# Wall design (D-025; extended session 16 / D-034 Slice 11.2; re-architected
+#   session 17 / D-035 — the owner-forwarded gates review's P1+P2):
+#   Job "canonical-layer" (REQUIRED) anchors FOUR trusted judges from main and
+#   runs them over the PR head's tree — under DISTINCT names, sha256-verified
+#   against base, fail-closed if absent (never a silent fallback to the
+#   candidate's version):
+#     1. base verifier            -> the candidate's DOCUMENTS (51/0 semantics)
+#     2. base mutation suite      -> the CANDIDATE'S VERIFIER (the floor: a PR
+#        that weakens the verifier AND its own tests together still fails the
+#        base's 30 mutations in the REQUIRED job)
+#     3. base isolation checker   -> the candidate's TREE in CI mode
+#     4. base isolation matrix    -> the CANDIDATE'S CHECKER (the same floor)
+#   Job "head-tools" (ALSO REQUIRED — bound at branch protection after this
+#   workflow's first green run was observed, the W-01 stage-2 pattern) exercises
+#   the CANDIDATE'S OWN tools, fail-closed on missing files: a red here BLOCKS
+#   the merge (the turn-14 P1: candidate-tool changes are merge-blocking), and
+#   the coordinated-weakening class is still caught by the base floors above.
 #
-# Never weaken this gate (LAW-09): removing the base-anchoring, the self-tests, or
-# either isolation step is a constraint-weakening change requiring an owner decision.
+# Never weaken this gate (LAW-09): removing the anchoring, the sha256
+# verification, the fail-closed checks, either isolation step, the floors, or
+# un-requiring a job is a constraint-weakening change requiring an owner
+# decision.
 
 name: verify
 
@@ -36,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout main (base — the anchored judge)
+      - name: Checkout main (base — the anchored judges)
         uses: actions/checkout@v4
         with:
           ref: main
@@ -45,24 +52,33 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: head
-      - name: Anchor the verifier and isolation checker from main into the head tree
+      - name: "Anchor the trusted judges from main (fail-closed; distinct names; sha256-verified — never a silent fallback to the candidate's version)"
         run: |
-          cp base/tools/verify_canonical_layer.py head/tools/verify_canonical_layer.py
-          if [ -f base/tools/isolation_check.py ]; then cp base/tools/isolation_check.py head/tools/isolation_check.py; fi
-      - name: "Verify the canonical layer (base-anchored judge — check count printed by the tool)"
-        run: python3 tools/verify_canonical_layer.py
+          set -e
+          for f in verify_canonical_layer.py verify_selftest.py isolation_check.py isolation_selftest.py; do
+            test -f "base/tools/$f" || { echo "FAIL: base/tools/$f missing — refusing any candidate-substituted judge (the turn-14 P2: never fall back silently)"; exit 1; }
+            cp "base/tools/$f" "head/tools/${f%.py}_anchored.py"
+          done
+          echo "sha256 verification (the anchored file IS the base's):"
+          for f in verify_canonical_layer.py verify_selftest.py isolation_check.py isolation_selftest.py; do
+            a=$(sha256sum "base/tools/$f" | cut -d' ' -f1)
+            b=$(sha256sum "head/tools/${f%.py}_anchored.py" | cut -d' ' -f1)
+            [ "$a" = "$b" ] || { echo "FAIL: anchored copy of $f differs from base"; exit 1; }
+            echo "  $f: ${a:0:16}... verified identical to base"
+          done
+      - name: "Verify the canonical layer — base-anchored judge over the candidate documents (check count printed by the tool)"
+        run: python3 tools/verify_canonical_layer_anchored.py
         working-directory: head
-      - name: Self-test — known-bad mutations must FAIL their named checks (base-anchored)
-        run: python3 tools/verify_canonical_layer.py --self-test
+      - name: "Candidate-verifier floor — the BASE's 30-mutation suite judged against the CANDIDATE's verifier (D-035: the coordinated-weakening floor)"
+        run: python3 tools/verify_selftest_anchored.py
         working-directory: head
-      - name: "Isolation check — base-anchored judge over the candidate tree (CI mode; W-03, LAW-28, Slice 11.2/D-034)"
+      - name: "Isolation check — base-anchored judge over the candidate tree (CI mode; W-03, LAW-28)"
         run: |
-          test -f tools/isolation_check.py || { echo "base isolation_check.py not anchored — refusing to skip the gate"; exit 1; }
-          python3 tools/isolation_check.py --ci
+          test -f tools/isolation_check_anchored.py
+          python3 tools/isolation_check_anchored.py --ci
         working-directory: head
-      - name: Isolation self-test — the complete diagnostic-path matrix must hold (base-anchored)
-        run: |
-          python3 tools/isolation_check.py --self-test
+      - name: "Candidate-isolation floor — the BASE's 18-case matrix judged against the CANDIDATE's checker (D-035)"
+        run: python3 tools/isolation_selftest_anchored.py
         working-directory: head
 
   head-tools:
@@ -71,15 +87,16 @@ jobs:
     steps:
       - name: Checkout head
         uses: actions/checkout@v4
-      - name: Verify with the head tree's own verifier (exercises in-PR tool changes)
-        run: python3 tools/verify_canonical_layer.py
-      - name: Self-test (head)
-        run: python3 tools/verify_canonical_layer.py --self-test
-      - name: Isolation check — conditions printed, values never (W-03, LAW-28)
+      - name: "Candidate tools must be present (fail-closed — a missing tool is RED, never skipped)"
         run: |
-          if [ -f tools/isolation_check.py ]; then
-            python3 tools/isolation_check.py --ci
-            python3 tools/isolation_check.py --self-test
-          else
-            echo "isolation_check.py not present in this tree (pre-W-03 commit range) — skipped, not assumed"
-          fi
+          for f in tools/verify_canonical_layer.py tools/verify_selftest.py tools/isolation_check.py tools/isolation_selftest.py; do
+            test -f "$f" || { echo "FAIL: $f missing from the candidate tree — a deleted/renamed tool is a constraint-weakening change (LAW-09)"; exit 1; }
+          done
+      - name: "Verify with the candidate's own verifier (its changes are exercised — and REQUIRED, D-035)"
+        run: python3 tools/verify_canonical_layer.py
+      - name: "Candidate's own mutation suite (exercised, REQUIRED)"
+        run: python3 tools/verify_selftest.py
+      - name: "Isolation check — the candidate's own checker (CI mode; W-03, LAW-28)"
+        run: python3 tools/isolation_check.py --ci
+      - name: "Isolation self-test — the candidate's own matrix (exercised, REQUIRED)"
+        run: python3 tools/isolation_selftest.py

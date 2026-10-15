@@ -345,3 +345,24 @@ Stage Summary:
 - Unresolved: D-014 (non-blocking); PR #23's post-merge run + the integrated graduation proof at the final SHA (session 17's preflight + gate); tag-semantics rule at its named pre-Phase-5 gate
 - Next: session 17 — the Phase-1 graduation gate (record 16 §11 verbatim)
 - Session record: context/extracted/16-ISOLATION-DIAGNOSTICS-HOST-GATES.md
+
+---
+Task ID: 16
+Agent: Super Z (main orchestrator, GLM host) + 2 uncoached fresh-context GLM sub-agents (graduation task agent; separate graduation grader)
+Task: Owner turn 14 (INT-119/D-035 — the owner-forwarded gates review): resolve the candidate-tool gate (P1 — merge-blocking for candidate tools, the coordinated weakening class) and the missing-anchor fallback (P2), then the integrated fresh-context Phase-1 graduation proof at the resulting final SHA.
+
+Work Log:
+- Preflight @ `8e5b1e9` (51/0 + 30/30 + isolation + 18/18; run 38578692377 SUCCESS; protection = [`canonical-layer`] ONLY — the P1 confirmed live; the turn's leading token verified identical to the store, redacted at ingestion, never recorded)
+- PR #24 `00e3dc3`: record 17 §1 verbatim BEFORE the ledger (INT-119 E-4-labeled, 101 entries; D-035 ADOPTED); the selftest EXTRACTION — `tools/isolation_selftest.py` + `tools/verify_selftest.py` (suites as separately-invocable modules; flags delegate; counts unchanged 51/30/18); the missing-`__main__` false-green found by inspecting EMPTY output (exit 0, no run) and fixed pre-PR
+- PR #25 `563b19a`: the candidate-tool gate — canonical-layer anchors FOUR trusted judges under DISTINCT sha256-verified names (base verifier + base isolation checker judge the candidate's documents/tree; the BASE's suites judge the CANDIDATE'S tool implementations — the coordinated-weakening floor); fail-closed anchoring (no conditional copy; the anchored file is provably the base's; head-tools' silent-skip removed); ATTACK TEST: a candidate weakened exactly as the review describes (VER-109 always-pass + its MUT-05 removed) is green to itself (29/29) and RED at the floor
+- Binding (W-01 stage-2): post-merge run 38685103408 observed green → protection updated → re-observed required = [`canonical-layer`, `head-tools`], strict, admins
+- Graduation @ the final content SHA `563b19a`: fresh-context task agent — cold start (10 files ~10k words, zero raw/), authority/intent with pointers, all four checks green, push probe REJECTED ("GH006 … 2 of 2 required status checks are expected" — the doubled requirement confirmed behaviorally), bounded authorized change through the gates' allowed path (branch `slice/graduation-audit-s17`, one commit, pushed, main untouched); SEPARATE grader re-ran everything, 23+ citations zero contradictions → **96/100 PASS**
+- PR #26: the seven-part graduation evidence table (record 17 §4.3) + both reports verbatim (§7) + the phase update — Phase 1 GRADUATED, Phase 2 UNBLOCKED; the audit branch deleted after verbatim preservation
+
+Stage Summary:
+- Outcome: the turn-14 P1/P2 resolved by construction (candidate tool changes merge-blocking; the coordinated weakening mechanically caught; anchoring fail-closed and provable) and Phase 1 GRADUATED on the integrated proof — slice-level green never treated as system-level proof
+- Evidence: 51/0 + 30/30 + isolation 18/18 at every head (re-run by two independent fresh-context agents at `563b19a`); CI green at every merge (#24 `00e3dc3` · #25 `563b19a` · #26 this merge — the first merges under the DOUBLED required checks); graduation 96/100 (record 17 §4.3/§7)
+- Pointer: record 17 (COMPLETE)
+- Unresolved: D-014 (non-blocking); PR #26's post-merge run (session 18's preflight if not observed at close); tag-semantics at its named pre-Phase-5 gate
+- Next: session 18 — Phase 2 Layer 2.1 (the minimum trustworthy harness) per the owner's plan as supplied
+- Session record: context/extracted/17-CANDIDATE-TOOL-GATE-AND-GRADUATION.md

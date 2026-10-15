@@ -15,6 +15,7 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-100..INT-109** — owner turn 10 (session record 14, 2026-10-14 layer-1.2 session): slices 4–6 as Phase 1's 1.2 layer; the STATE contract (whole-repo long-term memory, evidence pointers, snapshot semantics); the session-record event-type policy; the selective cold-start read path; replicability of the whole system.
 - **INT-110..INT-117** — owner turn 12 (session record 15, 2026-10-14 integrity-and-evidence session): the open-question answers — agent-agnostic design (Q1), purge top option (Q2), tag system removed (Q3), any readable format (QD-1), math deferred (D-014 reaffirmed), Supabase synced deployment (F-06), identity boundary accepted (Q-IDENT) — plus the Integrity-and-evidence directive (slices 7–9).
 - **INT-118** — owner turn 13 (session record 16, 2026-10-14 isolation-diagnostics-host-gates session): the owner-forwarded Arivoo review — the final two Phase-1 slices (10: isolation and diagnostics; 11: real host bridges and automated gates) + the Phase-1 graduation gate, with the findings that closed decision language and the GLM-host assumption have not fully propagated (owner-forwarded text, E-4 class, labeled).
+- **INT-119** — owner turn 14 (session record 17, 2026-10-15 candidate-tool-gate-and-graduation session): the owner-forwarded gates review — candidate tool changes must be merge-blocking (P1: the coordinated tool+self-test weakening class), the anchor must be fail-closed (P2), and the graduation is resequenced: gates first, then the integrated fresh-context proof at the resulting final SHA (owner-forwarded text, E-4 class, labeled; the turn's leading access token redacted at ingestion per D-025/INT-092).
 
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
@@ -576,7 +577,18 @@ Source: owner turn 12, chat 2026-10-14 (session record 15 §1, E-2 class; the em
 
 Source: owner turn 13, chat 2026-10-14 (session record 16 §1, E-2 class for the turn's preservation; the quoted lines are owner-FORWARDED review text, labeled per the INT-053/068 owner-presented-statement convention — never silently treated as the owner's own words). Grounds: DECISIONS D-034 (the review's adoption — findings repair + Slices 10–11 + the graduation gate, severable and challengeable); D-028 (agent-agnostic — the review's second P1 finding propagates it); D-026/D-024 (bounded diffs, change channel); P-13/P-15 (standing authorization for the memory-delta + owner-directed execution work this turn directs). The owner's act is the forwarding itself: no owner-voiced words accompany the review text this turn.
 
+**INT-119 — GATES REVIEW: CANDIDATE-TOOL GATE + GRADUATION RESEQUENCING — active (owner-forwarded review text, E-4 class — the full turn is preserved verbatim in record 17 §1, the leading access token redacted at ingestion per D-025/INT-092)**
+> "I'm keeping those two claims separate rather than treating successful slice-level checks as proof of the entire system." · "I would therefore not mark Phase 1 graduated yet. First resolve the candidate-tool gate issue and the missing-anchor fallback, run the required checks through the protected PR workflow, and then complete the integrated fresh-context proof at the resulting final `main` SHA."
+
+Source: owner turn 14, chat 2026-10-15 (session record 17 §1, E-2 class for the turn's preservation; the quoted lines are owner-FORWARDED review text, labeled per the INT-053/068 owner-presented-statement convention). Grounds: DECISIONS D-035 (the review's adoption — the candidate-tool gate resolution, fail-closed anchoring, and the graduation sequencing, severable and challengeable); D-034 item 6 (the graduation gate this resequences); D-025/D-026 (walls + bounded diffs); P-13/P-15 (standing authorization). The owner's act is the forwarding itself; the turn's leading token was a re-supplied session credential, redacted at ingestion and never recorded.
+
 ---
+
+## Audit note (2026-10-15, session 17 — the candidate-tool-gate-and-graduation session; appends, supersedes nothing)
+
+- **INT-119 records owner turn 14** — 101 statused entries, INT-019..INT-119, contiguous and unique. Session record 17 §1 is the verbatim-preservation home (written and committed BEFORE the entry, per the closed INT-046/068 class).
+- **Ledger discipline held (INT-075):** owner words only — this turn again carries no owner-voiced words; it is the owner forwarding the gates review. The turn OPENED with an owner-supplied access token: redacted at ingestion (verified programmatically identical to the standing out-of-repo store; the value never entered any file, log, or record — D-025/INT-092, the turn-8 precedent). The review text is preserved verbatim in record 17 §1; only its two governing lines are quoted on INT-119, explicitly labeled owner-forwarded (E-4 class).
+- **Open owner gates (after this turn):** D-014 (non-blocking) — unchanged. The graduation gate is a D-035 condition, not an owner question.
 
 ## Audit note (2026-10-14, session 16 — the isolation-diagnostics-host-gates session; appends, supersedes nothing)
 

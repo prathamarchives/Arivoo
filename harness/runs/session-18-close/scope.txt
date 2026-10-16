@@ -1,0 +1,11 @@
+# session-18 close (PR #34): the session record completes (§5–§12 + the header correction),
+# the STATE/PLAN/AGENTS session-exit refresh (Phase 2 LANDED), the WORKLOG Task-17 entry,
+# the manifest turn-15/16 provenance rows, and the state.py truncation repair
+# (an S4a deliverable defect found by the fresh-context verifier, record 18 §8).
+context/extracted/18-RESEARCH-DRIVEN-REVIEW-AND-PHASE2-FOUNDATION.md
+STATE.md
+PLAN.md
+AGENTS.md
+context/SOURCE-COVERAGE-MANIFEST.md
+context/WORKLOG D-036
+harness/ D-036

@@ -366,3 +366,24 @@ Stage Summary:
 - Unresolved: D-014 (non-blocking); PR #26's post-merge run (session 18's preflight if not observed at close); tag-semantics at its named pre-Phase-5 gate
 - Next: session 18 — Phase 2 Layer 2.1 (the minimum trustworthy harness) per the owner's plan as supplied
 - Session record: context/extracted/17-CANDIDATE-TOOL-GATE-AND-GRADUATION.md
+
+---
+Task ID: 17
+Agent: Super Z (main, GLM host) + 1 uncoached fresh-context GLM sub-agent (the close verification; environment worklog Task 19-a)
+Task: Owner turns 15–16 (INT-120/INT-121, D-036): intake the 2026-10-16 research-driven review + repair its drift findings, then execute Phase 2 Layer 2.1 — the review's S1–S4 harness slices, Rider A folded — and close the session with binding, probe, and independent verification.
+
+Work Log:
+- PR #27 (cd5f322): the review artifact verbatim in context/reviews/ + record 18 §1–§3 committed BEFORE the ledger; INT-120/121 (103 entries); D-036; F-1..F-5/F-8 drift repairs across AGENTS/STATE/EXECUTION/GLOSSARY/DECISIONS; the open register Q6–Q10
+- PR #28–#30 (S1/S2/S3, b508dfb/3c2b115/aa2761a): red-first each (LAW-11) — the migrations runner + CI postgres:17 job + version-parity FACT; the substrate-convention table (immutability triggers, RLS, arv_read independent reads, adapters clock/ids per LAW-24); the idempotent command path + SIGKILL crash injection at 3 points (exactly-once, ack-after-commit)
+- PR #31+#32 (S4a/S4b, cd1f61c/c704d51): S4 split by its own SIZE check (414>400) — scope/size/PROT/lint/deps checks + the Proof Sheet (records-embedded commit; --verify byte-identical) + THE GATE + the 8-case known-bad matrix + the CI gate step; the boundary lint caught the session's own LAW-24 violation (clock.mono repaired)
+- Binding (W-01 stage-2): the gate's first green main run observed (38897851392) → protection PUT → required = [canonical-layer, head-tools, harness] re-observed
+- Probe PR #33 (closed unmerged): a comment-line edit with no red-record amendment → harness check RED in CI with ARV-RED-002 (run 38905555800; canonical-layer + head-tools GREEN in the same run) → merge API refused HTTP 405 "Required status check \"harness\" is failing." → branch deleted
+- Fresh-context verification: an uncoached sub-agent, clean clone from origin at c704d51e, 13/13 commands exit 0 (all suites, gate, known-bads, canonical 51/0 + 30/30 + isolation 18/18) — archived; it found the make-state truncation defect (repaired in PR #34)
+- PR #34 (session close): record 18 §5–§12 + STATE/PLAN/AGENTS refresh (Phase 2 LANDED) + manifest turn-15/16 rows + the state.py repair + the close slice's declaration/records/sheet
+
+Stage Summary:
+- Outcome: Phase 2 Layer 2.1 LANDED — the PLAN's exit criteria observed met (scope, immutability, idempotency, independent reads on the real DB; broken builds fail with named codes); three merge-blocking walls live and behaviorally proven; Phase 3 owner-gated
+- Evidence: CI green at every merge (runs 38892931186 · 38893913126 · 38894450007 · 38895757859 · 38897533577 · 38897851392 + #34's); the probe 405; the fresh-context 13/13; local 51/0 + 30/30 + isolation + 18/18 + 25 test PASS + gate GREEN at c704d51e
+- Pointer: record 18 (COMPLETE; PRs #27–#32, #34 merged; #33 probe closed unmerged)
+- Unresolved: D-014 + Q6–Q10 (each blocks only its named dependents); no base-anchored floor for harness tools yet (named next gate); PR #34's post-merge run = session 19 preflight if unobserved
+- Next: session 19 — preflight at the close merge, then hold for the owner's fork: Phase 3 Layer 3.1 go / Q6–Q10 answers

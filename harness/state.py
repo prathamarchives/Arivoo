@@ -18,7 +18,7 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 def main() -> int:
     state = (REPO / "STATE.md").read_text()
     phase = next((l for l in state.splitlines() if l.startswith("- **Phase:**")), "")
-    print(phase[:300])
+    print(phase)  # the full phase line — the position statement; a [:300] cut truncated it mid-word (found by the fresh-context verifier, record 18 §8)
     r = pg.psql("SELECT count(*) FROM arv.schema_migrations;", db="postgres")
     if r.returncode == 0:
         print(f"- harness stack: REACHABLE · migrations recorded: {r.out}")

@@ -22,6 +22,15 @@
 # verification, the fail-closed checks, either isolation step, the floors, or
 # un-requiring a job is a constraint-weakening change requiring an owner
 # decision.
+#
+# Job "harness" (added session 18 / S1, D-036 — WALL CONSTRUCTION per the owner
+# directive "execute phase 2 foundation" + the 2026-10-16 review §7 S1, which
+# requires a real-stack CI rig; evidence attached in record 18 §4.1): runs the
+# Phase 2 harness suites against a postgres:17 service container (FACT-001:
+# engine parity with the local rig). ADDITIVE ONLY — canonical-layer and
+# head-tools above are untouched. NOT a required check yet: binding follows a
+# green run being observed, the W-01 stage-2 pattern (D-025/D-035 precedent).
+# Weakening or removing it after binding is a LAW-09 owner decision.
 
 name: verify
 
@@ -39,6 +48,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  harness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: arv_harness
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+    steps:
+      - name: Checkout head
+        uses: actions/checkout@v4
+      - name: "Ensure the psql client is present (deterministic provisioning — never asserted from docs, LAW-02)"
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+      - name: "S1 — the real-stack rig: health + the migrations suite (Phase 2 Layer 2.1, D-036)"
+        run: |
+          make harness-health
+          make harness-tests
+
   canonical-layer:
     runs-on: ubuntu-latest
     timeout-minutes: 15

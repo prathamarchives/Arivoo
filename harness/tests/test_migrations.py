@@ -184,7 +184,7 @@ def main() -> int:
               "a destructive migration WITHOUT -- arv-baseline-bump is REFUSED with ARV-MIG-003",
               "the runner must scan for destructive statements and require the explicit baseline-bump directive")
         with open(os.path.join(mdir4, "0002_dropbad.sql"), "w") as f:
-            f.write("-- arv-baseline-bump: 2\nDROP TABLE arv.sentinel_never;\n")
+            f.write("-- arv-baseline-bump: 2\nCREATE TABLE arv.temp_x (id INT);\nDROP TABLE arv.temp_x;\n")
         rd2 = run_migrate(db_d, mdir4)
         check("ARV-TEST-010", rd2.returncode == 0,
               "positive control: WITH the -- arv-baseline-bump directive the destructive migration applies",

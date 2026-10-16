@@ -188,3 +188,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+# probe-only marker (harness wall block probe, record 18 §6) — this edit must be refused by ARV-RED-002

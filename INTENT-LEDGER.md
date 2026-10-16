@@ -16,6 +16,7 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-110..INT-117** — owner turn 12 (session record 15, 2026-10-14 integrity-and-evidence session): the open-question answers — agent-agnostic design (Q1), purge top option (Q2), tag system removed (Q3), any readable format (QD-1), math deferred (D-014 reaffirmed), Supabase synced deployment (F-06), identity boundary accepted (Q-IDENT) — plus the Integrity-and-evidence directive (slices 7–9).
 - **INT-118** — owner turn 13 (session record 16, 2026-10-14 isolation-diagnostics-host-gates session): the owner-forwarded Arivoo review — the final two Phase-1 slices (10: isolation and diagnostics; 11: real host bridges and automated gates) + the Phase-1 graduation gate, with the findings that closed decision language and the GLM-host assumption have not fully propagated (owner-forwarded text, E-4 class, labeled).
 - **INT-119** — owner turn 14 (session record 17, 2026-10-15 candidate-tool-gate-and-graduation session): the owner-forwarded gates review — candidate tool changes must be merge-blocking (P1: the coordinated tool+self-test weakening class), the anchor must be fail-closed (P2), and the graduation is resequenced: gates first, then the integrated fresh-context proof at the resulting final SHA (owner-forwarded text, E-4 class, labeled; the turn's leading access token redacted at ingestion per D-025/INT-092).
+- **INT-120..INT-121** — owner turns 15–16 (session record 18, 2026-10-16 research-driven-review + Phase-2-foundation session): turn 15's eight-part research-driven architecture review directive (read-only pass; the turn's full text crossed a host context boundary — the preserved fragments and the review artifact are the durable record), and turn 16's execution directive — update the repo on the review, then execute Phase 2 foundation (the S1–S4 harness slices; D-036).
 
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
@@ -582,7 +583,25 @@ Source: owner turn 13, chat 2026-10-14 (session record 16 §1, E-2 class for the
 
 Source: owner turn 14, chat 2026-10-15 (session record 17 §1, E-2 class for the turn's preservation; the quoted lines are owner-FORWARDED review text, labeled per the INT-053/068 owner-presented-statement convention). Grounds: DECISIONS D-035 (the review's adoption — the candidate-tool gate resolution, fail-closed anchoring, and the graduation sequencing, severable and challengeable); D-034 item 6 (the graduation gate this resequences); D-025/D-026 (walls + bounded diffs); P-13/P-15 (standing authorization). The owner's act is the forwarding itself; the turn's leading token was a re-supplied session credential, redacted at ingestion and never recorded.
 
+## Owner turns 15–16 — session record 2026-10-16 (INT-120/INT-121; the research-driven review + the Phase-2 execution directive)
+
+**INT-120 — THE EIGHT-PART RESEARCH-DRIVEN ARCHITECTURE REVIEW (READ-ONLY PASS) — active**
+> "现在是执行轮——对着仓库跑起来，并保留这一切：所有迭代、新北极星、本应已完成的一切；保持默认的日志、上下文与记忆提取；我之前说的是不要执行代码（改仓库）" · "更深而非更大"
+
+Source: owner turn 15, chat 2026-10-16 (session record 18 §1, E-2 class with the preservation boundary stated there: the turn's full verbatim text crossed a host context boundary before this session and the no-mutation constraint was honored — nothing was preserved in-repo at the time; the quoted fragments are the verbatim fragments carried across by the host session-continuation summary, and the review artifact `context/reviews/2026-10-16-research-driven-architecture-review.md` records the directive's operational content — the eight parts, the four roles, the nine-section report, the Phase 1/2 foundation plan, "deeper not bigger", and the read-only constraint). Grounds: the review artifact (the directive's execution); record 18 §2 (the evidence pass: four suites re-run, live API probe, cold-start exam); DECISIONS D-036 (the adoption).
+
+**INT-121 — UPDATE THE REPO ON THE REVIEW, THEN EXECUTE PHASE 2 FOUNDATION — active (the turn-15 no-mutation constraint is lifted for this session's work per EXR-08 — the latest owner statement governs)**
+> "read, push, understand, gather all the context and execute phase 2 foundation. but before that update the repo on everything we did rightnow in last convos"
+
+Source: owner turn 16, chat 2026-10-16 (session record 18 §1, E-2 class; the turn re-supplied the review deliverable as an upload — now preserved verbatim at `context/reviews/2026-10-16-research-driven-architecture-review.md`). Grounds: DECISIONS D-036 (the review's adoption: artifact intake + drift repair + Phase 2 Layer 2.1 execution per the review's S1–S4, severable and challengeable); D-024 (the owner's explicit authorization to merge the review artifact — "update the repo on everything we did rightnow in last convos"); P-13/P-15 (standing authorization for the memory-delta and slice work); the review artifact §7 (the slice definitions this turn executes).
+
 ---
+
+## Audit note (2026-10-16, session 18 — the research-driven-review + Phase-2-foundation session; appends, supersedes nothing)
+
+- **INT-120/INT-121 record owner turns 15/16** — 103 statused entries, INT-019..INT-121, contiguous and unique. Session record 18 §1 is the verbatim-preservation home (written and committed BEFORE these entries, per the closed INT-046/068 class). Turn 15's full text crossed a host context boundary before this session (the no-mutation session preserved nothing in-repo at the time); the preserved fragments + the boundary statement in record 18 §1 are the honest substitute — quote fidelity outranks completeness (a fabricated "verbatim" turn would be the exact class VER-803 exists to catch).
+- **Ledger discipline held (INT-075):** owner words only — INT-120's quotes are the fragments the host continuation summary preserved verbatim (boundary labeled); INT-121 is the turn's full text. The review's own text is NEVER ledgered as owner intent: it is preserved verbatim as the review artifact and adopted through D-036 (ADOPTED, severable, challengeable).
+- **Open owner gates (after this turn):** D-014 (non-blocking) + the review §8 questions registered as Q6–Q10 (each blocks only its named dependents — Q6: Part-2 finalization + S5 corpus; Q7: S6; Q8: S5 corpus; Q9: nothing, privacy-relevant; Q10: F-7's mechanical fix). S5/S6 and Riders B/C stay [P] until the owner answers; S1–S4 proceed under D-036.
 
 ## Audit note (2026-10-15, session 17 — the candidate-tool-gate-and-graduation session; appends, supersedes nothing)
 

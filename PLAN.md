@@ -17,8 +17,9 @@ Exit (OBSERVED 2026-10-14, session 13): a broken build cannot merge (probe PR #7
 
 **Layer 1.2 (2026-10-14, owner turn 10 — INT-100/D-027):** the exit evidence above remains observed and standing; the owner extended Phase 1 with one more layer — slice 4 (the STATE five-area contract), slice 5 (session handoffs: event-typed worklog/session-record policy + standardized fields), slice 6 (the selective read path + the bounded cold-start proof), plus the replication kit (INT-108). The layers execute in order, each with its own proofs; each is planned as it executes. Phase 1 (layer 1.2 included) completes when the slices' pass criteria hold; Phase 2 still begins only with the owner-approved execution plan. Layer 1.3 (above) supersedes the "Phase 2 still begins" sequencing for the current arc: the turn-13 slices and the graduation gate come first.
 
-## Phase 2 — Minimum trustworthy harness
+## Phase 2 — Minimum trustworthy harness (IN PROGRESS — session 18, 2026-10-16, owner turn 16: INT-121/D-036; the 2026-10-16 review's S1–S4 with Rider A folded)
 One real-stack test · Proof Sheet generated from run records · scope enforcement · representative known-bads for the proactive set only. NOT required before product code: the full constraint system, all architecture checks, every kernel primitive, every planned known-bad.
+**Layer 2.1 (executing, D-036):** S1 real-stack rig + migrations v0 (forward-only, versioned, baseline; Postgres per D-032; a CI service container; a version-parity FACT) → S2 the substrate-convention table (owner/actor/provenance/revision/tombstone; append-only triggers with named codes; RLS; a second read role for independent reads) → S3 the idempotent command path + crash-injection tooling (command registry; idempotency key; single transaction; ack strictly after commit; kill-at-each-point recovery) → S4 the gate assembly (Proof Sheet generated from run records, never hand-edited; SIZE/SCOPE enforcement; the proactive-set known-bads — scope breach, protected-path edit, skipped test, hand-written Proof Sheet, lowered threshold, missing red record, test edited after red, unapproved dependency; every failure with a named code; the harness CI job constructed with evidence and bound after a green run is observed — the W-01 stage-2 pattern). Grounded defaults (D-036, each overridable): Python standard library only (zero third-party dependencies); `psql` as the DB client — the app path and the independent verifier differ by role and code path (LAW-13's spirit); test-rig trust auth (ephemeral test databases only). S5/S6 spikes stay owner-gated (Q7/Q8; the review's Riders B stay [P]).
 Exit: the harness proves scope, evidence immutability, idempotency, and independent reads on a real database; deliberately broken builds fail with named codes.
 
 ## Phase 3 — Durable capture (first real behavior)
@@ -36,6 +37,13 @@ Exit: C3 demonstrable with reasons and provenance — new inputs resurface old m
 
 ## Standing open (owner)
 - D-014 — calculation engine: open, non-blocking for capture (owner reaffirmed 2026-10-14, INT-114).
+- Q6 — research-transcript status (2026-10-16 review §8 Q1; adopt vs reference doctrine) — blocks Part-2 acceptance-scenario finalization + the S5 corpus only.
+- Q7 — semantic-spike budget for S6 (review §8 Q2) — blocks S6 only.
+- Q8 — extraction-spike documents for S5 (review §8 Q3) — blocks S5's corpus only.
+- Q9 — repository visibility (review §8 Q4; observed public 2026-10-16) — blocks nothing; privacy-relevant.
+- Q10 — fine-grained PAT hardening (review §8 Q5, from F-7) — blocks F-7's mechanical fix only.
+
+Registered 2026-10-16 (session 18, D-036); entered from the 2026-10-16 review's §8 owner questions. S1–S4 proceed regardless of Q6–Q10 (each blocks only its named dependents, F-07).
 
 Closed 2026-10-14 (owner turn 12, INT-110..INT-117; LOCKED rows D-028..D-033 in DECISIONS): Q1, Q2, Q3, QD-1, F-06, Q-IDENT.
 

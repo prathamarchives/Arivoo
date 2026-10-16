@@ -40,6 +40,7 @@ Controlled vocabulary. One concept, one name — no synonyms. **Scope: this poli
 
 ## Execution
 - **Slice** — one behavior, size-limited, one card. The unit of build.
+- **Phase layer vs substrate layer** — disambiguation (2026-10-16 review finding F-8): "Layer N.M" (Layer 1.2, 1.3, 2.1...) = a sub-layer of an EXECUTION phase (the owner plan lineage, PLAN); "layer N" (layers 1–7, NORTH-STAR) = a product SUBSTRATE layer (ground truth → ingestion → memory index → structure → concept formation → agent surface → retrieval). The numbering systems never mix: a phase layer is work-in-time; a substrate layer is architecture-in-space.
 - **Card** — the self-contained slice spec (context pack) a fresh agent works from.
 - **Proof Sheet** — harness-built evidence for a slice. Never hand-edited.
 - **Gate / verify** — the command surface + CI authority. Local verify helps the builder; remote CI (owner-controlled) is authoritative.

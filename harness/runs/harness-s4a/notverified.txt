@@ -1,0 +1,3 @@
+- the SIZE check lands IN this slice; its own diff is audited by construction (measured post-commit in record 18 §4.4) and binds from the next slice on (KB-04 activation)
+- no base-anchored floor for the harness tools yet (the D-035 pattern covers the canonical tools; the next gate, not this slice — P-17)
+- the gate + known-bad matrix arrive with S4b; this slice is verified by the suites + the Proof Sheet re-derivation + the canonical verifier

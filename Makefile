@@ -20,3 +20,21 @@ verify-schema:
 
 harness-tests:
 	@for t in harness/tests/test_*.py; do echo "== $$t"; python3 $$t || exit 1; done
+
+# --- S4a (D-036): the command surface grows — state/fast/red/prove; the gate's
+# targets (gate/verify/known-bad) land with S4b (harness/gate.py) ---
+
+.PHONY: state fast red prove
+
+state:
+	@python3 harness/state.py
+
+fast:
+	@for t in harness/tests/test_*.py; do echo "== $$t"; python3 $$t || exit 1; done
+
+red:
+	@python3 harness/red.py --note "$${NOTE:-red run at the test-only commit -- record where it was observed}"
+
+prove:
+	@SL=$${SLICE:-main-selfcheck}; 	python3 harness/proofsheet.py --slice $$SL --record "python3 harness/tests/test_migrations.py"; 	python3 harness/proofsheet.py --slice $$SL --record "python3 harness/tests/test_substrate.py"; 	python3 harness/proofsheet.py --slice $$SL --record "python3 harness/tests/test_commands.py"; 	python3 harness/proofsheet.py --slice $$SL
+

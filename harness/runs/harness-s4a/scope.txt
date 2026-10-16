@@ -1,0 +1,3 @@
+harness/ D-036
+Makefile D-036
+context/extracted/18-RESEARCH-DRIVEN-REVIEW-AND-PHASE2-FOUNDATION.md

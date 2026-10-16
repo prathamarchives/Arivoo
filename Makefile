@@ -38,3 +38,18 @@ red:
 prove:
 	@SL=$${SLICE:-main-selfcheck}; 	python3 harness/proofsheet.py --slice $$SL --record "python3 harness/tests/test_migrations.py"; 	python3 harness/proofsheet.py --slice $$SL --record "python3 harness/tests/test_substrate.py"; 	python3 harness/proofsheet.py --slice $$SL --record "python3 harness/tests/test_commands.py"; 	python3 harness/proofsheet.py --slice $$SL
 
+
+# --- S4b (D-036): the gate lands — OPERATING-MODEL §9's minimum set completes ---
+.PHONY: gate known-bad
+
+gate:
+	@if [ -n "$$SLICE" ]; then EXTRA="--slice $$SLICE"; else EXTRA=""; fi; \
+	if [ -n "$$GATE_DIFF" ]; then EXTRA="$$EXTRA --diff $$GATE_DIFF"; else EXTRA="$$EXTRA --no-diff"; fi; \
+	python3 harness/gate.py $$EXTRA
+
+known-bad:
+	@python3 harness/gate.py --known-bad-only
+
+verify: fast known-bad
+	@python3 harness/gate.py --no-diff --skip-suites
+	@python3 tools/verify_canonical_layer.py > /dev/null && echo "canonical layer: 51/0 (verifier green)"

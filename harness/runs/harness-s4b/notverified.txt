@@ -1,0 +1,3 @@
+- the PR-time probe (a deliberately broken build observed RED in CI and closed unmerged) provides the end-to-end merge-blocking arm — it is the NEXT action after this slice, not inside it
+- no base-anchored floor for the harness tools themselves yet (the D-035 pattern covers the canonical tools; named as the next gate — P-17, never postponed)
+- the harness job is bound as a required check only AFTER its first green run on main is observed (the W-01 stage-2 pattern — binding evidence in record 18 §4.5)

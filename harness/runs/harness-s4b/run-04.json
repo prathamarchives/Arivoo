@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --known-bad-only",
+  "exit_code": 0,
+  "commit": "cd1f61c36f5cbd663942dd3d9d600ec80136c7dd",
+  "output_sha256": "ac7743f482124dd9d853c5a1fac39a9e1b9161e1d0dfa3312b5dd0c329fca1fe",
+  "recorded_at": "2026-10-16T12:01:36.467761+00:00"
+}

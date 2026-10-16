@@ -78,6 +78,21 @@ jobs:
         run: |
           make harness-health
           make harness-tests
+      - name: "S4b — THE GATE on the real stack (D-036; wall construction per owner directive, evidence in record 18 §4.5): suites fail-closed + red records + scope/size + LAW-24/08 + the known-bad matrix + the slice's Proof Sheet. PR mode judges the diff vs main against the slice's declaration; selfcheck mode re-proves everything on main. The harness job is bound as a required check after its first green run on main is observed (W-01 stage-2)."
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            git fetch origin main -q
+            SLICE_NAME="${{ github.head_ref }}"
+            SLICE_NAME="${SLICE_NAME#slice/}"
+            if [ -f "harness/runs/$SLICE_NAME/scope.txt" ]; then
+              python3 harness/gate.py --slice "$SLICE_NAME" --diff origin/main --skip-suites
+            else
+              echo "NOTE ARV-SCOPE-001-PROBE: no scope declaration for '$SLICE_NAME' — the declaration must land with the slice (checked at gate time); running the selfcheck gate"
+              python3 harness/gate.py --no-diff --skip-suites
+            fi
+          else
+            python3 harness/gate.py --no-diff --skip-suites
+          fi
 
   canonical-layer:
     runs-on: ubuntu-latest

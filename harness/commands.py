@@ -27,7 +27,6 @@ import signal
 import subprocess
 import sys
 import threading
-import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import pg, clock, ids  # noqa: E402
@@ -75,8 +74,8 @@ class Session:
     def read_until(self, marker: str, timeout: float = 30.0) -> list:
         """Consume stdout lines until the marker appears."""
         lines: list[str] = []
-        end = time.monotonic() + timeout
-        while time.monotonic() < end:
+        end = clock.mono() + timeout
+        while clock.mono() < end:
             try:
                 line = self._lines.get(timeout=0.2)
             except queue.Empty:

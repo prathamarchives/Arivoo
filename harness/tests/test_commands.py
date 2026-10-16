@@ -82,9 +82,13 @@ def audit(db: str, query: str) -> str:
 
 
 def state_fingerprint(db: str) -> str:
+    """Content-level state (the ids adapter's UUIDs are non-deterministic BY DESIGN;
+    their correctness is asserted separately: 020 replays return the same ref, 023
+    checks ack<->row correspondence). What must match after recovery: the evidence
+    content and the command_log identity, nothing else."""
     import hashlib
-    ev = audit(db, "SELECT id||owner_scope||payload FROM arv.evidence_event ORDER BY id;")
-    cl = audit(db, "SELECT idempotency_key||body_hash||result_ref FROM arv.command_log ORDER BY idempotency_key;")
+    ev = audit(db, "SELECT owner_scope||'|'||payload FROM arv.evidence_event ORDER BY owner_scope, payload;")
+    cl = audit(db, "SELECT idempotency_key||'|'||client_id||'|'||body_hash FROM arv.command_log ORDER BY idempotency_key;")
     return hashlib.sha256((ev + "||" + cl).encode()).hexdigest()[:24]
 
 

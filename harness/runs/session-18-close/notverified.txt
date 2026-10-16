@@ -1,0 +1,4 @@
+- this close PR's own post-merge run: observed at merge if it completed in time, else session 19's preflight duty (the standing close-gap pattern; record 18 §9)
+- no base-anchored floor for the harness tools themselves yet (the D-035 pattern covers the canonical tools; named as the next gate — P-17, record 18 §9)
+- the local rig (user-space PostgreSQL 17.11) is a convenience, never evidence: every merge-blocking claim this session is CI-side (LAW-02's spirit; record 18 §9)
+- the binding/probe/verification API actions are observed-live, not re-runnable locally (record 18 §6 — the GitHub API is the only authority for branch protection state)

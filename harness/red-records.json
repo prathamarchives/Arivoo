@@ -1,0 +1,35 @@
+{
+  "harness/tests/test_migrations.py": {
+    "red_commit": "8b17c7a99d66be35502d07c99d499ea88e53c904",
+    "red_evidence": "exit 1, ARV-TEST-000/011/019 waiting-for-harness (observed at the red commit; record 18 \u00a74.1-\u00a74.3)",
+    "red_sha256": "a83a4ce600e87d8dcd507d506ba6867bf1ac876220eb43fd4ea73861eb393c11",
+    "current_sha256": "4e313652d6d29a3bacbfbf771e20b63e60942575f52074dcd5b1893d6fa005a8",
+    "amendments": [
+      {
+        "note": "test-side defect repairs documented in record 18 \u00a74.1-\u00a74.3 (S1: count made dynamic; S2: dual-layer expectations, scoped effective view; S3: content-level fingerprint) \u2014 amendments correct assertions, none removed"
+      }
+    ]
+  },
+  "harness/tests/test_substrate.py": {
+    "red_commit": "e9ce6bf0a465bd29e16e5c854ec7c025e057a81d",
+    "red_evidence": "exit 1, ARV-TEST-000/011/019 waiting-for-harness (observed at the red commit; record 18 \u00a74.1-\u00a74.3)",
+    "red_sha256": "79c85b915253bc0a73122bbcc8bd8dcbe171823b184ef2931eaa25165f4bf90b",
+    "current_sha256": "7815eaab35602812f1b7d0ca3f4ea3588976184ac37c0a68dbc460acdf2fa787",
+    "amendments": [
+      {
+        "note": "test-side defect repairs documented in record 18 \u00a74.1-\u00a74.3 (S1: count made dynamic; S2: dual-layer expectations, scoped effective view; S3: content-level fingerprint) \u2014 amendments correct assertions, none removed"
+      }
+    ]
+  },
+  "harness/tests/test_commands.py": {
+    "red_commit": "b998b3c56e19c1d52f23cabcd32a4d3b9b519094",
+    "red_evidence": "exit 1, ARV-TEST-000/011/019 waiting-for-harness (observed at the red commit; record 18 \u00a74.1-\u00a74.3)",
+    "red_sha256": "f1c3b49d2a72160bc9f42a5d1d02467c9a0907fc5983c1b01e3fcf0a950472b7",
+    "current_sha256": "d01af27e0bcf401c1e270a61e03f252e25f3fe1ca156ab18ed954c791665e9ec",
+    "amendments": [
+      {
+        "note": "test-side defect repairs documented in record 18 \u00a74.1-\u00a74.3 (S1: count made dynamic; S2: dual-layer expectations, scoped effective view; S3: content-level fingerprint) \u2014 amendments correct assertions, none removed"
+      }
+    ]
+  }
+}

@@ -15,3 +15,10 @@ def now() -> str:
 def now_ms() -> int:
     """UTC now as epoch milliseconds (consumed by adapters/ids for UUIDv7-class IDs)."""
     return int(datetime.now(timezone.utc).timestamp() * 1000)
+
+
+def mono() -> float:
+    """The monotonic clock (elapsed-time measurement — timeouts, deadlines). The
+    ONLY sanctioned monotonic-time read (LAW-24); never a substrate value."""
+    import time
+    return time.monotonic()

@@ -100,9 +100,10 @@ def main() -> int:
               "repair the runner per its own ARV-MIG-NNN output")
         rows = sql(test_db, "SELECT count(*) FROM arv.schema_migrations;").stdout.strip()
         roles = sql(test_db, "SELECT count(*) FROM pg_roles WHERE rolname IN ('arv_app','arv_read');").stdout.strip()
-        check("ARV-TEST-003", rows == "1" and roles == "2",
-              f"INDEPENDENT psql read: schema_migrations has 1 applied row ({rows}) and both roles exist ({roles}) — the baseline is real",
-              "the migration did not produce the declared baseline — inspect 0001_baseline.sql vs the DB")
+        expected = str(len([f for f in os.listdir(real_migrations) if f.endswith(".sql")]))
+        check("ARV-TEST-003", rows == expected and roles == "2",
+              f"INDEPENDENT psql read: schema_migrations has all {rows} migration(s) applied and both roles exist ({roles}) — the baseline is real",
+              "the migration did not produce the declared baseline — inspect the migrations dir vs the DB")
 
         # (b) second migrate run = no-op
         before = sql(test_db, "SELECT count(*) FROM arv.schema_migrations;").stdout.strip()

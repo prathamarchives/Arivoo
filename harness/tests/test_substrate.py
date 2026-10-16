@@ -100,14 +100,18 @@ def main() -> int:
               "the substrate-convention table exists after migrate (0001+0002 applied)",
               "apply 0002_evidence_event.sql — the S2 red state is exactly its absence")
 
-        # (a) immutability: UPDATE and DELETE rejected with the named code
+        # (a) immutability: TWO layers — the app role lacks the privilege; even a
+        #     privileged session (the migrator) hits the trigger's named code
         a = ins(db, "A", payload="alpha")
-        ru = sql(db, f"UPDATE arv.evidence_event SET payload='x' WHERE id='{a}';", user="arv_app", owner="A")
-        rd = sql(db, f"DELETE FROM arv.evidence_event WHERE id='{a}';", user="arv_app", owner="A")
+        ru_app = sql(db, f"UPDATE arv.evidence_event SET payload='x' WHERE id='{a}';", user="arv_app", owner="A")
+        ru = sql(db, f"UPDATE arv.evidence_event SET payload='x' WHERE id='{a}';")
+        rd = sql(db, f"DELETE FROM arv.evidence_event WHERE id='{a}';")
         check("ARV-TEST-012",
-              ru.returncode != 0 and "ARV-EV-001" in ru.stderr and rd.returncode != 0 and "ARV-EV-001" in rd.stderr,
-              "UPDATE and DELETE are REJECTED by the trigger with the named code ARV-EV-001 (LAW-19 analog)",
-              "the BEFORE UPDATE/DELETE trigger must RAISE with 'ARV-EV-001: ...' — revisions and tombstones are NEW rows, never in-place mutations")
+              ru_app.returncode != 0 and "permission denied" in ru_app.stderr
+              and ru.returncode != 0 and "ARV-EV-001" in ru.stderr
+              and rd.returncode != 0 and "ARV-EV-001" in rd.stderr,
+              "mutations are rejected on BOTH layers: arv_app UPDATE = permission denied (no grant), and even the migrator's UPDATE/DELETE hit the trigger's named code ARV-EV-001 (LAW-19 analog)",
+              "the BEFORE UPDATE/DELETE trigger must RAISE with 'ARV-EV-001: ...' (guarding even privileged paths), and arv_app must never receive UPDATE/DELETE grants")
 
         # (b) two-owner isolation + the auditor sees all
         b1 = ins(db, "A", payload="a-row")
@@ -115,8 +119,8 @@ def main() -> int:
         see_b = sql(db, "SELECT count(*) FROM arv.evidence_event;", user="arv_app", owner="B").stdout.strip()
         see_a = sql(db, "SELECT count(*) FROM arv.evidence_event;", user="arv_app", owner="A").stdout.strip()
         audit = sql(db, "SELECT count(*) FROM arv.evidence_event;", user="arv_read").stdout.strip()
-        check("ARV-TEST-013", see_b == "1" and see_a == "1" and audit == "2",
-              f"owner B sees zero A-rows (B={see_b}), owner A sees zero B-rows (A={see_a}), arv_read sees all ({audit}) — LAW-22 analog",
+        check("ARV-TEST-013", see_b == "1" and see_a == "2" and audit == "3",
+              f"owner B sees zero A-rows (B's view={see_b}: only B's own row), owner A sees zero B-rows (A's view={see_a}: A's two rows), arv_read sees all ({audit}) — LAW-22 analog",
               "RLS policy owner_isolation must compare owner_scope to current_setting('app.current_owner', true) for arv_app; arv_read is the BYPASSRLS auditor")
 
         # (c) unattributed writes rejected at the schema level
@@ -141,11 +145,12 @@ def main() -> int:
         still = sql(db, f"SELECT count(*) FROM arv.evidence_event WHERE id='{e1}';", user="arv_read").stdout.strip()
         eff = sql(db, f"SELECT count(*) FROM arv.evidence_event WHERE id='{e1}' AND event_type='event';",
                   user="arv_read").stdout.strip()
-        effview = sql(db, "SELECT count(*) FROM arv.evidence_event e WHERE e.event_type='event' "
+        effview = sql(db, f"SELECT count(*) FROM arv.evidence_event e WHERE e.id='{e1}' "
+                          "AND e.event_type='event' "
                           "AND NOT EXISTS (SELECT 1 FROM arv.evidence_event t "
                           "WHERE t.event_type='tombstone' AND t.ref_id = e.id);", user="arv_read").stdout.strip()
         check("ARV-TEST-016", t is not None and still == "1" and eff == "1" and effview == "0",
-              f"tombstone lands as a NEW row (original recoverable: still={still}; effective view excludes it: {effview})",
+              f"tombstone lands as a NEW row (original recoverable: still={still}; e1 outside the effective view: {effview} — the view excludes exactly the tombstoned row)",
               "delete = a tombstone row referencing the target; the original is never mutated (ARV-EV-001 guards it)")
 
         # (f) revision: new row referencing the original; original intact

@@ -1,0 +1,26 @@
+# harness/facts.yaml — the FACT register (LAW-02: never state a fact about a tool,
+# model, library, or standard from memory — cite a FACT ID or run a spike).
+# A FACT records a claim, its evidence, and its limits. Entries append; never edit.
+
+- id: FACT-001
+  claim: "PostgreSQL 17 is the Phase 2 harness database engine, locally and in CI (major-version parity; R7)"
+  evidence: >
+    local rig: psql (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1), observed 2026-10-16
+    (user-space Debian packages; record 18 section 2); CI: the postgres:17 Docker
+    service container in .github/workflows/verify.yml (job harness, landed with S1,
+    PR #28 — version observed in the job log at merge).
+  limits: >
+    Supabase's served Postgres major version is owner-observable only ([U]) — record
+    it when the Phase 3 schema slice targets Supabase; pgvector availability is a
+    Phase 5 fact, asserted never (P-16 forbids deferring the architecture, not the
+    measurement).
+  observed: 2026-10-16
+
+- id: FACT-002
+  claim: "The harness DB client is psql via subprocess (zero third-party Python dependencies; D-036)"
+  evidence: >
+    harness/adapters/pg.py (the only psql caller); no requirements/lockfile exists
+    in the repo; LAW-08 is satisfied by construction and the S4 known-bad
+    ARV-DEP-008 guards the class mechanically.
+  limits: "A real driver for the product path is a Phase 3+ decision, owner-gated; the harness deliberately does not make it."
+  observed: 2026-10-16

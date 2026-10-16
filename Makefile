@@ -1,0 +1,22 @@
+# Arivoo command surface — Phase 2 Layer 2.1 minimum (D-036; the target surface is
+# OPERATING-MODEL.md §9; these are the S1 commands: health, migrate, verify-schema,
+# harness-tests. S4 completes the set: state/fast/red/prove/gate/verify/known-bad.)
+# Zero third-party dependencies (D-036): Python stdlib + psql + make.
+#
+# Connection (env, read by harness/adapters/pg.py — the ONLY env-reading module):
+#   PGHOST (default 127.0.0.1) · PGPORT (default 5432) · PGUSER (default postgres)
+# CI: the postgres:17 service container. Local: the rig cluster (record 18 §2).
+
+.PHONY: harness-health migrate verify-schema harness-tests
+
+harness-health:
+	@python3 harness/health.py
+
+migrate:
+	@python3 harness/migrate.py
+
+verify-schema:
+	@python3 harness/migrate.py --verify
+
+harness-tests:
+	@for t in harness/tests/test_*.py; do echo "== $$t"; python3 $$t || exit 1; done

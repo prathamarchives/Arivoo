@@ -101,9 +101,31 @@ def kb_dep(copy: pathlib.Path) -> None:
 # --- session 19, CLAIM-002 (D-038/LAW-31): the claims-registry guards (red-first) ---
 
 _CLAIMS_ROW_OVERLAP = (
-    "| CLAIM-999 | 19 | Test Agent | `slice/claim-999-overlap-probe` | `LAWS.md`, `CLAIMS.md` "
-    "| INT-125 | 2026-10-19 | the overlap probe: LAWS.md is CLAIM-001's scope, not shared-append |\n"
+    "| CLAIM-999 | 19 | Test Agent | `slice/claim-999-overlap-probe` | `context/extracted/`, `docs/unrelated/` "
+    "| INT-125 | 2026-10-19 | the overlap probe: context/extracted/ is an OPEN claim's non-shared scope |\n"
 )
+
+
+def _open_claims_row(text: str, probe_row: str) -> str:
+    """Insert probe_row as the LAST row of the OPEN table (structure-anchored since
+    the CLAIM-001-row anchor went blind the moment that claim CLOSED — the KB
+    matrix caught its own regression at the session-19 close; never anchor a
+    probe to a mutable row: anchor to the section's table shape)."""
+    import re as _re
+    m = _re.search(r"^## Open claims\s*$", text, _re.M)
+    if not m:
+        return text
+    tail = text[m.end():]
+    m2 = _re.search(r"^## ", tail, _re.M)
+    section = tail[:m2.start()] if m2 else tail
+    rows = [ln for ln in section.split("\n") if ln.strip().startswith("|")
+            and not set(ln.strip()) <= {"|", "-", " ", ":"}
+            and not ln.strip().startswith("| Claim |")]
+    if rows:
+        last = rows[-1]
+        return text.replace(last, last + "\n" + probe_row, 1)
+    sep = "|-------|---------|-------|--------|----------------|---------------|---------|-------|"
+    return text.replace(sep, sep + "\n" + probe_row, 1) if sep in text else text + "\n" + probe_row
 
 
 @case("KB-CLM-001", "the claims registry deleted (LAW-31 has no substrate)",
@@ -118,10 +140,7 @@ def kb_clm_missing(copy: pathlib.Path) -> None:
 def kb_clm_overlap(copy: pathlib.Path) -> None:
     c = copy / "CLAIMS.md"
     text = c.read_text()
-    anchor = "| CLAIM-001 |"
-    i = text.index(anchor)
-    line_end = text.index("\n", i)
-    c.write_text(text[:line_end + 1] + _CLAIMS_ROW_OVERLAP + text[line_end + 1:])
+    c.write_text(_open_claims_row(text, _CLAIMS_ROW_OVERLAP))
     _load(copy, "harness.claims").check_registry()
 
 
@@ -130,14 +149,11 @@ def kb_clm_overlap(copy: pathlib.Path) -> None:
 def kb_clm_dup_reservation(copy: pathlib.Path) -> None:
     c = copy / "CLAIMS.md"
     text = c.read_text()
-    anchor = "| CLAIM-001 |"
-    i = text.index(anchor)
-    line_end = text.index("\n", i)
     dup = (
         "| CLAIM-998 | 19 | Test Agent | `slice/claim-998-dup-probe` | `docs/unrelated/` "
-        "| INT-124 | 2026-10-19 | the duplicate-reservation probe (same INT as CLAIM-001) |\n"
+        "| INT-124 | 2026-10-19 | the duplicate-reservation probe |\n"
     )
-    c.write_text(text[:line_end + 1] + dup + text[line_end + 1:])
+    c.write_text(_open_claims_row(text, dup))
     _load(copy, "harness.claims").check_registry()
 
 
@@ -146,14 +162,11 @@ def kb_clm_dup_reservation(copy: pathlib.Path) -> None:
 def kb_clm_malformed(copy: pathlib.Path) -> None:
     c = copy / "CLAIMS.md"
     text = c.read_text()
-    anchor = "| CLAIM-001 |"
-    i = text.index(anchor)
-    line_end = text.index("\n", i)
     bad = (
         "| CLAIM-997 | 19 | Test Agent | `slice/wrong-branch-name` | `docs/unrelated/` "
         "| INT-125 | 2026-10-19 | the well-formedness probe: branch lacks claim-997 |\n"
     )
-    c.write_text(text[:line_end + 1] + bad + text[line_end + 1:])
+    c.write_text(_open_claims_row(text, bad))
     _load(copy, "harness.claims").check_registry()
 
 

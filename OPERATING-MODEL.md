@@ -29,20 +29,24 @@ The governing loop (INT-036): *Build a small, real slice of Arivo. Verify it ind
 One behavior, one card, one loop. Steps 3–8 are a **cycle**; after 3 failed cycles stop (LAW-16); after any failure, ratchet before the next slice (LAW-18).
 
 | # | Step | Specification |
-|---|------|---------------|
-| 1 | `make state` → read the card | The repo's generated status (phase, open slices, open questions, constraint status, last gate) — never an agent's memory of it (P-02) |
-| 2 | Write `understanding.yaml` | Slice ID, **intent IDs (INT-*) with the owner quotes**, intent restated, scope restated, must-reject restated, **unknowns: []** — meaning zero *unclassified or unresolved blocking* unknowns (D-012; the correction of the original "zero unknowns"). Facts used, plan. A non-empty blocking list stops the slice |
-| 3 | Write the tests from the card. Commit them ALONE. `make red` | Each test MUST fail for the stated reason (LAW-11). The harness hashes the red tests and freezes the record (RED-01/02). Amendments add assertions, never remove (RED-03) |
-| 4 | Write code inside card scope. `make fast` after each change | ≤60s (AFA-07). SIZE and SCOPE limits apply (LAW-05/06) |
-| 5 | `make real-run` | Start the real stack, drive it as a user, record the transcript + state snapshots (LAW-12). Real stack, never a mock that looks successful |
-| 6 | `make falsify` | Property, fault, differential, and mutation tests with fresh seeds (LAW-13: state read through paths the code under test does not control). Fix each failure; each failure prints its seed |
-| 7 | `make prove` | The harness builds the Proof Sheet from run records. Hand-editing it fails the gate (PRF-01) |
-| 8 | `make gate` → exit 0 | All mechanical checks: SCOPE, SIZE, PROT, RED, SKIP, FAST, ratchet, open blocking questions. Then PR |
-| 9 | CI runs `make verify` | Remote CI is the authority (D-009, WALL-06). Local verify is preflight |
-| 10 | Owner reads the proof → **accept, or ratchet** | The acceptance review: minutes, not hours — the Proof Sheet is designed for exactly this |
-| 11 | Any failure occurred → run the ratchet (§6) before the next slice | LAW-18. No exceptions |
+|---|---|---|
+| 1 | Read generated state and the slice card | Use repo state, open decisions, constraints, and last gate; do not rely on chat memory (P-02). |
+| 2 | Write understanding.yaml | Slice ID; owner INT IDs/quotes; SYS requirement IDs; scope; must-reject cases; facts used; plan; unknowns. A blocking unknown means STOP for that behavior. |
+| 3 | Write tests and commit them alone | Run the red path and record the exact failure reason. Each new test must fail for its stated reason before implementation (LAW-11); red evidence is frozen. |
+| 4 | Implement only inside card scope | Run the available fast suite after each change. Existing SIZE/SCOPE and dependency limits apply. If a documented command target is absent, do not claim it ran. |
+| 5 | Exercise the real stack | Use the real PostgreSQL rig and actual command/client boundary; preserve transcript and independent state snapshots (LAW-12), not a mock that looks successful. |
+| 6 | Falsify the implementation | Run applicable property, fault, differential, and mutation probes with fresh seeds and an independent read path (LAW-13). Each failure has a named code and reproduction. |
+| 7 | Generate the Proof Sheet | Build from run records; never hand-edit generated evidence. Record actual revisions, commands, outcomes, known-bads, and not-verified items (LAW-01/04). |
+| 8 | Independent test verifier | A fresh-context verifier that did not implement the slice reads the card, diff, tests, and proof. It tries to falsify the behavior and reports reproducible findings; it does not repair product code. |
+| 9 | Systems-engineering verification | A separate fresh-context SEV reviewer checks requirement traceability, interfaces, failure modes, cross-layer impact, V-model closure, regressions, and not-verified claims (D-037/LAW-30). Missing, stale, rejected, or incomplete evidence blocks once H-02 is live. |
+| 10 | Run the gate | Check scope, size, protected paths, red records, skipped suites, dependencies, adapter boundaries, known-bads, Proof Sheet and—after H-02—the diff-bound SEV report. Non-zero on missing required evidence. |
+| 11 | Remote CI | All required checks pass on the proposed revision. Remote CI, not local green, is the merge authority (D-009). |
+| 12 | Owner release | The owner reviews the Proof Sheet and SEV disposition and accepts or requests a ratchet. Green CI does not let an agent resolve owner questions or merge its own analysis/proposal. |
+| 13 | Ratchet before the next slice | If any defect occurred, record the failing reproduction, add the strongest appropriate guard, prove the known-bad catches it, then continue (LAW-18).
 
 **Stop conditions (STOP-01..08, any one true):** a blocking Question Record is open for the slice · the slice failed 3 cycles · the change needs a path outside scope · the harness is red · two laws conflict · the task asks you to weaken a constraint · owner words conflict with another file · you cannot verify a fact the slice needs. Action: write the record, commit it, end the session with a one-line status.
+
+**SEV contract (D-037/LAW-30).** The test verifier asks whether implementation can be falsified against acceptance criteria. The systems-engineering verifier asks whether requirements were correctly decomposed, the correct component/interface was changed, relevant assumptions and failure modes are controlled, and the evidence closes the V-model level actually claimed. Both records are required after H-02. The SEV cannot reinterpret owner intent, close an owner question, or weaken a law. A context identifier in the report is not cryptographic proof of reviewer independence; a separate context and independent grader are still required at phase gates.
 
 ---
 
@@ -292,14 +296,19 @@ Every custom check, lint rule, and runtime error prints: a stable **rule ID**, t
 | `make new-slice NAME=x` | Generate a slice folder from the golden path | — |
 | `make entropy` | Dead code, stale FACTs, flaky tests, unused constraints | — |
 
+### Current command-surface honesty
+
+The command table below mixes existing commands with the target operating surface; it is not proof that every target exists. The current Makefile provides harness-health, migrate, verify-schema, harness-tests, state, fast, red, prove, gate, known-bad, and verify. It does not currently provide real-run, falsify, audit, new-slice, or entropy. An agent MUST inspect the Makefile before invoking a target and MUST NOT report a missing command as passed. Add missing targets only through a bounded slice with red-first tests and explicit acceptance.
+
 ### The Proof Sheet (harness-built; never hand-edited)
 
-Holds: header (slice, commit, harness version, seeds) · owner words · claims with proof IDs · real-run summary · must-reject results · **independent state reads** · fault and differential results · known-bad result · scope report · defaults used · **the not-verified list** · open questions. PRF-01: the harness builds it from run records; a hand-edited sheet fails the gate. LAW-04's honesty requirement is a schema field — the not-verified list cannot be empty-by-omission.
+Holds: header (slice, commit, harness version, seeds) · owner words · claims with proof IDs · actual real-run summary where available · must-reject results · independent state reads · fault/differential results · known-bad result · scope report · defaults used · not-verified list · open questions. After H-02, it also carries the SEV report digest, reviewed-diff digest, disposition, findings, and not-verified items. PRF-01: the harness builds the sheet from run records; hand-editing fails the gate (LAW-01). LAW-04's honesty requirement is a schema field; the not-verified list cannot be empty by omission.### The Independent Test Verifier and Systems Engineering Verifier (VRF-01..05; LAW-30)
 
-### The Verifier (VRF-01..05)
+The independent test verifier runs in a fresh context and did not write the code. It reads the card, Proof Sheet, and diff only; it writes failing tests, never product-code fixes, and reports reproducible findings with test, seed, and command. Its report is advisory to the mechanical gate.
 
-Fresh context; did not write the code. Reads the card, the Proof Sheet, and the diff ONLY. Writes failing tests; never edits product code. Reports only failures it can reproduce, with test, seed, and command. The report is advisory — **the gate decides**. The verification protocol is host-agnostic (D-028): the current default family is GLM (INT-070); any capable model family may run it — a host change requires no redesign and contradicts no authority rule. A different model family CAN add optional adversarial coverage, but it is never a required gate. Independence comes from the verification design, not the model brand: acceptance criteria fixed before implementation, a verifier that did not write the implementation, real running paths, independent state reads, known-bad controls, and protected gates the verifier cannot quietly weaken. **The falsification loop (INT-117, 2026-10-14):** fresh-context subagents (currently the GLM default) run the testing, falsification, and retesting loop — real tests, independent state reads, deliberately broken cases, actual protected gates; a known-bad change must be rejected, the failure diagnosed, the correction reviewed, and the catch confirmed. The verifier never implements the code it evaluates.
+After H-02, a separate SEV record is also mandatory before merge. The SEV checks traceability from owner intent and approved system requirements through design and interfaces to component verification, integration verification, system verification, and validation in the user's actual scenario. It reviews relevant failure modes, data-loss/security boundaries, dependency and regression risk, and not-verified claims. It cannot make owner decisions or lower a constraint. The gate checks report completeness, freshness, and disposition; a separate grader examines the SEV at phase gates.
 
+The verification protocol is host-agnostic (D-028): the current default family is GLM (INT-070); any capable model family may run it without redesign. A different family may add optional adversarial coverage but is not a required gate. Independence is established through the process (fresh context, separately fixed acceptance criteria, real stack, independent reads, known-bads, protected gates), not the model brand. A context identifier alone is not cryptographic proof that contexts are separate; this limitation must be stated honestly. The falsification loop (INT-117) remains: reproduce the failure, repair it, and prove the known-bad is caught before the next slice.
 ### Walls, CI, and signed gates (WALL-01..06)
 
 `main` protected: PR + required check, no force push, applies to admins. CODEOWNERS on protected paths. The agent credential cannot change workflow files and cannot sign. Phase gates are owner-signed tags verified by CI against `gates/owner.pub`. The agent never holds the owner key. Local `make verify` is preflight; remote CI is the authority. The required status check is restricted to the expected source application so an untrusted integration cannot supply a look-alike status — verified on the installed host version (Host Contract), never assumed.

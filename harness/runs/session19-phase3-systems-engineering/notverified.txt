@@ -1,4 +1,4 @@
 Local Phase 2 preflight was not run in this execution environment; no local PostgreSQL client is available here.
 Live branch-protection detail returned HTTP 403 and was not newly verified.
 A separate fresh-context SEV review of this documentation slice has not been run; this Proof Sheet does not claim independent SEV PASS.
-PR CI and this branch’s required-check result are not yet observed at the time of record assembly.
+Required PR checks were observed green on prior head caa84aee8a8b541c86a927639da81325488f3a03 in run 39235286059. This evidence update changes the PR head, so verify CI for the resulting head before approval or merge.

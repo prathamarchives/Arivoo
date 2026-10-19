@@ -357,9 +357,9 @@ def main() -> int:
                              "ARV_PR_HEAD": "slice/" + sname})
         out = r.stdout + r.stderr
         check("H01aR-bad-base exits nonzero", r.returncode != 0, f"exit={r.returncode}")
-        check("H01aR-bad-base refuses with ARV-DIFF-001 exactly once",
-              out.count("ARV-DIFF-001") == 1,
-              f"count={out.count('ARV-DIFF-001')} — ONE consolidated named refusal, not a duplicated print plus a crash")
+        check("H01aR-bad-base prints ONE ARV-DIFF-001 disposition",
+              len([l for l in out.splitlines() if l.startswith("FAIL ARV-DIFF-001")]) == 1,
+              "the named refusal prints as a disposition exactly once; the summary lists the code (that IS the consolidated disposition) — but a second FAIL disposition or a crash-repeated code is the defect (amendment: the first draft of this assertion counted raw substring mentions, which the skip note and the required summary legitimately contain; narrowed to the disposition form, no assertion removed)")
         check("H01aR-bad-base has NO uncaught traceback", "Traceback" not in out,
               "a failed diff is a named gate disposition, never a process crash")
         check("H01aR-bad-base skips the claim check on an invalid diff",

@@ -1,0 +1,12 @@
+# CLAIM-009 / H-01a-R — the bounded completion checks (INT-126/D-040)
+# Protected paths (harness/) carry the owner ref; PLAN carries the card correction:
+harness/gate.py INT-126/D-040
+harness/scope.py INT-126/D-040
+harness/tests/test_gate_dispatch.py INT-126/D-040
+harness/red-records.json INT-126/D-040
+PLAN.md INT-126/D-040
+CLAIMS.md
+STATE.md
+context/WORKLOG.md INT-126/D-040
+context/extracted/21-SESSION-21-EXECUTION-DIRECTIVE-INTAKE.md
+harness/runs/claim-009-h01a-completion-checks INT-126/D-040

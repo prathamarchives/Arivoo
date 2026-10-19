@@ -137,6 +137,8 @@ An Anchor identifies a Source version and contains enough format-specific locati
 
 **Storage boundary:** PostgreSQL and object/blob storage do not share one transaction. Do not claim cross-service atomicity. Use staged content-digested blobs; only commit Source metadata that references a verified durable blob; track unfinished imports; recover or clean orphaned staging objects under a tested policy. If the selected host cannot satisfy the contract, open a blocker instead of inventing weaker semantics.
 
+**Q12 storage decision.** D-032 does not itself select an object-storage provider or specify local staging/cache semantics. At P3-00, compare the existing Supabase Storage option against any alternative using durability/backup guarantees, offline operation, content identity, upload completion, signed access, purge and restore integration, orphan cleanup, and local/cloud failure recovery. Recommend one option with evidence; do not implement provider-specific migrations or claim cross-store atomicity until the owner ratifies the choice.
+
 **Minimum kernel only**
 
 Build only what the first real slice needs:
@@ -159,7 +161,7 @@ Every slice gets its own branch/PR, one behavior, pre-registered acceptance test
 - Trace SYS-01–SYS-11 to owning component, interface, tests, C1–C5 claims, and user validation scenario.
 - Draw data-lifecycle and state machines for import; capture; revision/tombstone; local outbox; server sync; indexing; export/restore.
 - Specify authoritative entities, IDs, ownership, actor, revisions, provenance, transaction boundaries, migration plan, kernel interfaces, and failure behavior.
-- Q11 and Q8 must remain visible at their named scopes; other owner decisions block only the dependent work.
+- Q11, Q12, and Q8 must remain visible at their named scopes; other owner decisions block only the dependent work.
 - Acceptance: no contradictory source-of-truth rule; every requirement has tests and proof paths; unresolved dependencies have exact boundaries; independent SEV finds no P0/P1. No product schema migration until this gate is accepted.
 
 **P3-01 — Kernel and first real command**
@@ -266,6 +268,7 @@ Exit: C3 demonstrable with reasons and provenance — new inputs resurface old m
 - Q9 — repository visibility (review §8 Q4; observed public 2026-10-16) — blocks nothing; privacy-relevant.
 - Q10 — fine-grained PAT/workflow-tamper hardening (review §8 Q5, from F-7) — blocks mechanical workflow-tamper hardening only; credential/permission choice stays owner-controlled.
 - Q11 — Work/Source identity and duplicate-import semantics — working-context notes indicate a preference for separate logical imports by default and optional duplicate detection, but this is not yet canonical owner intent in the ledger. Do not auto-merge or add identity-specific uniqueness constraints until the owner ratifies the identity rule. Blocks auto-dedup/merge only; unrelated capture/kernel work continues. Home: DECISIONS Q11; gate: P3-00 schema freeze.
+- Q12 — source-file blob backend, local staging/cache lifecycle, and cross-store recovery are not specified by D-032. Do not pick a provider or promise cross-store atomicity by assumption. It blocks the source/blob persistence schema and durability promises only; command-kernel work can continue. Home: DECISIONS Q12; gate: P3-00 review, before P3-02.
 
 Q6–Q10 were registered 2026-10-16 (session 18, D-036); each blocks only its named dependents. Q11 is registered in this plan branch because the review's Work/Source dedup assumption conflicts with working-context notes that are not yet canonical owner intent. Phase 2 S1–S4 remain complete.
 

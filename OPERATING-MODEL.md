@@ -279,7 +279,7 @@ Every custom check, lint rule, and runtime error prints: a stable **rule ID**, t
 
 ## 9. The verification stack
 
-### Command surface (target state, arriving with Phase 2)
+### Command surface (target state; verify the actual Makefile before use)
 
 | Command | Result | Budget |
 |---------|--------|--------|

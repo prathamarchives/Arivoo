@@ -1,0 +1,13 @@
+# CLAIM-008 — the session-21 intake (owner turn 21 verbatim + INT-126 + D-040 + the card refresh)
+# Protected paths carry the owner refs that authorize this intake (INT-126 is
+# reserved by this very row with the retroactive notation; D-040 records the
+# operational adoption):
+context/extracted/21-SESSION-21-EXECUTION-DIRECTIVE-INTAKE.md
+INTENT-LEDGER.md INT-126/D-040
+DECISIONS.md INT-126/D-040
+PLAN.md INT-126/D-040
+CLAIMS.md
+STATE.md
+AGENTS.md
+context/WORKLOG.md INT-126/D-040
+harness/runs/claim-008-session-21-intake INT-126/D-040

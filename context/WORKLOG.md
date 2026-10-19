@@ -456,3 +456,10 @@ Stage Summary:
 - Unresolved: unchanged — A03 (H-01b), A11/A12 (H-01c split), A09+A08 (H-02), A04/A07/A13 (P3-K0), A05/A06 (P3-M0), A14–A18 (bounded follow-ups) — all 'static, confirmed' until their slices
 - Next: the session-21 intake (owner turn 21 verbatim, INT-126) as the next claim; then the bounded H-01a completion sub-slice; then H-01b with H-02 parallelizable per the registry
 - Session record: context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md (§12 amendment; record 21 pending the intake claim)
+
+## Task 25 (CLAIM-008, session 21) — the session-21 intake: owner turn 21 verbatim + the card refresh
+- Task: import owner turn 21 faithfully (record 21 §1, the full 10-section directive) + INT-126 (retroactive notation — the ledger entry and the claim row in one PR, the CLAIM-004 precedent) + D-040 (the operational adoption) + the PLAN card refresh per the turn's §2/§4/§5/§6 + STATE/AGENTS count sync + CLAIM-007's prompt closed row
+- The refreshed card set: H-01a-R (the bounded completion checks — READY; its defect forms reproduced/confirmed at the session-21 preflight), H-01b (the trusted-floor contract — READY; five points + eight RED cases + the CI real-floor + the same-host residual boundary), H-01c-claims/authority/evidence (the A11/A12+A17/A15+A18+narrow-A16 split, disjoint), H-02 extended (evidence-not-ceremony: the digest rules, the A09 repairs, the public-validator known-bad list, the bootstrap-scoped transition, the H-01b activation dependency), P3-M0/P3-K0 (the product-entry prerequisites)
+- Non-goals honored: no code this slice; no owner question opened or closed; no roadmap rewrite (the Phase 4/5 outcome rows stay source of truth)
+- Next: the H-01a-R sub-slice as the next claim (RED-first on the reproduced defects), then H-01b; H-01c/H-02 design parallelizable under disjoint claims
+- Session record: context/extracted/21-SESSION-21-EXECUTION-DIRECTIVE-INTAKE.md (§1–§3)

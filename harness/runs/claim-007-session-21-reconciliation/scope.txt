@@ -1,0 +1,9 @@
+# CLAIM-007 — the session-21 preflight reconciliation (narrow; no new owner decision)
+# Protected paths carry the owner ref that authorizes registry/record honesty work
+# under the standing claim rules (D-038 rule 4's closing append; record 20 §12's
+# named reconciliation item):
+CLAIMS.md
+STATE.md
+context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md
+context/WORKLOG.md INT-125/D-039
+harness/runs/claim-007-session-21-reconciliation INT-125/D-039

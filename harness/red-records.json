@@ -33,8 +33,12 @@
     ]
   },
   "harness/tests/test_gate_dispatch.py": {
-    "current_sha256": "61179680a97bad070f448820bff5ffc6c43d915df1d83020c555769691d419c8",
-    "amendments": [],
-    "red_evidence": "H-01a red-first observed at the test-only commit on the actual predecessor 6cdd458: all six dispatch cases RED on the missing real dispatcher (subprocess exit 2) AND the A10 cases RED on actual wrong behavior \u2014 diff_paths returns [] for a nonexistent base (refused=False, the vacuous-pass defect A10 live) and rejects the repo kwarg (no merge-base decoupling); output frozen at harness/runs/claim-005-h01a-pr-dispatch-git-fail-closed/red-01.txt"
+    "current_sha256": "b3cf0abf9262cb156df38825473f4abd69c9af27950b90e14b97556dc1350bb7",
+    "amendments": [
+      {
+        "note": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
+      }
+    ],
+    "red_evidence": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
   }
 }

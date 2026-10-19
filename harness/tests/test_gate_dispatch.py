@@ -196,6 +196,7 @@ def main() -> int:
         gitu("checkout", "-q", "--orphan", "other")
         (u / "a.txt").unlink(); (u / "b.txt").write_text("root B\n")
         gitu("add", "-A"); gitu("commit", "-qm", "root B")
+        gitu("checkout", "-q", "main")  # HEAD and 'other' are now unrelated roots
         refused = False
         code = ""
         try:

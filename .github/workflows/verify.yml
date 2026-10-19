@@ -72,27 +72,26 @@ jobs:
     steps:
       - name: Checkout head
         uses: actions/checkout@v4
+        with:
+          # H-01a/A10: full history — the gate's triple-dot diff against
+          # origin/main needs a decidable merge-base; a depth-1 checkout
+          # cannot prove the base/merge relationship.
+          fetch-depth: 0
       - name: "Ensure the psql client is present (deterministic provisioning — never asserted from docs, LAW-02)"
         run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
       - name: "S1 — the real-stack rig: health + the migrations suite (Phase 2 Layer 2.1, D-036)"
         run: |
           make harness-health
           make harness-tests
-      - name: "S4b — THE GATE on the real stack (D-036; record 18 §4.5): fail-closed suites, red records, scope/size, LAW-24/08, known-bads, and slice Proof Sheet. PR mode judges the declared diff; main selfcheck re-proves the gate. Harness is REQUIRED per session 18 §6."
+      - name: "S4b — THE GATE on the real stack (D-036; H-01a/INT-125/D-039: FAIL-CLOSED DISPATCH — event fields arrive via env, never template-interpolated into the script (A02); a pull request is ALWAYS judged in PR mode — missing scope/claim/sheet is refused by the gate's named codes, never selfchecked away (A01); git failures refuse (A10)). Harness is REQUIRED per session 18 §6."
+        env:
+          # untrusted event metadata travels through the ENVIRONMENT only — the
+          # dispatcher validates it as an identifier before anything executes
+          ARV_EVENT_NAME: ${{ github.event_name }}
+          ARV_PR_HEAD: ${{ github.head_ref }}
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            git fetch origin main -q
-            SLICE_NAME="${{ github.head_ref }}"
-            SLICE_NAME="${SLICE_NAME#slice/}"
-            if [ -f "harness/runs/$SLICE_NAME/scope.txt" ]; then
-              python3 harness/gate.py --slice "$SLICE_NAME" --diff origin/main --skip-suites
-            else
-              echo "NOTE ARV-SCOPE-001-PROBE: no scope declaration for '$SLICE_NAME' — the declaration must land with the slice (checked at gate time); running the selfcheck gate"
-              python3 harness/gate.py --no-diff --skip-suites
-            fi
-          else
-            python3 harness/gate.py --no-diff --skip-suites
-          fi
+          git fetch origin main
+          python3 harness/dispatch.py
 
   canonical-layer:
     runs-on: ubuntu-latest

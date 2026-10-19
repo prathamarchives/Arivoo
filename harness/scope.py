@@ -15,6 +15,29 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 
+
+class GitRefusal(Exception):
+    """A failed git operation is a REFUSAL, never an empty diff (H-01a/A10).
+
+    Carries the named code in its message: ARV-DIFF-001 (the git operation
+    failed) / ARV-DIFF-002 (no merge-base between the declared base and HEAD —
+    invalid base or insufficient graph history). The gate catches this and
+    refuses; the predecessor returned [] silently, which read as a compliant
+    empty diff (the vacuous-pass defect, reproduced RED in test_gate_dispatch).
+    """
+
+
+def _git(args: list, repo=None):
+    """Run git, refusing on failure (ARV-DIFF-001) instead of trusting stdout."""
+    import subprocess
+    r = subprocess.run(["git"] + args, cwd=repo or REPO,
+                       capture_output=True, text=True, timeout=60)
+    if r.returncode != 0:
+        raise GitRefusal(
+            f"ARV-DIFF-001: git {' '.join(args[:2])} failed (exit {r.returncode}): "
+            f"{(r.stderr or r.stdout).strip()[:200]}")
+    return r
+
 # LAW-05's size limits (LAWS.md). Editing these constants is a constraint-weakening
 # change (LAW-09) — they live in harness/ (a protected path), so the scope check
 # flags any edit without an owner-referenced declaration.
@@ -34,23 +57,39 @@ MIGRATION_RE = re.compile(r"^harness/migrations/\d{4}_.*\.sql$")
 SOURCE_RE = re.compile(r"\.py$")
 
 
-def diff_paths(base: str) -> list:
-    """Changed paths (git diff base...HEAD), for the scope check."""
+def ensure_merge_base(base: str, repo=None) -> str:
+    """ARV-DIFF-002: the declared base must share history with HEAD (A10).
+
+    A triple-dot diff with no merge-base is a failure condition, not a no-op:
+    refusing here keeps an invalid base or a shallow/incomplete graph from
+    producing a compliant-looking empty diff."""
     import subprocess
-    r = subprocess.run(["git", "diff", "--name-only", f"{base}...HEAD"],
-                       cwd=pathlib.Path(__file__).resolve().parents[1],
+    r = subprocess.run(["git", "merge-base", base, "HEAD"], cwd=repo or REPO,
                        capture_output=True, text=True, timeout=60)
-    return [l for l in r.stdout.splitlines() if l]
+    if r.returncode != 0:
+        raise GitRefusal(
+            f"ARV-DIFF-001: git merge-base failed for base '{base}' (exit {r.returncode}): "
+            f"{(r.stderr or '').strip()[:160]}")
+    if not r.stdout.strip():
+        raise GitRefusal(
+            f"ARV-DIFF-002: no merge-base between '{base}' and HEAD — an invalid base or "
+            "insufficient graph history; refusing rather than treating it as an empty diff")
+    return r.stdout.strip()
 
 
-def diff_stats(base: str) -> list:
+def diff_paths(base: str, repo=None) -> list:
+    """Changed paths (git diff base...HEAD), for the scope check. Fail-closed (A10)."""
+    ensure_merge_base(base, repo)
+    return [l for l in _git(["diff", "--name-only", f"{base}...HEAD"], repo).stdout.splitlines() if l]
+
+
+def diff_stats(base: str, repo=None) -> list:
     """Per-path added lines, honestly classified: SOURCE = .py non-test; TEST =
     test_*.py; MIGRATION = 1-per-slice; everything else = DATA (evidence
-    artifacts — not source lines, but still gated by the SCOPE check)."""
-    import subprocess
-    r = subprocess.run(["git", "diff", "--numstat", f"{base}...HEAD"],
-                       cwd=pathlib.Path(__file__).resolve().parents[1],
-                       capture_output=True, text=True, timeout=60)
+    artifacts — not source lines, but still gated by the SCOPE check).
+    Fail-closed (A10): a failed diff refuses, never a compliant empty one."""
+    ensure_merge_base(base, repo)
+    r = _git(["diff", "--numstat", f"{base}...HEAD"], repo)
     out = []
     for line in r.stdout.splitlines():
         parts = line.split("\t")

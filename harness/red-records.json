@@ -33,7 +33,7 @@
     ]
   },
   "harness/tests/test_gate_dispatch.py": {
-    "current_sha256": "1f27eac49313867aa7b78d88b8f8934ceb97f6b63f123758159c377c429ff73f",
+    "current_sha256": "d01232a828f42eb6248f82dd2576441d3cf02606770937ad18011d6577109924",
     "amendments": [
       {
         "note": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
@@ -46,8 +46,14 @@
       },
       {
         "note": "H-01a additive amendment 4 (LAW-11): fixture base derivation corrected \u2014 candidate order HEAD^2 (the CI merge commit's main parent) -> origin/main (the dev clone's remote-tracking ref; plain rev-parse never DWIMs to it \u2014 the previous fallback 'main' could never resolve in a branchless clone) -> main; the derived base is then SET via update-ref refs/remotes/origin/main so the real gate inside the fixture finds it. No assertion changed."
+      },
+      {
+        "note": "H-01a additive amendment 5 (LAW-11, carried by the close slice after the walls caught it at PR #41): the positive case was coupled to LIVE registry state \u2014 it exercised the real claim-005 row, which legitimately CLOSED when the slice merged, and the real gate (correctly) refused ARV-CLM-005. The case is now SELF-CONTAINED (the A11 self-containment class applied to this suite itself): a synthetic claim-998 row in a stripped clone registry, scope derived from the clone's actual diff, a fresh runs dir \u2014 no real evidence touched. Assertions unchanged: 11 named checks."
+      },
+      {
+        "note": "H-01a additive amendment 6 (LAW-11, the PR #41 walls-catch taken to its final form): the positive case is now ENVIRONMENT-INDEPENDENT \u2014 registry kept intact (the KB probes keep their pre-existing-row partners), the fixture base reset to HEAD (empty diff \u2014 the case proves dispatch routing; diff evaluation is the negative cases' job), and the synthetic claim-998 row carries a guaranteed KB-CLM-002 probe partner (context/extracted/21-fixture-probe.md) so the probe fires on every future branch regardless of live claims \u2014 A11's probe-coupling defect made deterministic in the fixture, its real repair stays H-01c's card. Assertions unchanged: 11 named checks."
       }
     ],
-    "red_evidence": "H-01a additive amendment 4 (LAW-11): fixture base derivation corrected \u2014 candidate order HEAD^2 (the CI merge commit's main parent) -> origin/main (the dev clone's remote-tracking ref; plain rev-parse never DWIMs to it \u2014 the previous fallback 'main' could never resolve in a branchless clone) -> main; the derived base is then SET via update-ref refs/remotes/origin/main so the real gate inside the fixture finds it. No assertion changed."
+    "red_evidence": "H-01a additive amendment 6 (LAW-11, the PR #41 walls-catch taken to its final form): the positive case is now ENVIRONMENT-INDEPENDENT \u2014 registry kept intact (the KB probes keep their pre-existing-row partners), the fixture base reset to HEAD (empty diff \u2014 the case proves dispatch routing; diff evaluation is the negative cases' job), and the synthetic claim-998 row carries a guaranteed KB-CLM-002 probe partner (context/extracted/21-fixture-probe.md) so the probe fires on every future branch regardless of live claims \u2014 A11's probe-coupling defect made deterministic in the fixture, its real repair stays H-01c's card. Assertions unchanged: 11 named checks."
   }
 }

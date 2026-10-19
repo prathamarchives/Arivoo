@@ -140,13 +140,34 @@ def main() -> int:
                               "ARV_PR_HEAD": "slice/claim-999-nosheet"})
         pr_refusal(r, "ARV-PRF", "A01-missing-sheet")
 
-        # ---- positive: THE SLICE'S OWN SHAPE dispatches green — the real name,
-        # the real committed scope declaration, the real claim row, a sheet ----
+        # ---- positive: a VALID scoped/claimed/sheeted PR dispatches green ----
+        # ENVIRONMENT-INDEPENDENT by design (three walls-catches at PR #41 drove
+        # this to its final form): (1) the case once exercised the LIVE claim-005
+        # row and broke when that claim legitimately closed (ARV-CLM-005 — the
+        # gate was right); (2) stripping the live rows then broke the KB-CLM-002
+        # probe, which needs a pre-existing row to overlap against (the A11
+        # probe-coupling defect, exactly as the audit states it). Final design:
+        # registry INTACT (probes keep their partners), the base ref reset to
+        # HEAD (the fixture's diff is empty — the case proves dispatch routing,
+        # not diff evaluation, which the negative cases cover), and a synthetic
+        # non-overlapping row that ALSO carries a guaranteed probe partner.
         d = fixture_clone(tmp, "positive")
-        sname = "claim-005-h01a-pr-dispatch-git-fail-closed"
+        subprocess.run(["git", "update-ref", "refs/remotes/origin/main", "HEAD"], cwd=d,
+                       check=True, capture_output=True, timeout=60)
+        sname = "claim-998-positive-shape"
         sd = d / "harness" / "runs" / sname
-        sd.mkdir(parents=True, exist_ok=True)  # scope.txt + red-01.txt are committed
-        nv_text = "- fixture probe record (the slice's real runs land with its own close)\n"
+        sd.mkdir(parents=True)
+        (sd / "scope.txt").write_text(
+            "README.md INT-125/D-039\n"
+            "context/extracted/21-fixture-probe.md INT-125/D-039\n")
+        reg = d / "CLAIMS.md"
+        text = reg.read_text()
+        anchor = "|-------|---------|-------|--------|----------------|---------------|---------|-------|\n"
+        row = ("| CLAIM-998 | 20 | test | `slice/" + sname + "` | "
+               "`README.md`, `context/extracted/21-fixture-probe.md` | "
+               "— | 2026-10-19 | positive probe — non-overlapping, and the 21- entry is the KB-CLM-002 probe's guaranteed overlap partner (A11's coupling, made deterministic) |\n")
+        reg.write_text(text.replace(anchor, anchor + row, 1))
+        nv_text = "- fixture probe record (self-contained; no real evidence touched)\n"
         (sd / "run-01.json").write_text(
             '{"command": "probe", "exit_code": 0, "commit": "' + "0" * 40 + '", '
             '"output_sha256": "' + "0" * 64 + '", "recorded_at": "2026-10-19T00:00:00+00:00"}\n')

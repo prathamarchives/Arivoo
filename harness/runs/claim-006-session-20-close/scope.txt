@@ -1,0 +1,13 @@
+# CLAIM-006 (session 20 close work, INT-125/D-039): the interim close — CLAIM-005's
+# closed row, record 20 §4/§8/§11/§12, STATE's exact-next-action, the WORKLOG Task 23;
+# PLUS the suite-stability repair the close's own CI exposed (PR #41's walls-catch:
+# the dispatch suite's positive case was coupled to live registry state and broke
+# when CLAIM-005 legitimately closed — made self-contained, the record-19 in-slice
+# repair precedent applied; red amended additively, assertions unchanged).
+CLAIMS.md INT-125/D-039
+STATE.md INT-125/D-039
+context/WORKLOG.md INT-125/D-039
+context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md INT-125/D-039
+harness/runs/claim-006-session-20-close INT-125/D-039
+harness/tests/test_gate_dispatch.py INT-125/D-039
+harness/red-records.json INT-125/D-039

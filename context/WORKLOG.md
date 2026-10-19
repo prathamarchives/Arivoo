@@ -405,6 +405,6 @@ Stage Summary:
 - Outcome: Phase 3 execution contract and canonical process updates are in draft PR #35; not owner-accepted or merged. Previous PR head caa84aee8a8b541c86a927639da81325488f3a03 passed canonical-layer, head-tools, and harness in run 39235286059.
 - Evidence: current main workflow run 38907815470; detailed starting state and limitations in session record 19.
 - Pointer: PLAN.md Phase 2 close-out/Phase 3 sections; context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md.
-- Unresolved: local preflight; fresh branch-protection observation (API returned 403); independent fresh-context SEV for the documentation slice; final evidence-update revision CI until observed; H-01/H-02 implementation and proof; owner acceptance; Q6–Q11 and D-014 at their named scopes.
-- Next: re-check all required CI on the final evidence-update revision, then leave draft PR #35 unmerged for explicit owner authorization. After approval, run local preflight at then-current main and execute bounded H-01/H-02 before P3-00/P3-01.
+- Unresolved: local preflight; fresh branch-protection observation (API returned 403); independent fresh-context SEV for the documentation slice; CI status on the exact current PR head before owner approval (status evidence is SHA-specific); H-01/H-02 implementation and proof; owner acceptance; Q6–Q11 and D-014 at their named scopes.
+- Next: check all required CI on the exact current PR head before owner authorization; leave draft PR #35 unmerged unless explicitly authorized. After approval, run local preflight at then-current main and execute bounded H-01/H-02 before P3-00/P3-01.
 - Session record: context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md

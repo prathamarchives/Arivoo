@@ -26,7 +26,6 @@ cases fail on ACTUAL wrong behavior of the existing code, not just absence.
 """
 import os
 import pathlib
-import re
 import shutil
 import subprocess
 import sys
@@ -142,37 +141,32 @@ def main() -> int:
         pr_refusal(r, "ARV-PRF", "A01-missing-sheet")
 
         # ---- positive: a VALID scoped/claimed/sheeted PR dispatches green ----
-        # SELF-CONTAINED by design (the A11 lesson applied to this suite itself,
-        # after the walls caught it at PR #41: a case coupled to the LIVE
-        # registry state broke when CLAIM-005 legitimately closed). The fixture
-        # strips the clone's live OPEN rows and registers its own synthetic
-        # claim whose scope is derived from the clone's ACTUAL diff vs the
-        # base — so the case proves the dispatcher+gate positive path on any
-        # branch, never touching real evidence files.
+        # ENVIRONMENT-INDEPENDENT by design (three walls-catches at PR #41 drove
+        # this to its final form): (1) the case once exercised the LIVE claim-005
+        # row and broke when that claim legitimately closed (ARV-CLM-005 — the
+        # gate was right); (2) stripping the live rows then broke the KB-CLM-002
+        # probe, which needs a pre-existing row to overlap against (the A11
+        # probe-coupling defect, exactly as the audit states it). Final design:
+        # registry INTACT (probes keep their partners), the base ref reset to
+        # HEAD (the fixture's diff is empty — the case proves dispatch routing,
+        # not diff evaluation, which the negative cases cover), and a synthetic
+        # non-overlapping row that ALSO carries a guaranteed probe partner.
         d = fixture_clone(tmp, "positive")
+        subprocess.run(["git", "update-ref", "refs/remotes/origin/main", "HEAD"], cwd=d,
+                       check=True, capture_output=True, timeout=60)
         sname = "claim-998-positive-shape"
         sd = d / "harness" / "runs" / sname
         sd.mkdir(parents=True)
-        rd = subprocess.run(["git", "diff", "--name-only", "origin/main...HEAD"], cwd=d,
-                            capture_output=True, text=True, timeout=60)
-        diff_paths = [l for l in rd.stdout.splitlines() if l]
-        decl_lines = "".join(f"{p} INT-125/D-039\n" for p in diff_paths)
-        (sd / "scope.txt").write_text(decl_lines if diff_paths
-                                      else "harness/tests/test_migrations.py INT-125/D-039\n")
-        scope_cell = ", ".join("`" + p + "`" for p in diff_paths) or "`harness/tests`"
+        (sd / "scope.txt").write_text(
+            "README.md INT-125/D-039\n"
+            "context/extracted/21-fixture-probe.md INT-125/D-039\n")
         reg = d / "CLAIMS.md"
         text = reg.read_text()
-        mo = re.search(r"## Open claims.*?(?=\n## )", text, re.S)
-        if not mo:
-            raise AssertionError("fixture: no Open claims section in the clone registry")
-        section = mo.group(0)
-        stripped = re.sub(r"^\| CLAIM-[0-9]+ \|.*\|$", "", section, flags=re.M).rstrip() + "\n\n"
-        text = text.replace(section, stripped)
         anchor = "|-------|---------|-------|--------|----------------|---------------|---------|-------|\n"
-        row = ("| CLAIM-998 | 20 | test | `slice/" + sname + "` | " + scope_cell + " | "
-               "— | 2026-10-19 | positive probe — self-contained (live rows stripped) |\n")
-        text = text.replace(anchor, anchor + row, 1)
-        reg.write_text(text)
+        row = ("| CLAIM-998 | 20 | test | `slice/" + sname + "` | "
+               "`README.md`, `context/extracted/21-fixture-probe.md` | "
+               "— | 2026-10-19 | positive probe — non-overlapping, and the 21- entry is the KB-CLM-002 probe's guaranteed overlap partner (A11's coupling, made deterministic) |\n")
+        reg.write_text(text.replace(anchor, anchor + row, 1))
         nv_text = "- fixture probe record (self-contained; no real evidence touched)\n"
         (sd / "run-01.json").write_text(
             '{"command": "probe", "exit_code": 0, "commit": "' + "0" * 40 + '", '

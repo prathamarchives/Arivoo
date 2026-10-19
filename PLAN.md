@@ -36,12 +36,9 @@ At the exact main SHA from which implementation will branch, record the SHA and 
 4. python3 tools/isolation_selftest.py
 5. make harness-health
 6. make verify-schema
-7. make harness-tests
-8. make known-bad
-9. make gate
-10. make verify
+7. make verify
 
-The local database must be the real PostgreSQL rig, not a mock. Do not print environment variables or secrets. Save the actual command, exit status, revision, and material result in the slice run record. Run remote required checks on the same proposed revision. A green remote run at an earlier SHA is historical evidence, not proof that a future PR or new local environment is green.
+The local database must be the real PostgreSQL rig, not a mock. `make verify` already runs the fast test suite, the known-bad matrix, the integrated gate, and the canonical verifier; do not rerun those same suites separately unless diagnosing a failure. Do not print environment variables or secrets. Save the actual command, exit status, revision, and material result in the slice run record. Run remote required checks on the same proposed revision. A green remote run at an earlier SHA is historical evidence, not proof that a future PR or new local environment is green.
 
 The current Makefile does not provide the real-run or falsify targets described in parts of the operating-model target surface. Do not claim either target ran until it exists and has actually run. Implement any missing command through a bounded card with red-first tests.
 

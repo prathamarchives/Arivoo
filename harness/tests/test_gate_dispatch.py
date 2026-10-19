@@ -51,12 +51,26 @@ def run_dispatch(cwd: pathlib.Path, env_extra: dict) -> subprocess.CompletedProc
 
 
 def fixture_clone(tmp: str, name: str) -> pathlib.Path:
-    """A real git clone of this repo at the branch tip (full history — the
-    merge-base against origin/main must be decidable; the candidate tree
-    carries the implementation under test). Mutated per case after cloning."""
+    """A real git clone of this repo at the candidate tree (full history), mutated
+    per case. The gate diffs against 'origin/main', so the clone MUST carry that
+    ref: in CI the parent workspace is a detached merge checkout with no local
+    branches (a plain clone inherits none) — derive the base from the merge
+    commit's second parent there, from the local 'main' branch elsewhere."""
     d = pathlib.Path(tmp) / name
     subprocess.run(["git", "clone", "-q", "--no-local", str(REPO), str(d)],
                    check=True, capture_output=True, timeout=300)
+    r = subprocess.run(["git", "rev-parse", "HEAD^2"], cwd=d,
+                       capture_output=True, text=True, timeout=60)
+    base = r.stdout.strip() if r.returncode == 0 else ""
+    if not base:
+        r = subprocess.run(["git", "rev-parse", "main"], cwd=d,
+                           capture_output=True, text=True, timeout=60)
+        base = r.stdout.strip() if r.returncode == 0 else ""
+    if base:
+        subprocess.run(["git", "update-ref", "refs/remotes/origin/main", base], cwd=d,
+                       check=True, capture_output=True, timeout=60)
+    else:
+        raise AssertionError("fixture cannot derive the origin/main base for the clone")
     return d
 
 

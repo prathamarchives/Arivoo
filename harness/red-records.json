@@ -33,15 +33,18 @@
     ]
   },
   "harness/tests/test_gate_dispatch.py": {
-    "current_sha256": "da3f436fdd12ad9711b63ef8c18c63914617aaa5ea3954ba172108d32c331e7b",
+    "current_sha256": "cee5181a919cae1d1f49810fe2c306b5bfa8b5396c728b3c720849dd7739849a",
     "amendments": [
       {
         "note": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
       },
       {
         "note": "H-01a additive amendment 2 (LAW-11): fixture precision \u2014 clones take the natural branch tip (the candidate tree under test); the positive case now exercises THE REAL SLICE's own shape (real name, committed scope declaration, real claim row, fixture-built sheet) instead of a synthetic claim; assertion set unchanged (the 11 named checks stand)"
+      },
+      {
+        "note": "H-01a additive amendment 3 (LAW-11): fixture environment-robustness \u2014 the walls caught it in CI, not locally: the runner workspace is a detached merge checkout with no local branches, so a plain fixture clone carried NO refs/remotes/origin/main and the gate (correctly) refused ARV-DIFF-001 before reaching the asserted codes. The fixture now derives the base uniformly (merge-commit parent 2 in CI; the local main branch elsewhere) and sets the ref explicitly. No assertion changed; the 11 named checks stand."
       }
     ],
-    "red_evidence": "H-01a additive amendment 2 (LAW-11): fixture precision \u2014 clones take the natural branch tip (the candidate tree under test); the positive case now exercises THE REAL SLICE's own shape (real name, committed scope declaration, real claim row, fixture-built sheet) instead of a synthetic claim; assertion set unchanged (the 11 named checks stand)"
+    "red_evidence": "H-01a additive amendment 3 (LAW-11): fixture environment-robustness \u2014 the walls caught it in CI, not locally: the runner workspace is a detached merge checkout with no local branches, so a plain fixture clone carried NO refs/remotes/origin/main and the gate (correctly) refused ARV-DIFF-001 before reaching the asserted codes. The fixture now derives the base uniformly (merge-commit parent 2 in CI; the local main branch elsewhere) and sets the ref explicitly. No assertion changed; the 11 named checks stand."
   }
 }

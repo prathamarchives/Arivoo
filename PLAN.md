@@ -267,7 +267,7 @@ Exit: C3 demonstrable with reasons and provenance — new inputs resurface old m
 - Q7 — semantic-spike budget for S6 (review §8 Q2) — blocks S6 only.
 - Q8 — extraction-spike documents for S5 (review §8 Q3) — blocks S5's corpus only.
 - Q9 — repository visibility (review §8 Q4; observed public 2026-10-16) — blocks nothing; privacy-relevant.
-- Q10 — fine-grained PAT hardening (review §8 Q5, from F-7) — blocks F-7's mechanical fix only.
+- Q10 — fine-grained PAT/workflow-tamper hardening (review §8 Q5, from F-7) — blocks mechanical workflow-tamper hardening only; credential/permission choice stays owner-controlled.
 - Q11 — Work/Source identity and duplicate-import semantics — working-context notes indicate a preference for separate logical imports by default and optional duplicate detection, but this is not yet canonical owner intent in the ledger. Do not auto-merge or add identity-specific uniqueness constraints until the owner ratifies the identity rule. Blocks auto-dedup/merge only; unrelated capture/kernel work continues. Home: DECISIONS Q11; gate: P3-00 schema freeze.
 
 Q6–Q10 were registered 2026-10-16 (session 18, D-036); each blocks only its named dependents. Q11 is registered in this plan branch because the review's Work/Source dedup assumption conflicts with working-context notes that are not yet canonical owner intent. Phase 2 S1–S4 remain complete.

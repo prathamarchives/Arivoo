@@ -24,7 +24,7 @@ The plan and canonical updates are committed to draft PR #35. Latest observed re
 
 ## 5. Files changed
 
-Changed paths (19): .github/workflows/verify.yml (comment/step-label accuracy only; runtime logic unchanged); AGENTS.md; DECISIONS.md; ENGINEERING.md; EXECUTION.md; GLOSSARY.md; INTENT-LEDGER.md; LAWS.md; OPERATING-MODEL.md; PLAN.md; STATE.md; context/TEMPLATES.md; context/WORKLOG.md; this session record; harness/runs/session19-phase3-systems-engineering/{scope.txt,run-01.json,run-02.json,run-03.json,notverified.txt,proofsheet.md}.
+Changed paths (20): .github/workflows/verify.yml (comment/step-label accuracy only; runtime logic unchanged); AGENTS.md; DECISIONS.md; ENGINEERING.md; EXECUTION.md; GLOSSARY.md; INTENT-LEDGER.md; LAWS.md; OPERATING-MODEL.md; PLAN.md; STATE.md; context/TEMPLATES.md; context/WORKLOG.md; this session record; harness/runs/session19-phase3-systems-engineering/{scope.txt,run-01.json,run-02.json,run-03.json,notverified.txt,proofsheet.md}.
 
 ## 6. Commands and external actions (ACTUAL — never reconstructed)
 

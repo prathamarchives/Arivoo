@@ -1,0 +1,14 @@
+# CLAIM-004 (session 20, INT-125/D-039): the turn-20 intake — the directive
+# verbatim (record 20 §1), the ledger/decision adoption, the NG-04-exception
+# outcome roadmap rows, the H-01a ready card, STATE/AGENTS count sync, and the
+# registry reconciliation (CLAIM-003's late close). Documentation only — no code.
+context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md INT-125/D-039
+INTENT-LEDGER.md INT-125/D-039
+DECISIONS.md INT-125/D-039
+PLAN.md INT-125/D-039
+STATE.md INT-125/D-039
+AGENTS.md INT-125/D-039
+context/WORKLOG.md INT-125/D-039
+CLAIMS.md INT-125/D-039
+.gitignore INT-125/D-039
+harness/runs/claim-004-session-20-intake INT-125/D-039

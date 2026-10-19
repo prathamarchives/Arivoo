@@ -429,3 +429,12 @@ Stage Summary:
 - Unresolved: D-014 + Q6–Q12 (Q11/Q12 NEW — identity + blob gates at the P3-00 schema freeze); H-01/H-02 unbuilt; the local Postgres rig wiped (CI-only harness green this session)
 - Next: session 20 — preflight at the final SHA, then the contract's entry sequence (H-01 → H-02 → P3-00/P3-01), claimable in parallel by any capable agents
 - Session record: context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md
+
+## Task 22 (CLAIM-004, session 20) — the systems-engineering execution directive intake
+- Task: owner turn 20 (INT-125): the ~9.6k-word directive (12 sections + the A01–A18 audit addendum at the audit SHA 026fead) — import verbatim, adopt operationally (D-039), authorize the outcome roadmap through Phase 5 (the NG-04 owner-exception, scope recorded), freeze the H-01a ready card, reconcile the registry
+- Outcome: record 20 §1 verbatim (token redacted per D-025/INT-092); INT-125 + D-039 landed; PLAN carries the 4A–4F/5A–5J outcome rows + the H-01a card (named codes frozen BEFORE code: ARV-DISPATCH-001/ARV-DIFF-001/ARV-DIFF-002 + reused ARV-SCOPE-001/ARV-CLM-005/ARV-PRF-002); CLAIM-003's late close reconciled; a first-draft transcription defect in the addendum (A03 dropped, A04–A18 shifted) caught by self-check BEFORE commit and repaired
+- Evidence: session-20 preflight all green at 026fead (the audit SHA — the seven P2-CLOSE commands; rig rebuilt at the exact FACT-001 version); A01–A18 all confirmed by direct source read (static, not reproduced — the cards' work)
+- Pointer: record 20 (IN PROGRESS — §4–§12 at the session close); PLAN H-01a (the ready card)
+- Unresolved: D-014 + Q6–Q12 (narrowed to named dependents, none a general stop); H-01a/H-01b/H-02 unbuilt — the dispositions are pending their slices
+- Next: CLAIM-005 — execute the H-01a card: red-first test_gate_dispatch.py on the actual predecessor, then dispatch.py + gate/scope/workflow repairs, registration in gate/red TESTS, Proof Sheet, three-wall CI, merge, dispositions in record 20 §4
+- Session record: context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md

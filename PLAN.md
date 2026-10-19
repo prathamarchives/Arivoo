@@ -267,10 +267,10 @@ Exit: C3 demonstrable with reasons and provenance — new inputs resurface old m
 - Q8 — extraction-spike documents for S5 (review §8 Q3) — blocks S5's corpus only.
 - Q9 — repository visibility (review §8 Q4; observed public 2026-10-16) — blocks nothing; privacy-relevant.
 - Q10 — fine-grained PAT/workflow-tamper hardening (review §8 Q5, from F-7) — blocks mechanical workflow-tamper hardening only; credential/permission choice stays owner-controlled.
-- Q11 — Work/Source identity and duplicate-import semantics — working-context notes indicate a preference for separate logical imports by default and optional duplicate detection, but this is not yet canonical owner intent in the ledger. Do not auto-merge or add identity-specific uniqueness constraints until the owner ratifies the identity rule. Blocks auto-dedup/merge only; unrelated capture/kernel work continues. Home: DECISIONS Q11; gate: P3-00 schema freeze.
+- Q11 — Work/Source identity and duplicate-import semantics (raised 2026-10-19, session 19, record 19 §8) — working-context notes indicate a preference for separate logical imports by default and optional duplicate detection, but this is not yet canonical owner intent in the ledger. Do not auto-merge or add identity-specific uniqueness constraints until the owner ratifies the identity rule. Blocks auto-dedup/merge only; unrelated capture/kernel work continues. Home: DECISIONS Q11; gate: P3-00 schema freeze.
 - Q12 — source-file blob backend, local staging/cache lifecycle, and cross-store recovery are not specified by D-032. Do not pick a provider or promise cross-store atomicity by assumption. It blocks the source/blob persistence schema and durability promises only; command-kernel work can continue. Home: DECISIONS Q12; gate: P3-00 review, before P3-02.
 
-Q6–Q10 were registered 2026-10-16 (session 18, D-036); each blocks only its named dependents. Q11 is registered in this plan branch because the review's Work/Source dedup assumption conflicts with working-context notes that are not yet canonical owner intent. Phase 2 S1–S4 remain complete.
+Q6–Q10 were registered 2026-10-16 (session 18, D-036); Q11 and Q12 added 2026-10-19 (session 19, record 19 §8/§10) to keep the Work/Source identity and source-blob persistence gaps explicit. Each blocks only its named dependents (F-07); directed work proceeds regardless. Phase 2 S1–S4 remain complete.
 
 Closed 2026-10-14 (owner turn 12, INT-110..INT-117; LOCKED rows D-028..D-033 in DECISIONS): Q1, Q2, Q3, QD-1, F-06, Q-IDENT.
 

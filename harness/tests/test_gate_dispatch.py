@@ -51,14 +51,12 @@ def run_dispatch(cwd: pathlib.Path, env_extra: dict) -> subprocess.CompletedProc
 
 
 def fixture_clone(tmp: str, name: str) -> pathlib.Path:
-    """A real git clone of this repo (full history — the merge-base must be
-    decidable), mutated per case. The clone is the candidate tree the
-    dispatcher judges."""
+    """A real git clone of this repo at the branch tip (full history — the
+    merge-base against origin/main must be decidable; the candidate tree
+    carries the implementation under test). Mutated per case after cloning."""
     d = pathlib.Path(tmp) / name
     subprocess.run(["git", "clone", "-q", "--no-local", str(REPO), str(d)],
                    check=True, capture_output=True, timeout=300)
-    # detach from the branch we cloned: the dispatcher derives the slice from
-    # ARV_PR_HEAD, not from the checked-out state.
     return d
 
 
@@ -83,7 +81,11 @@ def main() -> int:
         r = run_dispatch(d, {"ARV_EVENT_NAME": "pull_request", "ARV_PR_HEAD": hostile})
         out = r.stdout + r.stderr
         pr_refusal(r, "ARV-DISPATCH-001", "A02-hostile-branch")
-        check("A02-hostile-branch executes nothing", "ARV_PWNED_MARKER" not in out,
+        # the refusal echoes the untrusted input ONCE (as data, inside the
+        # 'rejected as data' line); if the payload had EXECUTED, its output
+        # would appear on lines that are not that refusal echo.
+        non_refusal = "\n".join(l for l in out.splitlines() if "rejected as data" not in l)
+        check("A02-hostile-branch executes nothing", "ARV_PWNED_MARKER" not in non_refusal,
               "the breakout payload must never run as script")
         check("A02-hostile-branch creates no side-effect file",
               not (d / "ARV_PWNED_MARKER").exists(), "a `touch` payload must not land")
@@ -98,7 +100,10 @@ def main() -> int:
         d = fixture_clone(tmp, "noclaim")
         sd = d / "harness" / "runs" / "claim-999-unclaimed"
         sd.mkdir(parents=True)
-        (sd / "scope.txt").write_text("harness/tests INT-125/D-039\n")
+        # fixture scopes deliberately avoid CLAIM-005's own declared scope —
+        # the registry's real exclusivity check would otherwise (correctly)
+        # refuse the probe as an overlap with the live claim
+        (sd / "scope.txt").write_text("harness/tests/test_migrations.py INT-125/D-039\n")
         r = run_dispatch(d, {"ARV_EVENT_NAME": "pull_request",
                              "ARV_PR_HEAD": "slice/claim-999-unclaimed"})
         pr_refusal(r, "ARV-CLM-005", "A01-unclaimed-branch")
@@ -107,10 +112,10 @@ def main() -> int:
         d = fixture_clone(tmp, "nosheet")
         sd = d / "harness" / "runs" / "claim-999-nosheet"
         sd.mkdir(parents=True)
-        (sd / "scope.txt").write_text("harness/tests INT-125/D-039\n")
+        (sd / "scope.txt").write_text("harness/tests/test_migrations.py INT-125/D-039\n")
         reg = d / "CLAIMS.md"
         row = ("| CLAIM-999 | 20 | test | `slice/claim-999-nosheet` | "
-               "`harness/tests/test_gate_dispatch.py` | — | 2026-10-19 | probe |\n")
+               "`harness/tests/test_migrations.py` | — | 2026-10-19 | probe |\n")
         text = reg.read_text()
         anchor = "|-------|---------|-------|--------|----------------|---------------|---------|-------|\n"
         reg.write_text(text.replace(anchor, anchor + row, 1))
@@ -118,24 +123,17 @@ def main() -> int:
                               "ARV_PR_HEAD": "slice/claim-999-nosheet"})
         pr_refusal(r, "ARV-PRF", "A01-missing-sheet")
 
-        # ---- positive: a scoped, claimed, sheeted slice dispatches the gate green ----
+        # ---- positive: THE SLICE'S OWN SHAPE dispatches green — the real name,
+        # the real committed scope declaration, the real claim row, a sheet ----
         d = fixture_clone(tmp, "positive")
-        sname = "claim-999-positive"
+        sname = "claim-005-h01a-pr-dispatch-git-fail-closed"
         sd = d / "harness" / "runs" / sname
-        sd.mkdir(parents=True)
-        # declare a scope that covers the diff of an EMPTY slice (no commits ->
-        # the triple-dot diff vs origin/main is empty: every check passes
-        # vacuously-legitimately; the sheet below carries the honest runs)
-        (sd / "scope.txt").write_text("# positive probe\n")
+        sd.mkdir(parents=True, exist_ok=True)  # scope.txt + red-01.txt are committed
+        nv_text = "- fixture probe record (the slice's real runs land with its own close)\n"
         (sd / "run-01.json").write_text(
             '{"command": "probe", "exit_code": 0, "commit": "' + "0" * 40 + '", '
             '"output_sha256": "' + "0" * 64 + '", "recorded_at": "2026-10-19T00:00:00+00:00"}\n')
-        (sd / "notverified.txt").write_text("- probe only\n")
-        reg = d / "CLAIMS.md"
-        text = reg.read_text()
-        row = ("| CLAIM-999 | 20 | test | `slice/" + sname + "` | `harness/tests` | "
-               "— | 2026-10-19 | probe |\n")
-        reg.write_text(text.replace(anchor, anchor + row, 1))
+        (sd / "notverified.txt").write_text(nv_text)
         # assemble the sheet from the record using the FIXTURE's own module
         sys.path.insert(0, str(d))
         try:
@@ -143,7 +141,7 @@ def main() -> int:
             ps = importlib.import_module("harness.proofsheet")
             ps.REPO = d
             ps.RUNS = d / "harness" / "runs"
-            (sd / "proofsheet.md").write_text(ps.assemble(sname, "- probe only\n"))
+            (sd / "proofsheet.md").write_text(ps.assemble(sname, nv_text))
         except SystemExit:
             raise AssertionError("fixture sheet assembly failed")
         finally:

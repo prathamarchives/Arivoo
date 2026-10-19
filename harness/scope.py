@@ -66,6 +66,11 @@ def ensure_merge_base(base: str, repo=None) -> str:
     import subprocess
     r = subprocess.run(["git", "merge-base", base, "HEAD"], cwd=repo or REPO,
                        capture_output=True, text=True, timeout=60)
+    if r.returncode == 1 and not (r.stderr or "").strip():
+        # git's own no-merge-base signal: exit 1, empty output
+        raise GitRefusal(
+            f"ARV-DIFF-002: no merge-base between '{base}' and HEAD — an invalid base or "
+            "insufficient graph history; refusing rather than treating it as an empty diff")
     if r.returncode != 0:
         raise GitRefusal(
             f"ARV-DIFF-001: git merge-base failed for base '{base}' (exit {r.returncode}): "

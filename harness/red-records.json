@@ -33,12 +33,15 @@
     ]
   },
   "harness/tests/test_gate_dispatch.py": {
-    "current_sha256": "b3cf0abf9262cb156df38825473f4abd69c9af27950b90e14b97556dc1350bb7",
+    "current_sha256": "da3f436fdd12ad9711b63ef8c18c63914617aaa5ea3954ba172108d32c331e7b",
     "amendments": [
       {
         "note": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
+      },
+      {
+        "note": "H-01a additive amendment 2 (LAW-11): fixture precision \u2014 clones take the natural branch tip (the candidate tree under test); the positive case now exercises THE REAL SLICE's own shape (real name, committed scope declaration, real claim row, fixture-built sheet) instead of a synthetic claim; assertion set unchanged (the 11 named checks stand)"
       }
     ],
-    "red_evidence": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
+    "red_evidence": "H-01a additive amendment 2 (LAW-11): fixture precision \u2014 clones take the natural branch tip (the candidate tree under test); the positive case now exercises THE REAL SLICE's own shape (real name, committed scope declaration, real claim row, fixture-built sheet) instead of a synthetic claim; assertion set unchanged (the 11 named checks stand)"
   }
 }

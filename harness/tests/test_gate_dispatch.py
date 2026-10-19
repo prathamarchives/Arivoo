@@ -59,18 +59,21 @@ def fixture_clone(tmp: str, name: str) -> pathlib.Path:
     d = pathlib.Path(tmp) / name
     subprocess.run(["git", "clone", "-q", "--no-local", str(REPO), str(d)],
                    check=True, capture_output=True, timeout=300)
-    r = subprocess.run(["git", "rev-parse", "HEAD^2"], cwd=d,
-                       capture_output=True, text=True, timeout=60)
-    base = r.stdout.strip() if r.returncode == 0 else ""
-    if not base:
-        r = subprocess.run(["git", "rev-parse", "main"], cwd=d,
+    base = ""
+    # candidate bases, first that resolves wins: HEAD^2 = the PR merge commit's
+    # main parent (CI); origin/main (a dev clone's remote-tracking ref — plain
+    # rev-parse never DWIMs to it, so try it explicitly); a local main branch.
+    for candidate in ("HEAD^2", "origin/main", "main"):
+        r = subprocess.run(["git", "rev-parse", candidate], cwd=d,
                            capture_output=True, text=True, timeout=60)
-        base = r.stdout.strip() if r.returncode == 0 else ""
-    if base:
-        subprocess.run(["git", "update-ref", "refs/remotes/origin/main", base], cwd=d,
-                       check=True, capture_output=True, timeout=60)
-    else:
+        if r.returncode == 0 and r.stdout.strip():
+            base = r.stdout.strip()
+            break
+    if not base:
         raise AssertionError("fixture cannot derive the origin/main base for the clone")
+    # the gate diffs against the literal ref 'origin/main' — set it explicitly
+    subprocess.run(["git", "update-ref", "refs/remotes/origin/main", base], cwd=d,
+                   check=True, capture_output=True, timeout=60)
     return d
 
 

@@ -33,7 +33,7 @@
     ]
   },
   "harness/tests/test_gate_dispatch.py": {
-    "current_sha256": "cee5181a919cae1d1f49810fe2c306b5bfa8b5396c728b3c720849dd7739849a",
+    "current_sha256": "1f27eac49313867aa7b78d88b8f8934ceb97f6b63f123758159c377c429ff73f",
     "amendments": [
       {
         "note": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
@@ -43,8 +43,11 @@
       },
       {
         "note": "H-01a additive amendment 3 (LAW-11): fixture environment-robustness \u2014 the walls caught it in CI, not locally: the runner workspace is a detached merge checkout with no local branches, so a plain fixture clone carried NO refs/remotes/origin/main and the gate (correctly) refused ARV-DIFF-001 before reaching the asserted codes. The fixture now derives the base uniformly (merge-commit parent 2 in CI; the local main branch elsewhere) and sets the ref explicitly. No assertion changed; the 11 named checks stand."
+      },
+      {
+        "note": "H-01a additive amendment 4 (LAW-11): fixture base derivation corrected \u2014 candidate order HEAD^2 (the CI merge commit's main parent) -> origin/main (the dev clone's remote-tracking ref; plain rev-parse never DWIMs to it \u2014 the previous fallback 'main' could never resolve in a branchless clone) -> main; the derived base is then SET via update-ref refs/remotes/origin/main so the real gate inside the fixture finds it. No assertion changed."
       }
     ],
-    "red_evidence": "H-01a additive amendment 3 (LAW-11): fixture environment-robustness \u2014 the walls caught it in CI, not locally: the runner workspace is a detached merge checkout with no local branches, so a plain fixture clone carried NO refs/remotes/origin/main and the gate (correctly) refused ARV-DIFF-001 before reaching the asserted codes. The fixture now derives the base uniformly (merge-commit parent 2 in CI; the local main branch elsewhere) and sets the ref explicitly. No assertion changed; the 11 named checks stand."
+    "red_evidence": "H-01a additive amendment 4 (LAW-11): fixture base derivation corrected \u2014 candidate order HEAD^2 (the CI merge commit's main parent) -> origin/main (the dev clone's remote-tracking ref; plain rev-parse never DWIMs to it \u2014 the previous fallback 'main' could never resolve in a branchless clone) -> main; the derived base is then SET via update-ref refs/remotes/origin/main so the real gate inside the fixture finds it. No assertion changed."
   }
 }

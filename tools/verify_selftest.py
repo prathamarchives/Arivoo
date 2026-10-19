@@ -396,27 +396,31 @@ def _strip_closure_annotation(repo: Path) -> None:
 
 def _glm_governing_regression(repo: Path) -> None:
     """MUT-29 (session 16, D-034 — the Arivoo review's second P1 finding): revert
-    OPERATING-MODEL §9's host-agnostic verification-protocol sentence to the
-    superseded GLM-governing form, while D-028 (agent-agnostic) still stands — the
-    reintroduced-known-conflicting-rule class. The strict §9-scoped VER-507 must
-    catch it; a valid alternative-host declaration (the positive case) passes."""
+    OPERATING-MODEL §9's host-agnostic verification-protocol line to the superseded
+    GLM-governing form, while D-028 (agent-agnostic) still stands — the
+    reintroduced-known-conflicting-rule class. CONTENT-GENERIC since 2026-10-19
+    (session 19 — a legitimate §9 rewording by a concurrent part made the exact-
+    string form silently no-op; the base-anchored suite RED-flagged it as a blind
+    guard — the PR #6/#12/#17/#19 re-target class): the mutation now locates the
+    §9 protocol line by its stable markers ('host-agnostic (D-028)' + 'INT-070' +
+    'GLM') and replaces that whole line, so a legitimate rewording cannot silently
+    no-op it. The strict §9-scoped VER-507 must catch the regression ('current
+    default' vanishes from §9); a valid alternative-host declaration (the positive
+    case) passes."""
     om = repo / "OPERATING-MODEL.md"
     text = om.read_text(encoding="utf-8")
-    NEW = (
-        "The verification protocol is host-agnostic (D-028): the current default "
-        "family is GLM (INT-070); any capable model family may run it — a host "
-        "change requires no redesign and contradicts no authority rule. A different "
-        "model family CAN add optional adversarial coverage, but it is never a "
-        "required gate."
-    )
+    lines = text.splitlines(keepends=True)
+    hits = [i for i, ln in enumerate(lines)
+            if "host-agnostic (D-028)" in ln and "INT-070" in ln and "GLM" in ln]
+    if not hits:
+        return
     OLD = (
         "The verification family is GLM-based subagents (INT-070, governing): a "
         "different model family CAN add optional adversarial coverage, but it is "
-        "never a required gate and never overrides the declared GLM workflow."
+        "never a required gate and never overrides the declared GLM workflow.\n"
     )
-    if NEW not in text:
-        return
-    om.write_text(text.replace(NEW, OLD, 1), encoding="utf-8")
+    lines[hits[0]] = OLD
+    om.write_text("".join(lines), encoding="utf-8")
 
 
 def _worklog_after_ledger(repo: Path) -> None:

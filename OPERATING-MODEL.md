@@ -302,7 +302,9 @@ The command table below mixes existing commands with the target operating surfac
 
 ### The Proof Sheet (harness-built; never hand-edited)
 
-Holds: header (slice, commit, harness version, seeds) · owner words · claims with proof IDs · actual real-run summary where available · must-reject results · independent state reads · fault/differential results · known-bad result · scope report · defaults used · not-verified list · open questions. After H-02, it also carries the SEV report digest, reviewed-diff digest, disposition, findings, and not-verified items. PRF-01: the harness builds the sheet from run records; hand-editing fails the gate (LAW-01). LAW-04's honesty requirement is a schema field; the not-verified list cannot be empty by omission.### The Independent Test Verifier and Systems Engineering Verifier (VRF-01..05; LAW-30)
+Holds: header (slice, commit, harness version, seeds) · owner words · claims with proof IDs · actual real-run summary where available · must-reject results · independent state reads · fault/differential results · known-bad result · scope report · defaults used · not-verified list · open questions. After H-02, it also carries the SEV report digest, reviewed-diff digest, disposition, findings, and not-verified items. PRF-01: the harness builds the sheet from run records; hand-editing fails the gate (LAW-01). LAW-04's honesty requirement is a schema field; the not-verified list cannot be empty by omission.
+
+### The Independent Test Verifier and Systems Engineering Verifier (VRF-01..05; LAW-30)
 
 The independent test verifier runs in a fresh context and did not write the code. It reads the card, Proof Sheet, and diff only; it writes failing tests, never product-code fixes, and reports reproducible findings with test, seed, and command. Its report is advisory to the mechanical gate.
 

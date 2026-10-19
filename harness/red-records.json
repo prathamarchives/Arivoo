@@ -33,7 +33,7 @@
     ]
   },
   "harness/tests/test_gate_dispatch.py": {
-    "current_sha256": "d01232a828f42eb6248f82dd2576441d3cf02606770937ad18011d6577109924",
+    "current_sha256": "3ffee856c59b2d6119903f8c28497ca6fa6b17e4134642bb85cea6345bbb5911",
     "amendments": [
       {
         "note": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
@@ -52,8 +52,14 @@
       },
       {
         "note": "H-01a additive amendment 6 (LAW-11, the PR #41 walls-catch taken to its final form): the positive case is now ENVIRONMENT-INDEPENDENT \u2014 registry kept intact (the KB probes keep their pre-existing-row partners), the fixture base reset to HEAD (empty diff \u2014 the case proves dispatch routing; diff evaluation is the negative cases' job), and the synthetic claim-998 row carries a guaranteed KB-CLM-002 probe partner (context/extracted/21-fixture-probe.md) so the probe fires on every future branch regardless of live claims \u2014 A11's probe-coupling defect made deterministic in the fixture, its real repair stays H-01c's card. Assertions unchanged: 11 named checks."
+      },
+      {
+        "note": "H-01a-R RED observed at the test-only commit (branch base 41a4a70, working tree): 6 failures on ACTUAL wrong behavior \u2014 the consolidated-refusal triple (ARV-DIFF-001 printed twice + uncaught GitRefusal traceback at gate.py:191 + no claim-check skip note), the ARV-DIFF-003 timeout pair (TimeoutExpired propagates unnamed from _git and ensure_merge_base), and the no-records PRF refusal skipping the gate's consolidated summary (SystemExit mid-run); the precision/regression additions (ARV-PRF-001 exact-code, ARV-PRF-002-only fixture, legal-hostile check-ref-format case, fuzz-label assertion) pass at the predecessor and are labeled as such in the suite; red run output preserved at harness/runs/claim-009-h01a-completion-checks/red-01.txt"
+      },
+      {
+        "note": "Amendment 2 (H-01a-R, narrowed not weakened): the bad-base assertion's first draft counted raw 'ARV-DIFF-001' substring mentions \u2014 but the ARV-CLM-000 skip note and the REQUIRED consolidated summary ('RED \u2014 the gate refuses: ...') legitimately contain the code string; the assertion is narrowed to the disposition form (lines starting 'FAIL ARV-DIFF-001' == exactly one) \u2014 no assertion removed, the traceback/exit/skip-note/selfcheck assertions unchanged; the underlying defect (a second disposition print or a crash-repeated code) stays refused"
       }
     ],
-    "red_evidence": "H-01a additive amendment 6 (LAW-11, the PR #41 walls-catch taken to its final form): the positive case is now ENVIRONMENT-INDEPENDENT \u2014 registry kept intact (the KB probes keep their pre-existing-row partners), the fixture base reset to HEAD (empty diff \u2014 the case proves dispatch routing; diff evaluation is the negative cases' job), and the synthetic claim-998 row carries a guaranteed KB-CLM-002 probe partner (context/extracted/21-fixture-probe.md) so the probe fires on every future branch regardless of live claims \u2014 A11's probe-coupling defect made deterministic in the fixture, its real repair stays H-01c's card. Assertions unchanged: 11 named checks."
+    "red_evidence": "Amendment 2 (H-01a-R, narrowed not weakened): the bad-base assertion's first draft counted raw 'ARV-DIFF-001' substring mentions \u2014 but the ARV-CLM-000 skip note and the REQUIRED consolidated summary ('RED \u2014 the gate refuses: ...') legitimately contain the code string; the assertion is narrowed to the disposition form (lines starting 'FAIL ARV-DIFF-001' == exactly one) \u2014 no assertion removed, the traceback/exit/skip-note/selfcheck assertions unchanged; the underlying defect (a second disposition print or a crash-repeated code) stays refused"
   }
 }

@@ -1,0 +1,70 @@
+PASS A02-fuzz-fixture is honestly NOT a legal ref: check-ref-format exit=128 — the space-carrying fixture is parser-boundary fuzzing (labeled, never an observed Git-ref path)
+PASS A02-hostile-branch exits nonzero: exit=1
+PASS A02-hostile-branch names ARV-DISPATCH-001: got: FAIL ARV-DISPATCH-001: untrusted branch metadata rejected as data: 'slice/x"; echo ARV_PWNED_MARKER; "y' does not derive to a safe slice identifier
+      repair: branch names carry the claim id (slice/<claim-id>-<slug>, D-038); hostile metadata is refused before any gate execution (A02)
+PASS A02-hostile-branch never falls back to selfcheck: the A01 bypass: a PR must be judged as a PR
+PASS A02-hostile-branch executes nothing: the breakout payload must never run as script
+PASS A02-hostile-branch creates no side-effect file: a `touch` payload must not land
+PASS A02-legal-hostile IS a genuinely legal ref: check-ref-format exit=0 — the case exercises permitted metadata, not fuzzing (passes at the predecessor; regression protection, never claimed RED)
+PASS A02-legal-hostile-branch exits nonzero: exit=1
+PASS A02-legal-hostile-branch names ARV-DISPATCH-001: got: FAIL ARV-DISPATCH-001: untrusted branch metadata rejected as data: 'slice/x"$(touch${IFS}ARV_PWNED_LEGAL)"y' does not derive to a safe slice identifier
+      repair: branch names carry the claim id (slice/<claim-id>-<slug>, D-038); hostile metadata is refused before any gate execution (A02)
+PASS A02-legal-hostile-branch never falls back to selfcheck: the A01 bypass: a PR must be judged as a PR
+PASS A02-legal-hostile executes nothing: the no-space breakout payload must never run as script
+PASS A02-legal-hostile creates no side-effect file: a `touch` payload must not land
+PASS A01-missing-scope exits nonzero: exit=1
+PASS A01-missing-scope names ARV-SCOPE-001: got: dispatch: pull_request event -> PR mode (slice=claim-999-no-such-slice, diff=origin/main) — a PR is judged as a PR, never selfchecked
+red records (LAW-11):
+scope/size (LAW-05/06/07):
+FAIL ARV-SCOPE-001: no scope declaration for slice 'claim-999-no-such-slice' (expected /tmp/arv_h01a_71p91jl4/noscope
+PASS A01-missing-scope never falls back to selfcheck: the A01 bypass: a PR must be judged as a PR
+PASS A01-unclaimed-branch exits nonzero: exit=1
+PASS A01-unclaimed-branch names ARV-CLM-005: got: dispatch: pull_request event -> PR mode (slice=claim-999-unclaimed, diff=origin/main) — a PR is judged as a PR, never selfchecked
+red records (LAW-11):
+scope/size (LAW-05/06/07):
+claims registry (LAW-31, D-038 — the collision's ratchet):
+FAIL ARV-CLM-005: branch 'slice/claim-999-unclaimed' carries N
+PASS A01-unclaimed-branch never falls back to selfcheck: the A01 bypass: a PR must be judged as a PR
+PASS A01-missing-records-and-sheet exits nonzero: exit=1
+PASS A01-missing-records-and-sheet names ARV-PRF-001: got: dispatch: pull_request event -> PR mode (slice=claim-999-nosheet, diff=origin/main) — a PR is judged as a PR, never selfchecked
+red records (LAW-11):
+scope/size (LAW-05/06/07):
+claims registry (LAW-31, D-038 — the collision's ratchet):
+LAW-24 boundary lint:
+LAW-08 dependency check:
+known-bad matrix 
+PASS A01-missing-records-and-sheet never falls back to selfcheck: the A01 bypass: a PR must be judged as a PR
+PASS A01-missing-records has NO uncaught traceback: a missing Proof Sheet is a named gate disposition (ARV-PRF-001), never a SystemExit crash — the exact class residual #1 names, same repair slice
+FAIL A01-missing-records gets the gate's consolidated disposition: the gate must CATCH the proofsheet refusal and print its own consolidated summary — a mid-run SystemExit that skips the summary is the same clean-disposition class (RED at the predecessor: the summary never printed)
+PASS A01-missing-sheet-only exits nonzero: exit=1
+PASS A01-missing-sheet-only names ARV-PRF-002: got: dispatch: pull_request event -> PR mode (slice=claim-999-nosheet2, diff=origin/main) — a PR is judged as a PR, never selfchecked
+red records (LAW-11):
+scope/size (LAW-05/06/07):
+claims registry (LAW-31, D-038 — the collision's ratchet):
+LAW-24 boundary lint:
+LAW-08 dependency check:
+known-bad matrix
+PASS A01-missing-sheet-only never falls back to selfcheck: the A01 bypass: a PR must be judged as a PR
+PASS positive-claimed-PR dispatches green: exit=0: 005: a PR-mode diff with no OPEN claim for its branch (unclaimed work) -> REFUSED with ARV-CLM-005 (the guard fires)
+Proof Sheet verify (claim-998-positive-shape):
+PASS ARV-PRF-004: 'claim-998-positive-shape' Proof Sheet re-derives byte-identically from 1 run records
+
+GREEN — the gate passes (slice=claim-998-positive-shape; suites + red records + scope/size + lint + deps + known-bads + proofsheet)
+PASS positive-PR is judged as a PR: the gate ran on the named slice, not selfcheck
+PASS push-selfcheck stays green: exit=0: selfcheck mode (no slice named) — per-slice Proof Sheets verify at slice time
+
+GREEN — the gate passes (slice=main-selfcheck; suites + red records + scope/size + lint + deps + known-bads + proofsheet)
+PASS push-selfcheck names itself: the --no-diff main surface is unchanged by H-01a
+PASS A10-git-failure refuses with ARV-DIFF-001: refused=True code="ARV-DIFF-001: git merge-base failed for base 'refs/heads/no-such-base-xyz-12345' (exit 128): fatal: Not a valid object name refs/heads/no-such-base-xyz-12345"
+PASS A10-no-merge-base refuses with ARV-DIFF-002: refused=True code="ARV-DIFF-002: no merge-base between 'other' and HEAD — an invalid base or insufficient graph history; refusing rather than treating it as an empty diff"
+PASS A10-valid-base returns a list (no exception): paths=<class 'list'>
+PASS H01aR-bad-base exits nonzero: exit=1
+FAIL H01aR-bad-base refuses with ARV-DIFF-001 exactly once: count=2 — ONE consolidated named refusal, not a duplicated print plus a crash
+FAIL H01aR-bad-base has NO uncaught traceback: a failed diff is a named gate disposition, never a process crash
+FAIL H01aR-bad-base skips the claim check on an invalid diff: the branch-claim coverage check must not run on a refused diff; the skip note is the observable
+PASS H01aR-bad-base never falls back to selfcheck: the A01 boundary: a PR is judged as a PR even when its diff refuses
+FAIL H01aR-timeout in _git refuses with ARV-DIFF-003: refused=False code="Command '['git', 'diff', '--name-only', 'x...HEAD']' timed out after 60 seconds" — a hung git op is a named refusal, never an unnamed crash
+FAIL H01aR-timeout in ensure_merge_base refuses with ARV-DIFF-003: refused=False code="Command '['git', 'merge-base', 'origin/main', 'HEAD']' timed out after 60 seconds"
+
+RED — 6 failure(s): A01-missing-records gets the gate's consolidated disposition, H01aR-bad-base refuses with ARV-DIFF-001 exactly once, H01aR-bad-base has NO uncaught traceback, H01aR-bad-base skips the claim check on an invalid diff, H01aR-timeout in _git refuses with ARV-DIFF-003, H01aR-timeout in ensure_merge_base refuses with ARV-DIFF-003
+      H-01a: the PR dispatch must fail closed (A01/A02/A10 — PLAN's frozen card)

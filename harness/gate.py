@@ -9,7 +9,17 @@ contract). Check order:
   2. ARV-RED-001/002   red records: every test file has one (LAW-11) and its
                        current hash matches the record (amendments re-record)
   3. ARV-SCOPE/PROT/SIZE  the diff is inside the declared scope, protected paths
-                       carry owner refs, the size limits hold (LAW-05/06/07)
+                       carry owner refs, the size limits hold (LAW-05/06/07);
+                       a failed/hung git diff is ONE consolidated named refusal
+                       (ARV-DIFF-001/002/003 via scope.GitRefusal — the diff is
+                       computed ONCE and shared by every consumer; a refused
+                       diff skips the claim-coverage check with a named note,
+                       never a mid-run crash — H-01a-R);
+                       a failed/hung git diff is ONE consolidated named refusal
+                       (ARV-DIFF-001/002/003 via scope.GitRefusal — the diff is
+                       computed ONCE and shared by every consumer; a refused
+                       diff skips the claim-coverage check with a named note,
+                       never a mid-run crash — H-01a-R)
   4. ARV-LAW24-001     ambient time/IDs/randomness only inside adapters/
   5. ARV-DEP-008       no unapproved dependencies (LAW-08)
   6. KB-01..06         every known-bad case is REJECTED with its named code
@@ -102,25 +112,6 @@ def check_red_records() -> list:
     return fails
 
 
-def check_diffs(base: str, slice_name: str) -> list:
-    fails: list[str] = []
-    if not base:
-        print("NOTE ARV-SCOPE-000: no-diff mode (main/selfcheck) — the diff-scoped checks ran at PR time on these same changes")
-        return []
-    try:
-        # H-01a/A10: a failed git operation or a base with no merge-base is a
-        # REFUSAL (scope.GitRefusal carries ARV-DIFF-001/002) — never a silent
-        # empty diff that reads as a compliant no-op (the vacuous-pass defect).
-        fails = scope.check_scope(scope.diff_paths(base), slice_name)
-        fails += scope.check_size(scope.diff_stats(base))
-    except scope.GitRefusal as refusal:
-        code = str(refusal).split(":")[0]
-        print(f"FAIL {refusal}")
-        print("      repair: verify the base ref exists and shares history with HEAD, and the checkout carries sufficient graph depth (fetch-depth 0 in CI) — a git failure is a refusal, never an empty diff (A10)")
-        fails.append(code)
-    return fails
-
-
 def run_known_bads() -> list:
     """KB-05: a known-bad that passes is a broken guard — red, stop building."""
     scratch = pathlib.Path(tempfile.mkdtemp(prefix="arv_kb_"))
@@ -182,13 +173,35 @@ def main() -> int:
         fails += check_suites()
     print("red records (LAW-11):")
     fails += check_red_records()
-    print("scope/size (LAW-05/06/07):")
-    fails += check_diffs("" if (a.no_diff or not a.diff) else a.diff, slice_name)
+    # scope/size (LAW-05/06/07) — H-01a-R: the diff is computed ONCE; both
+    # consumers (scope/size + the branch-claim coverage below) share it. A
+    # GitRefusal is ONE consolidated named disposition — never the
+    # print-then-crash the predecessor produced when the claim-coverage path
+    # recomputed the diff outside this handler (the reproduced residual #1).
+    pr_diff = None
+    stats = None
+    if a.no_diff or not a.diff:
+        print("NOTE ARV-SCOPE-000: no-diff mode (main/selfcheck) — the diff-scoped checks ran at PR time on these same changes")
+    else:
+        try:
+            pr_diff = scope.diff_paths(a.diff)
+            stats = scope.diff_stats(a.diff)
+        except scope.GitRefusal as refusal:
+            code = str(refusal).split(":")[0]
+            print(f"FAIL {refusal}")
+            print("      repair: verify the base ref exists and shares history with HEAD, and the checkout carries sufficient graph depth (fetch-depth 0 in CI) — a git failure is a refusal, never an empty diff (A10)")
+            fails.append(code)
+        if pr_diff is not None:
+            fails += scope.check_scope(pr_diff, slice_name)
+            fails += scope.check_size(stats)
     print("claims registry (LAW-31, D-038 — the collision's ratchet):")
     fails += claims.check_registry()
     if a.diff and not a.no_diff and slice_name not in ("main-selfcheck",):
-        branch = slice_name if slice_name.startswith("slice/") else "slice/" + slice_name
-        fails += claims.check_branch_claim(branch, scope.diff_paths(a.diff))
+        if pr_diff is None:
+            print("NOTE ARV-CLM-000: the diff was refused above (ARV-DIFF-001/002/003) — the branch-claim coverage check cannot run on an invalid diff; the refusal above is the consolidated disposition")
+        else:
+            branch = slice_name if slice_name.startswith("slice/") else "slice/" + slice_name
+            fails += claims.check_branch_claim(branch, pr_diff)
     else:
         print("NOTE ARV-CLM-000: no-diff mode (main/selfcheck) — the branch-claim and diff-coverage checks ran at PR time")
     print("LAW-24 boundary lint:")
@@ -205,6 +218,12 @@ def main() -> int:
         try:
             if ps.main() != 0:
                 fails.append("ARV-PRF-004")
+        except SystemExit:
+            # H-01a-R: proofsheet refuses a no-records slice BY SystemExit — the
+            # gate CATCHES it so the refusal becomes the gate's own consolidated
+            # disposition (ARV-PRF-004 in the summary), never a mid-run exit that
+            # skips the summary.
+            fails.append("ARV-PRF-004")
         finally:
             sys.argv = argv
     else:

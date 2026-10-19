@@ -1,0 +1,6 @@
+- the verbatim §1 transcription was made through the session context — a byte-level mechanical diff against the original message was not possible from this host (the standing limit, stated in the record's §1 close)
+- no fresh technical verifier and no SEV for this slice — the pre-H-02 discipline, the record-20 §8 honest gap; it closes when H-02's machinery is live
+- the live-API observations in §2 (main SHA, PR states, run conclusions, protection shape) are re-observations at preflight time, not properties of this tree (INT-104's class)
+- the H-01a residual reproductions were preflight inspections in disposable clones — the registered RED + regressions land in the H-01a-R sub-slice, not here
+- the card refresh records contracts, not implementations — A03/A11/A12/A09/A08/A04/A07/A13/A05/A06 stay 'static, confirmed' until their slices' RED-first regressions pass
+- no code was exercised beyond the repo's own check suites this slice; no product behavior exists yet to validate

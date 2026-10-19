@@ -1,0 +1,17 @@
+# CLAIM-005 / H-01a (session 20; INT-125/D-039 — the turn-20 directive's concrete
+# work packet; PLAN's frozen ready card): PR dispatch/Git fail-closed — A01/A02/A10.
+# Defect-bound authority: the owner directive + D-035 (the wall-construction
+# precedent) + D-037 (the entry sequence). Never a weakening: this slice makes the
+# harness gate's PR obligations unavoidable and CI event fields data, never script.
+.github/workflows/verify.yml INT-125/D-039
+harness/gate.py INT-125/D-039
+harness/scope.py INT-125/D-039
+harness/dispatch.py INT-125/D-039
+harness/red.py INT-125/D-039
+harness/tests/test_gate_dispatch.py INT-125/D-039
+harness/red-records.json INT-125/D-039
+harness/runs/claim-005-h01a-pr-dispatch-git-fail-closed INT-125/D-039
+CLAIMS.md INT-125/D-039
+STATE.md INT-125/D-039
+context/WORKLOG.md INT-125/D-039
+context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md INT-125/D-039

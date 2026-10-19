@@ -31,5 +31,10 @@
         "note": "test-side defect repairs documented in record 18 \u00a74.1-\u00a74.3 (S1: count made dynamic; S2: dual-layer expectations, scoped effective view; S3: content-level fingerprint) \u2014 amendments correct assertions, none removed"
       }
     ]
+  },
+  "harness/tests/test_gate_dispatch.py": {
+    "current_sha256": "61179680a97bad070f448820bff5ffc6c43d915df1d83020c555769691d419c8",
+    "amendments": [],
+    "red_evidence": "H-01a red-first observed at the test-only commit on the actual predecessor 6cdd458: all six dispatch cases RED on the missing real dispatcher (subprocess exit 2) AND the A10 cases RED on actual wrong behavior \u2014 diff_paths returns [] for a nonexistent base (refused=False, the vacuous-pass defect A10 live) and rejects the repo kwarg (no merge-base decoupling); output frozen at harness/runs/claim-005-h01a-pr-dispatch-git-fail-closed/red-01.txt"
   }
 }

@@ -117,7 +117,7 @@ The architecture below is a proposed implementation baseline. Higher-authority o
 
 **Open identity gate — Q11**
 
-The 2026-10-16 review assumes a repeated identical-file import resolves to the same Work. The known owner preference in prior context is the opposite safety posture: separate logical imports by default, optional duplicate detection. That preference is not yet represented as a verbatim owner-intent entry in the canonical ledger. Until formalized:
+The 2026-10-16 review assumes a repeated identical-file import resolves to the same Work. Working-context notes indicate a preference for separate logical imports by default and optional duplicate detection, but no verbatim source entry currently exists in the canonical ledger. That preference is not an adopted policy. Until the owner ratifies the identity rule:
 - Never automatically merge Works or Sources.
 - Do not create uniqueness constraints based on filename, title, or semantic similarity.
 - Duplicate detection, if present as a proposal, must leave existing objects unchanged.
@@ -268,15 +268,16 @@ Exit: C3 demonstrable with reasons and provenance — new inputs resurface old m
 - Q8 — extraction-spike documents for S5 (review §8 Q3) — blocks S5's corpus only.
 - Q9 — repository visibility (review §8 Q4; observed public 2026-10-16) — blocks nothing; privacy-relevant.
 - Q10 — fine-grained PAT hardening (review §8 Q5, from F-7) — blocks F-7's mechanical fix only.
+- Q11 — Work/Source identity and duplicate-import semantics — working-context notes indicate a preference for separate logical imports by default and optional duplicate detection, but this is not yet canonical owner intent in the ledger. Do not auto-merge or add identity-specific uniqueness constraints until the owner ratifies the identity rule. Blocks auto-dedup/merge only; unrelated capture/kernel work continues. Home: DECISIONS Q11; gate: P3-00 schema freeze.
 
-Registered 2026-10-16 (session 18, D-036); entered from the 2026-10-16 review's §8 owner questions. S1–S4 proceed regardless of Q6–Q10 (each blocks only its named dependents, F-07).
+Q6–Q10 were registered 2026-10-16 (session 18, D-036); each blocks only its named dependents. Q11 is registered in this plan branch because the review's Work/Source dedup assumption conflicts with working-context notes that are not yet canonical owner intent. Phase 2 S1–S4 remain complete.
 
 Closed 2026-10-14 (owner turn 12, INT-110..INT-117; LOCKED rows D-028..D-033 in DECISIONS): Q1, Q2, Q3, QD-1, F-06, Q-IDENT.
 
 The List is the refinement-debt register (D-020) — cloud sync (L-001) is its live entry; semantic search, pgvector, and vector search are in the active sequence (Phase 5), never on the register. Deployment (D-032): Supabase-hosted, cloud + local synced.
 
 ## Supersession note
-The F-00..F-09 foundation-slice order from the original execution spec is SUPERSEDED by this phase sequence (D-016; reconciliation brief R-02/R-10). The slice cycle, size limits, proof discipline, and laws carry over unchanged into the new phases — now codified at root: LAWS.md (the 29 laws, phase-mapped) and ENGINEERING.md (the doctrine). The execution contract's canonical home is `/EXECUTION.md` (created by the canonicalization slice, 2026-10-13, D-021): the 12 spec deltas staged in `context/extracted/08-RECONCILIATION-BRIEF.md` are folded into the root layer or closed by owner decision — Q1–Q3 closed 2026-10-14 by D-028/D-029/D-030 (the earlier "explicitly owner-gated (Q1–Q3)" wording is superseded: no open question remains among them) — nothing waits on a further agent-side rewrite.
+The F-00..F-09 foundation-slice order from the original execution spec is SUPERSEDED by this phase sequence (D-016; reconciliation brief R-02/R-10). The slice cycle, size limits, proof discipline, and laws carry over unchanged into the new phases — now codified at root: LAWS.md (the original 29 source laws plus owner-directed LAW-30) and ENGINEERING.md (the doctrine). The execution contract's canonical home is `/EXECUTION.md` (created by the canonicalization slice, 2026-10-13, D-021): the 12 spec deltas staged in `context/extracted/08-RECONCILIATION-BRIEF.md` are folded into the root layer or closed by owner decision — Q1–Q3 closed 2026-10-14 by D-028/D-029/D-030 (the earlier "explicitly owner-gated (Q1–Q3)" wording is superseded: no open question remains among them) — nothing waits on a further agent-side rewrite.
 
 ## Post-product comprehensive refinement pass (P-18, INT-094/INT-096 — named, not scheduled)
 

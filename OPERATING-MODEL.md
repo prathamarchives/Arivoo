@@ -30,7 +30,7 @@ One behavior, one card, one loop. Steps 3–8 are a **cycle**; after 3 failed cy
 
 | # | Step | Specification |
 |---|---|---|
-| 1 | Read generated state and the slice card | Use repo state, open decisions, constraints, and last gate; do not rely on chat memory (P-02). |
+| 1 | Read generated state and the slice card | Use repo state, open decisions, constraints, and last gate; do not rely on chat memory (P-02). **Multi-agent (D-038/LAW-31):** also read `/CLAIMS.md` — if your task is claimed, coordinate, do not race; if unclaimed, your first work commit carries your claim row (scope globs + reserved INTs). |
 | 2 | Write understanding.yaml | Slice ID; owner INT IDs/quotes; SYS requirement IDs; scope; must-reject cases; facts used; plan; unknowns. A blocking unknown means STOP for that behavior. |
 | 3 | Write tests and commit them alone | Run the red path and record the exact failure reason. Each new test must fail for its stated reason before implementation (LAW-11); red evidence is frozen. |
 | 4 | Implement only inside card scope | Run the available fast suite after each change. Existing SIZE/SCOPE and dependency limits apply. If a documented command target is absent, do not claim it ran. |

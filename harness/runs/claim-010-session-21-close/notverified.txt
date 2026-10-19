@@ -1,0 +1,4 @@
+- the A03 reproduction (both forms) ran in a disposable scratch dir from this session's context — it is inspection evidence for H-01b's card, NOT the registered suite RED (that lands in H-01b's test-only commit); the reproduction commands are preserved in §8's description
+- no fresh technical verifier and no SEV for CLAIM-007/008/009 — the pre-H-02 discipline, the honest gap stated in §8; it closes when H-02 is live
+- the live-API evidence (PR/CI run states) is snapshot-at-write, re-observe at preflight (INT-104)
+- the host-context boundary stated in §8 is this session's stop condition — a clean close at a READY card, never a silent stop-work; H-01b/H-02 are open to any capable agent per the registry

@@ -1,0 +1,6 @@
+# CLAIM-010 — the session-21 interim close (no new owner decision; registry/record honesty work)
+CLAIMS.md
+STATE.md
+context/WORKLOG.md INT-126/D-040
+context/extracted/21-SESSION-21-EXECUTION-DIRECTIVE-INTAKE.md
+harness/runs/claim-010-session-21-close INT-126/D-040

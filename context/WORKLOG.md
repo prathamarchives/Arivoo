@@ -472,3 +472,9 @@ Stage Summary:
 - Two amendments recorded, never weakened: (1) the suite's first-draft bad-base assertion counted raw substring mentions (the skip note + the REQUIRED summary legitimately contain the code) — narrowed to the disposition form; (2) the registry caught the missing CLAIM-008 close live (ARV-CLM-002 on the transient overlap) — the closed row appended promptly
 - Evidence: suite 41 PASS exit 0; all four declared suites green on the real stack; CI pending at the PR head; red-01.txt preserved; dispositions in record 21 §4
 - Next: H-01b (the trusted semantic floor — A03, the READY card with the five-point contract); H-01c's three cards and H-02's design parallelizable under disjoint claims
+
+## Task 27 (CLAIM-010, session 21) — the session-21 interim close
+- Task: the registry/record honesty work — CLAIM-009's prompt closed row; record 21 §4/§8/§11/§12; STATE exit; A03 reproduced in both forms as H-01b's RED evidence (the early-exit candidate: the whole mutation-suite process exits 0 with ZERO output — the vacuous pass; the write-after-checksum form: the shared-process/shared-tree authority hole)
+- The session's account: four slices landed (reconciliation + intake + H-01a-R + this close), five walls-catches recorded (VER-901 x2; ARV-CLM-002 x2 — the missing prompt close caught live, and the comma-split scope cell: the session-20 fourth-catch class repeated), one discovery (the ARV-PRF-001/002 condition split), two red-record amendments (narrowed, never weakened), the honest gaps stated (pre-H-02 verifier/SEV; the host-context boundary)
+- Next: H-01b (the trusted semantic floor — A03, the READY card with the five-point contract; RED now reproduced) as the next claim; H-02's design parallelizable under disjoint claims; then H-01c's three cards; then P3-M0/P3-K0 with P3-00/P3-01
+- Session record: context/extracted/21-SESSION-21-EXECUTION-DIRECTIVE-INTAKE.md (§4/§8/§11/§12)

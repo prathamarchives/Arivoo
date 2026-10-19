@@ -96,3 +96,69 @@ def kb_dep(copy: pathlib.Path) -> None:
     m = copy / "harness" / "migrate.py"
     m.write_text(m.read_text() + "\nimport requests  # the must-reject\n")
     _load(copy, "harness.scope").check_deps()
+
+
+# --- session 19, CLAIM-002 (D-038/LAW-31): the claims-registry guards (red-first) ---
+
+_CLAIMS_ROW_OVERLAP = (
+    "| CLAIM-999 | 19 | Test Agent | `slice/claim-999-overlap-probe` | `LAWS.md`, `CLAIMS.md` "
+    "| INT-125 | 2026-10-19 | the overlap probe: LAWS.md is CLAIM-001's scope, not shared-append |\n"
+)
+
+
+@case("KB-CLM-001", "the claims registry deleted (LAW-31 has no substrate)",
+      "ARV-CLM-001")
+def kb_clm_missing(copy: pathlib.Path) -> None:
+    (copy / "CLAIMS.md").unlink()
+    _load(copy, "harness.claims").check_registry()
+
+
+@case("KB-CLM-002", "two OPEN claims overlapping on a non-shared file (the session-19 collision class)",
+      "ARV-CLM-002")
+def kb_clm_overlap(copy: pathlib.Path) -> None:
+    c = copy / "CLAIMS.md"
+    text = c.read_text()
+    anchor = "| CLAIM-001 |"
+    i = text.index(anchor)
+    line_end = text.index("\n", i)
+    c.write_text(text[:line_end + 1] + _CLAIMS_ROW_OVERLAP + text[line_end + 1:])
+    _load(copy, "harness.claims").check_registry()
+
+
+@case("KB-CLM-003", "a duplicate INT reservation (the merge-order race the registry prevents)",
+      "ARV-CLM-003")
+def kb_clm_dup_reservation(copy: pathlib.Path) -> None:
+    c = copy / "CLAIMS.md"
+    text = c.read_text()
+    anchor = "| CLAIM-001 |"
+    i = text.index(anchor)
+    line_end = text.index("\n", i)
+    dup = (
+        "| CLAIM-998 | 19 | Test Agent | `slice/claim-998-dup-probe` | `docs/unrelated/` "
+        "| INT-124 | 2026-10-19 | the duplicate-reservation probe (same INT as CLAIM-001) |\n"
+    )
+    c.write_text(text[:line_end + 1] + dup + text[line_end + 1:])
+    _load(copy, "harness.claims").check_registry()
+
+
+@case("KB-CLM-004", "a malformed OPEN row (branch does not carry the claim id)",
+      "ARV-CLM-004")
+def kb_clm_malformed(copy: pathlib.Path) -> None:
+    c = copy / "CLAIMS.md"
+    text = c.read_text()
+    anchor = "| CLAIM-001 |"
+    i = text.index(anchor)
+    line_end = text.index("\n", i)
+    bad = (
+        "| CLAIM-997 | 19 | Test Agent | `slice/wrong-branch-name` | `docs/unrelated/` "
+        "| INT-125 | 2026-10-19 | the well-formedness probe: branch lacks claim-997 |\n"
+    )
+    c.write_text(text[:line_end + 1] + bad + text[line_end + 1:])
+    _load(copy, "harness.claims").check_registry()
+
+
+@case("KB-CLM-005", "a PR-mode diff with no OPEN claim for its branch (unclaimed work)",
+      "ARV-CLM-005")
+def kb_clm_unclaimed(copy: pathlib.Path) -> None:
+    _load(copy, "harness.claims").check_branch_claim(
+        "slice/claim-777-unclaimed-probe", ["docs/unrelated/file.txt"])

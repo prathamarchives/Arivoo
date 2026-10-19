@@ -1,0 +1,26 @@
+PASS KB-SCOPE-001: a diff touching a path OUTSIDE the slice's declared scope -> REFUSED with ARV-SCOPE-002 (the guard fires)
+PASS KB-PROT-002: a protected-path edit with no owner-referenced declaration line -> REFUSED with ARV-PROT-002 (the guard fires)
+PASS KB-TEST-003: a declared test file removed (skipped test) — the gate fails closed -> REFUSED with ARV-GATE-001 (the guard fires)
+PASS KB-PRF-004: a hand-edited Proof Sheet (a line appended after assembly) -> REFUSED with ARV-PRF-004 (the guard fires)
+PASS KB-LAW09-005: a constraint-weakening edit (a protected-path file with no owner ref on its declaration) -> REFUSED with ARV-PROT-002 (the guard fires)
+PASS KB-RED-006: a red record missing for a test file -> REFUSED with ARV-RED-001 (the guard fires)
+PASS KB-RED-007: a test file edited AFTER its red record (no amendment) -> REFUSED with ARV-RED-002 (the guard fires)
+PASS KB-DEP-008: an unapproved third-party import added -> REFUSED with ARV-DEP-008 (the guard fires)
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/gate.py", line 206, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/z/my-project/arivoo/harness/gate.py", line 160, in main
+    fails = run_known_bads()
+            ^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/gate.py", line 137, in run_known_bads
+    probe_fn(work)
+  File "/home/z/my-project/arivoo/harness/known-bad/cases.py", line 113, in kb_clm_missing
+    _load(copy, "harness.claims").check_registry()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/known-bad/cases.py", line 37, in _load
+    spec.loader.exec_module(mod)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/arv_kb_90wn045c/KB-CLM-001/harness/claims.py'

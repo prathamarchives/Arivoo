@@ -1,0 +1,5 @@
+{"command": "python3 harness/gate.py --known-bad-only", "slice": "claim-002-claims-machinery",
+ "stage": "RED (LAW-11: the five new known-bads written first, observed failing)",
+ "exit_code": 1, "output_sha256": "recorded in red-01.txt",
+ "recorded_at": "2026-10-19T10:41:00+00:00",
+ "note": "KB-CLM-001..005 written BEFORE harness/claims.py exists; the matrix dies at KB-CLM-001 with FileNotFoundError (harness/claims.py missing) — the named waiting-for-harness class; exit 1 = the red record frozen"}

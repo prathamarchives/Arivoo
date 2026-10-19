@@ -12,6 +12,9 @@ Controlled vocabulary. One concept, one name — no synonyms. **Scope: this poli
 - **Host** — a coding-agent environment operating on this repo (GLM-based agent/CLI, Claude Code, Codex CLI). Supported = passed the Host Contract.
 - **Host Contract** — verified requirements for a host to be supported (loads canonical instructions, respects walls, cannot fabricate verification).
 - **Host Bridge** — a host-specific file (e.g. `CLAUDE.md`) that imports the canonical `AGENTS.md`. Verified on installed versions, never assumed.
+- **Independent test verifier** — a fresh-context verifier that tries to falsify implementation behavior against the slice card and evidence; does not implement or repair product code.
+- **Systems Engineering Verifier (SEV)** — a separate reviewer that verifies traceability from approved intent and system requirements through architecture/interfaces to V-model verification and user validation, including failure modes and not-verified items. It cannot resolve owner decisions. Policy: OPERATING-MODEL.md and LAW-30; form: context/TEMPLATES.md.
+- **V-model** — systems-engineering decomposition from stakeholder need through requirements, architecture, and implementation, paired with component, integration, system verification, and validation evidence. Policy and execution loop: OPERATING-MODEL.md.
 
 ## Product objects (minimum durable model)
 - **Work** — a readable thing (book, article, paper, post, manga...). Identity separate from any imported file.

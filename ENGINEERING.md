@@ -18,7 +18,7 @@ This file is the WHY. `/LAWS.md` is the WHAT (the executable rules). `/OPERATING
 
 **Failure it kills:** agent-output quality attributed to model capability, leading to "try a better model" as the fix, when the fix is the environment.
 
-**Mechanism here:** this entire first layer. The 29 laws in `/LAWS.md`, the slice loop in `/OPERATING-MODEL.md`, the constraint ladder below. The maturity of this repo is measured by how little owner intervention a correct change requires — not by how many rules exist.
+**Mechanism here:** this entire first layer. The original 29 laws plus owner-directed LAW-30 in `/LAWS.md`, the slice loop in `/OPERATING-MODEL.md`, the constraint ladder below. The maturity of this repo is measured by how little owner intervention a correct change requires — not by how many rules exist.
 
 ---
 

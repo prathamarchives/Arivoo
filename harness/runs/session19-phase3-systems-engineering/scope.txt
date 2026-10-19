@@ -1,0 +1,17 @@
+# Session 19: Phase 3 execution contract, canonical synchronization, and per-slice SEV policy.
+# One coherent documentation/process proposal. No product code, workflow code, raw corpus, settings, or credentials changed.
+PLAN.md INT-122/D-037
+AGENTS.md INT-122/D-037
+STATE.md INT-122/D-037
+DECISIONS.md INT-122/D-037
+EXECUTION.md INT-122/D-037
+OPERATING-MODEL.md INT-122/D-037
+LAWS.md INT-122/D-037
+ENGINEERING.md INT-122/D-037
+GLOSSARY.md INT-122/D-037
+INTENT-LEDGER.md INT-122
+context/WORKLOG.md INT-122/D-037
+context/TEMPLATES.md INT-122/D-037
+context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md INT-122
+.github/ INT-122/D-037
+harness/ INT-122/D-037

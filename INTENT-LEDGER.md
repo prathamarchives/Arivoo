@@ -17,6 +17,7 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-118** — owner turn 13 (session record 16, 2026-10-14 isolation-diagnostics-host-gates session): the owner-forwarded Arivoo review — the final two Phase-1 slices (10: isolation and diagnostics; 11: real host bridges and automated gates) + the Phase-1 graduation gate, with the findings that closed decision language and the GLM-host assumption have not fully propagated (owner-forwarded text, E-4 class, labeled).
 - **INT-119** — owner turn 14 (session record 17, 2026-10-15 candidate-tool-gate-and-graduation session): the owner-forwarded gates review — candidate tool changes must be merge-blocking (P1: the coordinated tool+self-test weakening class), the anchor must be fail-closed (P2), and the graduation is resequenced: gates first, then the integrated fresh-context proof at the resulting final SHA (owner-forwarded text, E-4 class, labeled; the turn's leading access token redacted at ingestion per D-025/INT-092).
 - **INT-120..INT-121** — owner turns 15–16 (session record 18, 2026-10-16 research-driven-review + Phase-2-foundation session): turn 15's eight-part research-driven architecture review directive (read-only pass; the turn's full text crossed a host context boundary — the preserved fragments and the review artifact are the durable record), and turn 16's execution directive — update the repo on the review, then execute Phase 2 foundation (the S1–S4 harness slices; D-036).
+- **INT-122..INT-124** — owner turns 17–19 (session record 19, 2026-10-19 Phase-3-entry + concurrency session; two-part: a GitHub-integration part and the GLM-host continuation): turn 17's systems-engineering execution-contract directive (Phase 3 entry; per-slice systems-engineer verification), turn 18's access-re-establishment + context-gather directive (leading access token redacted at ingestion), and turn 19's multi-agent directive — the repo must be usable by multiple agents at a time (the concurrency protocol; D-038).
 
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
@@ -595,7 +596,35 @@ Source: owner turn 15, chat 2026-10-16 (session record 18 §1, E-2 class with th
 
 Source: owner turn 16, chat 2026-10-16 (session record 18 §1, E-2 class; the turn re-supplied the review deliverable as an upload — now preserved verbatim at `context/reviews/2026-10-16-research-driven-architecture-review.md`). Grounds: DECISIONS D-036 (the review's adoption: artifact intake + drift repair + Phase 2 Layer 2.1 execution per the review's S1–S4, severable and challengeable); D-024 (the owner's explicit authorization to merge the review artifact — "update the repo on everything we did rightnow in last convos"); P-13/P-15 (standing authorization for the memory-delta and slice work); the review artifact §7 (the slice definitions this turn executes).
 
+## Owner turns 17–19 — session record 2026-10-19 (INT-122/INT-123/INT-124; the Phase-3 entry + the multi-agent concurrency session)
+
+**INT-122 — PHASE-3 ENTRY: THE SYSTEMS-ENGINEERING EXECUTION CONTRACT — active**
+> "now as an world class systems engineer write a in depth long step by step instructions to execute the phase 2 and really start building the product. think this through step by step so we get everything rigth. the agnet must not be able to drift or make decisions itself. make everything clear what to execute how and what we want and actual systems design before executing a final check on system and roadmap, make repo uptodate, and update everything, and make the walls, harness, kernels, verifcation solid, add systems engineer verification after each slice... and should aligned with the goal"
+
+Source: owner turn 17, chat 2026-10-19 (session record 19 §1.a, E-2 class — preserved verbatim by the session's part 1 at record creation, BEFORE this entry, the INT-046/068 class held across the agent change). Grounds: DECISIONS D-037 (the turn's adoption: the contract-before-code sequencing, the actual systems design, the per-slice independent systems-engineer verification, the walls/harness/kernels/verification solidification — severable and challengeable); PLAN.md Phase 3 (the contract's target); the review artifact §7's handoff (the Phase-3 opening slice sketch this contract concretizes); OPERATING-MODEL §2/§9 (the V-model SEV protocol); LAW-30 (the SEV law, added this session — PLANNED until H-02's validator, gate, known-bads, and CI evidence exist); P-13/P-15. The turn is the owner's Phase-3 entry gate (NG-04): the phase opens with its contract, not with code. It authorizes the execution plan and systems-engineering process; it does not authorize agents to resolve owner questions, weaken walls, or mint credentials.
+
+**INT-123 — RE-ESTABLISH ACCESS AND GATHER ALL THE CONTEXT — active (executed this session, record 19 §2.2)**
+> "setup gh and cli githib... go through arivoo get all the context"
+
+Source: owner turn 18, chat 2026-10-19 (session record 19 §1.b, E-2 class; the turn's leading access token REDACTED AT INGESTION — it refreshed the out-of-repo credential store, a new PAT for the reset environment, and is never recorded: D-025/INT-092). Grounds: D-025 (credential hygiene); record 19 §2.2 (the preflight this turn authorized: the four suites + protection re-observed + the in-flight branch caught); INT-092 (the access-recovery precedent).
+
+**INT-124 — MULTI-AGENT CONCURRENT OPERATION: DESIGN THE REPO ACCORDINGLY — active**
+> "good you cuaght that, now i want you to design the repo acoordingly iterate on this thing. the repo should be usable by multiple agents at a time"
+
+Source: owner turn 19, chat 2026-10-19 (session record 19 §1.c, E-2 class; typos preserved). Grounds: DECISIONS D-038 (the multi-agent concurrency protocol's adoption: the CLAIMS.md coordination registry, claim-before-work, scope exclusivity, intent-ID reservation, claim-aware STATE/records/worklog, the mechanical gate checks — severable and challengeable); AGENTS.md binding rules (the multi-agent protocol's home); P-13/P-15; P-02 (the registry extends the repo-is-the-memory law to the multi-agent case: coordination state lives in the repo, not in chat or an agent's head).
+
 ---
+
+## Audit note (2026-10-19, session 19 — the Phase-3-entry + concurrency session; appends, supersedes nothing)
+
+- **INT-122..INT-124 record owner turns 17–19** — 106 statused entries, INT-019..INT-124, contiguous and unique. Session record 19 §1 is the verbatim-preservation home: part 1 (a GitHub-integration session) committed §1.a BEFORE any ledger entry — the INT-046/068 class held across a mid-session agent change; part 2 (the GLM-host continuation) appended §1.b/§1.c before ITS entries, turn 18's leading access token redacted at ingestion (D-025/INT-092).
+- **Ledger discipline held (INT-075):** owner words only — all three quotes are the owners' own words verbatim (typos preserved); the contract and protocol TEXT live in their canonical homes (the contract artifact; AGENTS.md/LAWS.md), adopted through D-037/D-038 (ADOPTED, severable, challengeable), never ledgered as owner intent.
+- **LAW-30/SEV scope (from part 1, folded here at the reconciliation):** the owner explicitly requires a separate systems-engineering verification after each slice; D-037 records the process decision; LAW-30 remains PLANNED until H-02's validator, gate, known-bads, and CI evidence exist.
+- **Open owner gates (after this turn):** D-014 (non-blocking) + Q6–Q10 (unchanged scopes) + **Q11 NEW** (Work/Source identity and duplicate-import policy — raised by session-19 part 1 §8; blocks auto-dedup/identity-specific schema constraints only, not unrelated kernel work). Phase-3 entry is now owner-directed (INT-122): the gate opened by the owner's own turn, per NG-04.
+
+---
+
+
 
 ## Audit note (2026-10-16, session 18 — the research-driven-review + Phase-2-foundation session; appends, supersedes nothing)
 

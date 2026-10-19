@@ -153,3 +153,47 @@ File: `context/extracted/NN-<NAME>.md`
 ## Vocabulary
 See `/GLOSSARY.md`. Core: <the ~10 load-bearing terms>
 ```
+
+
+## 6. SYSTEMS-ENGINEERING VERIFICATION RECORD (LAW-30; enforced after H-02)
+
+The governing policy lives in OPERATING-MODEL.md §2/§9 and LAWS.md LAW-30. This is the standard record form, not a second policy source. The record is authored by a fresh-context Systems Engineering Verifier after implementation and independent test verification. It is bound to the reviewed diff using the H-02 digest procedure; do not bind it to a commit hash that changes when the record is added.
+
+Required fields (JSON, standard library only):
+
+    {
+      "schema_version": 1,
+      "slice_id": "<slice>",
+      "base_sha": "<base revision>",
+      "reviewed_diff_sha256": "<digest excluding this report and generated proof output>",
+      "intent_ids": ["INT-..."],
+      "requirement_ids": ["SYS-..."],
+      "system_claims": ["C1"],
+      "changed_components": ["<paths/components>"],
+      "interfaces_reviewed": ["<contract + evidence pointer>"],
+      "v_model": {
+        "component_verification": ["<requirement + test/proof ID>"],
+        "integration_verification": ["<real boundary + proof ID>"],
+        "system_verification": ["<system requirement + proof ID>"],
+        "validation": ["<user scenario + expected outcome>"]
+      },
+      "failure_modes": [
+        {"id": "FM-...", "scenario": "...", "control": "...", "proof_ids": ["..."]}
+      ],
+      "findings": [
+        {"id": "SEV-...", "severity": "P0|P1|P2", "status": "open|resolved|owner-accepted-debt",
+         "evidence": "...", "disposition": "..."}
+      ],
+      "not_verified": ["<explicit limitation>"],
+      "builder_context": "<builder-session identifier>",
+      "reviewer_context": "<fresh, separate context identifier>",
+      "disposition": "PASS|BLOCKED",
+      "review_summary": "<traceability conclusion; no unsupported claims>"
+    }
+
+Rules:
+- After H-02, a missing, stale, incomplete, malformed, or BLOCKED report fails the gate.
+- An unresolved P0/P1 or blocking owner question fails the slice. P2 debt requires an explicit owner-approved record and revisit condition.
+- The report cannot close Q6–Q11, change a law, or promote a proposal to adopted status.
+- A reviewer-context identifier does not cryptographically prove independence. Fresh-context execution and a separate grader remain part of the protocol; state the identity limitation honestly.
+- The Proof Sheet records report and reviewed-diff digests, disposition, findings, and not-verified items. Generated evidence is never hand-edited.

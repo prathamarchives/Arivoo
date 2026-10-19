@@ -13,8 +13,8 @@
 | The goal and claims | `/NORTH-STAR.md` | Mission in owner words; C1–C5; the seven-layer contract; non-goals |
 | Owner intent | `/INTENT-LEDGER.md` | Owner words, verbatim, statused — the ONLY intent authority |
 | Owner laws | `/PRINCIPLES.md` | P-01..P-18: WORDS / MEANING / MECHANISM / FAILURE MODE / GROWTH |
-| Decisions | `/DECISIONS.md` | D-001..D-033, statused; open owner question D-014 (gate in §6; Q1/Q2/Q3/QD-1/F-06/Q-IDENT closed 2026-10-14 → D-028..D-033) |
-| Executable law | `/LAWS.md` | The 29 laws: statement, ladder level, check, live-at; LAD rules; proactive set |
+| Decisions | `/DECISIONS.md` | D-001..D-037, statused; open owner question D-014 (gate in §6; Q1/Q2/Q3/QD-1/F-06/Q-IDENT closed 2026-10-14 → D-028..D-033) |
+| Executable law | `/LAWS.md` | The 30 laws: statement, ladder level, check, live-at; LAD rules; proactive set |
 | Doctrine | `/ENGINEERING.md` | Why the laws are what they are (transcript + upstream) |
 | Roles, loop, growth, healing, verification | `/OPERATING-MODEL.md` | The slice loop; six operating models; memory-update protocol; self-healing; the verification stack |
 | Phase sequence | `/PLAN.md` | One phase deep (NG-04); guardrails; Phase 1 detail |
@@ -94,6 +94,7 @@ Rules:
 | Q8 | Sample documents for the S5 extraction spike (review §8 Q3) | Synthetic documents only (no privacy surface, weaker ecological validity) | Phase-3 schema slice |
 | Q9 | Repository visibility (review §8 Q4; API observed public 2026-10-16, private at clone 2026-10-13) | Keep public; confirm intent — `context/raw/` contains personal material | Owner confirmation |
 | Q10 | Fine-grained PAT hardening (review §8 Q5, from F-7: workflows:read closes the workflow-tamper class mechanically) | Keep the classic PAT; rely on the documented discipline (status quo, accepted residual D-033) | Owner token mint |
+| Q11 | Work/Source identity and duplicate-import semantics; review assumption conflicts with known owner preference | No automatic merge/dedup; preserve distinct logical imports pending formal intent | Phase 3 schema freeze (P3-00) |
 
 Closed 2026-10-14 (owner turn 12, chat 2026-10-14; INT-110..INT-117 → DECISIONS D-028..D-033): Q1 (agent-agnostic design — no primary builder host; verification hosts may vary), Q2 (the purge default adopted), Q3 (the tag system removed entirely), QD-1 (any readable format), F-06 (Supabase-hosted, cloud + local synced — supersedes D-003's ordering), Q-IDENT (documented acceptance, option (a)). Closures land as LOCKED decision rows with owner words, never as silent removal from prose; the table above is the complete current register, mirrored in DECISIONS' open section, PLAN's standing-open line, and STATE's blocking-questions list (checked mechanically by VER-504).
 

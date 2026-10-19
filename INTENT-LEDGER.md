@@ -597,6 +597,24 @@ Source: owner turn 16, chat 2026-10-16 (session record 18 §1, E-2 class; the tu
 
 ---
 
+
+## Owner turn 17 — session record 2026-10-19 (INT-122; Phase 3 and systems-engineering execution)
+
+**INT-122 — PHASE 3 SYSTEMS-ENGINEERING EXECUTION AND NO-DRIFT DIRECTIVE — active**
+
+> "now as an world class systems engineer write a in depth long step by step instructions to execute the phase 2 and really start building the product. think this through step by step so we get everything rigth. the agnet must not be able to drift or make decisions itself. make everything clear what to execute how and what we want and actual systems design before executing a final check on system and roadmap, make repo uptodate, and update everything, and make the walls, harness, kernels, verifcation solid, add systems engineer verification after each slice... and should aligned with the goal"
+
+Source: owner turn 17, chat 2026-10-19 (session record 19 §1, E-2 class; committed before this ledger entry). Grounds: D-037 (systems-engineering verification after every slice); PLAN Phase 3 (the execution path, requirements, decisions and acceptance criteria); OPERATING-MODEL §2/§9 (V-model SEV protocol); LAW-30 (the planned check). This instruction authorizes the execution plan and systems-engineering process; it does not authorize agents to resolve owner questions, weaken walls, mint credentials, or merge their own analysis/proposal.
+
+
+
+## Audit note (2026-10-19, session 19 — Phase 3 entry and systems-engineering execution contract; appends, supersedes nothing)
+
+- **INT-122 records owner turn 17** — 104 statused entries, INT-019..INT-122, contiguous and unique. Session record 19 §1 was committed before this entry, per the closed INT-046/068 procedure.
+- **Scope:** the owner explicitly requires a separate systems-engineering verification after each slice. D-037 records the process decision; LAW-30 remains PLANNED until H-02's validator, gate, known-bads, and CI evidence exist.
+- **Open owner gates:** D-014 + Q6–Q11. Q11 tracks the Work/Source identity conflict and blocks only automatic dedup/merge and identity-specific uniqueness constraints.
+
+
 ## Audit note (2026-10-16, session 18 — the research-driven-review + Phase-2-foundation session; appends, supersedes nothing)
 
 - **INT-120/INT-121 record owner turns 15/16** — 103 statused entries, INT-019..INT-121, contiguous and unique. Session record 18 §1 is the verbatim-preservation home (written and committed BEFORE these entries, per the closed INT-046/068 class). Turn 15's full text crossed a host context boundary before this session (the no-mutation session preserved nothing in-repo at the time); the preserved fragments + the boundary statement in record 18 §1 are the honest substitute — quote fidelity outranks completeness (a fabricated "verbatim" turn would be the exact class VER-803 exists to catch).

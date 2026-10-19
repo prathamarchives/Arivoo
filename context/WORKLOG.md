@@ -438,3 +438,12 @@ Stage Summary:
 - Unresolved: D-014 + Q6–Q12 (narrowed to named dependents, none a general stop); H-01a/H-01b/H-02 unbuilt — the dispositions are pending their slices
 - Next: CLAIM-005 — execute the H-01a card: red-first test_gate_dispatch.py on the actual predecessor, then dispatch.py + gate/scope/workflow repairs, registration in gate/red TESTS, Proof Sheet, three-wall CI, merge, dispositions in record 20 §4
 - Session record: context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md
+
+## Task 23 (CLAIM-005, session 20) — H-01a LANDED: PR dispatch/Git fail-closed
+- Task: PLAN's frozen ready card — A01 (the scope-less PR selfcheck-fallback bypass), A02 (CI event-field template interpolation), A10 (unchecked git ops -> empty-diff vacuous passes); red-first, registered suite, three-wall merge
+- Outcome: LANDED (PR #40 = 746fa57): harness/dispatch.py (env-only context, ARV-DISPATCH-001 identifier refusal, PR mode ALWAYS — the fallback branch deleted), scope.py GitRefusal (ARV-DIFF-001/002, merge-base decidable via fetch-depth 0), gate.py refusal handling, test_gate_dispatch.py (11 named checks: real dispatcher in real clones; the positive case proves the slice's own PR shape) registered in gate/red TESTS
+- Evidence: RED at c7c1633 (11 failures, two honest forms — incl. the predecessor's actual wrong behavior: diff_paths returned [] for a nonexistent base); GREEN locally + CI run 39255875913 all three checks (the S4b log shows the real dispatcher running the gate PR-mode green); post-merge 39256240219 success; dispositions A01/A02/A10 = reproduced+fixed+regression in record 20 §4
+- Failures found BY the walls, honestly kept: CI caught the fixture's missing origin/main (detached-merge workspace has no local branches — two repair rounds: rev-parse candidate order HEAD^2 -> origin/main -> main, then update-ref sets the literal ref); one push shipped before the suite output was checked (the pipe captured tail's exit — lesson recorded in the commit)
+- Unresolved: A03 + A11/A12 (H-01b/H-01c), A09+A08 (H-02), A04/A07/A13 (kernel prereq), A05/A06 (migration oracles), A14–A18 (bounded follow-ups) — all 'static, confirmed' until their slices
+- Next: H-01b (the trusted semantic floor) as CLAIM-007 per the D-039 sequence; or H-02 in parallel (disjoint scope)
+- Session record: context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md (§4)

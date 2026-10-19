@@ -1,6 +1,6 @@
 # 20 — SYSTEMS-ENGINEERING EXECUTION DIRECTIVE (INTAKE) AND H-01/H-02 CLOSURE SEQUENCE
 
-> STATUS: SESSION ENGINEERING RECORD — IN PROGRESS (session 20 opened 2026-10-19; owner turn 20, INT-125; §1 preserved verbatim below BEFORE any ledger entry — the INT-046/068 class; sections §4–§12 complete at this session's close slice; the token redaction at §1's end is the INT-092/D-025 precedent). Historical process artifact per D-022 once complete: NOT owner intent, outranks nothing.
+> STATUS: SESSION ENGINEERING RECORD — COMPLETE (session 20, 2026-10-19; owner turn 20, INT-125; §1 preserved verbatim below BEFORE any ledger entry — the INT-046/068 class; §4–§12 landed at the close slice (PR #41); the token redaction at §1's end is the INT-092/D-025 precedent). Session 20 ENDED at that slice; the final status + the §12 amendment below were set by session 21's reconciliation — record 21 §2. Historical process artifact per D-022: NOT owner intent, outranks nothing.
 
 ## 1. What the owner asked (verbatim — owner turn 20, 2026-10-19)
 
@@ -428,3 +428,5 @@ CLAIM-006 (this close) lands the registry/record honesty work. The deterministic
 ## 12. Session close (interim)
 
 Session 20 remains OPEN at this slice (the entry sequence continues: H-01b, H-02, then P3-00/P3-01). This interim close carries: the two landed slices' dispositions (§4), the failure/limit log (§8), and the exact next action (§11). STATE points here; the registry is current (CLAIM-005 closed promptly, CLAIM-006's own closed row is the next reconciliation item if the session ends at this slice).
+
+**2026-10-19, session 21 — the reconciliation amendment (append-only; nothing above is rewritten):** session 20 ENDED at this slice (the host context closed before H-01b could start). Per this section's own boundary above, CLAIM-006's closed row was the next reconciliation item: appended by session 21's CLAIM-007, whose preflight re-observed the live state (PR #41 merged `2087378`; 0 open PRs; post-merge run `39259609210` success) and repaired exactly the three-item drift — the registry row, STATE's active-task pointer, and this record's status header. The record stands as written: §4's disposition table and §8's four walls-catches are the honest account of the work this record contains, and its status is COMPLETE for that work. The session's remaining sequence (the turn-21 intake, the H-01a completion checks, H-01b, H-02) continues in session 21's record.

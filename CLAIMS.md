@@ -16,7 +16,7 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-003 | 19 (part 2) | Super Z (GLM host) | `slice/claim-003-session-19-close` | `context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md`, `STATE.md`, `context/WORKLOG.md`, `CLAIMS.md`, `harness/known-bad/`, `harness/runs/claim-003-session-19-close/` | — (no new owner turn) | 2026-10-19 | The close slice: record 19 completed (the true two-part account — including the record-side rebase incident repair), STATE exit, WORKLOG Task 19, the registry's own closes. |
+| CLAIM-004 | 20 | Super Z (GLM host) | `slice/claim-004-session-20-intake` | `context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md`, `INTENT-LEDGER.md`, `DECISIONS.md`, `PLAN.md`, `STATE.md`, `AGENTS.md`, `context/WORKLOG.md`, `CLAIMS.md`, `.gitignore`, `harness/runs/claim-004-session-20-intake` | INT-125 (retroactive-notation per rule 6: the ledger entry lands in this same PR — the registry row and its intent are the claiming agent's own in-flight edits until merged, rule 3; recorded in record 20 §8 as the first live exercise of the notation rule) | 2026-10-19 | The intake slice: owner turn 20 preserved verbatim (record 20 §1, the 12-section directive + the A01–A18 audit addendum; token redacted per D-025/INT-092); D-039; the NG-04 owner-exception roadmap rows in PLAN; the H-01a/H-01b/H-02 card definitions; STATE/AGENTS count sync; plus the registry reconciliation (CLAIM-003's late close, below). No code this slice. |
 
 ## Closed claims
 
@@ -24,5 +24,6 @@
 |-------|--------|--------|----------|
 | CLAIM-001 | The concurrency protocol landed (PR #36, `9a63579` — CLAIMS.md + AGENTS + LAWS LAW-31 + GLOSSARY + OPERATING-MODEL + EXECUTION) | 2026-10-19 | PR #36 = `9a63579`, post-merge run `39238984928` success |
 | CLAIM-002 | The enforcement machinery landed (PR #37, `04eae39` — ARV-CLM-001..005, five known-bads 13/13 in CI, the gate wiring; LAW-31 LIVE) | 2026-10-19 | PR #37 = `04eae39`, run `39239243662` all checks success |
+| CLAIM-003 | The session-19 close landed (PR #38, `026fead` — record 19 COMPLETE §§1–12, STATE exit, WORKLOG Task 19) | 2026-10-19 (late close appended 2026-10-19, session 20 — rule 4's closing append was missed by session 19 part 2; reconciled at session-20 preflight, noted in record 20 §2) | PR #38 = `026fead`, post-merge run `39240443928` success |
 
 Pre-registry history (PRs #1–#35, sessions 1–19 part 1) is NOT backfilled as claims; the registry governs work from this adoption onward (D-038). Session 19's two-part collision is the founding incident, preserved verbatim in record 19 §8 — the rules above are its ratchet response (LAW-18).

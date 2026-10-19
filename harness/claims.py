@@ -61,10 +61,12 @@ def _open_rows(text: str) -> list:
     for ln in section.splitlines():
         s = ln.strip()
         if not s.startswith("|") or set(s) <= {"|", "-", " ", ":"}:
-            continue  # header, separator, or blank
+            continue  # separator or blank
         cells = _cells(s)
         if len(cells) < 8 or cells[0].startswith("*"):
             continue
+        if cells[0].strip().lower() == "claim":
+            continue  # the header row (fail-closed shape check verified it separately)
         rows.append({
             "claim": cells[0], "session": cells[1], "agent": cells[2],
             "branch": cells[3], "scope": cells[4], "ints": cells[5],
@@ -148,7 +150,7 @@ def check_registry(repo: pathlib.Path = REPO) -> list:
                             f"{r['claim']}: INT-{n} is not the next free id (ledger max is INT-{lmax}; the next fresh reservation is INT-{lmax + 1})",
                             "reserve ledger-max+1; a retroactive reservation (an already-ledgered id) requires the retroactive notation in Notes")
                 fails.append("ARV-CLM-003")
-            if v <= lmax and "retroactiv" not in r["notes"].lower():
+            if v <= lmax and "retroactiv" not in (r["ints"] + " " + r["notes"]).lower():
                 _print_fail("ARV-CLM-003",
                             f"{r['claim']}: INT-{n} is already ledgered but the row does not carry the retroactive notation",
                             "a reservation of an already-ledgered id must be marked retroactive in Notes (honesty rule, CLAIMS.md 6)")

@@ -16,7 +16,7 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-006 | 20 | Super Z (GLM host) | `slice/claim-006-session-20-close` | `CLAIMS.md`, `STATE.md`, `context/WORKLOG.md`, `context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md`, `harness/runs/claim-006-session-20-close` | — (close work: no new owner turn) | 2026-10-19 | The session-20 interim close: CLAIM-005's closed row; record 20 §4 (the A01/A02/A10 dispositions landed this session: reproduced RED-first, repaired, regression-proven in CI at run 39255875913, merged) + §8 (the session's honest failure/limit log); STATE's exact next action -> H-01b. The session may continue (H-01b next); this close is the registry/record honesty work, not a session end. |
+| CLAIM-006 | 20 | Super Z (GLM host) | `slice/claim-006-session-20-close` | `CLAIMS.md`, `STATE.md`, `context/WORKLOG.md`, `context/extracted/20-SYSTEMS-ENGINEERING-EXECUTION-DIRECTIVE-INTAKE.md`, `harness/runs/claim-006-session-20-close`, `harness/tests/test_gate_dispatch.py`, `harness/red-records.json` (the suite-stability repair the close's own CI exposed — scope widened honestly, the record-19 precedent) | — (close work: no new owner turn) | 2026-10-19 | The session-20 interim close: CLAIM-005's closed row; record 20 §4 (the A01/A02/A10 dispositions landed this session: reproduced RED-first, repaired, regression-proven in CI at run 39255875913, merged) + §8 (the session's honest failure/limit log); STATE's exact next action -> H-01b. The session may continue (H-01b next); this close is the registry/record honesty work, not a session end. |
 
 ## Closed claims
 

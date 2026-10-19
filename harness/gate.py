@@ -34,7 +34,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from harness import proofsheet, scope  # noqa: E402
+from harness import proofsheet, scope, claims  # noqa: E402
 
 # known-bad cases load BY FILE PATH (the doc-conventional directory carries a
 # hyphen — not a Python package name; spec-loading keeps it importable anyway)
@@ -174,6 +174,13 @@ def main() -> int:
     fails += check_red_records()
     print("scope/size (LAW-05/06/07):")
     fails += check_diffs("" if (a.no_diff or not a.diff) else a.diff, slice_name)
+    print("claims registry (LAW-31, D-038 — the collision's ratchet):")
+    fails += claims.check_registry()
+    if a.diff and not a.no_diff and slice_name not in ("main-selfcheck",):
+        branch = slice_name if slice_name.startswith("slice/") else "slice/" + slice_name
+        fails += claims.check_branch_claim(branch, scope.diff_paths(a.diff))
+    else:
+        print("NOTE ARV-CLM-000: no-diff mode (main/selfcheck) — the branch-claim and diff-coverage checks ran at PR time")
     print("LAW-24 boundary lint:")
     fails += scope.lint_boundary()
     print("LAW-08 dependency check:")

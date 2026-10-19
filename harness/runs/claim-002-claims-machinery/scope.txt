@@ -1,0 +1,5 @@
+# CLAIM-002 (session 19 part 2, D-038/LAW-31): the claims-registry machinery, red-first.
+# The ratchet response to the recorded two-agent collision (record 19 §8).
+# One bounded slice: the check module + the known-bad matrix extension + the gate wiring.
+CLAIMS.md INT-124/D-038
+harness/ INT-124/D-038

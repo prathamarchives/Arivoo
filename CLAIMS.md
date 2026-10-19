@@ -16,6 +16,7 @@
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
 | CLAIM-001 | 19 (part 2) | Super Z (GLM host) | `slice/claim-001-concurrency-protocol` | `CLAIMS.md`, `AGENTS.md`, `LAWS.md`, `GLOSSARY.md`, `OPERATING-MODEL.md`, `EXECUTION.md`, `STATE.md` | INT-124 (the session's turn-19 intake — reserved retroactively; the turns predate the registry by hours, the ledger entry already landed with PR #35) | 2026-10-19 | The registry's own founding slice — this protocol text + the rules' canonical homes. The machinery (ARV-CLM checks + known-bads, red-first) is the session's NEXT slice, its own claim. |
+| CLAIM-002 | 19 (part 2) | Super Z (GLM host) | `slice/claim-002-claims-machinery` | `CLAIMS.md`, `harness/` | — (no new owner turn: executes D-038/INT-124, already ledgered) | 2026-10-19 | The machinery: harness/claims.py (ARV-CLM-001..005) + five known-bads (red-first: red-01.txt) + the gate wiring. Honest note: the claim row lands one commit after the red-first commit — the registry's adoption slice, its own first user; the rules govern from this PR onward. |
 
 ## Closed claims
 

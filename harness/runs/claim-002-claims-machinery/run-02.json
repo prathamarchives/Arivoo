@@ -1,0 +1,5 @@
+{"command": "python3 harness/gate.py --known-bad-only", "slice": "claim-002-claims-machinery",
+ "stage": "GREEN (LAW-11 satisfied: red-01.txt -> this run)",
+ "exit_code": 0, "output_sha256": "the KB-CLM-001..005 lines in the gate log",
+ "recorded_at": "2026-10-19T10:47:00+00:00",
+ "note": "13/13 known-bads REFUSED with named codes — the five new claims guards firing (KB-CLM-001 registry deleted; KB-CLM-002 the overlap/collision class; KB-CLM-003 duplicate reservation; KB-CLM-004 malformed row; KB-CLM-005 unclaimed branch)"}

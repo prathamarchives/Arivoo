@@ -29,7 +29,7 @@ Changed paths (18): .github/workflows/verify.yml (comment/step-label accuracy on
 ## 6. Commands and external actions (ACTUAL — never reconstructed)
 
 - GitHub repository/file/API reads were performed through the connected GitHub integration.
-- No local shell command ran in this session at record creation.
+- No local repository build/test command was run. A local Python digest calculation was used only to hash the authored summary of the observed CI status; repository checks were performed by GitHub Actions.
 - The current-main workflow observation is run 38907815470, conclusion success, head e96ee995.
 - Live branch protection detail could not be retrieved: the protection endpoint returned HTTP 403, Resource not accessible by integration. The branch list did report protected: true.
 
@@ -63,11 +63,11 @@ Changed paths (18): .github/workflows/verify.yml (comment/step-label accuracy on
 
 ## 11. Next action
 
-Keep draft PR #35 unmerged for explicit owner review; the current evidence at §7 records that all three required checks passed on caa84aee8a8b541c86a927639da81325488f3a03. Re-check CI on the final evidence-update revision before owner acceptance. After explicit plan authorization, run the local Phase 2 preflight on the then-current main SHA, then execute H-01 (base-anchored harness floor) and H-02 (SEV validator/gate) as bounded slices, and only then start P3-00/P3-01.
+Keep draft PR #35 unmerged for explicit owner review. CI status is SHA-specific: the recorded run at caa84aee8a8b541c86a927639da81325488f3a03 passed, but owner approval must use the live checks on the exact current PR head. After explicit plan authorization, run the local Phase 2 preflight on the then-current main SHA, then execute H-01 (base-anchored harness floor) and H-02 (SEV validator/gate) as bounded slices, and only then start P3-00/P3-01.
 
 ## 12. Session close
 
-PR #35 is open as a DRAFT, unmerged: https://github.com/prathamarchives/Arivoo/pull/35. Current PR head at the last observed status was caa84aee8a8b541c86a927639da81325488f3a03; required CI run 39235286059 completed successfully at 2026-10-19T10:09:17Z with canonical-layer=success, head-tools=success, harness=success. The subsequent evidence-only amendments trigger a fresh run and must be checked on the resulting HEAD.
+PR #35 is open as a DRAFT, unmerged: https://github.com/prathamarchives/Arivoo/pull/35. Current PR head at the last observed status was caa84aee8a8b541c86a927639da81325488f3a03; required CI run 39235286059 completed successfully at 2026-10-19T10:09:17Z with canonical-layer=success, head-tools=success, harness=success. The subsequent evidence and plan amendments are validated by a new run per revision; use the live pull request to inspect the exact HEAD's status before approval.
 - No local commands were run because the connected GitHub workflow, not a local shell, is the available execution surface in this session.
 - No independent fresh-context SEV review was run; proof sheet remains explicit about that limitation. No product behavior is claimed.
 - Repository is public (Q9); no visibility change was made. Branch-protection details returned HTTP 403; exact settings were not re-verified.

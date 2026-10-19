@@ -47,7 +47,7 @@ _kb_spec.loader.exec_module(kbcases)
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
-         "harness/tests/test_commands.py")
+         "harness/tests/test_commands.py", "harness/tests/test_gate_dispatch.py")
 
 
 def run_cmd(cmd: list) -> subprocess.CompletedProcess:
@@ -103,11 +103,21 @@ def check_red_records() -> list:
 
 
 def check_diffs(base: str, slice_name: str) -> list:
+    fails: list[str] = []
     if not base:
         print("NOTE ARV-SCOPE-000: no-diff mode (main/selfcheck) — the diff-scoped checks ran at PR time on these same changes")
         return []
-    fails = scope.check_scope(scope.diff_paths(base), slice_name)
-    fails += scope.check_size(scope.diff_stats(base))
+    try:
+        # H-01a/A10: a failed git operation or a base with no merge-base is a
+        # REFUSAL (scope.GitRefusal carries ARV-DIFF-001/002) — never a silent
+        # empty diff that reads as a compliant no-op (the vacuous-pass defect).
+        fails = scope.check_scope(scope.diff_paths(base), slice_name)
+        fails += scope.check_size(scope.diff_stats(base))
+    except scope.GitRefusal as refusal:
+        code = str(refusal).split(":")[0]
+        print(f"FAIL {refusal}")
+        print("      repair: verify the base ref exists and shares history with HEAD, and the checkout carries sufficient graph depth (fetch-depth 0 in CI) — a git failure is a refusal, never an empty diff (A10)")
+        fails.append(code)
     return fails
 
 

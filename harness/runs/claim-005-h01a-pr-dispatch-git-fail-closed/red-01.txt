@@ -1,0 +1,24 @@
+PASS A02-hostile-branch exits nonzero: exit=2
+FAIL A02-hostile-branch names ARV-DISPATCH-001: got: /home/z/.venv/bin/python3: can't open file '/tmp/arv_h01a_xne1h07y/hostile/harness/dispatch.py': [Errno 2] No such file or directory
+PASS A02-hostile-branch never falls back to selfcheck: the A01 bypass: a PR must be judged as a PR
+PASS A02-hostile-branch executes nothing: the breakout payload must never run as script
+PASS A02-hostile-branch creates no side-effect file: a `touch` payload must not land
+PASS A01-missing-scope exits nonzero: exit=2
+FAIL A01-missing-scope names ARV-SCOPE-001: got: /home/z/.venv/bin/python3: can't open file '/tmp/arv_h01a_xne1h07y/noscope/harness/dispatch.py': [Errno 2] No such file or directory
+PASS A01-missing-scope never falls back to selfcheck: the A01 bypass: a PR must be judged as a PR
+PASS A01-unclaimed-branch exits nonzero: exit=2
+FAIL A01-unclaimed-branch names ARV-CLM-005: got: /home/z/.venv/bin/python3: can't open file '/tmp/arv_h01a_xne1h07y/noclaim/harness/dispatch.py': [Errno 2] No such file or directory
+PASS A01-unclaimed-branch never falls back to selfcheck: the A01 bypass: a PR must be judged as a PR
+PASS A01-missing-sheet exits nonzero: exit=2
+FAIL A01-missing-sheet names ARV-PRF: got: /home/z/.venv/bin/python3: can't open file '/tmp/arv_h01a_xne1h07y/nosheet/harness/dispatch.py': [Errno 2] No such file or directory
+PASS A01-missing-sheet never falls back to selfcheck: the A01 bypass: a PR must be judged as a PR
+FAIL positive-claimed-PR dispatches green: exit=2: /home/z/.venv/bin/python3: can't open file '/tmp/arv_h01a_xne1h07y/positive/harness/dispatch.py': [Errno 2] No such file or directory
+FAIL positive-PR is judged as a PR: the gate ran on the named slice, not selfcheck
+FAIL push-selfcheck stays green: exit=2: /home/z/.venv/bin/python3: can't open file '/tmp/arv_h01a_xne1h07y/positive/harness/dispatch.py': [Errno 2] No such file or directory
+FAIL push-selfcheck names itself: the --no-diff main surface is unchanged by H-01a
+FAIL A10-git-failure refuses with ARV-DIFF-001: refused=False code=''
+FAIL A10-no-merge-base refuses with ARV-DIFF-002: refused=True code="diff_paths() got an unexpected keyword argument 'repo'"
+FAIL A10-valid-base returns a list (no exception): refused: diff_paths() got an unexpected keyword argument 'repo'
+
+RED — 11 failure(s): A02-hostile-branch names ARV-DISPATCH-001, A01-missing-scope names ARV-SCOPE-001, A01-unclaimed-branch names ARV-CLM-005, A01-missing-sheet names ARV-PRF, positive-claimed-PR dispatches green, positive-PR is judged as a PR, push-selfcheck stays green, push-selfcheck names itself, A10-git-failure refuses with ARV-DIFF-001, A10-no-merge-base refuses with ARV-DIFF-002, A10-valid-base returns a list (no exception)
+      H-01a: the PR dispatch must fail closed (A01/A02/A10 — PLAN's frozen card)

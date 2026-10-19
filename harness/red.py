@@ -15,7 +15,7 @@ import sys
 REPO = pathlib.Path(__file__).resolve().parents[1]
 RR = REPO / "harness" / "red-records.json"
 TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
-         "harness/tests/test_commands.py")
+         "harness/tests/test_commands.py", "harness/tests/test_gate_dispatch.py")
 
 
 def main() -> int:

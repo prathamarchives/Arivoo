@@ -1,0 +1,4 @@
+Local Phase 2 preflight was not run in this execution environment; no local PostgreSQL client is available here.
+Live branch-protection detail returned HTTP 403 and was not newly verified.
+A separate fresh-context SEV review of this documentation slice has not been run; this Proof Sheet does not claim independent SEV PASS.
+PR CI and this branch’s required-check result are not yet observed at the time of record assembly.

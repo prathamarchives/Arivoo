@@ -6,7 +6,7 @@
 
 **How laws change.** Only the owner changes a law. An agent CAN propose a change in a Question Record. Weakening a law — lowering a threshold, removing a test, reducing a lint level, widening a scope — is itself a violation (LAW-09).
 
-**Provenance.** The original 29 laws come from `context/raw/Arivo Agent Execution Specification.md` Part 4, unchanged in meaning. LAW-30 is an additional owner-directed process law; it does not rewrite or renumber that original set. The F-slice "live at" values are re-mapped to the reconciled phase order (D-016, superseding the F-band).
+**Provenance.** The original 29 laws come from `context/raw/Arivo Agent Execution Specification.md` Part 4, unchanged in meaning. LAW-30 (session 19 part 1: per-slice SEV) and LAW-31 (session 19 part 2: the claims discipline — the ratchet response to the recorded two-agent collision, record 19 §8) are additional owner-directed process laws; they do not rewrite or renumber that original set. The F-slice "live at" values are re-mapped to the reconciled phase order (D-016, superseding the F-band).
 
 ---
 
@@ -86,6 +86,7 @@
 | LAW-28 | Builder and verifier agents MUST NOT read real owner data or secrets. | C5 | Secret scan (redacted isolation check — conditions printed, values never); fixture-only repo; sandbox. | **Phase 1** |
 | LAW-29 | No generative model MAY run inside Arivo's pipeline. | C4 | NG-03 scan | Phase 5 (at enrichment pipeline) |
 | LAW-30 | Every implementation slice MUST receive a separately authored systems-engineering verification after implementation and independent test verification, before merge. The review MUST trace approved owner intent and system requirements through architecture/interfaces to component, integration, system, and validation evidence; list relevant failure modes and not-verified items; it MUST NOT resolve owner questions or weaken constraints. Missing, stale, incomplete, or blocked evidence means STOP. | C5 (record/gate) + C6 (context independence until separately enforced) | H-02: standard-library SEV validator bound to reviewed diff; gate rejects missing/stale/incomplete/blocked reports; known-bads prove the refusals. Fresh-context independence is separately graded and its identity limitation reported honestly. | Phase 3, after H-02 and its known-bads pass |
+| LAW-31 | No consequential change MAY land without an OPEN claim in `CLAIMS.md` whose declared scope covers its diff; two OPEN claims MUST NOT overlap on any non-shared file. Ledger IDs are reserved one at a time through the registry, each exactly previous-max+1. | C5 (the gate) + C2 (no silent cross-agent interference) | The harness gate's claims checks: ARV-CLM-001 (the registry exists and parses, fail-closed), ARV-CLM-002 (scope exclusivity among OPEN claims — the later overlapping claim is refused with the named code), ARV-CLM-003 (reservations unique, gapless, each exactly previous-max+1 of the used set), ARV-CLM-004 (well-formed rows: claim ID, session, agent, branch, scope); known-bad cases prove each refusal. | **Session 19 (the ratchet response to the recorded two-agent collision, record 19 §8/LAW-18): live when the machinery slice's known-bads pass; until then agent-discipline per D-038** |
 
 ---
 

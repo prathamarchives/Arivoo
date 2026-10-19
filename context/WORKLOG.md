@@ -408,3 +408,24 @@ Stage Summary:
 - Unresolved: local preflight; fresh branch-protection observation (API returned 403); independent fresh-context SEV for the documentation slice; CI status on the exact current PR head before owner approval (status evidence is SHA-specific); H-01/H-02 implementation and proof; owner acceptance; Q6–Q12 and D-014 at their named scopes.
 - Next: check all required CI on the exact current PR head before owner authorization; leave draft PR #35 unmerged unless explicitly authorized. After approval, run local preflight at then-current main and execute bounded H-01/H-02 before P3-00/P3-01.
 - Session record: context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md
+
+---
+Task ID: 19
+Agent: Super Z (main, GLM host — session-19 part 2; the two-agent session's reconciliation half)
+Task: Owner turns 18–19 (INT-123/INT-124, D-038): re-establish access + gather all context (turn 18 — the reset environment: new PAT, gh CLI v2.102.0, preflight at e96ee99); then design the repo for multi-agent concurrent operation (turn 19) — while concurrently reconciling the in-flight part-1 branch (the GPT-6 connector's execution-contract workstream, 34 commits in three waves).
+
+Work Log:
+- Preflight at e96ee99: 51/0 + 30/30 + isolation GREEN + 18/18; protection re-observed (THREE required checks); PR #34's post-merge run green — the close-gap closed; the in-flight part-1 branch caught (record 19 §2.2)
+- THE COLLISION (record 19 §8): part 1 pushed 34 commits across three waves during part 2's local authoring; the walls held every unreconciled state out (CI RED at run 39234699360 + three lease-blocked pushes); reconciled by rebasing part 2's intake onto part 1's terminal head, all conflicts merged by hand, both parts' content preserved; part 1's "keep PR #35 unmerged" plan superseded by turn 19 (EXR-08)
+- PR #35 (485a04a): the reconciled foundation — turns 17–19 intake (INT-122..124, D-037/D-038), the execution contract, Q12 registered, the MUT-29 blind-guard found by BOTH parts and repaired in parallel (part 1: 091f39e; part 2: the content-generic re-target)
+- PR #36/CLAIM-001 (9a63579): the multi-agent concurrency protocol — CLAIMS.md born (claim-before-work, scope exclusivity, INT reservation, shared-append class), AGENTS read-order step 3 + binding rule, LAW-31, GLOSSARY, OPERATING-MODEL slice-loop step
+- PR #37/CLAIM-002 (04eae39): the machinery RED-FIRST — five KB-CLM known-bads observed RED (red-01.txt), then harness/claims.py (ARV-CLM-001..005) + gate wiring + 13/13 GREEN; two in-slice repairs found by running the checks on the real registry; the Proof Sheet from 2 run records, byte-identical — LAW-31 LIVE (its known-bads passed in CI, run 39239243662)
+- The close slice (CLAIM-003): record 19 completed as the honest two-part account — including the record-side rebase incident (the second rebase resolved the record conflict to the WRONG side: --ours-in-rebase-is-the-BASE; the merged record briefly lost turns 18–19 verbatim + the collision account — repaired here; the manifest-vs-record section check named as a candidate ratchet)
+
+Stage Summary:
+- Outcome: the repo is a MULTI-AGENT workspace, mechanically enforced — the execution contract (SYS-01..11, P3-00..09, SEV) + the claims registry + its gate checks all landed; every merge three-wall green (runs 39237967003, 39238984928, PR #37's)
+- Evidence: record 19 COMPLETE (§§1–12, two parts, the collision verbatim); CI green at every merge; the claims machinery 13/13 in CI
+- Pointer: record 19 (COMPLETE); CLAIMS.md (the registry's own history carries the founding incident)
+- Unresolved: D-014 + Q6–Q12 (Q11/Q12 NEW — identity + blob gates at the P3-00 schema freeze); H-01/H-02 unbuilt; the local Postgres rig wiped (CI-only harness green this session)
+- Next: session 20 — preflight at the final SHA, then the contract's entry sequence (H-01 → H-02 → P3-00/P3-01), claimable in parallel by any capable agents
+- Session record: context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md

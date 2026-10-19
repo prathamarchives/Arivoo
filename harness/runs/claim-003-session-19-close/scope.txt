@@ -1,0 +1,10 @@
+# CLAIM-003 (session 19 part 2, D-038): the session-19 close — the record's true
+# two-part completion, the STATE exit, the WORKLOG Task 19, the registry's own closes;
+# PLUS the in-slice KB-probe re-anchoring repair (found at the close's own gate run:
+# the probes anchored to CLAIM-001's mutable row and went blind when it closed).
+context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md INT-124/D-038
+STATE.md INT-124/D-038
+context/WORKLOG.md INT-124/D-038
+CLAIMS.md INT-124/D-038
+harness/runs/claim-003-session-19-close INT-124/D-038
+harness/known-bad/ INT-124/D-038

@@ -30,7 +30,6 @@
 # engine parity with the local rig). ADDITIVE ONLY — canonical-layer and
 #   head-tools above remain separate required checks. The harness job was bound
 #   as REQUIRED in session 18 after a green run was observed (record 18 §6).
-# green run being observed, the W-01 stage-2 pattern (D-025/D-035 precedent).
 # Weakening or removing it after binding is a LAW-09 owner decision.
 
 name: verify

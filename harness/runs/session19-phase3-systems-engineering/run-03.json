@@ -1,0 +1,7 @@
+{
+  "command": "GitHub Actions PR run 39236571979 status/detail API snapshot; all three required checks on head e0db481957b17213da619585cafc7d06926caa0a observed success",
+  "exit_code": 0,
+  "commit": "e0db481957b17213da619585cafc7d06926caa0a",
+  "output_sha256": "d02fc905d09c623fd86ce6e0a39719ce249c313811c8d8ce5f3341a26e93ddd3",
+  "recorded_at": "2026-10-19T10:19:37Z"
+}

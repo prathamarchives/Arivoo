@@ -17,21 +17,29 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 
 
 class GitRefusal(Exception):
-    """A failed git operation is a REFUSAL, never an empty diff (H-01a/A10).
+    """A failed or hung git operation is a REFUSAL, never an empty diff (H-01a/A10;
+    H-01a-R for the timeout).
 
     Carries the named code in its message: ARV-DIFF-001 (the git operation
     failed) / ARV-DIFF-002 (no merge-base between the declared base and HEAD —
-    invalid base or insufficient graph history). The gate catches this and
-    refuses; the predecessor returned [] silently, which read as a compliant
-    empty diff (the vacuous-pass defect, reproduced RED in test_gate_dispatch).
+    invalid base or insufficient graph history) / ARV-DIFF-003 (the subprocess
+    timed out — a hung git operation is a named refusal, never an unnamed
+    TimeoutExpired crash). The gate catches this and refuses; the predecessor
+    returned [] silently, which read as a compliant empty diff (the
+    vacuous-pass defect, reproduced RED in test_gate_dispatch).
     """
 
 
 def _git(args: list, repo=None):
-    """Run git, refusing on failure (ARV-DIFF-001) instead of trusting stdout."""
+    """Run git, refusing on failure (ARV-DIFF-001) or a hang (ARV-DIFF-003)."""
     import subprocess
-    r = subprocess.run(["git"] + args, cwd=repo or REPO,
-                       capture_output=True, text=True, timeout=60)
+    try:
+        r = subprocess.run(["git"] + args, cwd=repo or REPO,
+                           capture_output=True, text=True, timeout=60)
+    except subprocess.TimeoutExpired:
+        raise GitRefusal(
+            f"ARV-DIFF-003: git {' '.join(args[:2])} exceeded the 60s timeout — "
+            "a hung git operation is a named refusal, never an unnamed crash (H-01a-R)")
     if r.returncode != 0:
         raise GitRefusal(
             f"ARV-DIFF-001: git {' '.join(args[:2])} failed (exit {r.returncode}): "
@@ -62,10 +70,16 @@ def ensure_merge_base(base: str, repo=None) -> str:
 
     A triple-dot diff with no merge-base is a failure condition, not a no-op:
     refusing here keeps an invalid base or a shallow/incomplete graph from
-    producing a compliant-looking empty diff."""
+    producing a compliant-looking empty diff. A hung merge-base probe is a
+    named refusal too (ARV-DIFF-003, H-01a-R)."""
     import subprocess
-    r = subprocess.run(["git", "merge-base", base, "HEAD"], cwd=repo or REPO,
-                       capture_output=True, text=True, timeout=60)
+    try:
+        r = subprocess.run(["git", "merge-base", base, "HEAD"], cwd=repo or REPO,
+                           capture_output=True, text=True, timeout=60)
+    except subprocess.TimeoutExpired:
+        raise GitRefusal(
+            f"ARV-DIFF-003: git merge-base for base '{base}' exceeded the 60s timeout — "
+            "a hung git operation is a named refusal, never an unnamed crash (H-01a-R)")
     if r.returncode == 1 and not (r.stderr or "").strip():
         # git's own no-merge-base signal: exit 1, empty output
         raise GitRefusal(

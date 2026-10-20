@@ -187,6 +187,58 @@ V_HANG = (
     "time.sleep(600)\n"
 )
 
+# FLOOR-REVIEW-1 (session 23, the H-01b exit item — an independent reviewer
+# breaking the floor with reproducible attacks; B1/B3/B4 are this slice's):
+V_DISCRIMINATING = (
+    # B1: probes the fixture/checkout CONTEXT difference (.git present?). In a
+    # real checkout (the positive side) it prints the fake completion line and
+    # exits 0; in the floor's fixture it prints the expected FAIL protocol and
+    # exits 1 — passing BOTH sides of the two-sided floor while verifying
+    # nothing. The reviewer proved GREEN 30/30 + a green positive side at the
+    # predecessor. The repair seeds a CONTROLLED .git stub into every fixture.
+    "import os, sys\n"
+    "if os.path.isdir('.git'):\n"
+    "    print('canonicalization-layer verifier — 51 checks, 0 failures')\n"
+    "    sys.exit(0)\n"
+    "print('VER-701 FAIL  fake')\n"
+    "print('canonicalization-layer verifier — 51 checks, 1 failures')\n"
+    "sys.exit(1)\n"
+)
+V_SWAP_FIFO = (
+    # B3: a same-user child swapping the driver-owned read-back file for a FIFO
+    # hangs the judge's unbounded read_bytes() at the predecessor. The repair:
+    # O_NONBLOCK|O_NOFOLLOW + open-fd ISREG + a single capped read.
+    "import os, sys\n"
+    "out = os.path.join('..', 'child.out')\n"
+    "try:\n"
+    "    os.unlink(out)\n"
+    "except FileNotFoundError:\n"
+    "    pass\n"
+    "os.mkfifo(out)\n"
+    "print('VER-701 FAIL  fake')\n"
+    "print('canonicalization-layer verifier — 51 checks, 1 failures')\n"
+    "sys.exit(1)\n"
+)
+V_ANCHOR_DELETER = (
+    # B4: case 1's child deletes the trusted base driver (reading the DRIVER's
+    # environ via /proc/<ppid>/environ — run_child sanitizes the child's own
+    # environment, which is exactly why this attack targets the parent); case 2's
+    # integrity() then raises a bare FileNotFoundError that the finally-return
+    # SWALLOWS at the predecessor (RED with no named code for the anchor loss).
+    # The repair: the anchor read raises FloorRefusal ARV-FLOOR-002, named.
+    "import os, sys\n"
+    "try:\n"
+    "    env = open('/proc/%d/environ' % os.getppid(), 'rb').read().decode('utf-8', 'replace')\n"
+    "    for kv in env.split('\\0'):\n"
+    "        if kv.startswith('ARV_FLOOR_BASE_TOOLS='):\n"
+    "            os.unlink(os.path.join(kv.split('=', 1)[1], 'verify_selftest.py'))\n"
+    "except Exception:\n"
+    "    pass\n"
+    "print('VER-701 FAIL  fake')\n"
+    "print('canonicalization-layer verifier — 51 checks, 1 failures')\n"
+    "sys.exit(1)\n"
+)
+
 
 # --------------------------------------------------------------------------
 # the RED-first suite
@@ -425,6 +477,56 @@ class MutationFloorTests(unittest.TestCase):
         self.assertIsNotNone(m, "the driver must print its temp root for auditability")
         self.assertFalse(Path(m.group(1)).exists(),
                          "the temp root survived a failed construction")
+
+    # -- FLOOR-REVIEW-1 (session 23): the independent review's broken findings,
+    #    each with its minimal repro turned into a stable regression ------------
+
+    def test_17_context_discriminating_verifier_must_not_pass_both_sides(self):
+        """FLOOR-REVIEW-1 B1: a verifier that probes the fixture/checkout CONTEXT
+        difference (.git present?) prints the fake completion line in real
+        checkouts and the expected FAIL protocol in fixtures — passing the
+        per-case floor AND the positive side at the predecessor (the reviewer
+        proved GREEN 30/30 + exit 0 on a real tree). The fixture must carry a
+        CONTROLLED .git stub so context probes see the same answer in both
+        contexts — the discriminating verifier then shows its REAL (always-green)
+        behavior to the floor and is refused with ARV-FLOOR-001."""
+        cand = build_candidate(self.td, verifier=V_DISCRIMINATING)
+        r = run_driver(cand, only="MUT-04")
+        self.assertNotEqual(r.returncode, 0,
+                            "the discriminating verifier passed the floor — context is not uniform")
+        self.assertIn("ARV-FLOOR-001", r.stdout + r.stderr)
+
+    def test_18_swapped_readback_fifo_never_hangs_the_judge(self):
+        """FLOOR-REVIEW-1 B3: a same-user child can unlink and swap the driver's
+        read-back file (child.out) for a FIFO — the predecessor's read_bytes()
+        HANGS the judge on the blocking open. The read-back must be bounded and
+        race-resistant (O_NONBLOCK|O_NOFOLLOW + open-fd ISREG + a single capped
+        read): the swapped output is refused, the case fails closed (never a
+        hang), and the driver completes."""
+        cand = build_candidate(self.td, verifier=V_SWAP_FIFO)
+        r = run_driver(cand, only="MUT-04", timeout=90)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("ARV-FLOOR-001", r.stdout + r.stderr,
+                      "the swapped-output case must be a named not-caught, never a hang")
+
+    def test_19_midrun_anchor_loss_is_a_named_refusal(self):
+        """FLOOR-REVIEW-1 B4: a child that deletes the trusted base driver makes
+        the NEXT case's integrity() raise a bare FileNotFoundError — swallowed
+        by the finally-return at the predecessor, surfacing only as
+        ARV-FLOOR-006 'appears 0 times' with no named code for the anchor loss.
+        The anchor read must refuse with a NAMED ARV-FLOOR-002 (the anchor became
+        unreadable mid-run), fail-closed before any further case is judged."""
+        cand = build_candidate(self.td, verifier=V_ANCHOR_DELETER)
+        base = self.td / "base"                 # a DISPOSABLE copy — never the real tools dir
+        base.mkdir()
+        for f in ("verify_selftest.py", "mutation_runner.py"):
+            shutil.copyfile(REPO / "tools" / f, base / f)
+        r = run_driver(cand, only="MUT-04,MUT-13", floor_base=str(base),
+                       extra_env={"ARV_FLOOR_BASE_TOOLS": str(base)})
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("ARV-FLOOR-002", r.stdout + r.stderr)
+        self.assertIn("unreadable mid-run", r.stdout + r.stderr,
+                      "the anchor loss must be a NAMED refusal, never a swallowed exception")
 
 
 if __name__ == "__main__":

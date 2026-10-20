@@ -1,0 +1,52 @@
+test_17_context_discriminating_verifier_must_not_pass_both_sides (__main__.MutationFloorTests.test_17_context_discriminating_verifier_must_not_pass_both_sides)
+FLOOR-REVIEW-1 B1: a verifier that probes the fixture/checkout CONTEXT ... FAIL
+test_18_swapped_readback_fifo_never_hangs_the_judge (__main__.MutationFloorTests.test_18_swapped_readback_fifo_never_hangs_the_judge)
+FLOOR-REVIEW-1 B3: a same-user child can unlink and swap the driver's ... ERROR
+test_19_midrun_anchor_loss_is_a_named_refusal (__main__.MutationFloorTests.test_19_midrun_anchor_loss_is_a_named_refusal)
+FLOOR-REVIEW-1 B4: a child that deletes the trusted base driver makes ... FAIL
+
+======================================================================
+ERROR: test_18_swapped_readback_fifo_never_hangs_the_judge (__main__.MutationFloorTests.test_18_swapped_readback_fifo_never_hangs_the_judge)
+FLOOR-REVIEW-1 B3: a same-user child can unlink and swap the driver's
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 507, in test_18_swapped_readback_fifo_never_hangs_the_judge
+    r = run_driver(cand, only="MUT-04", timeout=90)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 138, in run_driver
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/home/z/.venv/bin/python3', '/home/z/my-project/arivoo/tools/verify_selftest.py', '--repo', '/tmp/arvoo-floor-test-uqu4jj_q/candidate', '--only', 'MUT-04']' timed out after 90 seconds
+
+======================================================================
+FAIL: test_17_context_discriminating_verifier_must_not_pass_both_sides (__main__.MutationFloorTests.test_17_context_discriminating_verifier_must_not_pass_both_sides)
+FLOOR-REVIEW-1 B1: a verifier that probes the fixture/checkout CONTEXT
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 495, in test_17_context_discriminating_verifier_must_not_pass_both_sides
+    self.assertNotEqual(r.returncode, 0,
+AssertionError: 0 == 0 : the discriminating verifier passed the floor — context is not uniform
+
+======================================================================
+FAIL: test_19_midrun_anchor_loss_is_a_named_refusal (__main__.MutationFloorTests.test_19_midrun_anchor_loss_is_a_named_refusal)
+FLOOR-REVIEW-1 B4: a child that deletes the trusted base driver makes
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 527, in test_19_midrun_anchor_loss_is_a_named_refusal
+    self.assertIn("ARV-FLOOR-002", r.stdout + r.stderr)
+AssertionError: 'ARV-FLOOR-002' not found in "floor temp root: /tmp/arivoo-floor-8m1ih00z\nknown-bad self-test — 2 mutations, each must FAIL its named check (child-process floor)\n\nMUT-04 PASS  delete /STATE.md — the current-state index disappears → VER-701 FAILed as required\nfloor manifest: /tmp/arv-floor-manifest-03a0b5ce.json\n\nSELF-TEST RED — verdict RED: 1 case failure(s) + 1 manifest failure(s); codes: []\nresidual boundary: child processes run on the same host with the same OS user as this runner — NOT OS-level sandboxing; a hostile child could in principle kill the judge (the run turns RED, never green); the workflow-definition trust boundary is H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in this interpreter; every case ran in a fresh disposable fixture; integrity was re-verified before every case; the manifest records what actually happened.\n"
+
+----------------------------------------------------------------------
+Ran 3 tests in 90.237s
+
+FAILED (failures=2, errors=1)

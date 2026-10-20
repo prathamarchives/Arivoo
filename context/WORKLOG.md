@@ -494,3 +494,9 @@ Stage Summary:
 - The slice's own catches (all in record 22 §8): the ARV-SIZE-002 split (the card's named module), the KB-CLM-002 probe self-containment (the A11 class, third occurrence), the ARV-CLM-002 row-scope catch from CI, the ARV-DEP-008 import catch (repaired by the STRONGER public CLI surface), the run_floor trim incident, the sandbox /tmp quirk
 - Next: H-01b-F (F-002/F-011/F-012 — disjoint files) and H-01b-CI (F-003/F-004/F-006) separately claimable; H-01c x3 + H-02 design parallelizable per the registry; the card's "independent review tries to break the new mechanism" exit item remains open for the next session
 - Session record: context/extracted/22-ARIVOO-EXECUTION-DIRECTIVE-INTAKE.md §4/§8
+
+## Task 30 (CLAIM-015, session 22) — the session close
+- Task: the honest close after five slices: STATE re-derived (four landed + this close; the exact next action = H-01b-F or H-01b-CI, each with its named first items), record 22 §12 (the session account: twelve catches, every one recorded with its repair; the live-floor green; the remaining card items), the WORKLOG completion
+- The session's headline: A03 is CLOSED with stable regressions — the mutation floor judges every candidate verifier in disposable child processes over bounded no-dereference fixtures with per-case integrity re-verification and a validated completion manifest; main is green with the floor LIVE (post-merge 39403859240)
+- The one red window: the anchored-name bug (43 minutes from the failing post-merge run 39401172275 to the merged repair 87ab16b) — the repair slice's own lessons (the twice-vacuous regression; the bootstrap shim) recorded in §8 catches #11/#12
+- Next: H-01b-F / H-01b-CI (disjoint; H-01b-CI's first items: the -I flip + the shim removal), H-01c x3, H-02 design, P3-M0/P3-K0, P3-00/P3-01 — per the registry, any capable agent

@@ -1,0 +1,1 @@
+- the close slice carries no new behavior: the four landed slices' evidence is in their own proof sheets (claim-011/012/013/014 runs); this sheet records the close-time re-verification only

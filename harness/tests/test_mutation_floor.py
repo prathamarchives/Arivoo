@@ -304,8 +304,20 @@ class MutationFloorTests(unittest.TestCase):
                                extra={"tools/shutil.py": V_SHADOW_PROBE})
         anchored = cand / "tools" / "verify_selftest_anchored.py"
         shutil.copyfile(DRIVER, anchored)
+        # the CI anchor step ALSO copies the runner module (under its real name)
+        # before the floor step runs — the fixture must mirror that or the driver
+        # cannot load its machinery at all (the first draft crashed silently)
+        shutil.copyfile(REPO / "tools" / "mutation_runner.py",
+                        cand / "tools" / "mutation_runner.py")
         r = run_driver(cand, only="MUT-04", floor_base=str(REPO / "tools"),
                        driver_path=anchored)
+        # the floor must actually RUN (the anchored-name repair's own lesson:
+        # the first draft of this test passed VACUOUSLY — the driver refused
+        # ARV-FLOOR-002 before any case, so the marker assertion never engaged)
+        self.assertNotIn("ARV-FLOOR-002", r.stdout + r.stderr,
+                         "the anchored launch must resolve the base counterpart name and RUN")
+        self.assertIn("MUT-04", r.stdout,
+                      "the floor must run its case — a refusal that skips every case is a vacuous pass")
         self.assertFalse((cand / "SHADOW_MARKER.txt").exists(),
                          "the candidate shadow module executed inside the trusted driver")
 

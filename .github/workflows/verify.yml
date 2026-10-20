@@ -115,6 +115,17 @@ jobs:
             # (importlib spec) — the anchored floor must find the BASE's copy there.
             if [ "$f" = "mutation_runner.py" ]; then cp "base/tools/$f" "head/tools/$f"; else cp "base/tools/$f" "head/tools/${f%.py}_anchored.py"; fi
           done
+          # bootstrap shim (the anchored-name repair, CLAIM-014): the BASE's
+          # runner resolves the anchor by the anchored driver's OWN filename
+          # (verify_selftest_anchored.py), which does not exist in base/ under
+          # that name — place a byte-identical alias so the base machinery can
+          # complete its own digest check. All three copies (base original,
+          # alias, anchored head copy) are the same bytes: the check stays
+          # meaningful. Redundant once the fixed runner is ON main; removed in
+          # the H-01b-CI cleanup. The only PR-controllable lever in the
+          # anchored job IS this workflow file — F-003's documented boundary,
+          # demonstrated live (record 22 §8, catch #12).
+          cp "base/tools/verify_selftest.py" "base/tools/verify_selftest_anchored.py"
           echo "sha256 verification (the anchored file IS the base's):"
           for f in verify_canonical_layer.py verify_selftest.py mutation_runner.py isolation_check.py isolation_selftest.py; do
             a=$(sha256sum "base/tools/$f" | cut -d' ' -f1)

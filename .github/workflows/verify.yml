@@ -77,21 +77,44 @@ jobs:
           # origin/main needs a decidable merge-base; a depth-1 checkout
           # cannot prove the base/merge relationship.
           fetch-depth: 0
+      - name: Checkout base (the trusted machinery — H-01b-CI, INT-127/D-041)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: base
+      - name: "Anchor the trusted gate driver from base (fail-closed; sha256-verified — never a candidate substitute)"
+        run: |
+          set -e
+          test -f base/tools/trusted_gate.py || { echo "FAIL: base/tools/trusted_gate.py missing — refusing any candidate-substituted driver (the turn-14 P2: never fall back silently)"; exit 1; }
+          cp base/tools/trusted_gate.py tools/trusted_gate_anchored.py
+          a=$(sha256sum base/tools/trusted_gate.py | cut -d' ' -f1)
+          b=$(sha256sum tools/trusted_gate_anchored.py | cut -d' ' -f1)
+          [ "$a" = "$b" ] || { echo "FAIL: the anchored trusted driver differs from base"; exit 1; }
+          echo "  trusted_gate.py: ${a:0:16}... verified identical to base"
       - name: "Ensure the psql client is present (deterministic provisioning — never asserted from docs, LAW-02)"
         run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
-      - name: "S1 — the real-stack rig: health + the migrations suite (Phase 2 Layer 2.1, D-036)"
-        run: |
-          make harness-health
-          make harness-tests
-      - name: "S4b — THE GATE on the real stack (D-036; H-01a/INT-125/D-039: FAIL-CLOSED DISPATCH — event fields arrive via env, never template-interpolated into the script (A02); a pull request is ALWAYS judged in PR mode — missing scope/claim/sheet is refused by the gate's named codes, never selfchecked away (A01); git failures refuse (A10)). Harness is REQUIRED per session 18 §6."
+      - name: "S1 — the real-stack rig health (Phase 2 Layer 2.1, D-036)"
+        run: make harness-health
+      - name: "S1b — TRUSTED required suites (H-01b-CI, F-004): the BASE's gate.TESTS selection runs the candidate's suite files directly — candidate Make recipes are never the evidence (a gutted Makefile cannot fabricate 'suites ran')"
         env:
           # untrusted event metadata travels through the ENVIRONMENT only — the
-          # dispatcher validates it as an identifier before anything executes
+          # driver validates it as identifiers before anything executes (A02)
           ARV_EVENT_NAME: ${{ github.event_name }}
           ARV_PR_HEAD: ${{ github.head_ref }}
         run: |
           git fetch origin main
-          python3 harness/dispatch.py
+          python3 -I tools/trusted_gate_anchored.py --repo "$PWD" --base "$PWD/base" --phase suites
+      - name: "S4b — the candidate's own gate (D-036; H-01a/INT-125/D-039: FAIL-CLOSED DISPATCH). Since H-01b-CI this step is EVIDENCE, never the only authority: the trusted S1b/S4c path carries the required-check decision even if this candidate-controlled gate is gutted (F-006)."
+        env:
+          ARV_EVENT_NAME: ${{ github.event_name }}
+          ARV_PR_HEAD: ${{ github.head_ref }}
+        run: python3 harness/dispatch.py
+      - name: "S4c — TRUSTED gate re-run (H-01b-CI, F-006 backstop): the BASE's gate machinery, re-rooted over this candidate tree, re-runs the PR-mode obligations (scope/size/claims/red/lint/deps/known-bads/proofsheet) over the candidate diff — the candidate's harness package and its known-bad registry never execute in this step"
+        env:
+          ARV_EVENT_NAME: ${{ github.event_name }}
+          ARV_PR_HEAD: ${{ github.head_ref }}
+        run: |
+          python3 -I tools/trusted_gate_anchored.py --repo "$PWD" --base "$PWD/base" --phase gate --diff-ref origin/main
 
   canonical-layer:
     runs-on: ubuntu-latest
@@ -115,17 +138,10 @@ jobs:
             # (importlib spec) — the anchored floor must find the BASE's copy there.
             if [ "$f" = "mutation_runner.py" ]; then cp "base/tools/$f" "head/tools/$f"; else cp "base/tools/$f" "head/tools/${f%.py}_anchored.py"; fi
           done
-          # bootstrap shim (the anchored-name repair, CLAIM-014): the BASE's
-          # runner resolves the anchor by the anchored driver's OWN filename
-          # (verify_selftest_anchored.py), which does not exist in base/ under
-          # that name — place a byte-identical alias so the base machinery can
-          # complete its own digest check. All three copies (base original,
-          # alias, anchored head copy) are the same bytes: the check stays
-          # meaningful. Redundant once the fixed runner is ON main; removed in
-          # the H-01b-CI cleanup. The only PR-controllable lever in the
-          # anchored job IS this workflow file — F-003's documented boundary,
-          # demonstrated live (record 22 §8, catch #12).
-          cp "base/tools/verify_selftest.py" "base/tools/verify_selftest_anchored.py"
+          # the bootstrap shim (CLAIM-014) is REMOVED (H-01b-CI part 2b): the base's
+          # runner resolves the anchored driver's counterpart name itself (the
+          # _anchored suffix stripped — live since 87ab16b); the byte-identical
+          # alias in base/tools was redundant from that moment.
           echo "sha256 verification (the anchored file IS the base's):"
           for f in verify_canonical_layer.py verify_selftest.py mutation_runner.py isolation_check.py isolation_selftest.py; do
             a=$(sha256sum "base/tools/$f" | cut -d' ' -f1)
@@ -134,7 +150,7 @@ jobs:
             echo "  $f: ${a:0:16}... verified identical to base"
           done
       - name: "Verify the canonical layer — base-anchored judge over the candidate documents (check count printed by the tool)"
-        run: python3 tools/verify_canonical_layer_anchored.py
+        run: python3 -I tools/verify_canonical_layer_anchored.py
         working-directory: head
       - name: "Candidate-verifier floor — the BASE's 30-mutation suite judged against the CANDIDATE's verifier (D-035: the coordinated-weakening floor; H-01b/INT-127/D-041: the TRUSTED CHILD-PROCESS floor — activates AT MERGE: the anchored judge is the BASE's driver, so this PR's head still runs the predecessor form; the ARV_FLOOR_BASE_TOOLS anchor + the mutation_runner.py anchored copy land HERE so the merged base turns this step into the trusted child-process floor; the python3 -I isolated launch flips on in H-01b-CI's launch-hardening slice — it cannot flip in the same PR that changes the base driver, or the OLD base judge breaks at this PR's head: the activation's own chicken-and-egg, caught by CI and recorded in record 22 §8)"
         env:
@@ -143,15 +159,15 @@ jobs:
           # driver re-verifies its own digest against this base copy per case;
           # the predecessor driver ignores it (inert at the PR head)
           ARV_FLOOR_BASE_TOOLS: ${{ github.workspace }}/base/tools
-        run: python3 tools/verify_selftest_anchored.py
+        run: python3 -I tools/verify_selftest_anchored.py
         working-directory: head
       - name: "Isolation check — base-anchored judge over the candidate tree (CI mode; W-03, LAW-28)"
         run: |
           test -f tools/isolation_check_anchored.py
-          python3 tools/isolation_check_anchored.py --ci
+          python3 -I tools/isolation_check_anchored.py --ci
         working-directory: head
-      - name: "Candidate-isolation floor — the BASE's 18-case matrix judged against the CANDIDATE's checker (D-035)"
-        run: python3 tools/isolation_selftest_anchored.py
+      - name: "Candidate-isolation floor — the BASE's 24-case matrix (grown by PR #51) judged against the CANDIDATE's checker (D-035; -I per H-01b-CI part 2b)"
+        run: python3 -I tools/isolation_selftest_anchored.py
         working-directory: head
 
   head-tools:

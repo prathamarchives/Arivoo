@@ -1,0 +1,31 @@
+# red-01 — the FLOOR-REVIEW-1 B2 repro at the OLD launch vs the -I flip (H-01b-CI part 2)
+# candidate: tools/uuid.py (import-time payload patches re + writes a marker) + a ZERO-OUTPUT
+# verify_canonical_layer.py (exit 0, no output — the A03 vacuous form that must NEVER pass)
+
+$ /home/z/.venv/bin/python3 tools/verify_selftest_anchored.py --only MUT-04
+--- rc=1
+floor temp root: /tmp/arivoo-floor-b_vrsuv4
+
+t_anchored.py", line 565, in self_test
+    return runner.run_floor(
+           ^^^^^^^^^^^^^^^^^
+  File "/tmp/b2-repro-uqsn1fl8/head/tools/mutation_runner.py", line 407, in run_floor
+    "run_id": str(uuid.uuid4()),
+                  ^^^^^^^^^^
+AttributeError: module 'uuid' has no attribute 'uuid4'
+
+$ /home/z/.venv/bin/python3 -I tools/verify_selftest_anchored.py --only MUT-04
+--- rc=1
+floor temp root: /tmp/arivoo-floor-hgb8hs90
+known-bad self-test — 1 mutations, each must FAIL its named check (child-process floor)
+
+MUT-04 FAIL  delete /STATE.md — the current-state index disappears → not caught (without the expected FAIL line and exit 0) — a vacuous or evasive pass is refused (ARV-FLOOR-001)
+floor manifest: /tmp/arv-floor-manifest-8e5c1919.json
+
+SELF-TEST RED — verdict RED: 1 case failure(s) + 0 manifest failure(s); codes: ['FLOOR-001']
+residual boundary: child processes run on the same host with the same OS user as this runner — NOT OS-level sandboxing; a hostile child could in principle kill the judge (the run turns RED, never green); the workflow-definition trust boundary is H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in this interpreter; every case ran in a fresh disposable fixture; integrity was re-verified before every case; the manifest records what actually happened. FLOOR-REVIEW-1 sharpening (session 23): the manifest artifact is a RECORD, not a tamper-proof store — a surviving same-user daemon can overwrite it after the run (CI consumes exit codes; no process-group kill or RLIMIT_NPROC today); fixture context is seeded uniform for the .git channel — any OTHER environmental difference a candidate can probe (env, mounts, hostname, runner files) remains a discrimination channel, stated and never claimed closed
+
+
+======================================================================
+verdict: OLD launch — the shadow payload EXECUTED IN THE TRUSTED JUDGE (candidate code with full judge authority: the FLOOR-REVIEW-1 B2/F-005 hole, live) = True; exit rc=1 with this simplified payload (the FULL GREEN-30/30 forgery is the reviewer's preserved evidence under floor-review/ — the authority breach, not its maximal exploitation, is this repro's claim)
+verdict: -I launch refused the same candidate = True; the shadow executed = False

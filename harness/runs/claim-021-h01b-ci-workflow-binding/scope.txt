@@ -1,0 +1,4 @@
+# CLAIM-021 — H-01b-CI part 2b: THE WORKFLOW BINDING (the -I flips, the shim removal, the trusted S1b/S4c steps)
+CLAIMS.md
+.github/workflows/verify.yml INT-127/D-041
+harness/runs/claim-021-h01b-ci-workflow-binding INT-127/D-041

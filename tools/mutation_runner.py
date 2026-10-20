@@ -40,7 +40,13 @@ BOUNDARY = (
     "judge (the run turns RED, never green); the workflow-definition trust boundary is "
     "H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in "
     "this interpreter; every case ran in a fresh disposable fixture; integrity was "
-    "re-verified before every case; the manifest records what actually happened."
+    "re-verified before every case; the manifest records what actually happened. "
+    "FLOOR-REVIEW-1 sharpening (session 23): the manifest artifact is a RECORD, not a "
+    "tamper-proof store — a surviving same-user daemon can overwrite it after the run "
+    "(CI consumes exit codes; no process-group kill or RLIMIT_NPROC today); fixture "
+    "context is seeded uniform for the .git channel — any OTHER environmental difference "
+    "a candidate can probe (env, mounts, hostname, runner files) remains a discrimination "
+    "channel, stated and never claimed closed"
 )
 
 COMPLETION_RE = re.compile(
@@ -59,8 +65,31 @@ class FloorRefusal(Exception):
 
 
 def _read_capped(path: Path, cap: int = READ_CAP) -> tuple[str, bool]:
-    data = path.read_bytes()
-    return data[:cap].decode("utf-8", "replace"), len(data) > cap
+    """FLOOR-REVIEW-1 B3 (session 23): bounded, race-resistant read-back. The
+    child WRITES these files, but a same-user child can also unlink/swap them
+    after it exits — at the predecessor an unbounded read_bytes() HUNG the
+    judge on a FIFO swap and read a 200 MB swapped file whole. O_NONBLOCK |
+    O_NOFOLLOW + open-fd ISREG: a symlink swap is refused, a FIFO/device swap
+    is refused without blocking on the open, and the read is a single capped
+    pass. A refused read-back counts as truncated-EMPTY output — fail-closed:
+    a case whose evidence cannot be read can only fail, never pass."""
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_NONBLOCK
+                     | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0))
+    except OSError:
+        return "", True
+    try:
+        if not statmod.S_ISREG(os.fstat(fd).st_mode):
+            raise OSError("not a regular file")
+        with os.fdopen(fd, "rb") as fh:
+            data = fh.read(cap + 1)
+        return data[:cap].decode("utf-8", "replace"), len(data) > cap
+    except OSError:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+        return "", True
 
 
 def _open_regular_nofollow(path: Path):
@@ -176,6 +205,20 @@ def build_fixture(entries: list[dict], dest: Path) -> None:
                 "the corpus source changed under the run (content digest mismatch during fixture copy) — refusing to judge mutated input",
             )
         out.write_bytes(data)
+    # FLOOR-REVIEW-1 B1 (session 23): fixture/checkout CONTEXT UNIFORMITY. The
+    # independent review's discriminating verifier (a `.git` probe) passed BOTH
+    # sides of the two-sided floor: fixtures had no .git, real checkouts do.
+    # The fixture now carries a CONTROLLED .git stub — never the candidate's
+    # own .git (SKIP_DIRS keeps that untrusted dir out of the corpus and it is
+    # never copied). A context probe that answers "real checkout" in CI now
+    # answers the same inside the fixture, so the per-case protocol observes
+    # the candidate's actual behavior. Any OTHER environmental-difference
+    # channel remains a stated residual (BOUNDARY carries it, never claimed).
+    gitdir = dest / ".git"
+    (gitdir / "objects").mkdir(parents=True, exist_ok=True)
+    (gitdir / "refs").mkdir(exist_ok=True)
+    (gitdir / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
+    (gitdir / "config").write_text("[core]\n\trepositoryformatversion = 0\n", encoding="utf-8")
 
 
 def _rlimit_preexec() -> None:  # pragma: no cover — runs in the forked child
@@ -319,16 +362,35 @@ def run_floor(cases: list, cand_root: Path, *, driver_path: Path,
 
     def integrity() -> list[dict]:
         if anchored:
-            if hashlib.sha256((base / base_name).read_bytes()).hexdigest() != driver_sha:
+            # FLOOR-REVIEW-1 B4 (session 23): the anchor reads are NAMED
+            # refusals — at the predecessor a FileNotFoundError here escaped
+            # as a bare exception, swallowed by the finally-return with no
+            # code for the anchor loss. Fail-closed WITH the code.
+            try:
+                driver_bytes = (base / base_name).read_bytes()
+            except OSError:
+                raise FloorRefusal(
+                    "ARV-FLOOR-002",
+                    "the trusted base driver became unreadable mid-run — refusing to continue (fail-closed, never a swallowed exception)",
+                ) from None
+            if hashlib.sha256(driver_bytes).hexdigest() != driver_sha:
                 raise FloorRefusal(
                     "ARV-FLOOR-002",
                     "the anchored driver's digest no longer matches the trusted base copy — refusing to continue",
                 )
-            if sibling_module is not None and hashlib.sha256((base / sibling_module.name).read_bytes()).hexdigest() != sibling_sha:
-                raise FloorRefusal(
-                    "ARV-FLOOR-002",
-                    "the anchored runner module's digest no longer matches the trusted base copy — refusing to continue",
-                )
+            if sibling_module is not None:
+                try:
+                    sibling_bytes = (base / sibling_module.name).read_bytes()
+                except OSError:
+                    raise FloorRefusal(
+                        "ARV-FLOOR-002",
+                        "the trusted runner module became unreadable mid-run — refusing to continue (fail-closed, never a swallowed exception)",
+                    ) from None
+                if hashlib.sha256(sibling_bytes).hexdigest() != sibling_sha:
+                    raise FloorRefusal(
+                        "ARV-FLOOR-002",
+                        "the anchored runner module's digest no longer matches the trusted base copy — refusing to continue",
+                    )
         current = enumerate_corpus(cand_root)
         if corpus_digest(current) != baseline_digest:
             raise FloorRefusal(

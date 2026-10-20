@@ -1,0 +1,6 @@
+# CLAIM-017 — H-01b-R2: the FLOOR-REVIEW-1 repairs (B1 context uniformity, B3 bounded read-back, B4 named anchor loss)
+CLAIMS.md
+tools/mutation_runner.py INT-127/D-041
+harness/tests/test_mutation_floor.py INT-127/D-041
+harness/red-records.json INT-127/D-041
+harness/runs/claim-017-h01b-r2-floor-repairs INT-127/D-041

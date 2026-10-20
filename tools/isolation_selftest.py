@@ -69,16 +69,120 @@ CI_LEGIT = {
 }
 
 
-def _fixture() -> Path:
-    """A synthetic repository: the real tree (minus .git), re-initialized as a fresh
-    git repo with all files staged, so ls-files and remote probes operate on real
-    tracked content. Synthetic mutations are applied per-case on top of this."""
+# ---------------------------------------------------------------- H-01b-F (session 23)
+# The fixture builder's own contract (F-011/F-012): bounded, no-dereference,
+# sanitized — the mutation_runner contract family, kept SELF-CONTAINED because
+# this suite runs as the BASE-anchored judge: importing ANY module from the
+# candidate tree (e.g. tools/mutation_runner.py) would execute candidate code
+# inside the trusted judge — the F-005 class. Cleanup is established BEFORE
+# construction starts and runs even when construction fails; the refusal is a
+# fixed diagnostic + the cause's class name only (a secret-shaped FILENAME is
+# value material — F-012: it must never reach stdout/stderr).
+FIX_PER_FILE_BUDGET = 8 * 1024 * 1024
+FIX_TOTAL_BUDGET = 192 * 1024 * 1024
+FIX_COUNT_BUDGET = 5000
+FIX_SKIP_DIRS = {".git", "__pycache__", ".pg"}
+_FIX_REFUSAL = ("fixture construction refused: the source tree contains a non-regular "
+               "or unreadable entry, or a copy budget was exceeded (F-011) — sanitized: "
+               "no path, no filename, no raw error text (F-012)")
+
+
+class FixtureBuildError(Exception):
+    """The sanitized construction refusal: the message is fixed; the cause's
+    CLASS NAME travels, its message/path/filename NEVER."""
+
+
+def _open_regular_nofollow(path: Path) -> int:
+    """Race-resistant bounded-open (the mutation_runner contract family):
+    symlinks refused (O_NOFOLLOW), the OPEN fd re-verified ISREG. The fd pins
+    the inode: a same-name swap after open cannot redirect the copy."""
+    fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0))
+    try:
+        if not statmod.S_ISREG(os.fstat(fd).st_mode):
+            raise OSError("not a regular file")
+    except Exception:
+        os.close(fd)
+        raise
+    return fd
+
+
+def _copy_bounded(src: Path, dst: Path, per_file: int, total: int, count: int) -> None:
+    """Walk `src` and copy it into `dst`, bounded and WITHOUT dereference:
+    symlinked directories are never traversed; symlinks and every other
+    non-regular entry are REFUSED (never copied, never followed — F-011); the
+    copy is capped per-file/total/count; a source that changes under the walk
+    refuses. Raises FixtureBuildError on any refusal (sanitized message)."""
+    seen = 0
+    walked = 0
+    for dirpath, dirnames, filenames in os.walk(src, followlinks=False):
+        kept = []
+        for d in sorted(dirnames):
+            if d in FIX_SKIP_DIRS:
+                continue
+            if (Path(dirpath) / d).is_symlink():      # a symlinked directory is never traversed
+                raise FixtureBuildError(_FIX_REFUSAL)
+            kept.append(d)
+        dirnames[:] = kept
+        rel_dir = Path(dirpath).relative_to(src)
+        (dst / rel_dir).mkdir(parents=True, exist_ok=True)
+        for fn in sorted(filenames):
+            full = Path(dirpath) / fn
+            try:
+                st = full.lstat()
+            except OSError:
+                raise FixtureBuildError(_FIX_REFUSAL) from None
+            if not statmod.S_ISREG(st.st_mode):
+                raise FixtureBuildError(_FIX_REFUSAL) from None   # never dereferenced, never opened
+            if st.st_size > per_file:
+                raise FixtureBuildError(_FIX_REFUSAL) from None
+            walked += st.st_size
+            if walked > total:
+                raise FixtureBuildError(_FIX_REFUSAL) from None
+            seen += 1
+            if seen > count:
+                raise FixtureBuildError(_FIX_REFUSAL) from None
+            try:
+                fd = _open_regular_nofollow(full)
+            except OSError:
+                raise FixtureBuildError(_FIX_REFUSAL) from None
+            try:
+                with os.fdopen(fd, "rb") as fh:
+                    data = fh.read(per_file + 1)
+            except OSError:
+                raise FixtureBuildError(_FIX_REFUSAL) from None
+            if len(data) != st.st_size or len(data) > per_file:
+                raise FixtureBuildError(_FIX_REFUSAL) from None   # changed under the walk
+            (dst / rel_dir / fn).write_bytes(data)
+
+
+def _fixture(source: Path | None = None, *, per_file: int = FIX_PER_FILE_BUDGET,
+             total: int = FIX_TOTAL_BUDGET, count: int = FIX_COUNT_BUDGET) -> Path:
+    """A synthetic repository: the source tree (default: the real repo), copied
+    BOUNDED and WITHOUT dereference into a fresh git repo with all files
+    staged, so ls-files and remote probes operate on real tracked content.
+    Synthetic mutations are applied per-case on top of this.
+
+    H-01b-F (F-011/F-012): cleanup is established BEFORE construction starts
+    and runs even when construction ITSELF fails; the failure is sanitized —
+    a fixed diagnostic + the cause's class name only, never a path, a
+    filename, a raw error or a traceback. `source`/budget overrides exist so
+    the builder cases can prove this contract against poisoned sources."""
+    src = Path(source) if source is not None else REPO
     td = Path(tempfile.mkdtemp(prefix="arivoo-iso-"))
-    fix = td / "repo"
-    shutil.copytree(REPO, fix, ignore=shutil.ignore_patterns(".git", "__pycache__"))
-    subprocess.run(["git", "init", "-q"], cwd=fix, check=True, capture_output=True)
-    subprocess.run(["git", "add", "-A"], cwd=fix, check=True, capture_output=True)
-    return fix
+    try:
+        fix = td / "repo"
+        _copy_bounded(src, fix, per_file, total, count)
+        subprocess.run(["git", "init", "-q"], cwd=fix, check=True, capture_output=True)
+        subprocess.run(["git", "add", "-A"], cwd=fix, check=True, capture_output=True)
+        return fix
+    except Exception as exc:
+        # F-011: the cleanup scope began at mkdtemp — a failed construction
+        # still cleans up. F-012: the refusal carries the cause's CLASS only.
+        shutil.rmtree(td, ignore_errors=True)
+        raise FixtureBuildError(
+            f"fixture construction refused ({type(exc).__name__}) — "
+            "sanitized: no path or raw error is printed by design"
+        ) from None
 
 
 def _run_checker(fix: Path, args: list[str], case_env: dict[str, str]) -> tuple[int, str, str]:

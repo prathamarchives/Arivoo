@@ -75,7 +75,8 @@ REPO = _repo_root()
 TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          "harness/tests/test_commands.py", "harness/tests/test_gate_dispatch.py",
          "harness/tests/test_mutation_floor.py",
-         "harness/tests/test_trusted_gate.py")
+         "harness/tests/test_trusted_gate.py",
+         "harness/tests/test_claims_paths.py")
 
 
 def run_cmd(cmd: list) -> subprocess.CompletedProcess:
@@ -245,7 +246,12 @@ def main() -> int:
             fails += scope.check_size(stats)
     print("claims registry (LAW-31, D-038 — the collision's ratchet):")
     fails += claims.check_registry()
-    if a.diff and not a.no_diff and slice_name not in ("main-selfcheck",):
+    if a.diff and not a.no_diff:
+        # F-008 (H-01c-claims, session 23): the PR mode is the TRUSTED
+        # invocation itself (--diff set by dispatch or the trusted driver) —
+        # the contributor-selected slice LABEL never disables claim enforcement.
+        # The predecessor exempted a slice NAMED main-selfcheck: a PR whose
+        # branch claimed that label skipped its open-claim and coverage checks.
         if pr_diff is None:
             print("NOTE ARV-CLM-000: the diff was refused above (ARV-DIFF-001/002/003) — the branch-claim coverage check cannot run on an invalid diff; the refusal above is the consolidated disposition")
         else:

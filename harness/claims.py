@@ -123,6 +123,24 @@ def _print_fail(code: str, msg: str, repair: str) -> None:
     print(f"      repair: {repair}")
 
 
+def _closed_ids(text: str) -> set:
+    """The claim IDs of the Closed table (first cell per row). H-01c-claims:
+    the WHOLE registry is swept — the diff-scoped checks missed the
+    both-tables drift for three PRs (CLAIM-007, record 22 §2)."""
+    m = re.search(r"^## Closed claims\s*$", text, re.M)
+    if not m:
+        return set()
+    ids = set()
+    for ln in text[m.end():].splitlines():
+        s = ln.strip()
+        if not s.startswith("|") or set(s) <= {"|", "-", " ", ":"}:
+            continue
+        cells = _cells(s)
+        if cells and cells[0].strip().lower() != "claim" and not cells[0].startswith("*"):
+            ids.add(cells[0].strip())
+    return ids
+
+
 def check_registry(repo: pathlib.Path = REPO) -> list:
     """ARV-CLM-001..004 over the registry's OPEN table. Returns the fail codes."""
     fails = []
@@ -137,9 +155,17 @@ def check_registry(repo: pathlib.Path = REPO) -> list:
                     "restore the registry table: | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |")
         return ["ARV-CLM-001"]
     rows = _open_rows(text)
+    closed_ids = _closed_ids(text)
     lmax = _ledger_max(repo)
     seen_res: dict = {}
     for r in rows:
+        # ARV-CLM-006 — registry-wide duplicate detection (H-01c-claims): an
+        # ID in BOTH tables is drift; the diff-scoped checks can never see it
+        if r["claim"] in closed_ids:
+            _print_fail("ARV-CLM-006",
+                        f"{r['claim']}: present in BOTH the open and closed tables — registry drift (the CLAIM-007 class: a merged claim's stale open row surviving diff-scoped checks)",
+                        "reconcile the registry through the rule-4 protocol: append the closed row and retire the open row in the next slice's PR, recording the reconciliation")
+            fails.append("ARV-CLM-006")
         # ARV-CLM-004 — well-formedness
         blanks = [k for k in ("claim", "session", "agent", "branch", "scope") if not r[k]]
         want = "slice/" + r["claim"].strip().lower() + "-"

@@ -15,6 +15,7 @@ building stops.
 import importlib.util
 import json
 import pathlib
+import re
 
 SLICE = "known-bad-probe"  # the scratch slice the probe declaration lives under
 
@@ -196,3 +197,26 @@ def kb_clm_malformed(copy: pathlib.Path) -> None:
 def kb_clm_unclaimed(copy: pathlib.Path) -> None:
     _load(copy, "harness.claims").check_branch_claim(
         "slice/claim-777-unclaimed-probe", ["docs/unrelated/file.txt"])
+
+
+@case("KB-SCOPE-006", "a SIBLING-PREFIX path against a file declaration (README.md vs README.md.unrelated)",
+      "ARV-SCOPE-002")
+def kb_scope_sibling(copy: pathlib.Path) -> None:
+    _load(copy, "harness.scope").check_scope(["README.md.unrelated"], SLICE)
+
+
+@case("KB-CLM-006", "a claim ID present in BOTH the open and closed tables (registry drift)",
+      "ARV-CLM-006")
+def kb_clm_dup(copy: pathlib.Path) -> None:
+    p = copy / "CLAIMS.md"
+    text = p.read_text(encoding="utf-8")
+    m = re.search(r"^## Open claims\s*$", text, re.M)
+    assert m, "the registry must carry an Open table for this probe"
+    m2 = re.search(r"^\| (CLAIM-[A-Za-z0-9-]+) \|", text[m.end():], re.M)
+    assert m2, "the registry must carry an open row for this probe"
+    dup = m2.group(1)
+    mc = re.search(r"^## Closed claims\s*$", text, re.M)
+    assert mc, "the registry must carry a Closed table for this probe"
+    probe = text[:mc.end()] + f"\n| {dup} | duplicate drift row | 2026-10-20 | probe |\n" + text[mc.end():]
+    p.write_text(probe, encoding="utf-8")
+    _load(copy, "harness.claims").check_registry()

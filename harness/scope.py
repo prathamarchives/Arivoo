@@ -110,33 +110,76 @@ def ensure_merge_base(base: str, repo=None) -> str:
 
 
 def diff_paths(base: str, repo=None) -> list:
-    """Changed paths (git diff base...HEAD), for the scope check. Fail-closed (A10)."""
+    """Changed paths (git diff base...HEAD), for the scope check. Fail-closed (A10).
+    H-01c-claims (F-001, session 23): MACHINE-SAFE identity — NUL-delimited
+    records (a space/unicode/newline name arrives as exact bytes, never git's
+    human rendering: quoted and octal-escaped), rename detection ON so BOTH
+    endpoints are in the identity (the old name is part of what changed:
+    --name-only ever showed only the destination)."""
     ensure_merge_base(base, repo)
-    return [l for l in _git(["diff", "--name-only", f"{base}...HEAD"], repo).stdout.splitlines() if l]
+    out = _git(["diff", "--name-status", "-z", "--find-renames", f"{base}...HEAD"], repo).stdout
+    paths: list[str] = []
+    parts = out.split("\0")
+    i = 0
+    while i < len(parts):
+        rec = parts[i]
+        if not rec:
+            i += 1
+            continue
+        status = rec[0:1]
+        npaths = 2 if status in ("R", "C") else 1   # rename/copy records carry BOTH endpoints
+        for j in range(1, npaths + 1):
+            if i + j < len(parts) and parts[i + j]:
+                paths.append(parts[i + j])
+        i += 1 + npaths
+    seen, uniq = set(), []
+    for p in paths:
+        if p not in seen:
+            seen.add(p)
+            uniq.append(p)
+    return uniq
 
 
 def diff_stats(base: str, repo=None) -> list:
     """Per-path added lines, honestly classified: SOURCE = .py non-test; TEST =
     test_*.py; MIGRATION = 1-per-slice; everything else = DATA (evidence
     artifacts — not source lines, but still gated by the SCOPE check).
-    Fail-closed (A10): a failed diff refuses, never a compliant empty one."""
+    Fail-closed (A10): a failed diff refuses, never a compliant empty one.
+    H-01c-claims (F-001, session 23): NUL-delimited records — the human
+    numstat format QUOTES exotic names (undercounting stats against the
+    canonical identity); a rename/copy record carries BOTH endpoints after an
+    empty in-record path field (probed live: '0\t0\t\0old\0new\0')."""
     ensure_merge_base(base, repo)
-    r = _git(["diff", "--numstat", f"{base}...HEAD"], repo)
-    out = []
-    for line in r.stdout.splitlines():
-        parts = line.split("\t")
-        if len(parts) == 3:
-            add = int(parts[0]) if parts[0].isdigit() else 0
-            path = parts[2]
+    out = _git(["diff", "--numstat", "-z", "--find-renames", f"{base}...HEAD"], repo).stdout
+    result = []
+    parts = out.split("\0")
+    i = 0
+    while i < len(parts):
+        rec = parts[i]
+        if not rec:
+            i += 1
+            continue
+        i += 1
+        fields = rec.split("\t")
+        add = int(fields[0]) if fields and fields[0].lstrip("-").isdigit() else 0
+        def emit(path: str) -> None:
             if TEST_RE.search(path):
-                out.append({"path": path, "src_lines": 0, "test_lines": add, "fixture_lines": 0})
+                result.append({"path": path, "src_lines": 0, "test_lines": add, "fixture_lines": 0})
             elif MIGRATION_RE.match(path):
-                out.append({"path": path, "src_lines": 0, "test_lines": 0, "fixture_lines": 0})
+                result.append({"path": path, "src_lines": 0, "test_lines": 0, "fixture_lines": 0})
             elif SOURCE_RE.search(path):
-                out.append({"path": path, "src_lines": add, "test_lines": 0, "fixture_lines": 0})
+                result.append({"path": path, "src_lines": add, "test_lines": 0, "fixture_lines": 0})
             else:
-                out.append({"path": path, "src_lines": 0, "test_lines": 0, "fixture_lines": 0})
-    return out
+                result.append({"path": path, "src_lines": 0, "test_lines": 0, "fixture_lines": 0})
+        inline_path = fields[2] if len(fields) > 2 else ""
+        if inline_path:
+            emit(inline_path)
+        else:
+            for _ in range(2):                 # rename/copy: BOTH endpoints follow
+                if i < len(parts) and parts[i]:
+                    emit(parts[i])
+                i += 1
+    return result
 
 
 # LAW-24: only adapters may touch time/IDs/randomness.
@@ -197,7 +240,12 @@ def check_scope(diff_paths: list, slice_name: str) -> list:
     for path in diff_paths:
         matched = None
         for prefix in decl:
-            if path == prefix or path.startswith(prefix + "/") or path.startswith(prefix):
+            # H-01c-claims (F-001, session 23): EXPLICIT file/directory
+            # semantics — a path matches a declaration only by exact equality
+            # or as a directory-boundary descendant. The predecessor's third
+            # clause (raw startswith) accepted SIBLING PREFIXES: a declaration
+            # for README.md covered README.md.unrelated.
+            if path == prefix or path.startswith(prefix + "/"):
                 matched = prefix
                 break
         if matched is None:

@@ -106,5 +106,14 @@
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice)."
+  },
+  "harness/tests/test_claims_paths.py": {
+    "current_sha256": "1697dd3ed75876122e39e0188d5eacb2d9cb9fd6b880f135c078eb6fb72f86e9",
+    "amendments": [
+      {
+        "note": "FIXTURE CORRECTIONS (LAW-11, assertions unchanged \u2014 two test fixtures were wrong, not the code): test_01's declaration must live at REPO/harness/runs/<slice>/scope.txt (the first draft put it at a bare decl/ path and the ARV-SCOPE-001 no-declaration refusal masked the sibling-prefix assertion); test_03's renamed file must exist in the BASE commit (an add-then-rename chain collapses to a plain add and carries no rename record \u2014 git semantics, probed live). Both re-observed: the five RED assertions hold at the predecessor's code for the sibling-prefix, exotic-name, and exemption reasons; green at the implementation."
+      }
+    ],
+    "red_evidence": "RED-FIRST (H-01c-claims, session 23): NEW suite harness/tests/test_claims_paths.py \u2014 all five cases observed RED at the predecessor 00f3453 for their named reasons: test_01 the sibling-prefix collision (README.md.unrelated slipped past a README.md declaration through the raw startswith), test_02 the human-format diff mangle (a unicode/space path arrived as git's QUOTED-AND-OCTAL-ESCAPED rendering, exact bytes lost), test_03 the rename identity (only the new endpoint present), test_04 the main-selfcheck slice-name exemption still in the gate source, test_05 the both-tables duplicate undetected (the CLAIM-007 drift class)."
   }
 }

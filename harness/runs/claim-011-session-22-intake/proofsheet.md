@@ -16,7 +16,8 @@
 - - the live-API evidence (protection/PR/run states, the arivodesign observation) is snapshot-at-write — re-observe at preflight (INT-104)
 - - no fresh technical verifier and no SEV for this intake slice — the pre-H-02 discipline, the honest gap stated in record 20 §8; it closes when H-02 is live
 - - the ARV-CLM-003 catch (the missing retroactive notation on INT-127's reservation) was caught live by the registry check and repaired in-slice; the repair is in the claim row, the catch is recorded here and in the PR body — the proofsheet's recorded claims.py run is the POST-repair green run
+- - the SECOND catch, from CI: the harness job's gate refused ARV-PROT-002 (DECISIONS.md protected, the scope declaration carried no owner ref) — and the same gate had passed locally because the local run happened at the MID-SLICE HEAD (part 1 committed only), so the base...HEAD diff judged an incomplete change set; the standing lesson restated: the local gate is evidence only at the FULLY-COMMITTED candidate HEAD. Both the repair (owner refs on the protected-path declarations) and this lesson are recorded here and in the PR body
 - - the supabase CLI is provisioned for readiness only; the local Supabase stack requires a container runtime absent from this sandbox; Q12 remains the owner gate — no provider decision made or implied
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 15349c8024ca2c1bd75f0eea7e15e3749e9e60e51801059bb8570e8177e4778d
+- sheet sha256 (of the content above, excluding this line): 0e8fe71659b7d907b4909d23f87a4dd990219e9066a633f31eafa896551c9a89

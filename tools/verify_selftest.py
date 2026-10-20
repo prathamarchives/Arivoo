@@ -1,36 +1,128 @@
 #!/usr/bin/env python3
-"""verify_selftest.py — the canonical-layer self-test, as a separately-invocable module.
+"""verify_selftest.py — the H-01b trusted candidate-tool execution floor (A03).
 
-Extracted from tools/verify_canonical_layer.py (session 17, D-035 — the
-candidate-tool gate repair): the MUTATION SUITE and the VERIFIER can now be
-anchored independently, so the base-anchored CI job runs THIS suite (from main)
-against the CANDIDATE's verify_canonical_layer.py — the coordinated-weakening
-floor (a PR that weakens the verifier AND its own mutation suite together fails
-these cases in the required job).
+The base-owned mutation suite: 30 known-bad corpus mutations, each of which the
+CANDIDATE's verify_canonical_layer.py must catch with its named check. This
+module is anchored from main by CI (D-035: the coordinated-weakening floor) and
+judges whichever candidate tree it is pointed at.
 
-This module imports Layer (and its entry-header pattern) from
-verify_canonical_layer — WHICHEVER implementation sits beside it. That is the
-point: the base's suite judging the candidate's implementation. Content and
-semantics are moved verbatim (30 mutations; counts unchanged). The mutation
-helpers that no-op (e.g. a weakened _edit) are themselves caught: the self-test
-RED-flags a no-op mutation as a blind guard by design.
+H-01b (owner turns 21/22, INT-126/INT-127, D-040/D-041; PLAN card; the
+CodeRabbit F-005/F-013 routing) rebuilt the trust boundary. The predecessor
+imported the candidate verifier IN-PROCESS (line 30 of the old file) — a
+`SystemExit(0)` at candidate import exited the whole suite green with zero
+output (the A03 vacuous pass, reproduced in record 21 §4), a checker exception
+counted as a "caught guard", and the candidate controlled the corpus path. THIS
+driver:
 
-Usage: python3 tools/verify_selftest.py   (or verify_canonical_layer.py
---self-test, which delegates here for backward compatibility).
+1. never imports candidate code into its own interpreter — stdlib only, no
+   sys.path sibling imports (the machinery lives in tools/mutation_runner.py,
+   loaded BY PATH — the gate.py importlib-spec precedent — so `python3 -I`
+   keeps the candidate's tools/ from shadowing anything, F-005);
+2. runs every mutation case in a FRESH DISPOSABLE child process over a bounded
+   fixture: regular files only (symlinks/devices/fifos/sockets refused — never
+   dereferenced, F-013/F-002), per-file/total/count budgets, race-resistant
+   O_NOFOLLOW reads, cleanup established before any construction;
+3. re-verifies integrity BEFORE EVERY CASE: the anchored driver's own digest
+   against the trusted base copy (when --floor-base / ARV_FLOOR_BASE_TOOLS is
+   set) and the corpus source digest against the run's baseline — a mid-run
+   source mutation is a named refusal (ARV-FLOOR-002), never a silent judgment
+   of changed input;
+4. accepts a case ONLY on the full per-case protocol: nonzero exit + the
+   expected code's `FAIL` line + the verifier's completion count-line + no
+   traceback. Exit-0, printed-words-without-refusal, crashes, timeouts, floods
+   and missing verifiers are named refusals (ARV-FLOOR-001/003/005) — never
+   catches;
+5. writes a completion MANIFEST bound to this run (driver/candidate/corpus
+   digests, every expected case exactly once with its actual outcome) and
+   validates it (ARV-FLOOR-006) before any GREEN.
+
+Named codes (frozen in harness/tests/test_mutation_floor.py BEFORE this code):
+  ARV-FLOOR-001  an expected case was NOT caught (vacuous/absent/incomplete)
+  ARV-FLOOR-002  integrity failure (anchor/digest/mid-run corpus change)
+  ARV-FLOOR-003  an invalid catch form (traceback / timeout / flood)
+  ARV-FLOOR-004  fixture refusal (non-regular entry / budget / count)
+  ARV-FLOOR-005  the candidate verifier is missing (fail-closed)
+
+Usage:  python3 tools/verify_selftest.py [--repo DIR] [--only MUT-04[,...]]
+        [--floor-base DIR] [--manifest-out PATH] [--case-timeout SECONDS]
+        [--validate-manifest PATH]
+(The --self-test flag of verify_canonical_layer.py delegates here for backward
+compatibility; the corpus root is computed from THIS file's location — a caller
+argument is never the authority.)
+
+RESIDUAL BOUNDARY (stated, never claimed away): the child runs on the same host
+with the same OS user as this driver. That is NOT OS-level sandboxing: a hostile
+child could in principle signal or kill the driver — which makes the run RED
+(a killed judge writes no manifest and the required check fails), never green —
+and the workflow-definition trust boundary is the H-01b-CI card's item. Q10
+(token/workflow-tamper hardening) remains owner-gated. What this floor DOES
+claim: no candidate code ran in this interpreter, every case ran in a fresh
+disposable fixture, integrity was re-verified before every case, and the
+manifest records what actually happened.
 """
-
 from __future__ import annotations
 
+import argparse
+import hashlib
+import json
+import os
 import re
-import shutil
+import stat as statmod
+import subprocess
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 
-from verify_canonical_layer import INT_HEADER, REPO, Layer
+# Base-owned constants. H-01b: NO import from verify_canonical_layer — the
+# candidate module is executed as a CHILD PROCESS over a disposable fixture,
+# never imported here (the reproduced A03 hole was exactly that import).
+REPO = Path(__file__).resolve().parent.parent
+
+# The entry-header pattern the MUT-23 mutation needs. This is the BASE's copy
+# (kept in deliberate lockstep with the verifier's own pattern; if the verifier
+# legitimately changes its header syntax, this copy changes in the same slice).
+INT_HEADER = re.compile(r"^\*\*INT-(\d{3})\s+—\s+(.*?)\s+—\s+(.*?)\*\*\s*$", re.M)
+
+# ------------------------------------------------------------------ budgets
+PER_FILE_BUDGET = 8 * 1024 * 1024     # per corpus file
+TOTAL_BUDGET = 192 * 1024 * 1024      # whole corpus
+COUNT_BUDGET = 5000                   # whole corpus
+READ_CAP = 1024 * 1024                # child stdout/stderr read-back cap
+CHILD_FSIZE = 8 * 1024 * 1024         # child per-file write cap (RLIMIT_FSIZE)
+CHILD_AS = 512 * 1024 * 1024          # child address-space cap (RLIMIT_AS)
+DEFAULT_CASE_TIMEOUT = 120            # seconds, per case (wall clock)
+SKIP_DIRS = {".git", "__pycache__", ".pg"}  # .pg: the gitignored local rig dir — never corpus
+
+POSIX = os.name == "posix"
+
+BOUNDARY = (
+    "residual boundary: child processes run on the same host with the same OS user as "
+    "this driver — NOT OS-level sandboxing; a hostile child could in principle kill the "
+    "judge (the run turns RED, never green); the workflow-definition trust boundary is "
+    "H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in "
+    "this interpreter; every case ran in a fresh disposable fixture; integrity was "
+    "re-verified before every case; the manifest records what actually happened."
+)
+
+COMPLETION_RE = re.compile(
+    r"canonicalization-layer verifier\s+[—-]\s+\d+\s+checks?,\s+\d+\s+failures?", re.I
+)
+
+
+class FloorRefusal(Exception):
+    """A named, sanitized refusal. The message NEVER carries a corpus path
+    (F-012 class: secret-shaped filenames must not leak into diagnostics)."""
+
+    def __init__(self, code: str, message: str):
+        super().__init__(f"{code}: {message}")
+        self.code = code
+        self.message = message
+
 
 # ---------------------------------------------------------------- self-test (KB discipline)
-# Each mutation breaks ONE protected property on a temp copy; the named check MUST fail.
+# Each mutation breaks ONE protected property on a disposable fixture; the named
+# check MUST fail IN THE CHILD (the candidate verifier over the mutated corpus).
 
 MUTATIONS: list[tuple[str, str, callable, str]] = [
     (
@@ -236,6 +328,11 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
 ]
 
 
+# ------------------------------------------------------------ mutation helpers
+# (preserved verbatim from the predecessor suite — content and semantics
+# unchanged; the ONLY change is the base-owned INT_HEADER above replacing the
+# candidate-imported one, so a mutation can never be steered by candidate code)
+
 def _edit(repo: Path, rel: str, old: str, new: str) -> None:
     p = repo / rel
     p.write_text(p.read_text(encoding="utf-8").replace(old, new), encoding="utf-8")
@@ -246,12 +343,6 @@ def _rm(repo: Path, rel: str) -> None:
 
 
 def _tag_gate_regression(repo: Path) -> None:
-    """MUT-11, content-generic (re-targeted 2026-10-14, session 15 — the same repair
-    class as MUT-08/MUT-17, PRs #6/#12): rewrite the first 'never a gate' occurrence
-    in NORTH-STAR into a gate form, whatever the surrounding sentence says. The
-    earlier hard-coded string would silently no-op after the tag-removal rewording
-    (INT-112/D-030) — a no-op mutation reads as a blind guard and RED-blocks the
-    legitimate rewording PRs."""
     ns = repo / "NORTH-STAR.md"
     text = ns.read_text(encoding="utf-8")
     if "never a gate" not in text:
@@ -260,11 +351,6 @@ def _tag_gate_regression(repo: Path) -> None:
 
 
 def _malform_header(repo: Path) -> None:
-    """MUT-23, content-generic: strip the status segment from the highest-numbered
-    well-formed entry header. The strict INT_HEADER view stops seeing the entry
-    (VER-201/202 go blind for it) while the loose entry splitter still finds it —
-    VER-903 must catch the two-view disagreement (the malformed-header blind spot
-    the slice-7 audit found: the two parsing patterns disagreed silently)."""
     ledger = repo / "INTENT-LEDGER.md"
     text = ledger.read_text(encoding="utf-8")
     headers = list(INT_HEADER.finditer(text))
@@ -276,9 +362,6 @@ def _malform_header(repo: Path) -> None:
 
 
 def _dangling_ref(repo: Path) -> None:
-    """MUT-24: append a probe line to PLAN.md citing INT-199 and D-999 — neither
-    exists. VER-901 must fail on the dangling references (the referenced-IDs-must-
-    exist requirement, slice 7)."""
     plan = repo / "PLAN.md"
     plan.write_text(
         plan.read_text(encoding="utf-8")
@@ -288,9 +371,6 @@ def _dangling_ref(repo: Path) -> None:
 
 
 def _count_drift(repo: Path) -> None:
-    """MUT-25, content-generic: decrement the first stated statused-intent count in
-    AGENTS.md — the summary drifts from the observed ledger; VER-902 must catch the
-    contradiction (a stale count is not a snapshot)."""
     agents = repo / "AGENTS.md"
     text = agents.read_text(encoding="utf-8")
     m = re.search(r"(\d+) statused intents", text)
@@ -303,11 +383,6 @@ def _count_drift(repo: Path) -> None:
 
 
 def _open_set_drift(repo: Path) -> None:
-    """MUT-26, content-generic: remove the FIRST open-question table row in
-    EXECUTION §6 — the open register disagrees across its mirrors; the re-targeted
-    VER-504 must catch it (a closure by silent removal, never by a D-row). If the
-    §6 table ever legitimately changes shape, this no-ops and the self-test reports
-    a blind guard — the designed re-target alarm."""
     ex = repo / "EXECUTION.md"
     text = ex.read_text(encoding="utf-8")
     rows = [
@@ -322,11 +397,6 @@ def _open_set_drift(repo: Path) -> None:
 
 
 def _reintroduce_superseded_rule(repo: Path) -> None:
-    """MUT-27 (slice 9, class (d) — sub-agent finding 1): rewrite NORTH-STAR's
-    current-truth phrase 'no tag field' into the superseded optional-tag form. This
-    is the reintroduced-known-conflicting-rule class: the mutation leaves the C4
-    marker line intact and keeps the F-05 qualifier, so every substring guard
-    except the normative-marker register stays green — VER-904 must fail."""
     ns = repo / "NORTH-STAR.md"
     text = ns.read_text(encoding="utf-8")
     if "no tag field" not in text:
@@ -335,11 +405,6 @@ def _reintroduce_superseded_rule(repo: Path) -> None:
 
 
 def _blanket_ledger_boot(repo: Path) -> None:
-    """MUT-21, content-generic: rewrite the numbered read-order line naming
-    INTENT-LEDGER.md into the blanket ledger-first form — whatever the line currently
-    says (old order or selective order), the SELECTIVE marker must disappear so VER-110
-    catches the silent regression. Content-generic for the same reason as MUT-08/MUT-17:
-    a hard-coded current string would no-op after any future rewording."""
     agents = repo / "AGENTS.md"
     text = agents.read_text(encoding="utf-8")
     out = []
@@ -352,8 +417,6 @@ def _blanket_ledger_boot(repo: Path) -> None:
 
 
 def _drop_read_order_step(repo: Path, marker: str) -> None:
-    """MUT-22: remove the numbered read-order line containing `marker` (the worklog-tail
-    boot step). Generic over the line's current wording."""
     agents = repo / "AGENTS.md"
     text = agents.read_text(encoding="utf-8")
     out = [
@@ -365,14 +428,6 @@ def _drop_read_order_step(repo: Path, marker: str) -> None:
 
 
 def _drop_verification_rule(repo: Path) -> None:
-    """MUT-05, content-generic (re-targeted 2026-10-14, session 16 / D-034 — the same
-    repair class as MUT-08/MUT-11/MUT-17, PRs #6/#12/#17): remove every AGENTS.md line
-    carrying INT-070, whatever the line currently says. The earlier hard-coded string
-    ("Test and verification loops run on GLM-based subagents; ...") would silently
-    no-op the moment the agent-agnostic rewording lands (D-028's propagation, the
-    Arivoo review's P1 finding) — a no-op mutation reads as a blind guard and
-    RED-blocks the legitimate rewording PR. Generic form: works on every wording
-    that keeps the verification protocol's INT-070 reference."""
     agents = repo / "AGENTS.md"
     text = agents.read_text(encoding="utf-8")
     out = [ln for ln in text.splitlines(keepends=True) if "INT-070" not in ln]
@@ -380,10 +435,6 @@ def _drop_verification_rule(repo: Path) -> None:
 
 
 def _strip_closure_annotation(repo: Path) -> None:
-    """MUT-28 (session 16, D-034 — the Arivoo review's first P1 finding): strip the
-    D-028 closure pointer from D-007's update note in DECISIONS.md. The closed
-    question then reads as OPEN again in a current canonical document (the drift
-    class the review found); VER-904's closure-marker register must catch it."""
     d = repo / "DECISIONS.md"
     text = d.read_text(encoding="utf-8")
     if "Update 2026-10-14 (D-028)" not in text:
@@ -395,18 +446,6 @@ def _strip_closure_annotation(repo: Path) -> None:
 
 
 def _glm_governing_regression(repo: Path) -> None:
-    """MUT-29 (session 16, D-034 — the Arivoo review's second P1 finding): revert
-    OPERATING-MODEL §9's host-agnostic verification-protocol line to the superseded
-    GLM-governing form, while D-028 (agent-agnostic) still stands — the
-    reintroduced-known-conflicting-rule class. CONTENT-GENERIC since 2026-10-19
-    (session 19 — a legitimate §9 rewording by a concurrent part made the exact-
-    string form silently no-op; the base-anchored suite RED-flagged it as a blind
-    guard — the PR #6/#12/#17/#19 re-target class): the mutation now locates the
-    §9 protocol line by its stable markers ('host-agnostic (D-028)' + 'INT-070' +
-    'GLM') and replaces that whole line, so a legitimate rewording cannot silently
-    no-op it. The strict §9-scoped VER-507 must catch the regression ('current
-    default' vanishes from §9); a valid alternative-host declaration (the positive
-    case) passes."""
     om = repo / "OPERATING-MODEL.md"
     text = om.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
@@ -424,13 +463,6 @@ def _glm_governing_regression(repo: Path) -> None:
 
 
 def _worklog_after_ledger(repo: Path) -> None:
-    """MUT-30 (session 16, D-034 — the Arivoo review's P3 finding): swap the bodies of
-    the context/WORKLOG.md and INTENT-LEDGER.md read-order steps (numbers stay
-    well-formed), so the ledger step loads BEFORE the worklog tail — the coordination
-    context no longer precedes the selective authority dive. The old read-order
-    parser could not match paths containing a directory separator, so the worklog
-    step was invisible to position checks — this ordering regression was unenforceable
-    (a blind guard). The repaired parser + strengthened VER-110 must catch it."""
     agents = repo / "AGENTS.md"
     text = agents.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
@@ -452,14 +484,6 @@ def _worklog_after_ledger(repo: Path) -> None:
 
 
 def _drop_ledger_step(repo: Path) -> None:
-    """MUT-08, content-generic (2026-10-14, session-14 gate re-target): remove the numbered
-    read-order line that names /INTENT-LEDGER.md. The earlier form replaced a hard-coded
-    ledger-first step-1 string; once AGENTS' read order moves the ledger off step 1 (the
-    slice-6 supersession, D-027(3)/INT-107), that string stops matching, the mutation
-    silently no-ops, VER-101 does not fail, and the base-anchored self-test reports a blind
-    guard — RED-blocking the very PR that legitimately changes the boot order. Generic form:
-    works on every read order that keeps a numbered INTENT-LEDGER step, current or future
-    (the same repair class as MUT-17's genericization, PR #6)."""
     agents = repo / "AGENTS.md"
     text = agents.read_text(encoding="utf-8")
     out = [
@@ -471,13 +495,6 @@ def _drop_ledger_step(repo: Path) -> None:
 
 
 def _stale_state_pointer(repo: Path) -> None:
-    """MUT-17, content-generic (repaired 2026-10-14): rewrite STATE.md's highest
-    session-record reference to the highest LOWER-numbered record that exists on
-    disk. The earlier hard-coded pointer (12-GAP-CLOSURE...) would silently no-op
-    the moment STATE advanced to record 13 — the mutation would not apply, VER-804
-    would not fail, and the self-test would report a blind guard, RED-blocking the
-    very PRs that legitimately advance the record sequence. Generic form: works on
-    every future tree, exercises exactly the stale-pointer failure class."""
     state = repo / "STATE.md"
     text = state.read_text(encoding="utf-8")
     refs = sorted(
@@ -500,41 +517,95 @@ def _stale_state_pointer(repo: Path) -> None:
     )
 
 
-def self_test(repo: Path) -> int:
-    caught, missed = [], []
-    print(f"known-bad self-test — {len(MUTATIONS)} mutations, each must FAIL its named check\n")
-    for code, desc, mutate, expect in MUTATIONS:
-        with tempfile.TemporaryDirectory(prefix="arivoo-kb-") as td:
-            copy = Path(td) / "repo"
-            shutil.copytree(repo, copy, ignore=shutil.ignore_patterns(".git"))
-            mutate(copy)
-            layer = Layer(copy)
-            try:
-                layer.run()
-            except Exception as exc:  # a crashed checker is a caught guard
-                caught.append((code, expect, f"crash: {exc}"))
-                print(f"{code} PASS  {desc} → checker raised: {exc}")
-                continue
-            ok = layer.failed(expect)
-            if ok:
-                caught.append((code, expect, ""))
-                print(f"{code} PASS  {desc} → {expect} FAILed as required")
-            else:
-                missed.append((code, expect))
-                print(f"{code} FAIL  {desc} → {expect} did NOT fail — the guard is blind (KB-05)")
-    print()
-    if missed:
-        print(f"SELF-TEST RED — {len(missed)} blind guard(s): {[c for c, _ in missed]}")
-        print("A green checker with untested blind spots gives agents unjustified confidence (F-01).")
-        return 1
-    print(f"SELF-TEST GREEN — {len(caught)}/{len(MUTATIONS)} known-bad mutations caught by their named checks.")
-    print("The guards are themselves tested (KB-01..06 spirit, document-level).")
-    return 0
+# ------------------------------------------------------------ the H-01b delegation
+# The machinery (bounded fixtures, integrity, child runner, protocol, manifest)
+# lives in tools/mutation_runner.py — the card's named runner module, landed as
+# H-01b part 1 (PR #47). This driver owns the base-owned MUTATION REGISTRY and
+# the CLI; the runner is loaded BY PATH (never via sys.path), which works under
+# `python3 -I` and keeps the module boundary honest.
+
+def _load_runner():
+    import importlib.util
+    runner_path = Path(__file__).resolve().parent / "mutation_runner.py"
+    spec = importlib.util.spec_from_file_location("ariv_mutation_runner", runner_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod, runner_path
 
 
+def _select(only: str | None) -> list:
+    """Case selection against THIS module's registry (base-owned state — an
+    unknown/duplicate/empty selection refuses, fail-closed)."""
+    if not only:
+        return list(MUTATIONS)
+    wanted = [w.strip() for w in only.split(",") if w.strip()]
+    if not wanted:
+        raise SystemExit("refused: --only must name at least one case (MUT-XX)")
+    if len(set(wanted)) != len(wanted):
+        raise SystemExit("refused: --only must not repeat a case")
+    by_code = {m[0]: m for m in MUTATIONS}
+    sel = []
+    for w in wanted:
+        if not re.fullmatch(r"MUT-\d{2}", w) or w not in by_code:
+            raise SystemExit(f"refused: unknown case '{w}' — the expected set is fixed (MUT-01..MUT-30)")
+        sel.append(by_code[w])
+    return sel
 
 
+def self_test(repo: Path | None = None, only: str | None = None,
+              floor_base: str | None = None, manifest_out: Path | None = None,
+              case_timeout: int | None = None) -> int:
+    """The floor entry (verify_canonical_layer.py --self-test delegates here).
+    `repo` is accepted for backward compatibility but is NEVER the authority:
+    the corpus root is computed from THIS file's location (the caller-supplied
+    path was part of the A03 hole)."""
+    del repo
+    runner, _rp = _load_runner()
+    cases = _select(only)
+    return runner.run_floor(
+        cases, REPO,
+        driver_path=Path(__file__).resolve(),
+        sibling_module=Path(__file__).resolve().parent / "mutation_runner.py",
+        floor_base=floor_base,
+        manifest_out=manifest_out,
+        case_timeout=case_timeout if case_timeout is not None else runner.DEFAULT_CASE_TIMEOUT,
+    )
+
+
+def main(argv=None) -> int:
+    runner, _rp = _load_runner()
+    ap = argparse.ArgumentParser(description="the H-01b trusted candidate-tool execution floor")
+    ap.add_argument("--repo", default=None, help="the candidate tree to judge (default: this driver's own tree)")
+    ap.add_argument("--only", default=None, help="run only the named case(s), e.g. MUT-04,MUT-13 (test-side subsetting; CI runs the full set)")
+    ap.add_argument("--floor-base", default=None, help="the trusted base tools directory (CI passes base/tools via ARV_FLOOR_BASE_TOOLS or this flag)")
+    ap.add_argument("--manifest-out", default=None, help="where to write the completion manifest")
+    ap.add_argument("--case-timeout", type=int, default=runner.DEFAULT_CASE_TIMEOUT, help="per-case wall-clock seconds")
+    ap.add_argument("--validate-manifest", default=None, help="validate an EXTERNAL manifest file against the expected case set (the public validator surface — exit 0/1, ARV-FLOOR-006 named refusals); --only selects the expected set")
+    a = ap.parse_args(argv)
+    if a.validate_manifest:
+        import json
+        try:
+            m = json.loads(Path(a.validate_manifest).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            print(f"FAIL ARV-FLOOR-006: the manifest file is unreadable or malformed JSON ({type(exc).__name__}) — refusing")
+            return 1
+        expected = [c[0] for c in _select(a.only)]
+        fails = runner.validate_manifest(m, expected)
+        if fails:
+            for f in fails:
+                print(f"FAIL {f}")
+            return 1
+        print(f"OK ARV-FLOOR-006: the manifest validates — every one of {len(expected)} expected case(s) present exactly once, records well-formed")
+        return 0
+    global REPO
+    if a.repo is not None:
+        # explicit candidate selection (tests / explicit runs). The corpus the
+        # floor judges is a DRIVER-AUTHORITY input, never candidate-supplied.
+        REPO = Path(a.repo).resolve()
+    return self_test(only=a.only, floor_base=a.floor_base,
+                     manifest_out=Path(a.manifest_out) if a.manifest_out else None,
+                     case_timeout=a.case_timeout)
 
 
 if __name__ == "__main__":
-    sys.exit(self_test(REPO))
+    sys.exit(main())

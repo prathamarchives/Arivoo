@@ -619,3 +619,29 @@ All observations fresh this session, at the live HEAD, before any source change 
 - STATE re-derived; AGENTS phase/count sync (109 statused); WORKLOG Task 28; the slice's runs/scope/proof-sheet.
 
 **Non-goals (honored):** no code changes this slice (H-01b is the next claim — the directive §3's "do not wait for a perfect inventory before fixing H-01b" is answered by the card being READY and claimed next, not by widening this intake); no owner question opened or closed (Q6–Q12 + D-014 scopes unchanged; the directive adds gates to EXISTING cards, never new authority); no roadmap rewrite (the NG-04 outcome-row exception continues under D-039; turn 22's §7/§8 rows extend it); no history rewriting (all three reconciliations are append/migrate/dedup with evidence, the canonical methods); the credential never enters any repo file.
+
+## §4 — the disposition ledger (slices as they land)
+
+| Item | Disposition | Evidence |
+|------|-------------|----------|
+| CLAIM-011 (the intake + the three reconciliations) | LANDED | PR #46 = `e1ef3a0`, CI `39390452755` three-check green, post-merge `39390799806` success |
+| H-01b part 1 (CLAIM-012: the runner module) | LANDED | PR #47 = `0dc6aaf`, CI `39398823620` three-check green; the card's named mutation_runner.py; the KB-CLM-002 probe made self-contained |
+| H-01b part 2 (CLAIM-013: the activation) | THIS SLICE | The 16-case suite 16/16 GREEN (7.6s); make verify GREEN (13/13 + suites + canonical 51/0); the --self-test delegation 30/30 through the child-process floor; the run_floor orchestration completed (part 1 landed it inert — its absence was invisible to part 1's CI by construction, caught by this slice's first suite run) |
+| A03 (the verifier early-exit + write-after-checksum) | FIXED with stable regressions | test_01/test_05: the early-exit candidate refused (ARV-FLOOR-001); the mid-run source mutation detected (ARV-FLOOR-002); RED observed at the predecessor (red-01/red-02: 15/16) |
+| F-005 (import shadowing) | REPAIRED at this boundary | The driver: stdlib-only, launched `python3 -I` in CI, the runner loaded BY PATH; test_10's anchored shadow probe never fires |
+| F-013 (the suite's copytree) | REPAIRED | The bounded no-dereference builder (lstat + O_NOFOLLOW; budgets; the .pg skip); tests 07/08/09/16 |
+| F-002/F-011/F-012 (the isolation tools' fixture class) | NOT this slice — H-01b-F owns them | Routed in the PLAN refresh; no triage-only closure |
+| F-003/F-004/F-006 (the CI trust chain) | NOT this slice — H-01b-CI owns them | Routed; the host-level GitHub settings requirement recorded EXTERNAL |
+| The INT-126 one-liner triplication + both ARV-CLM coverage gaps | REPAIRED (CLAIM-011) + ROUTED (H-01c-claims) | record 22 §2/§3; the registry-wide duplicate case + the one-liner consistency case added to the card |
+
+## §8 — the honest failure log (every catch, this session)
+
+1. **ARV-CLM-003** (the intake slice): the missing retroactive notation on INT-127's same-PR reservation — caught live by the registry check, repaired in the claim row.
+2. **ARV-PROT-002** (the intake slice, from CI): DECISIONS.md protected, the scope declaration carried no owner ref — AND the local gate had passed because it ran at the MID-SLICE HEAD (part 1 committed only): the base...HEAD diff judged an incomplete set. Standing lesson restated in notverified: the local gate is evidence only at the FULLY-COMMITTED candidate HEAD.
+3. **The ARV-SIZE-002 split** (H-01b): the single-PR floor was refused at 537 source lines (LAW-05) — repaired by the card's own named module: part 1 the runner, part 2 the activation, each bounded.
+4. **The KB-CLM-002 probe coupling** (part 1): the matrix caught its own probe still depending on a LIVE claim's scope — the A11 probe-coupling class, third occurrence — repaired with the synthetic partner row, the exit-2 run record preserved.
+5. **ARV-CLM-002** (part 1, from CI): the claim ROW's scope cell lacked harness/known-bad/cases.py while the scope.txt had it — the registry's coverage check (not the scope check) refused; repaired; the local-PR-mode-gate lesson applied a third time.
+6. **ARV-DEP-008** (the activation): the suite's in-process `import verify_selftest` correctly refused (harness/ imports stdlib+harness only) — repaired by STRENGTHENING the surface: the public `--validate-manifest` CLI mode, tested as a subprocess (amendment 5).
+7. **The run_floor trim incident** (the activation): part 1's module landed WITHOUT run_floor — the pre-commit trim script cut from `def select_cases(` to EOF, and the inert module's missing orchestration was invisible to part 1's CI by construction; caught by this slice's first suite run (AttributeError), repaired by completing the orchestration here. Honest note: part 1's commit message overstated the module as "the runner + manifest contract" — the orchestration belongs to this slice, and §4 records it as such.
+8. **The sandbox /tmp quirk** (the activation): driver-spawned children's fresh /tmp lookups were intermittently blind in this host's unittest context (never in plain subprocess chains, never on CI's shared-tmpfs runners) — test_05's delivery made deterministic via source-path.txt as corpus data; the DETECTION property under test is unchanged.
+9. Five red-record amendments (LAW-11): three strengthenings + two fixture corrections — every one assertions-added/replaced-stronger, none removed, all recorded in the red records' amendment notes.

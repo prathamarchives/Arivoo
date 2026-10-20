@@ -109,21 +109,29 @@ jobs:
       - name: "Anchor the trusted judges from main (fail-closed; distinct names; sha256-verified — never a silent fallback to the candidate's version)"
         run: |
           set -e
-          for f in verify_canonical_layer.py verify_selftest.py isolation_check.py isolation_selftest.py; do
+          for f in verify_canonical_layer.py verify_selftest.py mutation_runner.py isolation_check.py isolation_selftest.py; do
             test -f "base/tools/$f" || { echo "FAIL: base/tools/$f missing — refusing any candidate-substituted judge (the turn-14 P2: never fall back silently)"; exit 1; }
-            cp "base/tools/$f" "head/tools/${f%.py}_anchored.py"
+            # mutation_runner.py keeps its real name: the driver loads it BY PATH
+            # (importlib spec) — the anchored floor must find the BASE's copy there.
+            if [ "$f" = "mutation_runner.py" ]; then cp "base/tools/$f" "head/tools/$f"; else cp "base/tools/$f" "head/tools/${f%.py}_anchored.py"; fi
           done
           echo "sha256 verification (the anchored file IS the base's):"
-          for f in verify_canonical_layer.py verify_selftest.py isolation_check.py isolation_selftest.py; do
+          for f in verify_canonical_layer.py verify_selftest.py mutation_runner.py isolation_check.py isolation_selftest.py; do
             a=$(sha256sum "base/tools/$f" | cut -d' ' -f1)
-            b=$(sha256sum "head/tools/${f%.py}_anchored.py" | cut -d' ' -f1)
+            if [ "$f" = "mutation_runner.py" ]; then b=$(sha256sum "head/tools/$f" | cut -d' ' -f1); else b=$(sha256sum "head/tools/${f%.py}_anchored.py" | cut -d' ' -f1); fi
             [ "$a" = "$b" ] || { echo "FAIL: anchored copy of $f differs from base"; exit 1; }
             echo "  $f: ${a:0:16}... verified identical to base"
           done
       - name: "Verify the canonical layer — base-anchored judge over the candidate documents (check count printed by the tool)"
         run: python3 tools/verify_canonical_layer_anchored.py
         working-directory: head
-      - name: "Candidate-verifier floor — the BASE's 30-mutation suite judged against the CANDIDATE's verifier (D-035: the coordinated-weakening floor)"
+      - name: "Candidate-verifier floor — the BASE's 30-mutation suite judged against the CANDIDATE's verifier (D-035: the coordinated-weakening floor; H-01b/INT-127/D-041: the TRUSTED CHILD-PROCESS floor — activates AT MERGE: the anchored judge is the BASE's driver, so this PR's head still runs the predecessor form; the ARV_FLOOR_BASE_TOOLS anchor + the mutation_runner.py anchored copy land HERE so the merged base turns this step into the trusted child-process floor; the python3 -I isolated launch flips on in H-01b-CI's launch-hardening slice — it cannot flip in the same PR that changes the base driver, or the OLD base judge breaks at this PR's head: the activation's own chicken-and-egg, caught by CI and recorded in record 22 §8)"
+        env:
+          # the trusted anchor travels via the ENVIRONMENT only (the H-01a A02
+          # pattern — never template-interpolated into the script); the merged
+          # driver re-verifies its own digest against this base copy per case;
+          # the predecessor driver ignores it (inert at the PR head)
+          ARV_FLOOR_BASE_TOOLS: ${{ github.workspace }}/base/tools
         run: python3 tools/verify_selftest_anchored.py
         working-directory: head
       - name: "Isolation check — base-anchored judge over the candidate tree (CI mode; W-03, LAW-28)"

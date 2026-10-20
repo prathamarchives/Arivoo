@@ -291,3 +291,125 @@ def validate_manifest(m, expected_codes: list[str]) -> list[str]:
     if m.get("expected_cases") != list(expected_codes):
         fails.append("ARV-FLOOR-006: the manifest's expected_cases disagrees with the run's expected set")
     return fails
+
+def run_floor(cases: list, cand_root: Path, *, driver_path: Path,
+              sibling_module: Path | None = None, floor_base: str | None = None,
+              manifest_out: Path | None = None,
+              case_timeout: int = DEFAULT_CASE_TIMEOUT) -> int:
+    """Execute the floor: every case in a fresh disposable child fixture,
+    integrity re-verified before every case, the manifest always written."""
+    base = Path(floor_base) if floor_base else Path(os.environ.get("ARV_FLOOR_BASE_TOOLS", ""))
+    anchored = bool(floor_base or os.environ.get("ARV_FLOOR_BASE_TOOLS"))
+    if anchored and not (base / driver_path.name).is_file():
+        print(f"FAIL ARV-FLOOR-002: the trusted floor anchor is missing ({base}) — refusing to run unanchored")
+        return 1
+    expected_codes = [m[0] for m in cases]
+    driver_sha = hashlib.sha256(driver_path.read_bytes()).hexdigest()
+    sibling_sha = hashlib.sha256(sibling_module.read_bytes()).hexdigest() if sibling_module else None
+    cand_verifier = cand_root / "tools" / "verify_canonical_layer.py"
+    if not cand_verifier.is_file():
+        print("FAIL ARV-FLOOR-005: the candidate verifier is missing from the corpus — refusing to run (fail-closed)")
+        return 1
+
+    def integrity() -> list[dict]:
+        if anchored:
+            if hashlib.sha256((base / driver_path.name).read_bytes()).hexdigest() != driver_sha:
+                raise FloorRefusal(
+                    "ARV-FLOOR-002",
+                    "the anchored driver's digest no longer matches the trusted base copy — refusing to continue",
+                )
+            if sibling_module is not None and hashlib.sha256((base / sibling_module.name).read_bytes()).hexdigest() != sibling_sha:
+                raise FloorRefusal(
+                    "ARV-FLOOR-002",
+                    "the anchored runner module's digest no longer matches the trusted base copy — refusing to continue",
+                )
+        current = enumerate_corpus(cand_root)
+        if corpus_digest(current) != baseline_digest:
+            raise FloorRefusal(
+                "ARV-FLOOR-002",
+                "the corpus source changed under the run (digest mismatch before a case) — refusing to judge mutated input",
+            )
+        return current
+
+    temproot_m = tempfile.TemporaryDirectory(prefix="arivoo-floor-")
+    temproot = Path(temproot_m.name)
+    print(f"floor temp root: {temproot}")
+    manifest = {
+        "schema_version": 1,
+        "run_id": str(uuid.uuid4()),
+        "mode": "anchored" if anchored else "local",
+        "driver_sha256": driver_sha,
+        "runner_sha256": sibling_sha,
+        "floor_base": str(base) if anchored else None,
+        "candidate_verifier_sha256": hashlib.sha256(cand_verifier.read_bytes()).hexdigest(),
+        "candidate_root": str(cand_root),
+        "expected_cases": expected_codes,
+        "cases": [],
+        "verdict": None,
+        "boundary": BOUNDARY,
+    }
+    refusal: FloorRefusal | None = None
+    try:
+        baseline = enumerate_corpus(cand_root)
+        baseline_digest = corpus_digest(baseline)
+        manifest["corpus_digest"] = baseline_digest
+        manifest["corpus_file_count"] = len(baseline)
+        print(f"known-bad self-test — {len(cases)} mutations, each must FAIL its named check (child-process floor)\n")
+        for code, desc, mutate, expect in cases:
+            current = integrity()          # ARV-FLOOR-002 — before EVERY case
+            with tempfile.TemporaryDirectory(dir=temproot, prefix="case-") as cd:
+                casedir = Path(cd)
+                fixture = casedir / "repo"
+                build_fixture(current, fixture)
+                try:
+                    mutate(fixture)
+                except Exception as exc:
+                    manifest["cases"].append({
+                        "code": code, "expect": expect, "caught": False,
+                        "disposition": f"the mutation could not be applied to the fixture ({type(exc).__name__}) — the case cannot be proven caught (ARV-FLOOR-001)",
+                    })
+                    print(f"{code} FAIL  {desc} → mutation application failed — the case cannot be proven caught (ARV-FLOOR-001)")
+                    continue
+                rc, out, err, trunc = run_child(fixture, casedir, case_timeout)
+                caught, disposition, _fcode = evaluate_case(expect, rc, out, err, trunc)
+                manifest["cases"].append({
+                    "code": code, "expect": expect, "caught": caught,
+                    "disposition": disposition, "child_exit": rc,
+                    "output_truncated": bool(trunc),
+                })
+                if caught:
+                    print(f"{code} PASS  {desc} → {expect} FAILed as required")
+                else:
+                    print(f"{code} FAIL  {desc} → {disposition}")
+    except FloorRefusal as fr:
+        refusal = fr
+        print(f"FAIL {fr.code}: {fr.message}")
+    finally:
+        mval_fails = validate_manifest(manifest, expected_codes)
+        manifest["manifest_validation_failures"] = mval_fails
+        caught_n = sum(1 for c in manifest["cases"] if c.get("caught"))
+        manifest["verdict"] = "REFUSED" if refusal else ("RED" if (caught_n != len(expected_codes) or mval_fails) else "GREEN")
+        mpath = Path(manifest_out) if manifest_out else temproot.parent / f"arv-floor-manifest-{manifest['run_id'][:8]}.json"
+        try:
+            mpath.parent.mkdir(parents=True, exist_ok=True)
+            mpath.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            print(f"floor manifest: {mpath}")
+        except OSError:
+            print("floor manifest: <write failed — the run stands RED by the validation failures below if any>")
+        print()
+        if manifest["verdict"] == "GREEN":
+            print(f"SELF-TEST GREEN — {caught_n}/{len(expected_codes)} known-bad mutations caught by their named checks.")
+            print("The guards are themselves tested (KB-01..06 spirit, document-level; each case ran in a disposable child process).")
+        else:
+            codes = set()
+            for c in manifest["cases"]:
+                d = c.get("disposition", "")
+                if "(ARV-" in d:
+                    codes.add(d.split("(ARV-")[1].split(")")[0])
+            if refusal:
+                codes.add(refusal.code)
+            print(f"SELF-TEST RED — verdict {manifest['verdict']}: {len(expected_codes) - caught_n} case failure(s) + {len(mval_fails)} manifest failure(s); codes: {sorted(codes)}")
+        print(f"{BOUNDARY}")
+        rc = 0 if manifest["verdict"] == "GREEN" else 1
+        temproot_m.cleanup()
+        return rc

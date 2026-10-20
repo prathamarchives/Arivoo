@@ -55,10 +55,27 @@ _kb_spec = importlib.util.spec_from_file_location(
 kbcases = importlib.util.module_from_spec(_kb_spec)
 _kb_spec.loader.exec_module(kbcases)
 
-REPO = pathlib.Path(__file__).resolve().parents[1]
+def _repo_root() -> pathlib.Path:
+    """H-01b-CI (session 23): the trusted gate driver (tools/trusted_gate.py)
+    re-roots this machinery onto the CANDIDATE tree by setting ARV_TRUSTED_ROOT
+    before import, so the BASE's gate judges the candidate's data (suites run
+    with cwd=candidate; registry/records/declarations/git-diff all read from
+    the candidate). The override is honored ONLY when it names an absolute
+    existing directory; anything else keeps the natural root — the modules
+    never refuse at import time (the driver validates strictly first). The
+    known-bad cases stay __file__-relative: they always come from the BASE."""
+    root = os.environ.get("ARV_TRUSTED_ROOT", "")
+    p = pathlib.Path(root) if root else None
+    if p is not None and p.is_absolute() and p.is_dir():
+        return p
+    return pathlib.Path(__file__).resolve().parents[1]
+
+
+REPO = _repo_root()
 TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          "harness/tests/test_commands.py", "harness/tests/test_gate_dispatch.py",
-         "harness/tests/test_mutation_floor.py")
+         "harness/tests/test_mutation_floor.py",
+         "harness/tests/test_trusted_gate.py")
 
 
 def run_cmd(cmd: list) -> subprocess.CompletedProcess:
@@ -114,40 +131,71 @@ def check_red_records() -> list:
 
 
 def run_known_bads() -> list:
-    """KB-05: a known-bad that passes is a broken guard — red, stop building."""
-    scratch = pathlib.Path(tempfile.mkdtemp(prefix="arv_kb_"))
-    fails = []
+    """KB-05: a known-bad that passes is a broken guard — red, stop building.
+
+    H-01b-CI (session 23): the probes are COPY-RELATIVE — each loads machinery
+    modules and mutates its own WORK COPY of the tree. In the TRUSTED re-root
+    run the module BYTES come from the BASE (ARV_TRUSTED_KB_MACHINERY — the
+    candidate's harness package, including its known-bad registry, never
+    executes in the trusted judge: a candidate cases.py running SystemExit(0)
+    at import made three probes vacuous before this routing, reproduced live
+    by test_trusted_gate.test_06), while ARV_TRUSTED_ROOT is re-pointed at
+    EACH case's work copy so the freshly-loaded BASE machinery resolves its
+    REPO onto the mutated tree. In the LOCAL self-check (no re-root active)
+    the legacy form holds: modules from the copy, REPO module-relative."""
+    saved_root = os.environ.pop("ARV_TRUSTED_ROOT", None)
+    trusted = saved_root is not None
     try:
-        copy = scratch / "repo"
-        shutil.copytree(REPO, copy, ignore=shutil.ignore_patterns(".git", "__pycache__", "harness/runs"))
-        probe = copy / "harness" / "runs" / kbcases.SLICE
-        probe.mkdir(parents=True, exist_ok=True)
-        # the probe declaration: declared-but-UNREFERENCED protected prefixes (the refusals' target)
-        (probe / "scope.txt").write_text("harness/tests\nharness/runs\n.github\nharness/scope.py\n")
-        (probe / "run-01.json").write_text(json.dumps(
-            {"command": "probe", "exit_code": 0, "output_sha256": "0" * 64,
-             "recorded_at": "2026-10-16T00:00:00+00:00"}) + "\n")
-        ps = kbcases._load(copy, "harness.proofsheet")
-        ps.RUNS = probe.parent
-        (probe / "proofsheet.md").write_text(ps.assemble(kbcases.SLICE, "- probe only"))
-        for cid, desc, code, probe_fn in kbcases.CASES:
-            work = scratch / cid
-            shutil.copytree(copy, work, ignore=shutil.ignore_patterns("__pycache__"))
-            buf = io.StringIO()
-            try:
-                with contextlib.redirect_stdout(buf):
-                    probe_fn(work)
-            except SystemExit:
-                pass
-            if code in buf.getvalue():
-                print(f"PASS {cid}: {desc} -> REFUSED with {code} (the guard fires)")
-            else:
-                print(f"FAIL {cid}: {desc} -> the guard did NOT fire (expected {code}) — a broken guard (KB-05)")
-                print("      repair: fix the check so this known-bad is rejected; building stops until it is")
-                fails.append(cid)
+        if trusted:
+            # module BYTES from the BASE (this file's own repo root — gate.py
+            # IS the base's copy in the trusted run; _load joins "harness/<mod>"
+            # onto this root); DATA stays copy-relative
+            os.environ["ARV_TRUSTED_KB_MACHINERY"] = str(pathlib.Path(__file__).resolve().parents[1])
+        scratch = pathlib.Path(tempfile.mkdtemp(prefix="arv_kb_"))
+        fails = []
+        try:
+            copy = scratch / "repo"
+            shutil.copytree(REPO, copy, ignore=shutil.ignore_patterns(".git", "__pycache__", "harness/runs"))
+            probe = copy / "harness" / "runs" / kbcases.SLICE
+            probe.mkdir(parents=True, exist_ok=True)
+            # the probe declaration: declared-but-UNREFERENCED protected prefixes (the refusals' target)
+            (probe / "scope.txt").write_text("harness/tests\nharness/runs\n.github\nharness/scope.py\n")
+            (probe / "run-01.json").write_text(json.dumps(
+                {"command": "probe", "exit_code": 0, "output_sha256": "0" * 64,
+                 "recorded_at": "2026-10-16T00:00:00+00:00"}) + "\n")
+            if trusted:
+                os.environ["ARV_TRUSTED_ROOT"] = str(copy)
+            ps = kbcases._load(copy, "harness.proofsheet")
+            ps.RUNS = probe.parent
+            (probe / "proofsheet.md").write_text(ps.assemble(kbcases.SLICE, "- probe only"))
+            for cid, desc, code, probe_fn in kbcases.CASES:
+                work = scratch / cid
+                shutil.copytree(copy, work, ignore=shutil.ignore_patterns("__pycache__"))
+                if trusted:
+                    # each probe's freshly-loaded (BASE) machinery must resolve
+                    # its REPO onto THIS case's work copy — the mutations land
+                    # there, and module-bytes trust never changes REPO semantics
+                    os.environ["ARV_TRUSTED_ROOT"] = str(work)
+                buf = io.StringIO()
+                try:
+                    with contextlib.redirect_stdout(buf):
+                        probe_fn(work)
+                except SystemExit:
+                    pass
+                if code in buf.getvalue():
+                    print(f"PASS {cid}: {desc} -> REFUSED with {code} (the guard fires)")
+                else:
+                    print(f"FAIL {cid}: {desc} -> the guard did NOT fire (expected {code}) — a broken guard (KB-05)")
+                    print("      repair: fix the check so this known-bad is rejected; building stops until it is")
+                    fails.append(cid)
+        finally:
+            if trusted:
+                os.environ.pop("ARV_TRUSTED_KB_MACHINERY", None)
+            shutil.rmtree(scratch, ignore_errors=True)
+        return fails
     finally:
-        shutil.rmtree(scratch, ignore_errors=True)
-    return fails
+        if saved_root is not None:
+            os.environ["ARV_TRUSTED_ROOT"] = saved_root
 
 
 def main() -> int:

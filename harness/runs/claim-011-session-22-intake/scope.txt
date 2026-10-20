@@ -1,0 +1,12 @@
+# CLAIM-011 — the session-22 intake + reconciliation (owner turn 22 verbatim; no code this slice)
+CLAIMS.md
+INTENT-LEDGER.md INT-127/D-041
+DECISIONS.md INT-127/D-041
+PLAN.md INT-127/D-041
+STATE.md
+AGENTS.md
+context/WORKLOG.md INT-127/D-041
+context/extracted/22-ARIVOO-EXECUTION-DIRECTIVE-INTAKE.md INT-127
+context/reviews/arivoo-repository-review-2026-10-20.md INT-127
+context/reviews/coderabbit-security-findings-2026-10-20.md INT-127
+harness/runs/claim-011-session-22-intake INT-127/D-041

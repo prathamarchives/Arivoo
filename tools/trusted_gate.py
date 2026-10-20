@@ -170,7 +170,12 @@ def main() -> int:
     base = _valid_root(a.base, "base checkout (--base)")
     if a.phase == "suites":
         return _phase_suites(repo, base)
-    return _phase_gate(repo, base, a.event, a.head, a.diff_ref)
+    # the resolved locals (env-backed), never the raw argparse values — an
+    # env-only invocation (exactly how CI calls this driver) passed None at
+    # the call site before this repair and the gate phase refused with a
+    # false ARV-TG-001 (found live by the S4c binding rehearsal; pinned by
+    # test_08)
+    return _phase_gate(repo, base, event, head, a.diff_ref)
 
 
 if __name__ == "__main__":

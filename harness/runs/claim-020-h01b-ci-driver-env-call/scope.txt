@@ -1,0 +1,6 @@
+# CLAIM-020 — H-01b-CI part 2a: the driver env-call repair (found live by the S4c rehearsal)
+CLAIMS.md
+tools/trusted_gate.py INT-127/D-041
+harness/tests/test_trusted_gate.py INT-127/D-041
+harness/red-records.json INT-127/D-041
+harness/runs/claim-020-h01b-ci-driver-env-call INT-127/D-041

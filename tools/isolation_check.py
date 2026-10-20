@@ -47,6 +47,20 @@ caught and that the checker does not print their values. The isolation claim
 rests on this evidence PLUS verified host permissions (record 16 §4.1 — the
 Slice 10A boundary account), never on an overbroad reading of a green regex scan.
 
+v2.2 (session 23, H-01b-F — F-002, INT-127/D-041): the tracked-file scan is
+bounded and mode-aware. A tracked path is DATA, never authority over how it is
+read: lstat first (a missing entry stays the fail-closed unscannable class);
+a symlink is scanned as LINK TEXT with the target NEVER opened (a tracked link
+to a non-terminating stream cannot hang the checker, and a credential hidden
+in link text is caught — a NEW covered leak class); a non-regular entry is
+refused to the unscannable class without being opened; a regular file is
+opened O_NOFOLLOW, re-verified ISREG on the open fd (race-resistant), and read
+under per-file/total/count budgets with ~25x headroom over the live corpus.
+A breach is a NAMED fail-closed refusal: the over-budget READ is skipped and
+the rest of the scan continues bounded (coverage under the bound — a break
+that silently unsweeps later files would be its own defect), and the run is
+RED regardless.
+
 Usage:
   python3 tools/isolation_check.py            # local agent environment
   python3 tools/isolation_check.py --ci       # CI runner (required CI config checked)
@@ -61,6 +75,7 @@ from __future__ import annotations
 import os
 import re
 import shutil
+import stat as statmod
 import subprocess
 import sys
 import tempfile
@@ -98,6 +113,29 @@ SECRET_ENV_NAMES = re.compile(
 # mode, never counted as unexpected exposure.
 CI_EXPECTED_ENV = {"GITHUB_TOKEN"}
 CI_EXPECTED_PREFIXES = ("GITHUB_", "ACTIONS_", "RUNNER_")
+
+# H-01b-F (F-002, session 23): the tracked-file scan budgets. Headroom over
+# the live corpus (208 files, ~2.3 MB, largest 243 KB) is ~25x; a breach is an
+# anomaly to REFUSE, never a normal state to swallow. Editing these down under
+# the real corpus is a constraint-weakening change (LAW-09).
+SCAN_PER_FILE_BUDGET = 8 * 1024 * 1024
+SCAN_TOTAL_BUDGET = 64 * 1024 * 1024
+SCAN_COUNT_BUDGET = 2000
+
+
+def _open_regular_nofollow(path: Path) -> int:
+    """Race-resistant bounded-open helper (the mutation_runner contract
+    family): refuse symlinks (O_NOFOLLOW), verify the OPEN fd is a regular
+    file, return the fd. The fd — not the path — pins the inode for the read,
+    so a same-name swap after open cannot redirect the scan."""
+    fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0))
+    try:
+        if not statmod.S_ISREG(os.fstat(fd).st_mode):
+            raise OSError("not a regular file")
+    except Exception:
+        os.close(fd)
+        raise
+    return fd
 
 # REQUIRED configuration by execution mode (Slice 10.2 #2): names only, values
 # never. Local agent environment: no environment variables are required
@@ -279,16 +317,73 @@ def check(ci_mode: bool, env: dict[str, str] | None = None, repo_root: Path | No
         print("  [FAIL] no tracked files visible to git ls-files — tracked-file scan vacuous")
     else:
         leaked, unscannable = [], []
+        scan_refused = None   # F-002: the FIRST named budget breach (fail-closed — the run is RED regardless); over-budget reads are SKIPPED while the rest of the scan stays bounded: maximal coverage under the bound, never a break that silently unsweeps later files
+        read_total = 0
+        read_count = 0
         for rel in git_tracked:
             p = repo / rel
+            # H-01b-F (F-002): mode-aware, bounded, race-resistant scanning.
+            # lstat first — a missing entry stays the fail-closed unscannable
+            # class, checked in every state (budget or no budget). A symlink is
+            # scanned as LINK TEXT with the target NEVER opened. Anything
+            # non-regular is refused without being opened. A regular file is
+            # opened O_NOFOLLOW + re-verified ISREG on the fd, then read under
+            # the per-file/total/count budgets; a breach skips the over-budget
+            # READ and continues the scan (the refusal still fails the run).
             try:
-                text = p.read_text(encoding="utf-8", errors="replace")
-            except Exception:
+                st = p.lstat()
+            except OSError:
                 unscannable.append(rel)
                 continue
+            text: str
+            if statmod.S_ISLNK(st.st_mode):
+                try:
+                    text = os.readlink(p)          # the link's own text; the target is never opened
+                except OSError:
+                    unscannable.append(rel)
+                    continue
+            elif not statmod.S_ISREG(st.st_mode):
+                unscannable.append(rel)            # fifo/socket/device: refused, never opened
+                continue
+            else:
+                if st.st_size > SCAN_PER_FILE_BUDGET:
+                    if scan_refused is None:
+                        scan_refused = (f"tracked file exceeds the per-file scan budget ({SCAN_PER_FILE_BUDGET} bytes) "
+                                        "— the over-budget file is SKIPPED, the rest of the scan stays bounded, and the run is RED (F-002); no path is printed by design")
+                    continue
+                if read_total + st.st_size > SCAN_TOTAL_BUDGET or read_count + 1 > SCAN_COUNT_BUDGET:
+                    if scan_refused is None:
+                        scan_refused = (f"tracked content exceeds the total scan budget ({SCAN_TOTAL_BUDGET} bytes) "
+                                        f"or the count budget ({SCAN_COUNT_BUDGET}) — further reads are skipped (missing/non-regular "
+                                        "entries are still checked), and the run is RED (F-002); no path is printed by design")
+                    continue
+                try:
+                    fd = _open_regular_nofollow(p)
+                except OSError:
+                    unscannable.append(rel)        # raced into a symlink/non-regular swap — refused, never dereferenced
+                    continue
+                try:
+                    with os.fdopen(fd, "rb") as fh:
+                        data = fh.read(SCAN_PER_FILE_BUDGET + 1)
+                except OSError:
+                    unscannable.append(rel)
+                    continue
+                if len(data) > SCAN_PER_FILE_BUDGET or len(data) != st.st_size:
+                    if scan_refused is None:
+                        scan_refused = (f"tracked file changed under the scan or exceeds the per-file read budget "
+                                        f"({SCAN_PER_FILE_BUDGET} bytes) — the unstable entry is SKIPPED, the rest of the "
+                                        "scan stays bounded, and the run is RED (F-002); no path is printed by design")
+                    continue
+                text = data.decode("utf-8", "replace")
+                read_total += len(data)
+                read_count += 1
             for label, pat in SECRET_VALUE_PATTERNS:
                 if pat.search(text):
                     leaked.append(f"{rel} ({label})")
+        if scan_refused is not None:
+            findings.append(scan_refused)
+            unexpected += 1
+            print(f"  [FAIL] {scan_refused}")
         if unscannable:
             for rel in unscannable:
                 findings.append(f"tracked file missing from worktree or unreadable: {_redact(rel)} — the index copy is unscanned; inspect the indexed copy before trusting this run")
@@ -300,8 +395,8 @@ def check(ci_mode: bool, env: dict[str, str] | None = None, repo_root: Path | No
                 findings.append(f"secret VALUE pattern found in tracked file: {_redact(rel)} — remove it, rotate the credential, and scrub git history if it was ever pushed{raw_note}")
             unexpected += 1
             print(f"  [FAIL] secret value pattern(s) in tracked files: {_redact(', '.join(leaked))}")
-        if not leaked and not unscannable:
-            print("  [PASS] no secret value patterns in tracked repo files (every tracked file, all extensions, incl. context/raw/)")
+        if not leaked and not unscannable and scan_refused is None:
+            print("  [PASS] no secret value patterns in tracked repo files (every tracked file, all extensions, incl. context/raw/; bounded, mode-aware reads — F-002)")
 
     # 4. .env files must never be tracked — ANY .env-family path: root, nested,
     #    suffixed (.env.local), case-insensitive (.ENV), dotfile forms (.envrc)

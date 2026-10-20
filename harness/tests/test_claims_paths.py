@@ -73,11 +73,11 @@ class ClaimsPathTests(unittest.TestCase):
         README.md.unrelated. At the predecessor the raw startswith accepts the
         sibling prefix and the out-of-scope change slips through uncovered."""
         repo = build_repo(self.td, {"README.md.unrelated": "sibling\n"})
-        decl = repo / "decl"
-        decl.mkdir()
-        (decl / "scope.txt").write_text("README.md\n")
+        runs = self.td / "harness" / "runs" / "claim-x"     # check_scope reads REPO/harness/runs/<slice>/scope.txt
+        runs.mkdir(parents=True, exist_ok=True)
+        (runs / "scope.txt").write_text("README.md\n")
         old = scope.REPO
-        scope.REPO = decl.parent
+        scope.REPO = self.td
         try:
             fails = scope.check_scope(["README.md.unrelated"], "claim-x")
         finally:
@@ -100,8 +100,19 @@ class ClaimsPathTests(unittest.TestCase):
         """A rename's OLD path is part of the changed-path identity too: a
         declaration covering only the old name must see the change (and a
         scope check over the new name must see it). The predecessor's
-        --name-only shows only the destination."""
-        repo = build_repo(self.td, {"old-name.txt": "content\n"})
+        --name-only shows only the destination. The renamed file must exist
+        in the BASE commit — an add-then-rename chain collapses to a plain
+        add and carries no rename record."""
+        repo = self.td / "repo"
+        repo.mkdir()
+        _git(repo, "init", "-q", "-b", "main")
+        _git(repo, "config", "user.email", "t@t.local")
+        _git(repo, "config", "user.name", "T")
+        (repo / "old-name.txt").write_text("content\n")
+        (repo / "base.txt").write_text("base\n")
+        _git(repo, "add", "-A")
+        _git(repo, "commit", "-q", "-m", "base (old-name.txt lives here)")
+        _git(repo, "checkout", "-q", "-b", "slice/claim-x-synthetic")
         _git(repo, "mv", "old-name.txt", "new-name.txt")
         _git(repo, "commit", "-q", "-m", "rename")
         paths = scope.diff_paths("main", repo=repo)

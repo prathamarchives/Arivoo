@@ -111,8 +111,13 @@ def _phase_suites(repo: Path, base: Path) -> int:
             _refuse("ARV-TG-003", f"required suite {t} exceeded the {SUITE_TIMEOUT}s timeout — a hung suite is a failed suite, never a green", "run the suite directly for its named failure and repair it")
         if r.returncode != 0:
             _refuse("ARV-TG-003", f"required suite FAILED: {t} (exit {r.returncode}) — a candidate recipe cannot fabricate a green over a red suite", "run the suite directly for its named failure and repair it")
-        if not r.stdout.strip():
-            _refuse("ARV-TG-004", f"required suite {t} produced NO output with exit 0 — the A03 vacuous class (zero output is never proof the cases ran)", "the suite must report what it ran; a silent exit-0 stub is refused")
+        if not r.stdout.strip() and not r.stderr.strip():
+            # stdout OR stderr counts: unittest-based suites report to STDERR
+            # (found live by the part-2 binding rehearsal — the first driver
+            # draft was unittest-blind and refused every real suite with a
+            # false ARV-TG-004; the silent-stub regression still refuses a
+            # genuinely zero-output suite on BOTH streams)
+            _refuse("ARV-TG-004", f"required suite {t} produced NO output on either stream with exit 0 — the A03 vacuous class (zero output is never proof the cases ran)", "the suite must report what it ran; a silent exit-0 stub is refused")
         print(f"  PASS {t} — exit 0, non-empty output (ran as a subprocess over the candidate tree)")
     print("SUITES GREEN — every required suite ran directly and passed (trusted selection; recipes never consulted)")
     return 0

@@ -1,0 +1,6 @@
+# CLAIM-019 — H-01b-CI part 2a: the driver unittest-blind completion check (found live by the S1b rehearsal)
+CLAIMS.md
+tools/trusted_gate.py INT-127/D-041
+harness/tests/test_trusted_gate.py INT-127/D-041
+harness/red-records.json INT-127/D-041
+harness/runs/claim-019-h01b-ci-driver-unittest-fix INT-127/D-041

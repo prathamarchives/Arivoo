@@ -100,9 +100,15 @@ def kb_dep(copy: pathlib.Path) -> None:
 
 # --- session 19, CLAIM-002 (D-038/LAW-31): the claims-registry guards (red-first) ---
 
+_CLAIMS_ROW_OVERLAP_PARTNER = (
+    "| CLAIM-998 | 19 | Test Agent | `slice/claim-998-overlap-partner` | `context/extracted/99-PROBE-PARTNER.md` "
+    "| — (probe: no reservation) | 2026-10-19 | the SYNTHETIC overlap partner — the probe is self-contained, "
+    "never coupled to a live claim's scope (the A11 probe-coupling class, caught by its own matrix a third time "
+    "at the H-01b split when a legitimate rescope dropped context/extracted/ from the only OPEN claim; fixed for real) |\n"
+)
 _CLAIMS_ROW_OVERLAP = (
     "| CLAIM-999 | 19 | Test Agent | `slice/claim-999-overlap-probe` | `context/extracted/`, `docs/unrelated/` "
-    "| INT-125 | 2026-10-19 | the overlap probe: context/extracted/ is an OPEN claim's non-shared scope |\n"
+    "| INT-125 | 2026-10-19 | the overlap probe: overlaps the synthetic partner's context/extracted/99-PROBE-PARTNER.md |\n"
 )
 
 
@@ -140,6 +146,7 @@ def kb_clm_missing(copy: pathlib.Path) -> None:
 def kb_clm_overlap(copy: pathlib.Path) -> None:
     c = copy / "CLAIMS.md"
     text = c.read_text()
+    text = _open_claims_row(text, _CLAIMS_ROW_OVERLAP_PARTNER)
     c.write_text(_open_claims_row(text, _CLAIMS_ROW_OVERLAP))
     _load(copy, "harness.claims").check_registry()
 

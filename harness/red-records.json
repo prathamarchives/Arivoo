@@ -106,5 +106,10 @@
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice)."
+  },
+  "harness/tests/test_claims_paths.py": {
+    "current_sha256": "e693a758b594a49516de595da1c03b3b6832bdfdcc1c9d1dc9c783d0181a0990",
+    "amendments": [],
+    "red_evidence": "RED-FIRST (H-01c-claims, session 23): NEW suite harness/tests/test_claims_paths.py \u2014 all five cases observed RED at the predecessor 00f3453 for their named reasons: test_01 the sibling-prefix collision (README.md.unrelated slipped past a README.md declaration through the raw startswith), test_02 the human-format diff mangle (a unicode/space path arrived as git's QUOTED-AND-OCTAL-ESCAPED rendering, exact bytes lost), test_03 the rename identity (only the new endpoint present), test_04 the main-selfcheck slice-name exemption still in the gate source, test_05 the both-tables duplicate undetected (the CLAIM-007 drift class)."
   }
 }

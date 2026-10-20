@@ -1,0 +1,9 @@
+# CLAIM-022 — H-01c-claims: strict path identity (F-001) + trusted-mode claims (F-008) + registry-wide duplicate detection (ARV-CLM-006)
+CLAIMS.md
+harness/scope.py INT-127/D-041
+harness/claims.py INT-127/D-041
+harness/gate.py INT-127/D-041
+harness/known-bad/cases.py INT-127/D-041
+harness/tests/test_claims_paths.py INT-127/D-041
+harness/red-records.json INT-127/D-041
+harness/runs/claim-022-h01c-claims-trust INT-127/D-041

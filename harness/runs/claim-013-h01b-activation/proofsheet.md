@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-013-h01b-activation (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 0dc6aaf3e6ca7755aefd800372d2c3ab8e60bac5
-- generated (last record's timestamp): 2026-10-20T09:20:12.696580+00:00
-- run records: 5
+- commit (last run record's): 3469b061e79679112b2ff160f0f19fe08c703217
+- generated (last record's timestamp): 2026-10-20T09:35:55.320598+00:00
+- run records: 7
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 81f13cc867679e21 · 2026-10-20T09:19:31.820169+00:00
@@ -10,6 +10,8 @@
 - `make verify` -> exit 0 · output sha256 16b5411e50a5a0d2 · 2026-10-20T09:20:12.426060+00:00
 - `python3 harness/claims.py` -> exit 0 · output sha256 6beec6ef5d385ac5 · 2026-10-20T09:20:12.492422+00:00
 - `python3 tools/isolation_check.py` -> exit 0 · output sha256 4b8f208f23cf8aa4 · 2026-10-20T09:20:12.696580+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 852cb8ff80d033ca · 2026-10-20T09:35:24.206081+00:00
+- `make verify` -> exit 0 · output sha256 d525b8e6c4b97c0c · 2026-10-20T09:35:55.320598+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - the CI real-floor run (the anchored python3 -I launch with ARV_FLOOR_BASE_TOOLS + mutation_runner.py in the anchor loops) is exercised by the same integration path locally (test_10's anchored-copy launch) but the actual GitHub runner execution is observed only at the PR's CI — pending at push; the post-merge selfcheck re-observes
@@ -20,4 +22,4 @@
 - - the sandbox /tmp quirk (intermittently blind fresh /tmp lookups in driver-spawned children under this host's unittest context) is recorded in record 22 §8; CI's ubuntu runners share /tmp; the test's delivery mechanism is deterministic regardless
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): f99ba14b4128b23da59e556374213f84c9ca2240edeabb0fc55d31c8952beda8
+- sheet sha256 (of the content above, excluding this line): 0c49ba45af70a71cb3713ed32bd4132b25550b09837cbf3a04541c31edf2aece

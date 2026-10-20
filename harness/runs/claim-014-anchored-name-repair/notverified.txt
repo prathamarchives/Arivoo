@@ -1,0 +1,3 @@
+- the repair is live-verified only at the PR's CI + the post-merge run; the anchored-name path (the _anchored suffix resolution) is exercised end-to-end by test_10's completed fixture (the runner copy under its real name — exactly what the workflow's anchor step does) and by the CI floor step itself
+- the deeper lesson is recorded in record 22 §8 catch #11: the vacuous-pass class my own floor guards against appeared in my own regression test — twice (the early refusal, then the runner-load crash both left the marker absent) — a test that asserts an ABSENCE must also prove the mechanism under test actually RAN
+- no fresh technical verifier and no SEV — the pre-H-02 discipline

@@ -300,7 +300,13 @@ def run_floor(cases: list, cand_root: Path, *, driver_path: Path,
     integrity re-verified before every case, the manifest always written."""
     base = Path(floor_base) if floor_base else Path(os.environ.get("ARV_FLOOR_BASE_TOOLS", ""))
     anchored = bool(floor_base or os.environ.get("ARV_FLOOR_BASE_TOOLS"))
-    if anchored and not (base / driver_path.name).is_file():
+    # the anchored copy carries the _anchored suffix; the BASE original does not —
+    # resolve the counterpart name (the post-merge run 39401172275 caught the
+    # mismatch: base/verify_selftest_anchored.py does not exist, only the original)
+    base_name = driver_path.name
+    if base_name.endswith("_anchored.py"):
+        base_name = base_name[: -len("_anchored.py")] + ".py"
+    if anchored and not (base / base_name).is_file():
         print(f"FAIL ARV-FLOOR-002: the trusted floor anchor is missing ({base}) — refusing to run unanchored")
         return 1
     expected_codes = [m[0] for m in cases]
@@ -313,7 +319,7 @@ def run_floor(cases: list, cand_root: Path, *, driver_path: Path,
 
     def integrity() -> list[dict]:
         if anchored:
-            if hashlib.sha256((base / driver_path.name).read_bytes()).hexdigest() != driver_sha:
+            if hashlib.sha256((base / base_name).read_bytes()).hexdigest() != driver_sha:
                 raise FloorRefusal(
                     "ARV-FLOOR-002",
                     "the anchored driver's digest no longer matches the trusted base copy — refusing to continue",

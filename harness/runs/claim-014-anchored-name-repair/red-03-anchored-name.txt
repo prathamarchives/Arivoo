@@ -1,0 +1,17 @@
+test_10_candidate_shadow_module_never_reaches_the_driver (__main__.MutationFloorTests.test_10_candidate_shadow_module_never_reaches_the_driver)
+F-005, the REAL CI path: the trusted judge is copied INTO the ... FAIL
+
+======================================================================
+FAIL: test_10_candidate_shadow_module_never_reaches_the_driver (__main__.MutationFloorTests.test_10_candidate_shadow_module_never_reaches_the_driver)
+F-005, the REAL CI path: the trusted judge is copied INTO the
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 317, in test_10_candidate_shadow_module_never_reaches_the_driver
+    self.assertNotIn("ARV-FLOOR-002", r.stdout + r.stderr,
+AssertionError: 'ARV-FLOOR-002' unexpectedly found in 'FAIL ARV-FLOOR-002: the trusted floor anchor is missing (/home/z/my-project/arivoo/tools) — refusing to run unanchored\n' : the anchored launch must resolve the base counterpart name and RUN
+
+----------------------------------------------------------------------
+Ran 1 test in 0.052s
+
+FAILED (failures=1)
+EXIT=1

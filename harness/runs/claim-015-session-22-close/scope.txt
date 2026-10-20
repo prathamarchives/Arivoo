@@ -1,0 +1,6 @@
+# CLAIM-015 — the session-22 close (registry/record honesty work; no new owner decision)
+CLAIMS.md
+STATE.md
+context/WORKLOG.md INT-127/D-041
+context/extracted/22-ARIVOO-EXECUTION-DIRECTIVE-INTAKE.md INT-127/D-041
+harness/runs/claim-015-session-22-close INT-127/D-041

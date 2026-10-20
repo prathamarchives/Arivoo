@@ -64,9 +64,15 @@ def _base_gate():
     return _REAL_GATE
 
 
-def _stub_suite(name: str, *, fail: bool = False, silent: bool = False) -> str:
+def _stub_suite(name: str, *, fail: bool = False, silent: bool = False,
+                stderr_only: bool = False) -> str:
     if silent:
         return "# silent stub\n"
+    if stderr_only:
+        # the unittest-shaped reporter: everything on STDERR, nothing on stdout
+        return ("import sys\n"
+                "print('unittest-shaped stub: reporting on stderr only', file=sys.stderr)\n"
+                "print('Ran 3 tests in 0.1s')\n")
     return ("# synthetic candidate suite (stubbed for the trusted-gate tests)\n"
             f"print('stub suite ok: {name}')\n" + ("raise SystemExit(1)\n" if fail else ""))
 
@@ -210,8 +216,14 @@ class TrustedGateTests(unittest.TestCase):
     def test_04_gutted_makefile_cannot_fake_suites_ran(self):
         """F-004's positive control: the stub's Makefile recipes are LIES (echo
         success, run nothing) yet the driver's suites phase runs every required
-        suite file directly and is GREEN only because the real suites pass."""
-        stub = build_stub(self.td, gutted_makefile=True)
+        suite file directly and is GREEN only because the real suites pass.
+        The suites report STDERR-ONLY (the unittest shape — the part-2 binding
+        rehearsal caught the driver's first draft refusing them with a false
+        ARV-TG-004: zero-OUTPUT meant zero-STDOUT, and unittest never prints
+        there); stderr-only reporters count as evidence on either stream."""
+        stub = build_stub(self.td, gutted_makefile=True,
+                          suite_mutations={t: _stub_suite(t, stderr_only=True)
+                                           for t in _base_gate().TESTS})
         r = run_driver(self.td, stub, "suites")
         self.assertEqual(r.returncode, 0, r.stdout[-1500:] + r.stderr[-500:])
         for t in _base_gate().TESTS:

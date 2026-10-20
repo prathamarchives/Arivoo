@@ -1,0 +1,103 @@
+test_01_missing_required_suite_is_refused (__main__.TrustedGateTests.test_01_missing_required_suite_is_refused)
+F-004, fail-closed: a required suite deleted from the candidate tree ... FAIL
+test_02_failing_required_suite_is_refused (__main__.TrustedGateTests.test_02_failing_required_suite_is_refused)
+F-004: a required suite that FAILS is ARV-TG-003 — a gutted Makefile ... FAIL
+test_03_silent_suite_is_the_vacuous_class (__main__.TrustedGateTests.test_03_silent_suite_is_the_vacuous_class)
+A suite that exits 0 with NO output is ARV-TG-004 — the A03 vacuous ... FAIL
+test_04_gutted_makefile_cannot_fake_suites_ran (__main__.TrustedGateTests.test_04_gutted_makefile_cannot_fake_suites_ran)
+F-004's positive control: the stub's Makefile recipes are LIES (echo ... FAIL
+test_05_gate_phase_reroots_and_judges_the_candidate (__main__.TrustedGateTests.test_05_gate_phase_reroots_and_judges_the_candidate)
+F-006: the BASE's gate machinery re-rooted over the candidate tree. ... FAIL
+test_06_candidate_knownbad_registry_never_executes_in_the_trusted_run (__main__.TrustedGateTests.test_06_candidate_knownbad_registry_never_executes_in_the_trusted_run)
+F-006's backstop, the named card case: the candidate's ... FAIL
+test_07_invalid_inputs_and_hostile_metadata_are_refused (__main__.TrustedGateTests.test_07_invalid_inputs_and_hostile_metadata_are_refused)
+ARV-TG-001/005: a relative or nonexistent candidate root, a base ... FAIL
+
+======================================================================
+FAIL: test_01_missing_required_suite_is_refused (__main__.TrustedGateTests.test_01_missing_required_suite_is_refused)
+F-004, fail-closed: a required suite deleted from the candidate tree
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 186, in test_01_missing_required_suite_is_refused
+    r = run_driver(self.td, stub, "suites")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 164, in run_driver
+    raise AssertionError("the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt")
+AssertionError: the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt
+
+======================================================================
+FAIL: test_02_failing_required_suite_is_refused (__main__.TrustedGateTests.test_02_failing_required_suite_is_refused)
+F-004: a required suite that FAILS is ARV-TG-003 — a gutted Makefile
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 195, in test_02_failing_required_suite_is_refused
+    r = run_driver(self.td, stub, "suites")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 164, in run_driver
+    raise AssertionError("the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt")
+AssertionError: the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt
+
+======================================================================
+FAIL: test_03_silent_suite_is_the_vacuous_class (__main__.TrustedGateTests.test_03_silent_suite_is_the_vacuous_class)
+A suite that exits 0 with NO output is ARV-TG-004 — the A03 vacuous
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 203, in test_03_silent_suite_is_the_vacuous_class
+    r = run_driver(self.td, stub, "suites")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 164, in run_driver
+    raise AssertionError("the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt")
+AssertionError: the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt
+
+======================================================================
+FAIL: test_04_gutted_makefile_cannot_fake_suites_ran (__main__.TrustedGateTests.test_04_gutted_makefile_cannot_fake_suites_ran)
+F-004's positive control: the stub's Makefile recipes are LIES (echo
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 212, in test_04_gutted_makefile_cannot_fake_suites_ran
+    r = run_driver(self.td, stub, "suites")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 164, in run_driver
+    raise AssertionError("the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt")
+AssertionError: the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt
+
+======================================================================
+FAIL: test_05_gate_phase_reroots_and_judges_the_candidate (__main__.TrustedGateTests.test_05_gate_phase_reroots_and_judges_the_candidate)
+F-006: the BASE's gate machinery re-rooted over the candidate tree.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 223, in test_05_gate_phase_reroots_and_judges_the_candidate
+    r = run_driver(self.td, stub, "gate")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 164, in run_driver
+    raise AssertionError("the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt")
+AssertionError: the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt
+
+======================================================================
+FAIL: test_06_candidate_knownbad_registry_never_executes_in_the_trusted_run (__main__.TrustedGateTests.test_06_candidate_knownbad_registry_never_executes_in_the_trusted_run)
+F-006's backstop, the named card case: the candidate's
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 241, in test_06_candidate_knownbad_registry_never_executes_in_the_trusted_run
+    r = run_driver(self.td, stub, "gate")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 164, in run_driver
+    raise AssertionError("the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt")
+AssertionError: the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt
+
+======================================================================
+FAIL: test_07_invalid_inputs_and_hostile_metadata_are_refused (__main__.TrustedGateTests.test_07_invalid_inputs_and_hostile_metadata_are_refused)
+ARV-TG-001/005: a relative or nonexistent candidate root, a base
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 252, in test_07_invalid_inputs_and_hostile_metadata_are_refused
+    r = run_driver(self.td, stub, "suites", repo="relative/path")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 164, in run_driver
+    raise AssertionError("the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt")
+AssertionError: the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.158s
+
+FAILED (failures=7)

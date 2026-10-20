@@ -1,0 +1,11 @@
+# CLAIM-018 — H-01b-CI: the trusted-CI driver (F-003/F-004 + F-005 -I hardening + F-006 backstop)
+CLAIMS.md
+tools/trusted_gate.py INT-127/D-041
+harness/gate.py INT-127/D-041
+harness/scope.py INT-127/D-041
+harness/claims.py INT-127/D-041
+harness/proofsheet.py INT-127/D-041
+harness/tests/test_trusted_gate.py INT-127/D-041
+harness/red-records.json INT-127/D-041
+.github/workflows/verify.yml INT-127/D-041
+harness/runs/claim-018-h01b-ci-trusted-driver INT-127/D-041

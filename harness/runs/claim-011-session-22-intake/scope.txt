@@ -1,8 +1,8 @@
 # CLAIM-011 — the session-22 intake + reconciliation (owner turn 22 verbatim; no code this slice)
 CLAIMS.md
-INTENT-LEDGER.md
-DECISIONS.md
-PLAN.md
+INTENT-LEDGER.md INT-127/D-041
+DECISIONS.md INT-127/D-041
+PLAN.md INT-127/D-041
 STATE.md
 AGENTS.md
 context/WORKLOG.md INT-127/D-041

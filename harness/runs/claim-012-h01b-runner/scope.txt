@@ -1,0 +1,5 @@
+# CLAIM-012 — H-01b part 1: the trusted child-process runner module (the card's named mutation_runner.py; inert until CLAIM-013 activates it) + the KB-probe self-containment repair its own matrix forced
+CLAIMS.md
+tools/mutation_runner.py INT-127/D-041
+harness/known-bad/cases.py INT-127/D-041
+harness/runs/claim-012-h01b-runner INT-127/D-041

@@ -1,0 +1,6 @@
+# R-01 ANNOTATION (2026-10-20, session 24 — CodeRabbit's PR #48 finding CR-48-3, accepted; posted as a SEPARATE file: the original notverified.txt above is the slice's committed historical limits, byte-preserved — the sheets were assembled over it)
+
+- this slice's five run records and the proof sheet bind commit 0dc6aaf — the PREDECESSOR merge, not a revision containing this slice's driver/runner-orchestration/suite. The recorded outputs were produced in the slice's working tree BEFORE its final commit, so the records cannot serve as immutable evidence binding outputs to a SHA that contains the code under test
+- the lesson (record 22 §8 catch #2: local evidence counts only at the FULLY-COMMITTED candidate HEAD) was learned THIS session and applied from session 24 onward (every slice commits content first, then records runs at the committed HEAD)
+- the authoritative evidence for this slice's behavior: PR #48's CI run 39400826353 (all three checks green over the real tree) + the post-merge observations in CLAIMS.md + the preserved RED outputs red-01/red-02
+- the records are kept as history, honestly labeled by this note — never regenerated retroactively (a re-run at a later HEAD would exercise different code and prove nothing about this slice)

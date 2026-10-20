@@ -1,7 +1,7 @@
 # CLAIM-025 — R-01: the record-evidence repairs (the seven verified bot findings, no code changes)
 context/extracted/22-ARIVOO-EXECUTION-DIRECTIVE-INTAKE.md INT-129/D-042
 context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md
-harness/red-records.json
+harness/red-records.json INT-129/D-042
 harness/runs/claim-013-h01b-activation INT-129/D-042
 harness/runs/claim-014-anchored-name-repair INT-129/D-042
 harness/runs/claim-025-r01-record-evidence INT-129/D-042

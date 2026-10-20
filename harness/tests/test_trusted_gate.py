@@ -166,16 +166,22 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
     return stub
 
 
-def run_driver(td: Path, stub: Path, phase: str, *, event: str = "pull_request",
-               head: str = BRANCH, diff_ref: str = "HEAD~1",
-               repo: str | None = None, base: str | None = None) -> subprocess.CompletedProcess:
+def run_driver(td: Path, stub: Path, phase: str, *, event: str | None = None,
+               head: str | None = None, diff_ref: str = "HEAD~1",
+               repo: str | None = None, base: str | None = None,
+               env_extra: dict | None = None) -> subprocess.CompletedProcess:
     if not DRIVER.is_file():
         raise AssertionError("the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt")
     env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": str(td)}
+    if env_extra:
+        env.update(env_extra)
     cmd = [sys.executable, "-I", str(DRIVER),
            "--repo", repo or str(stub), "--base", base or str(REPO),
-           "--phase", phase, "--event", event, "--head", head,
-           "--diff-ref", diff_ref]
+           "--phase", phase, "--diff-ref", diff_ref]
+    if event is not None:
+        cmd += ["--event", event]
+    if head is not None:
+        cmd += ["--head", head]
     return subprocess.run(cmd, capture_output=True, text=True, timeout=900, env=env)
 
 
@@ -235,13 +241,13 @@ class TrustedGateTests(unittest.TestCase):
         carries an UNDECLARED path is refused with ARV-SCOPE-002 — judged by the
         BASE's machinery, never the candidate's own gate."""
         stub = build_stub(self.td, gutted_makefile=True)
-        r = run_driver(self.td, stub, "gate")
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
         self.assertEqual(r.returncode, 0, r.stdout[-2000:] + r.stderr[-500:])
         self.assertIn("GREEN — the gate passes", r.stdout)
         td2 = Path(str(self.td) + "-breach")
         td2.mkdir()
         stub2 = build_stub(td2, breach=True)
-        r2 = run_driver(td2, stub2, "gate")
+        r2 = run_driver(td2, stub2, "gate", event="pull_request", head=BRANCH)
         self.assertNotEqual(r2.returncode, 0)
         self.assertIn("ARV-SCOPE-002", r2.stdout + r2.stderr)
 
@@ -253,7 +259,7 @@ class TrustedGateTests(unittest.TestCase):
         matrix (the BASE's cases judge the candidate) and stay GREEN — the
         candidate registry was never authority."""
         stub = build_stub(self.td, hostile_registry=True, gutted_makefile=True)
-        r = run_driver(self.td, stub, "gate")
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
         self.assertEqual(r.returncode, 0, r.stdout[-2000:] + r.stderr[-500:])
         self.assertIn("PASS KB-", r.stdout, "the BASE's known-bad matrix must RUN to completion")
         self.assertIn("GREEN — the gate passes", r.stdout)
@@ -267,15 +273,34 @@ class TrustedGateTests(unittest.TestCase):
         r = run_driver(self.td, stub, "suites", repo="relative/path")
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("ARV-TG-001", r.stdout + r.stderr)
-        r = run_driver(self.td, stub, "gate", head="x; touch " + str(self.td / "pwned"))
+        r = run_driver(self.td, stub, "gate", event="pull_request",
+                       head="x; touch " + str(self.td / "pwned"))
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("ARV-TG-001", r.stdout + r.stderr)
         self.assertFalse((self.td / "pwned").exists(), "hostile metadata became shell syntax")
         empty_base = self.td / "empty-base"          # EXISTS but carries no harness/gate.py
         empty_base.mkdir()
-        r = run_driver(self.td, stub, "gate", base=str(empty_base))
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH,
+                       base=str(empty_base))
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("ARV-TG-005", r.stdout + r.stderr)
+
+    def test_08_env_only_invocation_is_the_ci_form(self):
+        """The CI form: metadata arrives through ARV_EVENT_NAME/ARV_PR_HEAD with
+        NO --event/--head flags (the dispatch.py precedent). At the predecessor
+        the call site passed the RAW argparse values — an env-only invocation
+        handed the gate phase None and refused with a false ARV-TG-001 (found
+        live by the S4c binding rehearsal; the other tests never caught it
+        because they pass explicit flags). The env-only invocation must reach
+        and pass the re-rooted gate, identically to the flag form."""
+        stub = build_stub(self.td, gutted_makefile=True)
+        r = run_driver(self.td, stub, "gate",
+                       env_extra={"ARV_EVENT_NAME": "pull_request",
+                                  "ARV_PR_HEAD": BRANCH})
+        self.assertEqual(r.returncode, 0, r.stdout[-2000:] + r.stderr[-500:])
+        self.assertIn("GREEN — the gate passes", r.stdout)
+        self.assertNotIn("ARV-TG-001", r.stdout + r.stderr,
+                         "the env-only form must never be refused as None-metadata")
 
 
 if __name__ == "__main__":

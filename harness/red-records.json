@@ -90,13 +90,19 @@
     "red_evidence": "AMENDMENT 6 (the repair slice for the LIVE-ON-MAIN anchored-name bug, post-merge run 39401172275): test_10 strengthened to kill its own vacuous pass (assert the floor RUNS its case and no ARV-FLOOR-002 fires \u2014 the first draft passed twice-vacuously: the driver first refused on the missing anchor, then crashed loading a runner the fixture never copied) + the fixture completed to mirror CI (the runner module copied under its real name, as the workflow's anchor step does). RED observed at the buggy main (red-03-anchored-name.txt: the ARV-FLOOR-002 refusal, MUT-04 absent, exit 1); GREEN with the runner's base-counterpart name resolution (_anchored suffix stripped). All 16 GREEN."
   },
   "harness/tests/test_trusted_gate.py": {
-    "current_sha256": "6aefcac120d14b809755f69cfb319db21f948301f9fdd48a679c21c7d532cfc1",
+    "current_sha256": "d657c6edd6df879330c01fad379640c092bdb0b4c6dd575e74f944396af46d5a",
     "amendments": [
       {
         "note": "AMENDMENT 1 (H-01b-CI implementation slice, assertions strengthened/added \u2014 never removed, LAW-11): test_07's ARV-TG-005 probe strengthened to the real form (an EXISTING-but-empty base dir \u2014 the nonexistent-dir form fires ARV-TG-001 first); the stub builder corrected with the machinery the BASE's KB probes actually load (harness/gate.py, harness/migrate.py) and the slice's notverified.txt (the --verify re-derivation source \u2014 PRF-01); the red_evidence smash in harness/red.py repaired in the same slice (set only on first record)."
       },
       {
         "note": "AMENDMENT 2 (found live by the H-01b-CI part-2 binding rehearsal, assertions strengthened \u2014 never removed, LAW-11): the driver's completion check was unittest-BLIND (zero-output meant zero-STDOUT; unittest suites report to STDERR \u2014 the first S1b rehearsal over the REAL tree refused test_mutation_floor with a false ARV-TG-004). Repaired: stdout OR stderr counts as evidence. test_04's stubs now report stderr-only to pin the unittest shape; the silent-stub regression (test_03) still refuses a genuinely zero-output suite on BOTH streams."
+      },
+      {
+        "note": "AMENDMENT 3 (found live by the S4c binding rehearsal, assertions ADDED \u2014 never removed, LAW-11): the driver's call site passed the RAW argparse a.event/a.head instead of the env-resolved locals \u2014 an env-only invocation (exactly CI's form, the dispatch.py precedent) handed the gate phase None and refused with a false ARV-TG-001. Repaired: the call passes the resolved locals; NEW test_08 pins the env-only invocation end-to-end; test_05/06/07 now pass metadata EXPLICITLY so their assertions stay non-vacuous under the new run_driver signature (an absent event must never silently satisfy an ARV-TG-001 assertion)."
+      },
+      {
+        "note": "AMENDMENT 3 (continued): test_07's empty-base probe now passes explicit metadata so its ARV-TG-005 assertion is non-vacuous (the new signature's absent event would otherwise mask the machinery refusal with an empty-event ARV-TG-001 \u2014 the vacuous-assertion class, caught before commit)."
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice)."

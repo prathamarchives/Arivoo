@@ -521,3 +521,12 @@ Stage Summary:
 - Unresolved: the five repair slices (R-01..R-05) + the review sweep — the session's next work, in that order
 - Next: R-01 (the record-evidence repairs), then R-02/R-03/R-04 (disjoint code repairs, RED-first), then R-05 (the sweep)
 - Session record: context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md (in progress — §§1-3 this slice)
+
+## Task 33 (CLAIM-025, session 24) — R-01: the record-evidence repairs
+- Task: the seven verified record-evidence defects from the PR #46-#58 bot reviews, all fixed with sourced evidence: record 22 §8's three omitted catches (the stray copy d074af4, the -I deferral, the bootstrap shim) appended additively; §1's 541 CRLF bytes restored byte-identical to bc30575; both smashed red_evidence fields repaired (gate-dispatch restored from e1ef3a0; mutation-floor's honest unrecoverable-statement — the creation value never survived to any commit); claim-013/014's run-record defects annotated; claim-014's 39401172275 wording corrected (it exposed the bug, it did not verify the repair); the duplicate CLAIM-021 row removed
+- The ratchet for the duplicate-row class is routed to R-04(9) (intra-table duplicate detection + its KB case) — the current checks could not see it because ARV-CLM-006 covers only open/closed drift
+- Outcome: the reasoning-record layer's contradictions with its own cross-references are repaired, each repair traceable to git history or labeled as honestly unrecoverable
+- Evidence: record 24 §4 (the disposition ledger); the restored record 22 (prefix byte-identical to bc30575, verified); the red-records amendment notes
+- Unresolved: R-02/R-03/R-04 (the code repairs, RED-first), R-05 (the 37-PR sweep + the enforcement attempt)
+- Next: R-02 (the mutation-floor hardening: walk onerror, process-group kill, truncated/signal-rc rejection, final integrity recheck, manifest-write RED, post-read budget, manifest type checks, the .git worktree file, test_10's vacuous window)
+- Session record: context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md §4

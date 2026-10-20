@@ -66,3 +66,44 @@
 **Assertion changes on existing cases (LAW-11, amendment 7 in the red records):** test_10 (the ALWAYS-GREEN candidate is intentionally not a catch — the JUDGED disposition is now the proof the mechanism ran); test_18 (the swapped-FIFO read-back reclassifies from ARV-FLOOR-001 to ARV-FLOOR-003 — the unread-evidence refusal, strictly more precise; the not-caught/never-hang property unchanged).
 
 **The slice's own two bugs, caught by its own tests before any commit (the honest failure log):** (1) the Popen `check=` kwarg slip — 16 suite failures, and the finally-return swallowed the TypeError (the A9d-adjacent unnamed-RED residual: a machinery crash surfaces as RED with no named code, never green — stated, fail-closed held); (2) the serialize-before-assign manifest bug — the artifact briefly carried verdict=None; restructured so the record's own validation/verdict keys are assigned BEFORE serialization.
+
+## §6 — R-05: the review-coverage sweep (the turn's first ask — LANDED)
+
+**37/37 host verification reviews posted** on the merged PRs that had no review comment at the time (#3, #6, #7, #9–#34, #39–#45, #55 — all predating the CodeRabbit/Greptile installation, first coverage #46). Each review posts the honest form for already-merged work: merge state/commit, the CI evidence at the head, the files changed, content survival at HEAD (sampled via the tree), and the findings the mechanical verification surfaced (none blocking; superseded-scaffold paths noted as verification notes). Every bot-reviewed PR's findings were dispositioned in their slices (#59/#60/#61) — never silently dropped. The sweep's machine log: `r05-results.json` (session workspace); the results table: 37 POSTED, 0 failures.
+
+**The enforcement attempt (D-042 element 3) — OUTCOME: LIVE:** GitHub branch protection on `main` now requires **1 approving review** per merge (`dismiss_stale_reviews: true`), alongside the existing three required status checks (strict, admins included, no force pushes). The token COULD write protection — the F-003-era "read-only" observation is honestly revised to its precise form: the formal REVIEW-EVENT API is blocked (COMMENTED-review posts are refused — the conversation-comment channel is the standing host-review form), but protection writes succeeded. **The operating-model consequence, stated:** from this point an approving review is mechanically required — the agent's token cannot approve, so every subsequent PR lands and WAITS for the owner's manual approval in the GitHub UI. This PR (#62) is the FIRST under the new gate: its host review posts, its checks run, and it waits — never bypassed, never force-pushed. That is the owner's rule made mechanical.
+
+## §7 — the verification coverage summary
+
+- PRs #1–#58 (pre-session): every PR now carries at least one review comment (Codex 9, CodeRabbit 4, Greptile 13, host 37 + the disposition replies). **Review coverage: 58/58.**
+- The 42 CodeRabbit/Greptile findings on #46–#58: every one dispositioned with its reasoning — 21 fixed (R-01's 7 record-evidence repairs via #60; R-02's 10 floor repairs + the 2 #61-review classes via #61; the already-fixed 7 verified as such), 2 reasoned no-fixes (the parent-dir swap neutralized by the double content-digest verification; the superseded PLAN-count history), the remaining 9 (R-03's 5 isolation-tool findings + R-04's 4 gate/scope/known-bad/workflow findings + the closed-dup ratchet) remain READY on their PLAN cards with the findings' exact texts preserved in this record's routing and the live reviews — the session's honest unfinished work, never silently dropped.
+- The #59/#60/#61 review rounds caught 11 real defects in MY OWN work (the 21/37 count error; the STATE field incoherence; the overwritten historical limits + the sheet decoupling + the misquote; the machinery-crash swallow; the missing not-verified; the root case; the NPROC value) — the loop the owner ordered, working.
+
+## §8 — the honest failure log (every catch, this session)
+
+1. ARV-SCOPE-002/ARV-CLM-002 ×5 (slice 1): STATE undeclared; CLAIM-023 left in both tables after its rule-4 row; the missing retroactive notations on INT-128/129; the claim cell's inline owner-refs breaking path matching; the cell missing STATE — each repaired, re-gated.
+2. ARV-PRF-004 (slice 1): the proof sheet predating its run records — re-recorded at the fully-committed content HEAD (the CodeRabbit claim-013/014 lesson applied from then on).
+3. ARV-CLM-006 via the dispatch suite (slice 2): CLAIM-024's rule-4 close MISSED — its open row overlapped CLAIM-025 on record 24; the suite's live-registry assertion caught it; closed canonically.
+4. The #60 round: my annotation OVERWROTE claim-013's committed historical limits and decoupled its assembled proof sheet from its source; my correction MISQUOTED the original line — Greptile caught all three; the originals restored byte-identical, the annotations moved to separate files, the wording made precise.
+5. The committed-conflict-marker incident (slice 3): the stash-pop conflict in red-records.json was committed UNRESOLVED — the dispatch suite's fixture clone crashed on the invalid JSON; rebuilt on main's version; the make verify exit 2 was recorded because --record does not propagate exit codes (a harness gap honestly noted: the record is the evidence, the record's exit code is IN it — checked at the gate, not at the shell).
+6. The R-02 implementation's own two bugs caught by its own tests before any commit: the Popen `check=` kwarg slip (16 failures — and the finally-return swallowed the TypeError, fail-closed RED but unnamed) and the serialize-before-assign manifest bug (the artifact briefly carried verdict=None).
+7. ARV-PROT-002 ×3: the owner refs demanded on the protected test file, red-records.json, and (slice 3 again) the test file after the #61-review edit — each declaration repaired with its INT/D ref.
+8. The #61 round: my notverified.txt missing entirely (the sheet carried the placeholder); the root-run blindness; the NPROC hard-limit blindness; the machinery-crash swallow — 6 bot findings, all real, all dispositioned, 4 fixed in-PR.
+9. The #60 merge incident: an ambiguous merge API response, then I deleted the branch before verifying — PR #60 closed-unmerged for ~4 minutes; recovered (branch re-pushed, PR reopened, merge retried with verification: merged:True checked BEFORE cleanup; the standing lesson re-learned: verify the merged state before any deletion).
+10. ARV-RED-002 (slice 3, twice): the test-file edits after their record without an amendment — amendments 7 and 8 recorded.
+
+## §9 — evidence chain
+
+PRs #59 (`4b8cb6f`), #60 (`ae4815e`), #61 (`3ec9115`) — each: three-check green at the head, the host review posted BEFORE merge, the bot findings dispositioned before merge, post-merge observed. The rig: rebuilt FACT-001-exact after the environment reset corrupted the data dir (fourth rebuild). The suites: 27/27 floor (8 new RED-first cases), 13/13 known-bads, canonical 51/0 at every landing. The sweep: 37/37 posted; the protection flip observed live (the API's own response + the re-read).
+
+## §10 — defects and disruptions (named, honestly)
+
+The environment reset (rig corruption) — rebuilt, recorded. The display pipeline's `[m` eating artifact (tool-output only, never the files — verified by base64 reads). The `&&`-pipe masking make's exit code — the commit went through on a red verify; caught immediately, the record amended, re-verified green before the push landed the fix. The context window's own budget: R-03/R-04's 9 findings are the session's named unfinished work — routed, READY, their exact texts preserved.
+
+## §11 — named gap
+
+The formal review-event API remains token-blocked (the approving review the new protection requires can only come from the owner's UI action). The conversation-comment form carries the host reviews' full content, but "approved" as a GitHub review STATE will not exist from this token. The owner's per-PR approval is now the mechanical merge gate — by design, per the turn.
+
+## §12 — the session close
+
+Three PRs merged (#59/#60/#61), 37 reviews posted, the standing rule recorded (D-042), enforced as far as the environment honestly permits (protection LIVE: 1 approving review required), and this close PR (CLAIM-027) is the first to wait for the owner's approval — the rule's first live exercise on the repo itself. The exact next action after this PR merges: R-03 (the isolation-tool hardening: G-51-1..5), then R-04 (the gate/scope/known-bad/workflow repairs + the closed-dup ratchet: G-54-1, G-56-1/2, G-57-1..5), then the ledger one-liner slice per STATE's re-derivation. A clean close at READY cards — never a silent stop-work.

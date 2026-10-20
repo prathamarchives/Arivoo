@@ -536,3 +536,11 @@ Stage Summary:
 - Two of the slice's own bugs caught by its own tests before any commit: the Popen check= kwarg slip (surfaced as 16 failures — the finally-return swallowed the TypeError, the A9d-adjacent unnamed-RED residual honestly noted) and the serialize-before-assign manifest bug (the artifact briefly carried verdict=None — restructured: the record's own keys assigned before serialization; both now green and recorded)
 - LAW-11 amendment 7 in the red records; the growing-file budget race is untestable deterministically at suite speed — stated in the not-verified list, never fake-tested
 - Next: R-03 (isolation tools), R-04 (gate/scope/known-bad/workflow), R-05 (the 37-PR sweep)
+
+## Task 35 (CLAIM-027, session 24) — R-05 + the close: the sweep LANDED, the rule LIVE
+- Task: the turn's first ask delivered — 37/37 host verification reviews on the unreviewed merged PRs (58/58 total coverage); the enforcement attempt's outcome recorded LIVE: main's branch protection now REQUIRES 1 approving review (dismiss_stale_reviews) + the three checks — the close PR (#62) is the first to wait for the owner's approval
+- The session's landings: #59 (the intake: INT-128 late-mint + INT-129 + D-042 + the R-routing), #60 (R-01: the 7 record-evidence repairs, Greptile's 3 findings fixed in-PR), #61 (R-02: the 10 floor repairs, 8 RED-first regressions, 6 bot findings dispositioned, 4 fixed in-PR)
+- The honest ledger: 10 wall/review catches recorded in record 24 §8 (the #60 closed-unmerged recovery incident among them); R-03/R-04's 9 findings remain READY — the named unfinished work
+- Evidence: record 24 §§1-12; the sweep log r05-results.json; the protection API's own response re-read
+- Next: the owner's approving review on this PR; then R-03, R-04, the one-liner slice, H-01c-authority/evidence, H-02
+- Session record: context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md (COMPLETE)

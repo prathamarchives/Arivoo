@@ -2,6 +2,6 @@
 CLAIMS.md
 STATE.md
 AGENTS.md
-context/WORKLOG.md
+context/WORKLOG.md INT-127/D-041
 context/extracted/23-SESSION-23-EXECUTION.md
-harness/runs/claim-023-session-23-close
+harness/runs/claim-023-session-23-close INT-127/D-041

@@ -511,3 +511,13 @@ Stage Summary:
 - Unresolved: the one-liner slice, H-01c-authority, H-01c-evidence/privacy (F-007), H-02 — all READY, disjoint; then the P3 entry sequence (P3-00 → P3-M0 ∥ P3-K0 → P3-01)
 - Next: the ledger one-liner consistency slice (the canonical-verifier family + the 51-count references)
 - Session record: context/extracted/23-SESSION-23-EXECUTION.md (COMPLETE §§1-12)
+
+## Task 32 (CLAIM-024, session 24) — the turn-24 intake: the review-sweep directive + the turn-23 late mint + D-042
+- Task: owner turn 24 verbatim (record 24 §1 — "all these prs must have review comments... do not merge a pr without the reviews complete"); the turn-23 late mint INT-128 (Greptile's PR #58 catch — the standing instruction worked seven slices unminted); INT-129; D-042 (the review-complete-before-merge standing rule, severable); the R-01..R-05 repair-card routing in PLAN; CLAIM-023's rule-4 closed row; AGENTS' merge-discipline amendment
+- The session's evidence base: all 58 PRs enumerated for review coverage (21 reviewed / 37 with NO review — the counts corrected by CodeRabbit+Greptile's #59 review, the loop working); all 42 CodeRabbit/Greptile findings on #46-#58 read in full and verified against HEAD 963356b BEFORE any edit — 7 already-fixed (the anchored-name class, the env-call, the unittest-blindness, the red.py smash guard, STATE's green-overstatement), 2 reasoned no-fixes (the parent-dir swap is neutralized by the double content-digest verification; the closed PLAN-card counts are superseded history), 24 live defects routed to R-01..R-04; the retroactive coverage sweep routed to R-05
+- Preflight: the rig rebuilt AGAIN (the env reset corrupted the data dir — fourth rebuild, the FACT-001 pattern); make verify GREEN 13/13; canonical 51/0; selftest 30/30; isolation green; isolation selftest green
+- Outcome: turns 23-24 durably in the ledger (111 statused intents); the standing rule recorded at its canonical homes (D-042 + AGENTS + the registry); every repair finding routed to a named card with its disposition
+- Evidence: record 24 §§1-3; INT-128/INT-129 detailed blocks + the session-24 audit note; D-042; PLAN's R-01..R-05
+- Unresolved: the five repair slices (R-01..R-05) + the review sweep — the session's next work, in that order
+- Next: R-01 (the record-evidence repairs), then R-02/R-03/R-04 (disjoint code repairs, RED-first), then R-05 (the sweep)
+- Session record: context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md (in progress — §§1-3 this slice)

@@ -1,0 +1,4 @@
+- the intake slice changes ONLY memory/state artifacts (the record, ledger, decisions, AGENTS, PLAN, CLAIMS, WORKLOG, STATE's minimal re-sync, this sheet); no tool, harness, or workflow file changed — the suites re-ran green at this head unchanged
+- the branch-protection enforcement attempt (D-042 element 3) has NOT run yet — it runs in the R-05 sweep slice; its outcome will be recorded there and in D-042's evidence trail
+- CodeRabbit/Greptile coverage of THIS slice's PR is best-effort (observed: CodeRabbit stopped after #49; Greptile skipped #49/#55) — the host review is the floor that satisfies D-042, and it posts BEFORE the merge
+- the 42 bot findings' full disposition table (fixed / already-fixed / no-fix with reasoning) lands in record 24 §5 as the R-01..R-05 slices close; this slice carries the routing only

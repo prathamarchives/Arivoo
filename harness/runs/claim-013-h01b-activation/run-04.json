@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/claims.py",
+  "exit_code": 0,
+  "commit": "0dc6aaf3e6ca7755aefd800372d2c3ab8e60bac5",
+  "output_sha256": "6beec6ef5d385ac599da9371bfde60a6251eb53cd5e1baee571a78ed42fba0a8",
+  "recorded_at": "2026-10-20T09:20:12.492422+00:00"
+}

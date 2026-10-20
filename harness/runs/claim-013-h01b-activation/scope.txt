@@ -1,0 +1,13 @@
+# CLAIM-013 — H-01b part 2: THE ACTIVATION (the thin trusted driver + the 16-case RED-first suite + the CI floor step)
+CLAIMS.md
+STATE.md
+tools/verify_selftest.py INT-127/D-041
+tools/mutation_runner.py INT-127/D-041
+.github/workflows/verify.yml INT-127/D-041
+harness/gate.py INT-127/D-041
+harness/red.py INT-127/D-041
+harness/red-records.json INT-127/D-041
+harness/tests/test_mutation_floor.py INT-127/D-041
+context/WORKLOG.md INT-127/D-041
+context/extracted/22-ARIVOO-EXECUTION-DIRECTIVE-INTAKE.md INT-127/D-041
+harness/runs/claim-013-h01b-activation INT-127/D-041

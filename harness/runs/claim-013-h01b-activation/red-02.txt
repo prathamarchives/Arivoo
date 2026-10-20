@@ -1,0 +1,180 @@
+test_01_early_exit_candidate_must_fail_the_floor (__main__.MutationFloorTests.test_01_early_exit_candidate_must_fail_the_floor)
+A03 form 1: candidate `SystemExit(0)` at import. The floor must exit ... FAIL
+test_02_words_without_refusal_must_fail_the_floor (__main__.MutationFloorTests.test_02_words_without_refusal_must_fail_the_floor)
+A candidate that PRINTS the expected failure words but returns ... FAIL
+test_03_checker_crash_is_not_a_named_refusal (__main__.MutationFloorTests.test_03_checker_crash_is_not_a_named_refusal)
+The narrowed any-exception semantics: an ordinary child exception ... FAIL
+test_04_missing_candidate_verifier_fails_closed (__main__.MutationFloorTests.test_04_missing_candidate_verifier_fails_closed)
+No tools/verify_canonical_layer.py in the candidate tree → ... FAIL
+test_05_midrun_source_mutation_must_be_detected (__main__.MutationFloorTests.test_05_midrun_source_mutation_must_be_detected)
+A03 form 2: a candidate child that mutates the SOURCE corpus mid-run ... FAIL
+test_06_missing_trusted_anchor_fails_closed (__main__.MutationFloorTests.test_06_missing_trusted_anchor_fails_closed)
+An explicit --floor-base that does not exist must refuse — the ... FAIL
+test_07_corpus_symlink_must_be_rejected_sanitized (__main__.MutationFloorTests.test_07_corpus_symlink_must_be_rejected_sanitized)
+A tracked-path symlink inside the corpus must refuse with ... FAIL
+test_08_oversized_file_must_trip_the_budget (__main__.MutationFloorTests.test_08_oversized_file_must_trip_the_budget)
+A 16 MiB regular corpus file (per-file budget 8 MiB) must refuse ... FAIL
+test_09_secret_shaped_failure_never_leaks (__main__.MutationFloorTests.test_09_secret_shaped_failure_never_leaks)
+F-012 class: a secret-shaped filename that breaks fixture ... FAIL
+test_10_candidate_shadow_module_never_reaches_the_driver (__main__.MutationFloorTests.test_10_candidate_shadow_module_never_reaches_the_driver)
+F-005, the REAL CI path: the trusted judge is copied INTO the ... ok
+test_11_manifest_validator_refuses_incomplete_and_malformed (__main__.MutationFloorTests.test_11_manifest_validator_refuses_incomplete_and_malformed)
+Unit-level: the manifest validator must refuse a missing case, a ... FAIL
+test_12_green_run_writes_complete_manifest (__main__.MutationFloorTests.test_12_green_run_writes_complete_manifest)
+The positive path over the REAL corpus: 30/30 caught, exit 0, and a ... ERROR
+test_13_fake_fail_passes_the_floor_protocol_by_design (__main__.MutationFloorTests.test_13_fake_fail_passes_the_floor_protocol_by_design)
+RESIDUAL DEMONSTRATION (labeled, never a security claim): a verifier ... FAIL
+test_14_hanging_child_is_a_named_timeout_refusal (__main__.MutationFloorTests.test_14_hanging_child_is_a_named_timeout_refusal)
+A child that hangs is killed at the case timeout and recorded as ... FAIL
+test_15_output_flood_is_bounded_and_fails_closed (__main__.MutationFloorTests.test_15_output_flood_is_bounded_and_fails_closed)
+A child flooding stdout is capped by the per-process output budget ... FAIL
+test_16_failed_construction_still_cleans_the_temp_root (__main__.MutationFloorTests.test_16_failed_construction_still_cleans_the_temp_root)
+The cleanup scope is established BEFORE any construction: after a ... FAIL
+
+======================================================================
+ERROR: test_12_green_run_writes_complete_manifest (__main__.MutationFloorTests.test_12_green_run_writes_complete_manifest)
+The positive path over the REAL corpus: 30/30 caught, exit 0, and a
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 343, in test_12_green_run_writes_complete_manifest
+    m = json.loads(mout.read_text())
+                   ^^^^^^^^^^^^^^^^
+  File "/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/arv-floor-manifest-1_t3gc_2/manifest.json'
+
+======================================================================
+FAIL: test_01_early_exit_candidate_must_fail_the_floor (__main__.MutationFloorTests.test_01_early_exit_candidate_must_fail_the_floor)
+A03 form 1: candidate `SystemExit(0)` at import. The floor must exit
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 206, in test_01_early_exit_candidate_must_fail_the_floor
+    self.assertNotEqual(r.returncode, 0,
+AssertionError: 0 == 0 : the vacuous pass MUST be refused — exit code was 0
+
+======================================================================
+FAIL: test_02_words_without_refusal_must_fail_the_floor (__main__.MutationFloorTests.test_02_words_without_refusal_must_fail_the_floor)
+A candidate that PRINTS the expected failure words but returns
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 215, in test_02_words_without_refusal_must_fail_the_floor
+    self.assertNotEqual(r.returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_03_checker_crash_is_not_a_named_refusal (__main__.MutationFloorTests.test_03_checker_crash_is_not_a_named_refusal)
+The narrowed any-exception semantics: an ordinary child exception
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 223, in test_03_checker_crash_is_not_a_named_refusal
+    self.assertNotEqual(r.returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_04_missing_candidate_verifier_fails_closed (__main__.MutationFloorTests.test_04_missing_candidate_verifier_fails_closed)
+No tools/verify_canonical_layer.py in the candidate tree →
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 231, in test_04_missing_candidate_verifier_fails_closed
+    self.assertNotEqual(r.returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_05_midrun_source_mutation_must_be_detected (__main__.MutationFloorTests.test_05_midrun_source_mutation_must_be_detected)
+A03 form 2: a candidate child that mutates the SOURCE corpus mid-run
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 242, in test_05_midrun_source_mutation_must_be_detected
+    self.assertNotEqual(r.returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_06_missing_trusted_anchor_fails_closed (__main__.MutationFloorTests.test_06_missing_trusted_anchor_fails_closed)
+An explicit --floor-base that does not exist must refuse — the
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 252, in test_06_missing_trusted_anchor_fails_closed
+    self.assertIn("ARV-FLOOR-002", r.stdout + r.stderr)
+AssertionError: 'ARV-FLOOR-002' not found in 'Traceback (most recent call last):\n  File "/home/z/my-project/arivoo/tools/verify_selftest.py", line 30, in <module>\n    from verify_canonical_layer import INT_HEADER, REPO, Layer\nModuleNotFoundError: No module named \'verify_canonical_layer\'\n'
+
+======================================================================
+FAIL: test_07_corpus_symlink_must_be_rejected_sanitized (__main__.MutationFloorTests.test_07_corpus_symlink_must_be_rejected_sanitized)
+A tracked-path symlink inside the corpus must refuse with
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 264, in test_07_corpus_symlink_must_be_rejected_sanitized
+    self.assertNotEqual(r.returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_08_oversized_file_must_trip_the_budget (__main__.MutationFloorTests.test_08_oversized_file_must_trip_the_budget)
+A 16 MiB regular corpus file (per-file budget 8 MiB) must refuse
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 273, in test_08_oversized_file_must_trip_the_budget
+    self.assertNotEqual(r.returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_09_secret_shaped_failure_never_leaks (__main__.MutationFloorTests.test_09_secret_shaped_failure_never_leaks)
+F-012 class: a secret-shaped filename that breaks fixture
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 282, in test_09_secret_shaped_failure_never_leaks
+    self.assertNotEqual(r.returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_11_manifest_validator_refuses_incomplete_and_malformed (__main__.MutationFloorTests.test_11_manifest_validator_refuses_incomplete_and_malformed)
+Unit-level: the manifest validator must refuse a missing case, a
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 316, in test_11_manifest_validator_refuses_incomplete_and_malformed
+    self.assertTrue(hasattr(vs, "validate_manifest"),
+AssertionError: False is not true : the driver must expose validate_manifest (base code, imported in-process by this base-side test)
+
+======================================================================
+FAIL: test_13_fake_fail_passes_the_floor_protocol_by_design (__main__.MutationFloorTests.test_13_fake_fail_passes_the_floor_protocol_by_design)
+RESIDUAL DEMONSTRATION (labeled, never a security claim): a verifier
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 365, in test_13_fake_fail_passes_the_floor_protocol_by_design
+    self.assertIn("boundary", r.stdout.lower())
+AssertionError: 'boundary' not found in "known-bad self-test — 30 mutations, each must fail its named check\n\nmut-14 pass  tamper a raw corpus file (append whitespace to 0.txt) — aut-02 was prose-only before the manifest → ver-802 failed as required\nmut-15 pass  fabricate a ledger quote (mutate int-083's words into text that is not in raw) → ver-803 failed as required\nmut-16 pass  delete the source-coverage manifest — the coverage control disappears → ver-801 failed as required\nmut-17 pass  stale state pointer — rewrite the highest session-record reference in state.md to a lower record on disk → ver-804 failed as required\nmut-18 pass  strip a restored source line from int-035 — the no-provenance defect class returns → ver-803 failed as required\nmut-19 pass  add a banner-less file to context/extracted/ — the static-briefs blind spot the sub-agent found (f-01 class recurring in the verifier) → ver-205 failed as required\nmut-20 pass  wrong-line citation: point int-083 at 1.txt:100 while its quote lives at 1.txt:444 — the file-level-vs-region gap the sub-agent found → ver-803 failed as required\nmut-01 pass  remove the newest ledger entry (int-091) — the f-01 class: entries vanish past a frozen bound → ver-212 failed as required\nmut-02 pass  duplicate a ledger header (int-091 twice) — uniqueness must catch it → ver-201 failed as required\nmut-03 pass  corrupt a status ('active' → 'actve') — the old regex was blind to bad statuses → ver-202 failed as required\nmut-04 pass  delete /state.md — the current-state index disappears → ver-701 failed as required\nmut-05 pass  remove the verification-protocol rule from agents.md — content-generic since 2026-10-14 (session 16 / d-034): removes whichever line(s) carry int-070, so the mutation cannot no-op when the host wording legitimately changes (the base-anchored self-test red-flags a no-op as a blind guard — the pr #6/#12/#17 re-target class) → ver-109 failed as required\nmut-06 pass  restore the blanket 'silence is consent' (f-02 regression) → ver-506 failed as required\nmut-07 pass  remove the change-channel rule from agents.md (fail-001's guard) → ver-107 failed as required\nmut-08 pass  drop the intent-ledger.md step from the read order (boot-sequence regression) — content-generic since 2026-10-14: removes whichever numbered read-order line names the ledger, so the mutation cannot silently no-op when the boot order changes (the base-anchored self-test red-flags a no-op as a blind guard) → ver-101 failed as required\nmut-21 pass  regress agents to blanket ledger-first boot — rewrite the numbered intent-ledger read-order step into the pre-supersession form, whatever its current wording (the int-107/d-027(3) supersession silently undone) → ver-110 failed as required\nmut-22 pass  drop the worklog tail from the boot path — the early coordination step disappears (the int-107 read path broken) → ver-110 failed as required\nmut-09 pass  break int-051's superseded_by link (silent supersession) → ver-204 failed as required\nmut-10 pass  delete failures/fail-001.yaml — a failure loses its record → ver-703 failed as required\nmut-11 pass  regress the f-05 qualifier — classification words become a gate for concept formation again (content-generic: targets the 'never a gate' qualifier, whatever the surrounding wording) → ver-211 failed as required\nmut-23 pass  malform the newest entry header (strip its status segment) — the entry vanishes from the strict status view while the entry splitter still sees it → ver-903 failed as required\nmut-24 pass  cite a non-existent ledger entry and a non-existent decision in a root document — dangling authority references → ver-901 failed as required\nmut-25 pass  drift the stated statused-intent count (content-generic: adjusts whatever count agents.md currently states) → ver-902 failed as required\nmut-26 pass  silently drop an execution §6 open-question row — the register disagrees across its mirrors (a closure by prose removal, never by a d-row) → ver-504 failed as required\nmut-27 pass  reintroduce the superseded tag rule — rewrite north-star's 'no tag field' into the optional-tag form while the c4 marker stays (slice 9's class (d), sub-agent finding 1: the p1 blind guard this mutation proved) → ver-904 failed as required\nmut-28 pass  strip a closed question's closure pointer — d-007's q1-closure annotation loses its d-028 reference, so the closed question reads as open again in a current canonical document (the arivoo review's first p1 finding, the drift class) → ver-904 failed as required\nmut-29 pass  regress §9 to the superseded glm-governing form — the verification family becomes a host requirement again while d-028 stands (the arivoo review's second p1 finding, the agent-agnostic propagation class) → ver-507 failed as required\nmut-30 pass  move the worklog-tail boot step below the ledger step — the coordination context no longer loads before the selective authority dive; the directory-separator path was invisible to the old parser (the arivoo review's p3 finding), so this mutation no-ops the old ver-110 — the repaired parser must catch it → ver-110 failed as required\nmut-12 pass  delete the review protocol proposal — review artifacts lose their home → ver-704 failed as required\nmut-13 pass  gut state.md's required fields (keep the file, lose the index) → ver-701 failed as required\n\nself-test green — 30/30 known-bad mutations caught by their named checks.\nthe guards are themselves tested (kb-01..06 spirit, document-level).\n"
+
+======================================================================
+FAIL: test_14_hanging_child_is_a_named_timeout_refusal (__main__.MutationFloorTests.test_14_hanging_child_is_a_named_timeout_refusal)
+A child that hangs is killed at the case timeout and recorded as
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 374, in test_14_hanging_child_is_a_named_timeout_refusal
+    self.assertNotEqual(r.returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_15_output_flood_is_bounded_and_fails_closed (__main__.MutationFloorTests.test_15_output_flood_is_bounded_and_fails_closed)
+A child flooding stdout is capped by the per-process output budget
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 384, in test_15_output_flood_is_bounded_and_fails_closed
+    self.assertNotEqual(r.returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_16_failed_construction_still_cleans_the_temp_root (__main__.MutationFloorTests.test_16_failed_construction_still_cleans_the_temp_root)
+The cleanup scope is established BEFORE any construction: after a
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_mutation_floor.py", line 396, in test_16_failed_construction_still_cleans_the_temp_root
+    self.assertNotEqual(r.returncode, 0)
+AssertionError: 0 == 0
+
+----------------------------------------------------------------------
+Ran 16 tests in 188.475s
+
+FAILED (failures=14, errors=1)
+EXIT=1

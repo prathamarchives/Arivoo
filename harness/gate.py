@@ -57,7 +57,8 @@ _kb_spec.loader.exec_module(kbcases)
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
-         "harness/tests/test_commands.py", "harness/tests/test_gate_dispatch.py")
+         "harness/tests/test_commands.py", "harness/tests/test_gate_dispatch.py",
+         "harness/tests/test_mutation_floor.py")
 
 
 def run_cmd(cmd: list) -> subprocess.CompletedProcess:

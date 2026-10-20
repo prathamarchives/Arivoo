@@ -1,0 +1,9 @@
+# CLAIM-024 — the turn-24 intake: the review-sweep directive verbatim + the turn-23 late mint (INT-128) + INT-129 + D-042 + the R-01..R-05 routing + CLAIM-023's rule-4 row
+context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md
+INTENT-LEDGER.md INT-128/INT-129/D-042
+DECISIONS.md INT-129/D-042
+AGENTS.md INT-129/D-042
+PLAN.md INT-129/D-042
+CLAIMS.md
+context/WORKLOG.md INT-129/D-042
+harness/runs/claim-024-turn24-intake INT-129/D-042

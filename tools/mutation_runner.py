@@ -30,6 +30,7 @@ COUNT_BUDGET = 5000
 READ_CAP = 1024 * 1024                 # child stdout/stderr read-back cap
 CHILD_FSIZE = 8 * 1024 * 1024          # child per-file write cap
 CHILD_AS = 512 * 1024 * 1024           # child address-space cap
+CHILD_NPROC = 256                      # child process-count cap (RLIMIT_NPROC; the whole-UID form is why the value sits well above a runner's baseline)
 DEFAULT_CASE_TIMEOUT = 120             # seconds, per case (wall clock)
 SKIP_DIRS = {".git", "__pycache__", ".pg"}  # .pg: gitignored local rig dir — never corpus
 POSIX = os.name == "posix"
@@ -40,13 +41,15 @@ BOUNDARY = (
     "judge (the run turns RED, never green); the workflow-definition trust boundary is "
     "H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in "
     "this interpreter; every case ran in a fresh disposable fixture; integrity was "
-    "re-verified before every case; the manifest records what actually happened. "
-    "FLOOR-REVIEW-1 sharpening (session 23): the manifest artifact is a RECORD, not a "
-    "tamper-proof store — a surviving same-user daemon can overwrite it after the run "
-    "(CI consumes exit codes; no process-group kill or RLIMIT_NPROC today); fixture "
-    "context is seeded uniform for the .git channel — any OTHER environmental difference "
-    "a candidate can probe (env, mounts, hostname, runner files) remains a discrimination "
-    "channel, stated and never claimed closed"
+    "re-verified before every case AND after the last case; the manifest records "
+    "what actually happened. FLOOR-REVIEW-1 sharpening (session 23): the manifest "
+    "artifact is a RECORD, not a tamper-proof store — a surviving same-user daemon "
+    "can overwrite it after the run (CI consumes exit codes). R-02 sharpening "
+    "(session 24): every case runs in its own process group and is killed with it "
+    "on every outcome + RLIMIT_NPROC bounds the child — a daemon that RE-SESSIONS "
+    "itself (setsid/double-fork outside the killed group) remains a stated residual, "
+    "as does any environmental difference a candidate can probe beyond the seeded "
+    ".git channel — stated and never claimed closed"
 )
 
 COMPLETION_RE = re.compile(
@@ -112,7 +115,13 @@ def enumerate_corpus(root: Path) -> list[dict]:
     entries: list[dict] = []
     total = 0
     nonreg = 0
-    for dirpath, dirnames, filenames in os.walk(root, followlinks=False):
+    walk_errors: list[OSError] = []
+    for dirpath, dirnames, filenames in os.walk(root, followlinks=False,
+                                                 onerror=walk_errors.append):
+        # R-02 (CR-47-2/G-47-6, session 24): a walk error (an unreadable
+        # directory, for example) used to be silently skipped — its files
+        # vanished from the corpus/digest/fixture with no refusal. Walk
+        # errors count as refused entries: the enumeration fails closed.
         kept = []
         for d in sorted(dirnames):
             if d in SKIP_DIRS:
@@ -123,6 +132,8 @@ def enumerate_corpus(root: Path) -> list[dict]:
             kept.append(d)
         dirnames[:] = kept
         for fn in sorted(filenames):
+            if fn in SKIP_DIRS:
+                continue          # R-02 (G-52-2): .git may be a FILE (worktree/submodule shape) — never corpus
             full = Path(dirpath) / fn
             try:
                 st = full.lstat()
@@ -136,12 +147,6 @@ def enumerate_corpus(root: Path) -> list[dict]:
                 raise FloorRefusal(
                     "ARV-FLOOR-004",
                     "corpus budget exceeded (per-file cap 8 MiB) — the entry's path is not printed by design",
-                )
-            total += st.st_size
-            if total > TOTAL_BUDGET:
-                raise FloorRefusal(
-                    "ARV-FLOOR-004",
-                    "corpus budget exceeded (total cap 192 MiB) — no path is printed by design",
                 )
             if len(entries) >= COUNT_BUDGET:
                 raise FloorRefusal(
@@ -160,12 +165,22 @@ def enumerate_corpus(root: Path) -> list[dict]:
                     "ARV-FLOOR-004",
                     "corpus budget exceeded (per-file cap 8 MiB at read time) — no path is printed by design",
                 )
+            # R-02 (G-47-7, session 24): the total budget is charged against the
+            # bytes ACTUALLY READ, never the pre-read st_size — a file that grew
+            # between lstat and read used to slip its real size past the cap.
+            total += len(data)
+            if total > TOTAL_BUDGET:
+                raise FloorRefusal(
+                    "ARV-FLOOR-004",
+                    "corpus budget exceeded (total cap 192 MiB, charged on bytes read) — no path is printed by design",
+                )
             entries.append({
                 "rel": full.relative_to(root).as_posix(),
                 "size": len(data),
                 "sha256": hashlib.sha256(data).hexdigest(),
                 "_abs": full,
             })
+    nonreg += len(walk_errors)   # R-02: every unreadable directory is a refused entry — fail closed
     if nonreg:
         raise FloorRefusal(
             "ARV-FLOOR-004",
@@ -177,7 +192,11 @@ def enumerate_corpus(root: Path) -> list[dict]:
 def corpus_digest(entries: list[dict]) -> str:
     h = hashlib.sha256()
     for e in sorted(entries, key=lambda x: x["rel"]):
-        h.update(e["rel"].encode("utf-8")); h.update(b"\0")
+        # R-02 (#61 review): Linux filenames may contain non-UTF-8 bytes (str
+        # via surrogateescape); a strict encode raised UnicodeEncodeError —
+        # swallowed by the finally-return as an unnamed GREEN-preserving RED.
+        # The digest encodes LOSSLESSLY: every name digests, none crashes.
+        h.update(e["rel"].encode("utf-8", "surrogateescape")); h.update(b"\0")
         h.update(str(e["size"]).encode("ascii")); h.update(b"\0")
         h.update(e["sha256"].encode("ascii")); h.update(b"\n")
     return h.hexdigest()
@@ -226,10 +245,24 @@ def _rlimit_preexec() -> None:  # pragma: no cover — runs in the forked child
     resource.setrlimit(resource.RLIMIT_FSIZE, (CHILD_FSIZE, CHILD_FSIZE))
     resource.setrlimit(resource.RLIMIT_AS, (CHILD_AS, CHILD_AS))
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    # R-02 (CR-47-3, session 24): bound the child's process count. Linux's
+    # RLIMIT_NPROC is enforced against the whole real UID's process count at
+    # fork time, so the cap must sit well above a runner's legitimate baseline
+    # while still killing fork bombs in their first milliseconds. The cap is
+    # CLAMPED to the inherited hard limit — a lower inherited hard limit is
+    # respected, never raised (#61 review: a setrlimit above the hard limit
+    # fails the preexec and kills the child before it runs).
+    _hard = resource.getrlimit(resource.RLIMIT_NPROC)[1]
+    _cap = CHILD_NPROC if _hard in (-1, None) or _hard > CHILD_NPROC else _hard
+    resource.setrlimit(resource.RLIMIT_NPROC, (_cap, _cap))
 
 
 def run_child(fixture: Path, tmpdir: Path, case_timeout: int):
     """Execute the CANDIDATE verifier as a child over the disposable fixture.
+    R-02 (CR-47-3/G-47-8, session 24): the child runs in its OWN session /
+    process group, and the group is killed on EVERY case outcome (normal exit,
+    failure, timeout) — a worker the verifier spawned used to outlive its case
+    and could write into later fixtures after the integrity re-verification.
     Returns (returncode|None, stdout, stderr, truncated)."""
     verifier = fixture / "tools" / "verify_canonical_layer.py"
     try:
@@ -254,25 +287,55 @@ def run_child(fixture: Path, tmpdir: Path, case_timeout: int):
     cmd = [sys.executable, "-B", str(verifier)]
     preexec = _rlimit_preexec if POSIX else None
     with open(out_f, "wb") as fo, open(err_f, "wb") as fe:
+        proc = subprocess.Popen(
+            cmd, cwd=fixture, stdout=fo, stderr=fe, env=env,
+            preexec_fn=preexec, start_new_session=POSIX,
+        )
         try:
-            r = subprocess.run(
-                cmd, cwd=fixture, stdout=fo, stderr=fe, env=env,
-                timeout=case_timeout, preexec_fn=preexec, check=False,
-            )
-            rc = r.returncode
+            rc = proc.wait(timeout=case_timeout)
         except subprocess.TimeoutExpired:
             rc = None
+        finally:
+            # the WHOLE process group is reaped on every outcome — the direct
+            # child AND anything it spawned without re-sessioning itself
+            if POSIX:
+                import signal
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except (ProcessLookupError, PermissionError):
+                    pass
+            else:
+                proc.kill()
+            proc.wait()
     out, out_tr = _read_capped(out_f)
     err, err_tr = _read_capped(err_f)
     return rc, out, err, (out_tr or err_tr)
 
 
 def evaluate_case(expect: str, rc, out: str, err: str, truncated: bool):
-    """The per-case protocol: a catch requires ALL of — nonzero exit, the
-    expected code's FAIL line, the completion count-line, no traceback."""
+    """The per-case protocol: a catch requires ALL of — a positive nonzero
+    exit, the expected code's FAIL line, the completion count-line, no
+    traceback, and evidence streams that could be read within the cap."""
     if rc is None:
         return False, (
             "child exceeded the case timeout — killed; an unbounded wait is never a catch (ARV-FLOOR-003)"
+        ), "ARV-FLOOR-003"
+    if truncated:
+        # R-02 (G-47-1/G-52-1, session 24): a truncated or refused read-back
+        # (a swapped output file, a flood past the cap) used to hide the rest
+        # of the evidence stream — stdout alone could prove a "catch" the
+        # full stream contradicts. An unreadable evidence stream is never a
+        # provable catch, fail-closed.
+        return False, (
+            "the child's evidence output could not be read within the cap (truncated or refused) — "
+            "an unread evidence stream is never a provable catch (ARV-FLOOR-003)"
+        ), "ARV-FLOOR-003"
+    if rc < 0:
+        # R-02 (G-47-2, session 24): a negative return code is a death by
+        # signal — the predecessor's `rc != 0` counted the kill as a
+        # completed catch. A killed child is not a named-refusal exit.
+        return False, (
+            f"child died by signal {-rc} — a signal death is not a completed named-refusal exit (ARV-FLOOR-003)"
         ), "ARV-FLOOR-003"
     blob = out + "\n" + err
     if "Traceback (most recent call last)" in blob:
@@ -282,7 +345,7 @@ def evaluate_case(expect: str, rc, out: str, err: str, truncated: bool):
         ), "ARV-FLOOR-003"
     caught_line = re.search(rf"^{re.escape(expect)}\s+FAIL\b", out, re.M)
     completion = COMPLETION_RE.search(out)
-    if rc != 0 and caught_line and completion:
+    if rc > 0 and caught_line and completion:
         return True, "caught", ""
     if rc == 0:
         detail = "with the expected FAIL line printed but exit 0" if caught_line else "without the expected FAIL line and exit 0"
@@ -320,6 +383,12 @@ def validate_manifest(m, expected_codes: list[str]) -> list[str]:
             continue
         if not {"code", "expect", "caught", "disposition"} <= set(c):
             fails.append("ARV-FLOOR-006: a malformed case record (code/expect/caught/disposition required)")
+            continue
+        # R-02 (G-47-11, session 24): presence was checked, TYPES were not —
+        # a record with expect=None and disposition={} used to validate clean.
+        if not (isinstance(c.get("code"), str) and isinstance(c.get("expect"), str)
+                and isinstance(c.get("disposition"), str)):
+            fails.append("ARV-FLOOR-006: a malformed case record (code/expect/disposition must be strings)")
             continue
         if not isinstance(c.get("caught"), bool):
             fails.append("ARV-FLOOR-006: a non-boolean 'caught' field")
@@ -449,21 +518,54 @@ def run_floor(cases: list, cand_root: Path, *, driver_path: Path,
                     print(f"{code} PASS  {desc} → {expect} FAILed as required")
                 else:
                     print(f"{code} FAIL  {desc} → {disposition}")
+        # R-02 (G-48-2, session 24): the integrity recheck AFTER the final
+        # case. integrity() ran only BEFORE each case, so a mutation of the
+        # source corpus during the LAST case (or a --only single-case run)
+        # was never re-checked — the run stayed GREEN on a tampered tree.
+        integrity()               # ARV-FLOOR-002 — after the LAST case too
     except FloorRefusal as fr:
         refusal = fr
         print(f"FAIL {fr.code}: {fr.message}")
+    except Exception as exc:
+        # R-02 (#61 review, Greptile P1): a machinery crash (an encode error on an
+        # exotic filename, a bad rlimit, a Popen failure) used to be SWALLOWED by
+        # the finally-return — the verdict could stay GREEN over a crashed run.
+        # Every unexpected error is now a NAMED RED: the run fails closed with a
+        # code, never silently. (The finally-return recheck class, A9d's sibling.)
+        refusal = FloorRefusal(
+            "ARV-FLOOR-006",
+            f"the floor machinery crashed ({type(exc).__name__}) — the run is RED, never green; a machinery error is never a candidate catch",
+        )
+        print(f"FAIL ARV-FLOOR-006: the floor machinery crashed ({type(exc).__name__}) — the run is RED, never green")
     finally:
-        mval_fails = validate_manifest(manifest, expected_codes)
-        manifest["manifest_validation_failures"] = mval_fails
-        caught_n = sum(1 for c in manifest["cases"] if c.get("caught"))
-        manifest["verdict"] = "REFUSED" if refusal else ("RED" if (caught_n != len(expected_codes) or mval_fails) else "GREEN")
+        mval_fails = list(validate_manifest(manifest, expected_codes))
+        # R-02 (G-48-3, session 24): a failed manifest WRITE used to print a
+        # warning while the verdict stayed GREEN and the driver exited 0 —
+        # the run's evidence was never recorded, yet it passed. The record's
+        # OWN validation/verdict keys are assigned BEFORE serialization; a
+        # write/serialize failure IS a validation failure, and the run can
+        # only be RED. The failure line PRINTS its named code.
         mpath = Path(manifest_out) if manifest_out else temproot.parent / f"arv-floor-manifest-{manifest['run_id'][:8]}.json"
+        caught_n = sum(1 for c in manifest["cases"] if c.get("caught"))
+        manifest["manifest_validation_failures"] = mval_fails
+        manifest["verdict"] = "REFUSED" if refusal else ("RED" if (caught_n != len(expected_codes) or mval_fails) else "GREEN")
+        manifest_write_ok = True
         try:
             mpath.parent.mkdir(parents=True, exist_ok=True)
             mpath.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        except (OSError, TypeError, ValueError):
+            manifest_write_ok = False
+            mval_fails.append("ARV-FLOOR-006: the manifest could not be written — the run's evidence is not recorded, refusing GREEN")
+            manifest["manifest_validation_failures"] = mval_fails
+            manifest["verdict"] = "REFUSED" if refusal else "RED"
+            try:
+                mpath.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            except Exception:
+                pass          # best-effort: an unwritable target writes nothing — the failure line below carries the code
+        if manifest_write_ok:
             print(f"floor manifest: {mpath}")
-        except OSError:
-            print("floor manifest: <write failed — the run stands RED by the validation failures below if any>")
+        else:
+            print("floor manifest: <write FAILED — ARV-FLOOR-006: the run is RED; an unwritten evidence record is never a pass>")
         print()
         if manifest["verdict"] == "GREEN":
             print(f"SELF-TEST GREEN — {caught_n}/{len(expected_codes)} known-bad mutations caught by their named checks.")
@@ -474,6 +576,9 @@ def run_floor(cases: list, cand_root: Path, *, driver_path: Path,
                 d = c.get("disposition", "")
                 if "(ARV-" in d:
                     codes.add(d.split("(ARV-")[1].split(")")[0])
+            for f in mval_fails:
+                if f.startswith("ARV-"):
+                    codes.add(f.split(":")[0].split("ARV-")[1])
             if refusal:
                 codes.add(refusal.code)
             print(f"SELF-TEST RED — verdict {manifest['verdict']}: {len(expected_codes) - caught_n} case failure(s) + {len(mval_fails)} manifest failure(s); codes: {sorted(codes)}")

@@ -1,0 +1,9 @@
+# CLAIM-026 — R-02: the mutation-floor hardening (the 10 verified findings; RED-first 8 new cases)
+tools/mutation_runner.py INT-129/D-042
+tools/verify_selftest.py INT-129/D-042
+harness/tests/test_mutation_floor.py INT-129/D-042
+harness/red-records.json INT-129/D-042
+harness/runs/claim-026-r02-floor-hardening INT-129/D-042
+CLAIMS.md
+context/WORKLOG.md INT-129/D-042
+context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md

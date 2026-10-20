@@ -1,0 +1,7 @@
+# CLAIM-023 — the session-23 close: record 23 + STATE re-derived + AGENTS synced + the rule-4 rows
+CLAIMS.md
+STATE.md
+AGENTS.md
+context/WORKLOG.md
+context/extracted/23-SESSION-23-EXECUTION.md
+harness/runs/claim-023-session-23-close

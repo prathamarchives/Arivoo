@@ -1,0 +1,4 @@
+- the close slice changes ONLY memory/state artifacts (the record, STATE, AGENTS, WORKLOG, CLAIMS, this sheet); no tool, harness, or workflow file changed — the canonical-layer check re-runs green at this head
+- the seven slices' CI evidence lives in their own PRs + the post-merge observations (CLAIMS.md's closed rows); this sheet's run records carry the close's own verification only
+- the one-liner split + the three H-01c/H-02 cards remain READY and unstarted — the exact next action in STATE and record 23 §10
+- the first two run records (run-01/02) captured the close's own WORKING state BEFORE the STATE pointer fix (canonical VER-804 red: the record-22 pointer; make verify cascading) — exactly the close-slice discipline the verifier enforces at session exit; runs 03/04 are the same two commands after the re-derivation completed (both green); both sets preserved

@@ -500,3 +500,14 @@ Stage Summary:
 - The session's headline: A03 is CLOSED with stable regressions — the mutation floor judges every candidate verifier in disposable child processes over bounded no-dereference fixtures with per-case integrity re-verification and a validated completion manifest; main is green with the floor LIVE (post-merge 39403859240)
 - The one red window: the anchored-name bug (43 minutes from the failing post-merge run 39401172275 to the merged repair 87ab16b) — the repair slice's own lessons (the twice-vacuous regression; the bootstrap shim) recorded in §8 catches #11/#12
 - Next: H-01b-F / H-01b-CI (disjoint; H-01b-CI's first items: the -I flip + the shim removal), H-01c x3, H-02 design, P3-M0/P3-K0, P3-00/P3-01 — per the registry, any capable agent
+
+## Task 31 (CLAIM-023, session 23) — the session-23 close
+- Task: seven slices under the turn-22 §9 order (the owner's standing instruction: continue to Phase 4 without stopping at green slices) + the independent adversarial review the H-01b card's exit item demanded
+- FLOOR-REVIEW-1 (fresh-context subagent, fresh clone): the floor's mechanisms HELD fail-closed against 12 attack classes; 4 broken findings (B1 the .git-probing discriminating verifier passing both sides; B2 the -I-less launch shadowable — full GREEN forgery reproduced; B3 the unbounded read-back FIFO hang; B4 the swallowed mid-run anchor loss) — each repaired RED-first across CLAIMs #017/#019/#020/#021
+- PRs #51-#57 all merged (three-check green + post-merge green at every merge): H-01b-F, H-01b-R2, H-01b-CI parts 1/2a/2a/2b, H-01c-claims; the ledger one-liner check SPLIT to its own slice (LAW-05)
+- Sixteen walls-catches recorded in record 23 §8 — the standouts: the two REHEARSAL catches (the unittest-blind completion check; the dead env path at the call site), the red_evidence smash in red.py (reproduced live, repaired, the smashed fields restored), the twice-leaked rehearsal artifact caught by ARV-SCOPE/ARV-CLM, the vacuous-assertion class caught before commit
+- Outcome: every finding of the directive's triage is now closed-with-regression or recorded-external (F-003); the trusted CI path is LIVE (candidate Make recipes and the candidate gate are no longer the evidence); the KB matrix is 15/15
+- Evidence: the seven slices' proof sheets + red records; CI runs in CLAIMS.md's closed rows; record 23 §§1-12
+- Unresolved: the one-liner slice, H-01c-authority, H-01c-evidence/privacy (F-007), H-02 — all READY, disjoint; then the P3 entry sequence (P3-00 → P3-M0 ∥ P3-K0 → P3-01)
+- Next: the ledger one-liner consistency slice (the canonical-verifier family + the 51-count references)
+- Session record: context/extracted/23-SESSION-23-EXECUTION.md (COMPLETE §§1-12)

@@ -7,6 +7,21 @@ so the base-anchored CI job runs THIS suite (from main) against the CANDIDATE's
 isolation_check.py — the coordinated-weakening floor (a PR that weakens the
 checker AND its own self-test together fails these cases in the required job).
 
+v2.2 (session 23, H-01b-F — F-002/F-011/F-012, INT-127/D-041): the suite's own
+fixture machinery is bounded, no-dereference and sanitized (self-contained by
+NECESSITY: the anchored copy must never import a candidate-controlled module —
+the F-005 class), and the matrix grows six bound-hygiene cases: B1/B2 pin
+mode-aware tracked scanning (a symlink's LINK TEXT is the data; the target is
+NEVER opened — a tracked link to a non-terminating stream cannot hang the
+checker, and a canary hidden in link text is caught); B3/B4 pin the per-file
+and total scan budgets (fail-closed named refusals); B5/B6 pin the builder's
+own contract (a failed construction cleans up its temp root — cleanup is
+established BEFORE construction starts — and the sanitized refusal carries a
+fixed diagnostic + the cause's class name only, never a path: a secret-shaped
+FILENAME is value material). The standalone entry gains the sanitized
+exception boundary (a harness crash prints one sanitized line, never a
+traceback). The 18 v2.1 cases are unchanged (assertions never removed).
+
 The suite invokes tools/isolation_check.py as a SUBPROCESS (implementation-
 agnostic: it judges whatever checker file sits beside this module). Content and
 semantics are moved verbatim from the v2.1 checker (18 cases; counts unchanged):
@@ -19,8 +34,11 @@ which delegates here for backward compatibility with the recorded commands).
 
 from __future__ import annotations
 
+import contextlib
+import io
 import os
 import shutil
+import stat as statmod
 import subprocess
 import sys
 import tempfile
@@ -39,6 +57,7 @@ REPO = Path(__file__).resolve().parent.parent
 CANARY_TRACKED = "ghp_" + "A" * 36            # synthetic classic-PAT shape, tracked file
 CANARY_ENV = "gho_" + "B" * 36                # synthetic OAuth-token shape, env var value
 CANARY_REMOTE = "ghp_" + "C" * 36             # synthetic PAT shape, embedded in a remote URL
+CANARY_LINK = "ghp_" + "E" * 36              # synthetic PAT shape, hidden in symlink LINK TEXT
 
 CI_LEGIT = {
     "CI": "true",
@@ -144,6 +163,31 @@ def self_test() -> int:
         subprocess.run(["git", "remote", "add", "multi", f"https://fakeuser@team:{CANARY_REMOTE}@github.example.invalid/Arivoo.git"],
                        cwd=fix, check=True, capture_output=True)
 
+    # H-01b-F preps (F-002): mode-aware tracked scanning + the scan budgets. Each
+    # case must be self-contained (the A11 probe-coupling lesson, third occurrence
+    # in record 22 §8 — a case never depends on another case's fixture state).
+    def prep_b1(fix: Path) -> None:  # B1 — tracked symlink -> a non-terminating stream (FIFO)
+        os.symlink("../stream.fifo", fix / "stream.link")
+        subprocess.run(["git", "add", "-A"], cwd=fix, check=True, capture_output=True)
+        os.mkfifo(fix.parent / "stream.fifo")   # AFTER git add: the fifo itself is never tracked
+
+    def prep_b2(fix: Path) -> None:  # B2 — canary in the symlink's LINK TEXT (dangling by construction)
+        os.symlink("https://user:" + CANARY_LINK + "@example.invalid/a.git", fix / "creds.link")
+        subprocess.run(["git", "add", "-A"], cwd=fix, check=True, capture_output=True)
+
+    def prep_b3(fix: Path) -> None:  # B3 — oversized tracked regular file (sparse; per-file budget)
+        fd = os.open(fix / "blob.bin", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+        os.ftruncate(fd, 16 * 1024 * 1024)      # 16 MiB sparse > the 8 MiB per-file scan budget
+        os.close(fd)
+        subprocess.run(["git", "add", "-A"], cwd=fix, check=True, capture_output=True)
+
+    def prep_b4(fix: Path) -> None:  # B4 — tracked content beyond the total scan budget
+        for i in range(10):                        # 10 x 7 MiB = 70 MiB > the 64 MiB total budget
+            fd = os.open(fix / f"blob-{i:02d}.bin", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+            os.ftruncate(fd, 7 * 1024 * 1024)    # each under the per-file budget
+            os.close(fd)
+        subprocess.run(["git", "add", "-A"], cwd=fix, check=True, capture_output=True)
+
     cases: list[tuple[str, object, list[str], dict[str, str], int, list[str], list[str]]] = [
         ("N1 canary in a tracked .md", prep_n1, [], {}, 1, [CANARY_TRACKED], ["secret VALUE pattern"]),
         ("N1b multi-@ remote with trailing token", prep_n1b, [], {}, 1, [CANARY_REMOTE], ["EXPOSED-IN-CONFIG"]),
@@ -163,23 +207,28 @@ def self_test() -> int:
         ("N13 --ci with case-variant false value counts as missing", None, ["--ci"], {"CI": "False", "GITHUB_ACTIONS": "true", "GITHUB_SHA": "0" * 40, "GITHUB_REF": "refs/heads/main", "GITHUB_REPOSITORY": "prathamarchives/Arivoo"}, 1, [], ["required CI configuration missing"]),
         ("P1 clean local environment", None, [], {}, 0, [], ["ISOLATION GREEN"]),
         ("P2 correctly configured CI environment", None, ["--ci"], dict(CI_LEGIT), 0, [], ["ISOLATION GREEN"]),
+        ("B1 tracked symlink to a non-terminating stream is never opened (F-002; no hang, scanned as link text)", prep_b1, [], {}, 0, [], ["ISOLATION GREEN"]),
+        ("B2 canary in a symlink's LINK TEXT is caught (dangling link; target never read)", prep_b2, [], {}, 1, [CANARY_LINK], ["secret VALUE pattern"]),
+        ("B3 oversized tracked regular file refuses with the per-file scan budget (F-002)", prep_b3, [], {}, 1, [], ["per-file scan budget"]),
+        ("B4 tracked content beyond the total scan budget refuses (F-002)", prep_b4, [], {}, 1, [], ["total scan budget"]),
     ]
 
-    print(f"isolation self-test (Slice 10.2, post-falsification v2.1) — complete diagnostic path:")
-    print(f"{len(cases)} cases; negative cases exit 1 with an attributable RED, positive cases exit 0;")
-    print("no synthetic canary may appear in stdout or stderr, including harness crash paths\n")
+    print(f"isolation self-test (Slice 10.2 v2.1 + H-01b-F v2.2) — complete diagnostic path:")
+    print(f"{len(cases)} checker cases + {2} builder cases; negative cases exit 1 with an attributable RED,")
+    print("positive cases exit 0; no synthetic canary may appear in stdout or stderr, including harness crash paths\n")
     failures = 0
     for i, (name, prep, args, case_env, want_rc, canaries, fragments) in enumerate(cases, 1):
-        fix = _fixture()
+        fix = None
         try:
-            try:
-                if prep is not None:
-                    prep(fix)
-                rc, out, err = _run_checker(fix, args, case_env)
-            except Exception as exc:  # sanitized: never a traceback (canary-safe)
-                failures += 1
-                print(f"  case {i} ({name}) FAIL — harness/setup error: {type(exc).__name__} (details redacted; canary never printed)")
-                continue
+            # H-01b-F: construction failure is INSIDE the sanitized boundary — a
+            # fixture that cannot be built is a case failure, never a traceback
+            # (the predecessor built the fixture outside this try: a copy failure
+            # escaped the boundary and printed a raw path/traceback — the F-012
+            # class, reproduced as this slice's red-02 probe).
+            fix = _fixture()
+            if prep is not None:
+                prep(fix)
+            rc, out, err = _run_checker(fix, args, case_env)
             problems = []
             if rc != want_rc:
                 problems.append(f"exit {rc} (expected {want_rc})")
@@ -198,16 +247,99 @@ def self_test() -> int:
                 print(f"  case {i} ({name}) FAIL — {'; '.join(problems)}")
             else:
                 print(f"  case {i} ({name}) PASS — exit {rc} as required, attributable, canary redaction proven")
+        except Exception as exc:  # sanitized: never a traceback (canary-safe)
+            failures += 1
+            print(f"  case {i} ({name}) FAIL — harness/setup error: {type(exc).__name__} (details redacted; canary never printed)")
         finally:
-            shutil.rmtree(fix.parent, ignore_errors=True)
+            if fix is not None:
+                shutil.rmtree(fix.parent, ignore_errors=True)
+
+    # H-01b-F builder cases (F-011/F-012): the suite's OWN fixture machinery is
+    # under test — bounded copy, cleanup established BEFORE construction, and a
+    # sanitized refusal (fixed diagnostic + the cause's class name only). A
+    # secret-shaped FILENAME breaking construction is value material: it must
+    # never reach stdout/stderr. These run in-process against disposable
+    # poisoned sources; class names are compared AS NAMES so the case fails
+    # cleanly (not with a NameError) when the API is absent at the predecessor.
+    def _iso_roots() -> set:
+        return {p.name for p in Path(tempfile.gettempdir()).glob("arivoo-iso-*")}
+
+    def b5_copy_failure_sanitized_and_cleaned() -> list:
+        src = Path(tempfile.mkdtemp(prefix="arivoo-iso-poison-"))
+        try:
+            (src / "readable.txt").write_text("ok\n", encoding="utf-8")
+            locked = src / CANARY_LINK              # a secret-shaped FILENAME (value material)
+            locked.write_text("x\n", encoding="utf-8")
+            locked.chmod(0)                          # unreadable: the copy must fail here
+            before = _iso_roots()
+            buf_out, buf_err = io.StringIO(), io.StringIO()
+            raised = None
+            with contextlib.redirect_stdout(buf_out), contextlib.redirect_stderr(buf_err):
+                try:
+                    _fixture(source=src)
+                except Exception as exc:
+                    raised = type(exc).__name__
+            blob = buf_out.getvalue() + buf_err.getvalue()
+            problems = []
+            if raised != "FixtureBuildError":
+                problems.append(f"raised {raised or 'nothing'} — expected the sanitized FixtureBuildError (F-012)")
+            if _iso_roots() - before:
+                problems.append("a fixture temp root SURVIVED the failed construction — cleanup was not established before construction (F-011)")
+            if CANARY_LINK in blob:
+                problems.append("CANARY VALUE LEAKED INTO OUTPUT")
+            return problems
+        finally:
+            shutil.rmtree(src, ignore_errors=True)
+
+    def b6_builder_budget_exhaustion() -> list:
+        src = Path(tempfile.mkdtemp(prefix="arivoo-iso-poison-"))
+        try:
+            (src / "a.bin").write_bytes(b"a" * 700)
+            (src / "b.bin").write_bytes(b"b" * 700)   # 1400 bytes declared > the injected total
+            before = _iso_roots()
+            buf_out, buf_err = io.StringIO(), io.StringIO()
+            raised = None
+            with contextlib.redirect_stdout(buf_out), contextlib.redirect_stderr(buf_err):
+                try:
+                    _fixture(source=src, total=1024)
+                except Exception as exc:
+                    raised = type(exc).__name__
+            blob = buf_out.getvalue() + buf_err.getvalue()
+            problems = []
+            if raised != "FixtureBuildError":
+                problems.append(f"raised {raised or 'nothing'} — expected the sanitized FixtureBuildError (F-011 budget)")
+            if _iso_roots() - before:
+                problems.append("a fixture temp root SURVIVED the refused construction (F-011)")
+            if str(src) in blob:
+                problems.append("the refusal diagnostic carried a PATH (F-012)")
+            return problems
+        finally:
+            shutil.rmtree(src, ignore_errors=True)
+
+    print()
+    print("builder cases (the suite's own fixture machinery — in-process, sanitized):")
+    for name, fn in (
+        ("B5 builder copy failure: sanitized refusal + cleanup-before-construction + secret-shaped name never leaks", b5_copy_failure_sanitized_and_cleaned),
+        ("B6 builder budget exhaustion: sanitized refusal + cleanup + no path in the diagnostic", b6_builder_budget_exhaustion),
+    ):
+        try:
+            problems = fn()
+        except Exception as exc:  # sanitized: never a traceback
+            problems = [f"harness exception: {type(exc).__name__} (sanitized)"]
+        if problems:
+            failures += 1
+            print(f"  {name} FAIL — {'; '.join(problems)}")
+        else:
+            print(f"  {name} PASS — sanitized refusal proven, cleanup proven, no leak")
 
     print()
     if failures:
-        print(f"SELF-TEST RED — {failures} case(s) failed: the diagnostic path does not prove the stated properties (Slice 10.2).")
+        print(f"SELF-TEST RED — {failures} case(s) failed: the diagnostic path does not prove the stated properties (Slice 10.2 + H-01b-F).")
         return 1
     print("SELF-TEST GREEN — every negative case failed with an attributable RED, every positive case stayed green,")
-    print("benign username-only remotes never false-flag, and no synthetic canary appeared in stdout or stderr")
-    print("(the complete redaction path is tested, including harness crash paths).")
+    print("benign username-only remotes never false-flag, no synthetic canary appeared in stdout or stderr,")
+    print("tracked symlinks are scanned as link text with the target never opened, scan/fixture budgets hold,")
+    print("and a failed fixture construction cleans up and prints a sanitized refusal only.")
     print("Limit, stated: a pattern scan proves these specified leak classes are caught — never that every secret is absent")
     print("(record 16 §4.1 carries the host-permission side of the isolation claim).")
     return 0
@@ -216,4 +348,12 @@ def self_test() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(self_test())
+    # H-01b-F (F-012): the standalone entry's sanitized exception boundary — a
+    # harness crash prints ONE sanitized line (the exception's class name only),
+    # never a traceback that could carry a canary or a path. SystemExit (the
+    # honest exit-code carrier) is not an Exception and propagates untouched.
+    try:
+        sys.exit(self_test())
+    except Exception as exc:  # noqa: BLE001 — the boundary is the point
+        print(f"SELF-TEST ABORTED — harness exception ({type(exc).__name__}); sanitized boundary: no traceback, no paths (H-01b-F, F-012)")
+        sys.exit(1)

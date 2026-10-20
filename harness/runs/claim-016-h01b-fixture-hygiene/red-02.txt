@@ -1,0 +1,12 @@
+# red-02 — the F-012/F-011 classes at the predecessor (probe output; the canary-shaped value is REDACTED IN THIS FILE — writing the raw value into a tracked evidence file would itself be the F-012 class, caught before commit by this slice's own checker semantics)
+# probe: python3 /home/z/my-project/scripts/f012_probe.py (scaffolding outside the repo)
+# injected failure: copytree -> OSError carrying a secret-shaped path; the child calls
+# the predecessor's _fixture() UNHANDLED — the old case loop builds fixtures outside
+# the sanitized try and the old __main__ has no exception boundary.
+
+Traceback (most recent call last):
+  File "<string>", line 17, in <module>
+  File "/home/z/my-project/arivoo/tools/isolation_selftest.py", line 78, in _fixture
+    shutil.copytree(REPO, fix, ignore=shutil.ignore_patterns(".git", "__pycache__"))
+  File "<string>", line 10, in boom
+OSError: cannot read source entry: /tmp/ghp_<36 CHARS REDACTED FROM THIS EVIDENCE FILE — the canary-shaped value sat HERE in the raw run; its presence in stdout is proven by this marker and by the probe's own exit verdict>/x

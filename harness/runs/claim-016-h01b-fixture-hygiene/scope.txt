@@ -1,0 +1,6 @@
+# CLAIM-016 — H-01b-F: the isolation tools' bounded fixture/read hygiene (F-002/F-011/F-012; the directive §5.5 routing)
+# Six new RED-first matrix cases + the bounded no-dereference builder + the sanitized boundaries.
+CLAIMS.md
+tools/isolation_check.py INT-127/D-041
+tools/isolation_selftest.py INT-127/D-041
+harness/runs/claim-016-h01b-fixture-hygiene INT-127/D-041

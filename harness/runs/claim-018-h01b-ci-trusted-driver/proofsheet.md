@@ -1,13 +1,16 @@
 # PROOF SHEET — slice claim-018-h01b-ci-trusted-driver (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 5bd6517c85420f35e9f6cd72a44a31fc92468206
-- generated (last record's timestamp): 2026-10-20T13:40:34.416115+00:00
-- run records: 3
+- commit (last run record's): efa8d858363d70e7c99d8cae62b082e33f1c217e
+- generated (last record's timestamp): 2026-10-20T13:44:05.784942+00:00
+- run records: 6
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 f1379530cbbd1285 · 2026-10-20T13:39:40.258401+00:00
 - `make verify` -> exit 0 · output sha256 cca80f2d93e703b5 · 2026-10-20T13:40:21.431639+00:00
 - `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 21467a77e115f84b · 2026-10-20T13:40:34.416115+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 c9cd12de3865cade · 2026-10-20T13:43:19.367773+00:00
+- `make verify` -> exit 0 · output sha256 e546d7d1cd5c5560 · 2026-10-20T13:43:54.409053+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 6b546006516e9456 · 2026-10-20T13:44:05.784942+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - the CI harness job's TRUSTED steps (S1b/S4c) are NOT yet bound — this slice lands the DRIVER and the machinery re-rooting only; the workflow binding is part 2 (the next slice) because at THIS PR head the base (main) carries no tools/trusted_gate.py and the anchor step would fail here (the CLAIM-013 activation chicken-and-egg, record 22 §8). Until part 2 merges, F-004's recipe-delegation exposure stands as documented — never claimed closed by this slice alone
@@ -17,4 +20,4 @@
 - - the suites phase's completion semantics cover existence + exit code + non-empty output (the A03 vacuous class); a candidate suite that prints fabricated output while exiting 0 is the two-sided floor's problem (the mutation floor + the canonical judge carry that side), stated — the driver is the SELECTION and EXECUTION authority, not the verifier-content oracle
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): e9242e4074063c4b623137369405fa82c291bfaa49b768ff0c166b0401a1db85
+- sheet sha256 (of the content above, excluding this line): 744427a687a730cbf8a500890927dd12d1e58b1cb1440873fae198f0b0ed63f4

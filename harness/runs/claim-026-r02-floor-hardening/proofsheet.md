@@ -12,7 +12,11 @@
 - `make verify` -> exit 0 · output sha256 3080128df7714c48 · 2026-10-20T17:06:24.349901+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
-- (none stated — REPAIR: the not-verified list may not be empty; LAW-04)
+- - the growing-file budget race (G-47-7's live form: a file APPENDED between lstat and read) is untestable deterministically at suite speed — the repair (the total budget charges bytes ACTUALLY READ, post-read) is correct by construction and the class is fail-closed (the per-file cap at read time); stated here per LAW-04, never fake-tested
+- - the finally-return's suppression of non-FloorRefusal machinery errors is now CONVERTED to a named ARV-FLOOR-006 RED (the #61 review's class fix); the residual that remains: the crash's OWN traceback is not captured into the manifest — the class name is, the traceback is not (fail-closed held in the observed incident: the Popen TypeError surfaced as RED, never green)
+- - RLIMIT_NPROC's value (256) is reasoned, not tuned: whole-UID semantics mean the cap must clear a runner's legitimate baseline (observed single-digit in this env) while killing fork bombs in their first milliseconds; the cap clamps to the inherited hard limit; a busy shared-UID host could still see EAGAIN in the child's legitimate spawns — that boundary is stated, CI's dedicated runners are the design point
+- - test_20's walk-error case cannot engage under root (CAP_DAC_OVERRIDE) — the test skips under root with the reason stated (#61 review); the CI runners are non-root, the case engages there
+- - no fresh technical verifier and no SEV — the pre-H-02 discipline
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 56d105a376d076099f1fa6bfabe5761377af7a2facda80dd53dc17122d73f6fe
+- sheet sha256 (of the content above, excluding this line): 55924af9b76838ab2e7035259cf2077c46afff533ee78503bae46b580b70a13d

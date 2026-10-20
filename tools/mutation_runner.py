@@ -192,7 +192,11 @@ def enumerate_corpus(root: Path) -> list[dict]:
 def corpus_digest(entries: list[dict]) -> str:
     h = hashlib.sha256()
     for e in sorted(entries, key=lambda x: x["rel"]):
-        h.update(e["rel"].encode("utf-8")); h.update(b"\0")
+        # R-02 (#61 review): Linux filenames may contain non-UTF-8 bytes (str
+        # via surrogateescape); a strict encode raised UnicodeEncodeError —
+        # swallowed by the finally-return as an unnamed GREEN-preserving RED.
+        # The digest encodes LOSSLESSLY: every name digests, none crashes.
+        h.update(e["rel"].encode("utf-8", "surrogateescape")); h.update(b"\0")
         h.update(str(e["size"]).encode("ascii")); h.update(b"\0")
         h.update(e["sha256"].encode("ascii")); h.update(b"\n")
     return h.hexdigest()
@@ -244,8 +248,13 @@ def _rlimit_preexec() -> None:  # pragma: no cover — runs in the forked child
     # R-02 (CR-47-3, session 24): bound the child's process count. Linux's
     # RLIMIT_NPROC is enforced against the whole real UID's process count at
     # fork time, so the cap must sit well above a runner's legitimate baseline
-    # while still killing fork bombs in their first milliseconds.
-    resource.setrlimit(resource.RLIMIT_NPROC, (CHILD_NPROC, CHILD_NPROC))
+    # while still killing fork bombs in their first milliseconds. The cap is
+    # CLAMPED to the inherited hard limit — a lower inherited hard limit is
+    # respected, never raised (#61 review: a setrlimit above the hard limit
+    # fails the preexec and kills the child before it runs).
+    _hard = resource.getrlimit(resource.RLIMIT_NPROC)[1]
+    _cap = CHILD_NPROC if _hard in (-1, None) or _hard > CHILD_NPROC else _hard
+    resource.setrlimit(resource.RLIMIT_NPROC, (_cap, _cap))
 
 
 def run_child(fixture: Path, tmpdir: Path, case_timeout: int):
@@ -517,6 +526,17 @@ def run_floor(cases: list, cand_root: Path, *, driver_path: Path,
     except FloorRefusal as fr:
         refusal = fr
         print(f"FAIL {fr.code}: {fr.message}")
+    except Exception as exc:
+        # R-02 (#61 review, Greptile P1): a machinery crash (an encode error on an
+        # exotic filename, a bad rlimit, a Popen failure) used to be SWALLOWED by
+        # the finally-return — the verdict could stay GREEN over a crashed run.
+        # Every unexpected error is now a NAMED RED: the run fails closed with a
+        # code, never silently. (The finally-return recheck class, A9d's sibling.)
+        refusal = FloorRefusal(
+            "ARV-FLOOR-006",
+            f"the floor machinery crashed ({type(exc).__name__}) — the run is RED, never green; a machinery error is never a candidate catch",
+        )
+        print(f"FAIL ARV-FLOOR-006: the floor machinery crashed ({type(exc).__name__}) — the run is RED, never green")
     finally:
         mval_fails = list(validate_manifest(manifest, expected_codes))
         # R-02 (G-48-3, session 24): a failed manifest WRITE used to print a

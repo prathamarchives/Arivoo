@@ -595,6 +595,9 @@ class MutationFloorTests(unittest.TestCase):
         """CR-47-2/G-47-6: os.walk silently skips a directory it cannot list,
         so an unreadable subtree VANISHES from the corpus/digest/fixture with
         no ARV-FLOOR-004 — the enumeration must fail closed on walk errors."""
+        if hasattr(os, "geteuid") and os.geteuid() == 0:
+            self.skipTest("root carries CAP_DAC_OVERRIDE: chmod(0) cannot make a directory "
+                          "unreadable for the root user, so the walk-error path cannot engage (#61 review)")
         cand = build_candidate(self.td, verifier=V_FAKE_FAIL)
         locked = cand / "locked-subtree"
         locked.mkdir()

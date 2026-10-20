@@ -125,13 +125,14 @@ jobs:
       - name: "Verify the canonical layer — base-anchored judge over the candidate documents (check count printed by the tool)"
         run: python3 tools/verify_canonical_layer_anchored.py
         working-directory: head
-      - name: "Candidate-verifier floor — the BASE's 30-mutation suite judged against the CANDIDATE's verifier (D-035: the coordinated-weakening floor; H-01b/INT-127/D-041: the TRUSTED CHILD-PROCESS floor — the anchored driver runs ISOLATED (python3 -I: no script-dir on sys.path, no PYTHONPATH — a candidate tools/shutil.py can never shadow the judge, F-005); every mutation case runs the candidate verifier as a CHILD over a fresh bounded disposable fixture; integrity re-verified before every case; per-case actual-outcome/exit/completion protocol; completion manifest; the residual boundary (same-host same-user children are not OS sandboxing) is stated in the run output — the workflow-definition trust boundary is H-01b-CI's item, Q10 owner-gated)"
+      - name: "Candidate-verifier floor — the BASE's 30-mutation suite judged against the CANDIDATE's verifier (D-035: the coordinated-weakening floor; H-01b/INT-127/D-041: the TRUSTED CHILD-PROCESS floor — activates AT MERGE: the anchored judge is the BASE's driver, so this PR's head still runs the predecessor form; the ARV_FLOOR_BASE_TOOLS anchor + the mutation_runner.py anchored copy land HERE so the merged base turns this step into the trusted child-process floor; the python3 -I isolated launch flips on in H-01b-CI's launch-hardening slice — it cannot flip in the same PR that changes the base driver, or the OLD base judge breaks at this PR's head: the activation's own chicken-and-egg, caught by CI and recorded in record 22 §8)"
         env:
           # the trusted anchor travels via the ENVIRONMENT only (the H-01a A02
-          # pattern — never template-interpolated into the script); the driver
-          # re-verifies its own digest against this base copy before EVERY case
+          # pattern — never template-interpolated into the script); the merged
+          # driver re-verifies its own digest against this base copy per case;
+          # the predecessor driver ignores it (inert at the PR head)
           ARV_FLOOR_BASE_TOOLS: ${{ github.workspace }}/base/tools
-        run: python3 -I tools/verify_selftest_anchored.py
+        run: python3 tools/verify_selftest_anchored.py
         working-directory: head
       - name: "Isolation check — base-anchored judge over the candidate tree (CI mode; W-03, LAW-28)"
         run: |

@@ -29,10 +29,23 @@ Scope entries use path-prefix semantics (the same convention as the slice
 declarations): an entry names a file or a directory prefix (a trailing '/'
 entry covers everything under it).
 """
+import os
 import pathlib
 import re
 
-REPO = pathlib.Path(__file__).resolve().parents[1]
+
+def _repo_root() -> pathlib.Path:
+    """H-01b-CI (session 23): ARV_TRUSTED_ROOT re-roots this machinery onto the
+    candidate tree when the trusted gate driver has validated it (absolute
+    existing dir only; anything else keeps the natural root)."""
+    root = os.environ.get("ARV_TRUSTED_ROOT", "")
+    p = pathlib.Path(root) if root else None
+    if p is not None and p.is_absolute() and p.is_dir():
+        return p
+    return pathlib.Path(__file__).resolve().parents[1]
+
+
+REPO = _repo_root()
 LEDGER = "INTENT-LEDGER.md"
 
 # the files any claim may touch (append-shaped only — CLAIMS.md rule 2)

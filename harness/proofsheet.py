@@ -25,7 +25,18 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import clock  # noqa: E402
 
-REPO = pathlib.Path(__file__).resolve().parents[1]
+def _repo_root() -> pathlib.Path:
+    """H-01b-CI (session 23): ARV_TRUSTED_ROOT re-roots this machinery onto the
+    candidate tree when the trusted gate driver has validated it (absolute
+    existing dir only; anything else keeps the natural root)."""
+    root = os.environ.get("ARV_TRUSTED_ROOT", "")
+    p = pathlib.Path(root) if root else None
+    if p is not None and p.is_absolute() and p.is_dir():
+        return p
+    return pathlib.Path(__file__).resolve().parents[1]
+
+
+REPO = _repo_root()
 RUNS = REPO / "harness" / "runs"
 
 

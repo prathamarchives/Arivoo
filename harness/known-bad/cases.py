@@ -30,8 +30,22 @@ def case(cid, desc, code):
 
 
 def _load(copy: pathlib.Path, name: str):
-    """Load a module BY FILE PATH from the mutated copy (never the cached one)."""
-    path = copy / (name.replace(".", "/") + ".py")
+    """Load a module BY FILE PATH (never the cached one).
+
+    H-01b-CI (session 23): in the TRUSTED gate re-run, module BYTES come from
+    the BASE's machinery (ARV_TRUSTED_KB_MACHINERY, set by gate.run_known_bads
+    to the base's own harness dir) while all DATA (records, declarations,
+    registry, trees) comes from the mutated work copy — the candidate's
+    harness modules, including its known-bad registry, never execute inside
+    the trusted judge (F-006; a candidate cases.py that runs SystemExit(0) at
+    import made three probes vacuous before this routing — reproduced live by
+    test_trusted_gate.test_06). Unset, the legacy self-check form holds:
+    modules load from the copy (the candidate's own gate proving its own
+    checks fire — the S4b self-report semantics, unchanged)."""
+    import os
+    mach = os.environ.get("ARV_TRUSTED_KB_MACHINERY", "")
+    root = pathlib.Path(mach) if mach else copy
+    path = root / (name.replace(".", "/") + ".py")
     spec = importlib.util.spec_from_file_location(name.replace(".", "_") + "_probe", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)

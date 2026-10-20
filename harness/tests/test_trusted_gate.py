@@ -88,8 +88,8 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
     # machinery data files (the candidate tree carries them; the trusted run
     # never imports them — the tests prove exactly that)
     for rel in ("harness/proofsheet.py", "harness/scope.py", "harness/claims.py",
-                "harness/__init__.py", "harness/adapters/__init__.py",
-                "harness/adapters/clock.py"):
+                "harness/gate.py", "harness/migrate.py", "harness/__init__.py",
+                "harness/adapters/__init__.py", "harness/adapters/clock.py"):
         dst = stub / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_bytes((REPO / rel).read_bytes())
@@ -140,6 +140,9 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
         "commit": "0" * 40, "output_sha256": hashlib.sha256(b"stub output").hexdigest(),
         "recorded_at": "2026-10-20T00:00:00+00:00"}, indent=2) + "\n")
     (runs / "proofsheet.md").write_text(ps.assemble(SLICE, NOTVERIFIED), encoding="utf-8")
+    # --verify re-derives the not-verified section from this FILE — the stub
+    # must carry it so the re-derivation is byte-identical (PRF-01)
+    (runs / "notverified.txt").write_text(NOTVERIFIED, encoding="utf-8")
 
     # a Makefile whose recipes lie — the driver must never consult it
     mk = stub / "Makefile"
@@ -256,7 +259,9 @@ class TrustedGateTests(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("ARV-TG-001", r.stdout + r.stderr)
         self.assertFalse((self.td / "pwned").exists(), "hostile metadata became shell syntax")
-        r = run_driver(self.td, stub, "gate", base=str(self.td / "no-such-base"))
+        empty_base = self.td / "empty-base"          # EXISTS but carries no harness/gate.py
+        empty_base.mkdir()
+        r = run_driver(self.td, stub, "gate", base=str(empty_base))
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("ARV-TG-005", r.stdout + r.stderr)
 

@@ -47,3 +47,22 @@
 
 
 **The #60 review round (Greptile, 3 findings — all real, all fixed in-PR before merge):** (1) my annotation originally OVERWROTE claim-013's historical notverified.txt, deleting its committed limits (the shared-user boundary, the test_13 dependency, the /tmp caveat) — the original restored byte-identical, the annotation moved to its own r01-annotation.txt; (2) the edits decoupled the historical proof sheets from their notverified sources (the sheets embed those bytes; --verify would refuse) — the same restoration closes it; (3) my correction misquoted the original line (it named no run number) — the annotation now quotes it precisely. The owner's loop working as ordered: the reviews reviewed, the reasoning engaged, the fixes fixed.
+
+## §5 — R-02's disposition (CLAIM-026, PR #61): the mutation-floor hardening LANDED
+
+**RED-first:** 8 new suite cases (test_20..test_27), each observed FAILING at the predecessor 4b8cb6f on actual wrong behavior (8 failures: no walk-error refusal; the surviving worker's marker landed; the truncated flood judged a catch; the SIGKILL judged a catch; the final-case source mutation undetected; the failed manifest write exit 0; the worktree .git-file corpus crashed the fixture build; the wrong-type manifest validated clean). **GREEN after the implementation: 27/27 suite + the 30/30 positive self-test + make verify 13/13 + canonical 51/0.**
+
+- CR-47-2/G-47-6 (walk onerror): unreadable directories count as refused entries — fail-closed ARV-FLOOR-004. [regression: test_20]
+- CR-47-3/G-47-8 (workers outlive cases): every case runs in its own session; the process group is killed on EVERY outcome; RLIMIT_NPROC 256 in the preexec (the value sits well above a runner's legitimate baseline — Linux's NPROC is whole-UID — while killing fork bombs in their first milliseconds); the BOUNDARY text shrinks honestly: the re-sessioning (setsid/double-fork) daemon residual stays stated. [regression: test_21 — the surviving-worker marker never lands AND the legitimate catch stands]
+- G-47-1/G-52-1 (truncated evidence): a truncated or refused read-back is never a provable catch — ARV-FLOOR-003. [regression: test_22]
+- G-47-2 (signal deaths): rc<0 is not a completed catch — ARV-FLOOR-003. [regression: test_23]
+- G-48-2 (final-case tampering): the post-loop integrity recheck — a source mutation during the FINAL case refuses ARV-FLOOR-002. [regression: test_24]
+- G-48-3 (failed manifest write): the write failure is a named ARV-FLOOR-006 validation failure; the verdict can only be RED. [regression: test_25]
+- G-47-7 (growing files): the total budget charges the bytes ACTUALLY READ (post-read len(data)), never the pre-read st_size. [correct by construction; the race itself is untestable deterministically at suite speed — stated in the not-verified list, never fake-tested]
+- G-47-11 (manifest types): code/expect/disposition must be strings. [regression: test_27 via the public --validate-manifest CLI]
+- G-52-2 (worktree .git FILE): the skip set applies to files as well as directories — a worktree-shaped corpus runs its cases, never crashes the fixture build. [regression: test_26]
+- CR-49-4 (test_10's vacuous window): the judged-form + not-mutation-skip + child_exit assertions distinguish a JUDGED case from a skipped one. [test_10 strengthened]
+
+**Assertion changes on existing cases (LAW-11, amendment 7 in the red records):** test_10 (the ALWAYS-GREEN candidate is intentionally not a catch — the JUDGED disposition is now the proof the mechanism ran); test_18 (the swapped-FIFO read-back reclassifies from ARV-FLOOR-001 to ARV-FLOOR-003 — the unread-evidence refusal, strictly more precise; the not-caught/never-hang property unchanged).
+
+**The slice's own two bugs, caught by its own tests before any commit (the honest failure log):** (1) the Popen `check=` kwarg slip — 16 suite failures, and the finally-return swallowed the TypeError (the A9d-adjacent unnamed-RED residual: a machinery crash surfaces as RED with no named code, never green — stated, fail-closed held); (2) the serialize-before-assign manifest bug — the artifact briefly carried verdict=None; restructured so the record's own validation/verdict keys are assigned BEFORE serialization.

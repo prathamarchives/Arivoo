@@ -522,6 +522,7 @@ Stage Summary:
 - Next: R-01 (the record-evidence repairs), then R-02/R-03/R-04 (disjoint code repairs, RED-first), then R-05 (the sweep)
 - Session record: context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md (in progress — §§1-3 this slice)
 
+<<<<<<< Updated upstream
 ## Task 33 (CLAIM-025, session 24) — R-01: the record-evidence repairs
 - Task: the seven verified record-evidence defects from the PR #46-#58 bot reviews, all fixed with sourced evidence: record 22 §8's three omitted catches (the stray copy d074af4, the -I deferral, the bootstrap shim) appended additively; §1's 541 CRLF bytes restored byte-identical to bc30575; both smashed red_evidence fields repaired (gate-dispatch restored from e1ef3a0; mutation-floor's honest unrecoverable-statement — the creation value never survived to any commit); claim-013/014's run-record defects annotated; claim-014's 39401172275 wording corrected (it exposed the bug, it did not verify the repair); the duplicate CLAIM-021 row removed
 - The ratchet for the duplicate-row class is routed to R-04(9) (intra-table duplicate detection + its KB case) — the current checks could not see it because ARV-CLM-006 covers only open/closed drift
@@ -530,3 +531,11 @@ Stage Summary:
 - Unresolved: R-02/R-03/R-04 (the code repairs, RED-first), R-05 (the 37-PR sweep + the enforcement attempt)
 - Next: R-02 (the mutation-floor hardening: walk onerror, process-group kill, truncated/signal-rc rejection, final integrity recheck, manifest-write RED, post-read budget, manifest type checks, the .git worktree file, test_10's vacuous window)
 - Session record: context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md §4
+=======
+## Task 34 (CLAIM-026, session 24) — R-02: the mutation-floor hardening
+- Task: the 10 verified floor findings from the CodeRabbit/Greptile reviews (CR-47-2/3, G-47-1/2/6/7/8/11, G-48-2/3, G-52-2, CR-49-4) — RED-first: 8 new suite cases observed FAILING at 4b8cb6f on actual wrong behavior, then the implementation, then 27/27 GREEN; make verify GREEN 13/13; the 30/30 positive self-test GREEN; canonical 51/0
+- The implementation: walk errors fail closed into the non-regular refusal; every case runs in its own session and the process GROUP is killed on every outcome + RLIMIT_NPROC 256 (the BOUNDARY text shrinks honestly — the re-sessioning daemon residual stays stated); truncated/refused evidence streams and signal deaths are never catches; the post-loop integrity recheck catches final-case source tampering; the failed manifest write is a named ARV-FLOOR-006 RED; the total budget charges bytes actually read; the validator type-checks code/expect/disposition; the .git FILE (worktree shape) is never corpus
+- Two of the slice's own bugs caught by its own tests before any commit: the Popen check= kwarg slip (surfaced as 16 failures — the finally-return swallowed the TypeError, the A9d-adjacent unnamed-RED residual honestly noted) and the serialize-before-assign manifest bug (the artifact briefly carried verdict=None — restructured: the record's own keys assigned before serialization; both now green and recorded)
+- LAW-11 amendment 7 in the red records; the growing-file budget race is untestable deterministically at suite speed — stated in the not-verified list, never fake-tested
+- Next: R-03 (isolation tools), R-04 (gate/scope/known-bad/workflow), R-05 (the 37-PR sweep)
+>>>>>>> Stashed changes

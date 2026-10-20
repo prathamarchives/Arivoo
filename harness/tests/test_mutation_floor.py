@@ -238,6 +238,48 @@ V_ANCHOR_DELETER = (
     "print('canonicalization-layer verifier — 51 checks, 1 failures')\n"
     "sys.exit(1)\n"
 )
+# R-02 (session 24 — the CodeRabbit/Greptile PR #47/#48/#52 findings, RED-first):
+
+V_TRUNC_HIDER = (
+    # G-47-1/G-52-1: prints the full fake-catch protocol to stdout, then floods
+    # stderr past the read cap and exits 1 — the traceback/flood is dropped by
+    # the capped read-back, so the predecessor accepts stdout alone as proof.
+    "import sys\n"
+    "print('VER-701 FAIL  fake')\n"
+    "print('canonicalization-layer verifier — 51 checks, 1 failures')\n"
+    "for _ in range(40):\n"
+    "    sys.stderr.write('x' * 65536)\n"
+    "sys.exit(1)\n"
+)
+V_SIGNAL_DEATH = (
+    # G-47-2: the full fake-catch protocol, then a signal death (rc<0) — the
+    # predecessor's `rc != 0` counts the kill as a completed catch.
+    "import os, signal, sys\n"
+    "print('VER-701 FAIL  fake')\n"
+    "print('canonicalization-layer verifier — 51 checks, 1 failures')\n"
+    "sys.stdout.flush()\n"
+    "os.kill(os.getpid(), signal.SIGKILL)\n"
+)
+# CR-47-3/G-47-8: a correct catch AND a worker that outlives the case (no
+# session of its own — it stays in the child's process group, the exact class
+# the process-group kill must reap on every case exit).
+V_WORKER_SPAWNER = (
+    "import subprocess, sys\n"
+    "print('VER-701 FAIL  fake')\n"
+    "print('canonicalization-layer verifier — 51 checks, 1 failures')\n"
+    "subprocess.Popen([sys.executable, '-c', "
+    "\"import time; time.sleep(1.2); open('{m}', 'w').write('survived')\"],\n"
+    "                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n"
+    "sys.exit(1)\n"
+)
+
+
+def cand_path(td: Path) -> Path:
+    """The candidate's AGENTS.md path — test_24's source-mutation target
+    (the V_MIDRUN_WRITER payload appends to the path source-path.txt names)."""
+    return td / "candidate" / "AGENTS.md"
+
+
 
 
 # --------------------------------------------------------------------------
@@ -368,8 +410,24 @@ class MutationFloorTests(unittest.TestCase):
         # ARV-FLOOR-002 before any case, so the marker assertion never engaged)
         self.assertNotIn("ARV-FLOOR-002", r.stdout + r.stderr,
                          "the anchored launch must resolve the base counterpart name and RUN")
-        self.assertIn("MUT-04", r.stdout,
-                      "the floor must run its case — a refusal that skips every case is a vacuous pass")
+        self.assertIn("MUT-04 FAIL", r.stdout,
+                      "the floor must run and JUDGE its case (this candidate's verifier is the ALWAYS-GREEN stub — "
+                      "the correct outcome is the JUDGED not-caught disposition, never a skipped case)")
+        self.assertNotIn("mutation application failed", r.stdout,
+                         "the judged form must not be the mutation-application-failure skip — CR-49-4's "
+                         "vacuous window: a skip also leaves the shadow marker trivially absent")
+        self.assertIn("(ARV-FLOOR-001)", r.stdout,
+                      "the disposition must be the JUDGED vacuous-pass refusal — proof run_child executed "
+                      "and evaluate_case engaged the protocol")
+        mpath = self.td / "r02-t10-manifest.json"
+        r2 = run_driver(cand, only="MUT-04", timeout=90, floor_base=str(REPO / "tools"),
+                        driver_path=anchored, manifest_out=mpath)
+        import json as _json
+        m = _json.loads(mpath.read_text(encoding="utf-8"))
+        mut04 = [c for c in m["cases"] if c.get("code") == "MUT-04"]
+        self.assertTrue(mut04 and "child_exit" in mut04[0],
+                        "the manifest record must prove run_child EXECUTED (a child_exit field), "
+                        "not merely that the case name appeared")
         self.assertFalse((cand / "SHADOW_MARKER.txt").exists(),
                          "the candidate shadow module executed inside the trusted driver")
 
@@ -506,8 +564,8 @@ class MutationFloorTests(unittest.TestCase):
         cand = build_candidate(self.td, verifier=V_SWAP_FIFO)
         r = run_driver(cand, only="MUT-04", timeout=90)
         self.assertNotEqual(r.returncode, 0)
-        self.assertIn("ARV-FLOOR-001", r.stdout + r.stderr,
-                      "the swapped-output case must be a named not-caught, never a hang")
+        self.assertIn("ARV-FLOOR-003", r.stdout + r.stderr,
+                      "the swapped-output case is the unread-evidence refusal (R-02: truncated/refused streams are never a provable catch) — still a named not-caught, never a hang")
 
     def test_19_midrun_anchor_loss_is_a_named_refusal(self):
         """FLOOR-REVIEW-1 B4: a child that deletes the trusted base driver makes
@@ -527,6 +585,123 @@ class MutationFloorTests(unittest.TestCase):
         self.assertIn("ARV-FLOOR-002", r.stdout + r.stderr)
         self.assertIn("unreadable mid-run", r.stdout + r.stderr,
                       "the anchor loss must be a NAMED refusal, never a swallowed exception")
+
+
+    # -- R-02 (session 24): the CodeRabbit/Greptile floor findings, RED-first --
+    # Each case below was observed FAILING at the predecessor 4b8cb6f (the
+    # behaviors the reviews named), then green with the repair.
+
+    def test_20_unreadable_directory_refuses_fail_closed(self):
+        """CR-47-2/G-47-6: os.walk silently skips a directory it cannot list,
+        so an unreadable subtree VANISHES from the corpus/digest/fixture with
+        no ARV-FLOOR-004 — the enumeration must fail closed on walk errors."""
+        cand = build_candidate(self.td, verifier=V_FAKE_FAIL)
+        locked = cand / "locked-subtree"
+        locked.mkdir()
+        (locked / "secret.txt").write_text("x\n", encoding="utf-8")
+        locked.chmod(0)                       # unreadable: the walk must refuse
+        r = run_driver(cand, only="MUT-04", timeout=90)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("ARV-FLOOR-004", r.stdout + r.stderr,
+                      "an unreadable directory must refuse the enumeration, never silently skip it")
+
+    def test_21_case_workers_do_not_outlive_their_case(self):
+        """CR-47-3/G-47-8: a verifier-spawned worker in the child's process
+        group used to survive the case (subprocess.run kills only the direct
+        child, and only on timeout). The case is a legitimate catch AND its
+        worker must be reaped when the case ends — the marker never lands."""
+        marker = self.td / "R02-PGK-MARKER.txt"
+        if marker.exists():
+            marker.unlink()
+        payload = V_WORKER_SPAWNER.replace("{m}", str(marker))
+        cand = build_candidate(self.td, verifier=payload)
+        r = run_driver(cand, only="MUT-04", timeout=90)
+        # the catch itself must stand (the standing lesson: prove the mechanism ran)
+        self.assertIn("MUT-04 PASS", r.stdout,
+                      "the legitimate catch must still be judged — the kill must not break the case")
+        # the worker: waited out the marker window, then checked
+        import time as _t
+        _t.sleep(1.6)
+        self.assertFalse(marker.exists(),
+                         "a case worker survived the case's process-group kill and wrote its marker")
+
+    def test_22_truncated_evidence_is_never_a_catch(self):
+        """G-47-1/G-52-1: the child prints the full catch protocol to stdout,
+        floods stderr past the read cap, and exits 1 — the predecessor ignored
+        the truncated flag and accepted stdout alone. An evidence stream that
+        could not be read within the cap is never a provable catch."""
+        cand = build_candidate(self.td, verifier=V_TRUNC_HIDER)
+        r = run_driver(cand, only="MUT-04", timeout=90)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertNotIn("MUT-04 PASS", r.stdout,
+                         "a truncated/refused evidence stream must never count as a catch")
+        self.assertIn("MUT-04 FAIL", r.stdout)
+
+    def test_23_signal_death_is_not_a_completed_catch(self):
+        """G-47-2: the child prints the catch protocol then dies by SIGKILL
+        (rc<0). The predecessor's `rc != 0` counted the signal death as a
+        completed catch — a killed child is not a named-refusal exit."""
+        cand = build_candidate(self.td, verifier=V_SIGNAL_DEATH)
+        r = run_driver(cand, only="MUT-04", timeout=90)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertNotIn("MUT-04 PASS", r.stdout,
+                         "a signal death must never count as a completed catch")
+
+    def test_24_final_case_source_mutation_is_detected(self):
+        """G-48-2: integrity() ran only BEFORE each case, so a mutation of the
+        source corpus during the FINAL case (or a --only single-case run) was
+        never re-checked — the run stayed GREEN on a tampered tree. The
+        post-loop recheck must refuse ARV-FLOOR-002."""
+        cand = build_candidate(self.td, verifier=V_MIDRUN_WRITER,
+                               extra={"source-path.txt": str(cand_path(self.td)) + chr(10)})
+        r = run_driver(cand, only="MUT-04", timeout=90)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("ARV-FLOOR-002", r.stdout + r.stderr,
+                      "a source mutation during the final case must refuse the run, never pass GREEN")
+
+    def test_25_failed_manifest_write_refuses_green(self):
+        """G-48-3: --manifest-out to an unwritable location only printed a
+        warning while the verdict stayed GREEN and the driver exited 0 — a
+        failed evidence write must fail the run (RED), never pass."""
+        mdir = self.td / "unwritable-manifest-dir"
+        mdir.mkdir()
+        cand = build_candidate(self.td, verifier=V_FAKE_FAIL)
+        r = run_driver(cand, only="MUT-04", timeout=90,
+                       manifest_out=mdir)          # a directory: write_text must fail
+        self.assertNotEqual(r.returncode, 0,
+                             "a failed manifest write must exit nonzero, never SELF-TEST GREEN exit 0")
+        self.assertIn("ARV-FLOOR-006", r.stdout + r.stderr,
+                      "the failed write must be a named manifest-validation failure")
+
+    def test_26_worktree_git_file_shape_runs(self):
+        """G-52-2: a corpus carrying a .git REGULAR FILE (worktree/submodule
+        shape) used to be copied into the fixture, where the controlled
+        .git/objects mkdir then crashed before any case ran. The .git entry —
+        file or directory — is never corpus; the floor must run its cases."""
+        cand = build_candidate(self.td, verifier=V_FAKE_FAIL,
+                               extra={".git": "gitdir: /nowhere/real\n"})
+        r = run_driver(cand, only="MUT-04", timeout=90)
+        self.assertNotIn("Traceback (most recent call last)", r.stdout + r.stderr,
+                         "a worktree-shaped corpus must never crash the fixture build")
+        self.assertIn("MUT-04 PASS", r.stdout,
+                      "the floor must run and judge its case over the worktree-shaped corpus")
+
+    def test_27_manifest_validator_rejects_wrong_field_types(self):
+        """G-47-11: validate_manifest checked field PRESENCE but never TYPES —
+        a record with a valid code, caught=True, expect=None, and disposition={}
+        validated clean. The validator must require strings."""
+        import json as _json
+        bad = self.td / "bad-types-manifest.json"
+        bad.write_text(_json.dumps({
+            "schema_version": 1,
+            "expected_cases": ["MUT-04"],
+            "cases": [{"code": "MUT-04", "expect": None, "caught": True,
+                       "disposition": {}}],
+        }), encoding="utf-8")
+        r = run_driver(validate_manifest=bad, timeout=90)
+        self.assertNotEqual(r.returncode, 0,
+                            "a manifest with non-string expect/disposition must NOT validate")
+        self.assertIn("ARV-FLOOR-006", r.stdout + r.stderr)
 
 
 if __name__ == "__main__":

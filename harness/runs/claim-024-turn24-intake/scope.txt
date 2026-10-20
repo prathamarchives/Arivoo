@@ -7,3 +7,4 @@ PLAN.md INT-129/D-042
 CLAIMS.md
 context/WORKLOG.md INT-129/D-042
 harness/runs/claim-024-turn24-intake INT-129/D-042
+STATE.md

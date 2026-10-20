@@ -1,0 +1,7 @@
+{
+  "command": "python3 -I tools/trusted_gate_anchored.py --repo $PWD --base /tmp/base-main --phase suites",
+  "exit_code": 0,
+  "commit": "7d86557e5b7f40c68331a97b2475d4e0f2e0950a",
+  "output_sha256": "64141b11935f0d1eb45d97a54baadfb5653e2d7321127e757c676323096e0988",
+  "recorded_at": "2026-10-20T14:12:52.237569+00:00"
+}

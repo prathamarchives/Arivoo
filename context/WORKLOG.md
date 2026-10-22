@@ -544,3 +544,14 @@ Stage Summary:
 - Evidence: record 24 §§1-12; the sweep log r05-results.json; the protection API's own response re-read
 - Next: the owner's approving review on this PR; then R-03, R-04, the one-liner slice, H-01c-authority/evidence, H-02
 - Session record: context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md (COMPLETE)
+
+## Task 36 (CLAIM-028, session 25) — R-03: the isolation-tool hardening
+- Task: the 4 card items (the G-51 Greptile findings on #51, routed by record 24): O_NONBLOCK in the bounded-open helpers; the builder walk's fail-closed onerror; the directory entry budget; the B5/B6 fixed-message pins
+- RED-first: B7/B8 (the checker's + the suite's own `_open_regular_nofollow` vs a FIFO — the probe children HUNG to the 10s timeout), B9 (an unreadable subtree SILENTLY DROPPED — the false-complete-fixture class), B10 (9 directories constructed under a 4-entry budget) — all four observed FAILING at the predecessor f190bfa for their named reasons; the 22 existing checker cases pass unchanged; the message pins' discriminating power proven on a scratch-corrupted wrapper (red-02.txt)
+- GREEN: both helpers open O_NONBLOCK (the FIFO open returns at once, the open-fd ISREG check refuses it); the walk fails closed as a sanitized FixtureBuildError; directories charge the budget; the suite 28/28 GREEN, make verify 13/13, the floor 30/30, the checker green, the cw-rehearsal green (the BASE's v2.2 suite over this candidate checker), the gate PR-mode GREEN over the real diff, the Proof Sheet byte-identical from 9 run records
+- The session-25 preflight: PR #62's merge outcome RECORDED (merged BY THE OWNER 2026-10-22T11:02:24Z, REVIEW_REQUIRED at merge — the single-actor absence closed by the owner's command INT-130); the rig rebuilt (fifth env-reset corruption, FACT-001-exact); the stale local clone synced (963356b → f190bfa)
+- Outcome: R-03's 5 findings FIXED with stable regressions; the 13-finding READY ledger now 5 fixed / 8+ratchet READY (R-04's)
+- Evidence: record 25 §§1-7; harness/runs/claim-028-r03-isolation-tool-hardening (red-01/red-02/scope/notverified/proofsheet)
+- Unresolved: R-04's 9 items, the ledger one-liner slice, H-01c-authority/evidence, H-02, P3-00 — in that order
+- Next: R-04 as CLAIM-029 (disjoint files: gate/scope/known-bad/trusted-driver)
+- Session record: context/extracted/25-SESSION-25-R03-R04-EXECUTION.md (in progress — §§1-7 the R-03 slice)

@@ -6,3 +6,5 @@ STATE.md
 context/WORKLOG.md INT-129/D-042
 PLAN.md INT-129/D-042
 harness/runs/claim-027-r05-sweep-and-close INT-129/D-042
+INTENT-LEDGER.md INT-130/D-042
+AGENTS.md

@@ -363,6 +363,17 @@ class TrustedGateTests(unittest.TestCase):
                       "sha256-verified anchoring is what makes the driver trusted")
         self.assertNotIn("success()", expression,
                          "the success() function would skip S4c on a red S4b — the exact defect")
+        # the #64 SECOND review round (CodeRabbit TOCTOU): S4b runs candidate-
+        # controlled Python in the same writable workspace, so the anchored
+        # driver is RE-VERIFIED at S4c ENTRY (the direct swap-after-anchor
+        # channel refuses); the same-job base-machinery residual is R-06's
+        # card, named in the workflow comment, never claimed closed here.
+        self.assertIn("sha256sum", step,
+                      "the S4c run block must re-verify the anchored driver's digest against "
+                      "base at entry — the post-anchor driver-swap refuses (the #64 TOCTOU "
+                      "round's in-PR hardening)")
+        self.assertIn("post-anchor tampering refused", step,
+                      "the re-verification's refusal line must be pinned by name")
 
     def test_10_bounded_tail_keeps_the_end_of_the_output(self):
         """R-04(3) + the #64 review round (Greptile P2 + CodeRabbit,

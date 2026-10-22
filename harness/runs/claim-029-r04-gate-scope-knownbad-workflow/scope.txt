@@ -15,3 +15,4 @@ CLAIMS.md
 STATE.md
 context/WORKLOG.md INT-129/D-042
 context/extracted/25-SESSION-25-R03-R04-EXECUTION.md INT-129/D-042
+PLAN.md

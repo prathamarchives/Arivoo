@@ -520,6 +520,15 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   one-liners): corrected — the one-liner slice builds its own check; (7) CodeRabbit — STATE's Outstanding-reviews
   snapshot still called this 'the R-03 PR' with R-04 pending: re-derived; (8) the docstring-coverage warning:
   docstrings added to every diff-touched function missing one.
+- **THE #64 SECOND REVIEW ROUND (CodeRabbit TOCTOU, Major, CWE-367 — the finding preserved here):** S4b runs
+  candidate-controlled Python in the writable workspace; it can replace `tools/trusted_gate_anchored.py` or write
+  `base/harness/*` AFTER the anchor's sha256 check, and S4c then loads those paths without rechecking. The exposure
+  PRE-EXISTS this PR (the merge base's S4c ran under `success()` in the same job) — never introduced here, now named.
+  DISPOSITION: (a) the in-PR hardening — the anchored driver's digest is re-verified at S4c ENTRY (the direct
+  swap-after-anchor channel refuses with the named message; pinned by test_09's extended assertions); (b) the
+  structural fix — the isolated fresh-checkout trusted job — ROUTED to the new R-06 card (PLAN, READY after the
+  one-liner slice, before H-02, which judges through this trusted path); (c) the residual named in notverified.txt —
+  the base machinery's same-job writability is NOT closed by this PR and NOT claimed closed.
 
 ## 9. Unverified items (LAW-04 — the slice's honest list)
 

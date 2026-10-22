@@ -131,6 +131,18 @@ jobs:
           ARV_EVENT_NAME: ${{ github.event_name }}
           ARV_PR_HEAD: ${{ github.head_ref }}
         run: |
+          set -e
+          # the #64 second review round (CodeRabbit TOCTOU): S4b runs candidate-
+          # controlled Python in this same writable workspace, so the anchored
+          # copy is RE-VERIFIED against base at S4c ENTRY — the direct driver-
+          # swap-after-anchor channel refuses here. The FULL same-job same-user
+          # tampering class (base/harness machinery writes; any candidate-
+          # executed code before this step) is the named residual — the
+          # structural fix (an isolated fresh-checkout trusted job) is the
+          # R-06 card, never claimed closed here.
+          a=$(sha256sum base/tools/trusted_gate.py | cut -d' ' -f1)
+          b=$(sha256sum tools/trusted_gate_anchored.py | cut -d' ' -f1)
+          [ "$a" = "$b" ] || { echo "FAIL: the anchored driver no longer matches base — post-anchor tampering refused (R-06's named residual: the base machinery remains same-job writable; the isolated-job fix is that card's work)"; exit 1; }
           python3 -I tools/trusted_gate_anchored.py --repo "$PWD" --base "$PWD/base" --phase gate --diff-ref origin/main
 
   canonical-layer:

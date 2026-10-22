@@ -18,5 +18,10 @@
 - - S4c's `!cancelled()` semantics are pinned by parsing the workflow artifact (test_09) and by the GitHub Actions
   documented step-scheduling behavior; the LIVE end-to-end proof (a genuinely red S4b on a real PR with S4c still running)
   is observed only if such a PR occurs — no synthetic PR was fabricated to force it
+- - the #64 second review round's TOCTOU residual (CodeRabbit Major, CWE-367, PRE-EXISTING at the merge base): the
+  harness job runs candidate-controlled code (S1's health.py, S1b's suite subprocesses, S4b) in the same writable
+  workspace BEFORE the trusted S4c step, so the base/harness machinery remains tamperable after the anchor check;
+  R-04's in-PR hardening re-verifies only the ANCHORED DRIVER's digest at S4c entry (the direct swap channel refuses) —
+  the structural isolation (the R-06 card: an isolated fresh-checkout trusted job) is NOT built and NOT claimed
 - - no fresh technical verifier and no SEV — the pre-H-02 discipline (H-02 is the next-but-one card: the ledger one-liner
   slice, then H-01c-authority/evidence, then H-02's activation)

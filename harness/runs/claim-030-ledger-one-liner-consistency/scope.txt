@@ -1,0 +1,16 @@
+# CLAIM-030 — the ledger one-liner consistency slice (the H-01c-claims card item (d), PLAN line 121;
+# the INT-126 TRIPPLICATION's receiving card — the C2 one-liner gap)
+# The session-25 reconciliation carried: CLAIM-029's rule-4 closed row (PR #64 = 8b89b311d, merged
+# 2026-10-22T17:04:40Z via the owner-authorized protection-flip path of record 24 §13; both bot rounds'
+# 10 findings all fixed/dispositioned in-PR; the R-06 card routed; post-merge CI green run 39819503021)
+tools/verify_canonical_layer.py INT-129/D-042
+tools/verify_selftest.py INT-129/D-042
+Makefile
+.github/workflows/verify.yml INT-129/D-042
+harness/tests/test_mutation_floor.py INT-129/D-042
+harness/red-records.json INT-129/D-042
+harness/runs/claim-030-ledger-one-liner-consistency INT-129/D-042
+CLAIMS.md
+STATE.md
+context/WORKLOG.md INT-129/D-042
+context/extracted/25-SESSION-25-R03-R04-EXECUTION.md INT-129/D-042

@@ -471,8 +471,11 @@ class MutationFloorTests(unittest.TestCase):
         self.assertIn("ARV-FLOOR-006", r.stdout + r.stderr)
 
     def test_12_green_run_writes_complete_manifest(self):
-        """The positive path over the REAL corpus: 30/30 caught, exit 0, and a
-        complete manifest whose case set covers all 30 base codes exactly once."""
+        """The positive path over the REAL corpus: every base case caught, exit
+        0, and a complete manifest whose case set covers every base code
+        exactly once — the count is DERIVED from the floor's own case list
+        (CLAIM-030: the pin was a hard 30 and the MUT-31 addition caught it
+        live; never a stale hard-code again)."""
         with tempfile.TemporaryDirectory(prefix="arv-floor-manifest-") as md:
             mout = Path(md) / "manifest.json"
             r = run_driver(only=None, timeout=900, manifest_out=mout)  # the real repo, the real verifier
@@ -480,8 +483,15 @@ class MutationFloorTests(unittest.TestCase):
             m = json.loads(mout.read_text())
             self.assertEqual(m["verdict"], "GREEN")
             codes = [c["code"] for c in m["cases"]]
-            self.assertEqual(len(codes), 30)
-            self.assertEqual(len(set(codes)), 30)
+            # the expected set: the floor's own CASES list (the single source of truth)
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("floor_cases", REPO / "tools" / "verify_selftest.py")
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            expected = [m[0] for m in mod.MUTATIONS]
+            self.assertEqual(len(codes), len(expected))
+            self.assertEqual(set(codes), set(expected))
+            self.assertEqual(len(set(codes)), len(expected))
             self.assertTrue(all(c["caught"] for c in m["cases"]))
             self.assertIn("corpus_digest", m)
             self.assertIn("candidate_verifier_sha256", m)

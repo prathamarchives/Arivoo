@@ -1,0 +1,14 @@
+- not verified (LAW-04 — required, never empty-by-omission; the CLAIM-030 one-liner slice's honest limits):
+- - the one-liner multiplicity check shares VER-212's bullet-pattern scope (the whole-ledger `-\s\*\*INT-...` regex):
+  a future section carrying that bullet form OUTSIDE the numbering section would enter BOTH checks' view — the
+  scope semantics stay in deliberate lockstep with VER-212 (the single-scope rule), never diverged for convenience
+- - the S4c-isolated-job structural fix for the #64 TOCTOU finding remains R-06's card (before H-02); this slice
+  touches no trust-path machinery beyond the floor's case list and the verifier's own check set
+- - the derived-count repairs cover the three LIVE hard-codes found in this slice (the Makefile echo, test_12's pin,
+  the workflow comment); historical "30/30"/"51/0" claims inside past session records are records of past runs and
+  are never rewritten (AUT-02)
+- - MUT-31 pins the triplicated-row form; the overlap form is scratch-copy evidence (red-02.txt), not a floor case —
+  one floor case per named check is the established budget (ARV-SIZE discipline), and the multiplicity count in
+  VER-213 covers both forms through one signal
+- - no fresh technical verifier and no SEV — the pre-H-02 discipline (R-06 and H-01c-authority/evidence come before
+  H-02's activation)

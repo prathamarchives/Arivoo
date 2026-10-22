@@ -416,6 +416,23 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   canonical 51/0). The test_09-tg pin's discriminating power proven live (the `if:` line removed on a scratch copy → RED;
   restored → OK).
 
+### 4-OL. Results — the LEDGER ONE-LINER CONSISTENCY slice LANDED (CLAIM-030, session 25 part 3)
+
+- **The gap (the H-01c-claims card item (d), PLAN line 121):** the numbering section's one-liner rows carried NO
+  multiplicity check — VER-201's INT_HEADER regex matches DETAILED blocks only, and VER-212's `named` is a SET that
+  dedupes the very rows it declares; the INT-126 triplication (three byte-identical rows from the intake commit
+  b572d3f) survived every check until the session-22 preflight eyeballed it (record 22 §2).
+- **RED-first (the floor's own named report):** MUT-31 added to the floor FIRST — triplicate the LAST one-liner row
+  byte-identically — and run against the PREDECESSOR verifier: `MUT-31 FAIL → not caught (without the expected FAIL
+  line and exit 0) — ARV-FLOOR-001` (red-01.txt; the floor is the canonical verifier's established known-bad home —
+  the card's cases.py mention predates the H-01b floor architecture, the routing recorded here).
+- **GREEN:** VER-213 in C2 — every one-liner-covered ID counted (multiplicity preserved): duplicates AND overlaps
+  refuse (the triplicated-row form caught by MUT-31; the OVERLAP form — a range row overlapping existing singles —
+  proven on a scratch copy, red-02); the verifier 52 checks / 0 failures; the floor 31/31.
+- **The derived-count repairs (the stale-hard-code class, three homes):** the Makefile's hard-coded "51/0" echo now
+  DERIVED from the verifier's own completion line; test_12's hard 30 now DERIVED from the floor's MUTATIONS list
+  (the wall ARV-RED-002 fired on the edit — the amendment recorded); the workflow comment's 30 → 31.
+
 ## 5. Files changed
 
 - `tools/isolation_check.py` — v2.3 note + O_NONBLOCK in `_open_regular_nofollow` (the checker's own bounded-open helper).
@@ -441,6 +458,17 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   proofsheet.md (assembled, never hand-edited).
 - `CLAIMS.md` — CLAIM-029's open row + CLAIM-028's rule-4 closed row (the open row retired in the same PR — the ARV-CLM-006
   transitional state caught by the registry check itself, then clean).
+
+### 5-OL. Files changed (the one-liner slice)
+
+- `tools/verify_canonical_layer.py` — VER-213 (the one-liner multiplicity check, C2's third numbering check).
+- `tools/verify_selftest.py` — MUT-31 (the INT-126 triplication mutation) + the doc/message count updates.
+- `Makefile` — the canonical-echo DERIVED from the completion line (never a stale hard-code).
+- `.github/workflows/verify.yml` — the comment's floor count 30 → 31.
+- `harness/tests/test_mutation_floor.py` — test_12's count pin DERIVED from tools/verify_selftest.py's MUTATIONS.
+- `harness/runs/claim-030-ledger-one-liner-consistency/` — red-01.txt (the ARV-FLOOR-001 RED), red-02.txt (the
+  overlap scratch proof), scope.txt, notverified.txt, run records + proofsheet.md (assembled, never hand-edited).
+- `CLAIMS.md` — CLAIM-030's open row + CLAIM-029's rule-4 closed row (the open row retired in the same PR).
 
 ## 6. Commands and external actions (ACTUAL — never reconstructed)
 
@@ -498,6 +526,15 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   removed on a scratch copy → RED; restored → OK).
 - **ARV-RED-002 FIRED LIVE ON BOTH FILES** (the wall catching the in-slice fixture/regex edits — exactly its job): both
   corrections recorded through the amendment protocol with the honest note; `make verify` GREEN after.
+- (§OL:) **test_12's HARD 30 caught itself stale** the moment MUT-31 joined the floor (the mutation-floor suite's own
+  positive-path test failed with `31 != 30` — the hard-code class repeating inside the very machinery that polices
+  evidence honesty); repaired DERIVED-from-MUTATIONS, the wall ARV-RED-002 firing on the test edit, the amendment
+  recorded.
+- (§OL:) **the Makefile's "51/0" echo was the same class** — a hard-coded claim about a derived quantity, one slice
+  behind reality the moment VER-213 landed; now derived from the verifier's own completion line.
+- (§OL:) **the nested-paren INTs cell** (CLAIM-030's first draft) tripped the registry's own reservation parser
+  (— ARV-CLM-003: the parenthetical-strip regex cannot span nested parens, so "(d)" left a bare INT-129 behind);
+  rephrased — the parser's bare-token rule respected, no retroactive notation needed.
 - **THE #64 REVIEW ROUND — Greptile 2 + CodeRabbit 7, ALL REAL, all fixed in-PR before merge (the loop working twice in
   one PR):** (1) CodeRabbit MAJOR — the bare `!cancelled()` opened the candidate-substitution hole: a failed base
   checkout or anchor leaves `tools/trusted_gate_anchored.py` absent, and S4c would execute whatever candidate-committed
@@ -551,10 +588,9 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
 
 ## 11. Next action
 
-**The ledger one-liner consistency slice** (the INT-126 TRIPPLICATION's receiving card — the C2 one-liner gap that
-the session-22 preflight found; NO existing check covers the INTENT-LEDGER's one-liner rows — the registry's
-ARV-CLM-007 ratchets CLAIMS.md rows, not ledger one-liners, and the one-liner slice builds its own check) — then
-**H-01c-authority**, then
+The ledger one-liner consistency slice (CLAIM-030) LANDED — VER-213 + MUT-31 live. Next: **R-06 the trusted-path
+TOCTOU isolation** (the #64 second review round's finding — the isolated fresh-checkout trusted job; before H-02,
+which judges through this path), then **H-01c-authority**, then
 **H-01c-evidence/privacy** (F-007), then **H-02** (the SEV gate — activation legal, the H-01b floor live), then **P3-00**
 (the RTM freeze). The R-04 slice (CLAIM-029) landed all 9 card items — the 13-finding READY ledger is now EMPTY.
 

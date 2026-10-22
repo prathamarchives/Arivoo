@@ -380,6 +380,25 @@ class Layer:
             "the numbering section and the entry headers agree both ways (every declared range ≥ 019 is present; every observed entry is declared) — a truncated tail cannot pass",
             f"headers with no numbering declaration: {undeclared}; declared but absent: {missing_declared} — the ledger and its numbering note must move together (AUT-02; tail-truncation class)",
         )
+        # VER-213 (CLAIM-030 — the H-01c-claims card item (d), the INT-126
+        # one-liner gap): the one-liner rows carry MULTIPLICITY. The b572d3f
+        # intake triplication (three byte-identical INT-126 rows) survived
+        # every check because VER-201's INT_HEADER regex matches DETAILED
+        # blocks only and VER-212's `named` is a SET that dedupes the very
+        # rows it declares. The count of one-liner rows covering each ID is
+        # the signal — multiplicity is drift, never collapsed away.
+        cover: dict[int, int] = {}
+        for a, b in bullets:
+            start, end = int(a), int(b) if b else int(a)
+            for n in range(start, end + 1):
+                cover[n] = cover.get(n, 0) + 1
+        multi = sorted(n for n, c in cover.items() if c > 1)
+        self.check(
+            "VER-213",
+            not multi,
+            f"the numbering section's one-liner rows are unique and non-overlapping — every ID declared exactly once ({len(bullets)} rows, {len(cover)} IDs covered)",
+            f"IDs declared by more than one one-liner row: {multi} — the INT-126 triplication class (b572d3f: a summary row appended twice at intake survived VER-201/VER-212 because the header regex matches detailed blocks only and the coverage set dedupes silently); dedupe the rows",
+        )
 
     # ------------------------------------------------------------ C3: register
     def c3(self) -> None:

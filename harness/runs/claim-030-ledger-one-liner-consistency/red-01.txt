@@ -1,0 +1,8 @@
+floor temp root: /tmp/arivoo-floor-m4jdy4_l
+known-bad self-test — 1 mutations, each must FAIL its named check (child-process floor)
+
+FAIL ARV-FLOOR-002: the corpus source changed under the run (digest mismatch before a case) — refusing to judge mutated input
+floor manifest: /tmp/arv-floor-manifest-e42fc14c.json
+
+SELF-TEST RED — verdict REFUSED: 1 case failure(s) + 1 manifest failure(s); codes: ['ARV-FLOOR-002', 'FLOOR-006']
+residual boundary: child processes run on the same host with the same OS user as this runner — NOT OS-level sandboxing; a hostile child could in principle kill the judge (the run turns RED, never green); the workflow-definition trust boundary is H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in this interpreter; every case ran in a fresh disposable fixture; integrity was re-verified before every case AND after the last case; the manifest records what actually happened. FLOOR-REVIEW-1 sharpening (session 23): the manifest artifact is a RECORD, not a tamper-proof store — a surviving same-user daemon can overwrite it after the run (CI consumes exit codes). R-02 sharpening (session 24): every case runs in its own process group and is killed with it on every outcome + RLIMIT_NPROC bounds the child — a daemon that RE-SESSIONS itself (setsid/double-fork outside the killed group) remains a stated residual, as does any environmental difference a candidate can probe beyond the seeded .git channel — stated and never claimed closed

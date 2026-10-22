@@ -1,0 +1,13 @@
+CLAIM-030 red-02 — the OVERLAP form's scratch proof (the multiplicity check's second face)
+
+MUT-31 (red-01) pins the TRIPLICATED-ROW form (byte-identical rows, the b572d3f intake class).
+The overlap form — a RANGE row added alongside existing SINGLE rows covering the same IDs — is
+the same VER-213 class through a different door: two DIFFERENT rows declaring the same IDs.
+
+Scratch-copy mutation (the repo tree never touched): insert
+  '- **INT-125..INT-130** — an OVERLAPPING range row (the drift probe)'
+before the existing '- **INT-125** — owner turn 20' single row; run the verifier over the copy.
+
+VER-213 FAIL  the numbering section's one-liner rows are unique and non-overlapping — every ID declared exactly once (22 rows, 130 IDs covered) — FIX: IDs declared by more than one one-liner row: [125, 126, 127, 128, 129, 130] — the INT-126 triplication class (b572d3f: a summary row appended twice at intake survived VER-201/VER-212 because the header regex matches detailed blocks only and the coverage set dedupes silently); dedupe the rows
+
+exit: 1 (a red verifier — the refusal is fail-closed)

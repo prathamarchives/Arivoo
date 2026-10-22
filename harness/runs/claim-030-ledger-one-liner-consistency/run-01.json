@@ -1,7 +1,7 @@
 {
   "command": "python3 harness/tests/test_migrations.py",
   "exit_code": 0,
-  "commit": "039d6925465f5515eff3c27adcb97277f827e9cd",
+  "commit": "b69d3991ebaa3cd1fd7aaf6203df66e3ee0c9a51",
   "output_sha256": "c738a1d35838996570d682d3ba192a9cfbc0a877b574cba33aaf6cf00ccc4b49",
-  "recorded_at": "2026-10-22T17:22:00.819657+00:00"
+  "recorded_at": "2026-10-22T17:39:41.437997+00:00"
 }

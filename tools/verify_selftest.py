@@ -353,7 +353,10 @@ def _one_liner_dup(repo: Path) -> None:
     rows = re.findall(r"^- \*\*INT-\d{3}(?:\.\.INT-\d{3})?\*\* .*$", text, re.M)
     assert rows, "the ledger must carry one-liner rows for this mutation"
     last = rows[-1]
-    p.write_text(text.replace(last, last + "\n" + last, 1), encoding="utf-8")
+    # THREE byte-identical rows total (the #65 review round: the first draft
+    # duplicated once; the named class is the b572d3f TRIPPLICATION — Greptile
+    # P2 + CodeRabbit's suggestion, independently confirmed)
+    p.write_text(text.replace(last, last + "\n" + last + "\n" + last, 1), encoding="utf-8")
 
 
 def _rm(repo: Path, rel: str) -> None:

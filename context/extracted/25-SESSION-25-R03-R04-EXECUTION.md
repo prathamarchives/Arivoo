@@ -535,6 +535,18 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
 - (§OL:) **the nested-paren INTs cell** (CLAIM-030's first draft) tripped the registry's own reservation parser
   (— ARV-CLM-003: the parenthetical-strip regex cannot span nested parens, so "(d)" left a bare INT-129 behind);
   rephrased — the parser's bare-token rule respected, no retroactive notation needed.
+- (§OL, the #65 review round — 4 findings, ALL REAL, all fixed in-PR:) **(1) THE COMMITTED red-01.txt WAS AN INVALID
+  PROOF** (Greptile P1 + CodeRabbit Major, independently confirmed): the first capture redirected the floor's output
+  INTO the floor's own corpus tree (harness/runs/ is corpus), so the run's own writing changed the source digest and
+  the floor refused with ARV-FLOOR-002 BEFORE JUDGING — the artifact showed a refusal, not the claimed not-caught
+  baseline. REPAIRED: the genuine predecessor-judgment run produced properly (the candidate = the 8b89b311d archive's
+  51-check verifier, the output captured OUTSIDE the corpus; MUT-31 → not caught → ARV-FLOOR-001, red-01.txt) with the
+  invalid-capture lesson preserved in its header. (2) MUT-31's helper duplicated the row ONCE while the named class is
+  the TRIPPLICATION (Greptile P2 + CodeRabbit's suggestion): the helper now produces THREE byte-identical rows.
+  (3) the Makefile printed "verifier green" even on a RED verifier and discarded its failure output (Greptile P2 +
+  CodeRabbit Minor): the label is rc-conditional and the failure path prints the verifier's own tail. (4) STATE's
+  phase entry carried session-record detail (CodeRabbit Minor — the D-027 navigation contract): reduced to status +
+  counts + the record pointer.
 - **THE #64 REVIEW ROUND — Greptile 2 + CodeRabbit 7, ALL REAL, all fixed in-PR before merge (the loop working twice in
   one PR):** (1) CodeRabbit MAJOR — the bare `!cancelled()` opened the candidate-substitution hole: a failed base
   checkout or anchor leaves `tools/trusted_gate_anchored.py` absent, and S4c would execute whatever candidate-committed

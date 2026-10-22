@@ -1,0 +1,36 @@
+# RED-02 — the B5/B6 message pins' discriminating power (R-03(4), CLAIM-028)
+
+The B5/B6 fixed-message pins are regression HARDENING, not a behavior repair: the
+wrapper already emits the fixed sanitized diagnostic at the predecessor (v2.2),
+so the pins pass there BY DESIGN — the defect was that the CASES discarded the
+message (asserting only the exception type), so a future wrapper that lost the
+fixed diagnostic or leaked a path would still pass both cases vacuously.
+
+The pin's discriminating power, proven on a scratch copy (never a repo file):
+
+  scratch: tools/isolation_selftest.py copied to /tmp, the _fixture wrapper's
+  refusal message corrupted from
+
+      f"fixture construction refused ({type(exc).__name__}) — "
+      "sanitized: no path or raw error is printed by design"
+
+  to
+
+      f"fixture construction refused ({type(exc).__name__}) — {td} raw-error-leak"
+
+  (a path leak + the fixed diagnostic gone — the exact regression class the pin
+  exists to catch). Observed result of the corrupted scratch run:
+
+  B5 builder copy failure: sanitized refusal (fixed message asserted) + ...
+    FAIL — the sanitized refusal's fixed message is WRONG — expected the
+    wrapper's exact fixed diagnostic (R-03(4): the predecessor kept the type
+    only and discarded the message)
+  B6 builder budget exhaustion: sanitized refusal (fixed message asserted) + ...
+    FAIL — the sanitized refusal's fixed message is WRONG — expected the
+    wrapper's exact fixed diagnostic (R-03(4))
+
+  The scratch run's other-case failures (the N-matrix) are noise of the probe
+  harness (the scratch dir is not a git repo); the B5/B6 signal is the evidence.
+
+Proven: the pins fire on a corrupted message, pass on the fixed one — never
+vacuous. Scratch artifacts removed after the probe; no repo file touched.

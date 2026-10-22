@@ -1,0 +1,22 @@
+- not verified (LAW-04 — required, never empty-by-omission; the R-03 slice's honest limits):
+- - the mid-scan FIFO race itself (lstat-regular, then a same-user swap to a FIFO BEFORE the open) cannot be
+  triggered deterministically through the checker's tracked-file scan — the B7/B8 child probes realize the
+  race's WORST CASE directly (the open happens on an actual FIFO) and pin the non-blocking refusal; the
+  lstat-to-open window between them remains the same-user/same-host residual the whole bounded-scan family
+  already states (F-002's BOUNDARY, unchanged)
+- - O_NONBLOCK on a FIFO with a live WRITER would let a single capped read return partial data — moot here:
+  the ISREG check refuses the fd BEFORE any read is attempted, and a regular file is never O_NONBLOCK-limited;
+  stated for completeness, never exercised
+- - B9's unreadable-directory case cannot engage under root (chmod-0 vs CAP_DAC_OVERRIDE) — the case
+  skip-declares under root with the reason printed (the R-02 test_20 precedent); the CI runners are non-root,
+  the case engages there and in this non-root local environment (uid 1001, observed)
+- - the B5/B6 message pins are regression hardening, not a behavior repair: the wrapper's fixed message
+  predates the pin (v2.2), so the pins pass at the predecessor BY DESIGN; their discriminating power is
+  proven separately (red-02.txt: a scratch-corrupted wrapper fails B5/B6 with the named reason); the
+  predecessor's own vacuity (type-only assertion) is the defect the pins close
+- - the directory-budget arithmetic is pinned at the REFUSAL, not at an exact constructed-entry count
+  (B10 asserts the refusal + cleanup, not which specific directory breached) — the budget semantics are
+  order-dependent by construction (walk order), and an exact-count pin would couple the case to os.walk's
+  traversal order rather than the contract
+- - no fresh technical verifier and no SEV — the pre-H-02 discipline (H-02 is the next-but-one card: the
+  ledger one-liner slice, then H-01c-authority/evidence, then H-02's activation)

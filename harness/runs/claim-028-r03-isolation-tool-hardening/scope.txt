@@ -1,0 +1,12 @@
+# CLAIM-028 — R-03: the isolation-tool hardening (the 4 card items; RED-first B7-B10 + the B5/B6 message pins)
+# INT-129/D-042 routing (the G-51 Greptile findings on #51); the session-25 reconciliation carried:
+# CLAIM-027's rule-4 closed row (PR #62 = f190bfa, merged by the owner 2026-10-22T11:02:24Z, REVIEW_REQUIRED
+# at merge — the single-actor structural absence closed by the owner's direct command, INT-130)
+tools/isolation_check.py INT-129/D-042
+tools/isolation_selftest.py INT-129/D-042
+harness/runs/claim-028-r03-isolation-tool-hardening INT-129/D-042
+CLAIMS.md
+STATE.md
+AGENTS.md
+context/WORKLOG.md INT-129/D-042
+context/extracted/25-SESSION-25-R03-R04-EXECUTION.md INT-129/D-042

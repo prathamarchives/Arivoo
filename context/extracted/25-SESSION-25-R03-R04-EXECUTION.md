@@ -498,6 +498,28 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   removed on a scratch copy → RED; restored → OK).
 - **ARV-RED-002 FIRED LIVE ON BOTH FILES** (the wall catching the in-slice fixture/regex edits — exactly its job): both
   corrections recorded through the amendment protocol with the honest note; `make verify` GREEN after.
+- **THE #64 REVIEW ROUND — Greptile 2 + CodeRabbit 7, ALL REAL, all fixed in-PR before merge (the loop working twice in
+  one PR):** (1) CodeRabbit MAJOR — the bare `!cancelled()` opened the candidate-substitution hole: a failed base
+  checkout or anchor leaves `tools/trusted_gate_anchored.py` absent, and S4c would execute whatever candidate-committed
+  file sits at that workspace-relative path (the turn-14 P2 class); the condition now guards on BOTH setup steps'
+  outcomes (`steps.checkout_base.outcome == 'success' && steps.anchor_trusted_gate.outcome == 'success'` — the
+  sha256-verified anchoring must actually have succeeded); (2) Greptile P1 + CodeRabbit independently —
+  KB-SCOPE-006's positive call LEAKED check_scope's own ARV-SCOPE-002 print into the expected-code channel, so an
+  over-refusing boundary PASSED as the sibling-prefix catch (exactly the masquerade the guard existed to prevent);
+  the positive call's stdout is now captured in a separate nested buffer, and test_11 pins both directions (the
+  pre-fix probe FAILS test_11, the fixed probe passes — discrimination proven live); (3) Greptile P2 + CodeRabbit
+  independently — the bounded tail kept the FIRST 1500 chars, dropping the failure details that live at the END of a
+  suite's output (unittest reports the traceback and verdict last); the tail now keeps the LAST 1500 with a truncation
+  marker, and test_10 pins a late failure marker behind ~6KB of normal output (the stub's own first draft had a
+  NameError — `i` was never bound, caught at the GREEN observation, fixed to a real loop); (4) CodeRabbit — the S4c
+  pin asserted `!cancelled()` against the whole step text, satisfiable by the explanatory COMMENT alone: the pin now
+  extracts the EXECUTABLE if-expression and requires the two outcome guards in it (twice-tightened, never
+  comment-matchable); (5) CodeRabbit — the red-records note claimed a never-observed '60 counted, 30 real': corrected
+  to the observed sequence (0 != 30 the fixture's own bug, then the TRUE 20 != 10); (6) CodeRabbit — §11 and STATE
+  wrongly attributed the LEDGER one-liner check to the registry (ARV-CLM-007 ratchets CLAIMS rows, not ledger
+  one-liners): corrected — the one-liner slice builds its own check; (7) CodeRabbit — STATE's Outstanding-reviews
+  snapshot still called this 'the R-03 PR' with R-04 pending: re-derived; (8) the docstring-coverage warning:
+  docstrings added to every diff-touched function missing one.
 
 ## 9. Unverified items (LAW-04 — the slice's honest list)
 
@@ -520,8 +542,10 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
 
 ## 11. Next action
 
-**The ledger one-liner consistency slice** (the INT-126 TRIPPLICATION's receiving card — the C2 one-liner gap that the
-session-22 preflight found and the registry's own check now ratchets) — then **H-01c-authority**, then
+**The ledger one-liner consistency slice** (the INT-126 TRIPPLICATION's receiving card — the C2 one-liner gap that
+the session-22 preflight found; NO existing check covers the INTENT-LEDGER's one-liner rows — the registry's
+ARV-CLM-007 ratchets CLAIMS.md rows, not ledger one-liners, and the one-liner slice builds its own check) — then
+**H-01c-authority**, then
 **H-01c-evidence/privacy** (F-007), then **H-02** (the SEV gate — activation legal, the H-01b floor live), then **P3-00**
 (the RTM freeze). The R-04 slice (CLAIM-029) landed all 9 card items — the 13-finding READY ledger is now EMPTY.
 

@@ -53,6 +53,9 @@ _REAL_GATE = None
 
 
 def _base_gate():
+    """Load the REAL harness/gate.py by file path (the required-suite source
+    for the stub trees) — cached for the test process only, which is NOT the
+    trusted judge."""
     global _REAL_GATE
     if _REAL_GATE is None:
         sys.path.insert(0, str(REPO))
@@ -66,6 +69,10 @@ def _base_gate():
 
 def _stub_suite(name: str, *, fail: bool = False, silent: bool = False,
                 stderr_only: bool = False) -> str:
+    """A synthetic candidate suite file body: the normal shape, the failing
+    shape, the zero-output A03 shape, or the unittest-shaped stderr-only
+    reporter (R-04(1): its completion line prints to STDERR so the pin
+    discriminates a stdout-only-blind driver)."""
     if silent:
         return "# silent stub\n"
     if stderr_only:
@@ -175,6 +182,9 @@ def run_driver(td: Path, stub: Path, phase: str, *, event: str | None = None,
                head: str | None = None, diff_ref: str = "HEAD~1",
                repo: str | None = None, base: str | None = None,
                env_extra: dict | None = None) -> subprocess.CompletedProcess:
+    """Invoke the driver EXACTLY the way CI invokes it: a subprocess, -I, the
+    anchored-copy path, a scrubbed env, and metadata only through the
+    environment (the A02 pattern)."""
     if not DRIVER.is_file():
         raise AssertionError("the trusted driver (tools/trusted_gate.py) does not exist at the predecessor — H-01b-CI's named module is unbuilt")
     env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": str(td)}
@@ -193,6 +203,7 @@ def run_driver(td: Path, stub: Path, phase: str, *, event: str | None = None,
 class TrustedGateTests(unittest.TestCase):
 
     def setUp(self):
+        """A fresh scratch dir per test (the stub trees are disposable)."""
         import tempfile
         self._td = tempfile.TemporaryDirectory(prefix="arvoo-tg-")
         self.td = Path(self._td.name)
@@ -336,12 +347,44 @@ class TrustedGateTests(unittest.TestCase):
         step = m.group("step")
         self.assertIn("if:", step, "the S4c step group captured no property lines — the "
                      "pin must parse the real workflow shape, never match an empty group")
-        self.assertIn("!cancelled()", step,
-                      "the S4c step lacks `if: ${{ !cancelled() }}` — a failed S4b would SKIP "
+        cond = re.search(r"(?m)^[ ]{8}if:\s*\$\{\{\s*(?P<expression>[^}\n]+?)\s*\}\}\s*$", step)
+        self.assertIsNotNone(cond, "the S4c step must define an executable if: expression")
+        expression = cond.group("expression")
+        self.assertIn("!cancelled()", expression,
+                      "the S4c if-expression lacks `!cancelled()` — a failed S4b would SKIP "
                       "the trusted gate re-run, and the trusted evidence would never flow "
                       "(R-04(2))")
-        self.assertNotIn("if: ${{ success()", step,
-                         "an if: success() condition would skip S4c on a red S4b — the exact defect")
+        self.assertIn("steps.checkout_base.outcome == 'success'", expression,
+                      "the S4c if-expression must guard on the base checkout succeeding — a "
+                      "skipped anchor leaves no anchored driver and a bare !cancelled() "
+                      "executes a candidate-committed substitute (#64's Major)")
+        self.assertIn("steps.anchor_trusted_gate.outcome == 'success'", expression,
+                      "the S4c if-expression must guard on the anchor step succeeding — the "
+                      "sha256-verified anchoring is what makes the driver trusted")
+        self.assertNotIn("success()", expression,
+                         "the success() function would skip S4c on a red S4b — the exact defect")
+
+    def test_10_bounded_tail_keeps_the_end_of_the_output(self):
+        """R-04(3) + the #64 review round (Greptile P2 + CodeRabbit,
+        independently confirmed): the ARV-TG-003 bounded tail keeps the LAST
+        1500 characters — a failing suite's named failure lives at the END of
+        its output (unittest reports the traceback and verdict last), so a
+        head-window drops the diagnostic behind long normal stdout. The stub
+        prints a long normal prefix, then the failure marker."""
+        long_stub = ("for i in range(200):\n"
+                     "    print('normal output line: ' + str(i))\n"
+                     "print('THE-NAMED-FAILURE-MARKER-AT-THE-END')\n"
+                     "raise SystemExit(1)\n")
+        stub = build_stub(self.td, suite_mutations={_base_gate().TESTS[1]: long_stub})
+        r = run_driver(self.td, stub, "suites")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("ARV-TG-003", r.stdout + r.stderr)
+        self.assertIn("THE-NAMED-FAILURE-MARKER-AT-THE-END", r.stdout + r.stderr,
+                      "the bounded tail kept the FIRST 1500 chars — the marker at the END "
+                      "of the output was dropped behind the long normal prefix (the #64 "
+                      "review round's head-window defect)")
+        self.assertIn("the LAST 1500 kept", r.stdout + r.stderr,
+                      "the truncation marker must state which window was kept")
 
 
 if __name__ == "__main__":

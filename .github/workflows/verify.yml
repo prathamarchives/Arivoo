@@ -78,11 +78,13 @@ jobs:
           # cannot prove the base/merge relationship.
           fetch-depth: 0
       - name: Checkout base (the trusted machinery — H-01b-CI, INT-127/D-041)
+        id: checkout_base
         uses: actions/checkout@v4
         with:
           ref: main
           path: base
       - name: "Anchor the trusted gate driver from base (fail-closed; sha256-verified — never a candidate substitute)"
+        id: anchor_trusted_gate
         run: |
           set -e
           test -f base/tools/trusted_gate.py || { echo "FAIL: base/tools/trusted_gate.py missing — refusing any candidate-substituted driver (the turn-14 P2: never fall back silently)"; exit 1; }
@@ -110,13 +112,21 @@ jobs:
           ARV_PR_HEAD: ${{ github.head_ref }}
         run: python3 harness/dispatch.py
       - name: "S4c — TRUSTED gate re-run (H-01b-CI, F-006 backstop): the BASE's gate machinery, re-rooted over this candidate tree, re-runs the PR-mode obligations (scope/size/claims/red/lint/deps/known-bads/proofsheet) over the candidate diff — the candidate's harness package and its known-bad registry never execute in this step"
-        # R-04(2): !cancelled() — a plain step is SKIPPED by GitHub Actions
-        # after any earlier failure, so a red S4b (the candidate's own gate,
-        # EVIDENCE since H-01b-CI) silently skipped the trusted re-run and the
-        # trusted evidence never flowed (Greptile's finding). S4c must run
-        # over a red S4b: the trusted path carries the required-check decision
-        # exactly when the candidate-controlled gate is red or gutted.
-        if: ${{ !cancelled() }}
+        # R-04(2) + the #64 review round (CodeRabbit Major): !cancelled() — a
+        # plain step is SKIPPED by GitHub Actions after any earlier failure, so
+        # a red S4b (the candidate's own gate, EVIDENCE since H-01b-CI)
+        # silently skipped the trusted re-run and the trusted evidence never
+        # flowed (Greptile's finding). S4c must run over a red S4b: the trusted
+        # path carries the required-check decision exactly when the
+        # candidate-controlled gate is red or gutted. THE STEP-OUTCOME GUARDS
+        # (the #64 review round's candidate-substitution hole): if the base
+        # checkout or the anchor step failed or was skipped, the anchored
+        # driver does not exist — a bare !cancelled() would then execute
+        # whatever candidate-committed file sits at the workspace-relative
+        # anchored path (candidate-controlled code in the judge, the turn-14
+        # P2 class). S4c runs only when the anchor (with its sha256
+        # verification) actually succeeded.
+        if: ${{ !cancelled() && steps.checkout_base.outcome == 'success' && steps.anchor_trusted_gate.outcome == 'success' }}
         env:
           ARV_EVENT_NAME: ${{ github.event_name }}
           ARV_PR_HEAD: ${{ github.head_ref }}

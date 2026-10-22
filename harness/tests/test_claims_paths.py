@@ -35,12 +35,18 @@ from harness import claims, scope  # noqa: E402
 
 
 def _git(repo: Path, *args):
+    """Run git in the synthetic fixture repo, asserting success (a fixture
+    helper: a git failure here is a broken fixture, never the behavior
+    under test)."""
     r = subprocess.run(["git", *args], cwd=repo, capture_output=True, text=True)
     assert r.returncode == 0, f"git {args[:2]} failed: {r.stderr[:200]}"
     return r.stdout
 
 
 def build_repo(td: Path, files: dict[str, str], branch: str = "slice/claim-x-synthetic") -> Path:
+    """A self-contained synthetic git repo (real `git diff` output — no string
+    fixtures pretending to be git): a base commit on main, then the slice
+    branch carrying the given files as the PR change."""
     repo = td / "repo"
     repo.mkdir()
     _git(repo, "init", "-q", "-b", "main")
@@ -62,6 +68,7 @@ def build_repo(td: Path, files: dict[str, str], branch: str = "slice/claim-x-syn
 class ClaimsPathTests(unittest.TestCase):
 
     def setUp(self):
+        """A fresh scratch dir per test (the synthetic repos are disposable)."""
         self._td = tempfile.TemporaryDirectory(prefix="arvoo-h01c-")
         self.td = Path(self._td.name)
         self.addCleanup(self._td.cleanup)
@@ -291,6 +298,60 @@ class ClaimsPathTests(unittest.TestCase):
         fails = claims.check_registry(repo=repo)
         self.assertTrue(any("ARV-CLM-007" in f for f in fails),
                         "the intra-table duplicate must refuse — the duplicate CLAIM-021 closed-row class")
+
+    # -- R-04(8) + the #64 review round: the probe's channel contract ----------
+
+    def test_11_probe_over_refusal_never_masquerades_as_the_catch(self):
+        """The KB-SCOPE-006 probe must keep the POSITIVE call's output OUT of
+        the expected-code channel (Greptile P1 + CodeRabbit, independently
+        confirmed): check_scope PRINTS its failures, so an un-nested positive
+        call leaks ARV-SCOPE-002 into the KB driver's captured stdout and an
+        over-refusing boundary PASSES as the sibling-prefix catch. Against a
+        scratch-corrupted over-refusing scope, the probe's channel must carry
+        the ARV-SCOPE-006 over-refusal line and NO ARV-SCOPE-002; against the
+        REAL scope, the channel carries the sibling refusal and no 006."""
+        import contextlib
+        import importlib.util
+        import io
+        import shutil
+        cases_spec = importlib.util.spec_from_file_location(
+            "cases_probe_r04", REPO / "harness" / "known-bad" / "cases.py")
+        cases = importlib.util.module_from_spec(cases_spec)
+        cases_spec.loader.exec_module(cases)
+        # a scratch copy of the harness dir (the probe loads machinery from
+        # its copy param in the local self-check form; the repo never touched)
+        scratch = self.td / "mach"          # a repo-shaped root: harness/ inside
+        shutil.copytree(REPO / "harness", scratch / "harness",
+                       ignore=shutil.ignore_patterns("__pycache__", "runs"))
+        (scratch / "harness" / "runs" / cases.SLICE).mkdir(parents=True, exist_ok=True)
+        # OVER-REFUSING corruption: every path refused, everything printed
+        scope_path = scratch / "harness" / "scope.py"
+        ss = scope_path.read_text(encoding="utf-8")
+        FIXED = 'if path == prefix or path.startswith(prefix + "/"):'
+        assert FIXED in ss, "the boundary line must exist at the copy"
+        scope_path.write_text(ss.replace(FIXED, "if False:  # the over-refusing scratch corruption (nothing ever matches)"), encoding="utf-8")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            cases.kb_scope_sibling(scratch)
+        self.assertNotIn("ARV-SCOPE-002", buf.getvalue(),
+                         "the positive call's refusal LEAKED into the expected-code channel "
+                         "— the over-refusal masquerades as the sibling-prefix catch (the #64 "
+                         "review round's P1)")
+        self.assertIn("ARV-SCOPE-006", buf.getvalue(),
+                      "the over-refusal must be NAMED on the channel (the honest broken-guard "
+                      "direction)")
+        # the REAL direction: pristine scratch, the sibling refusal fires, no 006
+        scratch2 = self.td / "mach2"        # the pristine repo-shaped sibling
+        shutil.copytree(REPO / "harness", scratch2 / "harness",
+                        ignore=shutil.ignore_patterns("__pycache__", "runs"))
+        (scratch2 / "harness" / "runs" / cases.SLICE).mkdir(parents=True, exist_ok=True)
+        buf2 = io.StringIO()
+        with contextlib.redirect_stdout(buf2):
+            cases.kb_scope_sibling(scratch2)
+        self.assertIn("ARV-SCOPE-002", buf2.getvalue(),
+                      "the sibling-prefix refusal must fire through the channel (the guard)")
+        self.assertNotIn("ARV-SCOPE-006", buf2.getvalue(),
+                         "a HEALTHY boundary must never print the over-refusal line")
 
 
 if __name__ == "__main__":

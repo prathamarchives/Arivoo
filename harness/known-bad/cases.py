@@ -12,7 +12,9 @@ TARGETED check loaded from that copy (spec-loaded — no module-cache pollution)
 A known-bad that passes is a broken guard (KB-05): the harness goes red and
 building stops.
 """
+import contextlib
 import importlib.util
+import io
 import json
 import pathlib
 import re
@@ -202,6 +204,19 @@ def kb_clm_unclaimed(copy: pathlib.Path) -> None:
 @case("KB-SCOPE-006", "a SIBLING-PREFIX path against a file declaration (README.md vs README.md.unrelated)",
       "ARV-SCOPE-002")
 def kb_scope_sibling(copy: pathlib.Path) -> None:
+    """The sibling-prefix regression probe: README.md.unrelated must REFUSE
+    against a REAL README.md declaration (the raw-startswith defect would
+    match it and the guard would go silent — the broken guard, KB-05).
+
+    R-04(8) + the #64 review round (Greptile P1 + CodeRabbit, independently
+    confirmed): the probe's OWN declaration (the predecessor's scratch
+    declaration named no README.md, so the refusal fired for the trivial
+    outside-declaration reason and could not detect the restored defect — P3,
+    red-01.txt) AND the positive call's stdout is captured SEPARATELY — the
+    first draft inspected only the RETURN list while check_scope's own PRINT
+    of ARV-SCOPE-002 leaked into the expected-code channel, so an
+    over-refusing boundary masqueraded as the sibling-prefix catch.
+    """
     # R-04(8): the probe's OWN declaration. The predecessor checked
     # README.md.unrelated against the scratch declaration that names NO
     # README.md — the refusal fired for the trivial OUTSIDE-DECLARATION
@@ -215,10 +230,16 @@ def kb_scope_sibling(copy: pathlib.Path) -> None:
                                                                 encoding="utf-8")
     scope = _load(copy, "harness.scope")
     # the POSITIVE side: the declared file itself MUST match (exact equality).
-    # A violation is named on the captured channel and the expected code is
-    # never printed — the case fails as the broken guard it is (KB-05), so an
-    # over-refusing boundary can never masquerade as the sibling-prefix catch
-    if any("ARV-SCOPE-002" in f for f in scope.check_scope(["README.md"], SLICE)):
+    # The positive call's stdout is captured SEPARATELY — check_scope PRINTS
+    # its failures, so an un-nested call would leak ARV-SCOPE-002 into the
+    # expected-code channel and the over-refusal would masquerade as the
+    # sibling-prefix catch (the #64 review round's finding). A violation is
+    # named on the captured channel and the expected code is NEVER printed:
+    # the case fails as the broken guard it is (KB-05).
+    positive_out = io.StringIO()
+    with contextlib.redirect_stdout(positive_out):
+        positive_fails = scope.check_scope(["README.md"], SLICE)
+    if any("ARV-SCOPE-002" in f for f in positive_fails):
         print("FAIL ARV-SCOPE-006: the DECLARED file README.md was itself refused — the "
               "boundary over-refuses; the sibling-prefix refusal below would be vacuous")
         return
@@ -230,6 +251,10 @@ def kb_scope_sibling(copy: pathlib.Path) -> None:
 @case("KB-CLM-006", "a claim ID present in BOTH the open and closed tables (registry drift)",
       "ARV-CLM-006")
 def kb_clm_dup(copy: pathlib.Path) -> None:
+    """The both-tables registry-drift probe — SYNTHETIC rows, self-contained
+    (never borrowing live registry state: the predecessor borrowed the first
+    live open row; on a reconciled registry its regex reached into the CLOSED
+    table and the guard never fired — P2, red-01.txt)."""
     # R-04(7): SYNTHETIC rows. The predecessor borrowed the FIRST live open
     # row — masked only because a live row happened to exist (Greptile:
     # latent); on a reconciled (empty-open) registry its open-row regex
@@ -251,6 +276,9 @@ def kb_clm_dup(copy: pathlib.Path) -> None:
 @case("KB-CLM-007", "the same claim ID TWICE in one table (intra-table drift — the duplicate-CLAIM-021 class)",
       "ARV-CLM-007")
 def kb_clm_intra_dup(copy: pathlib.Path) -> None:
+    """The intra-table duplicate probe (ARV-CLM-007's own known-bad — the
+    duplicate-CLAIM-021 class): the same claim ID twice in one table is
+    drift the both-tables check can never see."""
     # R-04(9)'s probe side: the duplicate survived every check at the
     # predecessor because ARV-CLM-006 covers only the BOTH-TABLES class —
     # the ratchet's own known-bad, synthetic (P2's lesson: never borrow live

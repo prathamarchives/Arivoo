@@ -185,6 +185,7 @@ def diff_stats(base: str, repo=None) -> list:
         fields = rec.split(b"\t", 2)          # R-04(4): the first two tabs ONLY — the path keeps its own tabs
         add = int(fields[0]) if fields and fields[0].lstrip(b"-").isdigit() else 0
         def emit(path: str, lines: int) -> None:
+            """Classify ONE path and append its honest per-class line counts."""
             if TEST_RE.search(path):
                 result.append({"path": path, "src_lines": 0, "test_lines": lines, "fixture_lines": 0})
             elif MIGRATION_RE.match(path):

@@ -22,6 +22,30 @@ FILENAME is value material). The standalone entry gains the sanitized
 exception boundary (a harness crash prints one sanitized line, never a
 traceback). The 18 v2.1 cases are unchanged (assertions never removed).
 
+v2.3 (session 25, R-03 — the G-51 isolation-tool hardening, INT-129/D-042's
+routing; the 5 Greptile findings on #51 in 4 repair items): (1) BOTH
+`_open_regular_nofollow` helpers (the checker's AND this suite's own) open
+O_NONBLOCK — a path lstat'd regular then swapped to a FIFO can no longer hang
+the open indefinitely (the same FIFO-swap class the mutation floor's B3
+repair closed in its sibling); the ISREG check on the open fd refuses the
+FIFO immediately. (2) `_copy_bounded`'s os.walk carries `onerror` — an
+unreadable directory's subtree is a fail-closed sanitized FixtureBuildError,
+never a SILENT DROP from the fixture copy (the false-complete-fixture class:
+shutil.copytree, which this replaced, reported the error). (3) every created
+directory charges the fixture entry budget (the predecessor charged only
+files: a source of N empty directories constructed under any count budget).
+(4) B5/B6 assert the sanitized refusal's FIXED MESSAGE directly (the exact
+text, cause class included, path/canary excluded) — the predecessor kept
+only the exception's TYPE and discarded the message, so a wrapper that lost
+the fixed diagnostic or leaked a path still passed. NEW cases B7/B8 pin the
+two helpers' non-blocking FIFO refusal in DISPOSABLE CHILD PROCESSES (the
+anchored copy never imports a candidate-controlled module in-process — the
+F-005 class held; the child imports by path, the parent judges only the
+bounded outcome); B9 pins the walk's fail-closed unreadable-directory
+refusal (skip-declared under root, the R-02 test_20 precedent — chmod-0
+cannot stop CAP_DAC_OVERRIDE); B10 pins the directory-entry budget. The v2.1
+and v2.2 cases are unchanged (assertions never removed).
+
 The suite invokes tools/isolation_check.py as a SUBPROCESS (implementation-
 agnostic: it judges whatever checker file sits beside this module). Content and
 semantics are moved verbatim from the v2.1 checker (18 cases; counts unchanged):
@@ -85,6 +109,34 @@ FIX_SKIP_DIRS = {".git", "__pycache__", ".pg"}
 _FIX_REFUSAL = ("fixture construction refused: the source tree contains a non-regular "
                "or unreadable entry, or a copy budget was exceeded (F-011) — sanitized: "
                "no path, no filename, no raw error text (F-012)")
+
+# R-03(1) / B7+B8: the wrapper's own fixed sanitized refusal (the _fixture
+# wrapper's message shape — cause class name embedded, nothing else). The B5/B6
+# message pins assert this EXACT text (a wrapper that loses the fixed diagnostic
+# or leaks a path must fail the case, never pass vacuously on the class name).
+_WRAPPER_REFUSAL = ("fixture construction refused (FixtureBuildError) — "
+                   "sanitized: no path or raw error is printed by design")
+
+# R-03(1) / B7+B8: the child-probe script for the bounded-open contract. The
+# child imports the target module BY PATH (a disposable child, never an
+# in-process import — the F-005 class held at the anchored copy) and calls its
+# _open_regular_nofollow on a FIFO. Under O_NONBLOCK the open returns at once
+# and the ISREG check refuses (PROBE-REFUSED); without it the open BLOCKS on
+# the FIFO and the parent's timeout names the hang (R-03's RED form).
+_BOUNDED_OPEN_PROBE = r"""
+import pathlib, sys
+spec_path, fifo_path = sys.argv[1], sys.argv[2]
+import importlib.util
+spec = importlib.util.spec_from_file_location("bounded_open_target", spec_path)
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+try:
+    mod._open_regular_nofollow(pathlib.Path(fifo_path))
+    print("PROBE-OPENED")
+except OSError:
+    print("PROBE-REFUSED")
+sys.exit(0)
+"""
 
 
 class FixtureBuildError(Exception):
@@ -317,8 +369,8 @@ def self_test() -> int:
         ("B4 tracked content beyond the total scan budget refuses (F-002)", prep_b4, [], {}, 1, [], ["total scan budget"]),
     ]
 
-    print(f"isolation self-test (Slice 10.2 v2.1 + H-01b-F v2.2) — complete diagnostic path:")
-    print(f"{len(cases)} checker cases + {2} builder cases; negative cases exit 1 with an attributable RED,")
+    print(f"isolation self-test (Slice 10.2 v2.1 + H-01b-F v2.2 + R-03 v2.3) — complete diagnostic path:")
+    print(f"{len(cases)} checker cases + {6} builder/tool-contract cases; negative cases exit 1 with an attributable RED,")
     print("positive cases exit 0; no synthetic canary may appear in stdout or stderr, including harness crash paths\n")
     failures = 0
     for i, (name, prep, args, case_env, want_rc, canaries, fragments) in enumerate(cases, 1):
@@ -378,19 +430,27 @@ def self_test() -> int:
             before = _iso_roots()
             buf_out, buf_err = io.StringIO(), io.StringIO()
             raised = None
+            message = ""
             with contextlib.redirect_stdout(buf_out), contextlib.redirect_stderr(buf_err):
                 try:
                     _fixture(source=src)
                 except Exception as exc:
                     raised = type(exc).__name__
+                    message = str(exc)
             blob = buf_out.getvalue() + buf_err.getvalue()
             problems = []
             if raised != "FixtureBuildError":
                 problems.append(f"raised {raised or 'nothing'} — expected the sanitized FixtureBuildError (F-012)")
+            if message != _WRAPPER_REFUSAL:            # R-03(4): the FIXED message asserted directly
+                problems.append("the sanitized refusal's fixed message is WRONG — "
+                                "expected the wrapper's exact fixed diagnostic (R-03(4): the predecessor "
+                                "kept the type only and discarded the message)")
+            if str(src) in message or str(src) in blob:
+                problems.append("the refusal diagnostic carried a PATH (F-012)")
+            if CANARY_LINK in message or CANARY_LINK in blob:
+                problems.append("CANARY VALUE LEAKED INTO OUTPUT")
             if _iso_roots() - before:
                 problems.append("a fixture temp root SURVIVED the failed construction — cleanup was not established before construction (F-011)")
-            if CANARY_LINK in blob:
-                problems.append("CANARY VALUE LEAKED INTO OUTPUT")
             return problems
         finally:
             shutil.rmtree(src, ignore_errors=True)
@@ -403,19 +463,136 @@ def self_test() -> int:
             before = _iso_roots()
             buf_out, buf_err = io.StringIO(), io.StringIO()
             raised = None
+            message = ""
             with contextlib.redirect_stdout(buf_out), contextlib.redirect_stderr(buf_err):
                 try:
                     _fixture(source=src, total=1024)
                 except Exception as exc:
                     raised = type(exc).__name__
+                    message = str(exc)
             blob = buf_out.getvalue() + buf_err.getvalue()
             problems = []
             if raised != "FixtureBuildError":
                 problems.append(f"raised {raised or 'nothing'} — expected the sanitized FixtureBuildError (F-011 budget)")
+            if message != _WRAPPER_REFUSAL:            # R-03(4): the FIXED message asserted directly
+                problems.append("the sanitized refusal's fixed message is WRONG — "
+                                "expected the wrapper's exact fixed diagnostic (R-03(4))")
+            if str(src) in message or str(src) in blob:
+                problems.append("the refusal diagnostic carried a PATH (F-012)")
             if _iso_roots() - before:
                 problems.append("a fixture temp root SURVIVED the refused construction (F-011)")
-            if str(src) in blob:
-                problems.append("the refusal diagnostic carried a PATH (F-012)")
+            return problems
+        finally:
+            shutil.rmtree(src, ignore_errors=True)
+
+    # R-03 (the G-51 hardening) — the four new tool-contract cases. B7/B8 run
+    # the two bounded-open helpers against a FIFO in DISPOSABLE CHILD PROCESSES
+    # (bounded by the parent's timeout: the predecessor's blocking open hangs,
+    # and the timeout is what turns the hang into a NAMED RED); B9/B10 exercise
+    # the builder's walk fail-close and the directory-entry budget in-process
+    # (the B5 pattern: disposable poisoned sources, never the real repo).
+    def b7_checker_bounded_open_nonblocking() -> list:
+        beside = Path(__file__).resolve().parent
+        probe = Path(tempfile.mkdtemp(prefix="arivoo-iso-probe-"))
+        try:
+            fifo = probe / "swapped.fifo"
+            os.mkfifo(fifo)                        # the lstat-regular -> FIFO swap, realized
+            try:
+                r = subprocess.run(
+                    [sys.executable, "-I", "-c", _BOUNDED_OPEN_PROBE,
+                     str(beside / "isolation_check.py"), str(fifo)],
+                    capture_output=True, text=True, timeout=10)
+            except subprocess.TimeoutExpired:
+                return ["the CHECKER's bounded open did NOT return against a FIFO within "
+                        "10s — the open is BLOCKING (the FIFO-swap hang class, R-03(1)); "
+                        "O_NONBLOCK is missing"]
+            if r.returncode != 0:
+                return [f"the probe child exited {r.returncode} — the checker's "
+                        "_open_regular_nofollow is missing or raised (the API-absent refusal)"]
+            if "PROBE-REFUSED" not in r.stdout:
+                return ["the checker's bounded open did not REFUSE the FIFO with the "
+                        "ISREG check — opened it or returned wrong (R-03(1))"]
+            return []
+        finally:
+            shutil.rmtree(probe, ignore_errors=True)
+
+    def b8_suite_bounded_open_nonblocking() -> list:
+        beside = Path(__file__).resolve().parent
+        probe = Path(tempfile.mkdtemp(prefix="arivoo-iso-probe-"))
+        try:
+            fifo = probe / "swapped.fifo"
+            os.mkfifo(fifo)
+            try:
+                r = subprocess.run(
+                    [sys.executable, "-I", "-c", _BOUNDED_OPEN_PROBE,
+                     str(beside / "isolation_selftest.py"), str(fifo)],
+                    capture_output=True, text=True, timeout=10)
+            except subprocess.TimeoutExpired:
+                return ["the SUITE's own bounded open did NOT return against a FIFO within "
+                        "10s — the open is BLOCKING (the FIFO-swap hang class, R-03(1)); "
+                        "O_NONBLOCK is missing"]
+            if r.returncode != 0:
+                return [f"the probe child exited {r.returncode} — the suite's own "
+                        "_open_regular_nofollow is missing or raised (the API-absent refusal)"]
+            if "PROBE-REFUSED" not in r.stdout:
+                return ["the suite's own bounded open did not REFUSE the FIFO with the "
+                        "ISREG check — opened it or returned wrong (R-03(1))"]
+            return []
+        finally:
+            shutil.rmtree(probe, ignore_errors=True)
+
+    def b9_builder_walk_unreadable_dir_fails_closed() -> list | None:
+        if hasattr(os, "geteuid") and os.geteuid() == 0:
+            print("    (skip under root: chmod-0 cannot make a directory unreadable to "
+                  "root — CAP_DAC_OVERRIDE; the case engages on the non-root CI runners; "
+                  "the R-02 test_20 precedent, stated here per LAW-04)")
+            return None
+        src = Path(tempfile.mkdtemp(prefix="arivoo-iso-poison-"))
+        try:
+            (src / "readable.txt").write_text("ok\n", encoding="utf-8")
+            sub = src / "locked-subtree"
+            sub.mkdir()
+            (sub / "inside.txt").write_text("hidden\n", encoding="utf-8")
+            sub.chmod(0)                            # unreadable: the walk must refuse, never drop
+            before = _iso_roots()
+            raised = None
+            message = ""
+            try:
+                _fixture(source=src)
+            except Exception as exc:
+                raised = type(exc).__name__
+                message = str(exc)
+            problems = []
+            if raised != "FixtureBuildError":
+                problems.append(f"raised {raised or 'nothing'} — the unreadable subtree was "
+                                "SILENTLY DROPPED from the fixture copy at the predecessor (R-03(2): "
+                                "os.walk without onerror) — a false-complete fixture is the false-green class")
+            if message and message != _WRAPPER_REFUSAL:
+                problems.append("the sanitized refusal's fixed message is WRONG (R-03(4))")
+            if _iso_roots() - before:
+                problems.append("a fixture temp root SURVIVED the refused construction (F-011)")
+            return problems
+        finally:
+            shutil.rmtree(src, ignore_errors=True)
+
+    def b10_builder_directory_entries_charge_the_budget() -> list:
+        src = Path(tempfile.mkdtemp(prefix="arivoo-iso-poison-"))
+        try:
+            for i in range(8):
+                (src / f"dir-{i:02d}").mkdir()      # 8 empty dirs + the root vs a 4-entry budget
+            before = _iso_roots()
+            raised = None
+            try:
+                _fixture(source=src, count=4)
+            except Exception as exc:
+                raised = type(exc).__name__
+            problems = []
+            if raised != "FixtureBuildError":
+                problems.append(f"raised {raised or 'nothing'} — directory creation charged "
+                                "NO entry budget at the predecessor (R-03(3)): 9 directories "
+                                "constructed under a 4-entry budget")
+            if _iso_roots() - before:
+                problems.append("a fixture temp root SURVIVED the refused construction (F-011)")
             return problems
         finally:
             shutil.rmtree(src, ignore_errors=True)
@@ -423,27 +600,35 @@ def self_test() -> int:
     print()
     print("builder cases (the suite's own fixture machinery — in-process, sanitized):")
     for name, fn in (
-        ("B5 builder copy failure: sanitized refusal + cleanup-before-construction + secret-shaped name never leaks", b5_copy_failure_sanitized_and_cleaned),
-        ("B6 builder budget exhaustion: sanitized refusal + cleanup + no path in the diagnostic", b6_builder_budget_exhaustion),
+        ("B5 builder copy failure: sanitized refusal (fixed message asserted) + cleanup-before-construction + secret-shaped name never leaks", b5_copy_failure_sanitized_and_cleaned),
+        ("B6 builder budget exhaustion: sanitized refusal (fixed message asserted) + cleanup + no path in the diagnostic", b6_builder_budget_exhaustion),
+        ("B7 the CHECKER's bounded open is non-blocking: a FIFO swap is refused promptly, never a hang (R-03(1))", b7_checker_bounded_open_nonblocking),
+        ("B8 the SUITE's own bounded open is non-blocking: a FIFO swap is refused promptly, never a hang (R-03(1))", b8_suite_bounded_open_nonblocking),
+        ("B9 the builder's walk fails CLOSED on an unreadable directory: never a silently-dropped subtree (R-03(2))", b9_builder_walk_unreadable_dir_fails_closed),
+        ("B10 the builder's directory creation charges the entry budget (R-03(3))", b10_builder_directory_entries_charge_the_budget),
     ):
         try:
             problems = fn()
         except Exception as exc:  # sanitized: never a traceback
             problems = [f"harness exception: {type(exc).__name__} (sanitized)"]
-        if problems:
+        if problems is None:
+            print(f"  {name} SKIP — declared, reason printed above (never a vacuous pass, never a failure under root)")
+        elif problems:
             failures += 1
             print(f"  {name} FAIL — {'; '.join(problems)}")
         else:
-            print(f"  {name} PASS — sanitized refusal proven, cleanup proven, no leak")
+            print(f"  {name} PASS — the tool contract held (sanitized, bounded, fail-closed)")
 
     print()
     if failures:
-        print(f"SELF-TEST RED — {failures} case(s) failed: the diagnostic path does not prove the stated properties (Slice 10.2 + H-01b-F).")
+        print(f"SELF-TEST RED — {failures} case(s) failed: the diagnostic path does not prove the stated properties (Slice 10.2 + H-01b-F + R-03).")
         return 1
     print("SELF-TEST GREEN — every negative case failed with an attributable RED, every positive case stayed green,")
     print("benign username-only remotes never false-flag, no synthetic canary appeared in stdout or stderr,")
     print("tracked symlinks are scanned as link text with the target never opened, scan/fixture budgets hold,")
-    print("and a failed fixture construction cleans up and prints a sanitized refusal only.")
+    print("both bounded-open helpers refuse a FIFO swap without blocking, the builder's walk fails closed on")
+    print("unreadable subtrees, directory creation charges the entry budget, the sanitized refusal carries its")
+    print("fixed message, and a failed fixture construction cleans up and prints a sanitized refusal only.")
     print("Limit, stated: a pattern scan proves these specified leak classes are caught — never that every secret is absent")
     print("(record 16 §4.1 carries the host-permission side of the isolation claim).")
     return 0

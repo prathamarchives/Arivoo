@@ -1,0 +1,53 @@
+isolation self-test (Slice 10.2 v2.1 + H-01b-F v2.2 + R-03 v2.3) — complete diagnostic path:
+22 checker cases + 6 builder/tool-contract cases; negative cases exit 1 with an attributable RED,
+positive cases exit 0; no synthetic canary may appear in stdout or stderr, including harness crash paths
+
+  case 1 (N1 canary in a tracked .md) PASS — exit 1 as required, attributable, canary redaction proven
+  case 2 (N1b multi-@ remote with trailing token) PASS — exit 1 as required, attributable, canary redaction proven
+  case 3 (N2 unexpected secret-named env var) PASS — exit 1 as required, attributable, canary redaction proven
+  case 4 (N3 required CI config missing) PASS — exit 1 as required, attributable, canary redaction proven
+  case 5 (N4 credential in remote URL (https)) PASS — exit 1 as required, attributable, canary redaction proven
+  case 6 (N4b credential in remote URL (scp syntax)) PASS — exit 1 as required, attributable, canary redaction proven
+  case 7 (N5 tracked .env family (root+nested+suffixed+index-only)) PASS — exit 1 as required, attributable, canary redaction proven
+  case 8 (N5b env-family names with benign content (family check pinned alone)) PASS — exit 1 as required, attributable, canary redaction proven
+  case 9 (N6 canary in .sh/.MD/extensionless) PASS — exit 1 as required, attributable, canary redaction proven
+  case 10 (N7 not a git repository) PASS — exit 1 as required, attributable, canary redaction proven
+  case 11 (N8 tracked file deleted from worktree) PASS — exit 1 as required, attributable, canary redaction proven
+  case 12 (N9 benign username-only remotes stay green) PASS — exit 0 as required, attributable, canary redaction proven
+  case 13 (N10 underscore-compounded generic secret key) PASS — exit 1 as required, attributable, canary redaction proven
+  case 14 (N11 extraheader advisory fires without failing) PASS — exit 0 as required, attributable, canary redaction proven
+  case 15 (N12 unknown flag exits 2 with usage error) PASS — exit 2 as required, attributable, canary redaction proven
+  case 16 (N13 --ci with case-variant false value counts as missing) PASS — exit 1 as required, attributable, canary redaction proven
+  case 17 (P1 clean local environment) PASS — exit 0 as required, attributable, canary redaction proven
+  case 18 (P2 correctly configured CI environment) PASS — exit 0 as required, attributable, canary redaction proven
+  case 19 (B1 tracked symlink to a non-terminating stream is never opened (F-002; no hang, scanned as link text)) PASS — exit 0 as required, attributable, canary redaction proven
+  case 20 (B2 canary in a symlink's LINK TEXT is caught (dangling link; target never read)) PASS — exit 1 as required, attributable, canary redaction proven
+  case 21 (B3 oversized tracked regular file refuses with the per-file scan budget (F-002)) PASS — exit 1 as required, attributable, canary redaction proven
+  case 22 (B4 tracked content beyond the total scan budget refuses (F-002)) PASS — exit 1 as required, attributable, canary redaction proven
+
+builder cases (the suite's own fixture machinery — in-process, sanitized):
+  B5 builder copy failure: sanitized refusal (fixed message asserted) + cleanup-before-construction + secret-shaped name never leaks PASS — the tool contract held (sanitized, bounded, fail-closed)
+  B6 builder budget exhaustion: sanitized refusal (fixed message asserted) + cleanup + no path in the diagnostic PASS — the tool contract held (sanitized, bounded, fail-closed)
+  B7 the CHECKER's bounded open is non-blocking: a FIFO swap is refused promptly, never a hang (R-03(1)) FAIL — the CHECKER's bounded open did NOT return against a FIFO within 10s — the open is BLOCKING (the FIFO-swap hang class, R-03(1)); O_NONBLOCK is missing
+  B8 the SUITE's own bounded open is non-blocking: a FIFO swap is refused promptly, never a hang (R-03(1)) FAIL — the SUITE's own bounded open did NOT return against a FIFO within 10s — the open is BLOCKING (the FIFO-swap hang class, R-03(1)); O_NONBLOCK is missing
+  B9 the builder's walk fails CLOSED on an unreadable directory: never a silently-dropped subtree (R-03(2)) FAIL — raised nothing — the unreadable subtree was SILENTLY DROPPED from the fixture copy at the predecessor (R-03(2): os.walk without onerror) — a false-complete fixture is the false-green class; a fixture temp root SURVIVED the refused construction (F-011)
+  B10 the builder's directory creation charges the entry budget (R-03(3)) FAIL — raised nothing — directory creation charged NO entry budget at the predecessor (R-03(3)): 9 directories constructed under a 4-entry budget; a fixture temp root SURVIVED the refused construction (F-011)
+
+SELF-TEST RED — 4 case(s) failed: the diagnostic path does not prove the stated properties (Slice 10.2 + H-01b-F + R-03).
+
+=== RED OBSERVATION (R-03, CLAIM-028) ===
+command: python3 tools/isolation_selftest.py
+observed at: 4cc19d7 (the test-only commit over predecessor f190bfa — the implementation files untouched)
+exit: 1 (SELF-TEST RED — 4 case(s) failed)
+the named failures (the card's four repairs, each observed on actual wrong behavior):
+- B7 FAIL: the CHECKER's bounded open did NOT return against a FIFO within 10s — the open is
+  BLOCKING (the FIFO-swap hang class, R-03(1)); O_NONBLOCK is missing
+- B8 FAIL: the SUITE's own bounded open did NOT return against a FIFO within 10s — the open is
+  BLOCKING (the FIFO-swap hang class, R-03(1)); O_NONBLOCK is missing
+- B9 FAIL: raised nothing — the unreadable subtree was SILENTLY DROPPED from the fixture copy
+  at the predecessor (R-03(2): os.walk without onerror) — a false-complete fixture is the
+  false-green class; a fixture temp root SURVIVED (construction completed with the dropped subtree)
+- B10 FAIL: raised nothing — directory creation charged NO entry budget at the predecessor
+  (R-03(3)): 9 directories constructed under a 4-entry budget; a fixture temp root SURVIVED
+all 22 checker cases (v2.1 + v2.2) PASS at the same run — the new cases discriminate the
+named defects without weakening any existing assertion.

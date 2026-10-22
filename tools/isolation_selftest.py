@@ -146,9 +146,13 @@ class FixtureBuildError(Exception):
 
 def _open_regular_nofollow(path: Path) -> int:
     """Race-resistant bounded-open (the mutation_runner contract family):
-    symlinks refused (O_NOFOLLOW), the OPEN fd re-verified ISREG. The fd pins
-    the inode: a same-name swap after open cannot redirect the copy."""
-    fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0))
+    symlinks refused (O_NOFOLLOW), open NON-BLOCKING (R-03/G-51-1: a path
+    lstat'd regular then swapped to a FIFO between the lstat and the open can
+    never hang the builder — the same FIFO-swap class the floor's B3 repair
+    closed), the OPEN fd re-verified ISREG. The fd pins the inode: a same-name
+    swap after open cannot redirect the copy."""
+    fd = os.open(path, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0)
+                 | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0))
     try:
         if not statmod.S_ISREG(os.fstat(fd).st_mode):
             raise OSError("not a regular file")
@@ -163,19 +167,33 @@ def _copy_bounded(src: Path, dst: Path, per_file: int, total: int, count: int) -
     symlinked directories are never traversed; symlinks and every other
     non-regular entry are REFUSED (never copied, never followed — F-011); the
     copy is capped per-file/total/count; a source that changes under the walk
-    refuses. Raises FixtureBuildError on any refusal (sanitized message)."""
+    refuses. Raises FixtureBuildError on any refusal (sanitized message).
+
+    R-03 (the G-51 hardening): walk errors FAIL CLOSED (os.walk `onerror` —
+    an unreadable directory's subtree is a sanitized refusal, never a SILENT
+    DROP from the copy: a false-complete fixture is the false-green class —
+    the shutil.copytree this replaced reported the error), and EVERY created
+    directory charges the entry budget (the predecessor charged only files:
+    a source of N empty directories constructed under any count budget)."""
+
+    def _walk_fail_closed(err: OSError) -> None:
+        raise FixtureBuildError(_FIX_REFUSAL) from None
+
     seen = 0
     walked = 0
-    for dirpath, dirnames, filenames in os.walk(src, followlinks=False):
+    for dirpath, dirnames, filenames in os.walk(src, followlinks=False, onerror=_walk_fail_closed):
         kept = []
         for d in sorted(dirnames):
             if d in FIX_SKIP_DIRS:
                 continue
             if (Path(dirpath) / d).is_symlink():      # a symlinked directory is never traversed
-                raise FixtureBuildError(_FIX_REFUSAL)
+                raise FixtureBuildError(_FIX_REFUSAL) from None
             kept.append(d)
         dirnames[:] = kept
         rel_dir = Path(dirpath).relative_to(src)
+        seen += 1                                     # R-03(3): a directory is an entry
+        if seen > count:
+            raise FixtureBuildError(_FIX_REFUSAL) from None
         (dst / rel_dir).mkdir(parents=True, exist_ok=True)
         for fn in sorted(filenames):
             full = Path(dirpath) / fn

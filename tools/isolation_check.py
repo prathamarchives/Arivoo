@@ -61,6 +61,15 @@ the rest of the scan continues bounded (coverage under the bound — a break
 that silently unsweeps later files would be its own defect), and the run is
 RED regardless.
 
+v2.3 (session 25, R-03 — the G-51 isolation-tool hardening, INT-129/D-042's
+routing): `_open_regular_nofollow` opens O_NONBLOCK — a path lstat'd regular
+then swapped to a FIFO between the lstat and the open can no longer hang the
+scan indefinitely (the same FIFO-swap hang class the mutation floor's B3
+repair closed in its own sibling; the open returns at once and the open-fd
+ISREG check refuses the FIFO). The non-regular lstat refusal (F-002) and the
+race-into-a-swap refusal both stay; the budgets and the skip-and-continue
+refusal semantics are unchanged.
+
 Usage:
   python3 tools/isolation_check.py            # local agent environment
   python3 tools/isolation_check.py --ci       # CI runner (required CI config checked)
@@ -125,10 +134,14 @@ SCAN_COUNT_BUDGET = 2000
 
 def _open_regular_nofollow(path: Path) -> int:
     """Race-resistant bounded-open helper (the mutation_runner contract
-    family): refuse symlinks (O_NOFOLLOW), verify the OPEN fd is a regular
-    file, return the fd. The fd — not the path — pins the inode for the read,
-    so a same-name swap after open cannot redirect the scan."""
-    fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0))
+    family): refuse symlinks (O_NOFOLLOW), open NON-BLOCKING (R-03/G-51-1:
+    a path lstat'd regular then swapped to a FIFO can never hang the open
+    indefinitely — the same FIFO-swap class the floor's B3 repair closed in
+    its sibling), verify the OPEN fd is a regular file, return the fd. The
+    fd — not the path — pins the inode for the read, so a same-name swap
+    after open cannot redirect the scan."""
+    fd = os.open(path, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0)
+                 | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0))
     try:
         if not statmod.S_ISREG(os.fstat(fd).st_mode):
             raise OSError("not a regular file")

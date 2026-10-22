@@ -1,19 +1,19 @@
 # PROOF SHEET — slice claim-028-r03-isolation-tool-hardening (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): f64001e7f3dc70cff842b85db52de551b75be1b4
-- generated (last record's timestamp): 2026-10-22T15:00:01.948435+00:00
+- commit (last run record's): 815949a1aa1cac6b37c214a123042623cfd8ed5a
+- generated (last record's timestamp): 2026-10-22T15:07:24.033332+00:00
 - run records: 9
 
 ## Run records (command, exit, output digest)
-- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-22T14:58:34.172308+00:00
-- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-22T14:58:34.579685+00:00
-- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-22T14:58:36.945254+00:00
-- `python3 tools/isolation_selftest.py` -> exit 0 · output sha256 db0ced9ebcfb3551 · 2026-10-22T14:58:51.154268+00:00
-- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 c2fa83f16e5d4400 · 2026-10-22T14:58:51.300645+00:00
-- `make verify` -> exit 0 · output sha256 2121b1da77c48e6e · 2026-10-22T14:59:51.286586+00:00
-- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-22T14:59:59.166497+00:00
-- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-22T14:59:59.598763+00:00
-- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-22T15:00:01.948435+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-22T15:06:12.834010+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-22T15:06:13.208558+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-22T15:06:15.431452+00:00
+- `python3 tools/isolation_selftest.py` -> exit 0 · output sha256 db0ced9ebcfb3551 · 2026-10-22T15:06:28.153896+00:00
+- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 aabc93119fb178b6 · 2026-10-22T15:06:28.302087+00:00
+- `make verify` -> exit 0 · output sha256 7df1a60535c7ca05 · 2026-10-22T15:07:14.146117+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-22T15:07:21.446094+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-22T15:07:21.840488+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-22T15:07:24.033332+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - not verified (LAW-04 — required, never empty-by-omission; the R-03 slice's honest limits):
@@ -40,4 +40,4 @@
 - ledger one-liner slice, then H-01c-authority/evidence, then H-02's activation)
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 514853bfe98d755a8f5c47da47f03261d9f81fdf1385c1c1ba47d9ce3d022173
+- sheet sha256 (of the content above, excluding this line): a50f8d8bc68bb038159ae245a1852e8a5340f8cd948c09b36f32bdc73d6088e4

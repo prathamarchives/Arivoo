@@ -1,7 +1,7 @@
 {
   "command": "python3 harness/tests/test_substrate.py",
   "exit_code": 0,
-  "commit": "f64001e7f3dc70cff842b85db52de551b75be1b4",
+  "commit": "815949a1aa1cac6b37c214a123042623cfd8ed5a",
   "output_sha256": "bd4d723a03ab6c406bcaee5309283fbb5035b925032bbd9c34a1e7f1a478df1f",
-  "recorded_at": "2026-10-22T14:59:59.598763+00:00"
+  "recorded_at": "2026-10-22T15:07:21.840488+00:00"
 }

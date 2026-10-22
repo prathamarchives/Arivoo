@@ -1,7 +1,7 @@
 {
-  "command": "make verify",
+  "command": "python3 harness/tests/test_migrations.py",
   "exit_code": 0,
-  "commit": "815949a1aa1cac6b37c214a123042623cfd8ed5a",
-  "output_sha256": "7df1a60535c7ca053228baacfec358b87c8ed98b3a0a73554cb0e31deb05491b",
-  "recorded_at": "2026-10-22T15:07:14.146117+00:00"
+  "commit": "abcc29ac353decf1fa9ecb6bfa61981227451380",
+  "output_sha256": "c738a1d35838996570d682d3ba192a9cfbc0a877b574cba33aaf6cf00ccc4b49",
+  "recorded_at": "2026-10-22T15:19:45.136926+00:00"
 }

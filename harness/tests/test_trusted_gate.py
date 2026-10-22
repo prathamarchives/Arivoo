@@ -354,13 +354,18 @@ class TrustedGateTests(unittest.TestCase):
                       "the S4c if-expression lacks `!cancelled()` — a failed S4b would SKIP "
                       "the trusted gate re-run, and the trusted evidence would never flow "
                       "(R-04(2))")
-        self.assertIn("steps.checkout_base.outcome == 'success'", expression,
-                      "the S4c if-expression must guard on the base checkout succeeding — a "
-                      "skipped anchor leaves no anchored driver and a bare !cancelled() "
-                      "executes a candidate-committed substitute (#64's Major)")
-        self.assertIn("steps.anchor_trusted_gate.outcome == 'success'", expression,
-                      "the S4c if-expression must guard on the anchor step succeeding — the "
-                      "sha256-verified anchoring is what makes the driver trusted")
+        self.assertIn("steps.refresh_head.outcome == 'success'", expression,
+                      "the S4c if-expression must guard on the R-06 HEAD re-fresh succeeding — "
+                      "S1b ran candidate code in the workspace, and every byte it may have "
+                      "written is reverted to the pushed head before S4c judges")
+        self.assertIn("steps.refresh_base.outcome == 'success'", expression,
+                      "the S4c if-expression must guard on the R-06 BASE re-fresh succeeding — "
+                      "the RED-observed forgery replaced the BASE gate through a tamper-payload "
+                      "suite; the fresh checkout is the trusted revert")
+        self.assertIn("steps.reanchor_trusted_gate.outcome == 'success'", expression,
+                      "the S4c if-expression must guard on the re-anchor succeeding — the "
+                      "head re-fresh removed the first anchored copy, and the sha256-verified "
+                      "re-anchor is what makes the driver trusted")
         self.assertNotIn("success()", expression,
                          "the success() function would skip S4c on a red S4b — the exact defect")
         # the #64 SECOND review round (CodeRabbit TOCTOU): S4b runs candidate-
@@ -396,6 +401,47 @@ class TrustedGateTests(unittest.TestCase):
                       "review round's head-window defect)")
         self.assertIn("the LAST 1500 kept", r.stdout + r.stderr,
                       "the truncation marker must state which window was kept")
+
+    def test_11_r06_isolated_job_shape(self):
+        """R-06 (the #64 second review round's TOCTOU, CLAIM-031): the TRUSTED
+        phases live in their own job, and S1b's candidate-executed suites can
+        never write into S4c's judgment — the R-06 re-fresh steps (trusted
+        actions) revert BOTH trees between S1b and S4c, and no step that
+        executes candidate code runs after the re-fresh. The pin parses the
+        workflow artifact itself (the structure IS the isolation)."""
+        import re
+        wf = (REPO / ".github" / "workflows" / "verify.yml").read_text(encoding="utf-8")
+        m = re.search(r"^  harness-trusted:\n(?P<job>(?:[ ]{4,}[^\n]*\n)*)", wf, re.M)
+        self.assertIsNotNone(m, "the harness-trusted job must exist (R-06's isolated trusted path)")
+        job = m.group("job")
+        steps = re.findall(r"^[ ]{4,}- name: (?P<name>[^\n]+)", job, re.M)
+        names = [s.strip().strip('"') for s in steps]
+        i_s1b = next((i for i, n in enumerate(names) if n.startswith("S1b")), None)
+        i_rhead = next((i for i, n in enumerate(names) if n.startswith("R-06 — re-fresh the HEAD")), None)
+        i_rbase = next((i for i, n in enumerate(names) if n.startswith("R-06 — re-fresh the BASE")), None)
+        i_reanchor = next((i for i, n in enumerate(names) if n.startswith("R-06 — re-anchor")), None)
+        i_s4c = next((i for i, n in enumerate(names) if n.startswith("S4c")), None)
+        self.assertIsNotNone(i_s1b, "the isolated job must run S1b (the trusted suites)")
+        self.assertIsNotNone(i_s4c, "the isolated job must run S4c (the trusted gate re-run)")
+        self.assertIsNotNone(i_rhead, "the R-06 HEAD re-fresh step must exist")
+        self.assertIsNotNone(i_rbase, "the R-06 BASE re-fresh step must exist")
+        self.assertIsNotNone(i_reanchor, "the R-06 re-anchor step must exist")
+        self.assertLess(i_s1b, i_rhead, "the HEAD re-fresh must come AFTER S1b (it reverts S1b's writes)")
+        self.assertLess(i_rhead, i_rbase, "the BASE re-fresh follows the HEAD re-fresh (the head clean removes base/)")
+        self.assertLess(i_rbase, i_reanchor, "the re-anchor follows the re-freshes")
+        self.assertLess(i_reanchor, i_s4c, "S4c comes last — its judgment loads only freshly-checked-out trusted trees")
+        # no candidate-executing step between the re-anchor and S4c: the steps
+        # in that window must be none (S4c is the immediate next step)
+        between = [n for n in names[i_reanchor + 1:i_s4c] if not n.startswith(("R-06", "S4c"))]
+        self.assertEqual(between, [], f"steps between the re-anchor and S4c: {between} — no "
+                         "candidate-executing step may share the window; the structure IS the isolation")
+        # the harness job (candidate code: S1 suites + S4b) must NOT carry the trusted phases
+        mh = re.search(r"^  harness:\n(?P<job>(?:[ ]{4,}[^\n]*\n)*)", wf, re.M)
+        self.assertIsNotNone(mh, "the harness job must exist (S1 + S4b, the candidate-controlled evidence)")
+        self.assertNotIn("- name: \"S4c", mh.group("job"),
+                         "S4c must NOT run in the harness job — it moved to the isolated R-06 job")
+        self.assertNotIn("- name: \"S1b", mh.group("job"),
+                         "S1b must NOT run in the harness job — it moved to the isolated R-06 job")
 
 
 if __name__ == "__main__":

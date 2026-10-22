@@ -578,3 +578,14 @@ Stage Summary:
 - Unresolved: R-06 (the TOCTOU isolation), H-01c-authority/evidence (F-007), H-02, P3-00 — in that order
 - Next: R-06 as CLAIM-031 (the isolated fresh-checkout trusted job)
 - Session record: context/extracted/25-SESSION-25-R03-R04-EXECUTION.md (in progress)
+
+## Task 39 (CLAIM-031, session 25) — R-06: the trusted-path TOCTOU isolation
+- Task: the #64 second review round's CodeRabbit finding (CWE-367) — the isolated fresh-checkout trusted job (PLAN's R-06 card)
+- The RED, honestly escalated: the first draft's scope-only tamper was CAUGHT by the gate's own defense-in-depth (the independent claims check + the KB-05 broken-guard machinery — a resilience finding, recorded); the full forgery targets the judgment entry point — a tamper-payload suite run by S1b replaces base/harness/gate.py and S4c goes GREEN over a scope breach at the predecessor (red-01.txt); the R-06 refresh reverts the tamper and the GENUINE refusal (ARV-SCOPE-002) fires
+- GREEN: the NEW harness-trusted job (checkout head, checkout base, anchor, S1b, R-06 HEAD re-fresh, BASE re-fresh, re-anchor, S4c — nothing candidate-executed runs in the re-anchor-to-S4c window); the harness job reduced to S1 + S4b (the dead trusted steps removed); test_09's guards updated to the refresh ids; test_11 pins the job shape (S1b < HEAD-refresh < BASE-refresh < re-anchor < S4c, the empty window, the harness job carrying neither phase)
+- The harness-trusted required context binds at branch protection AFTER the job's first green run (the W-01 stage-2 pattern — the PR's own CI is the first run)
+- Reconciliation: CLAIM-030's rule-4 closed row (PR #65 = b56f24f11) + its open-row retirement
+- Evidence: record 25 §§4-R06/5-R06/8-R06; harness/runs/claim-031-r06-trusted-path-toctou-isolation (red-01/scope/notverified/proofsheet)
+- Unresolved: H-01c-authority, H-01c-evidence/privacy (F-007), H-02 (now activatable through the isolated path), P3-00 — in that order
+- Next: H-01c-authority as CLAIM-032
+- Session record: context/extracted/25-SESSION-25-R03-R04-EXECUTION.md (in progress)

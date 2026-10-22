@@ -1,0 +1,11 @@
+# CLAIM-031 — R-06: the trusted-path TOCTOU isolation (the #64 second review round's CodeRabbit
+# finding, CWE-367 — the isolated fresh-checkout trusted job; PLAN's R-06 card)
+.github/workflows/verify.yml INT-129/D-042
+harness/tests/test_trusted_gate.py INT-129/D-042
+harness/red-records.json INT-129/D-042
+harness/runs/claim-031-r06-trusted-path-toctou-isolation INT-129/D-042
+CLAIMS.md
+STATE.md
+PLAN.md
+context/WORKLOG.md INT-129/D-042
+context/extracted/25-SESSION-25-R03-R04-EXECUTION.md INT-129/D-042

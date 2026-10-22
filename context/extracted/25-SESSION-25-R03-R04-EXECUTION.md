@@ -12,20 +12,315 @@
 > product execute phase 3 and 4 with following the directive and aligned goal. build real backend as a world class engineer and
 > systems artitecht. # ARIVOO — EXECUTION DIRECTIVE: PHASE 3 → PHASE 4 REAL PRODUCT
 >
-> [The directive follows in full — the mission (working product behavior, not more planning documents, infrastructure
-> demonstrations, mock implementations, or a green test suite that does not prove the product works), §1 the actual starting
-> state (read the canonical documents; verify PR #62 = f190bfa20aa4897384f3cf8d54ea883c5c7461e3 is an ancestor of current main
-> rather than assuming; reconcile documentation against merged code and executed evidence), §2 the canonical execution order
-> (R-03 → R-04 → the ledger one-liner slice → H-01c authority/evidence → H-02 the SEV validator/gate → P3-00 → P3-M0/P3-K0 →
-> P3-01..P3-09 → the Phase 3 exit gate on the final main revision → P4-00 → the Phase 4 backend capabilities → the Phase 4 exit
-> gate against the real end-to-end product workflow), §3 Phase 3 durable capture (P3-00 freeze through P3-09 export/restore),
-> §4 Phase 4 reader and journal backend path (P4-00 through P4F; backend-only; a mocked API is not proof), §5 the mandatory
-> per-slice verification and iteration (claim-before-work; tests first; the real production boundary; the Proof Sheet from
-> actual run records; review before merge; never hand-edit a report to make a gate pass), §6 the architecture boundaries
-> (authoritative vs derived; the command kernel as the mutation boundary; Q11/Q12 owner decisions preserved at their exact
-> scopes), §7 blocker handling (read the exact decision records; never broaden a local blocker; never make an owner decision on
-> the owner's behalf), §8 the definition of success (a backend that demonstrably supports the intended product workflow) —
-> preserved in full in the session context; the standing byte-level-diff limit applies to this embed.]
+> ## Mission
+>
+> Act as the principal systems engineer and implementation orchestrator for `prathamarchives/Arivoo`.
+>
+> Your mission is to take Arivoo from its current verified engineering foundation to a functioning, durable product backend by completing Phase 3 and Phase 4, in order.
+>
+> **The objective is working product behavior, not more planning documents, infrastructure demonstrations, mock implementations, or a green test suite that does not prove the product works.**
+>
+> Execute the canonical roadmap. Implement the smallest complete, useful behavior at each step. Verify it against explicit requirements, repair defects, and continue until the applicable phase exit gate is genuinely satisfied.
+>
+> This directive is backend-only. Do not implement UI/UX in this repository. The actual client may be used as an integration-test consumer of the backend contracts; that does not authorize frontend work here.
+>
+> ## 1. Establish the actual starting state
+>
+> Before modifying code:
+>
+> 1. Read `AGENTS.md`, `STATE.md`, `PLAN.md`, `NORTH-STAR.md`, `OPERATING-MODEL.md`, `ENGINEERING.md`, `LAWS.md`, `DECISIONS.md`, `CLAIMS.md`, and the relevant templates.
+> 2. Read the latest session record and worklog entries, including the record documenting PR #62 and its merge.
+> 3. Verify the current `main` SHA, working tree, required CI checks, unresolved review findings, active claims, and actual repository contents.
+> 4. Reconcile documentation against merged code and executed evidence. Treat status snapshots as navigation aids, not proof.
+> 5. Produce a concise baseline stating what is implemented, what has passed, what remains unverified, which decisions block specific scopes, and the next authorized slice.
+>
+> PR #62 merged as `f190bfa20aa4897384f3cf8d54ea883c5c7461e3`. Verify that it is an ancestor of the current `main` rather than assuming the repository has not moved since the merge.
+>
+> Do not recreate work already completed. Do not mark work complete because a plan, test, or status document says it is complete without checking the supporting evidence.
+>
+> ## 2. Follow the canonical execution order
+>
+> Execute this sequence, updating status from observed results:
+>
+> **Review-hardening closure → verification-gate activation → Phase 3 product entry → Phase 3 durable capture → Phase 3 exit → Phase 4 foundation contract → Phase 4 backend capabilities → Phase 4 integration and exit.**
+>
+> The immediate sequence recorded in the repository is:
+>
+> 1. R-03: isolation-tool hardening.
+> 2. R-04: gate, scope, known-bad, workflow, and duplicate-detection ratchet repairs.
+> 3. The outstanding ledger one-line consistency slice.
+> 4. H-01c authority and evidence/privacy work.
+> 5. H-02: the Systems Engineering Verification (SEV) validator and gate, activated only after its trusted verification prerequisites are proven.
+> 6. P3-00: requirements, interfaces, and schema freeze.
+> 7. P3-M0 and P3-K0: migration-oracle and command-kernel prerequisites, coordinated through the repository's claim and dependency rules.
+> 8. P3-01 through P3-09.
+> 9. Phase 3 exit gate, evaluated on the final main revision.
+> 10. P4-00: Phase 4 foundation and integration contract.
+> 11. Phase 4 backend capabilities and real integration tests, with detailed slices derived from Phase 3 exit evidence and the canonical Phase 4 outcome roadmap.
+> 12. Phase 4 exit gate, evaluated against the real end-to-end product workflow.
+>
+> Do not skip a prerequisite. Do not reopen completed infrastructure without a concrete defect, failed proof, or authorized requirement. Infrastructure work must remain bounded and must not become an indefinite substitute for building the product.
+>
+> ## 3. Phase 3 — Durable capture
+>
+> ### Product outcome
+>
+> A real client must be able to import supported material, create durable authored content, and retrieve it again through the real backend boundary. Accepted writes must remain safe across retries, crashes, restarts, synchronization failures, and restoration.
+>
+> ### P3-00 — Freeze requirements and interfaces
+>
+> Before product schema migrations:
+>
+> - Trace SYS-01 through SYS-11 to components, interfaces, tests, acceptance scenarios, and North Star claims.
+> - Define the authoritative entities, stable identifiers, ownership and actor model, provenance, revisions, tombstones, and transaction boundaries.
+> - Specify the lifecycle and state machines for import, extraction, capture, local outbox, server synchronization, indexing, export, and restore.
+> - Define kernel and adapter interfaces, failure semantics, durability acknowledgments, and migration compatibility.
+> - Establish one canonical requirements traceability matrix (RTM).
+> - Preserve unresolved owner decisions at their exact scopes; do not silently decide them.
+>
+> Acceptance: every requirement has an identifiable implementation and verification path, no conflicting source-of-truth rules remain, and an independent SEV finds no P0/P1 defect. No product schema migration before this gate is accepted.
+>
+> ### P3-M0 and P3-K0 — Prove the prerequisites
+>
+> **Migration oracle (P3-M0):** verify safe migration admission, filename and SQL boundaries, transaction behavior, rollback containment, bidirectional ledger/schema consistency, and observational verification. Every known-bad must fail for its intended reason.
+>
+> **Command kernel (P3-K0):** establish canonical, versioned command encoding; stable idempotency semantics; owner/actor attribution; transaction atomicity; named errors; and correct retry and concurrency behavior.
+>
+> Test identical key/identical body, identical key/different body, delimiter and Unicode boundaries, concurrent duplicate requests, crash before commit, crash after commit but before acknowledgment, and independent database observation.
+>
+> Do not assume sequential tests prove concurrency safety. Do not assume a hash makes ambiguous input encoding unambiguous.
+>
+> ### P3-01 — First real product command
+>
+> Implement the smallest real command needed by the capture path through the actual kernel and persistence boundary.
+>
+> Prove it with a real database, a separate read path, failure injection, idempotent replay, attributed writes, and named failure behavior. This is the transition from representative harness behavior to real product behavior.
+>
+> ### P3-02 — Work and Source intake
+>
+> Implement the initial supported readable-text/Markdown import path.
+>
+> Establish logical Work identity, Source identity and version, content digest, media type, acquisition metadata, owner/actor attribution, and explicit import states.
+>
+> Test duplicate imports, distinct similar works, retries, missing blobs, partial failures, restarts, owner isolation, and recovery of unfinished imports.
+>
+> Do not automatically merge logical Works or Sources. Physical byte reuse does not imply logical identity. Q11 remains binding until the owner ratifies the identity policy.
+>
+> ### P3-03 — Extraction and Anchors
+>
+> Implement versioned extraction generations and stable Anchors tied to a particular Source version.
+>
+> Measure anchor stability before promising format-specific behavior. Test invalid and empty input, encoding boundaries, extraction crashes, source re-imports, cosmetic reprocessing, new editions, hash mismatches, and wrong-source references.
+>
+> Extraction must be complete or explicitly failed. An Anchor must never silently move to another Source version.
+>
+> Do not claim PDF or EPUB anchor reliability without evidence from an approved, representative corpus.
+>
+> ### P3-04 — Highlights and immutable revisions
+>
+> Implement stable Highlight identities and append-only revisions with selected content, Anchor, Source reference, owner/actor, input digest, and command provenance.
+>
+> Reject dangling Anchors and cross-owner references. Preserve history. Use tombstones for normal deletion and apply governed purge rules where authorized.
+>
+> Verify revision history, replay, crashes at transaction boundaries, re-extraction, tombstoning, restoration, and independently observed durability state.
+>
+> ### P3-05 — Bookmarks
+>
+> Implement Bookmarks as stable identities pointing to a valid location or Anchor, not duplicated Source content.
+>
+> Define and test behavior after re-import, re-extraction, Source changes, tombstoning, and restoration. An unresolved location must be reported explicitly rather than silently redirected.
+>
+> ### P3-06 — Notes and revision history
+>
+> Implement owner-authored Notes with immutable revisions and explicit references to relevant Works, Sources, Anchors, Highlights, and other Notes.
+>
+> Verify competing revisions, retries, dangling references, cross-owner access, crash recovery, and export/restore. No accepted revision may silently overwrite or destroy another revision.
+>
+> Do not add complex serialization features until their round-trip contract is defined.
+>
+> ### P3-07 — Keyword findability
+>
+> Build a rebuildable keyword index over committed supported sources, extracted passages, captures, and Notes.
+>
+> Test indexing failures, stale entries, revisions, tombstones, owner filtering, tokenization and encoding boundaries, deletion, and complete rebuilds.
+>
+> The system must either return results under a defined contract or report indexing lag/failure truthfully.
+>
+> ### P3-08 — Local outbox, Supabase synchronization, and recovery
+>
+> Persist a local mutation and its outbox intent atomically. Apply remote mutations through the same command kernel.
+>
+> Define ordering, retries, uncertain acknowledgments, conflict behavior, and server outbox handoff. Preserve concurrent authored revisions; do not silently apply last-write-wins to authored content.
+>
+> Test offline capture, restart before sync, duplicate and out-of-order delivery, server outages, mismatched local/remote state, cross-owner sync, and process death around acknowledgment.
+>
+> A committed local write must be server-durable or explicitly queued and recoverable. Prove zero lost committed writes and zero duplicate logical effects under the tested fault model.
+>
+> Do not claim provider-specific guarantees or cross-store atomicity while Q12 remains unresolved.
+>
+> ### P3-09 — Export, restore, and integrated proof
+>
+> Define a versioned export/restore contract for authoritative records, required source/blob references, revisions, and governed retention/purge state.
+>
+> Test clean-destination restore, canonical authoritative-state comparison, repeated restore, missing blobs, malformed archives, interrupted restore, purge followed by restore, and derived-index reconstruction.
+>
+> A purge must not be resurrected by restoration. Recovery errors must be explicit and appropriately retryable.
+>
+> ### Phase 3 exit gate
+>
+> Phase 3 is complete only when the final main revision demonstrates all of the following:
+>
+> - The real client/backend path imports supported material and creates a valid Highlight, Bookmark, and Note.
+> - Keyword search finds the committed material through the defined contract.
+> - Accepted captures survive the defined crash, restart, replay, offline, and recovery scenarios without lost committed writes or duplicate logical effects.
+> - Local durability and server durability are distinct and truthfully reported.
+> - Owner/actor attribution, two-owner isolation tests, and independent database reads pass.
+> - Immutable revisions, tombstones, governed purge, derived-state rebuilding, export, and restore work under their specified contracts.
+> - Requirements, implementation, tests, and evidence are traceable through the V-model.
+> - Required known-bads fail for the correct reasons, independent SEV passes, and the actual clean-clone and real-stack acceptance path succeeds.
+>
+> Do not waive a failed requirement because other tests are green.
+>
+> ## 4. Phase 4 — Reader and journal backend path
+>
+> Phase 4 builds on the verified Phase 3 foundation. Its purpose is to make the core reading, capture, journaling, and reference workflow usable through a real client.
+>
+> The Arivoo repository remains backend-only. Implement the API, domain behavior, persistence, retrieval needed by this phase, and contract/integration tests. Do not build screens or move product writes into the client.
+>
+> ### P4-00 — Foundation and integration contract
+>
+> Before broad client integration, specify and test:
+>
+> - Authenticated client identity and owner-scoped authorization.
+> - API contracts for import, open/read, saved reading position, Highlight, Bookmark, Note, and Journal operations.
+> - Truthful durability states, including saved, queued, synced, conflicted, and failed where applicable.
+> - Stable identifiers and `@`-reference resolution across rename, revision, tombstone, and purge.
+> - Pagination, bounded responses, explicit errors, retries, and idempotency.
+> - Offline behavior, uncertain acknowledgments, stale Source behavior, and cache invalidation.
+> - Format capability matrix, extraction readiness, and unresolved-Anchor states.
+> - Client/API compatibility, migration and rollback behavior.
+> - Real user-task scenarios and evidence-backed contract tests.
+>
+> The client must not write product tables directly or use a privileged/service key to bypass owner-scoped authorization. A mocked API is not proof of integration: a real contract test must call the actual backend boundary.
+>
+> ### Phase 4A — Format intake and position
+>
+> Implement the backend contracts needed for supported-format intake, opening or resolving a Source, and persisting/recovering reading position.
+>
+> Expose format capability and extraction readiness explicitly. Preserve Source identity and version. Do not claim that a format is supported merely because a file can be uploaded.
+>
+> ### Phase 4B — Reading and capture behavior
+>
+> Make the real backend support the read-and-capture workflow over the Phase 3 foundation.
+>
+> Verify that Anchors remain associated with the correct Source version, capture operations are idempotent, and re-opening material restores the expected location or reports a typed unresolved state.
+>
+> ### Phase 4C — Library, resumability, and Journal
+>
+> Implement the backend operations needed to list and reopen library material, resume reading, and create or revise free-standing Journal thoughts and blocks.
+>
+> Journal content is owner-authored data: it requires stable identity, immutable revision history, attribution, owner scoping, recovery, and export/restore behavior.
+>
+> ### Phase 4D — Stable `@` references
+>
+> Implement stable, authorized reference resolution across the supported domain entities.
+>
+> Test rename, revision, tombstone, purge, missing targets, cross-owner attempts, and restore. References must not silently point to a different object. Preserve enough provenance to explain resolution behavior.
+>
+> ### Phase 4E — Read-only agent access
+>
+> Provide the required scoped, read-only agent access through the same authorized core boundary.
+>
+> Agent access must enforce the same owner and permission rules as the client. Test hostile and malformed requests, unauthorized targets, bounded responses, provenance, and attempts to access or mutate data outside the granted scope.
+>
+> Do not let an agent bypass the domain layer through direct database access.
+>
+> ### Phase 4F — Recovery and integrated acceptance
+>
+> Prove that the backend can support the complete day-one workflow through the actual client and real backend:
+>
+> Import → open/read → save position → Highlight/Bookmark → write or revise a Note → capture a free-standing Journal thought → resolve stable `@` references → leave and reopen → recover the same material and truthful durability state.
+>
+> Test online, offline, uncertain acknowledgment, stale Source, failed import, unauthorized access, recovery, export/restore, and purge behavior. Confirm that purge invalidates relevant derived state and does not resurrect deleted material.
+>
+> ### Phase 4 exit gate
+>
+> Phase 4 is complete only when:
+>
+> - The complete day-one workflow works through the actual client and real backend, not a mock-only path.
+> - Authentication and owner isolation are enforced and tested.
+> - Reading position, capture, Notes, Journal content, and stable references survive supported restart and recovery scenarios.
+> - Durability states and failures are explicit and truthful.
+> - Export/restore preserves authoritative content and revision history; governed purge invalidates derived state without resurrection.
+> - Scoped read-only agent access uses the same authorized core.
+> - Hostile imports and invalid requests fail closed.
+> - Backend tests, real API integration, system tests, independent grading, and owner-fidelity review pass.
+> - Traceability is current and no blocking defect is mislabeled as a pass.
+>
+> If an owner decision blocks one feature, isolate that exact sub-gate and continue independent work. Never fake the overall exit gate as green.
+>
+> ## 5. Mandatory verification and iteration for every slice
+>
+> For every implementation slice:
+>
+> 1. Claim the authorized scope and identify dependencies before editing.
+> 2. State the requirement IDs, one bounded behavior, interfaces, failure model, and acceptance criteria.
+> 3. Declare the changed-file scope and expected evidence before implementation.
+> 4. Write tests first. Observe the intended failure for each new regression before applying the fix.
+> 5. Implement the smallest complete behavior through the actual production boundary.
+> 6. Run the relevant focused tests, predecessor suites, real-stack tests, independent reads, and registered known-bads.
+> 7. Exercise relevant crash, retry, concurrency, authorization, migration, and recovery cases.
+> 8. Produce the Proof Sheet from actual run records. Never hand-edit a report to make a gate pass.
+> 9. Have a fresh-context verifier who did not implement the slice independently review the requirements, diff, evidence, failure modes, and explicit not-verified list.
+> 10. Run the required SEV and gate checks against the exact candidate revision. Re-run them whenever the relevant diff or base changes.
+> 11. Obtain the required review comments and disposition every finding with evidence. Fix valid findings with red-first regressions; document reasoned no-fixes and superseded findings accurately.
+> 12. Update canonical state, claims, worklog, traceability, and session records consistently.
+> 13. Open a focused PR. Do not merge your own work or bypass required review and branch protections. Leave the PR ready for the authorized review/merge path.
+>
+> Continue verification and refinement until the actual acceptance conditions hold. Use the standing instruction for extensive iterative review—including 50+ rounds where needed—as a quality expectation, not as a substitute for a measurable exit criterion. Do not invent a round count, repeat unchanged tests pointlessly, or stop at an arbitrary count if a real defect remains.
+>
+> ## 6. Architecture boundaries that must remain intact
+>
+> - Authoritative authored content is distinct from derived passages, indexes, embeddings, relationships, rankings, and context packs.
+> - Derived state must carry sufficient input and processing lineage to be rebuilt and explained.
+> - The command kernel remains the authoritative mutation boundary.
+> - Owner/actor scope and attribution are enforced on every relevant operation.
+> - Acknowledgment never claims a stronger durability state than has actually been achieved.
+> - No semantic auto-merge or identity-based uniqueness policy may be introduced while the relevant owner decision remains open.
+> - Phase 3 must not prematurely implement Phase 5 semantic retrieval, relationship discovery, concept formation, or Kev-backed behavior.
+> - Phase 4 may establish the contracts needed for future work but must not silently expand into Phase 5.
+> - No unapproved dependency, privileged bypass, weakened test, or undocumented architecture fork.
+>
+> ## 7. Handling ambiguity and blockers
+>
+> Read the exact current decision and requirement records before treating a question as a blocker.
+>
+> D-014 and Q6–Q12 block only their explicitly named scopes. Do not broaden a local blocker into a general stop-work condition.
+>
+> For every blocker, record:
+> - The exact decision or evidence missing.
+> - The behavior that depends on it.
+> - The independent work that can continue.
+> - The safest reversible default, if the existing policy authorizes one.
+> - The evidence needed to close the question and who has authority to decide it.
+>
+> Never make an owner decision on the owner's behalf.
+>
+> ## 8. Definition of success
+>
+> The result is not "Phase 3 and Phase 4 code has been written." The result is a backend that demonstrably supports the intended product workflow, with durable authoritative content, reliable capture and recovery, truthful status, authorized access, stable references, real client integration, and independently verified behavior.
+>
+> At every handoff, report:
+>
+> 1. The exact main and candidate SHAs.
+> 2. The product behavior newly proven.
+> 3. The tests and failure injections actually executed.
+> 4. The verification evidence and unresolved findings.
+> 5. The precise next slice and its acceptance gate.
+> 6. Any not-verified boundary or owner decision.
+> 7. Why the next slice moves Arivoo closer to a real usable product.
+>
+> **Begin with the current repository state and the next unfinished canonical slice. Execute the roadmap in order. Keep building and verifying until the Phase 3 and Phase 5 exit gates are proven on the appropriate final revisions.** dont stop until done
 >
 > (End of owner turn 26. Not minted as a new INT- at intake: the turn is the CONTINUATION directive for INT-129/D-042's routed
 > work — R-03/R-04 were already routed by turn 24 and remain READY; the turn's new content (the phase-4-5 "do not stop"

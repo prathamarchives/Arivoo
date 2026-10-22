@@ -591,6 +591,14 @@ def self_test() -> int:
                 problems.append("a fixture temp root SURVIVED the refused construction (F-011)")
             return problems
         finally:
+            # the #63 review round (Greptile P2 + CodeRabbit Minor, independently
+            # confirmed): a 0-mode directory cannot be scandir'd, so rmtree left the
+            # poisoned source behind on every non-root run — restore readability
+            # BEFORE the cleanup, never accumulating unreadable temp dirs
+            try:
+                (src / "locked-subtree").chmod(0o755)
+            except OSError:
+                pass
             shutil.rmtree(src, ignore_errors=True)
 
     def b10_builder_directory_entries_charge_the_budget() -> list:

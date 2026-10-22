@@ -1,6 +1,8 @@
 # CLAIM-027 — R-05: the review sweep + the session close (the owner's turn-24 work completed; the first owner-approval-gated PR)
 context/extracted/24-REVIEW-SWEEP-AND-INTAKE.md
+context/extracted/23-SESSION-23-EXECUTION.md
 CLAIMS.md
 STATE.md
 context/WORKLOG.md INT-129/D-042
+PLAN.md INT-129/D-042
 harness/runs/claim-027-r05-sweep-and-close INT-129/D-042

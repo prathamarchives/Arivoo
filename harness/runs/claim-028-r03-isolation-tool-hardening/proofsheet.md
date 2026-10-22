@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-028-r03-isolation-tool-hardening (harness-built; never hand-edited — PRF-01, LAW-01)
 
 - commit (last run record's): abcc29ac353decf1fa9ecb6bfa61981227451380
-- generated (last record's timestamp): 2026-10-22T15:19:47.788596+00:00
-- run records: 8
+- generated (last record's timestamp): 2026-10-22T15:20:30.033363+00:00
+- run records: 9
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-22T15:19:28.249691+00:00
@@ -13,6 +13,7 @@
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-22T15:19:45.136926+00:00
 - `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-22T15:19:45.511593+00:00
 - `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-22T15:19:47.788596+00:00
+- `make verify` -> exit 0 · output sha256 1de42f86f4c29e51 · 2026-10-22T15:20:30.033363+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - not verified (LAW-04 — required, never empty-by-omission; the R-03 slice's honest limits):
@@ -39,4 +40,4 @@
 - ledger one-liner slice, then H-01c-authority/evidence, then H-02's activation)
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 779304e0a37fe071c0f6dbb03c0dddece25ed986de065382d9adb27cb31ec48c
+- sheet sha256 (of the content above, excluding this line): 2e6e4222a61c625a993d0c81a089c29655b333d9d237b79a8cf67be30ee15cfd

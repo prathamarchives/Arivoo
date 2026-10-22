@@ -35,12 +35,18 @@ from harness import claims, scope  # noqa: E402
 
 
 def _git(repo: Path, *args):
+    """Run git in the synthetic fixture repo, asserting success (a fixture
+    helper: a git failure here is a broken fixture, never the behavior
+    under test)."""
     r = subprocess.run(["git", *args], cwd=repo, capture_output=True, text=True)
     assert r.returncode == 0, f"git {args[:2]} failed: {r.stderr[:200]}"
     return r.stdout
 
 
 def build_repo(td: Path, files: dict[str, str], branch: str = "slice/claim-x-synthetic") -> Path:
+    """A self-contained synthetic git repo (real `git diff` output — no string
+    fixtures pretending to be git): a base commit on main, then the slice
+    branch carrying the given files as the PR change."""
     repo = td / "repo"
     repo.mkdir()
     _git(repo, "init", "-q", "-b", "main")
@@ -62,6 +68,7 @@ def build_repo(td: Path, files: dict[str, str], branch: str = "slice/claim-x-syn
 class ClaimsPathTests(unittest.TestCase):
 
     def setUp(self):
+        """A fresh scratch dir per test (the synthetic repos are disposable)."""
         self._td = tempfile.TemporaryDirectory(prefix="arvoo-h01c-")
         self.td = Path(self._td.name)
         self.addCleanup(self._td.cleanup)
@@ -173,6 +180,178 @@ class ClaimsPathTests(unittest.TestCase):
         fails = claims.check_registry(repo=repo)
         self.assertTrue(any("ARV-CLM-006" in f for f in fails),
                         "the both-tables duplicate is registry drift and must refuse")
+
+    # -- R-04(4): the numstat TAB split ---------------------------------------
+
+    def test_06_numstat_path_with_tab_survives_the_stats_parse(self):
+        """A changed path containing a literal TAB must arrive WHOLE in the
+        stats identity. The -z numstat record is 'added<TAB>deleted<TAB>path';
+        the predecessor split on EVERY tab, so a tab inside the path truncated
+        it to the fragment before the tab (identity mangled, classification
+        wrong) — Greptile's finding on the H-01c-claims diff."""
+        tabname = "ta\tb.py"                    # a .py file whose NAME carries a literal tab
+        repo = build_repo(self.td, {tabname: "print('x')\n"})
+        stats = scope.diff_stats("main", repo=repo)
+        hit = [d for d in stats if d["path"] == tabname]
+        self.assertTrue(hit, f"the tab-bearing path was truncated by the tab split: "
+                             f"{[d['path'] for d in stats]}")
+        self.assertEqual(hit[0]["src_lines"], 1, "the tab path must classify as a SOURCE file")
+
+    # -- R-04(5): -z output is BYTES + surrogateescape (identity preserved) ----
+
+    def test_07_non_utf8_path_identity_preserved(self):
+        """A path git stores as non-UTF-8 bytes must pass through BOTH diff
+        identities without a UnicodeDecodeError crash and without byte
+        rewriting. The predecessor read the -z output TEXT-MODE (strict locale
+        codec): the raw byte 0xE9 crashed the decode — Greptile's finding."""
+        raw = b"caf\xe9.py"                      # latin-1 'café.py' — invalid UTF-8
+        repo = self.td / "repo"
+        repo.mkdir()
+        _git(repo, "init", "-q", "-b", "main")
+        _git(repo, "config", "user.email", "t@t.local")
+        _git(repo, "config", "user.name", "T")
+        (repo / "base.txt").write_text("base\n")
+        _git(repo, "add", "-A")
+        _git(repo, "commit", "-q", "-m", "base")
+        _git(repo, "checkout", "-q", "-b", "slice/claim-x-synthetic")
+        p = repo / os.fsdecode(raw)              # the OS round-trips the surrogate escape to the raw bytes
+        p.write_text("print('x')\n", encoding="utf-8")
+        _git(repo, "add", "-A")
+        _git(repo, "commit", "-q", "-m", "the non-utf8 path change")
+        stats = scope.diff_stats("main", repo=repo)
+        self.assertEqual(len(stats), 1, f"the path must arrive as exactly one record: {stats}")
+        self.assertEqual(stats[0]["path"].encode("utf-8", "surrogateescape"), raw,
+                         "the byte identity was rewritten on the way through the diff parse")
+        paths = scope.diff_paths("main", repo=repo)
+        self.assertEqual([os.fsencode(pp) for pp in paths], [raw],
+                         "the changed-path identity must carry the exact bytes")
+
+    def test_08_cr_in_path_identity_preserved(self):
+        """A path containing a literal CR must arrive byte-identical. The
+        predecessor's TEXT-MODE read applied universal-newline translation:
+        the raw \\r inside the filename was rewritten to \\n — identity
+        corrupted (Greptile's finding: 'bytes + surrogateescape, identity
+        preserved')."""
+        crname = "line\rending.py"               # a literal CR inside the name
+        repo = build_repo(self.td, {crname: "print('x')\n"})
+        stats = scope.diff_stats("main", repo=repo)
+        self.assertEqual([d["path"] for d in stats], [crname],
+                         "the CR was rewritten by universal-newline translation")
+        paths = scope.diff_paths("main", repo=repo)
+        self.assertEqual(paths, [crname], "the CR-in-name identity was corrupted")
+
+    # -- R-04(6): the rename double-count --------------------------------------
+
+    def test_09_rename_counts_added_lines_once_under_the_destination(self):
+        """A rename+modify counts its added lines ONCE, under the DESTINATION
+        only. The predecessor emitted the FULL added count on BOTH rename
+        endpoints — every rename double-counted its lines into the size gate
+        (Greptile's finding). FIXTURE (LAW-11, corrected in-slice): the rename
+        must actually be DETECTED — similarity >= 50% (30->40 lines = 75%) and
+        the modify must be STAGED before the commit (an unstaged modify never
+        reaches the committed tree; the first draft's 10->40 shape was both
+        unstaged AND below the similarity threshold, so git emitted a
+        delete+add pair with no rename record at all and the observed 0 != 30
+        was the fixture's own bug, not the defect — probed live: 30->40 staged
+        emits the one-record form '10\\t0\\t\\0old\\0new\\0')."""
+        repo = self.td / "repo"
+        repo.mkdir()
+        _git(repo, "init", "-q", "-b", "main")
+        _git(repo, "config", "user.email", "t@t.local")
+        _git(repo, "config", "user.name", "T")
+        (repo / "old-name.py").write_text("x = 1\n" * 30, encoding="utf-8")
+        (repo / "base.txt").write_text("base\n")
+        _git(repo, "add", "-A")
+        _git(repo, "commit", "-q", "-m", "base (old-name.py lives here)")
+        _git(repo, "checkout", "-q", "-b", "slice/claim-x-synthetic")
+        _git(repo, "mv", "old-name.py", "new-name.py")
+        (repo / "new-name.py").write_text("x = 1\n" * 40, encoding="utf-8")   # +10 added lines, 75% similar
+        _git(repo, "add", "-A")       # stage the modify — an unstaged modify never commits
+        _git(repo, "commit", "-q", "-m", "rename plus modify")
+        stats = scope.diff_stats("main", repo=repo)
+        total = sum(d["src_lines"] for d in stats)
+        self.assertEqual(total, 10, f"the rename double-counted its added lines (total {total} != 10): {stats}")
+        under_dst = [d for d in stats if d["path"] == "new-name.py" and d["src_lines"] > 0]
+        under_old = [d for d in stats if d["path"] == "old-name.py" and d["src_lines"] > 0]
+        self.assertTrue(under_dst, f"the added lines must count under the DESTINATION: {stats}")
+        self.assertFalse(under_old, f"the old endpoint must contribute 0 lines (it stays in the identity, never in the count): {stats}")
+
+    # -- R-04(9): the intra-table duplicate ratchet -----------------------------
+
+    def test_10_closed_table_duplicate_refuses(self):
+        """The same claim ID TWICE in one table is drift too — the duplicate
+        CLAIM-021 closed rows (G-58-1) survived every check because ARV-CLM-006
+        covers only the BOTH-TABLES drift. check_registry must refuse
+        ARV-CLM-007 on an intra-table duplicate (the ratchet's check side; the
+        probe side is KB-CLM-007)."""
+        repo = self.td / "reg"
+        repo.mkdir()
+        (repo / "INTENT-LEDGER.md").write_text("**INT-100 — STUB — active**\n")
+        (repo / "CLAIMS.md").write_text(
+            "# CLAIMS\n\n## Open claims\n\n"
+            "| Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |\n"
+            "|-------|---------|-------|--------|----------------|---------------|---------|-------|\n\n"
+            "## Closed claims\n\n| Claim | Result | Closed | Evidence |\n|-------|--------|--------|----------|\n"
+            "| CLAIM-XX | landed | 2026-10-19 | PR #1 |\n"
+            "| CLAIM-XX | landed again | 2026-10-19 | PR #1 |\n",
+            encoding="utf-8")
+        fails = claims.check_registry(repo=repo)
+        self.assertTrue(any("ARV-CLM-007" in f for f in fails),
+                        "the intra-table duplicate must refuse — the duplicate CLAIM-021 closed-row class")
+
+    # -- R-04(8) + the #64 review round: the probe's channel contract ----------
+
+    def test_11_probe_over_refusal_never_masquerades_as_the_catch(self):
+        """The KB-SCOPE-006 probe must keep the POSITIVE call's output OUT of
+        the expected-code channel (Greptile P1 + CodeRabbit, independently
+        confirmed): check_scope PRINTS its failures, so an un-nested positive
+        call leaks ARV-SCOPE-002 into the KB driver's captured stdout and an
+        over-refusing boundary PASSES as the sibling-prefix catch. Against a
+        scratch-corrupted over-refusing scope, the probe's channel must carry
+        the ARV-SCOPE-006 over-refusal line and NO ARV-SCOPE-002; against the
+        REAL scope, the channel carries the sibling refusal and no 006."""
+        import contextlib
+        import importlib.util
+        import io
+        import shutil
+        cases_spec = importlib.util.spec_from_file_location(
+            "cases_probe_r04", REPO / "harness" / "known-bad" / "cases.py")
+        cases = importlib.util.module_from_spec(cases_spec)
+        cases_spec.loader.exec_module(cases)
+        # a scratch copy of the harness dir (the probe loads machinery from
+        # its copy param in the local self-check form; the repo never touched)
+        scratch = self.td / "mach"          # a repo-shaped root: harness/ inside
+        shutil.copytree(REPO / "harness", scratch / "harness",
+                       ignore=shutil.ignore_patterns("__pycache__", "runs"))
+        (scratch / "harness" / "runs" / cases.SLICE).mkdir(parents=True, exist_ok=True)
+        # OVER-REFUSING corruption: every path refused, everything printed
+        scope_path = scratch / "harness" / "scope.py"
+        ss = scope_path.read_text(encoding="utf-8")
+        FIXED = 'if path == prefix or path.startswith(prefix + "/"):'
+        assert FIXED in ss, "the boundary line must exist at the copy"
+        scope_path.write_text(ss.replace(FIXED, "if False:  # the over-refusing scratch corruption (nothing ever matches)"), encoding="utf-8")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            cases.kb_scope_sibling(scratch)
+        self.assertNotIn("ARV-SCOPE-002", buf.getvalue(),
+                         "the positive call's refusal LEAKED into the expected-code channel "
+                         "— the over-refusal masquerades as the sibling-prefix catch (the #64 "
+                         "review round's P1)")
+        self.assertIn("ARV-SCOPE-006", buf.getvalue(),
+                      "the over-refusal must be NAMED on the channel (the honest broken-guard "
+                      "direction)")
+        # the REAL direction: pristine scratch, the sibling refusal fires, no 006
+        scratch2 = self.td / "mach2"        # the pristine repo-shaped sibling
+        shutil.copytree(REPO / "harness", scratch2 / "harness",
+                        ignore=shutil.ignore_patterns("__pycache__", "runs"))
+        (scratch2 / "harness" / "runs" / cases.SLICE).mkdir(parents=True, exist_ok=True)
+        buf2 = io.StringIO()
+        with contextlib.redirect_stdout(buf2):
+            cases.kb_scope_sibling(scratch2)
+        self.assertIn("ARV-SCOPE-002", buf2.getvalue(),
+                      "the sibling-prefix refusal must fire through the channel (the guard)")
+        self.assertNotIn("ARV-SCOPE-006", buf2.getvalue(),
+                         "a HEALTHY boundary must never print the over-refusal line")
 
 
 if __name__ == "__main__":

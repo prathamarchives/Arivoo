@@ -94,6 +94,11 @@ def _load_base_gate(base: Path):
 
 
 def _phase_suites(repo: Path, base: Path) -> int:
+    """The TRUSTED suites phase (F-004): run the BASE-selected required suite
+    files directly over the candidate tree — recipes are never the evidence;
+    a missing suite refuses (ARV-TG-002), a failed suite refuses with its own
+    bounded output tail (ARV-TG-003), a zero-output suite refuses as the A03
+    vacuous class (ARV-TG-004)."""
     gate = _load_base_gate(base)
     required = getattr(gate, "TESTS", None)
     if not required:
@@ -110,7 +115,21 @@ def _phase_suites(repo: Path, base: Path) -> int:
         except subprocess.TimeoutExpired:
             _refuse("ARV-TG-003", f"required suite {t} exceeded the {SUITE_TIMEOUT}s timeout — a hung suite is a failed suite, never a green", "run the suite directly for its named failure and repair it")
         if r.returncode != 0:
-            _refuse("ARV-TG-003", f"required suite FAILED: {t} (exit {r.returncode}) — a candidate recipe cannot fabricate a green over a red suite", "run the suite directly for its named failure and repair it")
+            # R-04(3) + the #64 review round (Greptile P2 + CodeRabbit,
+            # independently confirmed): the refusal carries a BOUNDED TAIL of
+            # the failing suite's captured output — and the tail keeps the
+            # LAST 1500 characters, because a failing suite's named failure
+            # lives at the END of its output (unittest reports the traceback
+            # and the verdict last); a head-window would drop the diagnostic
+            # behind long normal stdout. The tail is bounded by characters
+            # (never an unbounded capture printed whole) and clearly fenced as
+            # the suite's own output, never the judge's.
+            tail = ((r.stdout or "") + "\n" + (r.stderr or "")).strip()
+            if len(tail) > 1500:
+                tail = "[...the first " + str(len(tail) - 1500) + " chars truncated — the LAST 1500 kept, the failure details live at the end]\n" + tail[-1500:]
+            _refuse("ARV-TG-003", f"required suite FAILED: {t} (exit {r.returncode}) — a candidate recipe cannot fabricate a green over a red suite"
+                    + (f"; the suite's own captured output (bounded tail):\n      {tail}" if tail else ""),
+                    "run the suite directly for its named failure and repair it")
         if not r.stdout.strip() and not r.stderr.strip():
             # stdout OR stderr counts: unittest-based suites report to STDERR
             # (found live by the part-2 binding rehearsal — the first driver

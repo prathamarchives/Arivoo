@@ -389,6 +389,33 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
 - **The 13 READY findings' ledger:** R-03's 5 findings (G-51-1..5 → the 4 card items) are now FIXED with stable regressions;
   R-04's 8 findings (+1 ratchet task) remain READY on their card — the next slice.
 
+### 4-R04. Results — R-04 LANDED (the 9 card items, RED-first; CLAIM-029)
+
+- **RED-first (commit 42f13f8, the test-only commit over predecessor 943dad9):** five suite REDs observed on actual wrong
+  behavior — **test_claims_paths test_06** (the tab-bearing numstat path TRUNCATED by the every-tab split), **test_07**
+  (UnicodeDecodeError CRASH on a latin-1 filename — the text-mode strict decode), **test_08** (the CR in a name rewritten to LF
+  by universal-newline translation), **test_09** (the rename double-count), **test_10** (the intra-table closed duplicate
+  survives check_registry — ARV-CLM-007 does not exist); **test_trusted_gate test_02** (the failing suite's captured output
+  DISCARDED — no bounded tail in the refusal), **test_09-tg** (the verify workflow's S4c step lacks `!cancelled()`). Plus the
+  three discriminating/latent proofs on scratch copies (red-01.txt): **P1** the OLD stderr_only stub shape passed a
+  stdout-only-blind regressed driver — the twice-vacuous pin; **P2** KB-CLM-006's open-row regex reaches into the CLOSED table on
+  a reconciled (empty-open) registry, duplicates a closed ID there, and the guard never fires — a broken-guard RED against a
+  legitimate live state (latent live-registry coupling); **P3** KB-SCOPE-006 fires for the trivial outside-declaration reason and
+  CANNOT detect the restored sibling-prefix defect (raw startswith) — vacuous.
+- **GREEN implementation:** scope.py — `_git` reads BYTES (diagnostics decode errors='replace'), both diff parses go through
+  `os.fsdecode` (surrogateescape — byte-identical identity), the numstat split takes the FIRST TWO tabs only, and a rename/copy
+  counts its added lines ONCE under the destination (the old endpoint stays in the identity, contributes 0 lines); claims.py —
+  ARV-CLM-007 (both tables, multiplicity preserved — `_closed_row_ids` list + `_dups`); cases.py — KB-CLM-006 rewritten with
+  SYNTHETIC rows (never borrowing live registry state), KB-SCOPE-006 writes its OWN README.md declaration + the positive-side
+  over-refusal guard (ARV-SCOPE-006 named, the expected code never printed — fails as the broken guard), and the NEW
+  KB-CLM-007; tools/trusted_gate.py — the ARV-TG-003 refusal carries a BOUNDED TAIL (1500 chars) of the failing suite's
+  captured output; verify.yml — S4c grows `if: ${{ !cancelled() }}` (a red S4b no longer skips the trusted re-run); the
+  stderr_only stub's completion line moves to stderr (the pin now discriminates — P1's repaired shape).
+- **The full battery GREEN at the content head:** test_claims_paths 10/10, test_trusted_gate 9/9, all seven required suites,
+  the 16/16 known-bad matrix (the new KB-CLM-007 included), `make verify` GREEN (fast + known-bads + the no-diff gate +
+  canonical 51/0). The test_09-tg pin's discriminating power proven live (the `if:` line removed on a scratch copy → RED;
+  restored → OK).
+
 ## 5. Files changed
 
 - `tools/isolation_check.py` — v2.3 note + O_NONBLOCK in `_open_regular_nofollow` (the checker's own bounded-open helper).
@@ -399,6 +426,21 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   pins' discriminating power), scope.txt, notverified.txt (LAW-04), run records + proofsheet.md (assembled, never hand-edited).
 - `CLAIMS.md` — CLAIM-028's open row + CLAIM-027's rule-4 closed row (the PR-#62 merge outcome recorded).
 - `context/WORKLOG.md` — Task 36. This record — §§1-7 (R-03). `STATE.md`/`AGENTS.md` — the re-derivation/phase-line repair.
+
+### 5-R04. Files changed (the R-04 slice)
+
+- `harness/scope.py` — the bytes/surrogateescape read + the first-two-tabs numstat split + the rename single-count.
+- `harness/claims.py` — `_closed_row_ids` (multiplicity-preserving) + `_dups` + ARV-CLM-007 (both tables).
+- `harness/known-bad/cases.py` — KB-CLM-006's synthetic rows + KB-SCOPE-006's own declaration/positive guard + KB-CLM-007.
+- `tools/trusted_gate.py` — the bounded tail on the ARV-TG-003 refusal.
+- `.github/workflows/verify.yml` — S4c's `if: ${{ !cancelled() }}`.
+- `harness/tests/test_claims_paths.py` — test_06/07/08/09/10 (+ test_09's fixture correction, §8-R04); the stderr_only stub
+  pin in `harness/tests/test_trusted_gate.py` (test_02's tail assertion + test_09 + the regex correction).
+- `harness/red-records.json` — the R-04 RED note + the in-slice amendment (ARV-RED-002 fired live, §8-R04).
+- `harness/runs/claim-029-r04-gate-scope-knownbad-workflow/` — red-01.txt, scope.txt, notverified.txt, run records +
+  proofsheet.md (assembled, never hand-edited).
+- `CLAIMS.md` — CLAIM-029's open row + CLAIM-028's rule-4 closed row (the open row retired in the same PR — the ARV-CLM-006
+  transitional state caught by the registry check itself, then clean).
 
 ## 6. Commands and external actions (ACTUAL — never reconstructed)
 
@@ -445,7 +487,48 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   its job on my own invocation) — re-run with the bare base ref, GREEN.
 - THE #63 REVIEW ROUND's four findings, all real, all fixed in-PR before merge (the loop working): (1)+(2) the B9 temp-dir leak (Greptile P2 + CodeRabbit Minor, independently confirmed — rmtree cannot scandir a 0-mode directory, so every non-root B9 run left its poisoned source behind; repaired by restoring readability BEFORE the cleanup, verified zero leaks from a clean slate); (3) §1's owner-directive embed was a summary paragraph, not the verbatim text (Greptile P2 + CodeRabbit Major, independently confirmed — AGENTS' own §1-verbatim rule; the full turn-26 directive now embedded verbatim, credential redaction retained); (4) the H-02 remaining-slice count in STATE (CodeRabbit Minor — four slices in the documented order, not two; fixed in STATE + this record §9).
 - THE &&-CHAIN RED-GATE COMMIT (683a843, the record-24 §8 failure class repeating on me, caught immediately): I appended the make-verify run record AFTER the sheet assembly, then a chained `make gate ... && git commit` — the gate refused with ARV-PRF-004 (records-changed-after-assembly) but the && chain had already... no: the gate's Error 1 propagated and the chain STOPPED — but my earlier same-command-line commit had already gone through on the stale sheet with a message claiming a GREEN gate that was RED at that tree. The correction commit (8f2a158) records the false claim and carries the gate GREEN observed at its own tree. The discipline restated for this session: never claim a gate result that was not observed at the exact committed tree.
-- (§8 continues with the R-04 slice's own catches in the sections below when they land.)
+- (§8-R04 continues:) **THE test_09 RENAME FIXTURE WAS ITSELF WRONG** (the LAW-11 class, caught at the RED observation): the
+  first draft's 10→40 shape was UNSTAGED at commit and 25%-similar, so git emitted a delete+add pair with NO rename record at
+  all — the observed `0 != 30` was the fixture's own bug, not the defect (probed live: 30→40 staged emits the real one-record
+  form `10<TAB>0<TAB><NUL>old<NUL>new<NUL>`); the corrected fixture re-observed the TRUE double-count at the predecessor
+  (`20 != 10` — the 10 under BOTH endpoints) before the GREEN.
+- **THE test_09-tg WORKFLOW REGEX WAS VACUOUS** (the same class): the first draft expected the S4c name line to close right
+  after `S4c`, matched ZERO continuation lines, and the pin asserted against an empty step group; the corrected pattern
+  consumes the name line then takes the 8+-space property lines, and its discriminating power proven live (the `if:` line
+  removed on a scratch copy → RED; restored → OK).
+- **ARV-RED-002 FIRED LIVE ON BOTH FILES** (the wall catching the in-slice fixture/regex edits — exactly its job): both
+  corrections recorded through the amendment protocol with the honest note; `make verify` GREEN after.
+- **THE #64 REVIEW ROUND — Greptile 2 + CodeRabbit 7, ALL REAL, all fixed in-PR before merge (the loop working twice in
+  one PR):** (1) CodeRabbit MAJOR — the bare `!cancelled()` opened the candidate-substitution hole: a failed base
+  checkout or anchor leaves `tools/trusted_gate_anchored.py` absent, and S4c would execute whatever candidate-committed
+  file sits at that workspace-relative path (the turn-14 P2 class); the condition now guards on BOTH setup steps'
+  outcomes (`steps.checkout_base.outcome == 'success' && steps.anchor_trusted_gate.outcome == 'success'` — the
+  sha256-verified anchoring must actually have succeeded); (2) Greptile P1 + CodeRabbit independently —
+  KB-SCOPE-006's positive call LEAKED check_scope's own ARV-SCOPE-002 print into the expected-code channel, so an
+  over-refusing boundary PASSED as the sibling-prefix catch (exactly the masquerade the guard existed to prevent);
+  the positive call's stdout is now captured in a separate nested buffer, and test_11 pins both directions (the
+  pre-fix probe FAILS test_11, the fixed probe passes — discrimination proven live); (3) Greptile P2 + CodeRabbit
+  independently — the bounded tail kept the FIRST 1500 chars, dropping the failure details that live at the END of a
+  suite's output (unittest reports the traceback and verdict last); the tail now keeps the LAST 1500 with a truncation
+  marker, and test_10 pins a late failure marker behind ~6KB of normal output (the stub's own first draft had a
+  NameError — `i` was never bound, caught at the GREEN observation, fixed to a real loop); (4) CodeRabbit — the S4c
+  pin asserted `!cancelled()` against the whole step text, satisfiable by the explanatory COMMENT alone: the pin now
+  extracts the EXECUTABLE if-expression and requires the two outcome guards in it (twice-tightened, never
+  comment-matchable); (5) CodeRabbit — the red-records note claimed a never-observed '60 counted, 30 real': corrected
+  to the observed sequence (0 != 30 the fixture's own bug, then the TRUE 20 != 10); (6) CodeRabbit — §11 and STATE
+  wrongly attributed the LEDGER one-liner check to the registry (ARV-CLM-007 ratchets CLAIMS rows, not ledger
+  one-liners): corrected — the one-liner slice builds its own check; (7) CodeRabbit — STATE's Outstanding-reviews
+  snapshot still called this 'the R-03 PR' with R-04 pending: re-derived; (8) the docstring-coverage warning:
+  docstrings added to every diff-touched function missing one.
+- **THE #64 SECOND REVIEW ROUND (CodeRabbit TOCTOU, Major, CWE-367 — the finding preserved here):** S4b runs
+  candidate-controlled Python in the writable workspace; it can replace `tools/trusted_gate_anchored.py` or write
+  `base/harness/*` AFTER the anchor's sha256 check, and S4c then loads those paths without rechecking. The exposure
+  PRE-EXISTS this PR (the merge base's S4c ran under `success()` in the same job) — never introduced here, now named.
+  DISPOSITION: (a) the in-PR hardening — the anchored driver's digest is re-verified at S4c ENTRY (the direct
+  swap-after-anchor channel refuses with the named message; pinned by test_09's extended assertions); (b) the
+  structural fix — the isolated fresh-checkout trusted job — ROUTED to the new R-06 card (PLAN, READY after the
+  one-liner slice, before H-02, which judges through this trusted path); (c) the residual named in notverified.txt —
+  the base machinery's same-job writability is NOT closed by this PR and NOT claimed closed.
 
 ## 9. Unverified items (LAW-04 — the slice's honest list)
 
@@ -454,6 +537,9 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   the walk order) — the canonical copy in harness/runs/claim-028-r03-isolation-tool-hardening/notverified.txt.
 - No fresh technical verifier and no SEV — the pre-H-02 discipline (H-02 is the SEV card; its activation is the next-but-one
   slice after R-04 + the one-liner).
+- The R-04 slice's own list (the bytes-mode identity's same-host filesystem-encoding assumption; the 1500-char tail bound's
+  arbitrary-but-bounded choice; the P2/P3 probes' discriminating-power proof being scratch-copy evidence) — the canonical
+  copy in harness/runs/claim-029-r04-gate-scope-knownbad-workflow/notverified.txt.
 
 ## 10. Open decisions (each blocks only what it names)
 
@@ -465,12 +551,12 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
 
 ## 11. Next action
 
-**R-04** (the gate/scope/known-bad/workflow repairs — 9 card items: the stderr-only stub's completion line, S4c `!cancelled()`,
-the trusted driver's failing-suite output tail, scope.py's tab-splitting/bytes-mode/rename-endpoints repairs, KB-CLM-006's
-synthetic probe rows, KB-SCOPE-006's own README.md declaration, and the closed-table-duplicate ratchet with its own KB case) —
-as CLAIM-029, RED-first, disjoint files from R-03 (declared scope: harness/gate.py, harness/scope.py, harness/known-bad/*,
-tools/trusted_gate.py + the claim/record/state append-shapes). Then the ledger one-liner consistency slice, then
-H-01c-authority, H-01c-evidence/privacy, H-02, then P3-00.
+**The ledger one-liner consistency slice** (the INT-126 TRIPPLICATION's receiving card — the C2 one-liner gap that
+the session-22 preflight found; NO existing check covers the INTENT-LEDGER's one-liner rows — the registry's
+ARV-CLM-007 ratchets CLAIMS.md rows, not ledger one-liners, and the one-liner slice builds its own check) — then
+**H-01c-authority**, then
+**H-01c-evidence/privacy** (F-007), then **H-02** (the SEV gate — activation legal, the H-01b floor live), then **P3-00**
+(the RTM freeze). The R-04 slice (CLAIM-029) landed all 9 card items — the 13-finding READY ledger is now EMPTY.
 
 ## 12. Session close
 

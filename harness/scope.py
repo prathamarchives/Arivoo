@@ -44,19 +44,28 @@ class GitRefusal(Exception):
 
 
 def _git(args: list, repo=None):
-    """Run git, refusing on failure (ARV-DIFF-001) or a hang (ARV-DIFF-003)."""
+    """Run git, refusing on failure (ARV-DIFF-001) or a hang (ARV-DIFF-003).
+
+    R-04(5): the output is BYTES. The -z records carry RAW filename bytes —
+    the predecessor's text-mode read applied a strict locale decode (a
+    non-UTF-8 filename CRASHED with UnicodeDecodeError) and universal-newline
+    translation (a literal CR inside a name was rewritten to LF). The callers
+    decode identity-bearing path fields with os.fsdecode (surrogateescape,
+    the OS round-trip); DIAGNOSTIC text in refusals decodes with
+    errors='replace' — a refusal message may be lossy, an identity never is."""
     import subprocess
     try:
         r = subprocess.run(["git"] + args, cwd=repo or REPO,
-                           capture_output=True, text=True, timeout=60)
+                           capture_output=True, timeout=60)
     except subprocess.TimeoutExpired:
         raise GitRefusal(
             f"ARV-DIFF-003: git {' '.join(args[:2])} exceeded the 60s timeout — "
             "a hung git operation is a named refusal, never an unnamed crash (H-01a-R)")
     if r.returncode != 0:
+        diag = ((r.stderr or r.stdout) or b"").decode("utf-8", "replace").strip()[:200]
         raise GitRefusal(
             f"ARV-DIFF-001: git {' '.join(args[:2])} failed (exit {r.returncode}): "
-            f"{(r.stderr or r.stdout).strip()[:200]}")
+            f"{diag}")
     return r
 
 # LAW-05's size limits (LAWS.md). Editing these constants is a constraint-weakening
@@ -115,11 +124,15 @@ def diff_paths(base: str, repo=None) -> list:
     records (a space/unicode/newline name arrives as exact bytes, never git's
     human rendering: quoted and octal-escaped), rename detection ON so BOTH
     endpoints are in the identity (the old name is part of what changed:
-    --name-only ever showed only the destination)."""
+    --name-only ever showed only the destination).
+    R-04(5): the -z output parses as BYTES and each path decodes through
+    os.fsdecode (surrogateescape) — identity preserved byte-for-byte: a
+    non-UTF-8 or CR-bearing filename arrives WHOLE, never a strict-decode
+    crash and never a universal-newline rewrite."""
     ensure_merge_base(base, repo)
     out = _git(["diff", "--name-status", "-z", "--find-renames", f"{base}...HEAD"], repo).stdout
     paths: list[str] = []
-    parts = out.split("\0")
+    parts = out.split(b"\0")
     i = 0
     while i < len(parts):
         rec = parts[i]
@@ -127,10 +140,10 @@ def diff_paths(base: str, repo=None) -> list:
             i += 1
             continue
         status = rec[0:1]
-        npaths = 2 if status in ("R", "C") else 1   # rename/copy records carry BOTH endpoints
+        npaths = 2 if status in (b"R", b"C") else 1   # rename/copy records carry BOTH endpoints
         for j in range(1, npaths + 1):
             if i + j < len(parts) and parts[i + j]:
-                paths.append(parts[i + j])
+                paths.append(os.fsdecode(parts[i + j]))
         i += 1 + npaths
     seen, uniq = set(), []
     for p in paths:
@@ -148,11 +161,20 @@ def diff_stats(base: str, repo=None) -> list:
     H-01c-claims (F-001, session 23): NUL-delimited records — the human
     numstat format QUOTES exotic names (undercounting stats against the
     canonical identity); a rename/copy record carries BOTH endpoints after an
-    empty in-record path field (probed live: '0\t0\t\0old\0new\0')."""
+    empty in-record path field (probed live: '0\t0\t\0old\0new\0').
+    R-04(4): the numstat record splits on the FIRST TWO TABS ONLY — the path
+    field is everything after 'added<TAB>deleted<TAB>', so a literal TAB
+    inside a filename arrives WHOLE instead of truncating the identity at the
+    tab (the predecessor split on every tab).
+    R-04(5): bytes + os.fsdecode — same identity rule as diff_paths.
+    R-04(6): a rename/copy counts its added lines ONCE, under the DESTINATION
+    endpoint; the old endpoint STAYS in the diff identity (scope coverage)
+    but contributes 0 lines — the predecessor emitted the full added count on
+    BOTH endpoints, double-counting every rename into the size gate."""
     ensure_merge_base(base, repo)
     out = _git(["diff", "--numstat", "-z", "--find-renames", f"{base}...HEAD"], repo).stdout
     result = []
-    parts = out.split("\0")
+    parts = out.split(b"\0")
     i = 0
     while i < len(parts):
         rec = parts[i]
@@ -160,24 +182,27 @@ def diff_stats(base: str, repo=None) -> list:
             i += 1
             continue
         i += 1
-        fields = rec.split("\t")
-        add = int(fields[0]) if fields and fields[0].lstrip("-").isdigit() else 0
-        def emit(path: str) -> None:
+        fields = rec.split(b"\t", 2)          # R-04(4): the first two tabs ONLY — the path keeps its own tabs
+        add = int(fields[0]) if fields and fields[0].lstrip(b"-").isdigit() else 0
+        def emit(path: str, lines: int) -> None:
+            """Classify ONE path and append its honest per-class line counts."""
             if TEST_RE.search(path):
-                result.append({"path": path, "src_lines": 0, "test_lines": add, "fixture_lines": 0})
+                result.append({"path": path, "src_lines": 0, "test_lines": lines, "fixture_lines": 0})
             elif MIGRATION_RE.match(path):
                 result.append({"path": path, "src_lines": 0, "test_lines": 0, "fixture_lines": 0})
             elif SOURCE_RE.search(path):
-                result.append({"path": path, "src_lines": add, "test_lines": 0, "fixture_lines": 0})
+                result.append({"path": path, "src_lines": lines, "test_lines": 0, "fixture_lines": 0})
             else:
                 result.append({"path": path, "src_lines": 0, "test_lines": 0, "fixture_lines": 0})
-        inline_path = fields[2] if len(fields) > 2 else ""
+        inline_path = fields[2] if len(fields) > 2 else b""
         if inline_path:
-            emit(inline_path)
+            emit(os.fsdecode(inline_path), add)
         else:
-            for _ in range(2):                 # rename/copy: BOTH endpoints follow
+            # rename/copy: BOTH endpoints follow; the added lines count ONCE,
+            # under the DESTINATION (the second endpoint) — R-04(6)
+            for lines in (0, add):
                 if i < len(parts) and parts[i]:
-                    emit(parts[i])
+                    emit(os.fsdecode(parts[i]), lines)
                 i += 1
     return result
 

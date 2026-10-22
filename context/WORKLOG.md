@@ -555,3 +555,14 @@ Stage Summary:
 - Unresolved: R-04's 9 items, the ledger one-liner slice, H-01c-authority/evidence, H-02, P3-00 — in that order
 - Next: R-04 as CLAIM-029 (disjoint files: gate/scope/known-bad/trusted-driver)
 - Session record: context/extracted/25-SESSION-25-R03-R04-EXECUTION.md (in progress — §§1-7 the R-03 slice)
+
+## Task 37 (CLAIM-029, session 25) — R-04: the gate/scope/known-bad/workflow repairs
+- Task: the 9 card items (the G-51 Greptile findings + the R-01(7) ratchet, PLAN line 161): the stderr_only stub's completion line, S4c `!cancelled()`, the driver's failing-suite bounded tail, scope.py's tab-split/bytes-mode/rename-endpoints, KB-CLM-006's synthetic rows, KB-SCOPE-006's own declaration, the ARV-CLM-007 intra-table duplicate ratchet + its KB-CLM-007
+- RED-first: 5 suite REDs at the predecessor 943dad9 (the tab-truncated path, the UnicodeDecodeError crash, the CR rewrite, the rename double-count, the intra-table duplicate surviving check_registry; the driver's discarded output; the workflow's missing `!cancelled()`) + the P1/P2/P3 scratch proofs (P1 the twice-vacuous stderr pin passes a stdout-only-blind driver; P2 KB-CLM-006 borrows the live open row — a broken guard on a reconciled registry; P3 KB-SCOPE-006 cannot detect the restored sibling-prefix defect) — red-01.txt
+- The walls' catches (§8-R04): the test_09 rename fixture was ITSELF wrong (unstaged + 25%-similar → git emitted delete+add, no rename record; corrected to 30→40 staged — the TRUE double-count re-observed 20 != 10); the test_09-tg regex matched ZERO continuation lines against the long name (vacuous; corrected + discrimination proven live); ARV-RED-002 fired on both files — the amendments recorded honestly
+- GREEN: scope.py bytes + os.fsdecode + first-two-tabs + the rename single-count; claims.py ARV-CLM-007 (both tables, multiplicity preserved); cases.py synthetic KB-CLM-006 + own-declaration KB-SCOPE-006 + new KB-CLM-007; the driver's 1500-char bounded tail; verify.yml S4c `if: !cancelled()`; the stub's line to stderr — the suites 10/10 + 9/9, the 16/16 KB matrix, make verify GREEN, canonical 51/0, the gate PR-mode GREEN
+- Reconciliation: CLAIM-028's rule-4 closed row appended + its open row retired in the same PR (the registry check itself caught the transitional both-tables state, then clean); the 13-finding READY ledger now EMPTY
+- Evidence: record 25 §§4-R04/5-R04/8-R04; harness/runs/claim-029-r04-gate-scope-knownbad-workflow (red-01/scope/notverified/proofsheet)
+- Unresolved: the ledger one-liner slice, H-01c-authority/evidence (F-007), H-02 (the SEV gate), P3-00 — in that order
+- Next: the ledger one-liner consistency slice (the INT-126 TRIPPLICATION's receiving card)
+- Session record: context/extracted/25-SESSION-25-R03-R04-EXECUTION.md (in progress — the R-03 §§1-7 + the R-04 extensions)

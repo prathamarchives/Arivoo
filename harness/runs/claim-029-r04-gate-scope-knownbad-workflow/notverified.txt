@@ -1,0 +1,27 @@
+- not verified (LAW-04 — required, never empty-by-omission; the R-04 slice's honest limits):
+- - the bytes-mode identity assumes the same-host filesystem-encoding round-trip (os.fsdecode/os.fsencode with
+  surrogateescape): the byte-identity preservation is proven on UTF-8-locale Linux (CI ubuntu-latest and this rig) — a
+  non-UTF-8 filesystem locale is the same-host/same-OS residual the OS-round-trip contract already states; the identity
+  contract itself (byte-in == byte-out) is what the regressions pin
+- - the 1500-character tail bound on the ARV-TG-003 refusal is bounded-by-choice, not measured-against-observed-suite-output:
+  it is large enough for a unittest traceback head and small enough to bound hostile floods; if a future suite's named
+  failure lands beyond 1500 chars the truncation marker states it — a larger bound is a one-line amendment, never silently
+  re-chosen
+- - the P1/P2/P3 discriminating-power/latent-vacuity proofs (red-01.txt) are SCRATCH-COPY evidence: the regressed driver, the
+  reconciled registry, and the sibling-prefix defect were each realized on disposable copies, never committed artifacts; the
+  committed regressions pin the POSITIVE side (the fixed shapes refuse/pass for the named reasons), the scratch side proves
+  the OLD shapes could not
+- - KB-SCOPE-006's positive-side guard prints ARV-SCOPE-006 (over-refusal) through the captured channel and the case then
+  fails via the expected-code-absent path (the honest broken-guard direction); the KB driver itself only knows the
+  expected-code protocol — a dedicated over-refusal case type remains a possible H-01c-evidence refinement, not silently
+  assumed
+- - S4c's `!cancelled()` semantics are pinned by parsing the workflow artifact (test_09) and by the GitHub Actions
+  documented step-scheduling behavior; the LIVE end-to-end proof (a genuinely red S4b on a real PR with S4c still running)
+  is observed only if such a PR occurs — no synthetic PR was fabricated to force it
+- - the #64 second review round's TOCTOU residual (CodeRabbit Major, CWE-367, PRE-EXISTING at the merge base): the
+  harness job runs candidate-controlled code (S1's health.py, S1b's suite subprocesses, S4b) in the same writable
+  workspace BEFORE the trusted S4c step, so the base/harness machinery remains tamperable after the anchor check;
+  R-04's in-PR hardening re-verifies only the ANCHORED DRIVER's digest at S4c entry (the direct swap channel refuses) —
+  the structural isolation (the R-06 card: an isolated fresh-checkout trusted job) is NOT built and NOT claimed
+- - no fresh technical verifier and no SEV — the pre-H-02 discipline (H-02 is the next-but-one card: the ledger one-liner
+  slice, then H-01c-authority/evidence, then H-02's activation)

@@ -164,6 +164,14 @@ The current Makefile does not provide the real-run or falsify targets described 
 
 **Acceptance (the sweep):** every finding in record 24's disposition tables (§4/§5/§7) with a FIX disposition has its stable regression or its honest record repair landed GREEN through the three-check CI; every PR in the repo carries at least one reasoned review; D-042's rule is recorded, attempted, and observed in this session's own merges (each PR carries its host review BEFORE merge).
 
+### R-06 — the trusted-path TOCTOU isolation (the #64 second review round's finding, routed 2026-10-22)
+
+**The finding (CodeRabbit, Major, CWE-367 — preserved verbatim in record 25's §8 second-round entry):** S4b runs candidate-controlled Python in the writable workspace of the harness job; that code can replace `tools/trusted_gate_anchored.py` or write `base/harness/*` AFTER the anchor's sha256 check, and S4c then loads and executes those paths without rechecking their hashes. The exposure PRE-EXISTS this PR (the merge base's S4c ran under `success()` in the same job); R-04's in-PR hardening re-verifies the anchored driver's digest at S4c entry (the direct swap-after-anchor channel refuses) and names the residual — the full same-job same-user class is NOT closed.
+
+**The card:** move the trusted phases (S1b's suite selection + S4c's gate re-run) into an isolated job with fresh head+base checkouts on a separate runner, so NO candidate-controlled code executes in that job's filesystem before the trusted machinery loads; OR equivalent prevention of candidate steps writing the anchored driver and the base machinery. RED-first: a candidate suite that writes a marker over the anchored driver (and over a base machinery file) must be REFUSED by the isolated path, observed at the predecessor. The same class is audited across S1b (which runs after the candidate's own S1 health code) and the canonical-layer job's anchored launches. LAW-09: the workflow's trust anchoring is a protected-path change — the card carries the owner routing (INT-129/D-042 family).
+
+**Sequencing:** READY after the ledger one-liner consistency slice; before H-02 (the SEV gate judges through this trusted path and must not sit on a named TOCTOU residual). H-01c-authority/evidence and P3-00 are not blocked by it (the exposure is pre-existing and named, never silently extended).
+
 ## Phase 3 — Durable capture (first real product behavior)
 
 **Entry condition:** this owner turn opens the Phase 3 execution path. Product-schema migrations begin only after the execution plan is explicitly accepted through the repository change process, P2-CLOSE is green, and H-01/H-02 are installed and proven. Phase 2 S1–S4 stays complete. H-01/H-02 are two bounded closure slices, not permission for an indefinite infrastructure phase.

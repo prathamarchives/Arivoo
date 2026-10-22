@@ -1,21 +1,21 @@
 # PROOF SHEET — slice claim-031-r06-trusted-path-toctou-isolation (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 3bb575ca6c9a1004906f21399d9077c6475cf56c
-- generated (last record's timestamp): 2026-10-22T18:29:56.726021+00:00
+- commit (last run record's): 881c53a1dc7500dd1dd869394c78bc94a952469d
+- generated (last record's timestamp): 2026-10-22T18:46:30.714222+00:00
 - run records: 11
 
 ## Run records (command, exit, output digest)
-- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-22T18:28:05.509571+00:00
-- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-22T18:28:05.912198+00:00
-- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-22T18:28:07.992227+00:00
-- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 b62f05bcdcdbdd6b · 2026-10-22T18:28:29.110538+00:00
-- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 e757231c54cc1b90 · 2026-10-22T18:28:42.235311+00:00
-- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 d19ed4e7348166f8 · 2026-10-22T18:28:44.058494+00:00
-- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 561b13162baabbf2 · 2026-10-22T18:28:44.422482+00:00
-- `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 912813bf36889c80 · 2026-10-22T18:28:51.512570+00:00
-- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 e9896ddf973cb10c · 2026-10-22T18:28:51.670717+00:00
-- `timeout 900 python3 tools/verify_selftest.py` -> exit 0 · output sha256 f5703ab57fe9bccc · 2026-10-22T18:29:05.907956+00:00
-- `make verify` -> exit 0 · output sha256 02cdf1749f9046f6 · 2026-10-22T18:29:56.726021+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-22T18:44:48.429368+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-22T18:44:48.818255+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-22T18:44:50.854570+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 90b131b1cddcf366 · 2026-10-22T18:45:10.689970+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 4c9c4816e4b92029 · 2026-10-22T18:45:23.246389+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 59c50dcdfa775419 · 2026-10-22T18:45:24.943077+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 79989c7c712fd7ee · 2026-10-22T18:45:25.315398+00:00
+- `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 912813bf36889c80 · 2026-10-22T18:45:31.976309+00:00
+- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 e9896ddf973cb10c · 2026-10-22T18:45:32.124482+00:00
+- `timeout 900 python3 tools/verify_selftest.py` -> exit 0 · output sha256 5980d7fca9aa6456 · 2026-10-22T18:45:38.822356+00:00
+- `make verify` -> exit 0 · output sha256 51b5b5f43b83df13 · 2026-10-22T18:46:30.714222+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - not verified (LAW-04 — required, never empty-by-omission; the R-06 slice's honest limits):
@@ -38,4 +38,4 @@
 - observed (the W-01 stage-2 pattern, recorded in the PR/merge sequence — never before the evidence exists)
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): a11af35e0c8fd1a673fb9573214dd32ac0a089e7a594db20fc04969ca9327f18
+- sheet sha256 (of the content above, excluding this line): 664a8343abbaeea02c61a49917f983f79f4925df3ae5338ab8f3b42e162dd430

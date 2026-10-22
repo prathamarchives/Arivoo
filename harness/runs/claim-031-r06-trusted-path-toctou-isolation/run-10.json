@@ -1,7 +1,7 @@
 {
   "command": "timeout 900 python3 tools/verify_selftest.py",
   "exit_code": 0,
-  "commit": "3bb575ca6c9a1004906f21399d9077c6475cf56c",
-  "output_sha256": "f5703ab57fe9bccc4447d69703938a4acf0de116835a6fb7d4167fd3d10ec7ee",
-  "recorded_at": "2026-10-22T18:29:05.907956+00:00"
+  "commit": "881c53a1dc7500dd1dd869394c78bc94a952469d",
+  "output_sha256": "5980d7fca9aa6456b35bd9a14aff626f1d05d1d49770fcf74f2d845d59e4ba45",
+  "recorded_at": "2026-10-22T18:45:38.822356+00:00"
 }

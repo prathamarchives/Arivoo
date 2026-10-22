@@ -110,6 +110,13 @@ jobs:
           ARV_PR_HEAD: ${{ github.head_ref }}
         run: python3 harness/dispatch.py
       - name: "S4c — TRUSTED gate re-run (H-01b-CI, F-006 backstop): the BASE's gate machinery, re-rooted over this candidate tree, re-runs the PR-mode obligations (scope/size/claims/red/lint/deps/known-bads/proofsheet) over the candidate diff — the candidate's harness package and its known-bad registry never execute in this step"
+        # R-04(2): !cancelled() — a plain step is SKIPPED by GitHub Actions
+        # after any earlier failure, so a red S4b (the candidate's own gate,
+        # EVIDENCE since H-01b-CI) silently skipped the trusted re-run and the
+        # trusted evidence never flowed (Greptile's finding). S4c must run
+        # over a red S4b: the trusted path carries the required-check decision
+        # exactly when the candidate-controlled gate is red or gutted.
+        if: ${{ !cancelled() }}
         env:
           ARV_EVENT_NAME: ${{ github.event_name }}
           ARV_PR_HEAD: ${{ github.head_ref }}

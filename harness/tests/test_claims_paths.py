@@ -239,23 +239,35 @@ class ClaimsPathTests(unittest.TestCase):
         """A rename+modify counts its added lines ONCE, under the DESTINATION
         only. The predecessor emitted the FULL added count on BOTH rename
         endpoints — every rename double-counted its lines into the size gate
-        (Greptile's finding)."""
+        (Greptile's finding). FIXTURE (LAW-11, corrected in-slice): the rename
+        must actually be DETECTED — similarity >= 50% (30->40 lines = 75%) and
+        the modify must be STAGED before the commit (an unstaged modify never
+        reaches the committed tree; the first draft's 10->40 shape was both
+        unstaged AND below the similarity threshold, so git emitted a
+        delete+add pair with no rename record at all and the observed 0 != 30
+        was the fixture's own bug, not the defect — probed live: 30->40 staged
+        emits the one-record form '10\\t0\\t\\0old\\0new\\0')."""
         repo = self.td / "repo"
         repo.mkdir()
         _git(repo, "init", "-q", "-b", "main")
         _git(repo, "config", "user.email", "t@t.local")
         _git(repo, "config", "user.name", "T")
-        (repo / "old-name.py").write_text("x = 1\n" * 10, encoding="utf-8")
+        (repo / "old-name.py").write_text("x = 1\n" * 30, encoding="utf-8")
         (repo / "base.txt").write_text("base\n")
         _git(repo, "add", "-A")
         _git(repo, "commit", "-q", "-m", "base (old-name.py lives here)")
         _git(repo, "checkout", "-q", "-b", "slice/claim-x-synthetic")
         _git(repo, "mv", "old-name.py", "new-name.py")
-        (repo / "new-name.py").write_text("x = 1\n" * 40, encoding="utf-8")   # +30 added lines
+        (repo / "new-name.py").write_text("x = 1\n" * 40, encoding="utf-8")   # +10 added lines, 75% similar
+        _git(repo, "add", "-A")       # stage the modify — an unstaged modify never commits
         _git(repo, "commit", "-q", "-m", "rename plus modify")
         stats = scope.diff_stats("main", repo=repo)
         total = sum(d["src_lines"] for d in stats)
-        self.assertEqual(total, 30, f"the rename double-counted its added lines (total {total} != 30): {stats}")
+        self.assertEqual(total, 10, f"the rename double-counted its added lines (total {total} != 10): {stats}")
+        under_dst = [d for d in stats if d["path"] == "new-name.py" and d["src_lines"] > 0]
+        under_old = [d for d in stats if d["path"] == "old-name.py" and d["src_lines"] > 0]
+        self.assertTrue(under_dst, f"the added lines must count under the DESTINATION: {stats}")
+        self.assertFalse(under_old, f"the old endpoint must contribute 0 lines (it stays in the identity, never in the count): {stats}")
 
     # -- R-04(9): the intra-table duplicate ratchet -----------------------------
 

@@ -110,7 +110,18 @@ def _phase_suites(repo: Path, base: Path) -> int:
         except subprocess.TimeoutExpired:
             _refuse("ARV-TG-003", f"required suite {t} exceeded the {SUITE_TIMEOUT}s timeout — a hung suite is a failed suite, never a green", "run the suite directly for its named failure and repair it")
         if r.returncode != 0:
-            _refuse("ARV-TG-003", f"required suite FAILED: {t} (exit {r.returncode}) — a candidate recipe cannot fabricate a green over a red suite", "run the suite directly for its named failure and repair it")
+            # R-04(3): the refusal carries a BOUNDED TAIL of the failing
+            # suite's captured output — the predecessor discarded it, so the
+            # suite's own named failure was invisible in the trusted evidence
+            # (Greptile: 'a bounded tail prints with the refusal'). The tail is
+            # bounded by characters (never an unbounded capture printed whole)
+            # and clearly fenced as the suite's own output, never the judge's
+            tail = ((r.stdout or "") + "\n" + (r.stderr or "")).strip()
+            if len(tail) > 1500:
+                tail = tail[:1500] + " [...truncated at 1500 chars]"
+            _refuse("ARV-TG-003", f"required suite FAILED: {t} (exit {r.returncode}) — a candidate recipe cannot fabricate a green over a red suite"
+                    + (f"; the suite's own captured output (bounded tail):\n      {tail}" if tail else ""),
+                    "run the suite directly for its named failure and repair it")
         if not r.stdout.strip() and not r.stderr.strip():
             # stdout OR stderr counts: unittest-based suites report to STDERR
             # (found live by the part-2 binding rehearsal — the first driver

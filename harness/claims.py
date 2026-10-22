@@ -123,26 +123,45 @@ def _print_fail(code: str, msg: str, repair: str) -> None:
     print(f"      repair: {repair}")
 
 
-def _closed_ids(text: str) -> set:
-    """The claim IDs of the Closed table (first cell per row). H-01c-claims:
-    the WHOLE registry is swept — the diff-scoped checks missed the
-    both-tables drift for three PRs (CLAIM-007, record 22 §2)."""
+def _closed_row_ids(text: str) -> list:
+    """The claim IDs of the Closed table, MULTIPLICITY PRESERVED — R-04(9):
+    the intra-table duplicate class (the duplicate CLAIM-021 closed rows,
+    G-58-1) is invisible to a set, which silently deduplicates the very
+    drift ARV-CLM-007 exists to name."""
     m = re.search(r"^## Closed claims\s*$", text, re.M)
     if not m:
-        return set()
-    ids = set()
+        return []
+    ids = []
     for ln in text[m.end():].splitlines():
         s = ln.strip()
         if not s.startswith("|") or set(s) <= {"|", "-", " ", ":"}:
             continue
         cells = _cells(s)
         if cells and cells[0].strip().lower() != "claim" and not cells[0].startswith("*"):
-            ids.add(cells[0].strip())
+            ids.append(cells[0].strip())
     return ids
 
 
+def _closed_ids(text: str) -> set:
+    """The claim IDs of the Closed table (first cell per row). H-01c-claims:
+    the WHOLE registry is swept — the diff-scoped checks missed the
+    both-tables drift for three PRs (CLAIM-007, record 22 §2)."""
+    return set(_closed_row_ids(text))
+
+
+def _dups(ids: list) -> list:
+    """The IDs appearing MORE THAN ONCE, first-repeated order (R-04(9))."""
+    seen, dup = set(), []
+    for x in ids:
+        if x in seen and x not in dup:
+            dup.append(x)
+        seen.add(x)
+    return dup
+
+
 def check_registry(repo: pathlib.Path = REPO) -> list:
-    """ARV-CLM-001..004 over the registry's OPEN table. Returns the fail codes."""
+    """ARV-CLM-001..004 over the OPEN table + 006/007 registry-wide (the
+    both-tables and intra-table duplicate classes). Returns the fail codes."""
     fails = []
     p = repo / "CLAIMS.md"
     if not p.is_file():
@@ -156,6 +175,23 @@ def check_registry(repo: pathlib.Path = REPO) -> list:
         return ["ARV-CLM-001"]
     rows = _open_rows(text)
     closed_ids = _closed_ids(text)
+    # ARV-CLM-007 — the INTRA-TABLE duplicate ratchet (R-04(9), G-58-1): the
+    # same claim ID TWICE in ONE table is registry drift; the duplicate
+    # CLAIM-021 closed rows survived every check because ARV-CLM-006 covers
+    # only the BOTH-TABLES class. Multiplicity is the signal — never dedupe
+    # it away. Both tables, one code: the drift class is the same either side.
+    open_ids = [r["claim"] for r in rows]
+    for cid in _dups(open_ids):
+        _print_fail("ARV-CLM-007",
+                    f"{cid}: appears {open_ids.count(cid)} times in the OPEN table — intra-table registry drift (the duplicate-CLAIM-021 closed-row class, G-58-1; R-04(9))",
+                    "one row per claim per table: merge the duplicate rows through the rule-4 reconciliation protocol in the next slice's PR, recording the merge in the claim's closed row")
+        fails.append("ARV-CLM-007")
+    closed_row_ids = _closed_row_ids(text)
+    for cid in _dups(closed_row_ids):
+        _print_fail("ARV-CLM-007",
+                    f"{cid}: appears {closed_row_ids.count(cid)} times in the CLOSED table — intra-table registry drift (the duplicate-CLAIM-021 closed-row class, G-58-1; R-04(9))",
+                    "one row per claim per table: merge the duplicate rows through the rule-4 reconciliation protocol in the next slice's PR, recording the merge in the claim's closed row")
+        fails.append("ARV-CLM-007")
     lmax = _ledger_max(repo)
     seen_res: dict = {}
     for r in rows:

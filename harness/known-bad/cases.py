@@ -202,21 +202,65 @@ def kb_clm_unclaimed(copy: pathlib.Path) -> None:
 @case("KB-SCOPE-006", "a SIBLING-PREFIX path against a file declaration (README.md vs README.md.unrelated)",
       "ARV-SCOPE-002")
 def kb_scope_sibling(copy: pathlib.Path) -> None:
-    _load(copy, "harness.scope").check_scope(["README.md.unrelated"], SLICE)
+    # R-04(8): the probe's OWN declaration. The predecessor checked
+    # README.md.unrelated against the scratch declaration that names NO
+    # README.md — the refusal fired for the trivial OUTSIDE-DECLARATION
+    # reason, and a scope.py with the sibling-prefix DEFECT restored (raw
+    # startswith) still passed the probe: it could not detect the regression
+    # it exists to backstop (P3, the vacuous form — red-01.txt). Declaring
+    # README.md makes the sibling-prefix boundary the ONLY discriminating
+    # reason the refusal can fire, and the POSITIVE side below guards the
+    # over-refusal direction the same probe-run.
+    (copy / "harness" / "runs" / SLICE / "scope.txt").write_text("README.md\n",
+                                                                encoding="utf-8")
+    scope = _load(copy, "harness.scope")
+    # the POSITIVE side: the declared file itself MUST match (exact equality).
+    # A violation is named on the captured channel and the expected code is
+    # never printed — the case fails as the broken guard it is (KB-05), so an
+    # over-refusing boundary can never masquerade as the sibling-prefix catch
+    if any("ARV-SCOPE-002" in f for f in scope.check_scope(["README.md"], SLICE)):
+        print("FAIL ARV-SCOPE-006: the DECLARED file README.md was itself refused — the "
+              "boundary over-refuses; the sibling-prefix refusal below would be vacuous")
+        return
+    # the SIBLING PREFIX: README.md.unrelated must refuse — a raw-startswith
+    # regression matches it and the guard goes silent (the broken guard KB-05)
+    scope.check_scope(["README.md.unrelated"], SLICE)
 
 
 @case("KB-CLM-006", "a claim ID present in BOTH the open and closed tables (registry drift)",
       "ARV-CLM-006")
 def kb_clm_dup(copy: pathlib.Path) -> None:
-    p = copy / "CLAIMS.md"
-    text = p.read_text(encoding="utf-8")
-    m = re.search(r"^## Open claims\s*$", text, re.M)
-    assert m, "the registry must carry an Open table for this probe"
-    m2 = re.search(r"^\| (CLAIM-[A-Za-z0-9-]+) \|", text[m.end():], re.M)
-    assert m2, "the registry must carry an open row for this probe"
-    dup = m2.group(1)
-    mc = re.search(r"^## Closed claims\s*$", text, re.M)
-    assert mc, "the registry must carry a Closed table for this probe"
-    probe = text[:mc.end()] + f"\n| {dup} | duplicate drift row | 2026-10-20 | probe |\n" + text[mc.end():]
-    p.write_text(probe, encoding="utf-8")
+    # R-04(7): SYNTHETIC rows. The predecessor borrowed the FIRST live open
+    # row — masked only because a live row happened to exist (Greptile:
+    # latent); on a reconciled (empty-open) registry its open-row regex
+    # reached into the CLOSED table, duplicated a closed ID into the closed
+    # table, and the guard never fired (P2 — a broken-guard RED against a
+    # legitimate live state, red-01.txt). The synthetic registry is
+    # self-contained: the probe never touches live registry state.
+    (copy / "CLAIMS.md").write_text(
+        "# CLAIMS (synthetic probe registry)\n\n## Open claims\n\n"
+        "| Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |\n"
+        "|-------|---------|-------|--------|----------------|---------------|---------|-------|\n"
+        "| CLAIM-DUP | 99 | probe | `slice/claim-dup-both-tables-probe` | `notes.txt` | — (synthetic probe row) | 2026-10-22 | the synthetic both-tables drift target |\n\n"
+        "## Closed claims\n\n| Claim | Result | Closed | Evidence |\n|-------|--------|--------|----------|\n"
+        "| CLAIM-DUP | the synthetic closed row carrying the SAME id | 2026-10-22 | probe |\n",
+        encoding="utf-8")
+    _load(copy, "harness.claims").check_registry()
+
+
+@case("KB-CLM-007", "the same claim ID TWICE in one table (intra-table drift — the duplicate-CLAIM-021 class)",
+      "ARV-CLM-007")
+def kb_clm_intra_dup(copy: pathlib.Path) -> None:
+    # R-04(9)'s probe side: the duplicate survived every check at the
+    # predecessor because ARV-CLM-006 covers only the BOTH-TABLES class —
+    # the ratchet's own known-bad, synthetic (P2's lesson: never borrow live
+    # registry state)
+    (copy / "CLAIMS.md").write_text(
+        "# CLAIMS (synthetic probe registry)\n\n## Open claims\n\n"
+        "| Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |\n"
+        "|-------|---------|-------|--------|----------------|---------------|---------|-------|\n\n"
+        "## Closed claims\n\n| Claim | Result | Closed | Evidence |\n|-------|--------|--------|----------|\n"
+        "| CLAIM-TWIN | the first synthetic row | 2026-10-22 | probe |\n"
+        "| CLAIM-TWIN | the duplicate synthetic row (intra-table drift) | 2026-10-22 | probe |\n",
+        encoding="utf-8")
     _load(copy, "harness.claims").check_registry()

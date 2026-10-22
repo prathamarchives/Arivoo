@@ -1,0 +1,17 @@
+# CLAIM-029 — R-04: the gate/scope/known-bad/workflow repairs (9 card items; PLAN line 161)
+# INT-129/D-042 routing (the G-51 Greptile findings); the session-25 reconciliation carried:
+# CLAIM-028's rule-4 closed row (PR #63 = 943dad9, merged 2026-10-22T15:32:39Z via the owner-authorized
+# protection-flip path of record 24 §13, reproduced live; protection restored exactly, post-merge CI green 39805833842)
+harness/scope.py INT-129/D-042
+harness/claims.py INT-129/D-042
+harness/known-bad/cases.py INT-129/D-042
+tools/trusted_gate.py INT-129/D-042
+.github/workflows/verify.yml INT-129/D-042
+harness/tests/test_claims_paths.py INT-129/D-042
+harness/tests/test_trusted_gate.py INT-129/D-042
+harness/red-records.json INT-129/D-042
+harness/runs/claim-029-r04-gate-scope-knownbad-workflow INT-129/D-042
+CLAIMS.md
+STATE.md
+context/WORKLOG.md INT-129/D-042
+context/extracted/25-SESSION-25-R03-R04-EXECUTION.md INT-129/D-042

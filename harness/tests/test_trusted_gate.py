@@ -322,12 +322,20 @@ class TrustedGateTests(unittest.TestCase):
         silently skipped the trusted re-run and the trusted evidence never
         flowed. The step's if-condition keeps S4c running over a red S4b
         (Greptile's finding; the pin parses the workflow file itself — the
-        artifact under repair, never a copy)."""
+        artifact under repair, never a copy). REGEX (LAW-11, corrected
+        in-slice): the S4c name line is a LONG quoted string — the first
+        draft's pattern expected the name to close right after "S4c and
+        matched ZERO continuation lines, so the pin was vacuous against the
+        real artifact shape; `[^\n]*` first consumes the name line, then the
+        step group takes the 8+-space property lines (the next step's
+        6-space `- name:` stops the group)."""
         import re
         wf = (REPO / ".github" / "workflows" / "verify.yml").read_text(encoding="utf-8")
-        m = re.search(r"- name: \"S4c(?P<step>(?:\n[ ]{8,}[^\n]*)*)", wf)
+        m = re.search(r"- name: \"S4c[^\n]*(?P<step>(?:\n[ ]{8,}[^\n]*)*)", wf)
         self.assertTrue(m, "the S4c step must exist in the verify workflow")
         step = m.group("step")
+        self.assertIn("if:", step, "the S4c step group captured no property lines — the "
+                     "pin must parse the real workflow shape, never match an empty group")
         self.assertIn("!cancelled()", step,
                       "the S4c step lacks `if: ${{ !cancelled() }}` — a failed S4b would SKIP "
                       "the trusted gate re-run, and the trusted evidence would never flow "

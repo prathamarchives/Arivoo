@@ -69,10 +69,15 @@ def _stub_suite(name: str, *, fail: bool = False, silent: bool = False,
     if silent:
         return "# silent stub\n"
     if stderr_only:
-        # the unittest-shaped reporter: everything on STDERR, nothing on stdout
+        # the unittest-shaped reporter: EVERYTHING on STDERR, nothing on
+        # stdout — INCLUDING the completion line (R-04(1): the predecessor's
+        # stub printed its 'Ran 3 tests' line to stdout, so a driver that
+        # regressed to stdout-only checking still passed this shape — the
+        # pin was twice-vacuous; the line moves to stderr so the pin
+        # discriminates the exact blindness it exists to guard)
         return ("import sys\n"
                 "print('unittest-shaped stub: reporting on stderr only', file=sys.stderr)\n"
-                "print('Ran 3 tests in 0.1s')\n")
+                "print('Ran 3 tests in 0.1s', file=sys.stderr)\n")
     return ("# synthetic candidate suite (stubbed for the trusted-gate tests)\n"
             f"print('stub suite ok: {name}')\n" + ("raise SystemExit(1)\n" if fail else ""))
 
@@ -204,12 +209,20 @@ class TrustedGateTests(unittest.TestCase):
 
     def test_02_failing_required_suite_is_refused(self):
         """F-004: a required suite that FAILS is ARV-TG-003 — a gutted Makefile
-        cannot fabricate a green (the driver runs the suite files itself)."""
+        cannot fabricate a green (the driver runs the suite files itself).
+        R-04(3): the refusal carries a BOUNDED TAIL of the failing suite's
+        captured output — the predecessor discarded it, so the suite's own
+        named failure was invisible in the trusted evidence (Greptile: 'a
+        bounded tail prints with the refusal')."""
         stub = build_stub(self.td, gutted_makefile=True,
                           suite_mutations={_base_gate().TESTS[1]: _stub_suite("x", fail=True)})
         r = run_driver(self.td, stub, "suites")
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("ARV-TG-003", r.stdout + r.stderr)
+        self.assertIn("stub suite ok: x", r.stdout + r.stderr,
+                      "the failing suite's captured output was DISCARDED — the refusal "
+                      "must carry a bounded tail so the named failure is visible in the "
+                      "trusted evidence (R-04(3))")
 
     def test_03_silent_suite_is_the_vacuous_class(self):
         """A suite that exits 0 with NO output is ARV-TG-004 — the A03 vacuous
@@ -301,6 +314,26 @@ class TrustedGateTests(unittest.TestCase):
         self.assertIn("GREEN — the gate passes", r.stdout)
         self.assertNotIn("ARV-TG-001", r.stdout + r.stderr,
                          "the env-only form must never be refused as None-metadata")
+
+    def test_09_s4c_step_runs_even_when_s4b_fails(self):
+        """R-04(2): the TRUSTED S4c step must carry `!cancelled()` — a plain
+        workflow step is SKIPPED by GitHub Actions after any earlier failure,
+        so a red S4b (the candidate's own gate, EVIDENCE since H-01b-CI)
+        silently skipped the trusted re-run and the trusted evidence never
+        flowed. The step's if-condition keeps S4c running over a red S4b
+        (Greptile's finding; the pin parses the workflow file itself — the
+        artifact under repair, never a copy)."""
+        import re
+        wf = (REPO / ".github" / "workflows" / "verify.yml").read_text(encoding="utf-8")
+        m = re.search(r"- name: \"S4c(?P<step>(?:\n[ ]{8,}[^\n]*)*)", wf)
+        self.assertTrue(m, "the S4c step must exist in the verify workflow")
+        step = m.group("step")
+        self.assertIn("!cancelled()", step,
+                      "the S4c step lacks `if: ${{ !cancelled() }}` — a failed S4b would SKIP "
+                      "the trusted gate re-run, and the trusted evidence would never flow "
+                      "(R-04(2))")
+        self.assertNotIn("if: ${{ success()", step,
+                         "an if: success() condition would skip S4c on a red S4b — the exact defect")
 
 
 if __name__ == "__main__":

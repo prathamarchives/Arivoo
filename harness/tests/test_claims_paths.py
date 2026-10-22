@@ -174,6 +174,112 @@ class ClaimsPathTests(unittest.TestCase):
         self.assertTrue(any("ARV-CLM-006" in f for f in fails),
                         "the both-tables duplicate is registry drift and must refuse")
 
+    # -- R-04(4): the numstat TAB split ---------------------------------------
+
+    def test_06_numstat_path_with_tab_survives_the_stats_parse(self):
+        """A changed path containing a literal TAB must arrive WHOLE in the
+        stats identity. The -z numstat record is 'added<TAB>deleted<TAB>path';
+        the predecessor split on EVERY tab, so a tab inside the path truncated
+        it to the fragment before the tab (identity mangled, classification
+        wrong) — Greptile's finding on the H-01c-claims diff."""
+        tabname = "ta\tb.py"                    # a .py file whose NAME carries a literal tab
+        repo = build_repo(self.td, {tabname: "print('x')\n"})
+        stats = scope.diff_stats("main", repo=repo)
+        hit = [d for d in stats if d["path"] == tabname]
+        self.assertTrue(hit, f"the tab-bearing path was truncated by the tab split: "
+                             f"{[d['path'] for d in stats]}")
+        self.assertEqual(hit[0]["src_lines"], 1, "the tab path must classify as a SOURCE file")
+
+    # -- R-04(5): -z output is BYTES + surrogateescape (identity preserved) ----
+
+    def test_07_non_utf8_path_identity_preserved(self):
+        """A path git stores as non-UTF-8 bytes must pass through BOTH diff
+        identities without a UnicodeDecodeError crash and without byte
+        rewriting. The predecessor read the -z output TEXT-MODE (strict locale
+        codec): the raw byte 0xE9 crashed the decode — Greptile's finding."""
+        raw = b"caf\xe9.py"                      # latin-1 'café.py' — invalid UTF-8
+        repo = self.td / "repo"
+        repo.mkdir()
+        _git(repo, "init", "-q", "-b", "main")
+        _git(repo, "config", "user.email", "t@t.local")
+        _git(repo, "config", "user.name", "T")
+        (repo / "base.txt").write_text("base\n")
+        _git(repo, "add", "-A")
+        _git(repo, "commit", "-q", "-m", "base")
+        _git(repo, "checkout", "-q", "-b", "slice/claim-x-synthetic")
+        p = repo / os.fsdecode(raw)              # the OS round-trips the surrogate escape to the raw bytes
+        p.write_text("print('x')\n", encoding="utf-8")
+        _git(repo, "add", "-A")
+        _git(repo, "commit", "-q", "-m", "the non-utf8 path change")
+        stats = scope.diff_stats("main", repo=repo)
+        self.assertEqual(len(stats), 1, f"the path must arrive as exactly one record: {stats}")
+        self.assertEqual(stats[0]["path"].encode("utf-8", "surrogateescape"), raw,
+                         "the byte identity was rewritten on the way through the diff parse")
+        paths = scope.diff_paths("main", repo=repo)
+        self.assertEqual([os.fsencode(pp) for pp in paths], [raw],
+                         "the changed-path identity must carry the exact bytes")
+
+    def test_08_cr_in_path_identity_preserved(self):
+        """A path containing a literal CR must arrive byte-identical. The
+        predecessor's TEXT-MODE read applied universal-newline translation:
+        the raw \\r inside the filename was rewritten to \\n — identity
+        corrupted (Greptile's finding: 'bytes + surrogateescape, identity
+        preserved')."""
+        crname = "line\rending.py"               # a literal CR inside the name
+        repo = build_repo(self.td, {crname: "print('x')\n"})
+        stats = scope.diff_stats("main", repo=repo)
+        self.assertEqual([d["path"] for d in stats], [crname],
+                         "the CR was rewritten by universal-newline translation")
+        paths = scope.diff_paths("main", repo=repo)
+        self.assertEqual(paths, [crname], "the CR-in-name identity was corrupted")
+
+    # -- R-04(6): the rename double-count --------------------------------------
+
+    def test_09_rename_counts_added_lines_once_under_the_destination(self):
+        """A rename+modify counts its added lines ONCE, under the DESTINATION
+        only. The predecessor emitted the FULL added count on BOTH rename
+        endpoints — every rename double-counted its lines into the size gate
+        (Greptile's finding)."""
+        repo = self.td / "repo"
+        repo.mkdir()
+        _git(repo, "init", "-q", "-b", "main")
+        _git(repo, "config", "user.email", "t@t.local")
+        _git(repo, "config", "user.name", "T")
+        (repo / "old-name.py").write_text("x = 1\n" * 10, encoding="utf-8")
+        (repo / "base.txt").write_text("base\n")
+        _git(repo, "add", "-A")
+        _git(repo, "commit", "-q", "-m", "base (old-name.py lives here)")
+        _git(repo, "checkout", "-q", "-b", "slice/claim-x-synthetic")
+        _git(repo, "mv", "old-name.py", "new-name.py")
+        (repo / "new-name.py").write_text("x = 1\n" * 40, encoding="utf-8")   # +30 added lines
+        _git(repo, "commit", "-q", "-m", "rename plus modify")
+        stats = scope.diff_stats("main", repo=repo)
+        total = sum(d["src_lines"] for d in stats)
+        self.assertEqual(total, 30, f"the rename double-counted its added lines (total {total} != 30): {stats}")
+
+    # -- R-04(9): the intra-table duplicate ratchet -----------------------------
+
+    def test_10_closed_table_duplicate_refuses(self):
+        """The same claim ID TWICE in one table is drift too — the duplicate
+        CLAIM-021 closed rows (G-58-1) survived every check because ARV-CLM-006
+        covers only the BOTH-TABLES drift. check_registry must refuse
+        ARV-CLM-007 on an intra-table duplicate (the ratchet's check side; the
+        probe side is KB-CLM-007)."""
+        repo = self.td / "reg"
+        repo.mkdir()
+        (repo / "INTENT-LEDGER.md").write_text("**INT-100 — STUB — active**\n")
+        (repo / "CLAIMS.md").write_text(
+            "# CLAIMS\n\n## Open claims\n\n"
+            "| Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |\n"
+            "|-------|---------|-------|--------|----------------|---------------|---------|-------|\n\n"
+            "## Closed claims\n\n| Claim | Result | Closed | Evidence |\n|-------|--------|--------|----------|\n"
+            "| CLAIM-XX | landed | 2026-10-19 | PR #1 |\n"
+            "| CLAIM-XX | landed again | 2026-10-19 | PR #1 |\n",
+            encoding="utf-8")
+        fails = claims.check_registry(repo=repo)
+        self.assertTrue(any("ARV-CLM-007" in f for f in fails),
+                        "the intra-table duplicate must refuse — the duplicate CLAIM-021 closed-row class")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

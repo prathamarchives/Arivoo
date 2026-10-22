@@ -1,0 +1,170 @@
+R-04 (CLAIM-029) — the RED observation at the predecessor 943dad9 (PR #63 merged head; branch slice/claim-029-r04-gate-scope-knownbad-workflow)
+
+=== harness/tests/test_claims_paths.py (the predecessor implementation, the new R-04 cases) ===
+test_01_sibling_prefix_never_matches (__main__.ClaimsPathTests.test_01_sibling_prefix_never_matches)
+A declaration for README.md must cover EXACTLY README.md — never ... FAIL ARV-SCOPE-002: README.md.unrelated outside the declared scope — scope breach (LAW-06)
+      repair: widen the declaration (with the owner ref if the path is protected) or drop the change from this slice
+ok
+test_02_exotic_names_survive_the_diff_parse (__main__.ClaimsPathTests.test_02_exotic_names_survive_the_diff_parse)
+A changed path with SPACES and UNICODE must arrive in the identity ... ok
+test_03_rename_endpoints_are_both_in_the_identity (__main__.ClaimsPathTests.test_03_rename_endpoints_are_both_in_the_identity)
+A rename's OLD path is part of the changed-path identity too: a ... ok
+test_04_main_selfcheck_name_never_disables_claims (__main__.ClaimsPathTests.test_04_main_selfcheck_name_never_disables_claims)
+A PR-diff invocation carrying --slice main-selfcheck must still ... FAIL ARV-CLM-005: branch 'slice/claim-x-synthetic' carries NO open claim — unclaimed work (the session-19 collision class)
+      repair: the first work commit carries the claim row (CLAIMS.md); one claim, one branch, one PR
+ok
+test_05_open_and_closed_duplicate_refuses (__main__.ClaimsPathTests.test_05_open_and_closed_duplicate_refuses)
+A claim ID present in BOTH tables is registry drift — the ... FAIL ARV-CLM-006: CLAIM-DUP: present in BOTH the open and closed tables — registry drift (the CLAIM-007 class: a merged claim's stale open row surviving diff-scoped checks)
+      repair: reconcile the registry through the rule-4 protocol: append the closed row and retire the open row in the next slice's PR, recording the reconciliation
+ok
+test_06_numstat_path_with_tab_survives_the_stats_parse (__main__.ClaimsPathTests.test_06_numstat_path_with_tab_survives_the_stats_parse)
+A changed path containing a literal TAB must arrive WHOLE in the ... FAIL
+test_07_non_utf8_path_identity_preserved (__main__.ClaimsPathTests.test_07_non_utf8_path_identity_preserved)
+A path git stores as non-UTF-8 bytes must pass through BOTH diff ... ERROR
+test_08_cr_in_path_identity_preserved (__main__.ClaimsPathTests.test_08_cr_in_path_identity_preserved)
+A path containing a literal CR must arrive byte-identical. The ... FAIL
+test_09_rename_counts_added_lines_once_under_the_destination (__main__.ClaimsPathTests.test_09_rename_counts_added_lines_once_under_the_destination)
+A rename+modify counts its added lines ONCE, under the DESTINATION ... FAIL
+test_10_closed_table_duplicate_refuses (__main__.ClaimsPathTests.test_10_closed_table_duplicate_refuses)
+The same claim ID TWICE in one table is drift too — the duplicate ... FAIL
+
+======================================================================
+ERROR: test_07_non_utf8_path_identity_preserved (__main__.ClaimsPathTests.test_07_non_utf8_path_identity_preserved)
+A path git stores as non-UTF-8 bytes must pass through BOTH diff
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_claims_paths.py", line 214, in test_07_non_utf8_path_identity_preserved
+    stats = scope.diff_stats("main", repo=repo)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/scope.py", line 153, in diff_stats
+    out = _git(["diff", "--numstat", "-z", "--find-renames", f"{base}...HEAD"], repo).stdout
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/my-project/arivoo/harness/scope.py", line 50, in _git
+    r = subprocess.run(["git"] + args, cwd=repo or REPO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 2153, in _communicate
+    stdout = self._translate_newlines(stdout,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 1086, in _translate_newlines
+    data = data.decode(encoding, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xe9 in position 7: invalid continuation byte
+
+======================================================================
+FAIL: test_06_numstat_path_with_tab_survives_the_stats_parse (__main__.ClaimsPathTests.test_06_numstat_path_with_tab_survives_the_stats_parse)
+A changed path containing a literal TAB must arrive WHOLE in the
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_claims_paths.py", line 189, in test_06_numstat_path_with_tab_survives_the_stats_parse
+    self.assertTrue(hit, f"the tab-bearing path was truncated by the tab split: "
+AssertionError: [] is not true : the tab-bearing path was truncated by the tab split: ['ta']
+
+======================================================================
+FAIL: test_08_cr_in_path_identity_preserved (__main__.ClaimsPathTests.test_08_cr_in_path_identity_preserved)
+A path containing a literal CR must arrive byte-identical. The
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_claims_paths.py", line 231, in test_08_cr_in_path_identity_preserved
+    self.assertEqual([d["path"] for d in stats], [crname],
+AssertionError: Lists differ: ['line\nending.py'] != ['line\rending.py']
+
+First differing element 0:
+'line\nending.py'
+'line\rending.py'
+
+- ['line\nending.py']
+?        ^
+
++ ['line\rending.py']
+?        ^
+ : the CR was rewritten by universal-newline translation
+
+======================================================================
+FAIL: test_09_rename_counts_added_lines_once_under_the_destination (__main__.ClaimsPathTests.test_09_rename_counts_added_lines_once_under_the_destination)
+A rename+modify counts its added lines ONCE, under the DESTINATION
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_claims_paths.py", line 258, in test_09_rename_counts_added_lines_once_under_the_destination
+    self.assertEqual(total, 30, f"the rename double-counted its added lines (total {total} != 30): {stats}")
+AssertionError: 0 != 30 : the rename double-counted its added lines (total 0 != 30): [{'path': 'old-name.py', 'src_lines': 0, 'test_lines': 0, 'fixture_lines': 0}, {'path': 'new-name.py', 'src_lines': 0, 'test_lines': 0, 'fixture_lines': 0}]
+
+======================================================================
+FAIL: test_10_closed_table_duplicate_refuses (__main__.ClaimsPathTests.test_10_closed_table_duplicate_refuses)
+The same claim ID TWICE in one table is drift too — the duplicate
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_claims_paths.py", line 280, in test_10_closed_table_duplicate_refuses
+    self.assertTrue(any("ARV-CLM-007" in f for f in fails),
+AssertionError: False is not true : the intra-table duplicate must refuse — the duplicate CLAIM-021 closed-row class
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.183s
+
+FAILED (failures=4, errors=1)
+
+=== harness/tests/test_trusted_gate.py (the predecessor implementation, the new R-04 cases) ===
+test_01_missing_required_suite_is_refused (__main__.TrustedGateTests.test_01_missing_required_suite_is_refused)
+F-004, fail-closed: a required suite deleted from the candidate tree ... ok
+test_02_failing_required_suite_is_refused (__main__.TrustedGateTests.test_02_failing_required_suite_is_refused)
+F-004: a required suite that FAILS is ARV-TG-003 — a gutted Makefile ... FAIL
+test_03_silent_suite_is_the_vacuous_class (__main__.TrustedGateTests.test_03_silent_suite_is_the_vacuous_class)
+A suite that exits 0 with NO output is ARV-TG-004 — the A03 vacuous ... ok
+test_04_gutted_makefile_cannot_fake_suites_ran (__main__.TrustedGateTests.test_04_gutted_makefile_cannot_fake_suites_ran)
+F-004's positive control: the stub's Makefile recipes are LIES (echo ... ok
+test_05_gate_phase_reroots_and_judges_the_candidate (__main__.TrustedGateTests.test_05_gate_phase_reroots_and_judges_the_candidate)
+F-006: the BASE's gate machinery re-rooted over the candidate tree. ... ok
+test_06_candidate_knownbad_registry_never_executes_in_the_trusted_run (__main__.TrustedGateTests.test_06_candidate_knownbad_registry_never_executes_in_the_trusted_run)
+F-006's backstop, the named card case: the candidate's ... ok
+test_07_invalid_inputs_and_hostile_metadata_are_refused (__main__.TrustedGateTests.test_07_invalid_inputs_and_hostile_metadata_are_refused)
+ARV-TG-001/005: a relative or nonexistent candidate root, a base ... ok
+test_08_env_only_invocation_is_the_ci_form (__main__.TrustedGateTests.test_08_env_only_invocation_is_the_ci_form)
+The CI form: metadata arrives through ARV_EVENT_NAME/ARV_PR_HEAD with ... ok
+test_09_s4c_step_runs_even_when_s4b_fails (__main__.TrustedGateTests.test_09_s4c_step_runs_even_when_s4b_fails)
+R-04(2): the TRUSTED S4c step must carry `!cancelled()` — a plain ... FAIL
+
+======================================================================
+FAIL: test_02_failing_required_suite_is_refused (__main__.TrustedGateTests.test_02_failing_required_suite_is_refused)
+F-004: a required suite that FAILS is ARV-TG-003 — a gutted Makefile
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 222, in test_02_failing_required_suite_is_refused
+    self.assertIn("stub suite ok: x", r.stdout + r.stderr,
+AssertionError: 'stub suite ok: x' not found in "trusted suites phase (F-004): 7 required suite(s), selected from the BASE's gate.TESTS — candidate Make recipes are never the evidence\n  PASS harness/tests/test_migrations.py — exit 0, non-empty output (ran as a subprocess over the candidate tree)\nFAIL ARV-TG-003: required suite FAILED: harness/tests/test_substrate.py (exit 1) — a candidate recipe cannot fabricate a green over a red suite\n      repair: run the suite directly for its named failure and repair it\n" : the failing suite's captured output was DISCARDED — the refusal must carry a bounded tail so the named failure is visible in the trusted evidence (R-04(3))
+
+======================================================================
+FAIL: test_09_s4c_step_runs_even_when_s4b_fails (__main__.TrustedGateTests.test_09_s4c_step_runs_even_when_s4b_fails)
+R-04(2): the TRUSTED S4c step must carry `!cancelled()` — a plain
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/z/my-project/arivoo/harness/tests/test_trusted_gate.py", line 331, in test_09_s4c_step_runs_even_when_s4b_fails
+    self.assertIn("!cancelled()", step,
+AssertionError: '!cancelled()' not found in '' : the S4c step lacks `if: ${{ !cancelled() }}` — a failed S4b would SKIP the trusted gate re-run, and the trusted evidence would never flow (R-04(2))
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.570s
+
+FAILED (failures=2)
+
+=== the P1/P2/P3 discriminating-power + latent-vacuity proofs (scratch copies; the repo tree untouched) ===
+scratch: /tmp/r04-red-dsf0ewzv
+
+=== P1 (R-04(1)): the twice-vacuous stderr_only pin ===
+  stdout-only regressed driver vs OLD-shape stub: exit=0 ARV-TG-004-refused=False
+  stdout-only regressed driver vs NEW-shape stub: exit=1 ARV-TG-004-refused=True
+  P1 PROVEN: old stub passes a stdout-only-blind driver; the fixed stub discriminates
+
+=== P2 (R-04(7)): KB-CLM-006 borrows the live open row — latent ===
+  probe returned without the guard firing -> vacuous
+
+=== P3 (R-04(8)): KB-SCOPE-006 cannot detect its own regression ===
+  current fixed scope.py: guard fired=True (but for the OUTSIDE-declaration reason)
+  sibling-prefix DEFECT restored (raw startswith): guard STILL fired=True
+  P3 PROVEN: the probe fires for the trivial reason and CANNOT detect the sibling-prefix regression — vacuous (its own README.md declaration is the repair)
+
+RED OBSERVATIONS COMPLETE (all on scratch copies; repo tree untouched)

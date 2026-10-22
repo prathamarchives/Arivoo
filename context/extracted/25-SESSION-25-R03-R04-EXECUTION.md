@@ -433,6 +433,27 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   DERIVED from the verifier's own completion line; test_12's hard 30 now DERIVED from the floor's MUTATIONS list
   (the wall ARV-RED-002 fired on the edit — the amendment recorded); the workflow comment's 30 → 31.
 
+### 4-R06. Results — the TRUSTED-PATH TOCTOU ISOLATION LANDED (CLAIM-031, session 25 part 4; the R-06 card)
+
+- **The finding (the #64 second review round, CodeRabbit Major, CWE-367):** S4b ran candidate-controlled Python in
+  the same writable workspace as the trusted S4c — the anchored driver and the base machinery were tamperable
+  after the anchor's sha256 check; S4c's guard checked only step outcomes. The #64 in-PR hardening re-verified the
+  driver digest at entry; the base-machinery channel remained open and named.
+- **RED-first (red-01.txt, the honest escalation):** the first draft's tamper neutralized check_scope ONLY — and the
+  gate's own defense-in-depth CAUGHT it (the independent claims module refused the breach; the KB-05 broken-guard
+  machinery detected the neutralized probe) — recorded as the resilience it proved. The full forgery targets the
+  judgment entry point itself: a tamper-payload suite run by S1b REPLACES base/harness/gate.py — and S4c at the
+  predecessor goes GREEN over a scope-breach candidate (the exit-0 forgery, observed live). The R-06 form (the
+  fresh re-checkout of the base between S1b and S4c) reverts the tamper and the GENUINE refusal (ARV-SCOPE-002)
+  fires.
+- **GREEN:** the NEW `harness-trusted` job — checkout head, checkout base, anchor, psql, S1b (candidate suites run
+  here), **R-06 HEAD re-fresh, BASE re-fresh, re-anchor** (trusted actions; every byte S1b's suites may have
+  written is reverted; nothing candidate-executed runs in the re-anchor-to-S4c window), S4c. The harness job keeps
+  ONLY S1 + S4b (candidate-controlled evidence — its dead checkout-base/anchor steps removed). test_09's guards
+  updated to the refresh ids; test_11 pins the isolated job's shape (the ordering, the empty window, the harness
+  job carrying neither trusted phase). The `harness-trusted` required context binds at protection AFTER its first
+  green run (the W-01 stage-2 pattern).
+
 ## 5. Files changed
 
 - `tools/isolation_check.py` — v2.3 note + O_NONBLOCK in `_open_regular_nofollow` (the checker's own bounded-open helper).
@@ -469,6 +490,18 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
 - `harness/runs/claim-030-ledger-one-liner-consistency/` — red-01.txt (the ARV-FLOOR-001 RED), red-02.txt (the
   overlap scratch proof), scope.txt, notverified.txt, run records + proofsheet.md (assembled, never hand-edited).
 - `CLAIMS.md` — CLAIM-030's open row + CLAIM-029's rule-4 closed row (the open row retired in the same PR).
+
+### 5-R06. Files changed (the R-06 slice)
+
+- `.github/workflows/verify.yml` — the harness-trusted job (S1b + the re-fresh/re-anchor + S4c); the harness job
+  reduced to S1 + S4b (the dead trusted steps removed).
+- `harness/tests/test_trusted_gate.py` — test_09's guard pins (the refresh ids) + test_11 (the R-06 job-shape pin).
+- `harness/runs/claim-031-r06-trusted-path-toctou-isolation/` — red-01.txt (the full forgery + the genuine
+  refusal), scope.txt, notverified.txt, run records + proofsheet.md.
+- `harness/red-records.json` — the R-06 RED record (the test_09 guard updates + test_11, the amendment noted).
+- `CLAIMS.md` — CLAIM-031's open row + CLAIM-030's rule-4 closed row. `PLAN.md` — the R-06 card LANDED note.
+- `STATE.md` — the R-06 state re-derivation. `context/WORKLOG.md` — Task 39. This session record — §§4-R06/5-R06/
+  8-R06 + §11 (the #66 round's extensions below).
 
 ## 6. Commands and external actions (ACTUAL — never reconstructed)
 
@@ -547,6 +580,24 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   CodeRabbit Minor): the label is rc-conditional and the failure path prints the verifier's own tail. (4) STATE's
   phase entry carried session-record detail (CodeRabbit Minor — the D-027 navigation contract): reduced to status +
   counts + the record pointer.
+- (§R06, in-slice:) **the first RED draft was too weak** (the scope-only tamper caught by the gate's own
+  defense-in-depth — the independent claims check + the KB-05 broken-guard detection): the honest escalation targets
+  the judgment entry point (base/harness/gate.py itself) and the forgery lands — recorded as the resilience finding
+  it was, never hidden.
+- **THE #66 REVIEW ROUND — 5 findings, ALL REAL, all fixed in-PR (the third loop in one PR family):** (1) Greptile
+  P1 (Security) — the one-job-with-refresh form reverted FILES but never the runner's accumulated PATH state: a
+  suite could plant a fake `python3` on $RUNNER_TEMP and append it to $GITHUB_PATH, capturing S4c's own launch; the
+  honest fix is the TWO-RUNNER SPLIT (harness-suites runs the candidate suites on its own runner; harness-trusted
+  runs S4c on a runner where candidate code NEVER executes — the refresh steps became moot and were removed);
+  (2) Greptile P2 — test_11's window check filtered by NAME (a same-prefixed step could slip through) and pinned
+  names not semantics: the pin now requires the anchor→S4c window EMPTY with no exemptions and asserts Job B carries
+  NO suite-executing step AT ALL; the residual (a run: step's internal commands are not fully name-pinnable) stated
+  in notverified; (3) CodeRabbit (CWE-522) — the checkouts persisted the token on runners candidate code can touch:
+  `persist-credentials: false` on all five candidate-exposed checkouts (the harness job's head included — the same
+  class on a pre-existing job, fixed in the same workflow edit); (4) CodeRabbit Minor — §5-R06's changed-file list
+  completed (red-records, STATE, WORKLOG, the record itself); (5) CodeRabbit Minor — PLAN's "bound at protection"
+  was past-tense for a not-yet-done binding: reworded to the post-merge conditional. The S1b fetch removed from the
+  suites job (dead there — only S4c's gate needs the origin/main ref).
 - **THE #64 REVIEW ROUND — Greptile 2 + CodeRabbit 7, ALL REAL, all fixed in-PR before merge (the loop working twice in
   one PR):** (1) CodeRabbit MAJOR — the bare `!cancelled()` opened the candidate-substitution hole: a failed base
   checkout or anchor leaves `tools/trusted_gate_anchored.py` absent, and S4c would execute whatever candidate-committed
@@ -600,9 +651,8 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
 
 ## 11. Next action
 
-The ledger one-liner consistency slice (CLAIM-030) LANDED — VER-213 + MUT-31 live. Next: **R-06 the trusted-path
-TOCTOU isolation** (the #64 second review round's finding — the isolated fresh-checkout trusted job; before H-02,
-which judges through this path), then **H-01c-authority**, then
+R-06 (CLAIM-031) LANDED — the harness-trusted job (the TOCTOU channel closed; the required
+context bound after its first green run). Next: **H-01c-authority**, then
 **H-01c-evidence/privacy** (F-007), then **H-02** (the SEV gate — activation legal, the H-01b floor live), then **P3-00**
 (the RTM freeze). The R-04 slice (CLAIM-029) landed all 9 card items — the 13-finding READY ledger is now EMPTY.
 

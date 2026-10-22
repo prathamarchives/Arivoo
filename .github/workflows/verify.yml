@@ -77,12 +77,71 @@ jobs:
           # origin/main needs a decidable merge-base; a depth-1 checkout
           # cannot prove the base/merge relationship.
           fetch-depth: 0
+          # the #66 review round (CWE-522): S1 + S4b below execute candidate
+          # code (health.py, dispatch.py) that could read the persisted token
+          persist-credentials: false
+      # R-06: the base checkout + anchor moved to the harness-trusted job —
+      # this job's remaining steps (S1 health, S4b) are candidate-controlled
+      # EVIDENCE and consume neither.
+      - name: "Ensure the psql client is present (deterministic provisioning — never asserted from docs, LAW-02)"
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+      - name: "S1 — the real-stack rig health (Phase 2 Layer 2.1, D-036)"
+        run: make harness-health
+      - name: "S4b — the candidate's own gate (D-036; H-01a/INT-125/D-039: FAIL-CLOSED DISPATCH). Since H-01b-CI this step is EVIDENCE, never the only authority: the trusted S1b/S4c path (the harness-trusted job, R-06) carries the required-check decision even if this candidate-controlled gate is gutted (F-006)."
+        env:
+          ARV_EVENT_NAME: ${{ github.event_name }}
+          ARV_PR_HEAD: ${{ github.head_ref }}
+        run: python3 harness/dispatch.py
+
+  # R-06 (CLAIM-031, the #64 second review round's CodeRabbit TOCTOU finding —
+  # CWE-367; then the #66 review round's Greptile P1 escalation): the TRUSTED
+  # phases split across TWO RUNNERS so that NO candidate-executed code ever
+  # shares a runner with the trusted judgment. The one-job-with-refresh form
+  # (the first implementation) reverted every FILE S1b's suites could write —
+  # but a suite can also plant a fake `python3` on $RUNNER_TEMP and append it
+  # to $GITHUB_PATH: the refreshes restore repository files, NEVER the
+  # runner's accumulated PATH state, so S4c's own launch could be captured.
+  # The two-runner split kills the whole class: harness-suites runs the
+  # candidate suites on its own runner (nothing trusted consumes anything
+  # after them there); harness-trusted runs the gate re-run on a runner where
+  # candidate code NEVER executes (the gate reads candidate data only).
+  harness-suites:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: arv_harness
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+    steps:
+      - name: Checkout head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # the #66 review round (CodeRabbit, CWE-522): S1b below executes
+          # candidate-controlled suites that could read the persisted token —
+          # the repo is public, the later fetch needs no auth, so credentials
+          # are never persisted on a runner candidate code can touch
+          persist-credentials: false
       - name: Checkout base (the trusted machinery — H-01b-CI, INT-127/D-041)
-        id: checkout_base
         uses: actions/checkout@v4
         with:
           ref: main
           path: base
+          persist-credentials: false
       - name: "Anchor the trusted gate driver from base (fail-closed; sha256-verified — never a candidate substitute)"
         id: anchor_trusted_gate
         run: |
@@ -95,54 +154,61 @@ jobs:
           echo "  trusted_gate.py: ${a:0:16}... verified identical to base"
       - name: "Ensure the psql client is present (deterministic provisioning — never asserted from docs, LAW-02)"
         run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
-      - name: "S1 — the real-stack rig health (Phase 2 Layer 2.1, D-036)"
-        run: make harness-health
-      - name: "S1b — TRUSTED required suites (H-01b-CI, F-004): the BASE's gate.TESTS selection runs the candidate's suite files directly — candidate Make recipes are never the evidence (a gutted Makefile cannot fabricate 'suites ran')"
+      - name: "S1b — TRUSTED required suites (H-01b-CI, F-004): the BASE's gate.TESTS selection runs the candidate's suite files directly — candidate Make recipes are never the evidence (a gutted Makefile cannot fabricate 'suites ran'). This job's runner is EXPOSED to candidate code BY DESIGN (the suites are the candidate's) — nothing trusted is consumed on this runner after them; the trusted judgment runs on the separate harness-trusted runner."
         env:
-          # untrusted event metadata travels through the ENVIRONMENT only — the
-          # driver validates it as identifiers before anything executes (A02)
           ARV_EVENT_NAME: ${{ github.event_name }}
           ARV_PR_HEAD: ${{ github.head_ref }}
         run: |
-          git fetch origin main
           python3 -I tools/trusted_gate_anchored.py --repo "$PWD" --base "$PWD/base" --phase suites
-      - name: "S4b — the candidate's own gate (D-036; H-01a/INT-125/D-039: FAIL-CLOSED DISPATCH). Since H-01b-CI this step is EVIDENCE, never the only authority: the trusted S1b/S4c path carries the required-check decision even if this candidate-controlled gate is gutted (F-006)."
-        env:
-          ARV_EVENT_NAME: ${{ github.event_name }}
-          ARV_PR_HEAD: ${{ github.head_ref }}
-        run: python3 harness/dispatch.py
-      - name: "S4c — TRUSTED gate re-run (H-01b-CI, F-006 backstop): the BASE's gate machinery, re-rooted over this candidate tree, re-runs the PR-mode obligations (scope/size/claims/red/lint/deps/known-bads/proofsheet) over the candidate diff — the candidate's harness package and its known-bad registry never execute in this step"
-        # R-04(2) + the #64 review round (CodeRabbit Major): !cancelled() — a
-        # plain step is SKIPPED by GitHub Actions after any earlier failure, so
-        # a red S4b (the candidate's own gate, EVIDENCE since H-01b-CI)
-        # silently skipped the trusted re-run and the trusted evidence never
-        # flowed (Greptile's finding). S4c must run over a red S4b: the trusted
-        # path carries the required-check decision exactly when the
-        # candidate-controlled gate is red or gutted. THE STEP-OUTCOME GUARDS
-        # (the #64 review round's candidate-substitution hole): if the base
-        # checkout or the anchor step failed or was skipped, the anchored
-        # driver does not exist — a bare !cancelled() would then execute
-        # whatever candidate-committed file sits at the workspace-relative
-        # anchored path (candidate-controlled code in the judge, the turn-14
-        # P2 class). S4c runs only when the anchor (with its sha256
-        # verification) actually succeeded.
+
+  harness-trusted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout head
+        uses: actions/checkout@v4
+        with:
+          # H-01a/A10: the gate's triple-dot diff needs a decidable merge-base.
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout base (the trusted machinery — H-01b-CI, INT-127/D-041)
+        id: checkout_base
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: base
+          persist-credentials: false
+      - name: "Anchor the trusted gate driver from base (fail-closed; sha256-verified — never a candidate substitute)"
+        id: anchor_trusted_gate
+        run: |
+          set -e
+          test -f base/tools/trusted_gate.py || { echo "FAIL: base/tools/trusted_gate.py missing — refusing any candidate-substituted driver (the turn-14 P2: never fall back silently)"; exit 1; }
+          cp base/tools/trusted_gate.py tools/trusted_gate_anchored.py
+          a=$(sha256sum base/tools/trusted_gate.py | cut -d' ' -f1)
+          b=$(sha256sum tools/trusted_gate_anchored.py | cut -d' ' -f1)
+          [ "$a" = "$b" ] || { echo "FAIL: the anchored trusted driver differs from base"; exit 1; }
+          echo "  trusted_gate.py: ${a:0:16}... verified identical to base"
+      - name: "S4c — TRUSTED gate re-run (H-01b-CI, F-006 backstop; R-06: its own runner — candidate code NEVER executes here, so no PATH state, no filesystem writes, no process from the candidate can reach this judgment): the BASE's gate machinery, re-rooted over this candidate tree, re-runs the PR-mode obligations (scope/size/claims/red/lint/deps/known-bads/proofsheet) over the candidate diff — the candidate's harness package and its known-bad registry never execute in this step"
+        # R-04(2) + the #64 review round: !cancelled() — S4c must run over a red
+        # S4b (the candidate's own gate is EVIDENCE; the trusted path carries
+        # the required-check decision exactly when the candidate-controlled
+        # gate is red or gutted) — and the step-outcome guards: S4c runs only
+        # when its own job's base checkout and anchor actually succeeded (a
+        # skipped anchor leaves no anchored driver and a bare !cancelled()
+        # would execute a candidate-committed substitute — the turn-14 P2
+        # class).
         if: ${{ !cancelled() && steps.checkout_base.outcome == 'success' && steps.anchor_trusted_gate.outcome == 'success' }}
         env:
           ARV_EVENT_NAME: ${{ github.event_name }}
           ARV_PR_HEAD: ${{ github.head_ref }}
         run: |
           set -e
-          # the #64 second review round (CodeRabbit TOCTOU): S4b runs candidate-
-          # controlled Python in this same writable workspace, so the anchored
-          # copy is RE-VERIFIED against base at S4c ENTRY — the direct driver-
-          # swap-after-anchor channel refuses here. The FULL same-job same-user
-          # tampering class (base/harness machinery writes; any candidate-
-          # executed code before this step) is the named residual — the
-          # structural fix (an isolated fresh-checkout trusted job) is the
-          # R-06 card, never claimed closed here.
+          git fetch origin main
+          # the #64 hardening, kept as defense-in-depth (nothing candidate-
+          # executed runs on this runner, but the re-verification costs nothing)
           a=$(sha256sum base/tools/trusted_gate.py | cut -d' ' -f1)
           b=$(sha256sum tools/trusted_gate_anchored.py | cut -d' ' -f1)
-          [ "$a" = "$b" ] || { echo "FAIL: the anchored driver no longer matches base — post-anchor tampering refused (R-06's named residual: the base machinery remains same-job writable; the isolated-job fix is that card's work)"; exit 1; }
+          [ "$a" = "$b" ] || { echo "FAIL: the anchored driver no longer matches base — post-anchor tampering refused"; exit 1; }
           python3 -I tools/trusted_gate_anchored.py --repo "$PWD" --base "$PWD/base" --phase gate --diff-ref origin/main
 
   canonical-layer:

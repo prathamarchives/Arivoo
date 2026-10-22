@@ -355,12 +355,13 @@ class TrustedGateTests(unittest.TestCase):
                       "the trusted gate re-run, and the trusted evidence would never flow "
                       "(R-04(2))")
         self.assertIn("steps.checkout_base.outcome == 'success'", expression,
-                      "the S4c if-expression must guard on the base checkout succeeding — a "
-                      "skipped anchor leaves no anchored driver and a bare !cancelled() "
-                      "executes a candidate-committed substitute (#64's Major)")
+                      "the S4c if-expression must guard on its OWN job's base checkout "
+                      "succeeding — a skipped anchor leaves no anchored driver and a bare "
+                      "!cancelled() would execute a candidate-committed substitute (#64's "
+                      "Major)")
         self.assertIn("steps.anchor_trusted_gate.outcome == 'success'", expression,
-                      "the S4c if-expression must guard on the anchor step succeeding — the "
-                      "sha256-verified anchoring is what makes the driver trusted")
+                      "the S4c if-expression must guard on its OWN job's anchor succeeding "
+                      "— the sha256-verified anchoring is what makes the driver trusted")
         self.assertNotIn("success()", expression,
                          "the success() function would skip S4c on a red S4b — the exact defect")
         # the #64 SECOND review round (CodeRabbit TOCTOU): S4b runs candidate-
@@ -396,6 +397,107 @@ class TrustedGateTests(unittest.TestCase):
                       "review round's head-window defect)")
         self.assertIn("the LAST 1500 kept", r.stdout + r.stderr,
                       "the truncation marker must state which window was kept")
+
+    def test_11_r06_isolated_job_shape(self):
+        """R-06 (the #64 TOCTOU + the #66 review round's Greptile P1 escalation):
+        the trusted phases are SPLIT ACROSS TWO RUNNERS — harness-suites runs
+        the candidate suites on its own runner (nothing trusted is consumed
+        after them there); harness-trusted runs S4c on a runner where
+        candidate code NEVER executes (the #66 escalation: a suite can plant a
+        fake interpreter on $GITHUB_PATH and file refreshes revert FILES, never
+        the runner's accumulated PATH state — only a separate runner kills the
+        class). The pin parses the workflow artifact (the structure IS the
+        isolation): Job B carries NO suite-executing step AT ALL, the
+        anchor→S4c window is EMPTY with no name-based exemptions (the #66
+        round's G2: a name-filtered window let a same-prefixed step through),
+        and the harness job carries neither trusted phase."""
+        import re
+        wf = (REPO / ".github" / "workflows" / "verify.yml").read_text(encoding="utf-8")
+
+        def job_block(name):
+            m = re.search(rf"^  {name}:\n(?P<job>(?:[ ]{{4,}}[^\n]*\n)*)", wf, re.M)
+            self.assertIsNotNone(m, f"the {name} job must exist (R-06's split trusted path)")
+            job = m.group("job")
+            steps = re.findall(r"^[ ]{4,}- name: (?P<name>[^\n]+)", job, re.M)
+            return job, [s.strip().strip('"') for s in steps]
+
+        # Job B (the judgment runner): S4c present, NO suite step AT ALL, the
+        # anchor→S4c window EMPTY (no name-based exemptions — the #66 round's G2;
+        # and EVERY step entry counts, including UNNAMED `- run:` steps — the
+        # #66 second pass's finding: a name-only parse lets an unnamed step
+        # slip through the adjacency assertion)
+        job_b, names_b = job_block("harness-trusted")
+        i_anchor = next((i for i, n in enumerate(names_b) if n.startswith("Anchor the trusted gate")), None)
+        i_s4c = next((i for i, n in enumerate(names_b) if n.startswith("S4c")), None)
+        self.assertIsNotNone(i_s4c, "harness-trusted must run S4c (the trusted gate re-run)")
+        self.assertIsNotNone(i_anchor, "harness-trusted must anchor the driver from base")
+        self.assertFalse(any(n.startswith("S1b") for n in names_b),
+                         "harness-trusted must NEVER run S1b — a suite step on the judgment "
+                         "runner reopens the whole candidate-code class (the #66 P1)")
+        self.assertFalse(any("required suites" in n for n in names_b),
+                         "no suite-executing step may exist on the judgment runner")
+        # EVERY step entry (named or unnamed) between anchor and S4c — an
+        # unnamed `- run:` between them would be a bypassable window step
+        entries_b = re.findall(r"^[ ]{6}- (?:(?:name|uses|run|env|if|id):[ ]*)?", job_b, re.M)
+        # reconstruct the ordered list of step STARTS within Job B
+        step_lines = [ln for ln in job_b.splitlines() if re.match(r"^[ ]{6}- ", ln)]
+        self.assertEqual(step_lines[i_anchor + 1:i_s4c], [],
+                         f"the anchor→S4c window must be EMPTY counting EVERY step entry "
+                         f"(named or not) — got {step_lines[i_anchor + 1:i_s4c]} "
+                         "(the structure IS the isolation)")
+        # the digest re-verification stays (defense-in-depth)
+        self.assertIn("sha256sum", job_b, "the S4c run block keeps the #64 digest re-verification")
+
+        # Job A (the suites runner): S1b present, the anchor precedes it
+        job_a, names_a = job_block("harness-suites")
+        i_a_anchor = next((i for i, n in enumerate(names_a) if n.startswith("Anchor the trusted gate")), None)
+        i_a_s1b = next((i for i, n in enumerate(names_a) if n.startswith("S1b")), None)
+        self.assertIsNotNone(i_a_s1b, "harness-suites must run S1b (the trusted suites selection)")
+        self.assertIsNotNone(i_a_anchor, "harness-suites must anchor the driver before S1b")
+        self.assertLess(i_a_anchor, i_a_s1b, "the anchor precedes S1b (the driver launch reads it)")
+
+        # the harness job (S1 + S4b, candidate evidence) carries NEITHER trusted phase
+        mh = re.search(r"^  harness:\n(?P<job>(?:[ ]{4,}[^\n]*\n)*)", wf, re.M)
+        self.assertIsNotNone(mh, "the harness job must exist (S1 + S4b, the candidate-controlled evidence)")
+        self.assertNotIn("- name: \"S4c", mh.group("job"),
+                         "S4c must NOT run in the harness job — it lives on the harness-trusted runner")
+        self.assertNotIn("- name: \"S1b", mh.group("job"),
+                         "S1b must NOT run in the harness job — it lives on the harness-suites runner")
+
+        # the CWE-522 hardening: every checkout reachable by candidate code
+        # persists no credentials — asserted PER CHECKOUT STEP, not by a
+        # workflow-wide count (the #66 second pass's finding: a global count
+        # passes if the setting is removed from one checkout and added to an
+        # unrelated one)
+        def checkout_blocks(job_text):
+            """Every `- uses: actions/checkout` step BLOCK (the step and its
+            indented body), in order — named or unnamed."""
+            out = []
+            cur = None
+            for ln in job_text.splitlines():
+                if re.match(r"^[ ]{6}- ", ln):
+                    if cur is not None:
+                        out.append(cur)
+                    cur = ln
+                elif cur is not None and (ln.startswith("        ") or not ln.strip()):
+                    cur += "\n" + ln
+                else:
+                    if cur is not None:
+                        out.append(cur)
+                    cur = None
+            if cur is not None:
+                out.append(cur)
+            return [b for b in out if "actions/checkout" in b]
+
+        for job_name, expected in (("harness", 1), ("harness-suites", 2), ("harness-trusted", 2)):
+            jtext, _ = job_block(job_name)
+            blocks = checkout_blocks(jtext)
+            self.assertEqual(len(blocks), expected,
+                             f"{job_name}: expected {expected} checkout step(s), found {len(blocks)}")
+            for b in blocks:
+                self.assertIn("persist-credentials: false", b,
+                              f"{job_name}: EVERY checkout reachable by candidate code must set "
+                              "persist-credentials: false (the #66 round, per-step asserted)")
 
 
 if __name__ == "__main__":

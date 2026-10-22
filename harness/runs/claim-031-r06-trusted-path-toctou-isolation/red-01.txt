@@ -1,0 +1,12 @@
+scratch: /tmp/r06-red-xir15fyx
+anchor: sha256 verified
+
+S1b: exit=0 (the tamper payload executed inside the suites phase)
+the base machinery after S1b: TAMPERED (the payload wrote through)
+
+S4c at the PREDECESSOR (tampered base): exit=0 -> GREEN OVER A SCOPE BREACH — THE FORGERY
+
+--- the R-06 form: the base re-checked-out fresh (the tamper reverted by a trusted action) ---
+S4c after the refresh: exit=1 -> the GENUINE refusal (ARV-SCOPE-002) — the breach caught
+
+RED OBSERVATION COMPLETE

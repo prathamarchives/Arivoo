@@ -1,20 +1,20 @@
 # PROOF SHEET — slice claim-029-r04-gate-scope-knownbad-workflow (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): d7ea94e144bfc36bf4ac61fe318608afac8879fd
-- generated (last record's timestamp): 2026-10-22T16:35:34.099795+00:00
+- commit (last run record's): 688917f0c3af7263bc09992180f23648b0827083
+- generated (last record's timestamp): 2026-10-22T16:52:57.895599+00:00
 - run records: 10
 
 ## Run records (command, exit, output digest)
-- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-22T16:34:10.745436+00:00
-- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-22T16:34:11.096906+00:00
-- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-22T16:34:12.930384+00:00
-- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 2e151a121d457426 · 2026-10-22T16:34:28.902870+00:00
-- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 a8634cd9c776a3a5 · 2026-10-22T16:34:41.709143+00:00
-- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 9f989735fbbbfa55 · 2026-10-22T16:34:43.289907+00:00
-- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 f43414a5e6384c4e · 2026-10-22T16:34:43.610027+00:00
-- `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 912813bf36889c80 · 2026-10-22T16:34:50.099408+00:00
-- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 aabc93119fb178b6 · 2026-10-22T16:34:50.254422+00:00
-- `make verify` -> exit 0 · output sha256 b9704e66ffe80ecd · 2026-10-22T16:35:34.099795+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-22T16:51:38.945562+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-22T16:51:39.308888+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-22T16:51:41.192550+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 bdcf4e9c89e246a3 · 2026-10-22T16:51:56.559913+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 19136a855547dd33 · 2026-10-22T16:52:07.716609+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 e268826c5dc33895 · 2026-10-22T16:52:09.159915+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 78585cdc7fb559c8 · 2026-10-22T16:52:09.454512+00:00
+- `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 912813bf36889c80 · 2026-10-22T16:52:15.826784+00:00
+- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 aabc93119fb178b6 · 2026-10-22T16:52:15.976172+00:00
+- `make verify` -> exit 0 · output sha256 fa4a1390f6498a6b · 2026-10-22T16:52:57.895599+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - not verified (LAW-04 — required, never empty-by-omission; the R-04 slice's honest limits):
@@ -37,8 +37,13 @@
 - - - S4c's `!cancelled()` semantics are pinned by parsing the workflow artifact (test_09) and by the GitHub Actions
 - documented step-scheduling behavior; the LIVE end-to-end proof (a genuinely red S4b on a real PR with S4c still running)
 - is observed only if such a PR occurs — no synthetic PR was fabricated to force it
+- - - the #64 second review round's TOCTOU residual (CodeRabbit Major, CWE-367, PRE-EXISTING at the merge base): the
+- harness job runs candidate-controlled code (S1's health.py, S1b's suite subprocesses, S4b) in the same writable
+- workspace BEFORE the trusted S4c step, so the base/harness machinery remains tamperable after the anchor check;
+- R-04's in-PR hardening re-verifies only the ANCHORED DRIVER's digest at S4c entry (the direct swap channel refuses) —
+- the structural isolation (the R-06 card: an isolated fresh-checkout trusted job) is NOT built and NOT claimed
 - - - no fresh technical verifier and no SEV — the pre-H-02 discipline (H-02 is the next-but-one card: the ledger one-liner
 - slice, then H-01c-authority/evidence, then H-02's activation)
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 06cd41b2d741ad433664e7e6749eb0f9a62c451b426972ba288a6a13bf786ce1
+- sheet sha256 (of the content above, excluding this line): dbd80755af5203c0be64bbc119398270faafe28f3a7df2760cb76da88fd4b5e2

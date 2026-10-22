@@ -498,7 +498,10 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
 - `harness/tests/test_trusted_gate.py` — test_09's guard pins (the refresh ids) + test_11 (the R-06 job-shape pin).
 - `harness/runs/claim-031-r06-trusted-path-toctou-isolation/` — red-01.txt (the full forgery + the genuine
   refusal), scope.txt, notverified.txt, run records + proofsheet.md.
+- `harness/red-records.json` — the R-06 RED record (the test_09 guard updates + test_11, the amendment noted).
 - `CLAIMS.md` — CLAIM-031's open row + CLAIM-030's rule-4 closed row. `PLAN.md` — the R-06 card LANDED note.
+- `STATE.md` — the R-06 state re-derivation. `context/WORKLOG.md` — Task 39. This session record — §§4-R06/5-R06/
+  8-R06 + §11 (the #66 round's extensions below).
 
 ## 6. Commands and external actions (ACTUAL — never reconstructed)
 
@@ -581,6 +584,20 @@ the identical FIFO-swap hang class (item 1's class, both helpers repaired + pinn
   defense-in-depth — the independent claims check + the KB-05 broken-guard detection): the honest escalation targets
   the judgment entry point (base/harness/gate.py itself) and the forgery lands — recorded as the resilience finding
   it was, never hidden.
+- **THE #66 REVIEW ROUND — 5 findings, ALL REAL, all fixed in-PR (the third loop in one PR family):** (1) Greptile
+  P1 (Security) — the one-job-with-refresh form reverted FILES but never the runner's accumulated PATH state: a
+  suite could plant a fake `python3` on $RUNNER_TEMP and append it to $GITHUB_PATH, capturing S4c's own launch; the
+  honest fix is the TWO-RUNNER SPLIT (harness-suites runs the candidate suites on its own runner; harness-trusted
+  runs S4c on a runner where candidate code NEVER executes — the refresh steps became moot and were removed);
+  (2) Greptile P2 — test_11's window check filtered by NAME (a same-prefixed step could slip through) and pinned
+  names not semantics: the pin now requires the anchor→S4c window EMPTY with no exemptions and asserts Job B carries
+  NO suite-executing step AT ALL; the residual (a run: step's internal commands are not fully name-pinnable) stated
+  in notverified; (3) CodeRabbit (CWE-522) — the checkouts persisted the token on runners candidate code can touch:
+  `persist-credentials: false` on all five candidate-exposed checkouts (the harness job's head included — the same
+  class on a pre-existing job, fixed in the same workflow edit); (4) CodeRabbit Minor — §5-R06's changed-file list
+  completed (red-records, STATE, WORKLOG, the record itself); (5) CodeRabbit Minor — PLAN's "bound at protection"
+  was past-tense for a not-yet-done binding: reworded to the post-merge conditional. The S1b fetch removed from the
+  suites job (dead there — only S4c's gate needs the origin/main ref).
 - **THE #64 REVIEW ROUND — Greptile 2 + CodeRabbit 7, ALL REAL, all fixed in-PR before merge (the loop working twice in
   one PR):** (1) CodeRabbit MAJOR — the bare `!cancelled()` opened the candidate-substitution hole: a failed base
   checkout or anchor leaves `tools/trusted_gate_anchored.py` absent, and S4c would execute whatever candidate-committed

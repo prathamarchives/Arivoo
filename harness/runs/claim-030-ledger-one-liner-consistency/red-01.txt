@@ -1,0 +1,17 @@
+CLAIM-030 red-01 — the GENUINE predecessor-judgment RED (the #65 review round's repair, honest:
+the first capture was INVALID — the output was redirected INTO the floor's own corpus tree
+(harness/runs/... was corpus), so the run's own writing changed the source digest and the floor refused with
+ARV-FLOOR-002 before judging; Greptile P1 + CodeRabbit Major caught it — the refused run's lesson preserved
+in record 25 §8-OL. The re-produced proof below: the candidate = the PREDECESSOR verifier (git archive
+8b89b311d, the 51-check tree), the driver = the current floor with MUT-31 (the three-copies triplication
+form, the #65 round's F2 fix), the output captured OUTSIDE the corpus tree. The floor judged: the
+predecessor passed the triplicated row vacuously — the not-caught refusal.)
+
+floor temp root: /tmp/arivoo-floor-ryplwiih
+known-bad self-test — 1 mutations, each must FAIL its named check (child-process floor)
+
+MUT-31 FAIL  triplicate the ledger's LAST one-liner row byte-identically — the INT-126 intake class (b572d3f): the numbering section's summary row appended twice at once, invisible to VER-201 (the header regex matches DETAILED blocks only) and deduped silently by VER-212's named set (CLAIM-030, the H-01c-claims card item (d)) → not caught (without the expected FAIL line and exit 0) — a vacuous or evasive pass is refused (ARV-FLOOR-001)
+floor manifest: /tmp/arv-floor-manifest-8f4ee145.json
+
+SELF-TEST RED — verdict RED: 1 case failure(s) + 0 manifest failure(s); codes: ['FLOOR-001']
+residual boundary: child processes run on the same host with the same OS user as this runner — NOT OS-level sandboxing; a hostile child could in principle kill the judge (the run turns RED, never green); the workflow-definition trust boundary is H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in this interpreter; every case ran in a fresh disposable fixture; integrity was re-verified before every case AND after the last case; the manifest records what actually happened. FLOOR-REVIEW-1 sharpening (session 23): the manifest artifact is a RECORD, not a tamper-proof store — a surviving same-user daemon can overwrite it after the run (CI consumes exit codes). R-02 sharpening (session 24): every case runs in its own process group and is killed with it on every outcome + RLIMIT_NPROC bounds the child — a daemon that RE-SESSIONS itself (setsid/double-fork outside the killed group) remains a stated residual, as does any environmental difference a candidate can probe beyond the seeded .git channel — stated and never claimed closed

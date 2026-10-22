@@ -566,3 +566,15 @@ Stage Summary:
 - Unresolved: the ledger one-liner slice, H-01c-authority/evidence (F-007), H-02 (the SEV gate), P3-00 — in that order
 - Next: the ledger one-liner consistency slice (the INT-126 TRIPPLICATION's receiving card)
 - Session record: context/extracted/25-SESSION-25-R03-R04-EXECUTION.md (in progress — the R-03 §§1-7 + the R-04 extensions)
+
+## Task 38 (CLAIM-030, session 25) — the ledger one-liner consistency slice
+- Task: the H-01c-claims card item (d) — the INT-126 TRIPPLICATION's receiving work (PLAN line 121): the one-liner section gains its uniqueness/consistency check with its own known-bad
+- The gap precisely: VER-201's INT_HEADER matches DETAILED blocks only; VER-212's named SET deduped the very rows it declared — the b572d3f triplication survived every check until the session-22 preflight eyeballed it
+- RED-first: MUT-31 (triplicate the LAST one-liner row byte-identically) added to the floor FIRST; run against the predecessor verifier: ARV-FLOOR-001 not-caught (red-01.txt — the floor's own named report of the vacuous pass)
+- GREEN: VER-213 in C2 — the one-liner coverage COUNTED (multiplicity preserved): duplicates AND overlaps refuse; MUT-31 caught (31/31); the overlap form proven on a scratch copy (red-02.txt); the verifier 52/0
+- The derived-count repairs (the stale-hard-code class, three live homes): the Makefile echo DERIVED from the completion line; test_12's hard 30 caught itself stale (31 != 30) the moment the floor grew — now DERIVED from MUTATIONS (ARV-RED-002 fired on the edit, the amendment recorded); the workflow comment 30→31
+- Reconciliation: CLAIM-029's rule-4 closed row (PR #64 = 8b89b311d) + its open-row retirement; the nested-paren INTs cell caught by the registry's own reservation parser (ARV-CLM-003), rephrased
+- Evidence: record 25 §§4-OL/5-OL/8-OL; harness/runs/claim-030-ledger-one-liner-consistency (red-01/red-02/scope/notverified/proofsheet)
+- Unresolved: R-06 (the TOCTOU isolation), H-01c-authority/evidence (F-007), H-02, P3-00 — in that order
+- Next: R-06 as CLAIM-031 (the isolated fresh-checkout trusted job)
+- Session record: context/extracted/25-SESSION-25-R03-R04-EXECUTION.md (in progress)

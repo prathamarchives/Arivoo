@@ -52,4 +52,10 @@ known-bad:
 
 verify: fast known-bad
 	@python3 harness/gate.py --no-diff --skip-suites
-	@python3 tools/verify_canonical_layer.py > /dev/null && echo "canonical layer: 51/0 (verifier green)"
+	@out=$$(python3 tools/verify_canonical_layer.py); rc=$$?; \
+	if [ $$rc -eq 0 ]; then \
+		echo "canonical layer: $$(echo "$$out" | grep -oE '[0-9]+ checks, [0-9]+ failures') (verifier green — the count DERIVED from the verifier's own completion line, never a stale hard-code)"; \
+	else \
+		echo "canonical layer: RED — the verifier's own refusal (the tail of its output follows; the exit code propagates):"; \
+		echo "$$out" | tail -8; \
+	fi; exit $$rc

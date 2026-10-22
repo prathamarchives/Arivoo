@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """verify_selftest.py — the H-01b trusted candidate-tool execution floor (A03).
 
-The base-owned mutation suite: 30 known-bad corpus mutations, each of which the
+The base-owned mutation suite: 31 known-bad corpus mutations, each of which the
 CANDIDATE's verify_canonical_layer.py must catch with its named check. This
 module is anchored from main by CI (D-035: the coordinated-weakening floor) and
 judges whichever candidate tree it is pointed at.
@@ -325,6 +325,12 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
         lambda r: _edit(r, "STATE.md", "- **Exact next action:**", "- ~~Exact next action:~~"),
         "VER-701",
     ),
+    (
+        "MUT-31",
+        "triplicate the ledger's LAST one-liner row byte-identically — the INT-126 intake class (b572d3f): the numbering section's summary row appended twice at once, invisible to VER-201 (the header regex matches DETAILED blocks only) and deduped silently by VER-212's named set (CLAIM-030, the H-01c-claims card item (d))",
+        lambda r: _one_liner_dup(r),
+        "VER-213",
+    ),
 ]
 
 
@@ -336,6 +342,21 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
 def _edit(repo: Path, rel: str, old: str, new: str) -> None:
     p = repo / rel
     p.write_text(p.read_text(encoding="utf-8").replace(old, new), encoding="utf-8")
+
+def _one_liner_dup(repo: Path) -> None:
+    """The INT-126 intake class (b572d3f): the LAST numbering-section one-liner
+    row appended byte-identically right after itself — the exact form the
+    session-22 preflight found triplicated; VER-201 cannot see it (detailed
+    blocks only) and VER-212's named SET dedupes it silently."""
+    p = repo / "INTENT-LEDGER.md"
+    text = p.read_text(encoding="utf-8")
+    rows = re.findall(r"^- \*\*INT-\d{3}(?:\.\.INT-\d{3})?\*\* .*$", text, re.M)
+    assert rows, "the ledger must carry one-liner rows for this mutation"
+    last = rows[-1]
+    # THREE byte-identical rows total (the #65 review round: the first draft
+    # duplicated once; the named class is the b572d3f TRIPPLICATION — Greptile
+    # P2 + CodeRabbit's suggestion, independently confirmed)
+    p.write_text(text.replace(last, last + "\n" + last + "\n" + last, 1), encoding="utf-8")
 
 
 def _rm(repo: Path, rel: str) -> None:
@@ -547,7 +568,7 @@ def _select(only: str | None) -> list:
     sel = []
     for w in wanted:
         if not re.fullmatch(r"MUT-\d{2}", w) or w not in by_code:
-            raise SystemExit(f"refused: unknown case '{w}' — the expected set is fixed (MUT-01..MUT-30)")
+            raise SystemExit(f"refused: unknown case '{w}' — the expected set is fixed (MUT-01..MUT-31)")
         sel.append(by_code[w])
     return sel
 

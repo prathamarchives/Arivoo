@@ -9,7 +9,7 @@
 #     1. base verifier            -> the candidate's DOCUMENTS (51/0 semantics)
 #     2. base mutation suite      -> the CANDIDATE'S VERIFIER (the floor: a PR
 #        that weakens the verifier AND its own tests together still fails the
-#        base's 30 mutations in the REQUIRED job)
+#        base's 31 mutations in the REQUIRED job)
 #     3. base isolation checker   -> the candidate's TREE in CI mode
 #     4. base isolation matrix    -> the CANDIDATE'S CHECKER (the same floor)
 #   Job "head-tools" (ALSO REQUIRED — bound at branch protection after this

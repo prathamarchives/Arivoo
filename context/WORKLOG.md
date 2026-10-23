@@ -589,3 +589,11 @@ Stage Summary:
 - Unresolved: H-01c-authority, H-01c-evidence/privacy (F-007), H-02 (now activatable through the isolated path), P3-00 — in that order
 - Next: H-01c-authority as CLAIM-032
 - Session record: context/extracted/25-SESSION-25-R03-R04-EXECUTION.md (in progress)
+
+## Task 40 (CLAIM-032, session 26) — the R-06 pin repair + the backend-review intake
+- Task: the 2026-10-23 review's ordered Action 1 (D-043): repair test_11's two pin gaps (Finding A the mixed index space; Finding B the comment-matchable credential substring) with discriminating fixtures, plus the intake (INT-131/132) and the turn-28 credential resume (INT-133).
+- Outcome: the pin repaired — one ordered step-block list; the with:-mapping-tracked active-value check; the NEW test_12 fixture self-verification (MUT-A/B/C: each proven its old form's blind spot inline, then refused). The #67 Greptile round added MUT-C (the env:-child wrong mapping, red-02/green-02) — its P1 real, fixed in-PR; its P2 (this entry over the 250-word contract) fixed here.
+- Evidence: record 26 (the full history: §8's seven-entry ledger, §12's resolved boundary); harness/runs/claim-032-r06-pin-repair-review-intake/ (red-01/02, green-01/02, scope, notverified, proofsheet; suite 12/12; verifier 52/0).
+- Unresolved: Action 2 (branch-protection verification), Action 3 (the reconciliation slice), then H-01c-authority.
+- Next: merge PR #67 once review-complete.
+- Session record: context/extracted/26-BACKEND-REVIEW-INTAKE-R06-PIN-REPAIR.md

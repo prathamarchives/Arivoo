@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_mutation_floor.py",
+  "exit_code": 0,
+  "commit": "20990a4d28e2492e0aebcb9d76f0f8cc19e73c3a",
+  "output_sha256": "0f9953edc919bcab8d9d9640518879e69e16b2d95d060246d629f1715814e5f9",
+  "recorded_at": "2026-10-23T14:58:18.530495+00:00"
+}

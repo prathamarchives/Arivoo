@@ -704,9 +704,26 @@ class Layer:
         # The authorization's GENUINENESS is the review layer's judgment (the walls
         # serialize the merge; the ref must be reviewed as real) — never claimed here.
         lineage_failures: list[str] = []
+        # H-01c-authority round (#71, Greptile P2 + CodeRabbit's confirmation): the
+        # designated full-digest block ONLY — the old whole-manifest scan kept the
+        # LAST row per filename, so swapped rows inside the designated block hid
+        # behind correct copies appended later in the document (MUT-37), and
+        # in-block duplicates resolved last-wins (MUT-38). A missing or ambiguous
+        # designated block is a refusal, never a silent selection.
         manifest_rows: dict[str, str] = {}
-        for m in re.finditer(r"^([\w .\-]+?)[ \t]+([0-9a-f]{64})[ \t]*$", manifest, re.M):
-            manifest_rows[m.group(1).strip()] = m.group(2)
+        _row_dupes: list[str] = []
+        _digest_block = re.search(r"Full SHA-256 values[^\n]*\n+```[^\n]*\n(.*?)```", manifest, re.S)
+        if _digest_block:
+            for m in re.finditer(r"^([\w .\-]+?)[ \t]+([0-9a-f]{64})[ \t]*$", _digest_block.group(1), re.M):
+                name = m.group(1).strip()
+                if name in manifest_rows:
+                    _row_dupes.append(name)
+                else:
+                    manifest_rows[name] = m.group(2)
+        if _row_dupes:
+            lineage_failures.append(
+                f"duplicate full-digest rows inside the designated block ({', '.join(sorted(set(_row_dupes)))}) — an ambiguous binding is refused, never resolved by last-wins"
+            )
         reanchors: dict[str, tuple[str, str, str, str]] = {}
         if "## 8. Reanchor register" in manifest:
             reg = manifest.split("## 8. Reanchor register", 1)[1]
@@ -741,8 +758,16 @@ class Layer:
                     )
                 else:
                     prior, new, auth, _date = ra
+                    # H-01c-authority round (#71, Greptile P1): an authorization
+                    # resolves against ACTUAL entry headers (a line-start **INT-xxx
+                    # followed by space/em-dash) and ACTUAL decision rows (^| D-xxx |)
+                    # — the old substring form matched the ledger's reserved-range
+                    # numbering note (**INT-001..INT-018**), so a phantom
+                    # authorization pointing at nothing passed (MUT-36).
                     auth_resolves = (
-                        f"**{auth}" in ledger_text if auth.startswith("INT-") else f"| {auth}" in decisions_text
+                        bool(re.search(rf"^\*\*{auth}[\s\u2014-]", ledger_text, re.M))
+                        if auth.startswith("INT-")
+                        else bool(re.search(rf"^\|\s*{auth}\s*\|", decisions_text, re.M))
                     )
                     if not (prior == RAW_ANCHORS.get(name) and new == actual and auth_resolves):
                         lineage_failures.append(
@@ -811,8 +836,14 @@ class Layer:
                 }
                 for q in quotes:
                     for frag in _fragments(q):
-                        if len(frag) < 20:
-                            continue
+                        if not frag:
+                            continue  # a post-normalization empty fragment is nothing to check
+                        # H-01c-authority round (#71, CodeRabbit): EVERY nonempty
+                        # fragment is validated — the old <20-char skip left short
+                        # quotations extracted-but-never-checked (a fabricated short
+                        # quote passed silently — the fail-open form, MUT-39). The
+                        # real ledger was probed first: all 5 previously-skipped short
+                        # fragments validate in their cited windows (zero false-RED).
                         found = any(
                             frag
                             in _normalize_for_fidelity(

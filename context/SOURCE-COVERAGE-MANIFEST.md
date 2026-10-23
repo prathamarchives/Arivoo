@@ -117,7 +117,7 @@ Quote fidelity at repair time: 54/58 raw-citable quotes matched on first probe; 
 **Row schema (every field required, checked mechanically by VER-805):**
 
 ```
-| `file` | `prior SHA-256 (== RAW_ANCHORS[file])` | `new SHA-256 (the actual post-change digest)` | `owner authorization (an INT-/D- that resolves in the ledger or DECISIONS)` | `date` |
+| `file` | `prior SHA-256 (== RAW_ANCHORS[file])` | `new SHA-256 (the actual post-change digest)` | `owner authorization (an INT-/D- that resolves against an ACTUAL entry header or decision row — a reserved-range mention never resolves; #71 round)` | `date` |
 ```
 
 **Rows (none yet — the corpus is unchanged since D-025):**

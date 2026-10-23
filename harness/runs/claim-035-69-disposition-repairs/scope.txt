@@ -1,0 +1,9 @@
+# CLAIM-035 — the #69 disposition repairs + the turn-29/30/31 intake (the bounded resume slice)
+CLAIMS.md D-038
+INTENT-LEDGER.md INT-134
+STATE.md D-043
+AGENTS.md D-043
+context/extracted/27-ACTION3-RECONCILIATION.md D-042
+context/extracted/28-69-DISPOSITION-REPAIRS.md D-042
+context/WORKLOG.md D-043
+harness/runs/claim-035-69-disposition-repairs D-042

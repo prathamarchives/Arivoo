@@ -616,3 +616,13 @@ Stage Summary:
 - Unresolved: none in this slice's scope.
 - Next: H-01c-authority (CLAIM-035) — RED-first, its own bounded slice.
 - Session record: context/extracted/27-ACTION3-RECONCILIATION.md (§8's fourth entry)
+
+## Task 43 (CLAIM-035, session 28) — the #69 disposition repairs + the resume intake
+- Task: the three accepted #69 dispositions' repairs (4356737480/4356737629/4356737830) + the turns 29/30/31 intake (INT-134/135/136; the credential redacted per D-025/INT-092).
+- Outcome: (a) CLAIM-034's close-row Result cell records the rule-3 reservation / rule-6 notation correction BY REFERENCE (the closed table has no INTs column; the predecessor open row's INTs-cell wording corrected by pointer); (b) the CLAIM-033 row's timing + merge-timestamp corrections BY POINTER (pre-merge finding; post-merge repair; #68's actual merge 05:53:39Z, never the recorded 06:34:39Z); (c) record 27 §8's gate-recovery text moved back to the fourth entry + the SEVENTH entry (the standing per-thread fix — REQUIRED for this PR's loop, the result recording in the close row). Riders: CLAIM-034's close row + open row retired; the stale branches' deletion executes at this slice's close (results in the close row); STATE/AGENTS re-derived; Task 42's Next-line superseded BY POINTER (H-01c-authority = CLAIM-036); the rig rebuilt (sixth env-reset).
+- DATED ORDINAL CORRECTION (#70 CodeRabbit round): record 27 §8's mechanical count is SEVEN entries — the missed-Minor entry is the THIRD, gate-recovery the FOURTH, Task-42 the SIXTH, thread-miss the SEVENTH; the closed Task 42 and record 27 §12 carry the same off-by-one (corrected BY POINTER; closed entries never edited).
+- Evidence: record 28; harness/runs/claim-035-69-disposition-repairs/ (PASS ARV-PRF-004); make verify GREEN 52/0.
+- Unresolved: none in this slice's scope.
+- Next: CLAIM-036 — H-01c-authority, RED-first, its own bounded slice, NO PAUSE after this merge.
+- Session record: context/extracted/28-69-DISPOSITION-REPAIRS.md
+

@@ -1,0 +1,15 @@
+not verified (LAW-04 — the disposition-repair slice's honest limits):
+- unchanged external limits (the CLAIM-033/034 lists): the required-contexts binding's actor/timestamp
+  provenance (the API exposes no audit data; personal repo, no org audit-log endpoint); the protection
+  export a snapshot (INT-104) — each preflight re-reads it; the platform's runner isolation (F-03
+  EXTERNAL, unchanged); the prose-consistency bound (the mechanical checks passed at the edited tree;
+  prose beyond the named repairs is reviewable, never mechanically proven).
+- this slice changes NO code and NO test: the regression surface for the registry's append-only rules
+  remains the claims-path suite's ARV-CLM checks + the reviewer rounds themselves (a mechanical
+  DECISIONS/WORKLOG-append-only check, if ever wanted, is a scoped decision for the owner, never
+  silently built here).
+- the exact in-chat arrival timestamps of turns 29/30 relative to the session-27 close sit in the
+  chat-mechanics layer this session resumed through; the words themselves are preserved verbatim as
+  received (E-2 class, the boundary stated) — quote fidelity outranks completeness (the VER-803 class).
+- the pushed head's own walls verification is the GitHub five-check run, observed in the PR — no
+  in-file result covers the pushed head itself (INT-104).

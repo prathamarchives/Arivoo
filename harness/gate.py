@@ -182,9 +182,21 @@ def check_red_records() -> list:
     cand_tests = set(TESTS)
     gp = REPO / "harness" / "gate.py"
     if gp.is_file() and str(gp.resolve()) != str(pathlib.Path(__file__).resolve()):
-        m = re.search(r"TESTS\s*=\s*\(([^)]*)\)", gp.read_text(encoding="utf-8"), re.S)
-        if m:
-            cand_tests |= set(re.findall(r'"([^"]+)"', m.group(1)))
+        # the third pass (CodeRabbit Major, CWE-693): the AST parse accepts
+        # only ACTUAL tuple entries — a quoted path in a COMMENT never
+        # registers (the regex form extracted comment strings too; a
+        # candidate could 'register' a suite the trusted selection never
+        # runs). ast.literal_eval executes nothing — a non-literal TESTS
+        # counts no additions (fail-closed, with a NOTE)
+        try:
+            import ast as _ast
+            _tree = _ast.parse(gp.read_text(encoding="utf-8"))
+            for _node in _ast.walk(_tree):
+                if isinstance(_node, _ast.Assign) and any(
+                        isinstance(_t, _ast.Name) and _t.id == "TESTS" for _t in _node.targets):
+                    cand_tests |= {str(_x) for _x in _ast.literal_eval(_node.value)}
+        except (SyntaxError, ValueError, TypeError):
+            print("NOTE ARV-RED-000: the candidate gate.py TESTS tuple is unparseable as a literal — no candidate additions counted (fail-closed)")
     for p in sorted((REPO / "harness" / "tests").glob("test_*.py")):
         rel = str(p.relative_to(REPO))
         if rel not in cand_tests:

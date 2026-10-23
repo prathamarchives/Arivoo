@@ -375,6 +375,19 @@ def kb_nonexistent_binding(copy: pathlib.Path) -> None:
     subprocess.run(["git", "commit", "-q", "-m", "probe base"], cwd=copy, capture_output=True)
     rr = copy / "harness" / "red-records.json"
     data = json.loads(rr.read_text())
+    # the third pass (CodeRabbit Major): the OTHER records still name the
+    # ORIGINAL history's commits, which the fresh repo does not contain —
+    # every one of them would refuse ARV-RED-007 and the case's expected code
+    # would fire from the WRONG records (a vacuous pass for the target).
+    # Rebind them to the fresh base commit so the ONLY 007 source is the
+    # nonexistent "f"*40 below.
+    base_sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=copy,
+                              capture_output=True, text=True).stdout.strip()
+    import hashlib
+    for _t, _r in data.items():
+        _p = copy / _t
+        _r["binding_commit"] = base_sha
+        _r["binding_sha256"] = hashlib.sha256(_p.read_bytes()).hexdigest()
     key = "harness/tests/test_migrations.py"
     data[key]["binding_commit"] = "f" * 40  # names nothing in any history
     rr.write_text(json.dumps(data, indent=2) + "\n")
@@ -422,3 +435,24 @@ def kb_unrecovered_without_baseline(copy: pathlib.Path) -> None:
             _load(copy, "harness.gate").check_red_records()
         finally:
             del os.environ["ARV_TRUSTED_BASE"]
+
+# --- CLAIM-037, CodeRabbit's second pass (the TESTS-parse hole) ---
+@case("KB-RED-013", "a test file 'registered' ONLY in a TESTS comment (the parse hole)",
+      "ARV-RED-008")
+def kb_comment_only_registration(copy: pathlib.Path) -> None:
+    """The comment-only 'registration' must refuse. In the KB form the loaded
+    gate module IS the copy's gate.py (the same-file parse skip — the module's
+    own tuple is the truth), so this case proves the module-tuple refusal; the
+    comment-extraction hole itself is discriminated by trusted test_16 (the
+    base/candidate split where the candidate's parse runs)."""
+    import json
+    (copy / "harness" / "tests" / "test_rogue_probe.py").write_text(
+        "# a suite file registered only in a comment — the must-reject\n", encoding="utf-8")
+    gpf = copy / "harness" / "gate.py"
+    gtext = gpf.read_text(encoding="utf-8")
+    anchor = '"harness/tests/test_claims_paths.py",'
+    assert anchor in gtext
+    gpf.write_text(gtext.replace(
+        anchor, anchor + '  # "harness/tests/test_rogue_probe.py" (a comment-only registration)', 1),
+        encoding="utf-8")
+    _load(copy, "harness.gate").check_red_records()

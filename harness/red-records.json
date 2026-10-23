@@ -164,7 +164,7 @@
     "red_unrecovered": true
   },
   "harness/tests/test_trusted_gate.py": {
-    "current_sha256": "9912163d75048295afc176fa6ce15762c2750be1f1a87f2e8d9925781f9f713a",
+    "current_sha256": "87615c60c8123c519d90c2d762505f37fbde6f6c49042e222c54e32cef41ab40",
     "amendments": [
       {
         "note": "AMENDMENT 1 (H-01b-CI implementation slice, assertions strengthened/added \u2014 never removed, LAW-11): test_07's ARV-TG-005 probe strengthened to the real form (an EXISTING-but-empty base dir \u2014 the nonexistent-dir form fires ARV-TG-001 first); the stub builder corrected with the machinery the BASE's KB probes actually load (harness/gate.py, harness/migrate.py) and the slice's notverified.txt (the --verify re-derivation source \u2014 PRF-01); the red_evidence smash in harness/red.py repaired in the same slice (set only on first record)."
@@ -252,6 +252,12 @@
         "new_sha256": "9912163d75048295afc176fa6ce15762c2750be1f1a87f2e8d9925781f9f713a",
         "note": "the #72 round's fixture repairs (all pre-merge, each an honest catch recorded in record 30 \u00a78's round entry): test_15's stub declarations (the gate.py scope/claim lines, the runs-line ref, the binding naming the suite's own commit), KB-011's git-context init + KB-012's suite file + the robust middle-tuple anchor, machinery case 6's git fixture. The fixes themselves: the either-tuple registration (the per-record loop covers the union), the false-history refusal, the run-100 format, the registry bootstrap, the unrecovered restriction",
         "observed_at": "2026-10-23T14:43:19.268431+00:00"
+      },
+      {
+        "prior_sha256": "9912163d75048295afc176fa6ce15762c2750be1f1a87f2e8d9925781f9f713a",
+        "new_sha256": "87615c60c8123c519d90c2d762505f37fbde6f6c49042e222c54e32cef41ab40",
+        "note": "the third pass's edits: test_trusted_gate.py gains test_16 (the comment-only registration through the trusted phase \u2014 RED observed at the regex form, GREEN at the AST form); the KB-RED-011 probe's rebinding (the other records -> the fresh base commit, the vacuous-pass repair); KB-RED-013's honest mechanism note. Tests added, none removed",
+        "observed_at": "2026-10-23T15:14:03.216964+00:00"
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice).",

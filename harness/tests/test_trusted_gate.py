@@ -840,6 +840,53 @@ class TrustedGateTests(unittest.TestCase):
                          "the registration check compared against the base tuple alone "
                          "(the #72 round's Greptile P1): " + r.stdout[-800:])
 
+    def test_16_comment_only_registration_is_refused_through_the_trusted_phase(self):
+        """The third pass (CodeRabbit Major, CWE-693): a candidate that places
+        a new suite's path ONLY in a TESTS COMMENT (with the file present and
+        a record minted) must be REFUSED with ARV-RED-008 — the registration
+        parse must accept only ACTUAL tuple entries (the regex form extracted
+        comment strings too; the AST parse never does). RED at the round's
+        head: the comment path registered, the phase passed the suite as if
+        legitimate while the trusted required selection would never run it."""
+        stub = build_stub(self.td, gutted_makefile=True)
+        scope_txt = stub / "harness" / "runs" / SLICE / "scope.txt"
+        scope_txt.write_text(
+            scope_txt.read_text().replace(f"harness/runs/{SLICE}\n", f"harness/runs/{SLICE} D-041\n")
+            + "harness/gate.py D-041\n")
+        claims_md = stub / "CLAIMS.md"
+        ctext = claims_md.read_text()
+        claims_md.write_text(ctext.replace(
+            "`notes.txt`, `harness/tests`, `harness/red-records.json`",
+            "`notes.txt`, `harness/tests`, `harness/red-records.json`, `harness/gate.py`", 1))
+        newsuite = stub / "harness" / "tests" / "test_comment_only.py"
+        newsuite.write_text("import unittest\n\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n\nif __name__ == \"__main__\":\n    unittest.main()\n", encoding="utf-8")
+        gp = stub / "harness" / "gate.py"
+        gtext = gp.read_text(encoding="utf-8")
+        anchor = '"harness/tests/test_claims_paths.py",'
+        # the path ONLY in a comment — never an actual tuple entry
+        gpf = gp
+        gpf.write_text(gtext.replace(anchor, anchor + '  # "harness/tests/test_comment_only.py"', 1), encoding="utf-8")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the suite lands"], cwd=stub, check=True, capture_output=True)
+        binding = subprocess.run(["git", "rev-parse", "HEAD"], cwd=stub, capture_output=True, text=True).stdout.strip()
+        rr = stub / "harness" / "red-records.json"
+        data = json.loads(rr.read_text())
+        data["harness/tests/test_comment_only.py"] = {
+            "schema": 2, "binding_commit": binding,
+            "binding_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),
+            "red_exit": 1, "red_code": "ARV-STUB-RED (the synthetic stub's own named refusal form)",
+            "red_evidence": "synthetic", "current_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),
+            "amendments": []}
+        rr.write_text(json.dumps(data, indent=2) + "\n")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the comment-only probe"], cwd=stub, check=True, capture_output=True)
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertNotEqual(r.returncode, 0,
+                            "the trusted phase PASSED a comment-only 'registration' — the parse "
+                            "accepted a path the trusted selection would never run (CWE-693): "
+                            + r.stdout[-600:])
+        self.assertIn("FAIL ARV-RED-008", r.stdout + r.stderr)
+
     def test_13_self_authorized_red_refresh_is_refused(self):
         """CLAIM-037 / F-007's named defect, end-to-end through the trusted
         phase: the candidate edits a frozen suite and refreshes its OWN record

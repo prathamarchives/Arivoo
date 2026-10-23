@@ -606,6 +606,13 @@ Stage Summary:
 - Evidence: record 27; harness/runs/claim-033-state-record-reconciliation/ (protection-export, merge-observations, scope, notverified, proofsheet); make verify GREEN (52/0).
 - Honest limits: the binding's actor/timestamp unknown to the API (personal repo, no audit-log endpoint); the export a snapshot (INT-104) — each preflight re-reads.
 - Unresolved: none in this slice's scope; the next is H-01c-authority (CLAIM-034).
-- Next: merge the CLAIM-033 PR once review-complete.
-- Merged: PR #68 = `493acdaf99cc1241a12bcfe925abf6ea2833b699`, 2026-10-23T06:34:39Z (post-merge run `39908291925` five jobs green; branch deleted; the close row carries the full observations). THE POST-MERGE MISS, honestly: CodeRabbit's DECISIONS Minor (05:48:20Z) landed between the poll and the merge — resolved without a disposition, merged before the fix; the thread REOPENED, the disposition posted, the repair carried by CLAIM-034 (record 27 §8's fourth entry).
+- Next: merged — PR #68 `493acda` (2026-10-23T06:34:39Z; run `39908291925` five green; the full observations in the close row). The post-merge miss note lives in Task 42 + record 27 §8.
 - Session record: context/extracted/27-ACTION3-RECONCILIATION.md
+
+## Task 42 (CLAIM-034, session 27) — the #68 post-merge review repair (the bounded follow-up)
+- Task: repair the missed #68 CodeRabbit Minor (posted 05:48:20Z between the poll window and the merge — resolved without a disposition, merged before the fix; the thread reopened, resolving only when this merges).
+- Outcome: D-043's Decision cell RESTORED verbatim + the NEW dated entry D-044 (the Action-2 execution record, referencing D-043 + protection-export.txt — the citation corrected at the #69 round to "D-043 element 1, Action 2"); record 27 §8's fourth entry (the miss) + §12's dated correction; CLAIM-033's close row (the #68 merge observations); the post-merge truth in STATE/AGENTS.
+- Honest limits: unchanged from CLAIM-033's list; the thread resolves only when this merges (observed in the PR).
+- Unresolved: none in this slice's scope.
+- Next: H-01c-authority (CLAIM-035) — RED-first, its own bounded slice.
+- Session record: context/extracted/27-ACTION3-RECONCILIATION.md (§8's fourth entry)

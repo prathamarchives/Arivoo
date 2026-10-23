@@ -147,7 +147,22 @@ credential arrived with the turn (value never recorded; verified live: login `pr
   enforced; the gate's red was in this case the EXPECTED pre-capture state (the slice's proof set not yet
   assembled — the capture sequence is content commit -> proof set -> evidence commit -> gate green), but
   the commit-on-red is the miss regardless: the gate must be run ALONE, read, and only then does anything
-  follow. Caught immediately (the gate's refusal was on screen), never pushed; the repair = the correct
+  follow.
+- **The #69 Greptile round's two P2s, both real, both fixed in-PR:** (a) D-044 cited "D-043 element 2"
+  — the row that records the two review FINDINGS; the settings verification is D-043 ELEMENT 1, ACTION 2 —
+  the citation corrected in both places; the same wrong citation inside the now-CLOSED CLAIM-033 row is
+  superseded BY POINTER (never edited — D-044's corrected citation is the authoritative reference); (b)
+  Task 41's merge-note append pushed the entry past the 250-word contract — re-compacted, the detailed
+  miss note living in Task 42 + this §8.
+- **The Task-42 &&-skip, honestly recorded (the chain-masking class's THIRD form this session — and the
+  worst: a silent skip that manufactured an overclaim):** the Task-42 worklog append was chained after the
+  follow-up edit script (`script && cat >>`); the script died at its malformed anchor and the `&&`
+  silently skipped the append while the block's later commands ran — the content commit `2b8ec0c` and its
+  message then claimed "WORKLOG Task 41's completion + the miss note + Task 42" while the tree carried NO
+  Task 42 (the #66 commit-message-overclaim class, caught by the #69 round's wordcount probe + this
+  ledger, never absorbed silently). Repair: Task 42 re-appended verbatim; the standing lesson now
+  third-learned: NOTHING consequential is ever chained — every command's own exit is read before the
+  next. Caught immediately (the gate's refusal was on screen), never pushed; the repair = the correct
   sequence restored (the 11-record set captured at the content head 2b8ec0c, all exit 0, PASS ARV-PRF-004)
   and this entry. The standing lesson now twice-learned this session: no command is ever chained after a
   gate.

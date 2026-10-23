@@ -777,6 +777,48 @@ class TrustedGateTests(unittest.TestCase):
 
 
 
+    def test_15_registered_new_suite_is_accepted_by_the_registration_check(self):
+        """The #72 round's Greptile P1: a candidate may legitimately ADD a suite
+        (registered in ITS OWN gate.py TESTS — a diff-visible, reviewable change
+        — with its red record minted). The registration check must accept it:
+        the check's subject is the file invisible to BOTH discovery surfaces,
+        never a legitimately-registered addition. The TRUSTED suite SELECTION
+        stays base-owned (the new suite is not REQUIRED until main adopts the
+        tuple — the next slice's trusted run executes it); this is the
+        registration semantics, never described as a trusted-gate bypass
+        (CodeRabbit's wording catch). RED at the round's predecessor: the
+        registration check compared against the BASE tuple alone and refused
+        the candidate's own registered addition with ARV-RED-008."""
+        stub = build_stub(self.td, gutted_makefile=True)
+        # a NEW suite, registered in the CANDIDATE'S OWN TESTS tuple + a record
+        newsuite = stub / "harness" / "tests" / "test_brand_new.py"
+        newsuite.write_text("import unittest\n\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n\nif __name__ == \"__main__\":\n    unittest.main()\n", encoding="utf-8")
+        gp = stub / "harness" / "gate.py"
+        gtext = gp.read_text(encoding="utf-8")
+        anchor = "harness/tests/test_record_machinery.py\")"
+        assert anchor in gtext
+        gtext = gtext.replace(anchor, anchor[:-1] + ",\n         \"harness/tests/test_brand_new.py\")")
+        gp.write_text(gtext, encoding="utf-8")
+        rr = stub / "harness" / "red-records.json"
+        data = json.loads(rr.read_text())
+        binding = subprocess.run(["git", "rev-list", "--max-parents=0", "HEAD"], cwd=stub,
+                                 capture_output=True, text=True).stdout.strip()
+        data["harness/tests/test_brand_new.py"] = {
+            "schema": 2, "binding_commit": binding,
+            "binding_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),
+            "red_exit": 1, "red_code": "ARV-STUB-RED (the synthetic stub's own named refusal form)",
+            "red_evidence": "synthetic new suite", "current_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),
+            "amendments": []}
+        rr.write_text(json.dumps(data, indent=2) + "\n")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the registered new-suite probe"],
+                       cwd=stub, check=True, capture_output=True)
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertEqual(r.returncode, 0,
+                         "the trusted phase REFUSED a legitimately-registered new suite — "
+                         "the registration check compared against the base tuple alone "
+                         "(the #72 round's Greptile P1): " + r.stdout[-800:])
+
     def test_13_self_authorized_red_refresh_is_refused(self):
         """CLAIM-037 / F-007's named defect, end-to-end through the trusted
         phase: the candidate edits a frozen suite and refreshes its OWN record

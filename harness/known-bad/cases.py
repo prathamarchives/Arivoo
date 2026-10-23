@@ -393,3 +393,63 @@ def kb_slot_unparseable(copy: pathlib.Path) -> None:
         ps.write_record(SLICE, "probe-write", 0, "out")
     except SystemExit:
         pass
+
+# --- CLAIM-037, the #72 review round (Greptile 2 P1 + 2 P2, CodeRabbit Minor + Major).
+#     Named codes frozen BEFORE the round's fixes (RED-first; every case observed
+#     NOT CAUGHT at the round's head 625396d, captured in red-02.txt):
+#       ARV-RED-007 also fires for: (a) a binding naming history git CANNOT SHOW
+#               (a nonexistent commit — the predecessor printed a NOTE and passed
+#               the false claim); (b) red_unrecovered on a record with NO trusted
+#               prior state (a new suite's mint — the marker exists for honestly
+#               lost history, never as the typed-red bypass)
+
+@case("KB-RED-011", "a record whose binding_commit does not exist in git history",
+      "ARV-RED-007")
+def kb_nonexistent_binding(copy: pathlib.Path) -> None:
+    """Greptile P1 (the #72 round): a fabricated commit NAME (40 hex chars that
+    name no revision) sailed through as 'unverifiable' — a NOTE without a
+    failure. In a git context, git's inability to show the commit IS the false
+    claim: a revision binding must name history that exists."""
+    import json
+    rr = copy / "harness" / "red-records.json"
+    data = json.loads(rr.read_text())
+    key = "harness/tests/test_migrations.py"
+    data[key]["binding_commit"] = "f" * 40  # names nothing in any history
+    rr.write_text(json.dumps(data, indent=2) + "\n")
+    _load(copy, "harness.gate").check_red_records()
+
+
+@case("KB-RED-012", "red_unrecovered on a record with NO trusted prior state (the new-mint bypass)",
+      "ARV-RED-007")
+def kb_unrecovered_without_baseline(copy: pathlib.Path) -> None:
+    """CodeRabbit Minor (the #72 round): a NEW suite's record is absent from the
+    trusted baseline, so ARV-RED-006 skips it; a schema-2 record carrying
+    red_unrecovered (instead of the typed observed-red) then bypasses
+    red_exit/red_code. The marker is for honestly-lost history — records that
+    EXIST in the baseline (the two smash-class migrations) — never a new
+    mint's bypass."""
+    import hashlib
+    import json
+    import os
+    import tempfile
+    rr = copy / "harness" / "red-records.json"
+    original = json.loads(rr.read_text())
+    key = "harness/tests/test_migrations.py"
+    rogue = "harness/tests/test_new_suite_probe.py"
+    data = json.loads(rr.read_text())
+    data[rogue] = {"schema": 2,
+                   "binding_commit": original[key].get("binding_commit", "0" * 40),
+                   "binding_sha256": "0" * 64,
+                   "red_unrecovered": True,  # the bypass attempt: no red_exit/red_code
+                   "red_evidence": "the new suite's record, never in any baseline",
+                   "current_sha256": "0" * 64, "amendments": []}
+    rr.write_text(json.dumps(data, indent=2) + "\n")
+    with tempfile.TemporaryDirectory() as td:
+        bdir = pathlib.Path(td) / "base"
+        (bdir / "harness").mkdir(parents=True)
+        (bdir / "harness" / "red-records.json").write_text(json.dumps(original, indent=2) + "\n")
+        os.environ["ARV_TRUSTED_BASE"] = str(bdir)
+        try:
+            _load(copy, "harness.gate").check_red_records()
+        finally:
+            del os.environ["ARV_TRUSTED_BASE"]

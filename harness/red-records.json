@@ -164,7 +164,7 @@
     "red_unrecovered": true
   },
   "harness/tests/test_trusted_gate.py": {
-    "current_sha256": "503d0beaa8c0de437ca4dcb8e7deadf6f1d7ee243bdc97b9e0ebcb3c68210b75",
+    "current_sha256": "7e21d999c2e92dd74d3795852d630145d774f520a241dcff1ec0bcc09f8906f0",
     "amendments": [
       {
         "note": "AMENDMENT 1 (H-01b-CI implementation slice, assertions strengthened/added \u2014 never removed, LAW-11): test_07's ARV-TG-005 probe strengthened to the real form (an EXISTING-but-empty base dir \u2014 the nonexistent-dir form fires ARV-TG-001 first); the stub builder corrected with the machinery the BASE's KB probes actually load (harness/gate.py, harness/migrate.py) and the slice's notverified.txt (the --verify re-derivation source \u2014 PRF-01); the red_evidence smash in harness/red.py repaired in the same slice (set only on first record)."
@@ -240,6 +240,12 @@
         "new_sha256": "503d0beaa8c0de437ca4dcb8e7deadf6f1d7ee243bdc97b9e0ebcb3c68210b75",
         "note": "the BRIDGE amendment (CLAIM-037): this slice's tests 13/14 + the build_stub restructure \u2014 chained exactly from the trusted prior state (origin/main) to the current form; the intermediate forms' note-only amendments stay as the honest history they are (the predecessor red.py recorded no digests)",
         "observed_at": "2026-10-23T00:00:00+00:00"
+      },
+      {
+        "prior_sha256": "503d0beaa8c0de437ca4dcb8e7deadf6f1d7ee243bdc97b9e0ebcb3c68210b75",
+        "new_sha256": "7e21d999c2e92dd74d3795852d630145d774f520a241dcff1ec0bcc09f8906f0",
+        "note": "the #72 review round's RED cases: trusted test_15 (the registered new-suite acceptance \u2014 the registration check's over-refusal), KB-RED-011 (a nonexistent binding_commit passing as a NOTE), KB-RED-012 (red_unrecovered as a new-mint bypass), the machinery suite's cases 5 (the run-100 parse stall) + 6 (the missing-registry bootstrap crash). Tests added, none removed",
+        "observed_at": "2026-10-23T14:35:18.377165+00:00"
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice).",
@@ -285,13 +291,19 @@
     "red_exit": 1,
     "red_code": "ARV-PRF-006 + ARV-RED-007/009 (the suite's RED set observed at 048aaa2 \u2014 six failures: the count-based overwrite, the stall, the unparseable-context no-refusal, the untyped-mint no-refusal, the changed-since-read no-refusal; red-01.txt)",
     "red_evidence": "the CLAIM-037 fix-commit amendment: test_trusted_gate.py's build_stub restructured for schema-2 stub records (the binding names the stub's own git history; the typed amendments chain from the base records) + the NEW suite test_record_machinery.py minted with its OBSERVED red",
-    "current_sha256": "c203318fb58618d675b00b17b3d60ec54a464e72e805e684619dfff3c782d97c",
+    "current_sha256": "4e14caad3904b577791d8827d6961f989aeabe237d4a0078fb164465e20f8be4",
     "amendments": [
       {
         "prior_sha256": "a4ee919f0c56a664e874aab871f6d4d6b278f9615ccf705be91b06f40130dcd3",
         "new_sha256": "c203318fb58618d675b00b17b3d60ec54a464e72e805e684619dfff3c782d97c",
         "note": "the fix-commit's own amendment: test_trusted_gate.py (build_stub's 3-commit shape \u2014 the records land after the declarations so the PR diff keeps the original notes.txt-only form) + test_record_machinery.py (the case-3/4 fixtures: red.main returns its refusal code, the racing writer lands BEFORE the guard's re-read; the module-copy list widened for red.py's gate import)",
         "observed_at": "2026-10-23T14:07:13.274239+00:00"
+      },
+      {
+        "prior_sha256": "c203318fb58618d675b00b17b3d60ec54a464e72e805e684619dfff3c782d97c",
+        "new_sha256": "4e14caad3904b577791d8827d6961f989aeabe237d4a0078fb164465e20f8be4",
+        "note": "the #72 review round's RED cases: trusted test_15 (the registered new-suite acceptance \u2014 the registration check's over-refusal), KB-RED-011 (a nonexistent binding_commit passing as a NOTE), KB-RED-012 (red_unrecovered as a new-mint bypass), the machinery suite's cases 5 (the run-100 parse stall) + 6 (the missing-registry bootstrap crash). Tests added, none removed",
+        "observed_at": "2026-10-23T14:35:18.377233+00:00"
       }
     ]
   }

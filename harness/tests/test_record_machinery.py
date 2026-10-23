@@ -45,6 +45,11 @@ import tempfile
 REPO = pathlib.Path(__file__).resolve().parents[2]
 FAILED: list[str] = []
 
+import sys as _sys
+_sys.path.insert(0, str(REPO))
+from harness.gate import TESTS as TESTS_NAMES  # noqa: E402  (read-only: the registration's one home)
+ARGV_BACKUP = None
+
 
 def check(name: str, ok: bool, detail: str = "") -> None:
     print(f"{'PASS' if ok else 'FAIL'}  {name}" + (f" — {detail}" if detail and not ok else ""))
@@ -197,6 +202,57 @@ def main() -> int:
         check("a red-record write over a changed file refuses with ARV-RED-009",
               rc3 != 0 and "ARV-RED-009" in out3,
               f"rc={rc3} output={out3[:200]!r}")
+        # ---- case 5 (the #72 round, Greptile P2): the 100-capture boundary
+        runs3 = ps.RUNS / "record-machinery-probe-3"
+        runs3.mkdir()
+        for n in range(1, 100):
+            (runs3 / f"run-{n:02d}.json").write_text(seed)
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                ps.write_record(SLICE + "-3", "the-hundredth", 0, "out")
+        except SystemExit:
+            pass
+        wrote_100 = (runs3 / "run-100.json").is_file()
+        stalled = False
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                ps.write_record(SLICE + "-3", "the-hundred-first", 0, "out")
+        except SystemExit:
+            stalled = True
+        check("the hundredth capture lands at run-100 and the writer keeps going",
+              wrote_100 and not stalled,
+              f"wrote_100={wrote_100} stalled_after={stalled} — the writer's own :02d output must be parseable by its own reader (the #72 round's Greptile P2)")
+
+        # ---- case 6 (the #72 round, Greptile P2): the missing-registry bootstrap
+        rt2 = tmp / "redtree2"
+        shutil.copytree(REPO / "harness", rt2 / "harness",
+                        ignore=shutil.ignore_patterns("__pycache__", "runs"))
+        for rel in ("harness/__init__.py", "harness/gate.py", "harness/scope.py",
+                    "harness/claims.py", "harness/proofsheet.py", "harness/red.py",
+                    "harness/known-bad/cases.py",
+                    "harness/adapters/__init__.py", "harness/adapters/clock.py"):
+            (rt2 / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(REPO / rel, rt2 / rel)
+        (rt2 / "harness" / "tests").mkdir(parents=True, exist_ok=True)
+        for t in TESTS_NAMES:
+            shutil.copy2(REPO / "harness" / "tests" / t, rt2 / "harness" / "tests" / t)
+        (rt2 / "harness" / "red-records.json").unlink()  # the recovery path's input
+        red2 = _load_machinery(rt2)["red"]
+        rc4 = 0
+        buf4 = io.StringIO()
+        _saved_argv = sys.argv
+        try:
+            sys.argv = ["red.py", "--note", "the bootstrap must-reject-nothing",
+                        "--exit", "1", "--code", "ARV-BOOTSTRAP-PROBE"]
+            with contextlib.redirect_stdout(buf4):
+                rc4 = red2.main() or 0
+        finally:
+            sys.argv = _saved_argv
+        out4 = buf4.getvalue()
+        bootstrapped = (rt2 / "harness" / "red-records.json").is_file()
+        check("a missing registry bootstraps (the ARV-RED-003 recovery path preserved)",
+              rc4 == 0 and bootstrapped,
+              f"rc={rc4} bootstrapped={bootstrapped} output={out4[:200]!r} — the recovery path crashed at the round's predecessor (Greptile P2)")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

@@ -119,8 +119,11 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
     else:
         kb.write_bytes((REPO / "harness" / "known-bad" / "cases.py").read_bytes())
 
-    # the required suites (the BASE's TESTS list, whatever it is at this revision)
-    red_records = {}
+    # the required suites (the BASE's TESTS list, whatever it is at this revision).
+    # The records are written AFTER the first commit (schema 2: the binding names
+    # the stub's own git history — CLAIM-037), with typed amendments chaining
+    # from the REAL base records' digests (the gate phase's baseline is this
+    # same REPO via ARV_TRUSTED_BASE, so the chain verifies consistently).
     for t in _base_gate().TESTS:
         rel = t
         p = stub / rel
@@ -131,10 +134,13 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
         p.write_text(content, encoding="utf-8")
         if delete_suite and rel == delete_suite:
             p.unlink()
-        else:
-            red_records[rel] = {"current_sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
-                               "amendments": [], "red_evidence": "synthetic stub"}
-    (stub / "harness" / "red-records.json").write_text(json.dumps(red_records, indent=2) + "\n")
+    # commit A: everything except the records and the PR change — the binding's
+    # target (the suite files live here); the records follow in commit B so the
+    # diff (HEAD~1..HEAD = commit C = notes.txt only) keeps the ORIGINAL shape
+    run("git", "add", "-A")
+    run("git", "commit", "-q", "-m", "synthetic base state (the suites)")
+    binding_commit = subprocess.run(["git", "rev-list", "--max-parents=0", "HEAD"],
+                                    cwd=stub, check=True, capture_output=True, text=True).stdout.strip()
 
     # the registry + ledger (valid open claim for BRANCH)
     (stub / "INTENT-LEDGER.md").write_text("**INT-100 — STUB — active**\n\nStatus legend: `active`.\n")
@@ -149,7 +155,7 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
     runs = stub / "harness" / "runs" / SLICE
     runs.mkdir(parents=True, exist_ok=True)
     (runs / "scope.txt").write_text(
-        f"# synthetic declaration\nnotes.txt\nharness/tests\nharness/red-records.json\nCLAIMS.md\nINTENT-LEDGER.md\nharness/runs/{SLICE}\n")
+        f"# synthetic declaration\nnotes.txt\nharness/tests D-041\nharness/red-records.json D-041\nCLAIMS.md\nINTENT-LEDGER.md\nharness/runs/{SLICE}\n")
     sys.path.insert(0, str(REPO))
     from harness import proofsheet as ps
     ps.RUNS = runs.parent          # RUNS is the runs ROOT — assemble re-joins the slice name
@@ -169,8 +175,35 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
                    if gutted_makefile else
                    "harness-tests:\n\t@for t in harness/tests/test_*.py; do python3 $$t || exit 1; done\nharness-health:\n\t@echo ok\n")
 
+    # the typed red records (schema 2) — written after the declarations so the
+    # PR diff (HEAD~1..HEAD) keeps the ORIGINAL shape (the PR change only);
+    # the binding names the suites' commit (the stub's own git history)
+    base_records = json.loads((REPO / "harness" / "red-records.json").read_text())
+    red_records = {}
+    for t in _base_gate().TESTS:
+        p = stub / t
+        if delete_suite and t == delete_suite:
+            continue
+        cur = hashlib.sha256(p.read_bytes()).hexdigest()
+        # the typed amendment: prior == the REAL record's current (the baseline
+        # the gate phase checks against), new == the stub's synthetic form
+        prior = (base_records.get(t) or {}).get("current_sha256")
+        amendments = []
+        if prior and prior != cur:
+            amendments.append({"prior_sha256": prior, "new_sha256": cur,
+                               "note": "the synthetic stub suite (the trusted-gate test fixture)",
+                               "observed_at": "2026-10-23T00:00:00+00:00"})
+        red_records[t] = {"schema": 2,
+                          "binding_commit": binding_commit,
+                          "binding_sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+                          "red_exit": 1,
+                          "red_code": "ARV-STUB-RED (the synthetic stub's own named refusal form)",
+                          "red_evidence": "synthetic stub",
+                          "current_sha256": cur,
+                          "amendments": amendments}
+    (stub / "harness" / "red-records.json").write_text(json.dumps(red_records, indent=2) + "\n")
     run("git", "add", "-A")
-    run("git", "commit", "-q", "-m", "synthetic base state (the claim row + declarations)")
+    run("git", "commit", "-q", "-m", "the registry + declarations + the typed red records")
     (stub / "notes.txt").write_text("the declared PR change\n")
     if breach:
         (stub / "undeclared-secret.txt").write_text("OUTSIDE the declared scope\n")

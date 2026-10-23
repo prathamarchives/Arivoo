@@ -72,11 +72,16 @@ def _repo_root() -> pathlib.Path:
 
 
 REPO = _repo_root()
+# The ONE TESTS home (CLAIM-037, F-007): red.py imports this tuple — the
+# predecessor DUPLICATED it (red.py's own docstring named the one-fact-two-
+# homes defect; the unification is this card's named work). Every file under
+# harness/tests/test_*.py MUST appear here (ARV-RED-008 refuses the gap).
 TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          "harness/tests/test_commands.py", "harness/tests/test_gate_dispatch.py",
          "harness/tests/test_mutation_floor.py",
          "harness/tests/test_trusted_gate.py",
-         "harness/tests/test_claims_paths.py")
+         "harness/tests/test_claims_paths.py",
+         "harness/tests/test_record_machinery.py")
 
 
 def run_cmd(cmd: list) -> subprocess.CompletedProcess:
@@ -109,25 +114,139 @@ def check_suites() -> list:
     return fails
 
 
+def _red_baseline():
+    """F-007 (CLAIM-037): the TRUSTED PRIOR STATE of the red records — the state
+    a candidate tree cannot rewrite. Resolution order: (1) ARV_TRUSTED_BASE (set
+    by the trusted driver from the BASE checkout — the CI authority, and by the
+    KB probe for the self-authorization case); (2) origin/main's copy via git
+    (the local PR-mode fallback); (3) unresolvable -> None + a printed NOTE
+    (stated residual for that run, never a hidden skip).
+    Returns (records dict | None, source label | None)."""
+    base = os.environ.get("ARV_TRUSTED_BASE", "")
+    if base:
+        p = pathlib.Path(base) / "harness" / "red-records.json"
+        if p.is_file():
+            try:
+                return json.loads(p.read_text()), "ARV_TRUSTED_BASE"
+            except json.JSONDecodeError as e:
+                print(f"FAIL ARV-RED-006: ARV_TRUSTED_BASE names an unparseable red-records.json ({e}) — a corrupt trusted baseline is a refusal")
+                return "REFUSED", "ARV_TRUSTED_BASE"
+        print("NOTE ARV-RED-000: ARV_TRUSTED_BASE names no red-records.json — no trusted baseline for this run (the self-authorization check is inactive; stated, never hidden)")
+        return None, None
+    r = subprocess.run(["git", "-C", str(REPO), "show", "origin/main:harness/red-records.json"],
+                       capture_output=True, text=True, timeout=60)
+    if r.returncode == 0 and r.stdout.strip():
+        try:
+            return json.loads(r.stdout), "origin/main"
+        except json.JSONDecodeError:
+            print("NOTE ARV-RED-000: origin/main's red-records.json is unparseable — no trusted baseline for this run")
+            return None, None
+    print("NOTE ARV-RED-000: no trusted baseline resolvable (no ARV_TRUSTED_BASE, no origin/main in this git context) — the self-authorization check is inactive for this run; the CI trusted job always resolves one (stated residual, never a hidden skip)")
+    return None, None
+
+
+def _git_show_hash(commit: str, rel: str):
+    """The sha256 of <rel> as committed at <commit>, or None when the tree is
+    not a git context (the KB work copies — .git ignored — and any git failure:
+    a NOTE, never a false verification)."""
+    try:
+        r = subprocess.run(["git", "-C", str(REPO), "show", f"{commit}:{rel}"],
+                           capture_output=True, timeout=60)
+    except Exception:
+        return None
+    if r.returncode != 0:
+        return None
+    return hashlib.sha256(r.stdout).hexdigest()
+
+
 def check_red_records() -> list:
-    fails = []
+    fails: list[str] = []
     rr_path = REPO / "harness" / "red-records.json"
     if not rr_path.is_file():
         print("FAIL ARV-RED-003: harness/red-records.json is missing — the red-first discipline has no mechanical memory (LAW-11)")
         print("      repair: 'make red' at the test-only commit, or backfill with the red commit's evidence")
         return ["ARV-RED-003"]
     data = json.loads(rr_path.read_text())
+
+    # ARV-RED-008 (fail-closed suite registration, CLAIM-037): every test file
+    # under harness/tests/ must be registered — the predecessor's discovery gap
+    # let a NEW suite sail past the trusted selection and the red control.
+    for p in sorted((REPO / "harness" / "tests").glob("test_*.py")):
+        rel = str(p.relative_to(REPO))
+        if rel not in TESTS:
+            print(f"FAIL ARV-RED-008: {rel} exists under harness/tests/ but is NOT registered in the TESTS suite list — an unregistered suite evades the required-suite selection and the red control entirely (fail-closed registration)")
+            print("      repair: register it in harness/gate.py TESTS + mint its red record ('make red --exit N --code CODE'), or remove the file")
+            fails.append("ARV-RED-008")
+
+    baseline, baseline_src = _red_baseline()
+    if baseline == "REFUSED":
+        return fails + ["ARV-RED-006"]
+    if baseline is not None:
+        print(f"NOTE ARV-RED-000: the trusted baseline resolved from {baseline_src} — a changed test is authorized only by a typed amendment chaining from it")
+
     for t in TESTS:
         if t not in data:
             print(f"FAIL ARV-RED-001: no red record for {t} — every test file must carry its red evidence (LAW-11: committed alone, observed failing)")
-            print("      repair: 'make red' at the test-only commit, or backfill the record with the red commit's evidence")
+            print("      repair: 'make red --exit N --code CODE' at the test-only commit, or backfill the record with the red commit's evidence")
             fails.append("ARV-RED-001")
             continue
+        rec = data[t]
         cur = hashlib.sha256((REPO / t).read_bytes()).hexdigest()
-        if cur != data[t].get("current_sha256"):
+        if cur != rec.get("current_sha256"):
             print(f"FAIL ARV-RED-002: {t} changed since its record (hash mismatch, no amendment) — tests edited after red (LAW-11)")
             print("      repair: re-record with 'make red' and an amendment note (amendments add assertions, never remove)")
             fails.append("ARV-RED-002")
+
+        # ARV-RED-007 (typed records, CLAIM-037/F-007): a written assertion is
+        # not an observed failure. A record must be schema 2 with EITHER the
+        # typed observed-red (red_exit nonzero int + red_code nonempty) OR the
+        # honest red_unrecovered marker (the smash class — never a fabricated
+        # observation), AND a git-verifiable binding.
+        untyped = []
+        if rec.get("schema") != 2:
+            untyped.append("no schema-2 marker")
+        if not rec.get("red_unrecovered"):
+            re_, rc_ = rec.get("red_exit"), rec.get("red_code")
+            if not isinstance(re_, int) or re_ == 0:
+                untyped.append("red_exit is not a nonzero int")
+            if not isinstance(rc_, str) or not rc_.strip():
+                untyped.append("red_code is not a nonempty string")
+        bc, bs = rec.get("binding_commit"), rec.get("binding_sha256")
+        if not bc or not bs:
+            untyped.append("no binding_commit/binding_sha256 pair")
+        if untyped:
+            print(f"FAIL ARV-RED-007: {t}'s red record is untyped ({'; '.join(untyped)}) — a written assertion is not an observed failure; the record needs the typed observed-red (or the honest unrecovered marker) and the git-verifiable binding (F-007)")
+            print("      repair: re-type via 'make red' with the observed --exit/--code, or record red_unrecovered honestly (the smash class)")
+            fails.append("ARV-RED-007")
+        elif REPO.joinpath(".git").exists() or REPO.joinpath(".git").is_file():
+            shown = _git_show_hash(bc, t)
+            if shown is None:
+                print(f"NOTE ARV-RED-000: {t}'s binding is unverifiable in this git context (git show failed) — stated, never a hidden skip")
+            elif shown != bs:
+                print(f"FAIL ARV-RED-007: {t}'s binding is FALSE — the digest recorded for binding commit {bc[:10]} does not match the file as git carries it (a fabricated revision claim)")
+                print("      repair: bind the record to the commit that actually carries the recorded content; a revision claim must name history that exists")
+                fails.append("ARV-RED-007")
+        else:
+            print(f"NOTE ARV-RED-000: {t}'s binding is unverifiable in a non-git copy (the KB probe context) — the binding verification runs in every git context (local, CI, the trusted job)")
+
+        # ARV-RED-006 (F-007's named defect, CLAIM-037): the self-authorization
+        # refusal. A test file whose digest differs from the TRUSTED PRIOR state
+        # is authorized ONLY by a typed amendment chain bridging exactly that
+        # transition: some typed amendment starts at the baseline's digest and
+        # consecutive typed amendments connect to the current form. The bare
+        # make-red refresh (the candidate's own current_sha256) is the hole.
+        if baseline is not None:
+            b_digest = (baseline.get(t) or {}).get("current_sha256")
+            if b_digest is not None and b_digest != cur:
+                reachable = {b_digest}
+                for am in rec.get("amendments", []):
+                    if isinstance(am, dict) and "prior_sha256" in am and "new_sha256" in am:
+                        if am["prior_sha256"] in reachable:
+                            reachable.add(am["new_sha256"])
+                if cur not in reachable:
+                    print(f"FAIL ARV-RED-006: {t} changed against the trusted prior state and its record's typed amendments do NOT bridge that state to the current form — the make-red refresh alone is the self-authorization this check refuses (F-007)")
+                    print("      repair: the change must be reviewed as what it is — an amendment chaining exactly from the trusted prior digest (prior == the baseline's, new == the actual); the diff is the review layer's authority")
+                    fails.append("ARV-RED-006")
     return fails
 
 

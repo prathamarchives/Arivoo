@@ -156,6 +156,11 @@ def _phase_gate(repo: Path, base: Path, event: str, head: str, diff_ref: str) ->
         _refuse("ARV-TG-001", f"untrusted diff ref rejected as data: {diff_ref!r} is not a safe git ref token", "the diff base is a fixed ref (origin/main in CI, HEAD~1 in tests)")
     # re-root the BASE's machinery onto the candidate tree BEFORE the import
     os.environ["ARV_TRUSTED_ROOT"] = str(repo)
+    # CLAIM-037 (F-007): the TRUSTED PRIOR STATE — the base checkout's red
+    # records are the baseline the candidate's own records are judged against
+    # (the candidate-supplied current_sha256 alone is the self-authorization
+    # hole this plumbing closes; the gate's ARV-RED-006 consumes it)
+    os.environ["ARV_TRUSTED_BASE"] = str(base)
     gate = _load_base_gate(base)
     print(f"trusted gate phase (F-006): the BASE's gate machinery re-rooted over the candidate tree (ARV_TRUSTED_ROOT set before import); the candidate's harness package and its known-bad registry never load in this process")
     if event == "push":

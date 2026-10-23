@@ -54,14 +54,28 @@ def check(name: str, ok: bool, detail: str = "") -> None:
 
 def _load_machinery(work: pathlib.Path):
     """Load the work copy's proofsheet/red modules BY FILE PATH (the KB
-    pattern) so the writes land in the copy, never the real tree."""
+    pattern) so the writes land in the copy, never the real tree. red.py (in
+    its fixed form) imports harness.gate — the ONE TESTS home — so the work
+    tree's harness package must be importable: gate.py is copied alongside
+    and the work root joins sys.path for the load, removed after."""
     mods = {}
-    for name in ("proofsheet", "red"):
-        spec = importlib.util.spec_from_file_location(
-            f"arv_{name}_probe", work / "harness" / f"{name}.py")
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        mods[name] = mod
+    saved_path = sys.path[:]
+    try:
+        for rel in ("harness/__init__.py", "harness/gate.py", "harness/scope.py",
+                    "harness/claims.py", "harness/proofsheet.py", "harness/red.py",
+                    "harness/known-bad/cases.py",
+                    "harness/adapters/__init__.py", "harness/adapters/clock.py"):
+            (work / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(REPO / rel, work / rel)
+        sys.path.insert(0, str(work))
+        for name in ("proofsheet", "red"):
+            spec = importlib.util.spec_from_file_location(
+                f"arv_{name}_probe", work / "harness" / f"{name}.py")
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            mods[name] = mod
+    finally:
+        sys.path[:] = saved_path
     return mods
 
 
@@ -139,19 +153,17 @@ def main() -> int:
         red = _load_machinery(rt)["red"]
         old_argv = sys.argv
         buf2 = io.StringIO()
-        refused2 = False
+        rc2 = 0
         try:
             sys.argv = ["red.py", "--note", "the untyped mint must-reject (no --exit/--code)"]
             with contextlib.redirect_stdout(buf2):
-                red.main()
-        except SystemExit as e:
-            refused2 = e.code not in (0, None)
+                rc2 = red.main() or 0
         finally:
             sys.argv = old_argv
         out2 = buf2.getvalue()
         check("the untyped NEW-record mint refuses with ARV-RED-007",
-              refused2 and "ARV-RED-007" in out2,
-              f"refused={refused2} output={out2[:200]!r}")
+              rc2 != 0 and "ARV-RED-007" in out2,
+              f"rc={rc2} output={out2[:200]!r}")
 
         # ---- case 4: the changed-since-read write refuses (ARV-RED-009)
         records2 = json.loads((REPO / "harness" / "red-records.json").read_text())
@@ -160,33 +172,31 @@ def main() -> int:
         state = {"n": 0}
 
         def racing_read(self, *a, **k):
-            out = real_read(self, *a, **k)
             if self.name == "red-records.json" and self.parent.name == "harness":
                 state["n"] += 1
                 if state["n"] == 2:
-                    # a concurrent writer landed between red.py's read and write
+                    # a concurrent writer landed BEFORE the guard's re-read — the
+                    # re-read must SEE the racing content, never the stale text
                     pathlib.Path.write_text(self, json.dumps(
                         {"harness/tests/test_migrations.py": {
                             "current_sha256": "0" * 64, "amendments": [],
                             "red_evidence": "racing"}}, indent=2) + "\n")
-            return out
+            return real_read(self, *a, **k)
 
-        refused3 = False
+        rc3 = 0
         buf3 = io.StringIO()
         pathlib.Path.read_text = racing_read
         try:
             sys.argv = ["red.py", "--note", "the concurrent-writer must-reject"]
             with contextlib.redirect_stdout(buf3):
-                red.main()
-        except SystemExit as e:
-            refused3 = e.code not in (0, None)
+                rc3 = red.main() or 0
         finally:
             pathlib.Path.read_text = real_read
             sys.argv = old_argv
         out3 = buf3.getvalue()
         check("a red-record write over a changed file refuses with ARV-RED-009",
-              refused3 and "ARV-RED-009" in out3,
-              f"refused={refused3} output={out3[:200]!r}")
+              rc3 != 0 and "ARV-RED-009" in out3,
+              f"rc={rc3} output={out3[:200]!r}")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

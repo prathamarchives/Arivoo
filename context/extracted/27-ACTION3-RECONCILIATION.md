@@ -150,10 +150,12 @@ credential arrived with the turn (value never recorded; verified live: login `pr
   follow. Caught immediately (the gate's refusal was on screen), never pushed; the repair = the correct
   sequence restored (the 11-record set captured at the content head 2b8ec0c, all exit 0, PASS ARV-PRF-004)
   and this entry. The standing lesson now twice-learned this session: no command is ever chained after a
-  gate. [DATED REPAIR (CLAIM-035, 2026-10-23, the Greptile 4356726873 finding, disposition 4356737830):
-  this closing text had been misplaced into the seventh entry by the 175c23f re-append — moved back to
-  its own entry here, the seventh keeps its own discovery/repair text; the edit authorized by the
-  accepted disposition, recorded in record 28 §8]
+  gate. [DATED REPAIR (CLAIM-035, 2026-10-23, the Greptile 4356726873 finding, disposition 4356737830 —
+  ordinals corrected at the #70 CodeRabbit round: the mechanical count is SEVEN entries; this entry is
+  the FOURTH, the Task-42 entry the SIXTH, the missed-CodeRabbit-Minor entry the THIRD, the thread-miss
+  entry the SEVENTH): this closing text had been misplaced into the sixth entry by the 175c23f
+  re-append — moved back to its own entry here, the sixth keeps its own discovery/repair text; the edit
+  authorized by the accepted disposition, recorded in record 28 §8]
 - **The #69 Greptile round's two P2s, both real, both fixed in-PR:** (a) D-044 cited "D-043 element 2"
   — the row that records the two review FINDINGS; the settings verification is D-043 ELEMENT 1, ACTION 2 —
   the citation corrected in both places; the same wrong citation inside the now-CLOSED CLAIM-033 row is
@@ -170,7 +172,7 @@ credential arrived with the turn (value never recorded; verified live: login `pr
   review, restored after); the standing lesson now third-learned: NOTHING consequential is ever chained —
   every command's own exit is read before the next. [DATED REPAIR (CLAIM-035, 2026-10-23, the Greptile
   4356726873 finding, disposition 4356737830): the gate-recovery closing text that sat here belonged to
-  the fifth entry above — moved back; this entry keeps only its own discovery/repair text, so each
+  the fourth entry above — moved back; this entry keeps only its own discovery/repair text, so each
   repair's timing and evidence read correctly]
 - **The third thread-miss, honestly recorded (the merge loop resolved UNREAD threads — the hardest
   form yet, found by CodeRabbit's 06:30Z post-merge pass and named by the owner's turn 29 the same
@@ -178,7 +180,7 @@ credential arrived with the turn (value never recorded; verified live: login `pr
   Minors on CLAIMS.md + Greptile's P2 on this record) without the read-and-disposition pass first —
   all three threads resolved at the merge with their findings UNREAD; the dispositions were posted
   post-merge (4356737480 / 4356737629 / 4356737830, 06:22Z), every finding ACCEPTED as real, every
-  repair routed to CLAIM-035. This repeats the fourth entry (the missed #68 CodeRabbit Minor) in a
+  repair routed to CLAIM-035. This repeats the third entry (the missed #68 CodeRabbit Minor) in a
   worse form: that entry's lesson ("re-poll the thread list immediately before the merge command")
   was WRITTEN but not yet MECHANICAL — the loop re-polled and resolved without reading. THE STANDING
   FIX (mechanical, effective the CLAIM-035 slice's own loop): the resolution step NEVER runs before

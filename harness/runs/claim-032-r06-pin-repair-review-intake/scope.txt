@@ -1,0 +1,13 @@
+# CLAIM-032 — the R-06 pin repair + the 2026-10-23 backend-review intake (the review's ordered
+# Action 1; D-043's routing: Findings A/B, both real, both repaired with discriminating fixtures)
+harness/tests/test_trusted_gate.py INT-132/D-043
+harness/red-records.json INT-132/D-043
+harness/runs/claim-032-r06-pin-repair-review-intake INT-132/D-043
+CLAIMS.md
+INTENT-LEDGER.md INT-131/INT-132
+DECISIONS.md D-043
+STATE.md INT-132/D-043
+AGENTS.md INT-132/D-043
+context/WORKLOG.md INT-132/D-043
+context/extracted/26-BACKEND-REVIEW-INTAKE-R06-PIN-REPAIR.md INT-132/D-043
+context/reviews/arivoo-backend-review-2026-10-23.md INT-132/D-043

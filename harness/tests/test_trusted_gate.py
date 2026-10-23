@@ -36,6 +36,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import unittest
@@ -198,6 +199,177 @@ def run_driver(td: Path, stub: Path, phase: str, *, event: str | None = None,
     if head is not None:
         cmd += ["--head", head]
     return subprocess.run(cmd, capture_output=True, text=True, timeout=900, env=env)
+
+
+# --- the R-06 workflow-pin machinery (test_11/test_12; the 2026-10-23 backend
+#     review's Findings A/B repaired: ONE common ordered step-block list for
+#     indexes AND slicing; comment-aware ACTIVE-input credential assertions) ---
+
+_WF_NAME_RE = re.compile(r'^[ ]{6}- name: (?P<name>"[^\n]+"|[^\n]+)')
+_WF_PERSIST_RE = re.compile(r"^[ ]+persist-credentials:[ ]*false[ ]*(?:#.*)?$")
+
+
+def _wf_job(wf_text: str, job_name: str):
+    """The job's text span + its ordered STEP BLOCKS — ONE common ordered list
+    for indexing AND slicing (Finding A's repair: the #66 form computed i_anchor/
+    i_s4c from the NAMED-only list but sliced the EVERY-entry list — two index
+    spaces, so an inserted unnamed step was invisible and the window assertion
+    passed over it; the #66 second-pass commit claimed "every step entry" but
+    the merged code kept the mixed space — red-01.txt).
+
+    A step block starts at a `^ {6}- ` line (named or unnamed — the unnamed
+    `- run:` class is Finding A's counterexample) and runs to the next step
+    start or the job's end. Returns (job_text, blocks); blocks is a list of
+    (start_offset_in_wf_text, [lines]). Raises AssertionError when the job is
+    absent — fail-closed, never a vacuous pass over an empty job."""
+    m = re.search(rf"^  {job_name}:\n(?P<job>(?:[ ]{{4,}}[^\n]*\n)*)", wf_text, re.M)
+    if m is None:
+        raise AssertionError(f"the {job_name} job must exist (R-06's split trusted path)")
+    job, job_off = m.group("job"), m.start("job")
+    blocks: list = []
+    cur, cur_off = None, None
+    pos = 0
+    for ln in job.splitlines(keepends=True):
+        if re.match(r"^[ ]{6}- ", ln):
+            if cur is not None:
+                blocks.append((cur_off, cur))
+            cur, cur_off = [], job_off + pos
+        if cur is not None:
+            cur.append(ln)
+        pos += len(ln)
+    if cur is not None:
+        blocks.append((cur_off, cur))
+    return job, blocks
+
+
+def _wf_step_name(block_lines):
+    """The step's name when its first line is `- name: X`; None for an
+    UNNAMED step (`- run:` / `- uses:` / ...) — the class the #66 form dropped
+    from its index space."""
+    m = _WF_NAME_RE.match(block_lines[0])
+    return m.group("name").strip().strip('"') if m else None
+
+
+def _wf_find(blocks, name_prefix):
+    """The index of the first block whose NAME starts with the prefix (the
+    anchor/S4c/S1b identification — on the SAME block list that gets sliced)."""
+    for i, b in enumerate(blocks):
+        n = _wf_step_name(b[1])
+        if n is not None and n.startswith(name_prefix):
+            return i
+    return None
+
+
+def _wf_active_persist_false(block_lines):
+    """True iff the checkout block carries the ACTIVE input
+    `persist-credentials: false` — the value exactly boolean false, a trailing
+    comment allowed, COMMENT LINES NEVER SATISFY (Finding B's repair: the #66
+    form's raw-substring assertIn matched a comment mentioning the phrase)."""
+    for ln in block_lines:
+        if ln.lstrip().startswith("#"):
+            continue
+        if _WF_PERSIST_RE.match(ln):
+            return True
+    return False
+
+
+def _wf_mut_unnamed_window_step(wf_text: str) -> str:
+    """MUT-A (Finding A's counterexample): an UNNAMED `- run:` step inserted
+    between harness-trusted's anchor and S4c. Structural surgery at the S4c
+    block's start offset — never exact-line matching, so the fixture tracks the
+    live artifact (when the shape changes, the parser refuses first and the
+    fixture updates WITH the artifact, never silently drifts)."""
+    _, blocks = _wf_job(wf_text, "harness-trusted")
+    i_anchor = _wf_find(blocks, "Anchor the trusted gate")
+    i_s4c = _wf_find(blocks, "S4c")
+    if i_anchor is None or i_s4c is None or not i_s4c > i_anchor:
+        raise AssertionError("the MUT-A fixture cannot be built — the harness-trusted "
+                             "anchor/S4c shape changed (update the fixture with the artifact)")
+    unnamed = ('      - run: |\n'
+               '          echo "unnamed window step: an entry the name-only index space cannot see"\n')
+    return wf_text[:blocks[i_s4c][0]] + unnamed + wf_text[blocks[i_s4c][0]:]
+
+
+def _wf_mut_comment_only_credential(wf_text: str) -> str:
+    """MUT-B (Finding B's counterexample): the ACTIVE persist-credentials input
+    removed from harness-suites' FIRST checkout (Checkout head), an explanatory
+    comment carrying the exact phrase left in its place — the raw-substring
+    form's blind spot."""
+    _, blocks = _wf_job(wf_text, "harness-suites")
+    co = [b for b in blocks if "actions/checkout" in "".join(b[1])]
+    if not co:
+        raise AssertionError("the MUT-B fixture cannot be built — no checkout step in "
+                              "harness-suites (update the fixture with the artifact)")
+    off0, lines = co[0]
+    for i, ln in enumerate(lines):
+        if _WF_PERSIST_RE.match(ln):
+            comment = ('          # the ACTIVE input was removed by this mutation but the comment still says\n'
+                       "          # persist-credentials: false right here — the substring check's blind spot\n")
+            old_block = "".join(lines)
+            new_block = "".join(lines[:i]) + comment + "".join(lines[i + 1:])
+            return wf_text[:off0] + new_block + wf_text[off0 + len(old_block):]
+    raise AssertionError("the MUT-B fixture cannot be built — no ACTIVE persist-credentials "
+                         "input in harness-suites' first checkout (update the fixture with the artifact)")
+
+
+def _wf_check_r06_shape(wf_text: str) -> None:
+    """The R-06 workflow pin — raises AssertionError on ANY violation. Every
+    invariant of the #66 test_11 is preserved; the 2026-10-23 review's two
+    findings repaired: (A) the anchor/S4c indexes AND the sliced window come
+    from the ONE parsed step-block list (every entry, named or not); (B) the
+    per-checkout credential invariant is asserted on the ACTIVE input value
+    with comments ignored (test_12 proves both repairs discriminate)."""
+    # --- Job B (the judgment runner): S4c present, NO suite step AT ALL, the
+    # anchor-to-S4c window EMPTY counting EVERY step entry (named or unnamed) ---
+    job_b, blocks_b = _wf_job(wf_text, "harness-trusted")
+    names_b = [_wf_step_name(b[1]) for b in blocks_b]
+    i_anchor = _wf_find(blocks_b, "Anchor the trusted gate")
+    i_s4c = _wf_find(blocks_b, "S4c")
+    if i_s4c is None:
+        raise AssertionError("harness-trusted must run S4c (the trusted gate re-run)")
+    if i_anchor is None:
+        raise AssertionError("harness-trusted must anchor the driver from base")
+    if any(n and n.startswith("S1b") for n in names_b):
+        raise AssertionError("harness-trusted must NEVER run S1b — a suite step on the "
+                             "judgment runner reopens the whole candidate-code class (the #66 P1)")
+    if any(n and "required suites" in n for n in names_b):
+        raise AssertionError("no suite-executing step may exist on the judgment runner")
+    window = blocks_b[i_anchor + 1:i_s4c]
+    if window:
+        raise AssertionError("the anchor-to-S4c window must be EMPTY counting EVERY step entry "
+                             "(named or not, from the ONE parsed step-block list) — got " +
+                             repr([w[1][0].strip() for w in window]) + " (the structure IS the isolation)")
+    if "sha256sum" not in job_b:
+        raise AssertionError("the S4c run block keeps the #64 digest re-verification")
+    # --- Job A (the suites runner): S1b present, the anchor precedes it ---
+    _, blocks_a = _wf_job(wf_text, "harness-suites")
+    i_a_anchor = _wf_find(blocks_a, "Anchor the trusted gate")
+    i_a_s1b = _wf_find(blocks_a, "S1b")
+    if i_a_s1b is None:
+        raise AssertionError("harness-suites must run S1b (the trusted suites selection)")
+    if i_a_anchor is None:
+        raise AssertionError("harness-suites must anchor the driver before S1b")
+    if not i_a_anchor < i_a_s1b:
+        raise AssertionError("the anchor precedes S1b (the driver launch reads it)")
+    # --- the harness job (S1 + S4b, candidate evidence) carries NEITHER trusted phase ---
+    _, blocks_h = _wf_job(wf_text, "harness")
+    names_h = [_wf_step_name(b[1]) for b in blocks_h]
+    if any(n and n.startswith("S4c") for n in names_h):
+        raise AssertionError("S4c must NOT run in the harness job — it lives on the harness-trusted runner")
+    if any(n and n.startswith("S1b") for n in names_h):
+        raise AssertionError("S1b must NOT run in the harness job — it lives on the harness-suites runner")
+    # --- the CWE-522 hardening, per checkout step, on the ACTIVE input value ---
+    for job_name, expected in (("harness", 1), ("harness-suites", 2), ("harness-trusted", 2)):
+        _, blocks = _wf_job(wf_text, job_name)
+        co = [b for b in blocks if "actions/checkout" in "".join(b[1])]
+        if len(co) != expected:
+            raise AssertionError(f"{job_name}: expected {expected} checkout step(s), found {len(co)}")
+        for _, lines in co:
+            if not _wf_active_persist_false(lines):
+                raise AssertionError(
+                    f"{job_name}: EVERY checkout reachable by candidate code must carry the ACTIVE "
+                    "input persist-credentials: false — a comment mentioning the phrase never "
+                    "satisfies the invariant (the block starts: " + repr(lines[0].strip()) + ")")
 
 
 class TrustedGateTests(unittest.TestCase):
@@ -408,96 +580,85 @@ class TrustedGateTests(unittest.TestCase):
         the runner's accumulated PATH state — only a separate runner kills the
         class). The pin parses the workflow artifact (the structure IS the
         isolation): Job B carries NO suite-executing step AT ALL, the
-        anchor→S4c window is EMPTY with no name-based exemptions (the #66
-        round's G2: a name-filtered window let a same-prefixed step through),
-        and the harness job carries neither trusted phase."""
-        import re
+        anchor-to-S4c window is EMPTY counting EVERY step entry — named or
+        unnamed, from the ONE parsed step-block list (the 2026-10-23 review's
+        Finding A: the #66 form mixed two index spaces — named-only indexes
+        slicing an every-entry list — so an inserted unnamed step was invisible;
+        red-01.txt observed the old form PASS over exactly that mutation) —
+        and the harness job carries neither trusted phase. The credential
+        invariant (CWE-522) is asserted per checkout step on the ACTIVE input
+        value with comments ignored (Finding B; test_12 proves the pin
+        discriminates both mutations)."""
+        wf = (REPO / ".github" / "workflows" / "verify.yml").read_text(encoding="utf-8")
+        _wf_check_r06_shape(wf)
+
+    def test_12_r06_pin_discriminates_the_mutations(self):
+        """The 2026-10-23 backend review's two live findings, as the standing
+        discriminating regression (its §3: "a green self-check that cannot
+        detect its named counterexample is not evidence of the property it
+        claims to establish"). Each mutation fixture is VERIFIED to represent
+        its named counterexample — the OLD #66 form's blindness is reproduced
+        inline against the fixture (the exact defect observed live at the
+        predecessor in red-01.txt) — then the REPAIRED check must REFUSE the
+        mutated workflow, and the CLEAN workflow must still pass."""
         wf = (REPO / ".github" / "workflows" / "verify.yml").read_text(encoding="utf-8")
 
-        def job_block(name):
-            m = re.search(rf"^  {name}:\n(?P<job>(?:[ ]{{4,}}[^\n]*\n)*)", wf, re.M)
-            self.assertIsNotNone(m, f"the {name} job must exist (R-06's split trusted path)")
-            job = m.group("job")
-            steps = re.findall(r"^[ ]{4,}- name: (?P<name>[^\n]+)", job, re.M)
-            return job, [s.strip().strip('"') for s in steps]
+        # --- MUT-A (Finding A): the unnamed step in the anchor-to-S4c window ---
+        mut_a = _wf_mut_unnamed_window_step(wf)
+        # fixture self-verification 1: the mutation took — an extra entry sits in
+        # the window on the every-entry list, and it is the UNNAMED `- run:` form
+        _, blocks_b = _wf_job(mut_a, "harness-trusted")
+        i_anchor = _wf_find(blocks_b, "Anchor the trusted gate")
+        i_s4c = _wf_find(blocks_b, "S4c")
+        self.assertGreater(i_s4c - i_anchor, 1,
+                           "MUT-A must actually insert a step into the window")
+        self.assertTrue(re.match(r"^[ ]{6}- run: ", blocks_b[i_anchor + 1][1][0]),
+                        "MUT-A's inserted entry must be the UNNAMED - run: form (the class "
+                        "the #66 index space dropped)")
+        # fixture self-verification 2: the OLD mixed-index-space form (the #66
+        # merged code, re-implemented here as the named historical defect) is
+        # BLIND to the mutation — the exact live observation of red-01.txt
+        names_b = [n for n in (_wf_step_name(b[1]) for b in blocks_b) if n is not None]
+        old_i_anchor = next(i for i, n in enumerate(names_b) if n.startswith("Anchor the trusted gate"))
+        old_i_s4c = next(i for i, n in enumerate(names_b) if n.startswith("S4c"))
+        old_step_lines = [b[1][0] for b in blocks_b]   # every entry's start line
+        self.assertEqual(old_step_lines[old_i_anchor + 1:old_i_s4c], [],
+                         "the old form's mixed index space must slice EMPTY over this "
+                         "mutation — it is the old form's named blind spot")
+        # the repaired check REFUSES the mutated workflow, naming the window
+        with self.assertRaises(AssertionError) as cm:
+            _wf_check_r06_shape(mut_a)
+        self.assertIn("window", str(cm.exception))
+        self.assertIn("- run:", str(cm.exception),
+                      "the refusal must name the UNNAMED window entry it caught")
 
-        # Job B (the judgment runner): S4c present, NO suite step AT ALL, the
-        # anchor→S4c window EMPTY (no name-based exemptions — the #66 round's G2;
-        # and EVERY step entry counts, including UNNAMED `- run:` steps — the
-        # #66 second pass's finding: a name-only parse lets an unnamed step
-        # slip through the adjacency assertion)
-        job_b, names_b = job_block("harness-trusted")
-        i_anchor = next((i for i, n in enumerate(names_b) if n.startswith("Anchor the trusted gate")), None)
-        i_s4c = next((i for i, n in enumerate(names_b) if n.startswith("S4c")), None)
-        self.assertIsNotNone(i_s4c, "harness-trusted must run S4c (the trusted gate re-run)")
-        self.assertIsNotNone(i_anchor, "harness-trusted must anchor the driver from base")
-        self.assertFalse(any(n.startswith("S1b") for n in names_b),
-                         "harness-trusted must NEVER run S1b — a suite step on the judgment "
-                         "runner reopens the whole candidate-code class (the #66 P1)")
-        self.assertFalse(any("required suites" in n for n in names_b),
-                         "no suite-executing step may exist on the judgment runner")
-        # EVERY step entry (named or unnamed) between anchor and S4c — an
-        # unnamed `- run:` between them would be a bypassable window step
-        entries_b = re.findall(r"^[ ]{6}- (?:(?:name|uses|run|env|if|id):[ ]*)?", job_b, re.M)
-        # reconstruct the ordered list of step STARTS within Job B
-        step_lines = [ln for ln in job_b.splitlines() if re.match(r"^[ ]{6}- ", ln)]
-        self.assertEqual(step_lines[i_anchor + 1:i_s4c], [],
-                         f"the anchor→S4c window must be EMPTY counting EVERY step entry "
-                         f"(named or not) — got {step_lines[i_anchor + 1:i_s4c]} "
-                         "(the structure IS the isolation)")
-        # the digest re-verification stays (defense-in-depth)
-        self.assertIn("sha256sum", job_b, "the S4c run block keeps the #64 digest re-verification")
+        # --- MUT-B (Finding B): the comment-only credential ---
+        mut_b = _wf_mut_comment_only_credential(wf)
+        # fixture self-verification 1: the mutated first checkout carries the
+        # phrase ONLY as comments — no ACTIVE input line remains
+        _, blocks_a = _wf_job(mut_b, "harness-suites")
+        co = [b for b in blocks_a if "actions/checkout" in "".join(b[1])]
+        self.assertEqual(len(co), 2, "the mutation must not change the checkout count")
+        self.assertFalse(_wf_active_persist_false(co[0][1]),
+                         "MUT-B must leave NO active persist-credentials input in the "
+                         "first checkout")
+        self.assertIn("persist-credentials: false", "".join(co[0][1]),
+                      "MUT-B must leave the phrase present in raw text (as the comment) — "
+                      "the substring form's blind spot")
+        # fixture self-verification 2: the OLD raw-substring form PASSES over the
+        # mutated block — exactly the live observation of red-01.txt
+        self.assertTrue(all("persist-credentials: false" in "".join(b[1]) for b in co),
+                        "the old per-block substring check must still pass over every "
+                        "checkout — the mutation is the old form's named blind spot")
+        # the repaired check REFUSES the mutated workflow, naming the job
+        with self.assertRaises(AssertionError) as cm:
+            _wf_check_r06_shape(mut_b)
+        self.assertIn("harness-suites", str(cm.exception))
+        self.assertIn("ACTIVE input persist-credentials: false", str(cm.exception),
+                      "the refusal must name the ACTIVE-input invariant (never a comment match)")
 
-        # Job A (the suites runner): S1b present, the anchor precedes it
-        job_a, names_a = job_block("harness-suites")
-        i_a_anchor = next((i for i, n in enumerate(names_a) if n.startswith("Anchor the trusted gate")), None)
-        i_a_s1b = next((i for i, n in enumerate(names_a) if n.startswith("S1b")), None)
-        self.assertIsNotNone(i_a_s1b, "harness-suites must run S1b (the trusted suites selection)")
-        self.assertIsNotNone(i_a_anchor, "harness-suites must anchor the driver before S1b")
-        self.assertLess(i_a_anchor, i_a_s1b, "the anchor precedes S1b (the driver launch reads it)")
-
-        # the harness job (S1 + S4b, candidate evidence) carries NEITHER trusted phase
-        mh = re.search(r"^  harness:\n(?P<job>(?:[ ]{4,}[^\n]*\n)*)", wf, re.M)
-        self.assertIsNotNone(mh, "the harness job must exist (S1 + S4b, the candidate-controlled evidence)")
-        self.assertNotIn("- name: \"S4c", mh.group("job"),
-                         "S4c must NOT run in the harness job — it lives on the harness-trusted runner")
-        self.assertNotIn("- name: \"S1b", mh.group("job"),
-                         "S1b must NOT run in the harness job — it lives on the harness-suites runner")
-
-        # the CWE-522 hardening: every checkout reachable by candidate code
-        # persists no credentials — asserted PER CHECKOUT STEP, not by a
-        # workflow-wide count (the #66 second pass's finding: a global count
-        # passes if the setting is removed from one checkout and added to an
-        # unrelated one)
-        def checkout_blocks(job_text):
-            """Every `- uses: actions/checkout` step BLOCK (the step and its
-            indented body), in order — named or unnamed."""
-            out = []
-            cur = None
-            for ln in job_text.splitlines():
-                if re.match(r"^[ ]{6}- ", ln):
-                    if cur is not None:
-                        out.append(cur)
-                    cur = ln
-                elif cur is not None and (ln.startswith("        ") or not ln.strip()):
-                    cur += "\n" + ln
-                else:
-                    if cur is not None:
-                        out.append(cur)
-                    cur = None
-            if cur is not None:
-                out.append(cur)
-            return [b for b in out if "actions/checkout" in b]
-
-        for job_name, expected in (("harness", 1), ("harness-suites", 2), ("harness-trusted", 2)):
-            jtext, _ = job_block(job_name)
-            blocks = checkout_blocks(jtext)
-            self.assertEqual(len(blocks), expected,
-                             f"{job_name}: expected {expected} checkout step(s), found {len(blocks)}")
-            for b in blocks:
-                self.assertIn("persist-credentials: false", b,
-                              f"{job_name}: EVERY checkout reachable by candidate code must set "
-                              "persist-credentials: false (the #66 round, per-step asserted)")
+        # --- the control: the CLEAN workflow passes the repaired check ---
+        _wf_check_r06_shape(wf)
 
 
 if __name__ == "__main__":

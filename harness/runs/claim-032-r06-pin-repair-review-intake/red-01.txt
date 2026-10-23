@@ -1,0 +1,34 @@
+the OLD test_11 at the predecessor 68722c6d51422be9ef79d41840233fcb8428cbe6 (git show), run against
+the TWO mutation fixtures of the 2026-10-23 backend review (Findings A/B) — the mutations are applied by
+string surgery to the REAL verify.yml text; the scratch trees carry the old test file + the mutated
+workflow only (REPO resolves from the test file location; test_11 reads nothing else).
+
+probe: python3 scripts-side host probe (r06_pin_probe.py, host-side — never a repo artifact), mode=red
+expected observation: the old test PASSES over each mutation — the pin is BLIND (the RED)
+
+=== MUT-A (an UNNAMED `- run:` step inserted between the anchor and S4c in harness-trusted): exit=0
+R-06 (the #64 TOCTOU + the #66 review round's Greptile P1 escalation): ... ok
+Ran 1 test in 0.003s — OK
+-> the old test CANNOT DETECT the unnamed window step: i_anchor/i_s4c are computed from names_b
+   (the named-only list) but slice step_lines (the every-entry list) — two different index spaces;
+   the inserted step shifts step_lines but never names_b, so the slice stays empty and the
+   assertion passes. entries_b (line 441) is computed and never used — the dead variable is the
+   unfinished second-pass fix: the #66 commit message claimed "the window now counts EVERY step
+   entry (the step-start line list, named or not)" but the merged code kept the mixed index space.
+
+=== MUT-B (the ACTIVE persist-credentials: false input REMOVED from the harness-suites Checkout head,
+         an explanatory comment still carrying the exact phrase left in place): exit=0
+R-06 (the #64 TOCTOU + the #66 review round's Greptile P1 escalation): ... ok
+Ran 1 test in 0.003s — OK
+-> the old test CANNOT DETECT the removed active input: checkout_blocks() gathers raw block text and
+   assertIn("persist-credentials: false", b) is a substring check — the comment satisfies it. The
+   #66 second pass made the check per-step (a real improvement over the workflow-wide count) but
+   left the raw-substring form, so a comment still forges the invariant.
+
+=== the control (the CLEAN workflow, old test): exit=0 — OK (the pin is selectively blind, never
+    spuriously red: it passes the clean artifact AND the two mutations — the discrimination is absent
+    in exactly the two named ways, nowhere else)
+
+RED OBSERVATION COMPLETE — both findings of the review reproduced live at the predecessor; the repaired
+test (the working tree) must REFUSE each mutation, pass the clean workflow, and carry the two fixtures
+as the discriminating regression (test_12) so the pin can never drift back to this form unnoticed.

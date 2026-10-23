@@ -1,0 +1,23 @@
+the REPAIRED pin (the working tree, test_11+test_12) against the SAME two mutation fixtures —
+the host probe's green mode: the mutations are applied to the workflow FILE itself (the real
+drift scenario: a future edit inserts the unnamed step / removes the active input), and the
+repaired test_11 must REFUSE the mutated artifact; the clean workflow must pass both tests.
+
+=== MUT-A applied to the workflow FILE (repaired test_11): exit=1 -> FAILED for the named reason
+AssertionError: the anchor-to-S4c window must be EMPTY counting EVERY step entry (named or not,
+from the ONE parsed step-block list) — got ['- run: |'] (the structure IS the isolation)
+
+=== MUT-B applied to the workflow FILE (repaired test_11): exit=1 -> FAILED for the named reason
+AssertionError: harness-suites: EVERY checkout reachable by candidate code must carry the ACTIVE
+input persist-credentials: false — a comment mentioning the phrase never satisfies the invariant
+(the block starts: '- name: Checkout head')
+
+=== CLEAN workflow (repaired test_11): exit=0 -> OK
+=== CLEAN workflow (test_12 — the in-test mutations + the old-form blindness verified inline): exit=0 -> OK
+
+GREEN DISCRIMINATION COMPLETE — the old form passes both mutations (red-01.txt), the repaired
+form refuses each for its NAMED reason both as real-file drift (this record) and as the in-test
+fixtures (test_12), and the clean workflow passes everywhere (never a pin that fails its own
+artifact). The two review findings are closed with falsifiable regressions: future workflow
+drift in the two named classes is caught; the #66 mixed-index-space and raw-substring forms
+are pinned as the historical defect inside test_12's fixture self-verification.

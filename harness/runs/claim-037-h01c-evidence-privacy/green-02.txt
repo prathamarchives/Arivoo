@@ -1,0 +1,36 @@
+# GREEN EVIDENCE — green-02.txt (CLAIM-037): the FULL trusted-gate suite at the fix head — 14/14 (tests 13/14 included; zero regression on 01..12)
+# Command: python3 harness/tests/test_trusted_gate.py
+
+test_01_missing_required_suite_is_refused (__main__.TrustedGateTests.test_01_missing_required_suite_is_refused)
+F-004, fail-closed: a required suite deleted from the candidate tree ... ok
+test_02_failing_required_suite_is_refused (__main__.TrustedGateTests.test_02_failing_required_suite_is_refused)
+F-004: a required suite that FAILS is ARV-TG-003 — a gutted Makefile ... ok
+test_03_silent_suite_is_the_vacuous_class (__main__.TrustedGateTests.test_03_silent_suite_is_the_vacuous_class)
+A suite that exits 0 with NO output is ARV-TG-004 — the A03 vacuous ... ok
+test_04_gutted_makefile_cannot_fake_suites_ran (__main__.TrustedGateTests.test_04_gutted_makefile_cannot_fake_suites_ran)
+F-004's positive control: the stub's Makefile recipes are LIES (echo ... ok
+test_05_gate_phase_reroots_and_judges_the_candidate (__main__.TrustedGateTests.test_05_gate_phase_reroots_and_judges_the_candidate)
+F-006: the BASE's gate machinery re-rooted over the candidate tree. ... ok
+test_06_candidate_knownbad_registry_never_executes_in_the_trusted_run (__main__.TrustedGateTests.test_06_candidate_knownbad_registry_never_executes_in_the_trusted_run)
+F-006's backstop, the named card case: the candidate's ... ok
+test_07_invalid_inputs_and_hostile_metadata_are_refused (__main__.TrustedGateTests.test_07_invalid_inputs_and_hostile_metadata_are_refused)
+ARV-TG-001/005: a relative or nonexistent candidate root, a base ... ok
+test_08_env_only_invocation_is_the_ci_form (__main__.TrustedGateTests.test_08_env_only_invocation_is_the_ci_form)
+The CI form: metadata arrives through ARV_EVENT_NAME/ARV_PR_HEAD with ... ok
+test_09_s4c_step_runs_even_when_s4b_fails (__main__.TrustedGateTests.test_09_s4c_step_runs_even_when_s4b_fails)
+R-04(2): the TRUSTED S4c step must carry `!cancelled()` — a plain ... ok
+test_10_bounded_tail_keeps_the_end_of_the_output (__main__.TrustedGateTests.test_10_bounded_tail_keeps_the_end_of_the_output)
+R-04(3) + the #64 review round (Greptile P2 + CodeRabbit, ... ok
+test_11_r06_isolated_job_shape (__main__.TrustedGateTests.test_11_r06_isolated_job_shape)
+R-06 (the #64 TOCTOU + the #66 review round's Greptile P1 escalation): ... ok
+test_12_r06_pin_discriminates_the_mutations (__main__.TrustedGateTests.test_12_r06_pin_discriminates_the_mutations)
+The 2026-10-23 backend review's two live findings, as the standing ... ok
+test_13_self_authorized_red_refresh_is_refused (__main__.TrustedGateTests.test_13_self_authorized_red_refresh_is_refused)
+CLAIM-037 / F-007's named defect, end-to-end through the trusted ... ok
+test_14_false_revision_binding_is_refused (__main__.TrustedGateTests.test_14_false_revision_binding_is_refused)
+CLAIM-037: the typed record's git binding, end-to-end through the ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 2.456s
+
+OK

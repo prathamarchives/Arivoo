@@ -6,6 +6,8 @@ harness/proofsheet.py D-041
 tools/trusted_gate.py D-041
 harness/known-bad/cases.py D-041
 harness/tests/test_trusted_gate.py D-041
+harness/tests/test_record_machinery.py D-041
+Makefile D-041
 CLAIMS.md D-038
 STATE.md D-043
 AGENTS.md D-043

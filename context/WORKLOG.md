@@ -642,3 +642,11 @@ Stage Summary:
 - Unresolved: none in this slice's scope.
 - Next: the merge once review-complete, then CLAIM-037 — H-01c-evidence/privacy (F-007), NO PAUSE.
 - Session record: context/extracted/29-H01C-AUTHORITY-RAW-LINEAGE.md
+
+### Task 46 (2026-10-23, in-PR — CLAIM-037, H-01c-evidence/privacy part 1; the evidence machinery)
+- What: F-007's named defect (the gate's RED control judged the candidate-supplied current_sha256 — a frozen test could be edited and self-authorized via make red) + the typed red records + fail-closed suite registration + record 29 §8's routed numbering rider.
+- Outcome: the trusted-baseline RED control (ARV-RED-006: ARV_TRUSTED_BASE / origin/main; a changed test authorized only by typed amendments bridging the trusted prior digest), the schema-2 typed records (git-verified bindings, typed observed-red, the red_unrecovered honest marker; the 7 predecessor records migrated from git history — never fabricated), fail-closed registration (ARV-RED-008; the ONE TESTS home — red.py's duplication closed), max-based proof-record numbering (ARV-PRF-006), the atomic + changed-since-read red write (ARV-RED-009). The NEW suite test_record_machinery.py registered + minted the honest way (its whole first form the RED set). RED: red-01.txt at 048aaa2 (the machinery suite 6 failures, tests 13/14, the KB matrix's 4 broken guards). GREEN: 8 suites, the KB guards firing, the verifier 53/0, the 11-record proof set (PASS ARV-PRF-004). The honest catches in record 30 §8 (the overclaim, the vacuous-pass, the fixtures, the walls' scope refusals).
+- Evidence: record 30; harness/runs/claim-037-h01c-evidence-privacy/ (red-01, green-01/02/03, the proof set, notverified).
+- Unresolved: none in this slice's scope (the canary/A16 cluster is CLAIM-038).
+- Next: the merge once review-complete, then CLAIM-038 (part 2), NO PAUSE.
+- Session record: context/extracted/30-H01C-EVIDENCE-PRIVACY.md

@@ -1,0 +1,19 @@
+not verified (LAW-04 — the CLAIM-037 honest limits):
+- ARV-RED-006's chain proves the typed amendments bridge the TRUSTED PRIOR digest to the
+  current form; whether a bridged change is DESIRABLE is the review layer's judgment (the
+  diff is review-visible; the walls serialize the merge) — the same honest limit as VER-805's
+  section-8 register (the form is mechanical, the genuineness is reviewed).
+- the typed observed-red (red_exit/red_code) validates the OBSERVATION'S FORM and the
+  binding's GIT TRUTH; the historical observation itself is a claim about the past — the
+  binding proves the revision carries the recorded content, never that the run happened.
+  The two smash-class records carry red_unrecovered (honestly lost, never fabricated).
+- the binding verification runs in every git context (local, CI, the trusted job); the KB
+  probe copies are non-git by construction (.git ignored) — there the binding degrades to a
+  printed NOTE (stated per-probe); the CI trusted job always runs in a git context.
+- a true two-process make-red race was not deterministically testable in the suite — the
+  changed-since-read guard (ARV-RED-009) is exercised through a deterministic mid-flight
+  mutation hook, and the write itself is atomic (tmp+os.replace, no torn file possible);
+  the surviving race window (two writers past the guard simultaneously) is a stated
+  residual of the single-writer protocol, refused fail-closed by the re-read.
+- the canary-redaction + A16-narrowing cluster is CLAIM-038 (part 2 of the card) — routed,
+  not silently claimed here.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """verify_selftest.py — the H-01b trusted candidate-tool execution floor (A03).
 
-The base-owned mutation suite: 35 known-bad corpus mutations, each of which the
+The base-owned mutation suite: 39 known-bad corpus mutations, each of which the
 CANDIDATE's verify_canonical_layer.py must catch with its named check. This
 module is anchored from main by CI (D-035: the coordinated-weakening floor) and
 judges whichever candidate tree it is pointed at.
@@ -355,6 +355,30 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
         lambda r: _strip_quote_lines(r),
         "VER-803",
     ),
+    (
+        "MUT-36",
+        "phantom authorization: the coordinated reanchor of MUT-32's form PLUS a WELL-FORMED section-8 register row whose owner authorization cites INT-001 — a RESERVED range the ledger's numbering note mentions (**INT-001..INT-018**) with no actual entry header; the old substring resolution matched the note, so a reanchor pointed at nothing passed (Greptile P1, the #71 round)",
+        lambda r: _reanchor_phantom_auth(r),
+        "VER-805",
+    ),
+    (
+        "MUT-37",
+        "hide swapped rows behind later copies: swap 0.txt/1.txt full-digest values in the designated block (MUT-33's form), then append the CORRECT rows later in the document outside the block — the old whole-manifest scan kept the LAST row per filename, so the published block's swapped rows passed the per-row check while wrong (Greptile P2, the #71 round)",
+        lambda r: _digest_row_hide_outside(r),
+        "VER-805",
+    ),
+    (
+        "MUT-38",
+        "hide swapped rows behind in-block duplicates: swap the designated rows, then append the correct copies INSIDE the same fenced block — duplicate filenames within the designated block are an ambiguous binding that must be refused, never resolved by a last-wins selection within the block (the duplicate-rejection half of the P2 fix)",
+        lambda r: _digest_row_hide_inside(r),
+        "VER-805",
+    ),
+    (
+        "MUT-39",
+        "fabricate a SHORT quotation on a raw-cited entry (INT-083's quote replaced by a 15-char nonsense string): the old fragment loop skipped every fragment under 20 chars, so a short quote was extracted (satisfying the no-quote guard) yet NEVER checked against raw — extraction without validation, the fail-open form (CodeRabbit Major, the #71 round)",
+        lambda r: _short_quote_fabrication(r),
+        "VER-803",
+    ),
 ]
 
 
@@ -442,6 +466,106 @@ def _strip_quote_lines(repo: Path) -> None:
         "INTENT-LEDGER.md",
         '> "1 - smallest daily loop. i read books, i import articles, posts, writings, research paper, pdfs, md\'s and any thing readable. reason through it take notes on it, and jounral about my learnings, reasoning, and reading journey how it is going and everything, and like everything compounds thats the goal since the start.. notes get compounded, everything i can comeback to, revise, and like actually learn things, develop..."',
         "- (the quotation was stripped by MUT-35 — source metadata must not pass without a checkable quote)",
+    )
+
+
+# ----------------------- H-01c-authority ROUND helpers (the #71 review findings)
+# The raw/manifest lineage mutations of the Greptile P1/P2 + CodeRabbit Major
+# round. Same discipline as MUT-32..35: digests are READ from the manifest at
+# mutation time (never hardcoded — the re-target class), the register row is
+# built from the fixture's own prior/new values, and the nonsense string was
+# probed first against the cited window (it appears nowhere in raw).
+
+def _reanchor_phantom_auth(repo: Path) -> None:
+    """Greptile P1 (#71): the ledger's numbering note mentions the RESERVED
+    range (**INT-001..INT-018**) with no actual INT-001 entry header — the old
+    substring resolution ('**INT-001' in ledger text) matched the note, so a
+    well-formed reanchor row citing INT-001 passed with an authorization that
+    points at nothing. The raw+manifest rewrite rides _reanchor_coordinated
+    (MUT-32's form, read-first digests); this adds the register row citing the
+    phantom. The anchored fix must resolve authorizations against ACTUAL
+    entry headers and decision rows only."""
+    mp = repo / "context" / "SOURCE-COVERAGE-MANIFEST.md"
+    prior = _manifest_full_digests(mp.read_text(encoding="utf-8"))["2.txt"]
+    _reanchor_coordinated(repo)
+    new_digest = hashlib.sha256((repo / "context" / "raw" / "2.txt").read_bytes()).hexdigest()
+    mtext = mp.read_text(encoding="utf-8")
+    row = f"| `2.txt` | `{prior}` | `{new_digest}` | `INT-001` | `2026-10-23` |"
+    placeholder = "| — | — | — | — | — |"
+    reg_anchor = "|------|---------------|-------------|---------------------|------|"
+    if placeholder in mtext:
+        mtext = mtext.replace(placeholder, row, 1)
+    elif reg_anchor in mtext:
+        mtext = mtext.replace(reg_anchor, reg_anchor + "\n" + row, 1)
+    else:
+        raise AssertionError(
+            "the section-8 reanchor register table must exist for this mutation (re-target guard)"
+        )
+    mp.write_text(mtext, encoding="utf-8")
+
+
+def _swap_designated_rows(mtext: str, d0: str, d1: str) -> str:
+    """Swap 0.txt/1.txt full-digest values inside the designated block (the
+    MUT-33 form, read at mutation time): every hash still appears in the file
+    (VER-802's grep passes) while each designated row binds the wrong file."""
+    mtext = re.sub(r"^(0\.txt)[ \t]+" + d0 + r"[ \t]*$",
+                   r"\g<1>" + " " * max(1, 41 - len("0.txt")) + d1, mtext, flags=re.M)
+    mtext = re.sub(r"^(1\.txt)[ \t]+" + d1 + r"[ \t]*$",
+                   r"\g<1>" + " " * max(1, 41 - len("1.txt")) + d0, mtext, flags=re.M)
+    return mtext
+
+
+def _digest_row_hide_outside(repo: Path) -> None:
+    """Greptile P2 (#71), the exact reported form: swap the designated rows,
+    then append the CORRECT rows later in the document (outside the block) —
+    the old whole-manifest last-wins scan bound the appended copies, so the
+    published block's swapped rows passed the per-row check while wrong."""
+    mp = repo / "context" / "SOURCE-COVERAGE-MANIFEST.md"
+    mtext = mp.read_text(encoding="utf-8")
+    digs = _manifest_full_digests(mtext)
+    d0, d1 = digs["0.txt"], digs["1.txt"]
+    mtext = _swap_designated_rows(mtext, d0, d1)
+    mtext += (
+        "\n\n## 9. Later copies (the mutation's hiding place)\n\n"
+        + "0.txt" + " " * max(1, 41 - len("0.txt")) + d0 + "\n"
+        + "1.txt" + " " * max(1, 41 - len("1.txt")) + d1 + "\n"
+    )
+    mp.write_text(mtext, encoding="utf-8")
+
+
+def _digest_row_hide_inside(repo: Path) -> None:
+    """The in-block variant (the P2 fix's second half): swap the designated
+    rows, then append the correct copies INSIDE the same fenced block —
+    duplicate filenames within the designated block are an ambiguous binding;
+    the parser must refuse them, never resolve last-wins within the block."""
+    mp = repo / "context" / "SOURCE-COVERAGE-MANIFEST.md"
+    mtext = mp.read_text(encoding="utf-8")
+    digs = _manifest_full_digests(mtext)
+    d0, d1 = digs["0.txt"], digs["1.txt"]
+    mtext = _swap_designated_rows(mtext, d0, d1)
+    block_pat = re.compile(r"(Full SHA-256 values[^\n]*\n+```[^\n]*\n)(.*?)(\n```)", re.S)
+    m = block_pat.search(mtext)
+    if not m:
+        raise AssertionError("the designated full-digest block must exist for this mutation (re-target guard)")
+    rows = m.group(2) + (
+        "\n0.txt" + " " * max(1, 41 - len("0.txt")) + d0
+        + "\n1.txt" + " " * max(1, 41 - len("1.txt")) + d1
+    )
+    mtext = mtext[: m.start()] + m.group(1) + rows + m.group(3) + mtext[m.end():]
+    mp.write_text(mtext, encoding="utf-8")
+
+
+def _short_quote_fabrication(repo: Path) -> None:
+    """CodeRabbit Major (#71): a SHORT fabricated quotation — extracted (so the
+    no-quote fail-closed guard is satisfied) yet skipped by the old <20-char
+    fragment floor and never validated against raw: extraction without
+    validation, the fail-open form. The nonsense string was probed first: it
+    appears nowhere in INT-083's cited window (1.txt:444)."""
+    _edit(
+        repo,
+        "INTENT-LEDGER.md",
+        '> "1 - smallest daily loop. i read books, i import articles, posts, writings, research paper, pdfs, md\'s and any thing readable. reason through it take notes on it, and jounral about my learnings, reasoning, and reading journey how it is going and everything, and like everything compounds thats the goal since the start.. notes get compounded, everything i can comeback to, revise, and like actually learn things, develop..."',
+        '> "qzwxecrv tbmzn"',
     )
 
 
@@ -650,7 +774,7 @@ def _select(only: str | None) -> list:
     sel = []
     for w in wanted:
         if not re.fullmatch(r"MUT-\d{2}", w) or w not in by_code:
-            raise SystemExit(f"refused: unknown case '{w}' — the expected set is fixed (MUT-01..MUT-35)")
+            raise SystemExit(f"refused: unknown case '{w}' — the expected set is fixed (MUT-01..MUT-39)")
         sel.append(by_code[w])
     return sel
 

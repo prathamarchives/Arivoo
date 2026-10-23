@@ -1,41 +1,16 @@
 #!/usr/bin/env python3
-"""harness/red.py — `make red` (S4; LAW-11's mechanical memory).
+"""harness/red.py — `make red` (S4; LAW-11's mechanical memory) — the TYPED writer.
 
-CLAIM-037 (H-01c-evidence/privacy part 1, F-007): the TYPED red-record writer.
-
-The predecessor recorded a hash + a note — a current hash alone can certify an
-unobserved or removed assertion, and a candidate can self-authorize an edited
-test by refreshing its own record (F-007's named defect). The typed form:
-
-  schema 2, per record:
-    binding_commit / binding_sha256  the git-verified revision binding —
-                       the commit whose history carries the recorded content
-                       (verified by the gate's `git show` against this pair;
-                       for a NEW record: the --red-commit, default HEAD)
-    red_exit / red_code  the TYPED OBSERVED-RED — the nonzero exit and the
-                       named refusal string observed at the red run (required
-                       for a NEW record: a written assertion is not an
-                       observed failure; ARV-RED-007 refuses the bare mint)
-    red_unrecovered  the honest marker for the smash class (the creation-time
-                       evidence overwritten before any commit preserved it) —
-                       never a fabricated exit/code
-    current_sha256  the file's hash now
-    amendments[]  TYPED entries from here on: {prior_sha256, new_sha256,
-                       note, observed_at} — the exact changed content; the
-                       gate's ARV-RED-006 accepts a changed test ONLY through
-                       a typed chain bridging the trusted prior state
-
-One TESTS home (this card's unification): the tuple is imported from
-harness/gate.py — the predecessor DUPLICATED it here (the one-fact-two-homes
-defect its own docstring named; a new suite registered in one tuple was
-invisible to the other, which is exactly how the fail-closed registration gap
-went unobserved).
-
-Concurrency (the card's explicit-semantics item): make red is a SINGLE-WRITER
-flow. The write is atomic (tmp + os.replace — a crash never leaves a torn
-file), and a file that changed since THIS run read it is refused with
-ARV-RED-009 (the changed-since-read guard — a concurrent writer is a refusal,
-never a lost update).
+CLAIM-037 (F-007): schema 2 per record — binding_commit/binding_sha256 (the
+git-verified revision binding), red_exit/red_code (the typed OBSERVED red,
+required for a NEW record: a written assertion is not an observed failure),
+red_unrecovered (the smash class's honest marker, baseline-present records
+only), current_sha256, and TYPED amendments {prior_sha256, new_sha256, note,
+observed_at} — the gate's ARV-RED-006 accepts a changed test only through a
+typed chain bridging the trusted prior state. The TESTS tuple imports from
+harness/gate.py (the ONE home). The write is atomic (tmp+os.replace) and a
+file changed since read refuses (ARV-RED-009 — the single-writer protocol).
+The full schema description: record 30 §4 and the slice's opening commit.
 """
 import argparse
 import hashlib

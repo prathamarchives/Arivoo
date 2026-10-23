@@ -169,16 +169,10 @@ def check_red_records() -> list:
         return ["ARV-RED-003"]
     data = json.loads(rr_path.read_text())
 
-    # ARV-RED-008 (fail-closed suite registration, CLAIM-037): every test file
-    # under harness/tests/ must be registered. The #72 round (Greptile P1):
-    # registration counts in EITHER tuple — the gate's OWN TESTS (base-owned at
-    # trusted time) OR the CANDIDATE'S gate.py TESTS, parsed as DATA (a
-    # diff-visible, reviewable addition; candidate code is never imported to
-    # learn it). A suite registered in the candidate's own tuple is NOT part of
-    # the trusted REQUIRED selection until main adopts the tuple (the next
-    # slice's trusted run executes it) — the check's subject is the file
-    # invisible to BOTH discovery surfaces, never a legitimately-registered
-    # addition (never described as a bypass — CodeRabbit's wording catch).
+    # ARV-RED-008: registration counts in EITHER tuple — the gate's OWN TESTS or
+    # the candidate's gate.py TESTS parsed as DATA (diff-visible; never imported);
+    # a candidate-registered suite is not TRUSTED-required until main adopts the
+    # tuple — the check's subject: a file invisible to BOTH discovery surfaces.
     cand_tests = set(TESTS)
     gp = REPO / "harness" / "gate.py"
     if gp.is_file() and str(gp.resolve()) != str(pathlib.Path(__file__).resolve()):
@@ -235,10 +229,6 @@ def check_red_records() -> list:
         untyped = []
         if rec.get("schema") != 2:
             untyped.append("no schema-2 marker")
-        # the #72 round (CodeRabbit Minor): red_unrecovered exists for honestly
-        # lost history — records the trusted baseline KNOWS (the smash-class
-        # migrations) — never as the typed-red bypass for a suite no baseline
-        # has ever seen (a new mint must carry the observed red)
         unrecovered_ok = bool(rec.get("red_unrecovered")) and (
             baseline is None or t in baseline)
         if not unrecovered_ok:
@@ -257,9 +247,7 @@ def check_red_records() -> list:
         elif REPO.joinpath(".git").exists() or REPO.joinpath(".git").is_file():
             shown = _git_show_hash(bc, t)
             if shown is None:
-                # the #72 round (Greptile P1): in a git context, git's inability
-                # to show the commit IS the false claim — a nonexistent revision
-                # name is a fabricated binding, never an unverifiable note
+                # a git context: git's inability to show the commit IS the false claim
                 print(f"FAIL ARV-RED-007: {t}'s binding is FALSE — git cannot show {t} at {bc[:10]} (the commit names no history this tree carries; a revision claim must name history that exists)")
                 print("      repair: bind the record to a commit that actually exists and carries the recorded content")
                 fails.append("ARV-RED-007")
@@ -270,12 +258,9 @@ def check_red_records() -> list:
         else:
             print(f"NOTE ARV-RED-000: {t}'s binding is unverifiable in a non-git copy (the KB probe context) — the binding verification runs in every git context (local, CI, the trusted job)")
 
-        # ARV-RED-006 (F-007's named defect, CLAIM-037): the self-authorization
-        # refusal. A test file whose digest differs from the TRUSTED PRIOR state
-        # is authorized ONLY by a typed amendment chain bridging exactly that
-        # transition: some typed amendment starts at the baseline's digest and
-        # consecutive typed amendments connect to the current form. The bare
-        # make-red refresh (the candidate's own current_sha256) is the hole.
+        # ARV-RED-006 (F-007's named defect): a changed test is authorized ONLY
+        # by a typed amendment chain bridging the trusted prior digest to the
+        # current form — the bare make-red refresh is the hole.
         if baseline is not None:
             b_digest = (baseline.get(t) or {}).get("current_sha256")
             if b_digest is not None and b_digest != cur:

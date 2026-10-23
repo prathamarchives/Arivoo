@@ -164,7 +164,7 @@
     "red_unrecovered": true
   },
   "harness/tests/test_trusted_gate.py": {
-    "current_sha256": "7e21d999c2e92dd74d3795852d630145d774f520a241dcff1ec0bcc09f8906f0",
+    "current_sha256": "9912163d75048295afc176fa6ce15762c2750be1f1a87f2e8d9925781f9f713a",
     "amendments": [
       {
         "note": "AMENDMENT 1 (H-01b-CI implementation slice, assertions strengthened/added \u2014 never removed, LAW-11): test_07's ARV-TG-005 probe strengthened to the real form (an EXISTING-but-empty base dir \u2014 the nonexistent-dir form fires ARV-TG-001 first); the stub builder corrected with the machinery the BASE's KB probes actually load (harness/gate.py, harness/migrate.py) and the slice's notverified.txt (the --verify re-derivation source \u2014 PRF-01); the red_evidence smash in harness/red.py repaired in the same slice (set only on first record)."
@@ -246,6 +246,12 @@
         "new_sha256": "7e21d999c2e92dd74d3795852d630145d774f520a241dcff1ec0bcc09f8906f0",
         "note": "the #72 review round's RED cases: trusted test_15 (the registered new-suite acceptance \u2014 the registration check's over-refusal), KB-RED-011 (a nonexistent binding_commit passing as a NOTE), KB-RED-012 (red_unrecovered as a new-mint bypass), the machinery suite's cases 5 (the run-100 parse stall) + 6 (the missing-registry bootstrap crash). Tests added, none removed",
         "observed_at": "2026-10-23T14:35:18.377165+00:00"
+      },
+      {
+        "prior_sha256": "7e21d999c2e92dd74d3795852d630145d774f520a241dcff1ec0bcc09f8906f0",
+        "new_sha256": "9912163d75048295afc176fa6ce15762c2750be1f1a87f2e8d9925781f9f713a",
+        "note": "the #72 round's fixture repairs (all pre-merge, each an honest catch recorded in record 30 \u00a78's round entry): test_15's stub declarations (the gate.py scope/claim lines, the runs-line ref, the binding naming the suite's own commit), KB-011's git-context init + KB-012's suite file + the robust middle-tuple anchor, machinery case 6's git fixture. The fixes themselves: the either-tuple registration (the per-record loop covers the union), the false-history refusal, the run-100 format, the registry bootstrap, the unrecovered restriction",
+        "observed_at": "2026-10-23T14:43:19.268431+00:00"
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice).",
@@ -291,7 +297,7 @@
     "red_exit": 1,
     "red_code": "ARV-PRF-006 + ARV-RED-007/009 (the suite's RED set observed at 048aaa2 \u2014 six failures: the count-based overwrite, the stall, the unparseable-context no-refusal, the untyped-mint no-refusal, the changed-since-read no-refusal; red-01.txt)",
     "red_evidence": "the CLAIM-037 fix-commit amendment: test_trusted_gate.py's build_stub restructured for schema-2 stub records (the binding names the stub's own git history; the typed amendments chain from the base records) + the NEW suite test_record_machinery.py minted with its OBSERVED red",
-    "current_sha256": "4e14caad3904b577791d8827d6961f989aeabe237d4a0078fb164465e20f8be4",
+    "current_sha256": "94fab7905c4cca346caa78a10ab325be0b5246f14307e28a64c48b75da4279c3",
     "amendments": [
       {
         "prior_sha256": "a4ee919f0c56a664e874aab871f6d4d6b278f9615ccf705be91b06f40130dcd3",
@@ -304,6 +310,12 @@
         "new_sha256": "4e14caad3904b577791d8827d6961f989aeabe237d4a0078fb164465e20f8be4",
         "note": "the #72 review round's RED cases: trusted test_15 (the registered new-suite acceptance \u2014 the registration check's over-refusal), KB-RED-011 (a nonexistent binding_commit passing as a NOTE), KB-RED-012 (red_unrecovered as a new-mint bypass), the machinery suite's cases 5 (the run-100 parse stall) + 6 (the missing-registry bootstrap crash). Tests added, none removed",
         "observed_at": "2026-10-23T14:35:18.377233+00:00"
+      },
+      {
+        "prior_sha256": "4e14caad3904b577791d8827d6961f989aeabe237d4a0078fb164465e20f8be4",
+        "new_sha256": "94fab7905c4cca346caa78a10ab325be0b5246f14307e28a64c48b75da4279c3",
+        "note": "the #72 round's fixture repairs (all pre-merge, each an honest catch recorded in record 30 \u00a78's round entry): test_15's stub declarations (the gate.py scope/claim lines, the runs-line ref, the binding naming the suite's own commit), KB-011's git-context init + KB-012's suite file + the robust middle-tuple anchor, machinery case 6's git fixture. The fixes themselves: the either-tuple registration (the per-record loop covers the union), the false-history refusal, the run-100 format, the registry bootstrap, the unrecovered restriction",
+        "observed_at": "2026-10-23T14:43:19.268502+00:00"
       }
     ]
   }

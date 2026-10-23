@@ -64,7 +64,7 @@ def write_record(slice_name: str, command: str, exit_code: int, output: str) -> 
     import re as _re
     numbers = []
     for f in glob.glob(str(d / "run-*.json")):
-        m = _re.fullmatch(r"run-(\d{2})\.json", pathlib.Path(f).name)
+        m = _re.fullmatch(r"run-(\d+)\.json", pathlib.Path(f).name)  # the #72 round: the writer's own :02d output (run-100+) must parse
         if m:
             numbers.append(int(m.group(1)))
         else:

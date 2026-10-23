@@ -410,7 +410,15 @@ def kb_nonexistent_binding(copy: pathlib.Path) -> None:
     name no revision) sailed through as 'unverifiable' — a NOTE without a
     failure. In a git context, git's inability to show the commit IS the false
     claim: a revision binding must name history that exists."""
-    import json
+    import json, subprocess
+    # the git-context form: the work copies are non-git by construction, so the
+    # probe git-inits its own copy — the binding check's git context must be
+    # REAL for the nonexistent-commit refusal to be exercisable
+    subprocess.run(["git", "init", "-q"], cwd=copy, capture_output=True)
+    subprocess.run(["git", "config", "user.email", "probe@test.local"], cwd=copy, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "probe"], cwd=copy, capture_output=True)
+    subprocess.run(["git", "add", "-A"], cwd=copy, capture_output=True)
+    subprocess.run(["git", "commit", "-q", "-m", "probe base"], cwd=copy, capture_output=True)
     rr = copy / "harness" / "red-records.json"
     data = json.loads(rr.read_text())
     key = "harness/tests/test_migrations.py"
@@ -437,6 +445,22 @@ def kb_unrecovered_without_baseline(copy: pathlib.Path) -> None:
     key = "harness/tests/test_migrations.py"
     rogue = "harness/tests/test_new_suite_probe.py"
     data = json.loads(rr.read_text())
+    # the rogue suite FILE must exist for the TESTS loop to examine its record
+    # (the probe's own second catch: registering a file that is not there is
+    # the ARV-GATE-001 class, not the bypass case under test)
+    (copy / "harness" / "tests" / "test_new_suite_probe.py").write_text(
+        "# the bypass probe's suite file (must exist for its record to be examined)\n", encoding="utf-8")
+    # the rogue suite must be REGISTERED in the copy's own gate.py TESTS (the
+    # registered-addition form) — otherwise the per-record check never examines
+    # its record and the bypass stays invisible (the probe's own first miss)
+    gpf = copy / "harness" / "gate.py"
+    gtext = gpf.read_text(encoding="utf-8")
+    # a MIDDLE tuple entry as the anchor — stable across the real tuple AND the
+    # test stubs whose tuples end with their own additions (the probe's own
+    # third catch: anchoring on the LAST entry crashed against test_15's stub)
+    anchor = '"harness/tests/test_claims_paths.py",'
+    assert anchor in gtext
+    gpf.write_text(gtext.replace(anchor, anchor + '\n         "harness/tests/test_new_suite_probe.py",', 1), encoding="utf-8")
     data[rogue] = {"schema": 2,
                    "binding_commit": original[key].get("binding_commit", "0" * 40),
                    "binding_sha256": "0" * 64,

@@ -790,7 +790,21 @@ class TrustedGateTests(unittest.TestCase):
         registration check compared against the BASE tuple alone and refused
         the candidate's own registered addition with ARV-RED-008."""
         stub = build_stub(self.td, gutted_makefile=True)
-        # a NEW suite, registered in the CANDIDATE'S OWN TESTS tuple + a record
+        # a NEW suite, registered in the CANDIDATE'S OWN TESTS tuple + a record.
+        # The registration edit touches the stub's OWN gate.py — declared in the
+        # stub's scope + claim row (the synthetic declaration of exactly this
+        # reviewable change), or the scope/claims checks refuse it (the honest
+        # form: registering a suite is a gate.py change, never a free edit)
+        scope_txt = stub / "harness" / "runs" / SLICE / "scope.txt"
+        scope_txt.write_text(
+            scope_txt.read_text().replace(
+                f"harness/runs/{SLICE}\n", f"harness/runs/{SLICE} D-041\n")
+            + "harness/gate.py D-041\n")
+        claims_md = stub / "CLAIMS.md"
+        ctext = claims_md.read_text()
+        claims_md.write_text(ctext.replace(
+            "`notes.txt`, `harness/tests`, `harness/red-records.json`",
+            "`notes.txt`, `harness/tests`, `harness/red-records.json`, `harness/gate.py`", 1))
         newsuite = stub / "harness" / "tests" / "test_brand_new.py"
         newsuite.write_text("import unittest\n\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n\nif __name__ == \"__main__\":\n    unittest.main()\n", encoding="utf-8")
         gp = stub / "harness" / "gate.py"
@@ -799,10 +813,17 @@ class TrustedGateTests(unittest.TestCase):
         assert anchor in gtext
         gtext = gtext.replace(anchor, anchor[:-1] + ",\n         \"harness/tests/test_brand_new.py\")")
         gp.write_text(gtext, encoding="utf-8")
+        # the suite file lands FIRST (its own commit), THEN the record binds to
+        # that commit — the real make-red form: the binding names history that
+        # actually carries the file (the fixture's own catch: binding to the
+        # repo's FIRST commit named a history that never carried the suite)
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the new suite lands"], cwd=stub,
+                       check=True, capture_output=True)
+        binding = subprocess.run(["git", "rev-parse", "HEAD"], cwd=stub,
+                                 capture_output=True, text=True).stdout.strip()
         rr = stub / "harness" / "red-records.json"
         data = json.loads(rr.read_text())
-        binding = subprocess.run(["git", "rev-list", "--max-parents=0", "HEAD"], cwd=stub,
-                                 capture_output=True, text=True).stdout.strip()
         data["harness/tests/test_brand_new.py"] = {
             "schema": 2, "binding_commit": binding,
             "binding_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),

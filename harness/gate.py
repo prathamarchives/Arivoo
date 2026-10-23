@@ -38,6 +38,7 @@ import json
 import contextlib
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -169,13 +170,26 @@ def check_red_records() -> list:
     data = json.loads(rr_path.read_text())
 
     # ARV-RED-008 (fail-closed suite registration, CLAIM-037): every test file
-    # under harness/tests/ must be registered — the predecessor's discovery gap
-    # let a NEW suite sail past the trusted selection and the red control.
+    # under harness/tests/ must be registered. The #72 round (Greptile P1):
+    # registration counts in EITHER tuple — the gate's OWN TESTS (base-owned at
+    # trusted time) OR the CANDIDATE'S gate.py TESTS, parsed as DATA (a
+    # diff-visible, reviewable addition; candidate code is never imported to
+    # learn it). A suite registered in the candidate's own tuple is NOT part of
+    # the trusted REQUIRED selection until main adopts the tuple (the next
+    # slice's trusted run executes it) — the check's subject is the file
+    # invisible to BOTH discovery surfaces, never a legitimately-registered
+    # addition (never described as a bypass — CodeRabbit's wording catch).
+    cand_tests = set(TESTS)
+    gp = REPO / "harness" / "gate.py"
+    if gp.is_file() and str(gp.resolve()) != str(pathlib.Path(__file__).resolve()):
+        m = re.search(r"TESTS\s*=\s*\(([^)]*)\)", gp.read_text(encoding="utf-8"), re.S)
+        if m:
+            cand_tests |= set(re.findall(r'"([^"]+)"', m.group(1)))
     for p in sorted((REPO / "harness" / "tests").glob("test_*.py")):
         rel = str(p.relative_to(REPO))
-        if rel not in TESTS:
-            print(f"FAIL ARV-RED-008: {rel} exists under harness/tests/ but is NOT registered in the TESTS suite list — an unregistered suite evades the required-suite selection and the red control entirely (fail-closed registration)")
-            print("      repair: register it in harness/gate.py TESTS + mint its red record ('make red --exit N --code CODE'), or remove the file")
+        if rel not in cand_tests:
+            print(f"FAIL ARV-RED-008: {rel} exists under harness/tests/ but is registered NOWHERE — invisible to BOTH discovery surfaces (the trusted required-suite selection and the red control)")
+            print("      repair: register it in the gate.py TESTS tuple (a diff-visible, reviewable change) + mint its red record ('make red --exit N --code CODE'), or remove the file")
             fails.append("ARV-RED-008")
 
     baseline, baseline_src = _red_baseline()
@@ -184,7 +198,11 @@ def check_red_records() -> list:
     if baseline is not None:
         print(f"NOTE ARV-RED-000: the trusted baseline resolved from {baseline_src} — a changed test is authorized only by a typed amendment chaining from it")
 
-    for t in TESTS:
+    # the #72 round: the per-record validation covers the UNION — the gate's
+    # own TESTS plus the candidate-registered additions (a registered suite's
+    # record gets the FULL typed/binding/chain validation; registering without
+    # a record is ARV-RED-001, and the unrecovered/typed-red rules reach it)
+    for t in sorted(cand_tests):
         if t not in data:
             print(f"FAIL ARV-RED-001: no red record for {t} — every test file must carry its red evidence (LAW-11: committed alone, observed failing)")
             print("      repair: 'make red --exit N --code CODE' at the test-only commit, or backfill the record with the red commit's evidence")
@@ -205,7 +223,13 @@ def check_red_records() -> list:
         untyped = []
         if rec.get("schema") != 2:
             untyped.append("no schema-2 marker")
-        if not rec.get("red_unrecovered"):
+        # the #72 round (CodeRabbit Minor): red_unrecovered exists for honestly
+        # lost history — records the trusted baseline KNOWS (the smash-class
+        # migrations) — never as the typed-red bypass for a suite no baseline
+        # has ever seen (a new mint must carry the observed red)
+        unrecovered_ok = bool(rec.get("red_unrecovered")) and (
+            baseline is None or t in baseline)
+        if not unrecovered_ok:
             re_, rc_ = rec.get("red_exit"), rec.get("red_code")
             if not isinstance(re_, int) or re_ == 0:
                 untyped.append("red_exit is not a nonzero int")
@@ -215,13 +239,18 @@ def check_red_records() -> list:
         if not bc or not bs:
             untyped.append("no binding_commit/binding_sha256 pair")
         if untyped:
-            print(f"FAIL ARV-RED-007: {t}'s red record is untyped ({'; '.join(untyped)}) — a written assertion is not an observed failure; the record needs the typed observed-red (or the honest unrecovered marker) and the git-verifiable binding (F-007)")
-            print("      repair: re-type via 'make red' with the observed --exit/--code, or record red_unrecovered honestly (the smash class)")
+            print(f"FAIL ARV-RED-007: {t}'s red record is untyped ({'; '.join(untyped)}) — a written assertion is not an observed failure; the record needs the typed observed-red (or the honest unrecovered marker, only for records the trusted baseline knows) and the git-verifiable binding (F-007)")
+            print("      repair: re-type via 'make red' with the observed --exit/--code; red_unrecovered is for honestly-lost history (baseline-present records), never a new mint's bypass")
             fails.append("ARV-RED-007")
         elif REPO.joinpath(".git").exists() or REPO.joinpath(".git").is_file():
             shown = _git_show_hash(bc, t)
             if shown is None:
-                print(f"NOTE ARV-RED-000: {t}'s binding is unverifiable in this git context (git show failed) — stated, never a hidden skip")
+                # the #72 round (Greptile P1): in a git context, git's inability
+                # to show the commit IS the false claim — a nonexistent revision
+                # name is a fabricated binding, never an unverifiable note
+                print(f"FAIL ARV-RED-007: {t}'s binding is FALSE — git cannot show {t} at {bc[:10]} (the commit names no history this tree carries; a revision claim must name history that exists)")
+                print("      repair: bind the record to a commit that actually exists and carries the recorded content")
+                fails.append("ARV-RED-007")
             elif shown != bs:
                 print(f"FAIL ARV-RED-007: {t}'s binding is FALSE — the digest recorded for binding commit {bc[:10]} does not match the file as git carries it (a fabricated revision claim)")
                 print("      repair: bind the record to the commit that actually carries the recorded content; a revision claim must name history that exists")

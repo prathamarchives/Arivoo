@@ -233,9 +233,14 @@ def main() -> int:
                     "harness/adapters/__init__.py", "harness/adapters/clock.py"):
             (rt2 / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(REPO / rel, rt2 / rel)
-        (rt2 / "harness" / "tests").mkdir(parents=True, exist_ok=True)
-        for t in TESTS_NAMES:
-            shutil.copy2(REPO / "harness" / "tests" / t, rt2 / "harness" / "tests" / t)
+        # copytree already carried harness/tests (the full TESTS set); the
+        # mint's binding verification needs real history — the tree git-inits
+        # and commits BEFORE the registry is removed (the recovery path's input)
+        subprocess.run(["git", "init", "-q"], cwd=rt2, capture_output=True)
+        subprocess.run(["git", "config", "user.email", "probe@test.local"], cwd=rt2, capture_output=True)
+        subprocess.run(["git", "config", "user.name", "probe"], cwd=rt2, capture_output=True)
+        subprocess.run(["git", "add", "-A"], cwd=rt2, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the bootstrap base"], cwd=rt2, capture_output=True)
         (rt2 / "harness" / "red-records.json").unlink()  # the recovery path's input
         red2 = _load_machinery(rt2)["red"]
         rc4 = 0

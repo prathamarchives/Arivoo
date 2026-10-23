@@ -72,8 +72,14 @@ def main() -> int:
             print(f"FAIL ARV-RED-004: {t} does not exist — nothing to record")
             return 1
 
-    original_text = RR.read_text()
-    data = json.loads(original_text)
+    # the #72 round (Greptile P2): the missing-registry recovery path — the
+    # predecessor bootstrapped an empty registry; the rewrite's unconditional
+    # read crashed. The ARV-RED-003 recovery path is preserved (every TESTS
+    # file below then mints a NEW record, each requiring --exit/--code).
+    original_text = RR.read_text() if RR.is_file() else ""
+    data = json.loads(original_text) if original_text.strip() else {}
+    if not RR.is_file():
+        print("NOTE ARV-RED-000: harness/red-records.json is absent — bootstrapping an empty registry (the ARV-RED-003 recovery path; every TESTS file mints a NEW record below, each requiring the observed --exit/--code)")
     red_commit = a.red_commit or subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
 
@@ -112,7 +118,8 @@ def main() -> int:
             data[t]["current_sha256"] = cur
         # unchanged digest: no-op (the note rides the invocation's output only)
 
-    if RR.read_text() != original_text:
+    current_text = RR.read_text() if RR.is_file() else ""
+    if current_text != original_text:
         print("FAIL ARV-RED-009: harness/red-records.json changed since it was read — a concurrent writer is refused (make red is a single-writer flow; the protocol is explicit, never racy)")
         return 1
     tmp = RR.with_suffix(".json.tmp")

@@ -1,0 +1,27 @@
+the OLD test_11 at the pushed head 5d4508a56f490100787153b38c48822a40a76b93 (git show — the
+comment-aware but line-anywhere form the #67 Greptile round's P1 found), run against the round's
+MUT-C fixture (the wrong-mapping credential) — the mutation applied by string surgery to the REAL
+verify.yml text; the scratch tree carries the old test file + the mutated workflow only.
+
+probe: python3 scripts-side host probe (r67_p1_probe.py, host-side — never a repo artifact), mode=red
+expected observation: the old test PASSES over the mutation — the pin is BLIND to the wrong-mapping
+credential (the RED, exactly as Greptile's P1 stated: "Moving persist-credentials: false into the
+step's env leaves this check green even though the checkout input is missing")
+
+=== MUT-C (the ACTIVE input MOVED OUT of the Checkout head's with: mapping, re-planted as a
+         step-level env: child — the phrase stays an ACTIVE line, the checkout INPUT is gone):
+         exit=0
+R-06 (the #64 TOCTOU + the #66 review round's Greptile P1 escalation): ... ok
+Ran 1 test in 0.004s — OK
+-> the old test CANNOT DETECT the moved input: _wf_active_persist_false at 5d4508a walks the
+   block's lines, skips comments, and accepts _WF_PERSIST_RE matching ANYWHERE in the step —
+   the matching line under env: satisfies it while the checkout input is absent. The Finding B
+   repair made the check comment-aware but left it mapping-BLIND: the invariant the check claims
+   (the checkout INPUT is set) is not the invariant it tests (a line exists somewhere).
+   Greptile's required form: "Track the with: mapping and add a wrong-mapping mutation alongside
+   the comment-only case" — done at the fix commit (the with:-child structural check + MUT-C in
+   test_12 + _wf_mut_wrong_mapping_credential).
+
+=== the control (the CLEAN workflow, old test): exit=0 — OK (the pin is selectively blind, never
+    spuriously red: it passes the clean artifact AND the wrong-mapping mutation — the new
+    discrimination is absent in exactly the one named way, nowhere else)

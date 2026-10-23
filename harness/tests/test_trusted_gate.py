@@ -261,14 +261,28 @@ def _wf_find(blocks, name_prefix):
 
 
 def _wf_active_persist_false(block_lines):
-    """True iff the checkout block carries the ACTIVE input
-    `persist-credentials: false` — the value exactly boolean false, a trailing
-    comment allowed, COMMENT LINES NEVER SATISFY (Finding B's repair: the #66
-    form's raw-substring assertIn matched a comment mentioning the phrase)."""
+    """True iff the checkout block carries the ACTIVE CHECKOUT INPUT
+    `persist-credentials: false` — a DIRECT CHILD of the step's `with:`
+    mapping, the value exactly boolean false, a trailing comment allowed.
+    COMMENT LINES never satisfy (Finding B's repair: the #66 form's raw
+    substring assertIn matched a comment mentioning the phrase), and a
+    WRONG-MAPPING line never satisfies either (the #67 Greptile round's P1:
+    the line-anywhere form stayed green over `persist-credentials: false`
+    planted under `env:` while the checkout input was absent — the mapping is
+    tracked structurally, never the bare line)."""
+    first = block_lines[0]
+    step_i = len(first) - len(first.lstrip())     # the `- ` line's own indent
+    key_i = step_i + 2                             # the step's keys (with:/env:/run:)
+    child_i = step_i + 4                           # a mapping's direct children
+    top = None                                     # the step key we are inside
     for ln in block_lines:
-        if ln.lstrip().startswith("#"):
-            continue
-        if _WF_PERSIST_RE.match(ln):
+        stripped = ln.strip()
+        if not stripped or stripped.startswith("#"):
+            continue                               # comments/blanks never switch context
+        ind = len(ln) - len(ln.lstrip())
+        if ind == key_i:
+            top = stripped.split(":", 1)[0].strip()   # a new step key ends the prior mapping
+        elif ind == child_i and top == "with" and _WF_PERSIST_RE.match(ln):
             return True
     return False
 
@@ -310,6 +324,35 @@ def _wf_mut_comment_only_credential(wf_text: str) -> str:
             return wf_text[:off0] + new_block + wf_text[off0 + len(old_block):]
     raise AssertionError("the MUT-B fixture cannot be built — no ACTIVE persist-credentials "
                          "input in harness-suites' first checkout (update the fixture with the artifact)")
+
+
+def _wf_mut_wrong_mapping_credential(wf_text: str) -> str:
+    """MUT-C (the #67 Greptile round's P1 counterexample): the ACTIVE
+    persist-credentials input MOVED OUT of harness-suites' FIRST checkout's
+    `with:` mapping and re-planted as a step-level `env:` child — an ACTIVE
+    line carrying the exact phrase remains, the checkout INPUT is gone. The
+    line-anywhere form's blind spot (the check must track the `with:` mapping,
+    never the bare line)."""
+    _, blocks = _wf_job(wf_text, "harness-suites")
+    co = [b for b in blocks if "actions/checkout" in "".join(b[1])]
+    if not co:
+        raise AssertionError("the MUT-C fixture cannot be built — no checkout step in "
+                              "harness-suites (update the fixture with the artifact)")
+    off0, lines = co[0]
+    step_i = len(lines[0]) - len(lines[0].lstrip())
+    key_i, child_i = step_i + 2, step_i + 4
+    for i, ln in enumerate(lines):
+        ind = len(ln) - len(ln.lstrip())
+        if ind == child_i and _WF_PERSIST_RE.match(ln):
+            # remove the with:-child; re-plant the phrase as an env: child at the
+            # step's end — the phrase stays ACTIVE in the step, the input is gone
+            old_block = "".join(lines)
+            env_block = (" " * key_i) + "env:\n" + (" " * child_i) + "persist-credentials: false\n"
+            new_block = "".join(lines[:i]) + "".join(lines[i + 1:]) + env_block
+            return wf_text[:off0] + new_block + wf_text[off0 + len(old_block):]
+    raise AssertionError("the MUT-C fixture cannot be built — no ACTIVE persist-credentials "
+                         "child in harness-suites' first checkout's with: mapping (update "
+                         "the fixture with the artifact)")
 
 
 def _wf_check_r06_shape(wf_text: str) -> None:
@@ -368,8 +411,10 @@ def _wf_check_r06_shape(wf_text: str) -> None:
             if not _wf_active_persist_false(lines):
                 raise AssertionError(
                     f"{job_name}: EVERY checkout reachable by candidate code must carry the ACTIVE "
-                    "input persist-credentials: false — a comment mentioning the phrase never "
-                    "satisfies the invariant (the block starts: " + repr(lines[0].strip()) + ")")
+                    "input persist-credentials: false — a DIRECT CHILD of the checkout's with: "
+                    "mapping, value exactly false; a comment mentioning the phrase, or a "
+                    "wrong-mapping line (an env: child), never satisfies the invariant "
+                    "(the block starts: " + repr(lines[0].strip()) + ")")
 
 
 class TrustedGateTests(unittest.TestCase):
@@ -656,6 +701,43 @@ class TrustedGateTests(unittest.TestCase):
         self.assertIn("harness-suites", str(cm.exception))
         self.assertIn("ACTIVE input persist-credentials: false", str(cm.exception),
                       "the refusal must name the ACTIVE-input invariant (never a comment match)")
+
+        # --- MUT-C (the #67 Greptile round's P1): the wrong-mapping credential ---
+        mut_c = _wf_mut_wrong_mapping_credential(wf)
+        # fixture self-verification 1: the phrase remains as an ACTIVE line in
+        # the step (a non-comment input-shaped line) but NO LONGER a child of
+        # with: — the checkout INPUT is gone
+        _, blocks_a = _wf_job(mut_c, "harness-suites")
+        co = [b for b in blocks_a if "actions/checkout" in "".join(b[1])]
+        self.assertEqual(len(co), 2, "the mutation must not change the checkout count")
+        self.assertFalse(_wf_active_persist_false(co[0][1]),
+                         "MUT-C must leave the phrase ACTIVE in the step (under env:) but NOT "
+                         "as a with: child — the checkout input is gone")
+        self.assertTrue(any((not ln.strip().startswith("#")) and _WF_PERSIST_RE.match(ln)
+                            for ln in co[0][1]),
+                        "MUT-C must keep an ACTIVE input-shaped line in the step — the "
+                        "line-anywhere form's blind spot")
+        # fixture self-verification 2: the OLD line-anywhere form (the #67
+        # pre-P1-fix form, re-implemented here as the named historical defect —
+        # comment-aware but mapping-BLIND) PASSES over the mutated block — the
+        # exact observation of red-02.txt at the pushed head 5d4508a
+        def _old_line_anywhere(block_lines):
+            for ln in block_lines:
+                if ln.lstrip().startswith("#"):
+                    continue
+                if _WF_PERSIST_RE.match(ln):
+                    return True
+            return False
+        self.assertTrue(_old_line_anywhere(co[0][1]),
+                        "the line-anywhere form must still pass over the env: child — the "
+                        "mutation is that form's named blind spot (Greptile's P1)")
+        # the repaired check REFUSES the mutated workflow, naming the mapping
+        with self.assertRaises(AssertionError) as cm:
+            _wf_check_r06_shape(mut_c)
+        self.assertIn("harness-suites", str(cm.exception))
+        self.assertIn("with:", str(cm.exception),
+                      "the refusal must name the mapping-tracked invariant (a bare line "
+                      "under env: is not the checkout input)")
 
         # --- the control: the CLEAN workflow passes the repaired check ---
         _wf_check_r06_shape(wf)

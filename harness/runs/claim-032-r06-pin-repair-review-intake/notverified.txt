@@ -3,11 +3,13 @@
   semantics — actions/checkout@v4's clean/persist-credentials behavior remains the platform's documented
   contract (the same external-trust class R-06's own notverified.txt records; a candidate-editable
   workflow file never audits the runner platform)
-- - the parser is a stdlib line-level block parse, NOT a full YAML parser: the two NAMED counterexample
-  classes (the unnamed window step; the comment-satisfied credential substring) are pinned with
-  discriminating fixtures, but no exhaustive enumeration of conceivable parser-blind YAML shapes
-  (anchors, merge keys, exotic quoting) is claimed — the known-bad mutation style of the floor is not
-  re-established here for every hypothetical form
+- - the parser is a stdlib line-level block parse, NOT a full YAML parser: the three NAMED counterexample
+  classes (the unnamed window step; the comment-satisfied credential substring; the wrong-mapping
+  credential line under env: — the #67 Greptile round's MUT-C) are pinned with discriminating fixtures,
+  but no exhaustive enumeration of conceivable parser-blind YAML shapes (anchors, merge keys, exotic
+  quoting, deeper nesting) is claimed — the known-bad mutation style of the floor is not
+  re-established here for every hypothetical form; the #67 round itself demonstrated the honest limit
+  (a review round found the class the two-fixture floor did not name)
 - - the branch-protection verification (the review's ordered Action 2) is NOT part of this slice: the
   harness-suites/harness-trusted required-context binding remains UNVERIFIED at this PR's write time —
   the review's own boundary keeps it a separate settings operation with its own recorded evidence; a
@@ -18,6 +20,6 @@
 - - the old-form blindness re-implemented inline in test_12 is the NAMED historical defect (the #66
   merged form, exactly as red-01.txt observed it live at the predecessor) — pinning it makes the
   fixture self-verifying; it is not a claim that every conceivable weakness of the old form is covered
-- - the host-side probe (red/green scratch runs) is recorded only through its outputs (red-01.txt,
-  green-01.txt); the probe script itself is a host artifact, never a repo file (the claim-031 red-01
-  precedent class)
+- - the host-side probes (red/green scratch runs) are recorded only through their outputs (red-01.txt,
+  green-01.txt, red-02.txt, green-02.txt); the probe scripts themselves are host artifacts, never repo
+  files (the claim-031 red-01 precedent class)

@@ -1,0 +1,27 @@
+the REPAIRED test_11 (the working tree at the fix commit — the with:-mapping-tracked credential
+check), run with MUT-C applied to the REAL workflow FILE itself (the real drift scenario: a future
+edit moving the ACTIVE input out of the checkout's with: mapping into env:) — then the file restored
+and the clean workflow re-run (the control).
+
+probe: python3 scripts-side host probe (r67_p1_probe.py, host-side — never a repo artifact), mode=green
+expected observation: the repaired test REFUSES the mutated workflow with the AssertionError naming
+the with: mapping-tracked invariant (the GREEN discrimination); the restored clean workflow passes
+test_11 AND test_12 (the fixture self-verification including the inline old-form blindness over MUT-C).
+
+=== MUT-C on the workflow FILE, the repaired test_11: exit=1 — the refusal, verbatim:
+AssertionError: harness: EVERY checkout reachable by candidate code must carry the ACTIVE input
+persist-credentials: false — a DIRECT CHILD of the checkout's with: mapping, value exactly false;
+a comment mentioning the phrase, or a wrong-mapping line (an env: child), never satisfies the
+invariant (the block starts: '- name: Checkout head')
+-> the refusal names the JOB (harness — the probe's surgery hit the first Checkout head in file
+   order), the INVARIANT (a direct child of with:, value exactly false), the two named
+   non-satisfying forms (comment; wrong-mapping env: child), and the block it caught — the
+   operator can act on the failure without re-deriving it.
+
+=== the restored clean workflow, repaired test_11: exit=0 — OK
+=== the restored clean workflow, repaired test_12: exit=0 — OK (the MUT-C self-verification: the
+    fixture proven to keep an ACTIVE input-shaped line with NO with:-child; the OLD line-anywhere
+    form re-implemented inline PROVEN to pass over it; the repaired check refuses each mutation
+    and passes the clean artifact)
+
+=== the suite at the fix commit: 12/12 OK (the full harness/tests/test_trusted_gate.py run)

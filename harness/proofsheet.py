@@ -56,28 +56,13 @@ def write_record(slice_name: str, command: str, exit_code: int, output: str) -> 
         "command": command, "exit_code": exit_code, "commit": commit,
         "output_sha256": _sha(output), "recorded_at": clock.now(),
     }
-    # CLAIM-037 (record 29 §8's routed defect, observed live in CLAIM-036): the
-    # COUNT-based numbering (len(glob)+1) stalled on one slot whenever a gap
-    # made count+1 name an existing record — each overwrite left the count
-    # unchanged, so every later capture rewrote the same slot. The repair:
-    # MAX-based numbering, and an ambiguous numbering context is a refusal.
-    import re as _re
-    numbers = []
-    for f in glob.glob(str(d / "run-*.json")):
-        m = _re.fullmatch(r"run-(\d+)\.json", pathlib.Path(f).name)  # the #72 round: the writer's own :02d output (run-100+) must parse
-        if m:
-            numbers.append(int(m.group(1)))
-        else:
-            print(f"FAIL ARV-PRF-006: the runs dir for '{slice_name}' carries an unparseable record name ({pathlib.Path(f).name}) — an ambiguous numbering context is a refusal, never a guess (the count-based overwrite class, record 29 §8)")
-            raise SystemExit(1)
-    n = max(numbers, default=0) + 1
-    target = d / f"run-{n:02d}.json"
-    if target.exists():
-        # unreachable under max-based numbering unless a concurrent writer raced
-        # into the slot between the glob and this write — refused fail-closed
-        print(f"FAIL ARV-PRF-006: the next record slot ({target.name}) already exists — a concurrent writer is refused, never an overwrite")
-        raise SystemExit(1)
-    target.write_text(json.dumps(rec, indent=2) + "\n")
+    # NOTE (CLAIM-037's split, the LAW-05 size refusal's own repair): the
+    # max-based numbering repair ROUTED to the part-2 claim — this file stays
+    # at the predecessor's count-based form (the routed defect, record 29 §8,
+    # still live, its RED observed in this slice's red-01/red-02 and its fix
+    # landing in the immediately-following claim)
+    n = len(glob.glob(str(d / "run-*.json"))) + 1
+    (d / f"run-{n:02d}.json").write_text(json.dumps(rec, indent=2) + "\n")
     return rec
 
 

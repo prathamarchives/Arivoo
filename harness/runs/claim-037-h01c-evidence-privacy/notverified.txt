@@ -17,3 +17,9 @@ not verified (LAW-04 — the CLAIM-037 honest limits):
   residual of the single-writer protocol, refused fail-closed by the re-read.
 - the canary-redaction + A16-narrowing cluster is CLAIM-038 (part 2 of the card) — routed,
   not silently claimed here.
+- THE LAW-05 SPLIT (the size refusal's own repair, observed at the PR gate: 467 source lines
+  > 400): the proof-record numbering rider (proofsheet.py's max-based repair + ARV-PRF-006 +
+  the machinery suite's cases 1/2/5) ROUTED to the part-2 claim — its RED stays observed in
+  this slice's red-01/red-02 (the overwrite, the stall, the unparseable context, the run-100
+  boundary); the defect remains at the predecessor's count-based form in main until the
+  part-2 claim lands, never silently fixed here (the size law's own repair: split the slice).

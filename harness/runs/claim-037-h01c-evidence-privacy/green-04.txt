@@ -1,0 +1,7 @@
+# GREEN EVIDENCE — green-04.txt (CLAIM-037, the #72 round at the fix head 948b37d): the trusted suite 15/15 (test_15's acceptance proven)
+
+...............
+----------------------------------------------------------------------
+Ran 15 tests in 4.855s
+
+OK

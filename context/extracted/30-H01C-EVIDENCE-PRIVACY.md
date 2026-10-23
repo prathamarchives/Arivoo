@@ -64,4 +64,6 @@ The merge once review-complete (D-042; every thread read + dispositioned BEFORE 
 
 ## 12. Session close
 
+[REPAIR 2026-10-23, the LAW-05 split — the PR gate's size refusal (ARV-SIZE-002: 467 > 400) worked exactly as designed]: the slice genuinely carried two behaviors (F-007's typed-record core + the routed numbering rider); the law's own repair is the split — the core stays in THIS PR (gate.py's RED control + the typed records + the registration + the migration; KB 008-012; tests 13/14/15; machinery cases 3/4/6), and the numbering rider (proofsheet.py's max-based repair + ARV-PRF-006 + machinery cases 1/2/5) moves to the part-2 claim with its RED already observed here (red-01/red-02) and re-observed at its own commit. The #72 review round's five fixes ALL stay in this PR (they are the core's own round).
+
 (complete at this PR's merge — the merge SHA + the CI run IDs + the post-merge observations record in the CLAIM-037 close row, appended by the next slice per rule 4; this record needs no second pass)

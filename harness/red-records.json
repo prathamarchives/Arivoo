@@ -297,7 +297,7 @@
     "red_exit": 1,
     "red_code": "ARV-PRF-006 + ARV-RED-007/009 (the suite's RED set observed at 048aaa2 \u2014 six failures: the count-based overwrite, the stall, the unparseable-context no-refusal, the untyped-mint no-refusal, the changed-since-read no-refusal; red-01.txt)",
     "red_evidence": "the CLAIM-037 fix-commit amendment: test_trusted_gate.py's build_stub restructured for schema-2 stub records (the binding names the stub's own git history; the typed amendments chain from the base records) + the NEW suite test_record_machinery.py minted with its OBSERVED red",
-    "current_sha256": "94fab7905c4cca346caa78a10ab325be0b5246f14307e28a64c48b75da4279c3",
+    "current_sha256": "eccd0d293757307ad6999bd91c7fac4511876623174d3b0a38d580396bcb831c",
     "amendments": [
       {
         "prior_sha256": "a4ee919f0c56a664e874aab871f6d4d6b278f9615ccf705be91b06f40130dcd3",
@@ -316,6 +316,12 @@
         "new_sha256": "94fab7905c4cca346caa78a10ab325be0b5246f14307e28a64c48b75da4279c3",
         "note": "the #72 round's fixture repairs (all pre-merge, each an honest catch recorded in record 30 \u00a78's round entry): test_15's stub declarations (the gate.py scope/claim lines, the runs-line ref, the binding naming the suite's own commit), KB-011's git-context init + KB-012's suite file + the robust middle-tuple anchor, machinery case 6's git fixture. The fixes themselves: the either-tuple registration (the per-record loop covers the union), the false-history refusal, the run-100 format, the registry bootstrap, the unrecovered restriction",
         "observed_at": "2026-10-23T14:43:19.268502+00:00"
+      },
+      {
+        "prior_sha256": "94fab7905c4cca346caa78a10ab325be0b5246f14307e28a64c48b75da4279c3",
+        "new_sha256": "eccd0d293757307ad6999bd91c7fac4511876623174d3b0a38d580396bcb831c",
+        "note": "the LAW-05 split (the size refusal's own repair): the max-based numbering repair + KB-PRF-006 + the machinery suite's numbering cases 1/2/5 ROUTED to the part-2 claim \u2014 this PR keeps F-007's typed-record core (gate/red/trusted_gate/migration + KB 008-012 + tests 13/14/15 + machinery 3/4/6). The numbering defect stays at the predecessor form in main until the part-2 claim lands; its RED is already observed (red-01/red-02) and re-observed at the part-2 commit",
+        "observed_at": "2026-10-23T14:50:31.756000+00:00"
       }
     ]
   }

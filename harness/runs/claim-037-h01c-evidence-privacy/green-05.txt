@@ -1,0 +1,12 @@
+# GREEN EVIDENCE — green-05.txt (CLAIM-037, the #72 round): the machinery suite 6/6 (the run-100 boundary + the bootstrap)
+
+PASS  max-based numbering: a seeded gap yields run-06
+PASS  max-based numbering: the existing run-05 is byte-unchanged
+PASS  max-based numbering: the second write advances to run-07
+PASS  the unparseable numbering context refuses with ARV-PRF-006
+PASS  the untyped NEW-record mint refuses with ARV-RED-007
+PASS  a red-record write over a changed file refuses with ARV-RED-009
+PASS  the hundredth capture lands at run-100 and the writer keeps going
+PASS  a missing registry bootstraps (the ARV-RED-003 recovery path preserved)
+
+GREEN — the record machinery refuses its named classes: max-based numbering, the unparseable context, the untyped mint, the changed-since-read write

@@ -305,8 +305,9 @@ def kb_clm_intra_dup(copy: pathlib.Path) -> None:
 #                    not an observed failure; the binding must verify against git
 #       ARV-RED-008  an unregistered test file under harness/tests/ (the
 #                    discovery/registration gap — fail-closed suite registration)
-#       ARV-PRF-006  a proof-record write into an unparseable/occupied numbering
-#                    context (the count-based overwrite class, record 29 §8)
+#       ARV-PRF-006  ROUTED to the part-2 claim at the LAW-05 split (with the
+#                    max-based numbering repair and machinery cases 1/2/5) — its
+#                    RED stays observed in this slice's red-01/red-02
 
 @case("KB-RED-008", "a test edited + its record self-refreshed (the make-red form) against a trusted baseline — no chaining amendment",
       "ARV-RED-006")
@@ -370,29 +371,6 @@ def kb_unregistered_suite(copy: pathlib.Path) -> None:
     _load(copy, "harness.gate").check_red_records()
 
 
-@case("KB-PRF-006", "a proof-record write into an unparseable numbering context (the count-based overwrite class)",
-      "ARV-PRF-006")
-def kb_slot_unparseable(copy: pathlib.Path) -> None:
-    """The proofsheet numbering rider (record 29 §8's routed defect): the
-    count-based writer stalled on one slot whenever a gap made count+1 name an
-    existing record, overwriting middle captures one by one. The repaired
-    writer numbers by max(existing)+1 and refuses fail-closed when the runs
-    dir carries a record name it cannot parse — an ambiguous numbering
-    context is a refusal, never a guess."""
-    import json
-    runs = copy / "harness" / "runs" / SLICE
-    ps = _load(copy, "harness.proofsheet")
-    ps.RUNS = copy / "harness" / "runs"
-    seed = json.dumps({"command": "probe", "exit_code": 0, "output_sha256": "0" * 64,
-                       "recorded_at": "2026-10-16T00:00:00+00:00"}, indent=2) + "\n"
-    for n in ("01", "02", "03"):
-        (runs / f"run-{n}.json").write_text(seed)
-    (runs / "run-05.json").write_text(seed)  # the gap that stalls count-based numbering on run-05
-    (runs / "run-ab.json").write_text(seed)  # the unparseable name — an ambiguous numbering context
-    try:
-        ps.write_record(SLICE, "probe-write", 0, "out")
-    except SystemExit:
-        pass
 
 # --- CLAIM-037, the #72 review round (Greptile 2 P1 + 2 P2, CodeRabbit Minor + Major).
 #     Named codes frozen BEFORE the round's fixes (RED-first; every case observed

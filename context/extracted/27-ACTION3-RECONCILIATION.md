@@ -81,15 +81,19 @@ credential arrived with the turn (value never recorded; verified live: login `pr
 - `context/extracted/25-SESSION-25-R03-R04-EXECUTION.md` — the header + §12 closes, by pointer
 - `context/extracted/27-ACTION3-RECONCILIATION.md` — this record
 - `harness/runs/claim-033-state-record-reconciliation/` — protection-export.txt, merge-observations.txt,
-  scope.txt, notverified.txt, the 11-record proof set + the proofsheet
+  scope.txt, notverified.txt, the 12-record proof set (run-11's honest exit 2 + run-12's exit-0 retry) + the proofsheet
 
 ## 6. The ACTUAL commands (the rig env exported per-command — record 26 §8's lesson)
 
 - the preflight: `make verify` at fresh main `fc7556c` → GREEN (the suites, 16/16 KB, the gate selfcheck, 52/0)
 - the settings read: `GET /repos/prathamarchives/Arivoo/branches/main/protection` (the admin-scoped owner
   credential; the JSON recorded verbatim to protection-export.txt; read twice, identical)
-- the slice's proof set: the 11-command re-record at this slice's content head + the sheet assembly (the
-  proofsheet.py sequence; all exit 0)
+- the slice's proof set: the 11-command re-record at this slice's content head + the sheet assembly —
+  **run-11 (`make verify`) captured exit 2: the ARV-CLM-003 refusal AT THE RECORD LEVEL** (the row's missing
+  retroactive notation; the walls' refusal preserved as history, never smoothed over) — then the row repaired
+  (per rule 6) and **run-12 re-captured `make verify` exit 0 at the repaired tree** (the sheet regenerated from
+  the 12 records: the failed capture and the successful retry both present, AGENTS.md's actual-commands-with-
+  exit-codes contract)
 - `make verify` → GREEN at the edited tree; the PR-mode gate GREEN over the actual diff (the exit read from
   PIPESTATUS, never the pipe's tail)
 
@@ -99,19 +103,31 @@ credential arrived with the turn (value never recorded; verified live: login `pr
   evidence form)
 - `merge-observations.txt` — the PR #67 end-to-end record (the rounds, the fixes, the threads, the flip path,
   the runs, the deletions)
-- the proofsheet — the 11 green records at this slice's content head
+- the proofsheet — the 12 records at this slice's content head (run-11's honest exit 2 + run-12's exit-0 retry; the sheet re-derives byte-identically from both)
 - the walls' own exercise of the reconciled state: make verify GREEN (52/0) — VER-804/VER-902/VER-504 over the
   re-derived STATE/AGENTS counts and pointers; ARV-CLM-001..007 over the registry rows
 
 ## 8. Failures (the honest ledger — each with its repair)
 
-- **The registry form, caught by the gate (ARV-CLM-003):** the CLAIM-033 open row's INTs cell named INT-132 +
-  INT-133 — both already ledgered — WITHOUT the retroactive notation (rule 6's honesty form; the exact catch
-  class record 26 §8's second entry records from session 26, repeating on the host). The first `make verify`
-  at the edited tree was exit 2 — the walls caught the form before anything else moved. Repair: the cell now
-  carries "both RETROACTIVE — already ledgered at this row's write; this row reserves NO new id and re-mints
-  nothing" per rule 6; the re-run GREEN. (The session-26 remote leg's own two catches — the &&-chain
-  red-gate commit and the ARV-PRF-004 proofsheet re-record — live in record 26 §8's seventh entry.)
+- **The registry form, caught by the gate (ARV-CLM-003) and preserved in the record set:** the CLAIM-033
+  open row's INTs cell named INT-132 + INT-133 — both already ledgered — WITHOUT the retroactive notation
+  (rule 6's honesty form; the exact catch class record 26 §8's second entry records from session 26, repeating
+  on the host). The first `make verify` at the edited tree was exit 2 — the walls caught the form before
+  anything else moved, AND the refusal is captured in the slice's own run-11 (the record-set-level evidence the
+  walls' exit code does not carry into the sheet check). Repair: the cell now carries "both RETROACTIVE —
+  already ledgered at this row's write; this row reserves NO new id and re-mints nothing" per rule 6; run-12's
+  exit-0 retry re-captured. (The session-26 remote leg's own two catches — the &&-chain red-gate commit and
+  the ARV-PRF-004 proofsheet re-record — live in record 26 §8's seventh entry.)
+- **The #68 Greptile round's three P2 findings, all real, all fixed in-PR (the walls blind exactly here — the
+  review round caught what the mechanical checks do not assert):** (a) the record set claimed "all exit 0"
+  while run-11 carried the exit-2 refusal — repaired by the run-12 retry + the regenerated sheet, the failed
+  run preserved (never smoothed over); (b) AGENTS.md's phase label still read SESSION 26 while STATE read
+  SESSION 27 — the mirror synchronized (SESSION 27 EXECUTING); (c) the closed CLAIM-031 row's evidence field
+  had been edited in the first content commit — a violation of the registry's own "NEVER edit a closed row;
+  supersede by pointer" — repaired by RESTORING the closed row verbatim and placing the verified statement in
+  the CLAIM-033 row as the dated pointer (the closed row's UNVERIFIED-at-this-write wording was true at its
+  write; its own demand — 'the verification + its recorded evidence land in the reconciliation slice' — is
+  satisfied by the pointer).
 
 ## 9. Unverified items (LAW-04 — the slice's honest list)
 

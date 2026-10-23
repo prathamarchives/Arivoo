@@ -1,0 +1,11 @@
+# CLAIM-036 — H-01c-authority: the raw manifest/quote lineage (RED-first; PLAN card; INT-127/D-041 routing + D-043's order)
+tools/verify_canonical_layer.py D-041
+tools/verify_selftest.py D-041
+context/SOURCE-COVERAGE-MANIFEST.md D-041
+harness/tests/test_mutation_floor.py D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+context/WORKLOG.md D-043
+context/extracted/29-H01C-AUTHORITY-RAW-LINEAGE.md D-042
+harness/runs/claim-036-h01c-authority-raw-lineage D-041

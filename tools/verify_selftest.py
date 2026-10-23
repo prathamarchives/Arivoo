@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """verify_selftest.py — the H-01b trusted candidate-tool execution floor (A03).
 
-The base-owned mutation suite: 31 known-bad corpus mutations, each of which the
+The base-owned mutation suite: 35 known-bad corpus mutations, each of which the
 CANDIDATE's verify_canonical_layer.py must catch with its named check. This
 module is anchored from main by CI (D-035: the coordinated-weakening floor) and
 judges whichever candidate tree it is pointed at.
@@ -331,6 +331,30 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
         lambda r: _one_liner_dup(r),
         "VER-213",
     ),
+    (
+        "MUT-32",
+        "coordinated raw+manifest reanchor (the H-01c-authority card's core case): append a benign line to 2.txt AND update its manifest full-digest anchor to the new hash — the candidate controls both sides of the old comparison, so VER-802's whole-manifest grep passes; the trusted anchor map must refuse the pair",
+        lambda r: _reanchor_coordinated(r),
+        "VER-805",
+    ),
+    (
+        "MUT-33",
+        "move a digest to the wrong row: swap 0.txt's and 1.txt's full-digest values in the manifest — every hash still appears in the file (VER-802's grep passes), but each anchor no longer binds to its OWN file's row (the per-row placement rule)",
+        lambda r: _wrong_row_digests(r),
+        "VER-805",
+    ),
+    (
+        "MUT-34",
+        "fabricate a ledger quote in CURLY-quoted form (U+201C/U+201D content that exists nowhere in raw) — the old extraction matched straight double quotes only, so fabricated curly-quoted content was never checked (the card's fail-closed quote form)",
+        lambda r: _curly_fabrication(r),
+        "VER-803",
+    ),
+    (
+        "MUT-35",
+        "strip a raw-cited entry's quotable lines entirely (INT-083's quote replaced by a non-quotable paraphrase): source metadata WITHOUT any supported quotation must fail closed, never pass as silently-validated (the card's fail-closed case)",
+        lambda r: _strip_quote_lines(r),
+        "VER-803",
+    ),
 ]
 
 
@@ -361,6 +385,64 @@ def _one_liner_dup(repo: Path) -> None:
 
 def _rm(repo: Path, rel: str) -> None:
     (repo / rel).unlink()
+
+
+# -------------------------------------------- H-01c-authority helpers (CLAIM-036)
+# The raw/manifest lineage mutations. They operate on the FIXTURE's copies of
+# the real corpus (never the tree itself) and must be robust to legitimate
+# anchor updates: the digests are READ from the manifest's full-digest block
+# at mutation time, never hardcoded here (a stale hard-code would no-op the
+# case after a legitimate reanchor — the PR #6/#12/#17 re-target class).
+
+def _manifest_full_digests(text: str) -> dict[str, str]:
+    """Parse the manifest's 'Full SHA-256 values' block: filename -> digest."""
+    digs: dict[str, str] = {}
+    for m in re.finditer(r"^([\w .\-]+?)[ \t]+([0-9a-f]{64})[ \t]*$", text, re.M):
+        digs[m.group(1).strip()] = m.group(2)
+    return digs
+
+
+def _reanchor_coordinated(repo: Path) -> None:
+    raw = repo / "context" / "raw" / "2.txt"
+    raw.write_text(raw.read_text(encoding="utf-8") + "coordinated reanchor probe\n", encoding="utf-8")
+    new_digest = hashlib.sha256(raw.read_bytes()).hexdigest()
+    mp = repo / "context" / "SOURCE-COVERAGE-MANIFEST.md"
+    mtext = mp.read_text(encoding="utf-8")
+    old_digest = _manifest_full_digests(mtext)["2.txt"]
+    # update BOTH the full-digest block and the abbreviated row if present
+    mtext = mtext.replace(old_digest, new_digest)
+    mtext = re.sub(r"(\|\s*`2\.txt`\s*\|[^\n]*\|)\s*`[0-9a-f]+[\u2026 ]+[0-9a-f]+`",
+                   r"\1 `reanchored`", mtext)
+    mp.write_text(mtext, encoding="utf-8")
+
+
+def _wrong_row_digests(repo: Path) -> None:
+    mp = repo / "context" / "SOURCE-COVERAGE-MANIFEST.md"
+    mtext = mp.read_text(encoding="utf-8")
+    digs = _manifest_full_digests(mtext)
+    d0, d1 = digs["0.txt"], digs["1.txt"]
+    # swap the two full-digest VALUES (files untouched — pure row relocation)
+    mtext = re.sub(r"^(0\.txt)[ \t]+" + d0 + r"[ \t]*$", r"\g<1>" + " " * max(1, 41 - len("0.txt")) + d1, mtext, flags=re.M)
+    mtext = re.sub(r"^(1\.txt)[ \t]+" + d1 + r"[ \t]*$", r"\g<1>" + " " * max(1, 41 - len("1.txt")) + d0, mtext, flags=re.M)
+    mp.write_text(mtext, encoding="utf-8")
+
+
+def _curly_fabrication(repo: Path) -> None:
+    _edit(
+        repo,
+        "INTENT-LEDGER.md",
+        '> "1 - smallest daily loop. i read books, i import articles, posts, writings, research paper, pdfs, md\'s and any thing readable. reason through it take notes on it, and jounral about my learnings, reasoning, and reading journey how it is going and everything, and like everything compounds thats the goal since the start.. notes get compounded, everything i can comeback to, revise, and like actually learn things, develop..."',
+        "> \u201c1 - biggest quarterly waterfall of fabricated curly content that exists nowhere in the raw corpus, the extraction must refuse it\u2014straight-quote blindness closed\u201d",
+    )
+
+
+def _strip_quote_lines(repo: Path) -> None:
+    _edit(
+        repo,
+        "INTENT-LEDGER.md",
+        '> "1 - smallest daily loop. i read books, i import articles, posts, writings, research paper, pdfs, md\'s and any thing readable. reason through it take notes on it, and jounral about my learnings, reasoning, and reading journey how it is going and everything, and like everything compounds thats the goal since the start.. notes get compounded, everything i can comeback to, revise, and like actually learn things, develop..."',
+        "- (the quotation was stripped by MUT-35 — source metadata must not pass without a checkable quote)",
+    )
 
 
 def _tag_gate_regression(repo: Path) -> None:
@@ -568,7 +650,7 @@ def _select(only: str | None) -> list:
     sel = []
     for w in wanted:
         if not re.fullmatch(r"MUT-\d{2}", w) or w not in by_code:
-            raise SystemExit(f"refused: unknown case '{w}' — the expected set is fixed (MUT-01..MUT-31)")
+            raise SystemExit(f"refused: unknown case '{w}' — the expected set is fixed (MUT-01..MUT-35)")
         sel.append(by_code[w])
     return sel
 

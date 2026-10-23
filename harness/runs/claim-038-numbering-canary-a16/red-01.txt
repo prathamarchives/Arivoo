@@ -1,0 +1,17 @@
+# RED EVIDENCE — red-01.txt (CLAIM-038, the numbering rider; re-observed at cb2e287873)
+# The routed rider's RED: the count-based writer STILL stalls (the defect stayed at main's
+# predecessor form after the LAW-05 split — its first observation in claim-037's red-01/red-02).
+# Command: python3 harness/tests/test_record_machinery.py -> exit 1 (4 failures)
+
+FAIL  max-based numbering: a seeded gap yields run-06 — the new record did not land at max+1
+FAIL  max-based numbering: the existing run-05 is byte-unchanged — the write OVERWROTE an existing record (the count-based stall class, record 29 §8)
+FAIL  max-based numbering: the second write advances to run-07 — the numbering stalled on one slot (each overwrite left the count unchanged)
+FAIL  the unparseable numbering context refuses with ARV-PRF-006 — refused=False output=''
+PASS  the untyped NEW-record mint refuses with ARV-RED-007
+PASS  a red-record write over a changed file refuses with ARV-RED-009
+PASS  the hundredth capture lands at run-100 and the writer keeps going
+PASS  a missing registry bootstraps (the ARV-RED-003 recovery path preserved)
+
+RED — 4 failure(s): max-based numbering: a seeded gap yields run-06, max-based numbering: the existing run-05 is byte-unchanged, max-based numbering: the second write advances to run-07, the unparseable numbering context refuses with ARV-PRF-006
+      CLAIM-037: the record machinery must refuse its named classes (F-007's typed-record core)
+

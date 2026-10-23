@@ -1,0 +1,10 @@
+not verified (LAW-04 — the CLAIM-038 honest limits):
+- the env-KEY and remote-NAME masking SITES landed (_redact at both finding sites) and the
+  direct probe OBSERVED the masked output (the canary never appears whole); the selftest-
+  registry integration (the N12 row) is ROUTED as a named follow-up (the case runner's
+  exit-2 usage form) — never silently claimed as selftest-proven.
+- the A16 narrowing: the alias check is concrete (from-import aliases of the ambient set);
+  dynamic dispatch (getattr strings), exec/eval payloads, and environment/network access
+  outside adapters remain the review layer's with named reopening triggers (record 31).
+- the N12-row routing and any further canary-position coverage (symlink link text beyond
+  the existing CANARY_LINK case) are follow-up work under the part-2 claim's umbrella.

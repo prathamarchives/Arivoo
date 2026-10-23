@@ -21,15 +21,19 @@ Named codes frozen BEFORE the implementation (the H-01a convention; RED-first
                concurrent-writer guard — make red is a single-writer flow;
                the refusal makes the protocol explicit, never racy)
 
-Cases (each names its target failure; the numbering cases 1/2/5 ROUTED to the
-part-2 claim at the LAW-05 split — the max-based repair + the run-100 boundary
-land there, their RED already observed in this slice's red-01/red-02):
+Cases (each names its target failure):
+  1. write_record numbers by MAX (a seeded gap 01,02,03,05 must yield run-06,
+     never touch run-05 — the overwrite class) — the routed rider, its RED
+     observed in claim-037's red-01/red-02 AND re-observed at this slice.
+  2. write_record refuses the unparseable context (run-ab.json) with
+     ARV-PRF-006.
   3. the red-record mint refuses an untyped NEW record (no --exit/--code)
-     with ARV-RED-007 — RED at the predecessor (the note-only mint passes).
+     with ARV-RED-007.
   4. the red-record write refuses when the file changed since read
-     (ARV-RED-009) — RED at the predecessor (the blind read-modify-write).
-  6. a missing registry bootstraps (the ARV-RED-003 recovery path preserved) —
-     RED at the predecessor (the unconditional read crashed).
+     (ARV-RED-009).
+  5. the 100-capture boundary (run-100 must parse — the writer's own :02d
+     output past 99).
+  6. a missing registry bootstraps (the ARV-RED-003 recovery path preserved).
 """
 import contextlib
 import hashlib
@@ -101,6 +105,45 @@ def main() -> int:
         runs = ps.RUNS / SLICE
         runs.mkdir(parents=True)
 
+        # ---- case 1 (the routed rider, re-observed at THIS slice's commit):
+        # max-based numbering never overwrites (the count-based stall class)
+        seed = json.dumps({"command": "probe", "exit_code": 0, "output_sha256": "0" * 64,
+                           "recorded_at": "2026-10-23T00:00:00+00:00"}, indent=2) + "\n"
+        for n in ("01", "02", "03", "05"):
+            (runs / f"run-{n}.json").write_text(seed)
+        before = (runs / "run-05.json").read_text()
+        ps.write_record(SLICE, "the-first-write", 0, "out-1")
+        wrote_run06 = (runs / "run-06.json").is_file()
+        run05_intact = (runs / "run-05.json").read_text() == before
+        check("max-based numbering: a seeded gap yields run-06",
+              wrote_run06,
+              "the new record did not land at max+1")
+        check("max-based numbering: the existing run-05 is byte-unchanged",
+              run05_intact,
+              "the write OVERWROTE an existing record (the count-based stall class, record 29 §8)")
+        ps.write_record(SLICE, "the-second-write", 0, "out-2")
+        check("max-based numbering: the second write advances to run-07",
+              (runs / "run-07.json").is_file(),
+              "the numbering stalled on one slot (each overwrite left the count unchanged)")
+
+        # ---- case 2: the unparseable context is a refusal (ARV-PRF-006)
+        runs2 = ps.RUNS / "record-machinery-probe-2"
+        runs2.mkdir()
+        for n in ("01", "02"):
+            (runs2 / f"run-{n}.json").write_text(seed)
+        (runs2 / "run-ab.json").write_text(seed)  # an unparseable record name
+        refused, code = False, ""
+        buf = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf):
+                ps.write_record(SLICE + "-2", "probe-write", 0, "out")
+        except SystemExit:
+            refused = True
+            code = buf.getvalue()
+        check("the unparseable numbering context refuses with ARV-PRF-006",
+              refused and "ARV-PRF-006" in code,
+              f"refused={refused} output={code[:160]!r}")
+
         # ---- case 3: the untyped NEW-record mint refuses (ARV-RED-007)
         # a scratch tree where red.py writes (its own REPO is module-relative —
         # the work copy's red.py resolves to the work copy; point it at a copy
@@ -164,6 +207,27 @@ def main() -> int:
         check("a red-record write over a changed file refuses with ARV-RED-009",
               rc3 != 0 and "ARV-RED-009" in out3,
               f"rc={rc3} output={out3[:200]!r}")
+        # ---- case 5 (the routed rider): the 100-capture boundary
+        runs3 = ps.RUNS / "record-machinery-probe-3"
+        runs3.mkdir()
+        for n in range(1, 100):
+            (runs3 / f"run-{n:02d}.json").write_text(seed)
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                ps.write_record(SLICE + "-3", "the-hundredth", 0, "out")
+        except SystemExit:
+            pass
+        wrote_100 = (runs3 / "run-100.json").is_file()
+        stalled = False
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                ps.write_record(SLICE + "-3", "the-hundred-first", 0, "out")
+        except SystemExit:
+            stalled = True
+        check("the hundredth capture lands at run-100 and the writer keeps going",
+              wrote_100 and not stalled,
+              f"wrote_100={wrote_100} stalled_after={stalled} — the writer's own :02d output must be parseable by its own reader (the #72 round's Greptile P2)")
+
         # ---- case 6 (the #72 round, Greptile P2): the missing-registry bootstrap
         rt2 = tmp / "redtree2"
         shutil.copytree(REPO / "harness", rt2 / "harness",
@@ -207,9 +271,9 @@ def main() -> int:
         print(f"RED — {len(FAILED)} failure(s): {', '.join(FAILED)}")
         print("      CLAIM-037: the record machinery must refuse its named classes (F-007's typed-record core)")
         return 1
-    print("GREEN — the record machinery refuses its named classes: the untyped mint, "
-          "the changed-since-read write, the missing-registry bootstrap "
-          "(the numbering cases routed to the part-2 claim at the LAW-05 split)")
+    print("GREEN — the record machinery refuses its named classes: max-based numbering, "
+          "the unparseable context, the untyped mint, the changed-since-read write, "
+          "the run-100 boundary, the registry bootstrap")
     return 0
 
 

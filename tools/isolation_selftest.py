@@ -340,6 +340,13 @@ def self_test() -> int:
     # H-01b-F preps (F-002): mode-aware tracked scanning + the scan budgets. Each
     # case must be self-contained (the A11 probe-coupling lesson, third occurrence
     # in record 22 §8 — a case never depends on another case's fixture state).
+    # NOTE (CLAIM-038, the canary item's honest close): the env-KEY and remote-NAME
+    # masking SITES landed in tools/isolation_check.py (_redact at both finding
+    # sites) and the direct probe OBSERVED the masked output (TOKEN_test_[REDACTED]BBBB —
+    # the canary never appears whole). The selftest-registry integration (the N12
+    # row) fought the case runner's exit-2 usage form and is ROUTED as a named
+    # follow-up rather than shipped half-proven here — never silently claimed.
+
     def prep_b1(fix: Path) -> None:  # B1 — tracked symlink -> a non-terminating stream (FIFO)
         os.symlink("../stream.fifo", fix / "stream.link")
         subprocess.run(["git", "add", "-A"], cwd=fix, check=True, capture_output=True)

@@ -157,6 +157,10 @@ def diff_stats(base: str, repo=None) -> list:
     """Per-path added lines, honestly classified: SOURCE = .py non-test; TEST =
     test_*.py; MIGRATION = 1-per-slice; everything else = DATA (evidence
     artifacts — not source lines, but still gated by the SCOPE check).
+    CLAIM-038 (the A16 narrowing, F-007): the SIZE check bounds ADDED lines —
+    a deletion-only or rename-heavy slice under-counts its true change surface
+    (the declared-vs-enforced gap the card names); the reopening trigger: any
+    slice whose deletions exceed its additions reopens the counting form.
     Fail-closed (A10): a failed diff refuses, never a compliant empty one.
     H-01c-claims (F-001, session 23): NUL-delimited records — the human
     numstat format QUOTES exotic names (undercounting stats against the
@@ -286,7 +290,16 @@ def check_scope(diff_paths: list, slice_name: str) -> list:
 
 
 def lint_boundary() -> list:
-    """LAW-24: ambient time/ID/randomness calls only inside harness/adapters/."""
+    """LAW-24: ambient time/ID/randomness calls only inside harness/adapters/.
+
+    CLAIM-038 (the A16 narrowing, F-007): the check's claims are exactly what
+    it enforces — (a) direct `module.func(...)` calls (the AST walk), and (b)
+    ALIASED from-imports (`from time import time as t; t()`) — the alias map
+    is built per file so the bypass the card named is closed. NOT claimed: a
+    universal Python security analyzer; dynamic dispatch (getattr strings),
+    exec/eval payloads, and environment/network access outside adapters
+    remain the review layer's — reopening trigger: a demonstrated ambient call
+    reaching an adapter boundary by any of those routes reopens the check."""
     fails = []
     for py in sorted((REPO / "harness").rglob("*.py")):
         rel = py.relative_to(REPO).as_posix()
@@ -297,11 +310,26 @@ def lint_boundary() -> list:
         except SyntaxError:
             fails.append(f"ARV-LAW24-001: {rel} does not parse — repair the syntax first")
             continue
+        # the alias map: from X import <amb-func> as <alias> — the card's named
+        # bypass (`from time import time as t; t()`) closed concretely
+        aliases: dict[str, str] = {}
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module:
+                for a in node.names:
+                    for amb in AMBIENT_CALLS:
+                        _mod, _sep, _fn = amb.partition(".")
+                        if node.module == _mod and a.name == _fn:
+                            aliases[a.asname or a.name] = amb
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
                 try:
                     call = ast.unparse(node.func)
                 except Exception:
+                    continue
+                if call in aliases:
+                    fails.append(f"ARV-LAW24-001: {rel} calls {aliases[call]} (aliased as {call}) — ambient time/ID/randomness lives ONLY in harness/adapters/ (LAW-24)")
+                    print(f"FAIL ARV-LAW24-001: {rel}:{node.lineno} {call} == {aliases[call]} (an aliased from-import — use adapters/clock, adapters/ids)")
+                    print("      repair: import the adapter; the S4 boundary lint is mechanical, not advisory")
                     continue
                 for amb in AMBIENT_CALLS:
                     if call.startswith(amb):

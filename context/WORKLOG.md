@@ -589,3 +589,13 @@ Stage Summary:
 - Unresolved: H-01c-authority, H-01c-evidence/privacy (F-007), H-02 (now activatable through the isolated path), P3-00 — in that order
 - Next: H-01c-authority as CLAIM-032
 - Session record: context/extracted/25-SESSION-25-R03-R04-EXECUTION.md (in progress)
+
+## Task 40 (CLAIM-032, session 26) — the R-06 pin repair + the backend-review intake
+- Task: the 2026-10-23 owner-forwarded review's ordered Action 1 (D-043): repair test_11's two regression gaps with the two discriminating mutation fixtures, plus the intake (turn 27 verbatim, the review preserved at context/reviews/, INT-131 the turn-26 late mint + INT-132)
+- The RED (red-01.txt): the old test_11 at the predecessor 68722c6d PASSES over both mutations — Finding A (the mixed index space: named-only indexes slicing the every-entry list, an unnamed window step invisible, entries_b dead) and Finding B (the raw-substring credential check satisfied by a comment) — and passes the clean control: the pin is selectively blind in exactly the two named ways; the #66 second-pass commit messages claimed more than the merged code delivered (the overclaim recorded in the CLAIM-031 close row)
+- GREEN: the R-06 pin machinery (_wf_job's one ordered step-block list; _wf_active_persist_false's comment-aware active-value check; structural mutation fixtures) + the NEW test_12 (each fixture self-verifies as the old form's named counterexample — the old logic re-implemented inline slices EMPTY / matches the comment — then the repaired check refuses each mutation, the clean workflow passes); green-01.txt: the repaired test_11 FAILS over both real-file mutations for their named reasons; the suite 12/12
+- The walls' catches (§8): VER-804+VER-902 on the stale STATE (the minimal repairs landed per P-18; the full Action-3 reconciliation stays its own slice); ARV-CLM-006/003/002 on the registry (the stale CLAIM-031 open row retired, the retroactive INT notation added); two env-artifact make-verify exit-2s (the rig env exported per-command); a host-side mangled-regex insert caught by the in-process syntax gate
+- Evidence: record 26 §§4-8; harness/runs/claim-032-r06-pin-repair-review-intake (red-01/green-01/scope/notverified/proofsheet)
+- Unresolved: the branch-protection verification (the review's Action 2 — a settings operation with recorded evidence), the STATE/record reconciliation (Action 3), then H-01c-authority
+- Next: merge the CLAIM-032 PR once review-complete, then the branch-protection verification (Action 2)
+- Session record: context/extracted/26-BACKEND-REVIEW-INTAKE-R06-PIN-REPAIR.md

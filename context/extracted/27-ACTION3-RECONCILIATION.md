@@ -140,6 +140,17 @@ credential arrived with the turn (value never recorded; verified live: login `pr
   D-044 entry appended as the completion record. The lesson standing: the review-completion check
   re-polls the thread list immediately before the merge command, and a finding posted after the last
   poll is caught by that re-read — never assumed absent.
+- **The &&-chain red-gate commit, repeating (the record-24 §8 class's SECOND occurrence this session —
+  and the harder form):** the CLAIM-034 content commit `2b8ec0c` chained after `make gate` whose refusal
+  was printed but masked — the shell pattern `make gate | tail -2; echo "G=${PIPESTATUS[0]}" && git add …`
+  still commits, because the `echo` itself succeeds and PIPESTATUS was read for display only, never
+  enforced; the gate's red was in this case the EXPECTED pre-capture state (the slice's proof set not yet
+  assembled — the capture sequence is content commit -> proof set -> evidence commit -> gate green), but
+  the commit-on-red is the miss regardless: the gate must be run ALONE, read, and only then does anything
+  follow. Caught immediately (the gate's refusal was on screen), never pushed; the repair = the correct
+  sequence restored (the 11-record set captured at the content head 2b8ec0c, all exit 0, PASS ARV-PRF-004)
+  and this entry. The standing lesson now twice-learned this session: no command is ever chained after a
+  gate.
 
 ## 9. Unverified items (LAW-04 — the slice's honest list)
 

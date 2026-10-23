@@ -616,3 +616,11 @@ Stage Summary:
 - Unresolved: none in this slice's scope.
 - Next: H-01c-authority (CLAIM-035) — RED-first, its own bounded slice.
 - Session record: context/extracted/27-ACTION3-RECONCILIATION.md (§8's fourth entry)
+
+## Task 43 (CLAIM-035, session 28) — the #69 disposition repairs + the resume intake
+- Task: the three accepted #69 post-merge dispositions' repairs (4356737480/4356737629/4356737830 — the third thread-miss's bounded follow-up) + the owner turns 29/30/31 intake (INT-134/135/136: the do-not-stop chain restated + the credential-push turn; the fresh credential's value never recorded, D-025/INT-092).
+- Outcome: (a) the CLAIM-034 close row's INTs cell written with the rule-3 reservation / rule-6 retroactive-notation split; (b) the CLAIM-033 row's timing + merge-timestamp corrections BY POINTER (pre-merge finding; post-merge repair; #68's actual merge 05:53:39Z per the API + the git committer date, never the recorded 06:34:39Z); (c) record 27 §8's gate-recovery text moved back to the fifth entry + the EIGHTH entry (the standing per-thread fix: resolution NEVER before read + disposition — first-practiced in this PR's own loop). Riders per rule 4: CLAIM-034's close row + its open row retired; the two stale merged branches deleted; STATE/AGENTS re-derived (SESSION 28); Task 42's Next-line superseded BY POINTER (H-01c-authority = CLAIM-036). The preflight rebuilt the rig (the sixth env-reset, FACT-001-exact).
+- Evidence: record 28; harness/runs/claim-035-69-disposition-repairs/ (the proof set, PASS ARV-PRF-004); make verify GREEN 52/0.
+- Unresolved: none in this slice's scope.
+- Next: CLAIM-036 — H-01c-authority, RED-first, its own bounded slice, NO PAUSE after this merge.
+- Session record: context/extracted/28-69-DISPOSITION-REPAIRS.md

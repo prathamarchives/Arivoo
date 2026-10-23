@@ -309,7 +309,7 @@
     "red_exit": 1,
     "red_code": "ARV-PRF-006 + ARV-RED-007/009 (the suite's RED set observed at 048aaa2 \u2014 six failures: the count-based overwrite, the stall, the unparseable-context no-refusal, the untyped-mint no-refusal, the changed-since-read no-refusal; red-01.txt)",
     "red_evidence": "the CLAIM-037 fix-commit amendment: test_trusted_gate.py's build_stub restructured for schema-2 stub records (the binding names the stub's own git history; the typed amendments chain from the base records) + the NEW suite test_record_machinery.py minted with its OBSERVED red",
-    "current_sha256": "eccd0d293757307ad6999bd91c7fac4511876623174d3b0a38d580396bcb831c",
+    "current_sha256": "911a4d651118b3e6a2079bfbb251d2d77950105ee7addc91fd908a585fc8dfe8",
     "amendments": [
       {
         "prior_sha256": "a4ee919f0c56a664e874aab871f6d4d6b278f9615ccf705be91b06f40130dcd3",
@@ -334,6 +334,12 @@
         "new_sha256": "eccd0d293757307ad6999bd91c7fac4511876623174d3b0a38d580396bcb831c",
         "note": "the LAW-05 split (the size refusal's own repair): the max-based numbering repair + KB-PRF-006 + the machinery suite's numbering cases 1/2/5 ROUTED to the part-2 claim \u2014 this PR keeps F-007's typed-record core (gate/red/trusted_gate/migration + KB 008-012 + tests 13/14/15 + machinery 3/4/6). The numbering defect stays at the predecessor form in main until the part-2 claim lands; its RED is already observed (red-01/red-02) and re-observed at the part-2 commit",
         "observed_at": "2026-10-23T14:50:31.756000+00:00"
+      },
+      {
+        "prior_sha256": "eccd0d293757307ad6999bd91c7fac4511876623174d3b0a38d580396bcb831c",
+        "new_sha256": "911a4d651118b3e6a2079bfbb251d2d77950105ee7addc91fd908a585fc8dfe8",
+        "note": "CLAIM-038's RED cases restored: the machinery suite's numbering cases 1/2/5 back (the routed rider, its RED re-observed at this slice's commit next). Tests added, none removed",
+        "observed_at": "2026-10-23T16:16:41.944664+00:00"
       }
     ]
   }

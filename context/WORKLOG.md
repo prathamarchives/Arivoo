@@ -650,3 +650,10 @@ Stage Summary:
 - Unresolved: none in this slice's scope (the canary/A16 cluster is CLAIM-038).
 - Next: the merge once review-complete, then CLAIM-038 (part 2), NO PAUSE.
 - Session record: context/extracted/30-H01C-EVIDENCE-PRIVACY.md
+
+### Task 47 (2026-10-23, in-PR — CLAIM-038, part 2)
+- What: the routed numbering rider (proofsheet max-based + ARV-PRF-006 + the run-100 format) + the env-KEY/remote-NAME masking sites + the A16 narrowing (the alias-map check + the narrowed claims with reopening triggers).
+- Outcome: the rider RED re-observed (red-01: the overwrite/stall/no-refusal) then GREEN (the machinery 6/6, KB-PRF-006 firing); the mask sites observed masked in the direct probe (the selftest N12-row ROUTED honestly — never half-proven); the alias bypass closed concretely; make verify 53/0; the PR gate GREEN (12 records).
+- Evidence: record 31; harness/runs/claim-038-numbering-canary-a16/ (red-01, the proof set, notverified).
+- Unresolved: the N12-row follow-up (notverified).
+- Next: the merge, then H-02 -> P3-00 -> the phases, NO PAUSE.

@@ -241,7 +241,9 @@ def check(ci_mode: bool, env: dict[str, str] | None = None, repo_root: Path | No
         embedded = [line.split()[0] for line in remotes.splitlines()
                     if line.strip() and _userinfo_embeds_credential(line.split("\t")[-1].split(" ")[0] if "\t" in line else line)]
         if embedded:
-            findings.append(f"git remote URL embeds a credential (remotes: {', '.join(sorted(set(embedded)))}) — condition: EXPOSED-IN-CONFIG; use a credential helper instead (git config credential.helper; store the token outside the repo)")
+            # CLAIM-038 (F-007): a remote NAME can itself be secret-shaped — masked
+            _names = ", ".join(sorted({_redact(n) for n in set(embedded)}))
+            findings.append(f"git remote URL embeds a credential (remotes: {_names}) — condition: EXPOSED-IN-CONFIG; use a credential helper instead (git config credential.helper; store the token outside the repo)")
             unexpected += 1
             print("  [FAIL] remote credential embedded in git config (remote names only, URL never printed) — repair: external credential helper")
         else:
@@ -276,9 +278,12 @@ def check(ci_mode: bool, env: dict[str, str] | None = None, repo_root: Path | No
         print(f"  [PASS] expected CI env var present: {k} (value never printed)")
     if unexpected_env:
         for k in unexpected_env:
-            findings.append(f"environment variable with a secret-like NAME is set: {k} (value never printed)")
+            # CLAIM-038 (the canary-redaction item, F-007): the KEY string itself is
+            # value material when secret-shaped — masked before any print/finding
+            _mk = _redact(k)
+            findings.append(f"environment variable with a secret-like NAME is set: {_mk} (value never printed)")
             unexpected += 1
-            print(f"  [FAIL] unexpected secret-named env var: {k}")
+            print(f"  [FAIL] unexpected secret-named env var: {_mk}")
     else:
         print(f"  [PASS] no unexpected secret-named environment variables ({len(secret_env)} secret-named total, {len(expected)} CI-expected)")
 

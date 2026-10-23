@@ -456,3 +456,22 @@ def kb_comment_only_registration(copy: pathlib.Path) -> None:
         anchor, anchor + '  # "harness/tests/test_rogue_probe.py" (a comment-only registration)', 1),
         encoding="utf-8")
     _load(copy, "harness.gate").check_red_records()
+
+@case("KB-PRF-006", "a proof-record write into an unparseable numbering context (the count-based overwrite class)",
+      "ARV-PRF-006")
+def kb_slot_unparseable(copy: pathlib.Path) -> None:
+    """CLAIM-038 (the routed rider): the writer numbers by max and refuses an
+    unparseable/occupied context — the count-based stall class."""
+    import json
+    runs = copy / "harness" / "runs" / SLICE
+    ps = _load(copy, "harness.proofsheet")
+    ps.RUNS = copy / "harness" / "runs"
+    seed = json.dumps({"command": "probe", "exit_code": 0, "output_sha256": "0" * 64,
+                       "recorded_at": "2026-10-16T00:00:00+00:00"}, indent=2) + "\n"
+    for n in ("01", "02", "03"):
+        (runs / f"run-{n}.json").write_text(seed)
+    (runs / "run-ab.json").write_text(seed)  # the unparseable name
+    try:
+        ps.write_record(SLICE, "probe-write", 0, "out")
+    except SystemExit:
+        pass

@@ -56,9 +56,26 @@ def write_record(slice_name: str, command: str, exit_code: int, output: str) -> 
         "command": command, "exit_code": exit_code, "commit": commit,
         "output_sha256": _sha(output), "recorded_at": clock.now(),
     }
-    # NOTE (the LAW-05 split): the max-based numbering repair is ROUTED to the part-2 claim (record 30 §12)
-    n = len(glob.glob(str(d / "run-*.json"))) + 1
-    (d / f"run-{n:02d}.json").write_text(json.dumps(rec, indent=2) + "\n")
+    # CLAIM-038 (record 29 §8's routed defect, observed live twice): the
+    # COUNT-based numbering (len(glob)+1) stalled on one slot whenever a gap
+    # made count+1 name an existing record — each overwrite left the count
+    # unchanged, so every later capture rewrote the same slot. The repair:
+    # MAX-based numbering; an ambiguous numbering context is a refusal.
+    import re as _re
+    numbers = []
+    for f in glob.glob(str(d / "run-*.json")):
+        m = _re.fullmatch(r"run-(\d+)\.json", pathlib.Path(f).name)
+        if m:
+            numbers.append(int(m.group(1)))
+        else:
+            print(f"FAIL ARV-PRF-006: the runs dir for '{slice_name}' carries an unparseable record name ({pathlib.Path(f).name}) — an ambiguous numbering context is a refusal, never a guess (the count-based overwrite class, record 29 §8)")
+            raise SystemExit(1)
+    n = max(numbers, default=0) + 1
+    target = d / f"run-{n:02d}.json"
+    if target.exists():
+        print(f"FAIL ARV-PRF-006: the next record slot ({target.name}) already exists — a concurrent writer is refused, never an overwrite")
+        raise SystemExit(1)
+    target.write_text(json.dumps(rec, indent=2) + "\n")
     return rec
 
 

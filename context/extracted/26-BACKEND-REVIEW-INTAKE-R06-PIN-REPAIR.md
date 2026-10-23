@@ -33,6 +33,31 @@ precedent. Turn 26's operative fragment, as preserved at record 25 §1: "i said 
 4-5 is done.. continue following the the directive..." followed by the full execution directive (mission,
 13-step cycle, ordered slices, backend-only scope) — see record 25 §1 for the complete verbatim text.
 
+**Turn 28 — the credential-resume turn (2026-10-23; INT-133; resolves §12's boundary):** the owner's
+message arrives with a fresh GitHub credential in the leading position (the value redacted at ingestion
+per the standing class — D-025/INT-092; only its ARRIVAL and its live verification are recorded, never
+the bytes) and re-issues the five-action sequence verbatim:
+
+> resuemeee : What to do next
+> The PDF lays out the sequence in detail. At a high level:
+> 1. Fix the two regression-test gaps in a small follow-up PR and prove each test catches its intended
+>    failure.
+> 2. Verify that both new checks are required by branch protection, preserving the existing required
+>    checks.
+> 3. Reconcile STATE.md and the session records with the actual verified settings and latest merge.
+> 4. Complete H-01c-authority, then H-01c-evidence/privacy, then the H-02 systems-engineering
+>    verification gate.
+> 5. Begin P3-00: freeze the requirements, interfaces, data states, and acceptance tests. Then proceed
+>    to P3-M0 and P3-K0, followed by the P3-01 through P3-09 product slices.
+>
+> (No PDF travelled with this turn — the "PDF" is the same 2026-10-23 review preserved at turn 27;
+> the five points re-state INT-132's endorsement byte-level. No new directive content beyond the
+> resume authorization + the credential: the five actions are INT-132/D-043's own, re-issued to
+> execute §12's blocked remote leg. The fresh credential verified live at the resume preflight:
+> login `prathamarchives`, admin-scoped — both the push and the review's Action-2 settings read
+> executable; the local gates re-verified GREEN at `200fa70` before the push, after the seventh
+> env-reset repair — §8's environment-artifact class, the rig env restored from `pgbuild/rig.sh`.)
+
 ## 2. Starting state
 
 - Baseline re-established at fresh main `68722c6` (the PR #66 merge, verified as local == origin after
@@ -117,7 +142,8 @@ precedent. Turn 26's operative fragment, as preserved at record 25 §1: "i said 
 - **The environment artifact, honestly recorded:** two `make verify` captures (exit 2) ran without the rig's env in the probe shell (psql not on PATH → the DB-backed suites fail) — an environment failure, never a tree failure; the re-run with the rig env exports in the same command exited 0. The lesson: the rig env is exported per-command, never assumed to persist across shell invocations.
 - **The host-side edit defect, caught in-process:** the first insertion of the pin machinery mangled a regex escape (a literal newline inside a character class) — caught by the in-process syntax gate before any test run, repaired by a line-range splice; never committed, never a repo artifact (the record-24 §8 class repeating on the host, contained one step earlier this time).
 - **The CLAIMS table splice, caught by inspection:** the first registry edit merged the CLAIM-031 and CLAIM-032 rows onto one table line (a missing newline in the edit); repaired immediately, then the gate's own ARV-CLM checks exercised the final form.
-- **The credential boundary, honestly recorded (the remote leg's blocker, INT-104's class — never claim a push that did not happen):** the stored GitHub token (the out-of-repo credential store, the D-025 class; the working token from the session that merged PR #66) is REVOKED/EXPIRED — the push of this slice's branch was refused (authentication failed for Git operations), the API check confirms the credential is dead in both auth header forms (401 Bad credentials; the unauthenticated API path is rate-limited 403 and cannot read protection anyway), no SSH channel exists on this host, and the older stored token is equally dead. The slice's LOCAL leg is COMPLETE (the branch committed, the gate GREEN in PR mode over the actual diff at the content head); the REMOTE leg (push, PR, reviews, merge) and the review's ordered Action 2 (the branch-protection verification needs the admin API) are BLOCKED at this real permission boundary — D-041 element 2's exact class (pause at real permission boundaries, never a silent stop). The branch sits ready to push the moment a fresh owner credential arrives; nothing else in the ordered sequence can bypass the review-before-merge rule to proceed without it.
+- **The credential boundary, honestly recorded (the remote leg's blocker, INT-104's class — never claim a push that did not happen):** the stored GitHub token (the out-of-repo credential store, the D-025 class; the working token from the session that merged PR #66) is REVOKED/EXPIRED — the push of this slice's branch was refused (authentication failed for Git operations), the API check confirms the credential is dead in both auth header forms (401 Bad credentials; the unauthenticated API path is rate-limited 403 and cannot read protection anyway), no SSH channel exists on this host, and the older stored token is equally dead. The slice's LOCAL leg is COMPLETE (the branch committed, the gate GREEN in PR mode over the actual diff at the content head); the REMOTE leg (push, PR, reviews, merge) and the review's ordered Action 2 (the branch-protection verification needs the admin API) are BLOCKED at this real permission boundary — D-041 element 2's exact class (pause at real permission boundaries, never a silent stop). The branch sits ready to push the moment a fresh owner credential arrives; nothing else in the ordered sequence can bypass the review-before-merge rule to proceed without it. **RESOLVED at the turn-28 resume** (§1's addendum, §12's update — the boundary held exactly as recorded, and the resume is its own recorded event, never an edit of this entry's history).
+- **The closed-row overclaim, caught at the resume preflight (turn 28 — the sixth catch):** CLAIM-031's rule-4 close row — this slice's own diff, written BEFORE the credential boundary was known — stated the harness-trusted required-context binding as "verified in session 26 AFTER this row," prose §12's own boundary record contradicts (the verification was BLOCKED at the dead credential, never executed; INT-104's exact class — never claim a settings observation without the settings evidence — and the review's §7 question 5 names the class: "prose claims a required context was bound without settings evidence"). Repair: the row's final field now states the truth — the `harness-suites` + `harness-trusted` binding UNVERIFIED at this write, blocked at the §12 boundary, with the verification + its recorded evidence landing as the review's Action 2 in the reconciliation slice. The overclaim was repaired in the turn-28 resume commit BEFORE any push — the remote never carried the false "verified" prose.
 
 ## 9. Unverified items (LAW-04 — the slice's honest list)
 
@@ -133,4 +159,4 @@ precedent. Turn 26's operative fragment, as preserved at record 25 §1: "i said 
 
 ## 12. Session close
 
-- (in progress — the credential boundary: the PR cannot be OPENED until a fresh owner-provided GitHub credential replaces the revoked one; the branch `slice/claim-032-r06-pin-repair-review-intake` is COMPLETE and committed locally — the content head + the evidence commit, the gate GREEN in PR mode over the actual diff — and resumes to push/PR/review/merge the moment the credential arrives. The merge SHA, the CI run IDs, and the post-merge observations record here at the close.)
+- **The boundary RESOLVED — the resume executed exactly as this section anticipated (owner turn 28, 2026-10-23; INT-133):** a fresh owner credential arrived (the value redacted per the standing class, never recorded in any repo file; verified live at the resume preflight: login `prathamarchives`, admin-scoped — both the push and the review's Action-2 settings read now executable). Before the push, two preflight facts: (1) the branch's local gates re-verified GREEN at `200fa70` — the seventh env-reset repaired in-process first (the rig's psql/PGPORT env lost to the host reset, the §8 environment-artifact class; the server found running on 5433, the env restored from `pgbuild/rig.sh`, health OK ARV-RIG-001; `make verify` GREEN: the seven suites, the 16/16 KB matrix, the gate selfcheck, the verifier 52/0); (2) the resume preflight caught the CLAIM-031 closed-row overclaim — §8's sixth entry — repaired in the same commit, before any push. The remote leg — push `slice/claim-032-r06-pin-repair-review-intake`, open the CLAIM-032 PR, observe CI at the exact head, the host + bot review rounds (CodeRabbit/Greptile), fix in-PR, merge under D-042's standing rule — executes from this commit. Its observations (the merge SHA, the PR's CI run IDs, the post-merge run) record in the Action-3 reconciliation slice per D-043 element 1 — the bounded slice that exists to hold exactly these; this record is never edited a second time.

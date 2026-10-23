@@ -1,0 +1,16 @@
+- not verified (LAW-04 — the reconciliation slice's honest limits):
+- - the branch-protection binding's ACTOR and TIMESTAMP: the endpoint exposes no audit data for a settings
+  change, and this is a personal repository — the org audit-log API does not exist for it. The observation
+  stands on the export itself (read twice, identical: the resume preflight + this slice's capture). Who added
+  harness-suites/harness-trusted to the required contexts, and exactly when, remain unknown to the API —
+  never inferred, never attributed.
+- - a committed export is a SNAPSHOT (INT-104's class): the live settings can drift after this write. The next
+  session preflight re-reads the endpoint; the merge gate's own required checks enforce the live state at
+  every merge (a context removed from settings stops blocking, which the next preflight catches).
+- - the platform's runner-level isolation (F-03 EXTERNAL): unchanged — GitHub-hosted runner isolation remains
+  the platform's claim, never independently audited by this repository (the R-06 notverified.txt's class).
+- - the reconciliation's completeness beyond the review's NAMED items: the mechanical mirrors (VER-804 record
+  pointers, VER-902 counts, VER-504 open-question registers, ARV-CLM registry integrity) passed their checks
+  at the edited tree (52/0); prose consistency beyond them is reviewable, never mechanically guaranteed.
+- - the pinned workflow's runtime semantics: the pin proves the PARSED workflow shape at test time, never the
+  platform's execution semantics (the CLAIM-032 notverified.txt's class, unchanged here).

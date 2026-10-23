@@ -3,7 +3,12 @@
 > STATUS: SESSION ENGINEERING RECORD (2026-10-22; the session's intent refs: INT-129/INT-130/D-042's routing; D-041). Historical
 > process artifact per D-022: NOT owner intent, outranks nothing. Worklog entry: Task 36.
 > PRs this session: (in progress — CLAIM-028/R-03 first; R-04, the one-liner slice, H-01c-authority/evidence, H-02 follow per the
-> STATE-exact next-action order.)
+> STATE-exact next-action order.) — CLOSED 2026-10-23 by pointer (CLAIM-033, the review's Action 3; never rewritten
+> history): FOUR PRs merged this session — R-03 = PR #63 `943dad9` (post-merge run `39805833842`), R-04 = PR #64
+> `8b89b311d` (run `39819503021`), the one-liner = PR #65 `b56f24f11` (run `39826812851`), R-06 = PR #66
+> `68722c6d51422be9ef79d41840233fcb8428cbe6` (run `39835784795`, five jobs) — each merge's observations recorded in
+> its CLAIMS close row; the session ended at the #66 merge before this line updated (the intake defect record 26's
+> audit note names).
 
 ## 1. What the owner asked (verbatim — owner turn 26, 2026-10-22)
 
@@ -659,3 +664,13 @@ context bound after its first green run). Next: **H-01c-authority**, then
 ## 12. Session close
 
 (in progress — the R-03 PR's merge SHA, CI run IDs, and the post-merge observations record here at the close)
+
+**CLOSED 2026-10-23 by pointer (CLAIM-033, the review's ordered Action 3 — this record's own §12 "(in progress)" was
+one of the review's named stale items; the close lands here, the original line stays, never rewritten):** all four
+session PRs merged with their observations recorded in their CLAIMS close rows — R-03 = PR #63 `943dad9`
+(merged 2026-10-22T15:32:39Z; post-merge run `39805833842`), R-04 = PR #64 `8b89b311d` (merged 2026-10-22T17:04:40Z;
+run `39819503021`), the one-liner = PR #65 `b56f24f11` (merged 2026-10-22T17:54:55Z; run `39826812851`), R-06 = PR
+#66 `68722c6d51422be9ef79d41840233fcb8428cbe6` (merged 2026-10-22; run `39835784795`, five jobs green — the
+two-runner trusted-path split). The session's successor records: record 26 (the review intake + the pin repair +
+the credential boundary resolved at turn 28) and record 27 (the reconciliation). The next slice after the
+reconciliation: H-01c-authority (CLAIM-034).

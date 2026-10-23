@@ -1,0 +1,11 @@
+# CLAIM-033 — the Action-3 reconciliation (the review's ordered Action 3; D-043 element 1: ONE consistent
+# required-contexts statement + the merge observations + the stale-record closes, each by pointer)
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-043
+CLAIMS.md
+DECISIONS.md D-043
+context/WORKLOG.md D-043
+context/extracted/25-SESSION-25-R03-R04-EXECUTION.md D-043
+context/extracted/27-ACTION3-RECONCILIATION.md D-043
+harness/runs/claim-033-state-record-reconciliation D-043

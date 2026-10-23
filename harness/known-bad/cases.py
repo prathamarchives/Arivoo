@@ -304,7 +304,7 @@ def kb_clm_intra_dup(copy: pathlib.Path) -> None:
 @case("KB-RED-008", "a test edited + its record self-refreshed (the make-red form) against a trusted baseline — no chaining amendment",
       "ARV-RED-006")
 def kb_self_authorized_refresh(copy: pathlib.Path) -> None:
-    """F-007's named defect: the make-red refresh alone must refuse — the change is authorized only by an amendment chaining exactly from the trusted prior digest."""
+    """F-007's named defect: the make-red refresh alone must refuse — only a typed amendment chaining from the trusted prior digest authorizes."""
     import hashlib
     import json
     import os

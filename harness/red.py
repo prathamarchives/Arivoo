@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """harness/red.py — `make red` (S4; LAW-11's mechanical memory) — the TYPED writer.
 
-CLAIM-037 (F-007): schema 2 per record — binding_commit/binding_sha256 (the
-git-verified revision binding), red_exit/red_code (the typed OBSERVED red,
-required for a NEW record: a written assertion is not an observed failure),
+CLAIM-037 (F-007), schema 2 per record: the git-verified binding
+(binding_commit/binding_sha256), the typed OBSERVED red (red_exit/red_code —
+required for a NEW record; a written assertion is not an observed failure),
 red_unrecovered (the smash class's honest marker, baseline-present records
-only), current_sha256, and TYPED amendments {prior_sha256, new_sha256, note,
-observed_at} — the gate's ARV-RED-006 accepts a changed test only through a
-typed chain bridging the trusted prior state. The TESTS tuple imports from
-harness/gate.py (the ONE home). The write is atomic (tmp+os.replace) and a
-file changed since read refuses (ARV-RED-009 — the single-writer protocol).
-The full schema description: record 30 §4 and the slice's opening commit.
+only), current_sha256, TYPED amendments {prior, new, note, observed_at} —
+ARV-RED-006 accepts a change only through a typed chain from the trusted
+prior state. TESTS imports from gate.py (the ONE home); the write is atomic;
+changed-since-read refuses (ARV-RED-009). Full schema: record 30 §4.
 """
 import argparse
 import hashlib

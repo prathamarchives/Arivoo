@@ -169,10 +169,10 @@ def check_red_records() -> list:
         return ["ARV-RED-003"]
     data = json.loads(rr_path.read_text())
 
-    # ARV-RED-008: registration counts in EITHER tuple — the gate's OWN TESTS or
-    # the candidate's gate.py TESTS parsed as DATA (diff-visible; never imported);
-    # a candidate-registered suite is not TRUSTED-required until main adopts the
-    # tuple — the check's subject: a file invisible to BOTH discovery surfaces.
+    # ARV-RED-008: registration counts in EITHER tuple (the gate's OWN TESTS or
+    # the candidate's gate.py TESTS parsed as DATA — diff-visible, never
+    # imported); a candidate-registered suite is not TRUSTED-required until
+    # main adopts the tuple; the subject: a file invisible to BOTH surfaces.
     cand_tests = set(TESTS)
     gp = REPO / "harness" / "gate.py"
     if gp.is_file() and str(gp.resolve()) != str(pathlib.Path(__file__).resolve()):
@@ -185,10 +185,7 @@ def check_red_records() -> list:
         try:
             import ast as _ast
             _tree = _ast.parse(gp.read_text(encoding="utf-8"))
-            # the fourth pass (CodeRabbit Major, CWE-693): MODULE-LEVEL
-            # assignments only — ast.walk found function-scoped TESTS bindings
-            # the module never executes; the LAST module-level assignment wins
-            # (Python's own execution semantics)
+            # the fourth pass (CWE-693): MODULE-LEVEL only; the LAST assignment wins
             _tests_node = None
             for _node in _tree.body:
                 if isinstance(_node, _ast.Assign) and any(

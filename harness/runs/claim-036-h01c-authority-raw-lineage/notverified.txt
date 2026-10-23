@@ -13,3 +13,10 @@ not verified (LAW-04 — the H-01c-authority slice's honest limits):
   the real corpus is byte-unchanged (VER-802/805 green over the real tree).
 - the pushed head's own walls verification is the GitHub five-check run, observed in the PR —
   no in-file result covers the pushed head itself (INT-104).
+- the #71 review round's own honest limits: the anchored authorization resolution proves an
+  ACTUAL entry header / decision row exists with the cited ID; whether that entry actually
+  authorizes THIS raw change remains the review layer's judgment (unchanged). The three
+  fix-probes (118/118 headers, 7/7 designated rows, 5/5 short fragments validate) were run on
+  the real tree BEFORE the fixes landed — recorded in the round's commits, not separately
+  re-pinned as artifacts. CodeRabbit's Minor on the designated-block hole confirmed Greptile's
+  P2 (one finding, two bots) — dispositioned as such, never counted twice.

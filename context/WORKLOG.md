@@ -634,3 +634,11 @@ Stage Summary:
 - Unresolved: none in this slice's scope.
 - Next: CLAIM-037 — H-01c-evidence/privacy (F-007), RED-first, NO PAUSE after this merge.
 - Session record: context/extracted/29-H01C-AUTHORITY-RAW-LINEAGE.md
+
+### Task 45 (2026-10-23, in-PR — the #71 review round on CLAIM-036; the standing per-thread fix, required for this loop)
+- What: the four PR-#71 bot findings, each read in full + dispositioned BEFORE resolution, each accepted as real, each fixed RED-first at the fix head.
+- Outcome: (a) Greptile P1 — the phantom authorization (the reserved-range numbering note `**INT-001..INT-018**` satisfied the old substring resolution): VER-805 now anchors INT- refs to ACTUAL entry headers and D- refs to ACTUAL decision rows (MUT-36, probed first: 118/118 real headers match the anchored form — zero false-RED); (b) Greptile P2 + CodeRabbit's independent Minor (one hole, two bots) — the whole-manifest last-wins row scan: VER-805 now reads the DESIGNATED full-digest block ONLY and refuses in-block duplicate filenames (MUT-37 outside-block hiding + MUT-38 in-block hiding, probed first: the real block parses 7/7 with zero strays); (c) CodeRabbit Major — the <20-char fragment skip left short quotes extracted-but-never-checked: VER-803 now validates EVERY nonempty fragment (MUT-39, probed first: all 5 previously-skipped short fragments validate on the real tree). RED: red-02.txt at dab5978 (all four NOT CAUGHT, ARV-FLOOR-001 × 4). GREEN: green-03 (4/4) + green-04 (the full floor 39/39, zero regression) + the verifier 53/0; the proof set re-captured at the fix head 52aca28 (run-13..23, every exit 0); the sheet re-derived from 23 records (PASS ARV-PRF-004). The manifest §8 row-schema sharpened in lockstep; the floor docstring count repair + its LAW-11 amendment via make red.
+- Evidence: record 29 (the round's dated entries in §4-§8); harness/runs/claim-036-h01c-authority-raw-lineage/ (red-02, green-03/04, run-13..23, the regenerated sheet, the notverified append).
+- Unresolved: none in this slice's scope.
+- Next: the merge once review-complete (D-042; the per-thread pass before any resolution — this round is its second observed result), then CLAIM-037 — H-01c-evidence/privacy (F-007), NO PAUSE.
+- Session record: context/extracted/29-H01C-AUTHORITY-RAW-LINEAGE.md (the round's dated brackets)

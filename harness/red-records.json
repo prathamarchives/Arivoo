@@ -66,7 +66,7 @@
     "red_evidence": "Amendment 2 (H-01a-R, narrowed not weakened): the bad-base assertion's first draft counted raw 'ARV-DIFF-001' substring mentions \u2014 but the ARV-CLM-000 skip note and the REQUIRED consolidated summary ('RED \u2014 the gate refuses: ...') legitimately contain the code string; the assertion is narrowed to the disposition form (lines starting 'FAIL ARV-DIFF-001' == exactly one) \u2014 no assertion removed, the traceback/exit/skip-note/selfcheck assertions unchanged; the underlying defect (a second disposition print or a crash-repeated code) stays refused"
   },
   "harness/tests/test_mutation_floor.py": {
-    "current_sha256": "ce5bfa07a30af26df89aaaf964ee0f7d92b7c3252e139a8aa4e47ad428edb99c",
+    "current_sha256": "35cb226204023e2faad66358e7c6a04e3134bd390328fe8fdc9d6ac5869117e1",
     "amendments": [
       {
         "note": "AMENDMENT (assertions ADDED, none removed \u2014 LAW-11): three card-required cases added to the frozen set before implementation \u2014 test_14 (the hanging child: named ARV-FLOOR-003 timeout, never an unbounded wait), test_15 (the stdout flood: RLIMIT_FSIZE-capped child + bounded driver read, fail-closed), test_16 (failed construction still cleans the printed temp root). All three observed RED at e1ef3a0 for the same missing-contract form as the original twelve (the predecessor ignores the floor CLI; no temp-root line exists)."
@@ -100,6 +100,12 @@
       },
       {
         "note": "CLAIM-030 (the ledger one-liner consistency slice): test_mutation_floor test_12's case-count pin changed from the hard 30 to DERIVED from the floor's own MUTATIONS list (the wall ARV-RED-002 fired on the edit \u2014 honest): the CLAIM-030 slice added MUT-31 (the INT-126 triplication mutation, expected VER-213), and the hard-coded 30 caught itself stale the moment the floor grew \u2014 the pin now reads the single source of truth (tools/verify_selftest.py's MUTATIONS), never a stale hard-code again"
+      },
+      {
+        "note": "CLAIM-036 (H-01c-authority): test_mutation_floor's header comment repaired to the derived-count form (the stale 'all 30 base mutations' \u2014 the count is DERIVED from the driver's case list, 35 at CLAIM-036: MUT-01..31 + the four H-01c-authority cases) \u2014 a COMMENT-ONLY change, zero assertions added or removed (LAW-11); the wall ARV-RED-002 fired on the edit at the proof-set capture (run-04 exit 1, recorded) \u2014 the honest catch, the amendment recorded here"
+      },
+      {
+        "note": "comment-only floor-docstring count repair (35->39 at the #71 round's four case additions MUT-36..39, observed at the round commit; zero assertions added or removed \u2014 the derived-count assertions already read the driver's list)"
       }
     ],
     "red_evidence": "R-01 REPAIR (session 24, honest \u2014 no fabrication): this record's creation-time red_evidence was overwritten before any commit preserved it (the smash class: the field was created and re-set within one slice's working tree, so no committed revision carries the original note \u2014 verified by walking every commit that ever contained this record). The creation red run's observable evidence survives intact elsewhere: the preserved RED outputs at harness/runs/claim-013-h01b-activation/ (red-01/red-02 \u2014 RED 15/16 observed at the true predecessor e1ef3a0, per CLAIM-013's row and record 22 \u00a74), and the run's authoritative CI evidence (PR #48's run 39400826353 + the post-merge observations in CLAIMS.md). This field now carries this repair statement instead of a forged 'original'."

@@ -66,6 +66,28 @@ EXPECTED_RAW = [
     "upstream of engineering transcripts.txt",
 ]
 
+# H-01c-authority (CLAIM-036): the TRUSTED raw-digest anchors — the approved per-file
+# SHA-256 values, in deliberate LOCKSTEP with the manifest's full-digest block
+# (context/SOURCE-COVERAGE-MANIFEST.md §1; the sync obligation is recorded in BOTH
+# files — the INT_HEADER-precedent copy pattern). The canonical-layer CI job runs the
+# BASE-ANCHORED copy of this file (verify.yml: the anchored judges, sha256-verified
+# against main), so these constants are the trusted prior state a candidate tree
+# cannot rewrite: a PR that changes a raw file AND its manifest row together (the
+# coordinated reanchor, MUT-32) is refused against THIS map, never against the
+# candidate's own manifest copy. A legitimate owner-authorized reanchor updates the
+# raw file, the manifest row, the manifest §5 reanchor register, AND this map in
+# ONE slice — the register row must cite the owner authorization (an INT-/D- that
+# resolves), the distinguishable path the H-01c-authority card requires.
+RAW_ANCHORS = {
+    "0.txt": "139249210b458d23d909761c069db9db3dc855ce18633145419dc942ae6edfea",
+    "1.txt": "6a7b337740620a08d28ea2f41313a74b3636aee8bd864b2bcd2e297dc491af95",
+    "2.txt": "0ca484496f0bb0ea7b33476952ec498c65116362c2d252c52ad5a1bfc824f73f",
+    "3.txt": "f24ff61d4769c6740090268a213e9fa5474f84958c78e1db63d60ede4515e24a",
+    "Arivo Agent Execution Specification.md": "06c9f7a9162808ca9c032a3d2a9ea152390b557ec95b33cfce806927c5e2646a",
+    "engineering transcript.txt": "dd133446a3e3f84ed3ecdf5157779e1d261e3299b2594b9dcd5aadb1ebcdb446",
+    "upstream of engineering transcripts.txt": "29cf75295d2c81169435489642c6788aab4346dab779fcc66218f3bee7202074",
+}
+
 # NOTE (sub-agent finding 2, 2026-10-14): the BRIEFS list was static and went stale the
 # moment session record 12 landed — the F-01 failure class recurring inside the verifier
 # itself. VER-205 now scans the directory dynamically; every *.md in context/extracted/
@@ -145,7 +167,7 @@ def _fragments(quote_line: str) -> list[str]:
     (E-1: elided excerpts), normalize and STRIP each fragment (the INT-060 class:
     a spaced ellipsis 'done ... and' leaves trailing whitespace the corpus's
     punctuation normalization collapses)."""
-    q = quote_line.strip().strip('"').strip()
+    q = quote_line.strip().strip('"' + "\u201c\u201d").strip()  # H-01c-authority: curly outer marks too
     q = re.sub(r"\[[^\]]*\]", " ", q)  # E-6: editorial brackets are not owner text
     parts = re.split(r"\.\.\.|\u2026", q)  # E-1: elisions produce fragments
     return [_normalize_for_fidelity(p).strip() for p in parts if p.strip()]
@@ -667,6 +689,97 @@ class Layer:
             f"context/raw/ was edited (mismatched: {', '.join(mismatches)}) — AUT-02 forbids raw edits; restore the file from git history and record intent through the ledger instead",
         )
 
+        # VER-805 (H-01c-authority, CLAIM-036): raw-source LINEAGE — the trusted-base
+        # binding. VER-802 proves each actual digest APPEARS in the candidate's manifest;
+        # this check binds each raw file to its OWN manifest row AND to the base-owned
+        # RAW_ANCHORS map (the trusted prior state — see the map's lockstep note):
+        #   (a) per-row placement: the digest on the file's OWN full-digest line must
+        #       equal the file's actual digest (the wrong-row relocation class, MUT-33);
+        #   (b) trusted-base binding: the actual digest must equal RAW_ANCHORS[file]
+        #       UNLESS the manifest's §5 reanchor register carries a WELL-FORMED row for
+        #       that file — prior == RAW_ANCHORS[file], new == the actual digest, an
+        #       owner-authorization reference that RESOLVES (an INT-xxx in the ledger
+        #       or a D-xxx in DECISIONS), and a date (the coordinated-reanchor class,
+        #       MUT-32, and the distinguishable owner-authorized path the card requires).
+        # The authorization's GENUINENESS is the review layer's judgment (the walls
+        # serialize the merge; the ref must be reviewed as real) — never claimed here.
+        lineage_failures: list[str] = []
+        # H-01c-authority round (#71, Greptile P2 + CodeRabbit's confirmation): the
+        # designated full-digest block ONLY — the old whole-manifest scan kept the
+        # LAST row per filename, so swapped rows inside the designated block hid
+        # behind correct copies appended later in the document (MUT-37), and
+        # in-block duplicates resolved last-wins (MUT-38). A missing or ambiguous
+        # designated block is a refusal, never a silent selection.
+        manifest_rows: dict[str, str] = {}
+        _row_dupes: list[str] = []
+        _digest_block = re.search(r"Full SHA-256 values[^\n]*\n+```[^\n]*\n(.*?)```", manifest, re.S)
+        if _digest_block:
+            for m in re.finditer(r"^([\w .\-]+?)[ \t]+([0-9a-f]{64})[ \t]*$", _digest_block.group(1), re.M):
+                name = m.group(1).strip()
+                if name in manifest_rows:
+                    _row_dupes.append(name)
+                else:
+                    manifest_rows[name] = m.group(2)
+        if _row_dupes:
+            lineage_failures.append(
+                f"duplicate full-digest rows inside the designated block ({', '.join(sorted(set(_row_dupes)))}) — an ambiguous binding is refused, never resolved by last-wins"
+            )
+        reanchors: dict[str, tuple[str, str, str, str]] = {}
+        if "## 8. Reanchor register" in manifest:
+            reg = manifest.split("## 8. Reanchor register", 1)[1]
+            reg = re.split(r"^## ", reg, maxsplit=1, flags=re.M)[0]
+            for m in re.finditer(
+                r"^\|\s*`([^`|]+)`\s*\|\s*`([0-9a-f]{64})`\s*\|\s*`([0-9a-f]{64})`\s*\|\s*`((?:INT|D)-\d{3})`\s*\|\s*`(\d{4}-\d{2}-\d{2})`\s*\|",
+                reg,
+                re.M,
+            ):
+                reanchors[m.group(1).strip()] = (m.group(2), m.group(3), m.group(4), m.group(5))
+        ledger_text = self.read("INTENT-LEDGER.md")
+        decisions_text = self.read("DECISIONS.md")
+        for name in EXPECTED_RAW:
+            p = self.repo / "context" / "raw" / name
+            if not p.is_file():
+                continue  # VER-802 already refused the missing file
+            actual = hashlib.sha256(p.read_bytes()).hexdigest()
+            row_digest = manifest_rows.get(name)
+            if row_digest is not None and row_digest != actual:
+                lineage_failures.append(
+                    f"{name}: the manifest row carries a digest that is not the file's own (wrong-row relocation)"
+                )
+                continue
+            if row_digest is None:
+                lineage_failures.append(f"{name}: no full-digest row binds this file (missing record)")
+                continue
+            if actual != RAW_ANCHORS.get(name):
+                ra = reanchors.get(name)
+                if ra is None:
+                    lineage_failures.append(
+                        f"{name}: the digest disagrees with the trusted prior anchor and the reanchor register carries NO row for it — a coordinated raw+manifest rewrite is refused (the owner-authorized path is the §5 register, never the candidate's own row)"
+                    )
+                else:
+                    prior, new, auth, _date = ra
+                    # H-01c-authority round (#71, Greptile P1): an authorization
+                    # resolves against ACTUAL entry headers (a line-start **INT-xxx
+                    # followed by space/em-dash) and ACTUAL decision rows (^| D-xxx |)
+                    # — the old substring form matched the ledger's reserved-range
+                    # numbering note (**INT-001..INT-018**), so a phantom
+                    # authorization pointing at nothing passed (MUT-36).
+                    auth_resolves = (
+                        bool(re.search(rf"^\*\*{auth}[\s\u2014-]", ledger_text, re.M))
+                        if auth.startswith("INT-")
+                        else bool(re.search(rf"^\|\s*{auth}\s*\|", decisions_text, re.M))
+                    )
+                    if not (prior == RAW_ANCHORS.get(name) and new == actual and auth_resolves):
+                        lineage_failures.append(
+                            f"{name}: malformed reanchor row (prior/new/auth) — prior must equal the trusted anchor, new the actual digest, and the owner-authorization reference must resolve"
+                        )
+        self.check(
+            "VER-805",
+            not lineage_failures,
+            "raw-source lineage: every raw file binds to its own manifest row and to the trusted prior anchor; reanchors only through the owner-authorized §5 register (H-01c-authority)",
+            f"raw-lineage failures: {'; '.join(lineage_failures[:4])} — a raw change is never authorized by the candidate's own manifest copy; the distinguishable path is the §5 register row citing the owner authorization",
+        )
+
         # VER-803: quote fidelity — every raw-cited ledger quote validates against its source
         ledger = self.read("INTENT-LEDGER.md")
         entries = [e for e in re.split(r"(?=^\*\*INT-\d+)", ledger, flags=re.M) if re.match(r"^\*\*INT-\d+", e)]
@@ -700,16 +813,37 @@ class Layer:
             quotes: list[str] = []
             for ln in entry.splitlines():
                 if ln.startswith("> ") or ln.startswith(">"):
-                    quotes.extend(re.findall(r'"([^"]+)"', ln))
+                    # H-01c-authority (CLAIM-036): BOTH straight and curly quote forms
+                    # — the straight-only extraction let fabricated curly-quoted
+                    # content pass unvalidated (MUT-34); the normalization maps the
+                    # marks symmetrically, so a legitimate curly quote still matches.
+                    for qm in re.findall(r'"([^"]+)"', ln):
+                        quotes.append(qm)
+                    for qm in re.findall(r"\u201c([^\u201d]+)\u201d", ln):
+                        quotes.append(qm)
             if raw_files:
+                if not quotes:
+                    # H-01c-authority (CLAIM-036, MUT-35): source metadata WITHOUT any
+                    # supported quotation is fail-closed — an entry citing raw files
+                    # carries no checkable owner words is a fidelity hole, never a pass.
+                    fidelity_failures.append(
+                        f"{iid}: raw-cited entry carries NO supported quotation (straight or curly) — source metadata without a checkable quote fails closed (the H-01c-authority card), never silently validated"
+                    )
+                    continue
                 file_cache: dict[str, list[str]] = {
                     f: (self.repo / "context" / "raw" / f).read_text(encoding="utf-8", errors="replace").splitlines()
                     for f in raw_files
                 }
                 for q in quotes:
                     for frag in _fragments(q):
-                        if len(frag) < 20:
-                            continue
+                        if not frag:
+                            continue  # a post-normalization empty fragment is nothing to check
+                        # H-01c-authority round (#71, CodeRabbit): EVERY nonempty
+                        # fragment is validated — the old <20-char skip left short
+                        # quotations extracted-but-never-checked (a fabricated short
+                        # quote passed silently — the fail-open form, MUT-39). The
+                        # real ledger was probed first: all 5 previously-skipped short
+                        # fragments validate in their cited windows (zero false-RED).
                         found = any(
                             frag
                             in _normalize_for_fidelity(

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_gate_dispatch.py",
+  "exit_code": 1,
+  "commit": "18c8ed0128d6bda8a12e6419499860399059dafc",
+  "output_sha256": "69aa2ef138fc1203e520d508077e25da13a03721a685242b3fe41aef07596191",
+  "recorded_at": "2026-10-23T12:51:52.819584+00:00"
+}

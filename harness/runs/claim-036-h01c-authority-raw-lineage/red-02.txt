@@ -1,0 +1,19 @@
+# RED EVIDENCE — red-02.txt (CLAIM-036, the #71 review round; the RED-first proof of the four bot findings)
+# Observed at commit dab5978's tree: the 4 new floor cases over the UNMODIFIED verifier
+# (base 5442f0b + the driver cases + the floor docstring count repair — the round's fixes NOT yet applied).
+# Command: python3 tools/verify_selftest.py --only MUT-36,MUT-37,MUT-38,MUT-39
+# Exit: 1 (SELF-TEST RED — 4 case failures, codes: [FLOOR-001])
+# (Captured to /tmp then copied in — the ARV-FLOOR-002 lesson from red-01's round: a run and its
+#  evidence capture never share a live corpus path.)
+
+floor temp root: /tmp/arivoo-floor-i3_mygjo
+known-bad self-test — 4 mutations, each must FAIL its named check (child-process floor)
+
+MUT-36 FAIL  phantom authorization: the coordinated reanchor of MUT-32's form PLUS a WELL-FORMED section-8 register row whose owner authorization cites INT-001 — a RESERVED range the ledger's numbering note mentions (**INT-001..INT-018**) with no actual entry header; the old substring resolution matched the note, so a reanchor pointed at nothing passed (Greptile P1, the #71 round) → not caught (without the expected FAIL line and exit 0) — a vacuous or evasive pass is refused (ARV-FLOOR-001)
+MUT-37 FAIL  hide swapped rows behind later copies: swap 0.txt/1.txt full-digest values in the designated block (MUT-33's form), then append the CORRECT rows later in the document outside the block — the old whole-manifest scan kept the LAST row per filename, so the published block's swapped rows passed the per-row check while wrong (Greptile P2, the #71 round) → not caught (without the expected FAIL line and exit 0) — a vacuous or evasive pass is refused (ARV-FLOOR-001)
+MUT-38 FAIL  hide swapped rows behind in-block duplicates: swap the designated rows, then append the correct copies INSIDE the same fenced block — duplicate filenames within the designated block are an ambiguous binding that must be refused, never resolved by a last-wins selection within the block (the duplicate-rejection half of the P2 fix) → not caught (without the expected FAIL line and exit 0) — a vacuous or evasive pass is refused (ARV-FLOOR-001)
+MUT-39 FAIL  fabricate a SHORT quotation on a raw-cited entry (INT-083's quote replaced by a 15-char nonsense string): the old fragment loop skipped every fragment under 20 chars, so a short quote was extracted (satisfying the no-quote guard) yet NEVER checked against raw — extraction without validation, the fail-open form (CodeRabbit Major, the #71 round) → not caught (without the expected FAIL line and exit 0) — a vacuous or evasive pass is refused (ARV-FLOOR-001)
+floor manifest: /tmp/arv-floor-manifest-907e05eb.json
+
+SELF-TEST RED — verdict RED: 4 case failure(s) + 0 manifest failure(s); codes: ['FLOOR-001']
+residual boundary: child processes run on the same host with the same OS user as this runner — NOT OS-level sandboxing; a hostile child could in principle kill the judge (the run turns RED, never green); the workflow-definition trust boundary is H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in this interpreter; every case ran in a fresh disposable fixture; integrity was re-verified before every case AND after the last case; the manifest records what actually happened. FLOOR-REVIEW-1 sharpening (session 23): the manifest artifact is a RECORD, not a tamper-proof store — a surviving same-user daemon can overwrite it after the run (CI consumes exit codes). R-02 sharpening (session 24): every case runs in its own process group and is killed with it on every outcome + RLIMIT_NPROC bounds the child — a daemon that RE-SESSIONS itself (setsid/double-fork outside the killed group) remains a stated residual, as does any environmental difference a candidate can probe beyond the seeded .git channel — stated and never claimed closed

@@ -1,0 +1,22 @@
+not verified (LAW-04 — the H-01c-authority slice's honest limits):
+- VER-805 validates the reanchor row's FORM and the authorization reference's RESOLVABILITY;
+  the authorization's GENUINENESS is the review layer's judgment (D-042 + the owner's merge
+  authority through the walls) — never a mechanical claim (the §8 register's honest-limit note).
+- the trust chain rests on the canonical-layer CI job running the BASE-ANCHORED judge
+  (verify.yml's anchored copies, sha256-verified against main); the host-level
+  workflow-definition protection remains H-01b-CI's EXTERNAL item (owner/admin settings,
+  recorded never claimed, unchanged); Q10 (token/workflow-tamper hardening) stays owner-gated.
+- the floor's residual boundaries unchanged: the same-user/same-host child, the re-sessioning
+  daemon class, the manifest-as-record-not-vault (stated in every floor output, never claimed
+  closed).
+- NO raw-file edits (the card's explicit rule): every mutation ran on the disposable fixture;
+  the real corpus is byte-unchanged (VER-802/805 green over the real tree).
+- the pushed head's own walls verification is the GitHub five-check run, observed in the PR —
+  no in-file result covers the pushed head itself (INT-104).
+- the #71 review round's own honest limits: the anchored authorization resolution proves an
+  ACTUAL entry header / decision row exists with the cited ID; whether that entry actually
+  authorizes THIS raw change remains the review layer's judgment (unchanged). The three
+  fix-probes (118/118 headers, 7/7 designated rows, 5/5 short fragments validate) were run on
+  the real tree BEFORE the fixes landed — recorded in the round's commits, not separately
+  re-pinned as artifacts. CodeRabbit's Minor on the designated-block hole confirmed Greptile's
+  P2 (one finding, two bots) — dispositioned as such, never counted twice.

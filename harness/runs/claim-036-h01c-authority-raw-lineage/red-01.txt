@@ -1,0 +1,17 @@
+# RED EVIDENCE — red-01.txt (CLAIM-036, H-01c-authority; the RED-first proof)
+# Observed at commit 6cbcd75's tree: the 4 new floor cases over the UNMODIFIED verifier
+# (base 53046dd + the CLAIM-035 merge b244c63 + the driver cases — the repair NOT yet applied).
+# Command: python3 tools/verify_selftest.py --only MUT-32,MUT-33,MUT-34,MUT-35
+# Exit: 1 (SELF-TEST RED — 4 case failures, codes: [FLOOR-001])
+
+floor temp root: /tmp/arivoo-floor-4bbyey3p
+known-bad self-test — 4 mutations, each must FAIL its named check (child-process floor)
+
+MUT-32 FAIL  coordinated raw+manifest reanchor (the H-01c-authority card's core case): append a benign line to 2.txt AND update its manifest full-digest anchor to the new hash — the candidate controls both sides of the old comparison, so VER-802's whole-manifest grep passes; the trusted anchor map must refuse the pair → not caught (without the expected FAIL line and exit 0) — a vacuous or evasive pass is refused (ARV-FLOOR-001)
+MUT-33 FAIL  move a digest to the wrong row: swap 0.txt's and 1.txt's full-digest values in the manifest — every hash still appears in the file (VER-802's grep passes), but each anchor no longer binds to its OWN file's row (the per-row placement rule) → not caught (without the expected FAIL line and exit 0) — a vacuous or evasive pass is refused (ARV-FLOOR-001)
+MUT-34 FAIL  fabricate a ledger quote in CURLY-quoted form (U+201C/U+201D content that exists nowhere in raw) — the old extraction matched straight double quotes only, so fabricated curly-quoted content was never checked (the card's fail-closed quote form) → not caught (without the expected FAIL line and exit 0) — a vacuous or evasive pass is refused (ARV-FLOOR-001)
+MUT-35 FAIL  strip a raw-cited entry's quotable lines entirely (INT-083's quote replaced by a non-quotable paraphrase): source metadata WITHOUT any supported quotation must fail closed, never pass as silently-validated (the card's fail-closed case) → not caught (without the expected FAIL line and exit 0) — a vacuous or evasive pass is refused (ARV-FLOOR-001)
+floor manifest: /tmp/arv-floor-manifest-44a29f7f.json
+
+SELF-TEST RED — verdict RED: 4 case failure(s) + 0 manifest failure(s); codes: ['FLOOR-001']
+residual boundary: child processes run on the same host with the same OS user as this runner — NOT OS-level sandboxing; a hostile child could in principle kill the judge (the run turns RED, never green); the workflow-definition trust boundary is H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in this interpreter; every case ran in a fresh disposable fixture; integrity was re-verified before every case AND after the last case; the manifest records what actually happened. FLOOR-REVIEW-1 sharpening (session 23): the manifest artifact is a RECORD, not a tamper-proof store — a surviving same-user daemon can overwrite it after the run (CI consumes exit codes). R-02 sharpening (session 24): every case runs in its own process group and is killed with it on every outcome + RLIMIT_NPROC bounds the child — a daemon that RE-SESSIONS itself (setsid/double-fork outside the killed group) remains a stated residual, as does any environmental difference a candidate can probe beyond the seeded .git channel — stated and never claimed closed

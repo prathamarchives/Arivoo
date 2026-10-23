@@ -626,3 +626,11 @@ Stage Summary:
 - Next: CLAIM-036 — H-01c-authority, RED-first, its own bounded slice, NO PAUSE after this merge.
 - Session record: context/extracted/28-69-DISPOSITION-REPAIRS.md
 
+
+## Task 44 (CLAIM-036, session 28) — H-01c-authority: the raw manifest/quote lineage
+- Task: the H-01c-authority card, RED-first (D-041's card routing + the review's ordered Action 4 first half; no new owner turn — the standing do-not-stop chain, no pause after PR #70).
+- Outcome: VER-805 — the trusted-base raw binding (the base-owned RAW_ANCHORS map in the base-anchored verifier; per-row digest placement; the coordinated raw+manifest rewrite REFUSED; the manifest §8 reanchor register the distinguishable owner-authorized path) + VER-803's fail-closed quote forms (straight AND curly extraction — fabricated curly content refused; a raw-cited entry with NO quotation fails closed). The floor's 4 new cases MUT-32..35: RED at 6cbcd75 (all four NOT CAUGHT — red-01.txt) then GREEN at the repair (4/4 + the full floor 35/35, zero regression — green-01/02); the verifier 53/0 at the real tree. The floor's own ARV-FLOOR-002 guard caught the first capture-into-corpus attempt (the note inside green-01). Rider per rule 4: CLAIM-035's close row (PR #70 merged b244c634, run 39954854214 five green, 3 branches deleted 204, protection restored verified).
+- Evidence: record 29; harness/runs/claim-036-h01c-authority-raw-lineage/ (red-01, green-01/02, scope, the proof set).
+- Unresolved: none in this slice's scope.
+- Next: CLAIM-037 — H-01c-evidence/privacy (F-007), RED-first, NO PAUSE after this merge.
+- Session record: context/extracted/29-H01C-AUTHORITY-RAW-LINEAGE.md

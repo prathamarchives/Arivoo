@@ -1,0 +1,20 @@
+# GREEN EVIDENCE — green-01.txt (CLAIM-036, H-01c-authority; the repair's proof)
+# At the repaired tree (this slice's content head): the 4 cases now CAUGHT.
+# Command: python3 tools/verify_selftest.py --only MUT-32,MUT-33,MUT-34,MUT-35
+# Exit: 0
+# (Captured to /tmp then copied in: the floor's ARV-FLOOR-002 integrity guard refuses a run whose
+#  corpus changes mid-run — writing the capture into harness/runs/ DURING the run is exactly that
+#  class, caught live on the first capture attempt and recorded here as the guard's own proof.)
+
+floor temp root: /tmp/arivoo-floor-6oexul8b
+known-bad self-test — 4 mutations, each must FAIL its named check (child-process floor)
+
+MUT-32 PASS  coordinated raw+manifest reanchor (the H-01c-authority card's core case): append a benign line to 2.txt AND update its manifest full-digest anchor to the new hash — the candidate controls both sides of the old comparison, so VER-802's whole-manifest grep passes; the trusted anchor map must refuse the pair → VER-805 FAILed as required
+MUT-33 PASS  move a digest to the wrong row: swap 0.txt's and 1.txt's full-digest values in the manifest — every hash still appears in the file (VER-802's grep passes), but each anchor no longer binds to its OWN file's row (the per-row placement rule) → VER-805 FAILed as required
+MUT-34 PASS  fabricate a ledger quote in CURLY-quoted form (U+201C/U+201D content that exists nowhere in raw) — the old extraction matched straight double quotes only, so fabricated curly-quoted content was never checked (the card's fail-closed quote form) → VER-803 FAILed as required
+MUT-35 PASS  strip a raw-cited entry's quotable lines entirely (INT-083's quote replaced by a non-quotable paraphrase): source metadata WITHOUT any supported quotation must fail closed, never pass as silently-validated (the card's fail-closed case) → VER-803 FAILed as required
+floor manifest: /tmp/arv-floor-manifest-477e90fd.json
+
+SELF-TEST GREEN — 4/4 known-bad mutations caught by their named checks.
+The guards are themselves tested (KB-01..06 spirit, document-level; each case ran in a disposable child process).
+residual boundary: child processes run on the same host with the same OS user as this runner — NOT OS-level sandboxing; a hostile child could in principle kill the judge (the run turns RED, never green); the workflow-definition trust boundary is H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in this interpreter; every case ran in a fresh disposable fixture; integrity was re-verified before every case AND after the last case; the manifest records what actually happened. FLOOR-REVIEW-1 sharpening (session 23): the manifest artifact is a RECORD, not a tamper-proof store — a surviving same-user daemon can overwrite it after the run (CI consumes exit codes). R-02 sharpening (session 24): every case runs in its own process group and is killed with it on every outcome + RLIMIT_NPROC bounds the child — a daemon that RE-SESSIONS itself (setsid/double-fork outside the killed group) remains a stated residual, as does any environmental difference a candidate can probe beyond the seeded .git channel — stated and never claimed closed

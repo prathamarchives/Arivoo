@@ -87,6 +87,7 @@ upstream of engineering transcripts.txt    29cf75295d2c81169435489642c6788aab434
 - **VER-802 — raw immutability:** each raw file's current SHA-256 equals the anchored hash above. Any edit to `context/raw/` — even a whitespace change — fails the layer (AUT-02 at C3, was C6-prose).
 - **VER-803 — quote fidelity:** every ledger entry that cites a raw source must have its quote fragments found within the CITED LINE WINDOW (per-citation ±10/+20, sub-agent finding 7b — wrong-file and wrong-region attributions both fail) of the cited file(s), after E-1/E-5/E-6 normalizations; entries with no raw citation must name a durable home (session record / reasoning log / chat-turn label per §2/E-2). A missing Source line fails (this caught the eight real defects repaired 2026-10-14, §6).
 - **VER-804 — STATE freshness:** `/STATE.md`'s last-completed session record must be the highest-numbered record in `context/extracted/` (staleness is caught, not remembered).
+- **VER-805 — raw-source lineage (H-01c-authority, CLAIM-036):** each raw file's digest binds to its OWN full-digest row here (wrong-row relocation refused) AND to the trusted prior anchor (`RAW_ANCHORS` in the base-anchored verifier — the coordinated raw+manifest rewrite is refused); the only distinguishable change path is a §8 reanchor row citing an owner authorization that resolves. Quote extraction covers straight AND curly forms, and a raw-cited entry with NO supported quotation fails closed.
 
 ## 6. Provenance repairs executed under this control (2026-10-14, session 12)
 
@@ -108,3 +109,23 @@ Quote fidelity at repair time: 54/58 raw-citable quotes matched on first probe; 
 - Quote validation proves **fidelity to the raw corpus**, not the completeness of the corpus itself: an owner statement that never entered any captured source cannot be validated into existence (E-2 turns are cross-checked only against session records, not raw).
 - The reviewed-range column is the record of human/agent multi-pass reading; a line-level proof that every owner-voice line was ledgered is impossible without an owner-voice oracle — the mapping above is the auditable claim (each INT cites its lines; each owner-voice region maps to INTs), and the burden shifts to the owner to flag anything missed (Question Record → ledger).
 - SHA-256 anchors protect against **post-capture mutation**, not against the owner supplying already-incomplete material (E-3 stands).
+
+## 8. Reanchor register (H-01c-authority — the owner-authorized raw-change path)
+
+> **STATUS: ACTIVE CONTROL SCHEMA (CLAIM-036, 2026-10-23; the H-01c-authority card: "a legitimate new source, approved reanchor, or sourced supersession requires an explicit, distinguishable owner-authorized path, never indistinguishable from an ordinary candidate rewrite").** VER-805 binds every raw file to its OWN digest row AND to the TRUSTED PRIOR anchor — the base-owned `RAW_ANCHORS` map inside `tools/verify_canonical_layer.py` (the canonical-layer CI job runs the BASE-ANCHORED judge, so the map is the state a candidate tree cannot rewrite). A raw change is NEVER authorized by this manifest's own rows (the candidate controls them); the ONLY distinguishable path is a row HERE.
+
+**Row schema (every field required, checked mechanically by VER-805):**
+
+```
+| `file` | `prior SHA-256 (== RAW_ANCHORS[file])` | `new SHA-256 (the actual post-change digest)` | `owner authorization (an INT-/D- that resolves in the ledger or DECISIONS)` | `date` |
+```
+
+**Rows (none yet — the corpus is unchanged since D-025):**
+
+| File | Prior SHA-256 | New SHA-256 | Owner authorization | Date |
+|------|---------------|-------------|---------------------|------|
+| — | — | — | — | — |
+
+**Lockstep obligation (one fact, two homes — by design):** the digest anchors live in BOTH this file's full-digest block and the verifier's `RAW_ANCHORS` map. The map is the TRUSTED copy (base-anchored in CI); this file is the human-readable register. A legitimate reanchor updates the raw file, this file's rows, a register row here, AND the map — in ONE slice, reviewed as a whole. The verifier's lockstep pattern is the `INT_HEADER` precedent (tools/verify_selftest.py: "kept in deliberate lockstep; if the verifier legitimately changes its header syntax, this copy changes in the same slice").
+
+**Honest limit:** VER-805 validates the row's FORM and the authorization reference's RESOLVABILITY — the authorization's GENUINENESS is the review layer's judgment (D-042's review-complete rule + the owner's merge authority through the walls), never a mechanical claim.

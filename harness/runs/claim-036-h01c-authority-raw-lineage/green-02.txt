@@ -1,0 +1,47 @@
+# GREEN EVIDENCE — green-02.txt (CLAIM-036): the FULL floor at the repaired tree — 35/35, zero regression
+# Command: python3 tools/verify_selftest.py
+# Exit: 0
+
+floor temp root: /tmp/arivoo-floor-ronfeavl
+known-bad self-test — 35 mutations, each must FAIL its named check (child-process floor)
+
+MUT-14 PASS  tamper a raw corpus file (append whitespace to 0.txt) — AUT-02 was prose-only before the manifest → VER-802 FAILed as required
+MUT-15 PASS  fabricate a ledger quote (mutate INT-083's words into text that is not in raw) → VER-803 FAILed as required
+MUT-16 PASS  delete the source-coverage manifest — the coverage control disappears → VER-801 FAILed as required
+MUT-17 PASS  stale STATE pointer — rewrite the highest session-record reference in STATE.md to a lower record on disk → VER-804 FAILed as required
+MUT-18 PASS  strip a restored Source line from INT-035 — the no-provenance defect class returns → VER-803 FAILed as required
+MUT-19 PASS  add a banner-less file to context/extracted/ — the static-BRIEFS blind spot the sub-agent found (F-01 class recurring in the verifier) → VER-205 FAILed as required
+MUT-20 PASS  wrong-line citation: point INT-083 at 1.txt:100 while its quote lives at 1.txt:444 — the file-level-vs-region gap the sub-agent found → VER-803 FAILed as required
+MUT-01 PASS  remove the newest ledger entry (INT-091) — the F-01 class: entries vanish past a frozen bound → VER-212 FAILed as required
+MUT-02 PASS  duplicate a ledger header (INT-091 twice) — uniqueness must catch it → VER-201 FAILed as required
+MUT-03 PASS  corrupt a status ('active' → 'actve') — the old regex was blind to bad statuses → VER-202 FAILed as required
+MUT-04 PASS  delete /STATE.md — the current-state index disappears → VER-701 FAILed as required
+MUT-05 PASS  remove the verification-protocol rule from AGENTS.md — content-generic since 2026-10-14 (session 16 / D-034): removes whichever line(s) carry INT-070, so the mutation cannot no-op when the host wording legitimately changes (the base-anchored self-test RED-flags a no-op as a blind guard — the PR #6/#12/#17 re-target class) → VER-109 FAILed as required
+MUT-06 PASS  restore the blanket 'silence is consent' (F-02 regression) → VER-506 FAILed as required
+MUT-07 PASS  remove the change-channel rule from AGENTS.md (FAIL-001's guard) → VER-107 FAILed as required
+MUT-08 PASS  drop the INTENT-LEDGER.md step from the read order (boot-sequence regression) — content-generic since 2026-10-14: removes whichever numbered read-order line names the ledger, so the mutation cannot silently no-op when the boot order changes (the base-anchored self-test RED-flags a no-op as a blind guard) → VER-101 FAILed as required
+MUT-21 PASS  regress AGENTS to blanket ledger-first boot — rewrite the numbered INTENT-LEDGER read-order step into the pre-supersession form, whatever its current wording (the INT-107/D-027(3) supersession silently undone) → VER-110 FAILed as required
+MUT-22 PASS  drop the worklog tail from the boot path — the early coordination step disappears (the INT-107 read path broken) → VER-110 FAILed as required
+MUT-09 PASS  break INT-051's superseded_by link (silent supersession) → VER-204 FAILed as required
+MUT-10 PASS  delete failures/FAIL-001.yaml — a failure loses its record → VER-703 FAILed as required
+MUT-11 PASS  regress the F-05 qualifier — classification words become a gate for concept formation again (content-generic: targets the 'never a gate' qualifier, whatever the surrounding wording) → VER-211 FAILed as required
+MUT-23 PASS  malform the newest entry header (strip its status segment) — the entry vanishes from the strict status view while the entry splitter still sees it → VER-903 FAILed as required
+MUT-24 PASS  cite a non-existent ledger entry and a non-existent decision in a root document — dangling authority references → VER-901 FAILed as required
+MUT-25 PASS  drift the stated statused-intent count (content-generic: adjusts whatever count AGENTS.md currently states) → VER-902 FAILed as required
+MUT-26 PASS  silently drop an EXECUTION §6 open-question row — the register disagrees across its mirrors (a closure by prose removal, never by a D-row) → VER-504 FAILed as required
+MUT-27 PASS  reintroduce the superseded tag rule — rewrite NORTH-STAR's 'no tag field' into the optional-tag form while the C4 marker stays (slice 9's class (d), sub-agent finding 1: the P1 blind guard this mutation proved) → VER-904 FAILed as required
+MUT-28 PASS  strip a closed question's closure pointer — D-007's Q1-closure annotation loses its D-028 reference, so the closed question reads as OPEN again in a current canonical document (the Arivoo review's first P1 finding, the drift class) → VER-904 FAILed as required
+MUT-29 PASS  regress §9 to the superseded GLM-governing form — the verification family becomes a host requirement again while D-028 stands (the Arivoo review's second P1 finding, the agent-agnostic propagation class) → VER-507 FAILed as required
+MUT-30 PASS  move the worklog-tail boot step BELOW the ledger step — the coordination context no longer loads before the selective authority dive; the directory-separator path was INVISIBLE to the old parser (the Arivoo review's P3 finding), so this mutation no-ops the old VER-110 — the repaired parser must catch it → VER-110 FAILed as required
+MUT-12 PASS  delete the review protocol proposal — review artifacts lose their home → VER-704 FAILed as required
+MUT-13 PASS  gut STATE.md's required fields (keep the file, lose the index) → VER-701 FAILed as required
+MUT-31 PASS  triplicate the ledger's LAST one-liner row byte-identically — the INT-126 intake class (b572d3f): the numbering section's summary row appended twice at once, invisible to VER-201 (the header regex matches DETAILED blocks only) and deduped silently by VER-212's named set (CLAIM-030, the H-01c-claims card item (d)) → VER-213 FAILed as required
+MUT-32 PASS  coordinated raw+manifest reanchor (the H-01c-authority card's core case): append a benign line to 2.txt AND update its manifest full-digest anchor to the new hash — the candidate controls both sides of the old comparison, so VER-802's whole-manifest grep passes; the trusted anchor map must refuse the pair → VER-805 FAILed as required
+MUT-33 PASS  move a digest to the wrong row: swap 0.txt's and 1.txt's full-digest values in the manifest — every hash still appears in the file (VER-802's grep passes), but each anchor no longer binds to its OWN file's row (the per-row placement rule) → VER-805 FAILed as required
+MUT-34 PASS  fabricate a ledger quote in CURLY-quoted form (U+201C/U+201D content that exists nowhere in raw) — the old extraction matched straight double quotes only, so fabricated curly-quoted content was never checked (the card's fail-closed quote form) → VER-803 FAILed as required
+MUT-35 PASS  strip a raw-cited entry's quotable lines entirely (INT-083's quote replaced by a non-quotable paraphrase): source metadata WITHOUT any supported quotation must fail closed, never pass as silently-validated (the card's fail-closed case) → VER-803 FAILed as required
+floor manifest: /tmp/arv-floor-manifest-a8e26671.json
+
+SELF-TEST GREEN — 35/35 known-bad mutations caught by their named checks.
+The guards are themselves tested (KB-01..06 spirit, document-level; each case ran in a disposable child process).
+residual boundary: child processes run on the same host with the same OS user as this runner — NOT OS-level sandboxing; a hostile child could in principle kill the judge (the run turns RED, never green); the workflow-definition trust boundary is H-01b-CI's item; Q10 remains owner-gated. Claims made: no candidate code ran in this interpreter; every case ran in a fresh disposable fixture; integrity was re-verified before every case AND after the last case; the manifest records what actually happened. FLOOR-REVIEW-1 sharpening (session 23): the manifest artifact is a RECORD, not a tamper-proof store — a surviving same-user daemon can overwrite it after the run (CI consumes exit codes). R-02 sharpening (session 24): every case runs in its own process group and is killed with it on every outcome + RLIMIT_NPROC bounds the child — a daemon that RE-SESSIONS itself (setsid/double-fork outside the killed group) remains a stated residual, as does any environmental difference a candidate can probe beyond the seeded .git channel — stated and never claimed closed

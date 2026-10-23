@@ -29,8 +29,9 @@ integrity anchor verifies, and the completion manifest validates.
 
 Each test exercises the REAL runner path (the driver is invoked as a subprocess,
 exactly the way CI invokes it) against a disposable candidate tree. The positive
-path (the real corpus + the real verifier) proves the floor still enforces all 30
-base mutations. The residual demonstration (fake-fail) documents the boundary the
+path (the real corpus + the real verifier) proves the floor still enforces every
+base mutation (the count DERIVED from the driver's case list — 35 at CLAIM-036:
+MUT-01..31 + the four H-01c-authority cases MUT-32..35). The residual demonstration (fake-fail) documents the boundary the
 floor alone does not claim: a verifier that prints the expected failure protocol
 without checking is caught by the POSITIVE 51/0 step of the same required job,
 not by this floor — stated, never hidden.

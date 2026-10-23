@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-033-state-record-reconciliation (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): fc7556c3ad3ba38abe16a7cba454fc8b9bf9bb21
-- generated (last record's timestamp): 2026-10-23T05:37:29.703385+00:00
-- run records: 11
+- commit (last run record's): 552fac0bef4ddb12a00f81bef78e3c2d0d7f1546
+- generated (last record's timestamp): 2026-10-23T05:48:28.235438+00:00
+- run records: 12
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-23T05:35:49.816187+00:00
@@ -16,6 +16,7 @@
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 591b298a9b177f15 · 2026-10-23T05:36:29.925799+00:00
 - `timeout 900 python3 tools/verify_selftest.py` -> exit 0 · output sha256 69cf25cb88e97b88 · 2026-10-23T05:36:37.474153+00:00
 - `make verify` -> exit 2 · output sha256 453d0c926e466df5 · 2026-10-23T05:37:29.703385+00:00
+- `make verify` -> exit 0 · output sha256 9d2cea8d640959d1 · 2026-10-23T05:48:28.235438+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - not verified (LAW-04 — the reconciliation slice's honest limits):
@@ -36,4 +37,4 @@
 - platform's execution semantics (the CLAIM-032 notverified.txt's class, unchanged here).
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): e684e079cb9c92d021b528064e2e775f3b8dfbb749e50328e14e0d69d6f4ef44
+- sheet sha256 (of the content above, excluding this line): 73d8cf4da8eede62a6b597074a246de521d983b43cd90a29c2704f190d31a13b

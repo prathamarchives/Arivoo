@@ -185,10 +185,17 @@ def check_red_records() -> list:
         try:
             import ast as _ast
             _tree = _ast.parse(gp.read_text(encoding="utf-8"))
-            for _node in _ast.walk(_tree):
+            # the fourth pass (CodeRabbit Major, CWE-693): MODULE-LEVEL
+            # assignments only — ast.walk found function-scoped TESTS bindings
+            # the module never executes; the LAST module-level assignment wins
+            # (Python's own execution semantics)
+            _tests_node = None
+            for _node in _tree.body:
                 if isinstance(_node, _ast.Assign) and any(
                         isinstance(_t, _ast.Name) and _t.id == "TESTS" for _t in _node.targets):
-                    cand_tests |= {str(_x) for _x in _ast.literal_eval(_node.value)}
+                    _tests_node = _node
+            if _tests_node is not None:
+                cand_tests |= {str(_x) for _x in _ast.literal_eval(_tests_node.value)}
         except (SyntaxError, ValueError, TypeError):
             print("NOTE ARV-RED-000: the candidate gate.py TESTS tuple is unparseable as a literal — no candidate additions counted (fail-closed)")
     for p in sorted((REPO / "harness" / "tests").glob("test_*.py")):

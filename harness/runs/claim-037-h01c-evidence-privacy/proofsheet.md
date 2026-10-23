@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-037-h01c-evidence-privacy (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 5c12299ec6dc4e08a3ec956ea35d142fd28318ea
-- generated (last record's timestamp): 2026-10-23T15:33:49.971617+00:00
-- run records: 55
+- commit (last run record's): d59f76984dd36668bd6b4c43f81f4278b723816e
+- generated (last record's timestamp): 2026-10-23T15:47:43.552166+00:00
+- run records: 66
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-23T14:10:48.192175+00:00
@@ -60,6 +60,17 @@
 - `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 d1e9df9197c3e51a · 2026-10-23T15:32:40.239420+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 38ae33a60365cce0 · 2026-10-23T15:32:40.402007+00:00
 - `make verify` -> exit 0 · output sha256 1be22c3e14bac3dd · 2026-10-23T15:33:49.971617+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-23T15:45:35.488503+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-23T15:45:35.868662+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-23T15:45:37.895398+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 8fdd990253576d3b · 2026-10-23T15:46:11.759661+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 472160d71b1bf47f · 2026-10-23T15:46:29.143079+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 f3eae46abfe48c1d · 2026-10-23T15:46:33.446093+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 a5a5632eff8211d1 · 2026-10-23T15:46:33.785606+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 658e0ea713f06f42 · 2026-10-23T15:46:33.939110+00:00
+- `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 d1e9df9197c3e51a · 2026-10-23T15:46:38.075798+00:00
+- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 38ae33a60365cce0 · 2026-10-23T15:46:38.234003+00:00
+- `make verify` -> exit 0 · output sha256 c5a4ad8f6d5b349a · 2026-10-23T15:47:43.552166+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - not verified (LAW-04 — the CLAIM-037 honest limits):
@@ -89,4 +100,4 @@
 - part-2 claim lands, never silently fixed here (the size law's own repair: split the slice).
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): c79352391a889253768a999c578b1570ace25ddd2e261f9d99fcb90a56ba73fd
+- sheet sha256 (of the content above, excluding this line): 55bdbff1a46ccae5ccad1e272476bcb411fed8ebf7f91e2982f7d9fdaf80c7e8

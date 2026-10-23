@@ -2,6 +2,7 @@
 harness/proofsheet.py D-041
 harness/known-bad/cases.py D-041
 harness/tests/test_record_machinery.py D-041
+harness/red-records.json D-041
 tools/isolation_check.py D-041
 harness/scope.py D-041
 tools/isolation_selftest.py D-041

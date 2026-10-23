@@ -128,6 +128,18 @@ credential arrived with the turn (value never recorded; verified live: login `pr
   the CLAIM-033 row as the dated pointer (the closed row's UNVERIFIED-at-this-write wording was true at its
   write; its own demand — 'the verification + its recorded evidence land in the reconciliation slice' — is
   satisfied by the pointer).
+- **The missed CodeRabbit Minor, honestly recorded (the process miss — this slice's own fourth catch, and
+  the one that forced this record's single post-merge amendment):** CodeRabbit posted its DECISIONS.md
+  finding at 05:48:20Z — between the slice's review-poll window and the merge — and the merge proceeded
+  with the thread RESOLVED but NO DISPOSITION posted: "Record Action 2 completion without rewriting
+  D-043" (the in-place completion insert inside D-043's Decision cell, against the register's own
+  "Append-only: supersede by adding a new entry that references the old; never rewrite"). The finding is
+  REAL and the same append-only class as Greptile's closed-row P2. Repair (CLAIM-034, the bounded
+  follow-up): the thread REOPENED at once (resolving it again before the fix would have repeated the
+  defect), the honest disposition posted in the thread, D-043's cell RESTORED verbatim, and the dated
+  D-044 entry appended as the completion record. The lesson standing: the review-completion check
+  re-polls the thread list immediately before the merge command, and a finding posted after the last
+  poll is caught by that re-read — never assumed absent.
 
 ## 9. Unverified items (LAW-04 — the slice's honest list)
 
@@ -155,3 +167,8 @@ credential arrived with the turn (value never recorded; verified live: login `pr
 
 - (complete at this PR's merge — the merge SHA + the PR's CI run IDs + the post-merge observations record in
   the CLAIM-033 close row, appended by the next slice per rule 4; this record needs no second pass)
+  — DATED CORRECTION (CLAIM-034, 2026-10-23): the "no second pass" intent was honestly superseded by the
+  fact: the missed CodeRabbit Minor (§8's fourth entry) forced ONE bounded post-merge amendment — the §8
+  ledger entry + this line. PR #68 merged at `493acdaf99cc1241a12bcfe925abf6ea2833b699`, post-merge run
+  `39908291925` completed/success (five jobs green); the thread's repair lands in CLAIM-034 and the
+  thread resolves only when that merges.

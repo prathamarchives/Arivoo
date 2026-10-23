@@ -607,4 +607,5 @@ Stage Summary:
 - Honest limits: the binding's actor/timestamp unknown to the API (personal repo, no audit-log endpoint); the export a snapshot (INT-104) — each preflight re-reads.
 - Unresolved: none in this slice's scope; the next is H-01c-authority (CLAIM-034).
 - Next: merge the CLAIM-033 PR once review-complete.
+- Merged: PR #68 = `493acdaf99cc1241a12bcfe925abf6ea2833b699`, 2026-10-23T06:34:39Z (post-merge run `39908291925` five jobs green; branch deleted; the close row carries the full observations). THE POST-MERGE MISS, honestly: CodeRabbit's DECISIONS Minor (05:48:20Z) landed between the poll and the merge — resolved without a disposition, merged before the fix; the thread REOPENED, the disposition posted, the repair carried by CLAIM-034 (record 27 §8's fourth entry).
 - Session record: context/extracted/27-ACTION3-RECONCILIATION.md

@@ -1,0 +1,11 @@
+# GREEN EVIDENCE — green-01.txt (CLAIM-037): the record-machinery suite at the fix head 15a9c13 — 4/4
+# Command: python3 harness/tests/test_record_machinery.py (RED at 048aaa2: 6 failures — red-01.txt)
+
+PASS  max-based numbering: a seeded gap yields run-06
+PASS  max-based numbering: the existing run-05 is byte-unchanged
+PASS  max-based numbering: the second write advances to run-07
+PASS  the unparseable numbering context refuses with ARV-PRF-006
+PASS  the untyped NEW-record mint refuses with ARV-RED-007
+PASS  a red-record write over a changed file refuses with ARV-RED-009
+
+GREEN — the record machinery refuses its named classes: max-based numbering, the unparseable context, the untyped mint, the changed-since-read write

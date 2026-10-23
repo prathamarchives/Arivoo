@@ -33,7 +33,7 @@ fast:
 	@for t in harness/tests/test_*.py; do echo "== $$t"; python3 $$t || exit 1; done
 
 red:
-	@python3 harness/red.py --note "$${NOTE:-red run at the test-only commit -- record where it was observed}"
+	@python3 harness/red.py --note "$${NOTE:-red run at the test-only commit -- record where it was observed}" $${RED_EXIT:+--exit $${RED_EXIT}} $${RED_CODE:+--code "$${RED_CODE}"}
 
 prove:
 	@SL=$${SLICE:-main-selfcheck}; 	python3 harness/proofsheet.py --slice $$SL --record "python3 harness/tests/test_migrations.py"; 	python3 harness/proofsheet.py --slice $$SL --record "python3 harness/tests/test_substrate.py"; 	python3 harness/proofsheet.py --slice $$SL --record "python3 harness/tests/test_commands.py"; 	python3 harness/proofsheet.py --slice $$SL

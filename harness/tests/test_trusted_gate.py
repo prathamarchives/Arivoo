@@ -119,8 +119,11 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
     else:
         kb.write_bytes((REPO / "harness" / "known-bad" / "cases.py").read_bytes())
 
-    # the required suites (the BASE's TESTS list, whatever it is at this revision)
-    red_records = {}
+    # the required suites (the BASE's TESTS list, whatever it is at this revision).
+    # The records are written AFTER the first commit (schema 2: the binding names
+    # the stub's own git history — CLAIM-037), with typed amendments chaining
+    # from the REAL base records' digests (the gate phase's baseline is this
+    # same REPO via ARV_TRUSTED_BASE, so the chain verifies consistently).
     for t in _base_gate().TESTS:
         rel = t
         p = stub / rel
@@ -131,10 +134,13 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
         p.write_text(content, encoding="utf-8")
         if delete_suite and rel == delete_suite:
             p.unlink()
-        else:
-            red_records[rel] = {"current_sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
-                               "amendments": [], "red_evidence": "synthetic stub"}
-    (stub / "harness" / "red-records.json").write_text(json.dumps(red_records, indent=2) + "\n")
+    # commit A: everything except the records and the PR change — the binding's
+    # target (the suite files live here); the records follow in commit B so the
+    # diff (HEAD~1..HEAD = commit C = notes.txt only) keeps the ORIGINAL shape
+    run("git", "add", "-A")
+    run("git", "commit", "-q", "-m", "synthetic base state (the suites)")
+    binding_commit = subprocess.run(["git", "rev-list", "--max-parents=0", "HEAD"],
+                                    cwd=stub, check=True, capture_output=True, text=True).stdout.strip()
 
     # the registry + ledger (valid open claim for BRANCH)
     (stub / "INTENT-LEDGER.md").write_text("**INT-100 — STUB — active**\n\nStatus legend: `active`.\n")
@@ -149,7 +155,7 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
     runs = stub / "harness" / "runs" / SLICE
     runs.mkdir(parents=True, exist_ok=True)
     (runs / "scope.txt").write_text(
-        f"# synthetic declaration\nnotes.txt\nharness/tests\nharness/red-records.json\nCLAIMS.md\nINTENT-LEDGER.md\nharness/runs/{SLICE}\n")
+        f"# synthetic declaration\nnotes.txt\nharness/tests D-041\nharness/red-records.json D-041\nCLAIMS.md\nINTENT-LEDGER.md\nharness/runs/{SLICE}\n")
     sys.path.insert(0, str(REPO))
     from harness import proofsheet as ps
     ps.RUNS = runs.parent          # RUNS is the runs ROOT — assemble re-joins the slice name
@@ -169,8 +175,35 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
                    if gutted_makefile else
                    "harness-tests:\n\t@for t in harness/tests/test_*.py; do python3 $$t || exit 1; done\nharness-health:\n\t@echo ok\n")
 
+    # the typed red records (schema 2) — written after the declarations so the
+    # PR diff (HEAD~1..HEAD) keeps the ORIGINAL shape (the PR change only);
+    # the binding names the suites' commit (the stub's own git history)
+    base_records = json.loads((REPO / "harness" / "red-records.json").read_text())
+    red_records = {}
+    for t in _base_gate().TESTS:
+        p = stub / t
+        if delete_suite and t == delete_suite:
+            continue
+        cur = hashlib.sha256(p.read_bytes()).hexdigest()
+        # the typed amendment: prior == the REAL record's current (the baseline
+        # the gate phase checks against), new == the stub's synthetic form
+        prior = (base_records.get(t) or {}).get("current_sha256")
+        amendments = []
+        if prior and prior != cur:
+            amendments.append({"prior_sha256": prior, "new_sha256": cur,
+                               "note": "the synthetic stub suite (the trusted-gate test fixture)",
+                               "observed_at": "2026-10-23T00:00:00+00:00"})
+        red_records[t] = {"schema": 2,
+                          "binding_commit": binding_commit,
+                          "binding_sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+                          "red_exit": 1,
+                          "red_code": "ARV-STUB-RED (the synthetic stub's own named refusal form)",
+                          "red_evidence": "synthetic stub",
+                          "current_sha256": cur,
+                          "amendments": amendments}
+    (stub / "harness" / "red-records.json").write_text(json.dumps(red_records, indent=2) + "\n")
     run("git", "add", "-A")
-    run("git", "commit", "-q", "-m", "synthetic base state (the claim row + declarations)")
+    run("git", "commit", "-q", "-m", "the registry + declarations + the typed red records")
     (stub / "notes.txt").write_text("the declared PR change\n")
     if breach:
         (stub / "undeclared-secret.txt").write_text("OUTSIDE the declared scope\n")
@@ -741,6 +774,221 @@ class TrustedGateTests(unittest.TestCase):
 
         # --- the control: the CLEAN workflow passes the repaired check ---
         _wf_check_r06_shape(wf)
+
+
+
+    def test_15_registered_new_suite_is_accepted_by_the_registration_check(self):
+        """The #72 round's Greptile P1: a candidate may legitimately ADD a suite
+        (registered in ITS OWN gate.py TESTS — a diff-visible, reviewable change
+        — with its red record minted). The registration check must accept it:
+        the check's subject is the file invisible to BOTH discovery surfaces,
+        never a legitimately-registered addition. The TRUSTED suite SELECTION
+        stays base-owned (the new suite is not REQUIRED until main adopts the
+        tuple — the next slice's trusted run executes it); this is the
+        registration semantics, never described as a trusted-gate bypass
+        (CodeRabbit's wording catch). RED at the round's predecessor: the
+        registration check compared against the BASE tuple alone and refused
+        the candidate's own registered addition with ARV-RED-008."""
+        stub = build_stub(self.td, gutted_makefile=True)
+        # a NEW suite, registered in the CANDIDATE'S OWN TESTS tuple + a record.
+        # The registration edit touches the stub's OWN gate.py — declared in the
+        # stub's scope + claim row (the synthetic declaration of exactly this
+        # reviewable change), or the scope/claims checks refuse it (the honest
+        # form: registering a suite is a gate.py change, never a free edit)
+        scope_txt = stub / "harness" / "runs" / SLICE / "scope.txt"
+        scope_txt.write_text(
+            scope_txt.read_text().replace(
+                f"harness/runs/{SLICE}\n", f"harness/runs/{SLICE} D-041\n")
+            + "harness/gate.py D-041\n")
+        claims_md = stub / "CLAIMS.md"
+        ctext = claims_md.read_text()
+        claims_md.write_text(ctext.replace(
+            "`notes.txt`, `harness/tests`, `harness/red-records.json`",
+            "`notes.txt`, `harness/tests`, `harness/red-records.json`, `harness/gate.py`", 1))
+        newsuite = stub / "harness" / "tests" / "test_brand_new.py"
+        newsuite.write_text("import unittest\n\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n\nif __name__ == \"__main__\":\n    unittest.main()\n", encoding="utf-8")
+        gp = stub / "harness" / "gate.py"
+        gtext = gp.read_text(encoding="utf-8")
+        anchor = "harness/tests/test_record_machinery.py\")"
+        assert anchor in gtext
+        gtext = gtext.replace(anchor, anchor[:-1] + ",\n         \"harness/tests/test_brand_new.py\")")
+        gp.write_text(gtext, encoding="utf-8")
+        # the suite file lands FIRST (its own commit), THEN the record binds to
+        # that commit — the real make-red form: the binding names history that
+        # actually carries the file (the fixture's own catch: binding to the
+        # repo's FIRST commit named a history that never carried the suite)
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the new suite lands"], cwd=stub,
+                       check=True, capture_output=True)
+        binding = subprocess.run(["git", "rev-parse", "HEAD"], cwd=stub,
+                                 capture_output=True, text=True).stdout.strip()
+        rr = stub / "harness" / "red-records.json"
+        data = json.loads(rr.read_text())
+        data["harness/tests/test_brand_new.py"] = {
+            "schema": 2, "binding_commit": binding,
+            "binding_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),
+            "red_exit": 1, "red_code": "ARV-STUB-RED (the synthetic stub's own named refusal form)",
+            "red_evidence": "synthetic new suite", "current_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),
+            "amendments": []}
+        rr.write_text(json.dumps(data, indent=2) + "\n")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the registered new-suite probe"],
+                       cwd=stub, check=True, capture_output=True)
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertEqual(r.returncode, 0,
+                         "the trusted phase REFUSED a legitimately-registered new suite — "
+                         "the registration check compared against the base tuple alone "
+                         "(the #72 round's Greptile P1): " + r.stdout[-800:])
+
+    def test_16_comment_only_registration_is_refused_through_the_trusted_phase(self):
+        """The third pass (CodeRabbit Major, CWE-693): a candidate that places
+        a new suite's path ONLY in a TESTS COMMENT (with the file present and
+        a record minted) must be REFUSED with ARV-RED-008 — the registration
+        parse must accept only ACTUAL tuple entries (the regex form extracted
+        comment strings too; the AST parse never does). RED at the round's
+        head: the comment path registered, the phase passed the suite as if
+        legitimate while the trusted required selection would never run it."""
+        stub = build_stub(self.td, gutted_makefile=True)
+        scope_txt = stub / "harness" / "runs" / SLICE / "scope.txt"
+        scope_txt.write_text(
+            scope_txt.read_text().replace(f"harness/runs/{SLICE}\n", f"harness/runs/{SLICE} D-041\n")
+            + "harness/gate.py D-041\n")
+        claims_md = stub / "CLAIMS.md"
+        ctext = claims_md.read_text()
+        claims_md.write_text(ctext.replace(
+            "`notes.txt`, `harness/tests`, `harness/red-records.json`",
+            "`notes.txt`, `harness/tests`, `harness/red-records.json`, `harness/gate.py`", 1))
+        newsuite = stub / "harness" / "tests" / "test_comment_only.py"
+        newsuite.write_text("import unittest\n\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n\nif __name__ == \"__main__\":\n    unittest.main()\n", encoding="utf-8")
+        gp = stub / "harness" / "gate.py"
+        gtext = gp.read_text(encoding="utf-8")
+        anchor = '"harness/tests/test_claims_paths.py",'
+        # the path ONLY in a comment — never an actual tuple entry
+        gpf = gp
+        gpf.write_text(gtext.replace(anchor, anchor + '  # "harness/tests/test_comment_only.py"', 1), encoding="utf-8")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the suite lands"], cwd=stub, check=True, capture_output=True)
+        binding = subprocess.run(["git", "rev-parse", "HEAD"], cwd=stub, capture_output=True, text=True).stdout.strip()
+        rr = stub / "harness" / "red-records.json"
+        data = json.loads(rr.read_text())
+        data["harness/tests/test_comment_only.py"] = {
+            "schema": 2, "binding_commit": binding,
+            "binding_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),
+            "red_exit": 1, "red_code": "ARV-STUB-RED (the synthetic stub's own named refusal form)",
+            "red_evidence": "synthetic", "current_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),
+            "amendments": []}
+        rr.write_text(json.dumps(data, indent=2) + "\n")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the comment-only probe"], cwd=stub, check=True, capture_output=True)
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertNotEqual(r.returncode, 0,
+                            "the trusted phase PASSED a comment-only 'registration' — the parse "
+                            "accepted a path the trusted selection would never run (CWE-693): "
+                            + r.stdout[-600:])
+        self.assertIn("FAIL ARV-RED-008", r.stdout + r.stderr)
+
+    def test_17_function_scoped_tests_assignment_never_registers(self):
+        """The fourth pass (CodeRabbit Major, CWE-693): the AST WALK found
+        TESTS assignments in ANY scope — a candidate could hide
+        TESTS = (".../test_rogue.py",) inside a FUNCTION and pass the
+        registration check while the module's real tuple never carries it.
+        Only the MODULE-LEVEL assignments count (the last one wins — Python's
+        own execution semantics). RED at the walk form: the function-scoped
+        path registered and the phase passed the suite as legitimate."""
+        stub = build_stub(self.td, gutted_makefile=True)
+        scope_txt = stub / "harness" / "runs" / SLICE / "scope.txt"
+        scope_txt.write_text(
+            scope_txt.read_text().replace(f"harness/runs/{SLICE}\n", f"harness/runs/{SLICE} D-041\n")
+            + "harness/gate.py D-041\n")
+        claims_md = stub / "CLAIMS.md"
+        ctext = claims_md.read_text()
+        claims_md.write_text(ctext.replace(
+            "`notes.txt`, `harness/tests`, `harness/red-records.json`",
+            "`notes.txt`, `harness/tests`, `harness/red-records.json`, `harness/gate.py`", 1))
+        newsuite = stub / "harness" / "tests" / "test_function_scoped.py"
+        newsuite.write_text("import unittest\n\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n\nif __name__ == \"__main__\":\n    unittest.main()\n", encoding="utf-8")
+        gp = stub / "harness" / "gate.py"
+        gtext = gp.read_text(encoding="utf-8")
+        # the path ONLY inside a function-scoped TESTS assignment — never module-level
+        gpf_payload = ("\n\ndef _probe_hidden_scope():\n"
+                       "    TESTS = (\"harness/tests/test_function_scoped.py\",)\n"
+                       "    return TESTS\n")
+        gp.write_text(gtext.rstrip() + gpf_payload, encoding="utf-8")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the suite lands"], cwd=stub, check=True, capture_output=True)
+        binding = subprocess.run(["git", "rev-parse", "HEAD"], cwd=stub, capture_output=True, text=True).stdout.strip()
+        rr = stub / "harness" / "red-records.json"
+        data = json.loads(rr.read_text())
+        data["harness/tests/test_function_scoped.py"] = {
+            "schema": 2, "binding_commit": binding,
+            "binding_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),
+            "red_exit": 1, "red_code": "ARV-STUB-RED (the synthetic stub's own named refusal form)",
+            "red_evidence": "synthetic", "current_sha256": hashlib.sha256(newsuite.read_bytes()).hexdigest(),
+            "amendments": []}
+        rr.write_text(json.dumps(data, indent=2) + "\n")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the function-scoped probe"], cwd=stub, check=True, capture_output=True)
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertNotEqual(r.returncode, 0,
+                            "the trusted phase PASSED a function-scoped TESTS 'registration' — the "
+                            "AST walk found a scope the module never executes: " + r.stdout[-500:])
+        self.assertIn("FAIL ARV-RED-008", r.stdout + r.stderr)
+
+    def test_13_self_authorized_red_refresh_is_refused(self):
+        """CLAIM-037 / F-007's named defect, end-to-end through the trusted
+        phase: the candidate edits a frozen suite and refreshes its OWN record
+        (the make-red form — the candidate-supplied current_sha256). The
+        trusted run must refuse with ARV-RED-006: a changed test is authorized
+        ONLY by a typed amendment chaining exactly from the trusted prior
+        digest (prior == the baseline's, new == the actual file) — the record
+        refresh alone is the self-authorization hole (observed RED at the
+        predecessor: the trusted run passed the refreshed form GREEN)."""
+        stub = build_stub(self.td, gutted_makefile=True)
+        key = _base_gate().TESTS[0]
+        t = stub / key
+        t.write_text(t.read_text(encoding="utf-8") + "\n# edited after red (the self-authorization probe)\n", encoding="utf-8")
+        import hashlib as _h, json as _j
+        rr = stub / "harness" / "red-records.json"
+        data = _j.loads(rr.read_text())
+        data[key]["current_sha256"] = _h.sha256(t.read_bytes()).hexdigest()  # the make-red refresh
+        rr.write_text(_j.dumps(data, indent=2) + "\n")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the self-authorized refresh probe"],
+                       cwd=stub, check=True, capture_output=True)
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertNotEqual(r.returncode, 0,
+                            "the trusted run PASSED a self-authorized red refresh — the candidate-"
+                            "supplied current_sha256 authorized its own edited test (F-007's named defect)")
+        self.assertIn("FAIL ARV-RED-006", r.stdout + r.stderr,
+                      "the refusal form is required: the KB runner's broken-guard line "
+                      "('expected ARV-RED-006') must never satisfy this probe")
+
+    def test_14_false_revision_binding_is_refused(self):
+        """CLAIM-037: the typed record's git binding, end-to-end through the
+        trusted phase: a record whose binding digest does not match the file
+        at its binding commit is a FALSE binding — the revision claim names
+        history that does not carry the claimed content. The trusted run must
+        refuse with ARV-RED-007 (observed RED at the predecessor: no binding
+        existed to be false — the class was unobservable)."""
+        stub = build_stub(self.td, gutted_makefile=True)
+        key = _base_gate().TESTS[0]
+        rr = stub / "harness" / "red-records.json"
+        data = json.loads(rr.read_text())
+        data[key]["binding_sha256"] = "e" * 64  # a fabricated digest — no revision carries it
+        data[key]["binding_commit"] = subprocess.run(
+            ["git", "rev-list", "--max-parents=0", "HEAD"], cwd=stub,
+            capture_output=True, text=True).stdout.strip() or "0" * 40
+        rr.write_text(json.dumps(data, indent=2) + "\n")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the false-binding probe"],
+                       cwd=stub, check=True, capture_output=True)
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertNotEqual(r.returncode, 0,
+                            "the trusted run PASSED a falsely-bound red record — the revision "
+                            "claim named content git does not carry")
+        self.assertIn("FAIL ARV-RED-007", r.stdout + r.stderr,
+                      "the refusal form is required: the KB runner's broken-guard line "
+                      "('expected ARV-RED-007') must never satisfy this probe")
 
 
 if __name__ == "__main__":

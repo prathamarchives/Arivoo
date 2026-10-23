@@ -1,58 +1,103 @@
 #!/usr/bin/env python3
-"""harness/red.py — `make red` (S4; LAW-11's mechanical memory).
+"""harness/red.py — `make red` (S4; LAW-11's mechanical memory) — the TYPED writer.
 
-Records the CURRENT hash of every declared test file into red-records.json
-(together with an --note that states WHERE the red run was observed — the
-test-only commit). Re-running after an amendment updates current_sha256 and
-appends the amendment note (amendments add assertions, never remove).
+CLAIM-037 (F-007), schema 2 per record: the git-verified binding
+(binding_commit/binding_sha256), the typed OBSERVED red (red_exit/red_code —
+required for a NEW record; a written assertion is not an observed failure),
+red_unrecovered (the smash class's honest marker, baseline-present records
+only), current_sha256, TYPED amendments {prior, new, note, observed_at} —
+ARV-RED-006 accepts a change only through a typed chain from the trusted
+prior state. TESTS imports from gate.py (the ONE home); the write is atomic;
+changed-since-read refuses (ARV-RED-009). Full schema: record 30 §4.
 """
 import argparse
 import hashlib
 import json
+import os
 import pathlib
+import subprocess
 import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 RR = REPO / "harness" / "red-records.json"
-# H-01b-CI (session 23): the trusted-gate suite joins the required set. NOTE:
-# this tuple DUPLICATES gate.py's TESTS — a one-fact-two-homes defect (the new
-# suite had to be registered in BOTH; the make red below initially skipped the
-# unregistered file entirely) — the unification is H-01c-evidence's named work,
-# recorded here, never silently diverged again.
-TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
-         "harness/tests/test_commands.py", "harness/tests/test_gate_dispatch.py",
-         "harness/tests/test_mutation_floor.py",
-         "harness/tests/test_trusted_gate.py",
-         "harness/tests/test_claims_paths.py")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from harness.gate import TESTS  # noqa: E402  — the ONE home (this slice's unification)
+
+
+def _now() -> str:
+    from harness.adapters import clock
+    return clock.now()
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--note", required=True, help="where the red run was observed (the test-only commit)")
+    ap.add_argument("--note", required=True, help="where the red run was observed (the test-only commit) / the amendment's reason")
+    ap.add_argument("--exit", dest="red_exit", type=int, default=None,
+                    help="the OBSERVED nonzero exit of the red run — REQUIRED for a NEW record (the typed observed-red)")
+    ap.add_argument("--code", default=None,
+                    help="the OBSERVED named refusal code(s) of the red run — REQUIRED for a NEW record")
+    ap.add_argument("--red-commit", default=None,
+                    help="the commit carrying the red form (default: HEAD; the binding must verify in git)")
     a = ap.parse_args()
-    data = json.loads(RR.read_text()) if RR.is_file() else {}
     for t in TESTS:
         p = REPO / t
         if not p.is_file():
             print(f"FAIL ARV-RED-004: {t} does not exist — nothing to record")
             return 1
+
+    # the #72 round (Greptile P2): the missing-registry recovery path — the
+    # predecessor bootstrapped an empty registry; the rewrite's unconditional
+    # read crashed. The ARV-RED-003 recovery path is preserved (every TESTS
+    # file below then mints a NEW record, each requiring --exit/--code).
+    original_text = RR.read_text() if RR.is_file() else ""
+    data = json.loads(original_text) if original_text.strip() else {}
+    if not RR.is_file():
+        print("NOTE ARV-RED-000: harness/red-records.json is absent — bootstrapping an empty registry (the ARV-RED-003 recovery path; every TESTS file mints a NEW record below, each requiring the observed --exit/--code)")
+    red_commit = a.red_commit or subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
+
+    for t in TESTS:
+        p = REPO / t
         cur = hashlib.sha256(p.read_bytes()).hexdigest()
         is_new = t not in data
-        # H-01b-CI (session 23 — the smash repair, reproduced live mid-slice):
-        # red_evidence names where THIS FILE's red run was observed, so it is
-        # set ONLY when the record is first created. The predecessor re-set it
-        # on EVERY `make red` (its `"red_commit" not in` guard never held), so
-        # the last invocation's note silently replaced every record's current
-        # evidence text — the amendments array was the only surviving trail.
-        # The typed-record redesign (observed-red results, revision binding,
-        # amendment approval) remains H-01c-evidence's named card.
-        if not is_new and data[t].get("current_sha256") != cur:
-            data[t].setdefault("amendments", []).append({"note": a.note})
-        data[t] = {**data.get(t, {}), "current_sha256": cur,
-                   "amendments": data.get(t, {}).get("amendments", [])}
         if is_new:
-            data[t]["red_evidence"] = a.note
-    RR.write_text(json.dumps(data, indent=2) + "\n")
+            if a.red_exit is None or not a.code or a.red_exit == 0:
+                print(f"FAIL ARV-RED-007: a NEW record for {t} requires the OBSERVED red (--exit nonzero + --code the named refusal) — a written assertion is not an observed failure (F-007)")
+                return 1
+            binding = subprocess.run(["git", "show", f"{red_commit}:{t}"], cwd=REPO, capture_output=True)
+            if binding.returncode != 0:
+                print(f"FAIL ARV-RED-007: the binding for {t} does not verify — git carries no {t} at {red_commit[:10]} (a revision claim must name history that exists)")
+                return 1
+            data[t] = {
+                "schema": 2,
+                "binding_commit": red_commit,
+                "binding_sha256": hashlib.sha256(binding.stdout).hexdigest(),
+                "red_exit": a.red_exit,
+                "red_code": a.code,
+                "red_evidence": a.note,
+                "current_sha256": cur,
+                "amendments": [],
+            }
+        elif data[t].get("current_sha256") != cur:
+            prior = data[t]["current_sha256"]
+            # the H-01b-CI smash repair kept red_evidence set only at creation;
+            # the typed redesign adds the EXACT changed content to amendments
+            data[t].setdefault("amendments", []).append({
+                "prior_sha256": prior,
+                "new_sha256": cur,
+                "note": a.note,
+                "observed_at": _now(),
+            })
+            data[t]["current_sha256"] = cur
+        # unchanged digest: no-op (the note rides the invocation's output only)
+
+    current_text = RR.read_text() if RR.is_file() else ""
+    if current_text != original_text:
+        print("FAIL ARV-RED-009: harness/red-records.json changed since it was read — a concurrent writer is refused (make red is a single-writer flow; the protocol is explicit, never racy)")
+        return 1
+    tmp = RR.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(data, indent=2) + "\n")
+    os.replace(tmp, RR)
     print(f"OK ARV-RED-005: red records updated for {len(TESTS)} test files (note: {a.note})")
     return 0
 

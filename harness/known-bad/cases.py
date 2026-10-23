@@ -292,3 +292,167 @@ def kb_clm_intra_dup(copy: pathlib.Path) -> None:
         "| CLAIM-TWIN | the duplicate synthetic row (intra-table drift) | 2026-10-22 | probe |\n",
         encoding="utf-8")
     _load(copy, "harness.claims").check_registry()
+
+
+# --- CLAIM-037 (H-01c-evidence/privacy part 1; the frozen codes are named in the
+#     opening commit + record 30; each probe carries a one-line docstring here):
+#     ARV-RED-006 the self-authorized make-red refresh (F-007's named defect)
+#     ARV-RED-007 the untyped/false-binding record (a written assertion is not
+#                an observed failure; a fabricated commit name is a false claim)
+#     ARV-RED-008 the unregistered test file (the discovery gap)
+
+@case("KB-RED-008", "a test edited + its record self-refreshed (the make-red form) against a trusted baseline — no chaining amendment",
+      "ARV-RED-006")
+def kb_self_authorized_refresh(copy: pathlib.Path) -> None:
+    """F-007's named defect: the make-red refresh alone must refuse — only a typed amendment chaining from the trusted prior digest authorizes."""
+    import hashlib
+    import json
+    import os
+    import tempfile
+    key = "harness/tests/test_migrations.py"
+    rr = copy / "harness" / "red-records.json"
+    original = json.loads(rr.read_text())
+    with tempfile.TemporaryDirectory() as td:
+        bdir = pathlib.Path(td) / "base"
+        (bdir / "harness").mkdir(parents=True)
+        (bdir / "harness" / "red-records.json").write_text(json.dumps(original, indent=2) + "\n")
+        t = copy / key
+        t.write_text(t.read_text(encoding="utf-8") + "\n# edited after red (the self-authorization must-reject)\n", encoding="utf-8")
+        data = json.loads(rr.read_text())
+        data[key]["current_sha256"] = hashlib.sha256(t.read_bytes()).hexdigest()
+        rr.write_text(json.dumps(data, indent=2) + "\n")
+        os.environ["ARV_TRUSTED_BASE"] = str(bdir)
+        try:
+            _load(copy, "harness.gate").check_red_records()
+        finally:
+            del os.environ["ARV_TRUSTED_BASE"]
+
+
+@case("KB-RED-009", "a prose-only red record (no typed observed-red, no honest unrecovered marker)",
+      "ARV-RED-007")
+def kb_untyped_record(copy: pathlib.Path) -> None:
+    """The typed-record guard: a prose-only record must refuse — a written assertion is not an observed failure."""
+    import json
+    rr = copy / "harness" / "red-records.json"
+    data = json.loads(rr.read_text())
+    key = "harness/tests/test_migrations.py"
+    data[key] = {"red_evidence": "the author asserts it failed (a written assertion is not an observed failure)",
+                 "current_sha256": data[key]["current_sha256"],
+                 "amendments": data[key].get("amendments", [])}
+    rr.write_text(json.dumps(data, indent=2) + "\n")
+    _load(copy, "harness.gate").check_red_records()
+
+
+@case("KB-RED-010", "an unregistered test file under harness/tests/ (the discovery/registration gap)",
+      "ARV-RED-008")
+def kb_unregistered_suite(copy: pathlib.Path) -> None:
+    """Fail-closed registration: a file under harness/tests/ registered nowhere sails past every discovery surface."""
+    (copy / "harness" / "tests" / "test_rogue_probe.py").write_text(
+        "# an unregistered suite file — the must-reject (fail-closed registration)\n", encoding="utf-8")
+    _load(copy, "harness.gate").check_red_records()
+
+
+
+# --- CLAIM-037, the #72 review round (Greptile 2 P1 + 2 P2, CodeRabbit Minor + Major).
+#     Named codes frozen BEFORE the round's fixes (RED-first; every case observed
+#     NOT CAUGHT at the round's head 625396d, captured in red-02.txt):
+#       ARV-RED-007 also fires for: (a) a binding naming history git CANNOT SHOW
+#               (a nonexistent commit — the predecessor printed a NOTE and passed
+#               the false claim); (b) red_unrecovered on a record with NO trusted
+#               prior state (a new suite's mint — the marker exists for honestly
+#               lost history, never as the typed-red bypass)
+
+@case("KB-RED-011", "a record whose binding_commit does not exist in git history",
+      "ARV-RED-007")
+def kb_nonexistent_binding(copy: pathlib.Path) -> None:
+    """The #72 round: a nonexistent binding_commit is a false claim — git's inability to show it IS the refusal, never an unverifiable note."""
+    import json, subprocess
+    # the work copies are non-git: the probe git-inits its own copy (the refusal needs a real git context)
+    subprocess.run(["git", "init", "-q"], cwd=copy, capture_output=True)
+    subprocess.run(["git", "config", "user.email", "probe@test.local"], cwd=copy, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "probe"], cwd=copy, capture_output=True)
+    subprocess.run(["git", "add", "-A"], cwd=copy, capture_output=True)
+    subprocess.run(["git", "commit", "-q", "-m", "probe base"], cwd=copy, capture_output=True)
+    rr = copy / "harness" / "red-records.json"
+    data = json.loads(rr.read_text())
+    # the third pass (CodeRabbit Major): the OTHER records still name the
+    # ORIGINAL history's commits, which the fresh repo does not contain —
+    # every one of them would refuse ARV-RED-007 and the case's expected code
+    # would fire from the WRONG records (a vacuous pass for the target).
+    # Rebind them to the fresh base commit so the ONLY 007 source is the
+    # nonexistent "f"*40 below.
+    base_sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=copy,
+                              capture_output=True, text=True).stdout.strip()
+    import hashlib
+    for _t, _r in data.items():
+        _p = copy / _t
+        _r["binding_commit"] = base_sha
+        _r["binding_sha256"] = hashlib.sha256(_p.read_bytes()).hexdigest()
+    key = "harness/tests/test_migrations.py"
+    data[key]["binding_commit"] = "f" * 40  # names nothing in any history
+    rr.write_text(json.dumps(data, indent=2) + "\n")
+    _load(copy, "harness.gate").check_red_records()
+
+
+@case("KB-RED-012", "red_unrecovered on a record with NO trusted prior state (the new-mint bypass)",
+      "ARV-RED-007")
+def kb_unrecovered_without_baseline(copy: pathlib.Path) -> None:
+    """The #72 round: red_unrecovered is for honestly-lost history (baseline-present records), never a new mint's typed-red bypass."""
+    import hashlib
+    import json
+    import os
+    import tempfile
+    rr = copy / "harness" / "red-records.json"
+    original = json.loads(rr.read_text())
+    key = "harness/tests/test_migrations.py"
+    rogue = "harness/tests/test_new_suite_probe.py"
+    data = json.loads(rr.read_text())
+    # the rogue suite FILE must exist (else it is the ARV-GATE-001 class, not this bypass case)
+    (copy / "harness" / "tests" / "test_new_suite_probe.py").write_text(
+        "# the bypass probe's suite file\n", encoding="utf-8")
+    # the rogue suite must be REGISTERED in the copy's own gate.py TESTS (the
+    # registered-addition form) — otherwise the per-record check never examines
+    # its record and the bypass stays invisible (the probe's own first miss)
+    gpf = copy / "harness" / "gate.py"
+    gtext = gpf.read_text(encoding="utf-8")
+    # a MIDDLE tuple entry as the anchor (stable across the real tuple and the test stubs' additions)
+    anchor = '"harness/tests/test_claims_paths.py",'
+    assert anchor in gtext
+    gpf.write_text(gtext.replace(anchor, anchor + '\n         "harness/tests/test_new_suite_probe.py",', 1), encoding="utf-8")
+    data[rogue] = {"schema": 2,
+                   "binding_commit": original[key].get("binding_commit", "0" * 40),
+                   "binding_sha256": "0" * 64,
+                   "red_unrecovered": True,  # the bypass attempt: no red_exit/red_code
+                   "red_evidence": "the new suite's record, never in any baseline",
+                   "current_sha256": "0" * 64, "amendments": []}
+    rr.write_text(json.dumps(data, indent=2) + "\n")
+    with tempfile.TemporaryDirectory() as td:
+        bdir = pathlib.Path(td) / "base"
+        (bdir / "harness").mkdir(parents=True)
+        (bdir / "harness" / "red-records.json").write_text(json.dumps(original, indent=2) + "\n")
+        os.environ["ARV_TRUSTED_BASE"] = str(bdir)
+        try:
+            _load(copy, "harness.gate").check_red_records()
+        finally:
+            del os.environ["ARV_TRUSTED_BASE"]
+
+# --- CLAIM-037, CodeRabbit's second pass (the TESTS-parse hole) ---
+@case("KB-RED-013", "a test file 'registered' ONLY in a TESTS comment (the parse hole)",
+      "ARV-RED-008")
+def kb_comment_only_registration(copy: pathlib.Path) -> None:
+    """The comment-only 'registration' must refuse. In the KB form the loaded
+    gate module IS the copy's gate.py (the same-file parse skip — the module's
+    own tuple is the truth), so this case proves the module-tuple refusal; the
+    comment-extraction hole itself is discriminated by trusted test_16 (the
+    base/candidate split where the candidate's parse runs)."""
+    import json
+    (copy / "harness" / "tests" / "test_rogue_probe.py").write_text(
+        "# a suite file registered only in a comment — the must-reject\n", encoding="utf-8")
+    gpf = copy / "harness" / "gate.py"
+    gtext = gpf.read_text(encoding="utf-8")
+    anchor = '"harness/tests/test_claims_paths.py",'
+    assert anchor in gtext
+    gpf.write_text(gtext.replace(
+        anchor, anchor + '  # "harness/tests/test_rogue_probe.py" (a comment-only registration)', 1),
+        encoding="utf-8")
+    _load(copy, "harness.gate").check_red_records()

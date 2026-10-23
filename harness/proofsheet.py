@@ -56,6 +56,7 @@ def write_record(slice_name: str, command: str, exit_code: int, output: str) -> 
         "command": command, "exit_code": exit_code, "commit": commit,
         "output_sha256": _sha(output), "recorded_at": clock.now(),
     }
+    # NOTE (the LAW-05 split): the max-based numbering repair is ROUTED to the part-2 claim (record 30 §12)
     n = len(glob.glob(str(d / "run-*.json"))) + 1
     (d / f"run-{n:02d}.json").write_text(json.dumps(rec, indent=2) + "\n")
     return rec

@@ -743,5 +743,63 @@ class TrustedGateTests(unittest.TestCase):
         _wf_check_r06_shape(wf)
 
 
+
+    def test_13_self_authorized_red_refresh_is_refused(self):
+        """CLAIM-037 / F-007's named defect, end-to-end through the trusted
+        phase: the candidate edits a frozen suite and refreshes its OWN record
+        (the make-red form — the candidate-supplied current_sha256). The
+        trusted run must refuse with ARV-RED-006: a changed test is authorized
+        ONLY by a typed amendment chaining exactly from the trusted prior
+        digest (prior == the baseline's, new == the actual file) — the record
+        refresh alone is the self-authorization hole (observed RED at the
+        predecessor: the trusted run passed the refreshed form GREEN)."""
+        stub = build_stub(self.td, gutted_makefile=True)
+        key = _base_gate().TESTS[0]
+        t = stub / key
+        t.write_text(t.read_text(encoding="utf-8") + "\n# edited after red (the self-authorization probe)\n", encoding="utf-8")
+        import hashlib as _h, json as _j
+        rr = stub / "harness" / "red-records.json"
+        data = _j.loads(rr.read_text())
+        data[key]["current_sha256"] = _h.sha256(t.read_bytes()).hexdigest()  # the make-red refresh
+        rr.write_text(_j.dumps(data, indent=2) + "\n")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the self-authorized refresh probe"],
+                       cwd=stub, check=True, capture_output=True)
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertNotEqual(r.returncode, 0,
+                            "the trusted run PASSED a self-authorized red refresh — the candidate-"
+                            "supplied current_sha256 authorized its own edited test (F-007's named defect)")
+        self.assertIn("FAIL ARV-RED-006", r.stdout + r.stderr,
+                      "the refusal form is required: the KB runner's broken-guard line "
+                      "('expected ARV-RED-006') must never satisfy this probe")
+
+    def test_14_false_revision_binding_is_refused(self):
+        """CLAIM-037: the typed record's git binding, end-to-end through the
+        trusted phase: a record whose binding digest does not match the file
+        at its binding commit is a FALSE binding — the revision claim names
+        history that does not carry the claimed content. The trusted run must
+        refuse with ARV-RED-007 (observed RED at the predecessor: no binding
+        existed to be false — the class was unobservable)."""
+        stub = build_stub(self.td, gutted_makefile=True)
+        key = _base_gate().TESTS[0]
+        rr = stub / "harness" / "red-records.json"
+        data = json.loads(rr.read_text())
+        data[key]["binding_sha256"] = "e" * 64  # a fabricated digest — no revision carries it
+        data[key]["binding_commit"] = subprocess.run(
+            ["git", "rev-list", "--max-parents=0", "HEAD"], cwd=stub,
+            capture_output=True, text=True).stdout.strip() or "0" * 40
+        rr.write_text(json.dumps(data, indent=2) + "\n")
+        subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "the false-binding probe"],
+                       cwd=stub, check=True, capture_output=True)
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertNotEqual(r.returncode, 0,
+                            "the trusted run PASSED a falsely-bound red record — the revision "
+                            "claim named content git does not carry")
+        self.assertIn("FAIL ARV-RED-007", r.stdout + r.stderr,
+                      "the refusal form is required: the KB runner's broken-guard line "
+                      "('expected ARV-RED-007') must never satisfy this probe")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

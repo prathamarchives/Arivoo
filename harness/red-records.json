@@ -111,7 +111,7 @@
     "red_evidence": "R-01 REPAIR (session 24, honest \u2014 no fabrication): this record's creation-time red_evidence was overwritten before any commit preserved it (the smash class: the field was created and re-set within one slice's working tree, so no committed revision carries the original note \u2014 verified by walking every commit that ever contained this record). The creation red run's observable evidence survives intact elsewhere: the preserved RED outputs at harness/runs/claim-013-h01b-activation/ (red-01/red-02 \u2014 RED 15/16 observed at the true predecessor e1ef3a0, per CLAIM-013's row and record 22 \u00a74), and the run's authoritative CI evidence (PR #48's run 39400826353 + the post-merge observations in CLAIMS.md). This field now carries this repair statement instead of a forged 'original'."
   },
   "harness/tests/test_trusted_gate.py": {
-    "current_sha256": "ddbf301bd0addb6947eb17c08f316fa77e31ac6b9cb80583e5df0447110a071e",
+    "current_sha256": "f0e6517bca4dc219859355fa82d83968da4ee1b961d3c255e0fd276e53ce2ec5",
     "amendments": [
       {
         "note": "AMENDMENT 1 (H-01b-CI implementation slice, assertions strengthened/added \u2014 never removed, LAW-11): test_07's ARV-TG-005 probe strengthened to the real form (an EXISTING-but-empty base dir \u2014 the nonexistent-dir form fires ARV-TG-001 first); the stub builder corrected with the machinery the BASE's KB probes actually load (harness/gate.py, harness/migrate.py) and the slice's notverified.txt (the --verify re-derivation source \u2014 PRF-01); the red_evidence smash in harness/red.py repaired in the same slice (set only on first record)."
@@ -151,6 +151,12 @@
       },
       {
         "note": "THE #67 GREPTILE ROUND'S P1, RED-FIRST AT THE PUSHED HEAD 5d4508a (red-02.txt): the comment-aware but line-anywhere _wf_active_persist_false PASSES over MUT-C (the ACTIVE persist-credentials input moved out of the checkout's with: mapping, re-planted as a step-level env: child \u2014 the phrase stays an ACTIVE line, the checkout INPUT is gone) \u2014 the pin mapping-BLIND in exactly the named way; the repair (green-02.txt): the with:-child structural check (top-key tracking, comments/blanks never switch context) + MUT-C as the standing third fixture in test_12 (fixture self-verified: the old line-anywhere form re-implemented inline PASSES over it; the repaired check refuses each mutation and passes the clean artifact) \u2014 suite 12/12; the P2 (WORKLOG Task 40 over the 250-word contract) compacted in the same round"
+      },
+      {
+        "note": "CLAIM-037's RED cases observed at this commit's tree (red-01.txt in the slice's runs dir): test_trusted_gate.py gains tests 13/14 (the self-authorized red refresh through the trusted phase; the false revision binding \u2014 both expected FAILING at the predecessor) + the NEW suite test_record_machinery.py (its whole first form is the RED set: max-based numbering, the unparseable context, the untyped mint, the changed-since-read write). Tests added, none removed"
+      },
+      {
+        "note": "the RED-case assertions discriminated (tests 13/14): the first form satisfied itself vacuously through the KB runner's broken-guard line ('expected ARV-RED-006') \u2014 the assertIn now requires the gate's own refusal form 'FAIL ARV-RED-006'. Tests edited, none removed; the vacuous-pass catch itself records in the slice's red-01"
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice)."

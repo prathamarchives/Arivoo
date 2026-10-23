@@ -1,0 +1,14 @@
+# CLAIM-037 — H-01c-evidence/privacy, part 1: the evidence machinery (the F-007 card's named defect + the typed records + fail-closed registration + the routed riders)
+harness/gate.py D-041
+harness/red.py D-041
+harness/red-records.json D-041
+harness/proofsheet.py D-041
+tools/trusted_gate.py D-041
+harness/known-bad/cases.py D-041
+harness/tests/test_trusted_gate.py D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+context/WORKLOG.md D-043
+context/extracted/30-H01C-EVIDENCE-PRIVACY.md D-042
+harness/runs/claim-037-h01c-evidence-privacy D-041

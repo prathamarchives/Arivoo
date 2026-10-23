@@ -292,3 +292,104 @@ def kb_clm_intra_dup(copy: pathlib.Path) -> None:
         "| CLAIM-TWIN | the duplicate synthetic row (intra-table drift) | 2026-10-22 | probe |\n",
         encoding="utf-8")
     _load(copy, "harness.claims").check_registry()
+
+
+# --- CLAIM-037 (H-01c-evidence/privacy, part 1 — F-007's named defect + the typed records +
+#     fail-closed registration + the proofsheet numbering rider). Named codes frozen BEFORE
+#     the implementation (the H-01a convention; RED-first — every case below is observed
+#     NOT CAUGHT at the predecessor, captured in the slice's red-01.txt):
+#       ARV-RED-006  a changed test self-authorized by a bare make-red refresh — the
+#                    candidate-supplied record alone cannot authorize; the amendment
+#                    must chain EXACTLY from the trusted prior digest (F-007 §5.3)
+#       ARV-RED-007  an untyped or falsely-bound red record — a written assertion is
+#                    not an observed failure; the binding must verify against git
+#       ARV-RED-008  an unregistered test file under harness/tests/ (the
+#                    discovery/registration gap — fail-closed suite registration)
+#       ARV-PRF-006  a proof-record write into an unparseable/occupied numbering
+#                    context (the count-based overwrite class, record 29 §8)
+
+@case("KB-RED-008", "a test edited + its record self-refreshed (the make-red form) against a trusted baseline — no chaining amendment",
+      "ARV-RED-006")
+def kb_self_authorized_refresh(copy: pathlib.Path) -> None:
+    """F-007's named defect, the exact self-authorization: the candidate edits a
+    frozen test and refreshes its OWN record (the make-red form). Under the
+    trusted-baseline repair the refresh alone must refuse — the changed test is
+    authorized only by an amendment chaining exactly from the trusted prior
+    digest (prior == the baseline's, new == the actual file)."""
+    import hashlib
+    import json
+    import os
+    import tempfile
+    key = "harness/tests/test_migrations.py"
+    rr = copy / "harness" / "red-records.json"
+    original = json.loads(rr.read_text())
+    with tempfile.TemporaryDirectory() as td:
+        bdir = pathlib.Path(td) / "base"
+        (bdir / "harness").mkdir(parents=True)
+        (bdir / "harness" / "red-records.json").write_text(json.dumps(original, indent=2) + "\n")
+        t = copy / key
+        t.write_text(t.read_text(encoding="utf-8") + "\n# edited after red (the self-authorization must-reject)\n", encoding="utf-8")
+        data = json.loads(rr.read_text())
+        data[key]["current_sha256"] = hashlib.sha256(t.read_bytes()).hexdigest()
+        rr.write_text(json.dumps(data, indent=2) + "\n")
+        os.environ["ARV_TRUSTED_BASE"] = str(bdir)
+        try:
+            _load(copy, "harness.gate").check_red_records()
+        finally:
+            del os.environ["ARV_TRUSTED_BASE"]
+
+
+@case("KB-RED-009", "a prose-only red record (no typed observed-red, no honest unrecovered marker)",
+      "ARV-RED-007")
+def kb_untyped_record(copy: pathlib.Path) -> None:
+    """The typed-record guard: a record reduced to the predecessor's prose-only
+    schema — no typed observed-red (red_exit/red_code), no git-verifiable
+    binding, no red_unrecovered marker — must refuse. A written assertion is
+    not an observed failure (the card's own words)."""
+    import json
+    rr = copy / "harness" / "red-records.json"
+    data = json.loads(rr.read_text())
+    key = "harness/tests/test_migrations.py"
+    data[key] = {"red_evidence": "the author asserts it failed (a written assertion is not an observed failure)",
+                 "current_sha256": data[key]["current_sha256"],
+                 "amendments": data[key].get("amendments", [])}
+    rr.write_text(json.dumps(data, indent=2) + "\n")
+    _load(copy, "harness.gate").check_red_records()
+
+
+@case("KB-RED-010", "an unregistered test file under harness/tests/ (the discovery/registration gap)",
+      "ARV-RED-008")
+def kb_unregistered_suite(copy: pathlib.Path) -> None:
+    """Fail-closed suite registration: a test file that exists under
+    harness/tests/ but appears in NEITHER the TESTS registry NOR the red records
+    sails through every discovery surface at the predecessor (the Makefile glob
+    runs it locally, but the trusted selection and the red control never see
+    it) — the registration gap must refuse."""
+    (copy / "harness" / "tests" / "test_rogue_probe.py").write_text(
+        "# an unregistered suite file — the must-reject (fail-closed registration)\n", encoding="utf-8")
+    _load(copy, "harness.gate").check_red_records()
+
+
+@case("KB-PRF-006", "a proof-record write into an unparseable numbering context (the count-based overwrite class)",
+      "ARV-PRF-006")
+def kb_slot_unparseable(copy: pathlib.Path) -> None:
+    """The proofsheet numbering rider (record 29 §8's routed defect): the
+    count-based writer stalled on one slot whenever a gap made count+1 name an
+    existing record, overwriting middle captures one by one. The repaired
+    writer numbers by max(existing)+1 and refuses fail-closed when the runs
+    dir carries a record name it cannot parse — an ambiguous numbering
+    context is a refusal, never a guess."""
+    import json
+    runs = copy / "harness" / "runs" / SLICE
+    ps = _load(copy, "harness.proofsheet")
+    ps.RUNS = copy / "harness" / "runs"
+    seed = json.dumps({"command": "probe", "exit_code": 0, "output_sha256": "0" * 64,
+                       "recorded_at": "2026-10-16T00:00:00+00:00"}, indent=2) + "\n"
+    for n in ("01", "02", "03"):
+        (runs / f"run-{n}.json").write_text(seed)
+    (runs / "run-05.json").write_text(seed)  # the gap that stalls count-based numbering on run-05
+    (runs / "run-ab.json").write_text(seed)  # the unparseable name — an ambiguous numbering context
+    try:
+        ps.write_record(SLICE, "probe-write", 0, "out")
+    except SystemExit:
+        pass

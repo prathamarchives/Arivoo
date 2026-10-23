@@ -1,0 +1,12 @@
+- not verified (LAW-04 — the follow-up slice's honest limits):
+- - unchanged from the CLAIM-033 slice's list (harness/runs/claim-033-state-record-reconciliation/notverified.txt):
+    the binding's actor/timestamp provenance (no audit data on the endpoint; personal repo, no org audit-log
+    API); the export a snapshot (INT-104) — each preflight re-reads; the platform's runner isolation (F-03
+    EXTERNAL); the prose-consistency bound (the mechanical checks passed 52/0 at the edited tree).
+- - this slice changes NO code and NO test: the regression surface for the registry's append-only rules
+  remains the claims-path suite's ARV-CLM checks + the reviewer rounds themselves (the round that caught this
+  miss IS the evidence that the append-only violations are reviewable defects — mechanically pinned only at
+  the registry layer, never at the DECISIONS prose layer; a mechanical DECISIONS-append-only check, if ever
+  wanted, is a scoped decision for the owner, never silently built here).
+- - the thread-resolution sequencing: the reopened DECISIONS.md thread resolves only when THIS repair merges —
+  observed in the PR, never claimed before.

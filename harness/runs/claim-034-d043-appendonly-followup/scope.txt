@@ -1,0 +1,8 @@
+# CLAIM-034 — the #68 post-merge review repair (the missed CodeRabbit Minor; the bounded follow-up)
+DECISIONS.md D-043/D-044
+CLAIMS.md D-043
+STATE.md D-043
+AGENTS.md D-043
+context/extracted/27-ACTION3-RECONCILIATION.md D-043
+context/WORKLOG.md D-043
+harness/runs/claim-034-d043-appendonly-followup D-043

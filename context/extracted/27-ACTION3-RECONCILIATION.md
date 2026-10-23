@@ -128,6 +128,44 @@ credential arrived with the turn (value never recorded; verified live: login `pr
   the CLAIM-033 row as the dated pointer (the closed row's UNVERIFIED-at-this-write wording was true at its
   write; its own demand — 'the verification + its recorded evidence land in the reconciliation slice' — is
   satisfied by the pointer).
+- **The missed CodeRabbit Minor, honestly recorded (the process miss — this slice's own fourth catch, and
+  the one that forced this record's single post-merge amendment):** CodeRabbit posted its DECISIONS.md
+  finding at 05:48:20Z — between the slice's review-poll window and the merge — and the merge proceeded
+  with the thread RESOLVED but NO DISPOSITION posted: "Record Action 2 completion without rewriting
+  D-043" (the in-place completion insert inside D-043's Decision cell, against the register's own
+  "Append-only: supersede by adding a new entry that references the old; never rewrite"). The finding is
+  REAL and the same append-only class as Greptile's closed-row P2. Repair (CLAIM-034, the bounded
+  follow-up): the thread REOPENED at once (resolving it again before the fix would have repeated the
+  defect), the honest disposition posted in the thread, D-043's cell RESTORED verbatim, and the dated
+  D-044 entry appended as the completion record. The lesson standing: the review-completion check
+  re-polls the thread list immediately before the merge command, and a finding posted after the last
+  poll is caught by that re-read — never assumed absent.
+- **The &&-chain red-gate commit, repeating (the record-24 §8 class's SECOND occurrence this session —
+  and the harder form):** the CLAIM-034 content commit `2b8ec0c` chained after `make gate` whose refusal
+  was printed but masked — the shell pattern `make gate | tail -2; echo "G=${PIPESTATUS[0]}" && git add …`
+  still commits, because the `echo` itself succeeds and PIPESTATUS was read for display only, never
+  enforced; the gate's red was in this case the EXPECTED pre-capture state (the slice's proof set not yet
+  assembled — the capture sequence is content commit -> proof set -> evidence commit -> gate green), but
+  the commit-on-red is the miss regardless: the gate must be run ALONE, read, and only then does anything
+  follow.
+- **The #69 Greptile round's two P2s, both real, both fixed in-PR:** (a) D-044 cited "D-043 element 2"
+  — the row that records the two review FINDINGS; the settings verification is D-043 ELEMENT 1, ACTION 2 —
+  the citation corrected in both places; the same wrong citation inside the now-CLOSED CLAIM-033 row is
+  superseded BY POINTER (never edited — D-044's corrected citation is the authoritative reference); (b)
+  Task 41's merge-note append pushed the entry past the 250-word contract — re-compacted, the detailed
+  miss note living in Task 42 + this §8.
+- **The Task-42 &&-skip, honestly recorded (the chain-masking class's THIRD form this session — and the
+  worst: a silent skip that manufactured an overclaim):** the Task-42 worklog append was chained after the
+  follow-up edit script (`script && cat >>`); the script died at its malformed anchor and the `&&`
+  silently skipped the append while the block's later commands ran — the content commit `2b8ec0c` and its
+  message then claimed "WORKLOG Task 41's completion + the miss note + Task 42" while the tree carried NO
+  Task 42 (the #66 commit-message-overclaim class, caught by the #69 round's wordcount probe + this
+  ledger, never absorbed silently). Repair: Task 42 re-appended verbatim; the standing lesson now
+  third-learned: NOTHING consequential is ever chained — every command's own exit is read before the
+  next. Caught immediately (the gate's refusal was on screen), never pushed; the repair = the correct
+  sequence restored (the 11-record set captured at the content head 2b8ec0c, all exit 0, PASS ARV-PRF-004)
+  and this entry. The standing lesson now twice-learned this session: no command is ever chained after a
+  gate.
 
 ## 9. Unverified items (LAW-04 — the slice's honest list)
 
@@ -155,3 +193,8 @@ credential arrived with the turn (value never recorded; verified live: login `pr
 
 - (complete at this PR's merge — the merge SHA + the PR's CI run IDs + the post-merge observations record in
   the CLAIM-033 close row, appended by the next slice per rule 4; this record needs no second pass)
+  — DATED CORRECTION (CLAIM-034, 2026-10-23): the "no second pass" intent was honestly superseded by the
+  fact: the missed CodeRabbit Minor (§8's fourth entry) forced ONE bounded post-merge amendment — the §8
+  ledger entry + this line. PR #68 merged at `493acdaf99cc1241a12bcfe925abf6ea2833b699`, post-merge run
+  `39908291925` completed/success (five jobs green); the thread's repair lands in CLAIM-034 and the
+  thread resolves only when that merges.

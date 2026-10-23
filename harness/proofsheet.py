@@ -56,11 +56,7 @@ def write_record(slice_name: str, command: str, exit_code: int, output: str) -> 
         "command": command, "exit_code": exit_code, "commit": commit,
         "output_sha256": _sha(output), "recorded_at": clock.now(),
     }
-    # NOTE (CLAIM-037's split, the LAW-05 size refusal's own repair): the
-    # max-based numbering repair ROUTED to the part-2 claim — this file stays
-    # at the predecessor's count-based form (the routed defect, record 29 §8,
-    # still live, its RED observed in this slice's red-01/red-02 and its fix
-    # landing in the immediately-following claim)
+    # NOTE (the LAW-05 split): the max-based numbering repair is ROUTED to the part-2 claim (record 30 §12)
     n = len(glob.glob(str(d / "run-*.json"))) + 1
     (d / f"run-{n:02d}.json").write_text(json.dumps(rec, indent=2) + "\n")
     return rec

@@ -294,29 +294,17 @@ def kb_clm_intra_dup(copy: pathlib.Path) -> None:
     _load(copy, "harness.claims").check_registry()
 
 
-# --- CLAIM-037 (H-01c-evidence/privacy, part 1 — F-007's named defect + the typed records +
-#     fail-closed registration + the proofsheet numbering rider). Named codes frozen BEFORE
-#     the implementation (the H-01a convention; RED-first — every case below is observed
-#     NOT CAUGHT at the predecessor, captured in the slice's red-01.txt):
-#       ARV-RED-006  a changed test self-authorized by a bare make-red refresh — the
-#                    candidate-supplied record alone cannot authorize; the amendment
-#                    must chain EXACTLY from the trusted prior digest (F-007 §5.3)
-#       ARV-RED-007  an untyped or falsely-bound red record — a written assertion is
-#                    not an observed failure; the binding must verify against git
-#       ARV-RED-008  an unregistered test file under harness/tests/ (the
-#                    discovery/registration gap — fail-closed suite registration)
-#       ARV-PRF-006  ROUTED to the part-2 claim at the LAW-05 split (with the
-#                    max-based numbering repair and machinery cases 1/2/5) — its
-#                    RED stays observed in this slice's red-01/red-02
+# --- CLAIM-037 (H-01c-evidence/privacy part 1; the frozen codes are named in the
+#     opening commit + record 30; each probe carries a one-line docstring here):
+#     ARV-RED-006 the self-authorized make-red refresh (F-007's named defect)
+#     ARV-RED-007 the untyped/false-binding record (a written assertion is not
+#                an observed failure; a fabricated commit name is a false claim)
+#     ARV-RED-008 the unregistered test file (the discovery gap)
 
 @case("KB-RED-008", "a test edited + its record self-refreshed (the make-red form) against a trusted baseline — no chaining amendment",
       "ARV-RED-006")
 def kb_self_authorized_refresh(copy: pathlib.Path) -> None:
-    """F-007's named defect, the exact self-authorization: the candidate edits a
-    frozen test and refreshes its OWN record (the make-red form). Under the
-    trusted-baseline repair the refresh alone must refuse — the changed test is
-    authorized only by an amendment chaining exactly from the trusted prior
-    digest (prior == the baseline's, new == the actual file)."""
+    """F-007's named defect: the make-red refresh alone must refuse — the change is authorized only by an amendment chaining exactly from the trusted prior digest."""
     import hashlib
     import json
     import os
@@ -343,10 +331,7 @@ def kb_self_authorized_refresh(copy: pathlib.Path) -> None:
 @case("KB-RED-009", "a prose-only red record (no typed observed-red, no honest unrecovered marker)",
       "ARV-RED-007")
 def kb_untyped_record(copy: pathlib.Path) -> None:
-    """The typed-record guard: a record reduced to the predecessor's prose-only
-    schema — no typed observed-red (red_exit/red_code), no git-verifiable
-    binding, no red_unrecovered marker — must refuse. A written assertion is
-    not an observed failure (the card's own words)."""
+    """The typed-record guard: a prose-only record must refuse — a written assertion is not an observed failure."""
     import json
     rr = copy / "harness" / "red-records.json"
     data = json.loads(rr.read_text())
@@ -361,11 +346,7 @@ def kb_untyped_record(copy: pathlib.Path) -> None:
 @case("KB-RED-010", "an unregistered test file under harness/tests/ (the discovery/registration gap)",
       "ARV-RED-008")
 def kb_unregistered_suite(copy: pathlib.Path) -> None:
-    """Fail-closed suite registration: a test file that exists under
-    harness/tests/ but appears in NEITHER the TESTS registry NOR the red records
-    sails through every discovery surface at the predecessor (the Makefile glob
-    runs it locally, but the trusted selection and the red control never see
-    it) — the registration gap must refuse."""
+    """Fail-closed registration: a file under harness/tests/ registered nowhere sails past every discovery surface."""
     (copy / "harness" / "tests" / "test_rogue_probe.py").write_text(
         "# an unregistered suite file — the must-reject (fail-closed registration)\n", encoding="utf-8")
     _load(copy, "harness.gate").check_red_records()
@@ -384,14 +365,9 @@ def kb_unregistered_suite(copy: pathlib.Path) -> None:
 @case("KB-RED-011", "a record whose binding_commit does not exist in git history",
       "ARV-RED-007")
 def kb_nonexistent_binding(copy: pathlib.Path) -> None:
-    """Greptile P1 (the #72 round): a fabricated commit NAME (40 hex chars that
-    name no revision) sailed through as 'unverifiable' — a NOTE without a
-    failure. In a git context, git's inability to show the commit IS the false
-    claim: a revision binding must name history that exists."""
+    """The #72 round: a nonexistent binding_commit is a false claim — git's inability to show it IS the refusal, never an unverifiable note."""
     import json, subprocess
-    # the git-context form: the work copies are non-git by construction, so the
-    # probe git-inits its own copy — the binding check's git context must be
-    # REAL for the nonexistent-commit refusal to be exercisable
+    # the work copies are non-git: the probe git-inits its own copy (the refusal needs a real git context)
     subprocess.run(["git", "init", "-q"], cwd=copy, capture_output=True)
     subprocess.run(["git", "config", "user.email", "probe@test.local"], cwd=copy, capture_output=True)
     subprocess.run(["git", "config", "user.name", "probe"], cwd=copy, capture_output=True)
@@ -408,12 +384,7 @@ def kb_nonexistent_binding(copy: pathlib.Path) -> None:
 @case("KB-RED-012", "red_unrecovered on a record with NO trusted prior state (the new-mint bypass)",
       "ARV-RED-007")
 def kb_unrecovered_without_baseline(copy: pathlib.Path) -> None:
-    """CodeRabbit Minor (the #72 round): a NEW suite's record is absent from the
-    trusted baseline, so ARV-RED-006 skips it; a schema-2 record carrying
-    red_unrecovered (instead of the typed observed-red) then bypasses
-    red_exit/red_code. The marker is for honestly-lost history — records that
-    EXIST in the baseline (the two smash-class migrations) — never a new
-    mint's bypass."""
+    """The #72 round: red_unrecovered is for honestly-lost history (baseline-present records), never a new mint's typed-red bypass."""
     import hashlib
     import json
     import os
@@ -423,19 +394,15 @@ def kb_unrecovered_without_baseline(copy: pathlib.Path) -> None:
     key = "harness/tests/test_migrations.py"
     rogue = "harness/tests/test_new_suite_probe.py"
     data = json.loads(rr.read_text())
-    # the rogue suite FILE must exist for the TESTS loop to examine its record
-    # (the probe's own second catch: registering a file that is not there is
-    # the ARV-GATE-001 class, not the bypass case under test)
+    # the rogue suite FILE must exist (else it is the ARV-GATE-001 class, not this bypass case)
     (copy / "harness" / "tests" / "test_new_suite_probe.py").write_text(
-        "# the bypass probe's suite file (must exist for its record to be examined)\n", encoding="utf-8")
+        "# the bypass probe's suite file\n", encoding="utf-8")
     # the rogue suite must be REGISTERED in the copy's own gate.py TESTS (the
     # registered-addition form) — otherwise the per-record check never examines
     # its record and the bypass stays invisible (the probe's own first miss)
     gpf = copy / "harness" / "gate.py"
     gtext = gpf.read_text(encoding="utf-8")
-    # a MIDDLE tuple entry as the anchor — stable across the real tuple AND the
-    # test stubs whose tuples end with their own additions (the probe's own
-    # third catch: anchoring on the LAST entry crashed against test_15's stub)
+    # a MIDDLE tuple entry as the anchor (stable across the real tuple and the test stubs' additions)
     anchor = '"harness/tests/test_claims_paths.py",'
     assert anchor in gtext
     gpf.write_text(gtext.replace(anchor, anchor + '\n         "harness/tests/test_new_suite_probe.py",', 1), encoding="utf-8")

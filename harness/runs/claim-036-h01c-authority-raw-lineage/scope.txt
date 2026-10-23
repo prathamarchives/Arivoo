@@ -3,6 +3,7 @@ tools/verify_canonical_layer.py D-041
 tools/verify_selftest.py D-041
 context/SOURCE-COVERAGE-MANIFEST.md D-041
 harness/tests/test_mutation_floor.py D-041
+harness/red-records.json D-041
 CLAIMS.md D-038
 STATE.md D-043
 AGENTS.md D-043

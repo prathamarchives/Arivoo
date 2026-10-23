@@ -588,6 +588,7 @@ Stage Summary:
 - Evidence: record 25 §§4-R06/5-R06/8-R06; harness/runs/claim-031-r06-trusted-path-toctou-isolation (red-01/scope/notverified/proofsheet)
 - Unresolved: H-01c-authority, H-01c-evidence/privacy (F-007), H-02 (now activatable through the isolated path), P3-00 — in that order
 - Next: H-01c-authority as CLAIM-032
+  (superseded at the turn-27/28 review re-routing, recorded in CLAIM-033: CLAIM-032 became the test_11 pin repair — PR #67 `fc7556c`, merged 2026-10-23; H-01c-authority is now CLAIM-034, after the CLAIM-033 reconciliation slice)
 - Session record: context/extracted/25-SESSION-25-R03-R04-EXECUTION.md (in progress)
 
 ## Task 40 (CLAIM-032, session 26) — the R-06 pin repair + the backend-review intake
@@ -596,4 +597,14 @@ Stage Summary:
 - Evidence: record 26 (the full history: §8's seven-entry ledger, §12's resolved boundary); harness/runs/claim-032-r06-pin-repair-review-intake/ (red-01/02, green-01/02, scope, notverified, proofsheet; suite 12/12; verifier 52/0).
 - Unresolved: Action 2 (branch-protection verification), Action 3 (the reconciliation slice), then H-01c-authority.
 - Next: merge PR #67 once review-complete.
+- Merged: PR #67 = `fc7556c3ad3ba38abe16a7cba454fc8b9bf9bb21`, 2026-10-23T05:28:54Z; post-merge run `39905987556` five jobs green; branch deleted; 0 open PRs after; the close row in CLAIMS.md carries the full merge observations.
 - Session record: context/extracted/26-BACKEND-REVIEW-INTAKE-R06-PIN-REPAIR.md
+
+## Task 41 (CLAIM-033, session 27) — the Action-3 reconciliation
+- Task: the review's ordered Action 3 (D-043 element 1; turn 28's directive): ONE consistent required-contexts statement with the settings evidence, the PR #67 merge observations, and the stale-record closes — each by pointer, never rewritten history.
+- Outcome: the settings read found all five contexts ALREADY BOUND (nothing added, nothing changed; the existing checks preserved exactly) — the export recorded verbatim (protection-export.txt, read twice, identical); the merge observations recorded (merge-observations.txt: fc7556c, run 39905987556, the flip path, threads resolved, branch deleted); record 25's header + §12 closed by pointer; WORKLOG Task 39's stale next-line annotated; PLAN's R-06 line BOUND-AND-VERIFIED; CLAIM-031's row UNVERIFIED → VERIFIED (both statements preserved); CLAIM-032's rule-4 close row appended; D-043 element 2 COMPLETE; STATE/AGENTS re-derived to the post-merge truth.
+- Evidence: record 27; harness/runs/claim-033-state-record-reconciliation/ (protection-export, merge-observations, scope, notverified, proofsheet); make verify GREEN (52/0).
+- Honest limits: the binding's actor/timestamp unknown to the API (personal repo, no audit-log endpoint); the export a snapshot (INT-104) — each preflight re-reads.
+- Unresolved: none in this slice's scope; the next is H-01c-authority (CLAIM-034).
+- Next: merge the CLAIM-033 PR once review-complete.
+- Session record: context/extracted/27-ACTION3-RECONCILIATION.md

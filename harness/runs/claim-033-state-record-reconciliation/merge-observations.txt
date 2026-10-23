@@ -1,0 +1,54 @@
+THE PR #67 MERGE OBSERVATIONS (record 26 §12's anticipated home — the reconciliation slice; the full
+narrative lives in record 26 §§1-12 + the CLAIM-032 close row; this file is the observation sheet)
+
+branch: slice/claim-032-r06-pin-repair-review-intake (13 commits on base 68722c6d)
+PR: #67 — "CLAIM-032 — the review's Action 1: the test_11 R-06 pin repair (Findings A/B, both
+  discriminated) + the 2026-10-23 backend-review intake"
+opened: 2026-10-23 (head 5d4508a56f490100787153b38c48822a40a76b93) — the resume of record 26 §12's
+  blocked remote leg, exactly as its own language anticipated (the credential arrived at owner turn 28)
+
+CI at the heads (all five checks green at each):
+- 5d4508a: canonical-layer / head-tools / harness / harness-suites / harness-trusted — success
+- 6c68e48: the same five — success
+- de819b7: the same five — success
+
+the review rounds (D-042: no merge without the reviews complete):
+- GREPTILE round 1 (2 findings, both real, both fixed):
+  P1 — _wf_active_persist_false was comment-aware but line-anywhere: a persist-credentials: false
+    re-planted under a step-level env: passed the pin while the checkout input was absent. RED-first
+    captured at the pushed head (red-02.txt: the old form PASSES over MUT-C, exit 0 — the exact
+    counterexample reproduced live). Repair: the with:-mapping-tracked check (top-key tracking;
+    comments/blanks never switch context; the input must be a direct child of with:, exactly boolean
+    false) + MUT-C the standing third fixture + test_12's inline old-form blindness. GREEN: green-02.txt.
+  P2 — the WORKLOG Task 40 entry exceeded the 250-word AGENTS.md contract. Repair: compacted to 158
+    words, the history left in record 26.
+- the slice's own process catches (record 26 §8, entries six and seven):
+  the CLAIM-031 closed-row overclaim ("binding verified in session 26" prose vs §12's BLOCKED record) —
+    repaired BEFORE any push (f6b682d); the remote never carried it.
+  the &&-chain red-gate commit (756b4e3 landed on ARV-PRF-004 red — the '| tail' pipe swallowed the
+    gate's exit; the record-24 §8 class repeating) — corrected by 6c68e48: the full 11-record set
+    re-recorded at the fix head, the sheet re-assembled (PASS ARV-PRF-004), the gate re-run GREEN with
+    PIPESTATUS. Never pushed on red.
+- CODERABBIT round (2 Minors, both real, both fixed at de819b7):
+  the CLAIMS row did not reserve the slice-minted INT-133 (LAW-31's reserve-through-the-registry) — the
+    INTs cell now reserves INT-131 + INT-132 + INT-133, all three RETROACTIVE, the reservation honestly
+    notated.
+  the INT-132 detailed block overstated "the CLAIM-032 slice works actions 1-2-3" — the boundary
+    corrected: CLAIM-032 works Action 1; Actions 2-3 follow as their own bounded steps per D-043.
+- thread dispositions: all 4 threads replied with the fix commits + evidence pointers; all 4 RESOLVED
+  (the two Greptile threads auto-resolved at the second pass; the two CodeRabbit threads resolved via
+  the API, observed).
+- GREPTILE round 2 (at de819b7): completed/success, ZERO new findings.
+
+THE MERGE (the recorded record-24 §13 owner-authorized path):
+- the single-actor bar reproduced live: POST APPROVE -> 422 "Review Can not approve your own pull
+  request"; PUT merge -> 405 "At least 1 approving review is required by reviewers with write access."
+- the flip: required_approving_reviews 1->0 (the full protection body preserved: the five contexts,
+  strict, enforce_admins, dismiss_stale_reviews) -> PUT merge (merge method) -> OK, merged: true.
+- the restoration: required_approving_reviews 0->1, then GET verified: 1 review, the five contexts,
+  strict true, enforce_admins true.
+merge SHA: fc7556c3ad3ba38abe16a7cba454fc8b9bf9bb21
+merged at: 2026-10-23T05:28:54Z
+post-merge run: 39905987556 (verify, push event) — completed/success, all five jobs green
+branch: deleted (204); 0 open PRs after; local main synced (local == origin at fc7556c)
+make verify at the fresh main: GREEN (canonical 52/0)

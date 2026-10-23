@@ -1,0 +1,113 @@
+THE BRANCH-PROTECTION SETTINGS EXPORT (the review's ordered Action 2 — the settings read with recorded
+evidence; the review's acceptance: "Record a screenshot or text export of the required-check list and the
+rule target. Confirm the exact check names match the jobs that ran green on main.")
+
+read: GET /repos/prathamarchives/Arivoo/branches/main/protection
+read at: 2026-10-23 (the turn-28 resume; the admin-scoped owner credential — the token's value never recorded)
+read twice: at the resume preflight and at this evidence capture — identical both times
+repo: prathamarchives/Arivoo (personal repository; default branch main; public)
+rule target: the branch-protection rule on 'main' (the API's branch-protection endpoint — no separate
+  ruleset object is configured for this branch; the required-status-checks live IN this rule)
+
+=== the export, verbatim (the JSON the endpoint returned at the capture read) ===
+{
+ "allow_deletions": {
+  "enabled": false
+ },
+ "allow_force_pushes": {
+  "enabled": false
+ },
+ "allow_fork_syncing": {
+  "enabled": false
+ },
+ "block_creations": {
+  "enabled": false
+ },
+ "enforce_admins": {
+  "enabled": true,
+  "url": "https://api.github.com/repos/prathamarchives/Arivoo/branches/main/protection/enforce_admins"
+ },
+ "lock_branch": {
+  "enabled": false
+ },
+ "required_conversation_resolution": {
+  "enabled": false
+ },
+ "required_linear_history": {
+  "enabled": false
+ },
+ "required_pull_request_reviews": {
+  "dismiss_stale_reviews": true,
+  "require_code_owner_reviews": false,
+  "require_last_push_approval": false,
+  "required_approving_review_count": 1,
+  "url": "https://api.github.com/repos/prathamarchives/Arivoo/branches/main/protection/required_pull_request_reviews"
+ },
+ "required_signatures": {
+  "enabled": false,
+  "url": "https://api.github.com/repos/prathamarchives/Arivoo/branches/main/protection/required_signatures"
+ },
+ "required_status_checks": {
+  "checks": [
+   {
+    "app_id": 15368,
+    "context": "canonical-layer"
+   },
+   {
+    "app_id": 15368,
+    "context": "head-tools"
+   },
+   {
+    "app_id": 15368,
+    "context": "harness"
+   },
+   {
+    "app_id": 15368,
+    "context": "harness-suites"
+   },
+   {
+    "app_id": 15368,
+    "context": "harness-trusted"
+   }
+  ],
+  "contexts": [
+   "canonical-layer",
+   "head-tools",
+   "harness",
+   "harness-suites",
+   "harness-trusted"
+  ],
+  "contexts_url": "https://api.github.com/repos/prathamarchives/Arivoo/branches/main/protection/required_status_checks/contexts",
+  "strict": true,
+  "url": "https://api.github.com/repos/prathamarchives/Arivoo/branches/main/protection/required_status_checks"
+ },
+ "url": "https://api.github.com/repos/prathamarchives/Arivoo/branches/main/protection"
+}
+
+=== the cross-check (the review's confirmation form) ===
+required contexts (5): canonical-layer, head-tools, harness, harness-suites, harness-trusted
+strict: true (the branch must be up to date before merging)
+enforce_admins: true (the rule applies to administrators)
+required approving reviews: 1, dismiss_stale_reviews: true
+allow_force_pushes / allow_deletions: false / false
+
+the exact names vs the green jobs:
+- run 39835784795 (PR #66's post-merge, main @ 68722c6d): canonical-layer, head-tools, harness,
+  harness-suites, harness-trusted — all green. MATCH (5/5).
+- PR #67's head runs (5d4508a, de819b7): the same five — all green both heads. MATCH (5/5).
+- run 39905987556 (PR #67's post-merge, main @ fc7556c): the same five — all green. MATCH (5/5).
+
+=== the honest limits (LAW-04) ===
+- NOTHING WAS ADDED AND NOTHING CHANGED: the binding was already in place at the read; the review's
+  "add harness-suites and harness-trusted if absent" resolves to "absent: no" — the existing checks
+  preserved exactly.
+- THE ACTOR/TIMESTAMP PROVENANCE: this endpoint exposes no audit data for WHEN the two contexts were
+  added or by whom; a personal repository has no org audit-log API to query. The observation stands on
+  the export itself. CLAIM-031's close row had earlier claimed the binding "verified in session 26"
+  (prose the turn-28 resume preflight caught as an overclaim — record 26 §8's sixth catch — and repaired
+  to UNVERIFIED-at-this-write before any push); the verified statement NOW recorded everywhere: the
+  binding EXISTS, first verifiably read 2026-10-23, the earlier actor unknown to the API. Both
+  statements preserved by pointer.
+- a committed export is a SNAPSHOT (INT-104's class): the live settings can drift after this write; each
+  session preflight re-reads (and the merge gate's own required checks enforce the live state at every
+  merge — a context removed from settings stops blocking, which the next preflight catches).

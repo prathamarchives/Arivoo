@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-041-h02b-sev-wiring (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): da4c52bc794bf88429fc766227706a65859497bd
-- generated (last record's timestamp): 2026-10-24T08:41:01.905104+00:00
-- run records: 13
+- commit (last run record's): 496cc6111cf16ab12786dfb4676f1d5e1b5b2330
+- generated (last record's timestamp): 2026-10-24T09:05:31.392311+00:00
+- run records: 14
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-24T08:36:01.270656+00:00
@@ -18,6 +18,7 @@
 - `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 2632a4f08b8b19b8 · 2026-10-24T08:38:31.927035+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 04a2d3d3d4b5149e · 2026-10-24T08:38:32.122697+00:00
 - `make verify` -> exit 0 · output sha256 b14f8cc74d98a2d3 · 2026-10-24T08:41:01.905104+00:00
+- `python3 harness/gate.py --slice claim-041-h02b-sev-wiring --diff origin/main` -> exit 0 · output sha256 b2b8a90a3161a91f · 2026-10-24T09:05:31.392311+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - not verified (LAW-04 — the CLAIM-041 honest limits):
@@ -51,4 +52,4 @@
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 5788472071067792f6ac1a1f561fb4c639a495b49e22d8267145f7404411ea89
+- sheet sha256 (of the content above, excluding this line): ed087f44bb5a38afbcfc49a9ae43666accefada0ffee1b01647d9ad538ead0d8

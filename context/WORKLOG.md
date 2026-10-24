@@ -664,3 +664,11 @@ Stage Summary:
 - Evidence: record 32; harness/runs/claim-039-p3-roadmap-transition/ (scope, notverified, the 12-record proof set, the sheet); PR #74.
 - Unresolved: the N12 self-test-row integration/canary-position follow-up (claim-038's notverified, unchanged); H-02 unbuilt; P3-00 unaccepted; D-014 + Q6–Q12 open (named scopes only).
 - Next: H-02 (the SEV validator + the actual gate path, RED-first under the trusted floor) → P3-00 → P3-M0 ∥ P3-K0 → P3-01..09 — NO PAUSE.
+
+## Task 49 (CLAIM-040, session 30) — H-02 part 1: the SEV validator
+- What: harness/sev.py (the public validate_report + check_sev + the reviewed-diff digest procedure excluding only the slice's own generated artifacts + the A09 run-record schema: 64-hex digests, typed fields, git-verifiable binding commits, placeholder refusals) with the refusal codes ARV-SEV-001..008 frozen in the suite's docstring first; the focused suite test_sev.py (24 case groups); the fail-closed TESTS registration; the typed red mint (binding 3a9e595, observed exit 1 — the module-absent RED); GREEN 29/0 at 98a0e8b.
+- Outcome: the validator lives, its matrix discriminated; the GATE does not yet enforce it (part 2 = CLAIM-041) — not-mechanically-enforced, the independent-review discipline continues.
+- Catches: the proof-id stem binding (the suite's own positive cases caught the filename-only form); test_15's tuple-tail anchor broke on the first legitimate suite addition (moved to the stable first entry, the typed amendment); the commit-A script's post-write assert duplicated registry rows (the registry check itself caught it — the script idempotency lesson).
+- Evidence: record 33; harness/runs/claim-040-h02a-sev-validator/ (red-01, the proof set, the sheet); PR #75.
+- Unresolved: the N12 residual (unchanged); part 2's gate/KB/activation work; P3-00 unaccepted.
+- Next: CLAIM-041 (H-02 part 2) → P3-00 — NO PAUSE.

@@ -250,7 +250,11 @@ North Star claim ladder, and the user validation scenario (the V-model validatio
   any single archive; restore RECONCILES the archive's content against the destination's
   CURRENT purge ledger before declaring completion — a current-ledger entry WINS over older
   archive content (an export made before a purge cannot resurrect the purged item into a
-  destination that carries the purge). **The no-ledger path, bound to the owner's LOCKED
+  destination that carries the purge). **The no-ledger path is FAIL-CLOSED (#78 round 3): it requires a POSITIVE absence
+  determination — the destination's ledger store must affirmatively answer that no ledger
+  exists; a read error, timeout, or outage is a typed NON-RESTORING outcome naming the
+  reason, never a silent downgrade to the archive-only path (an unreadable ledger is not
+  an absent ledger — the honest-state rule of §3's preamble). Bound to the owner's LOCKED
   default (D-029 — "documented backup expiry, purge ledger applied on restore"):** a
   genuinely clean destination (no live ledger anywhere — the archive is the only surviving
   owner state, the disaster-recovery case) does NOT silently claim purge-safety: the restore
@@ -436,6 +440,9 @@ restored_pending_validation --references+blobs valid--> restored   [equality con
                                                  the destination's current ledger wins over
                                                  older archive content (SYS-10's rule)]
 restored_pending_validation --missing blob/malformed/interrupted--> failed [safely; nothing half-complete]
+restored_pending_validation --ledger unreadable (error/timeout/outage)--> failed [FAIL-CLOSED: a
+                                                 typed non-restoring outcome naming the reason — an
+                                                 unreadable ledger is never treated as absent]
 restored --rebuild derived--> fully_operational [indexes rebuilt from the restored authoritative state]
 ```
 
@@ -491,7 +498,7 @@ restored --rebuild derived--> fully_operational [indexes rebuilt from the restor
 | extraction crash/invalid input | the previous generation stays; the failed generation named | a partial generation as current |
 | index outage | capture unaffected; search reports honestly | capture blocked by derived failure |
 | sync conflict (competing revisions) | `conflicted`; both inputs preserved | last-write-wins destruction |
-| purge/restore interaction | the destination's current purge ledger wins over older archive content; the no-ledger disaster path completes as an explicitly scoped owner action (the typed state names the ledger as-of time + the D-029 backup-expiry window + the stated residual; the restore event recorded in the new ledger) | silent resurrection (an export predating a purge re-importing the purged item into a ledger-carrying destination; or a no-ledger restore claiming purge-safety it cannot know) |
+| purge/restore interaction | the destination's current purge ledger wins over older archive content; the no-ledger path is FAIL-CLOSED (a positive absence determination required; an unreadable ledger is a typed non-restoring outcome, never treated as absent) and the disaster path completes as an explicitly scoped owner action (the typed state names the ledger as-of time + the D-029 backup-expiry window + the stated residual; the restore event recorded in the new ledger) | silent resurrection (an export predating a purge re-importing the purged item into a ledger-carrying destination; or a no-ledger restore claiming purge-safety it cannot know) |
 | cross-owner access | refused at command AND DB boundary | existence leakage |
 
 ## 7. The open-question boundary register (exact scopes)

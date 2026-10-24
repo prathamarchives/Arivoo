@@ -1,0 +1,21 @@
+# CLAIM-044 — the SEV-3 follow-up (adopted at the #78 review): the base-side sheet_section
+# expectation — a slice whose PR base carries the Proof-Sheet SEV section renderer MUST set
+# sheet_section true (the candidate-controlled opt-in window closed when the first section-
+# bearing sheet merged at #78). ARV-SEV-009, RED-first.
+harness/sev.py D-037
+harness/tests/test_sev.py D-037
+harness/tests/test_gate_dispatch.py D-037
+harness/tests/test_trusted_gate.py D-037
+harness/known-bad/cases.py D-041
+harness/red-records.json D-041
+PLAN.md D-037
+context/TEMPLATES.md D-027
+STATE.md D-043
+AGENTS.md D-043
+CLAIMS.md D-038
+context/WORKLOG.md D-043
+context/extracted/37-SEV-BASE-SIDE-SECTION.md D-042
+harness/gate.py D-037
+RTM.md D-039
+LAWS.md D-037
+harness/runs/claim-044-sev-base-side-section D-042

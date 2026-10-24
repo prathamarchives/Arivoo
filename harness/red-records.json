@@ -66,7 +66,7 @@
     "red_code": "ARV-TEST-000/011/019"
   },
   "harness/tests/test_gate_dispatch.py": {
-    "current_sha256": "b688d10a8e652222e1d4a743ae02d6be9c9a49547838d1338a07b31315a32378",
+    "current_sha256": "4251b778e7a50d5b55c6f0c96827444eacaf44cad8fe01fededa95550429d37d",
     "amendments": [
       {
         "note": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
@@ -106,6 +106,12 @@
         "new_sha256": "b688d10a8e652222e1d4a743ae02d6be9c9a49547838d1338a07b31315a32378",
         "note": "the CLAIM-041 RED observed at the test-only commit: the three new-case groups at the wiring-absent predecessor (fc8b32e) \u2014 the dispatch missing-report case (the PR dispatches green with NO SEV report), the trusted tests 18/19 (no SEV step: nothing refuses), the machinery SEV-sheet-section case (the sheet silent about the report) \u2014 red-01.txt; the KB-SEV-001..008 matrix added as precision/regression cases over the landed validator (labeled, never claimed RED)",
         "observed_at": "2026-10-24T08:07:34.779308+00:00"
+      },
+      {
+        "prior_sha256": "b688d10a8e652222e1d4a743ae02d6be9c9a49547838d1338a07b31315a32378",
+        "new_sha256": "4251b778e7a50d5b55c6f0c96827444eacaf44cad8fe01fededa95550429d37d",
+        "note": "CLAIM-044 (the fixture modernization + the scope widening): test_gate_dispatch.py's born-positive sev.json gains sheet_section: true \u2014 the fixture's base is the whole copy (its proofsheet carries the renderer), so the base-side expectation applies to the fixture exactly as in reality; the first fix-head run caught the fixture NOT born-valid (ARV-SEV-009 at the fixture's own assert) \u2014 the modernization rides WITH the machinery (the 5447477 precedent: both inert at the predecessor, never before their time). The file joins the slice's scope in BOTH homes (scope.txt + the row's cell) \u2014 the declaration-drift class (SEV-1/record 34) guarded against by widening at edit time.",
+        "observed_at": "2026-10-24T14:38:01.244912+00:00"
       }
     ],
     "red_evidence": "Amendment 2 (H-01a-R, narrowed not weakened): the bad-base assertion's first draft counted raw 'ARV-DIFF-001' substring mentions \u2014 but the ARV-CLM-000 skip note and the REQUIRED consolidated summary ('RED \u2014 the gate refuses: ...') legitimately contain the code string; the assertion is narrowed to the disposition form (lines starting 'FAIL ARV-DIFF-001' == exactly one) \u2014 no assertion removed, the traceback/exit/skip-note/selfcheck assertions unchanged; the underlying defect (a second disposition print or a crash-repeated code) stays refused",
@@ -170,7 +176,7 @@
     "red_unrecovered": true
   },
   "harness/tests/test_trusted_gate.py": {
-    "current_sha256": "6bb6ed04efe30f4bc77df9560b49439f0d9cf944bdb495c54035fa653a7a7a79",
+    "current_sha256": "1ac1221d999a3db93842c09376ed62517ff1052f7d4414358d296b80fe814d56",
     "amendments": [
       {
         "note": "AMENDMENT 1 (H-01b-CI implementation slice, assertions strengthened/added \u2014 never removed, LAW-11): test_07's ARV-TG-005 probe strengthened to the real form (an EXISTING-but-empty base dir \u2014 the nonexistent-dir form fires ARV-TG-001 first); the stub builder corrected with the machinery the BASE's KB probes actually load (harness/gate.py, harness/migrate.py) and the slice's notverified.txt (the --verify re-derivation source \u2014 PRF-01); the red_evidence smash in harness/red.py repaired in the same slice (set only on first record)."
@@ -294,6 +300,12 @@
         "new_sha256": "6bb6ed04efe30f4bc77df9560b49439f0d9cf944bdb495c54035fa653a7a7a79",
         "note": "the #76 CodeRabbit round's repairs: test_19's complete-statement replacement (the predecessor left 'fails += pass' \u2014 a SyntaxError in the stub's gate; the omission is now a VALID gate that skips the step), the LAW-30 CI-claim scoping (the S4b leg + the recorded run; the trusted leg begins with the next PR), the STATE next-action bullet (merge #76 -> P3-00). The findings/not_verified mistype guard is CLAIM-042's with the section (the finding obsolete-by-deference at this head)",
         "observed_at": "2026-10-24T09:45:39.450625+00:00"
+      },
+      {
+        "prior_sha256": "6bb6ed04efe30f4bc77df9560b49439f0d9cf944bdb495c54035fa653a7a7a79",
+        "new_sha256": "1ac1221d999a3db93842c09376ed62517ff1052f7d4414358d296b80fe814d56",
+        "note": "CLAIM-044 (the trusted-stub modernization + the scope widening): test_trusted_gate.py's build_stub born-valid report gains sheet_section: true \u2014 the stub's base carries the copy's real proofsheet (the renderer), so the base-side expectation applies to the trusted fixture exactly as in reality; the fix-head run caught the stub NOT born-valid (16 failures, every one the stub's gate refusing its own report with ARV-SEV-009 \u2014 the rule working, the fixture stale). The file joins the slice's scope in BOTH homes at edit time (the SEV-1 declaration-drift class guarded against).",
+        "observed_at": "2026-10-24T14:42:03.274564+00:00"
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice).",
@@ -404,7 +416,7 @@
     "red_exit": 1,
     "red_code": "ARV-SEV-001..008 all unprovable at the predecessor (the module absent \u2014 the ten suite groups red, exit 1, red-01.txt)",
     "red_evidence": "the CLAIM-040 red observed at the test-only commit: test_sev.py at the predecessor (no harness/sev.py) \u2014 ten failing case groups, every named ARV-SEV code unprovable, exit 1; red-01.txt in the run dir",
-    "current_sha256": "4f3dff68cf944a8f32d31dd5b2b578ca598684188e317efb59d6cccc4cb05dcf",
+    "current_sha256": "d91fa3e259ed48fe8c01ff90c7cf42b934fdc0524aba2489efebd81767ba4ff8",
     "amendments": [
       {
         "prior_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
@@ -435,6 +447,24 @@
         "new_sha256": "4f3dff68cf944a8f32d31dd5b2b578ca598684188e317efb59d6cccc4cb05dcf",
         "note": "CLAIM-042 (the RED cases + the typed amendments, chained from the #76-merged state): test_record_machinery.py gains the deferred SEV sheet-section cases 7-10 (record 34 \u00a78's RED set: the opted-in section assembly, the digest-after-it coverage, the mistyped-field guards; case 10 the precision-labeled transition guard) + test_sev.py gains the optional sheet_section typed check (the bool positive + the string refusal) \u2014 the RED observed live: the machinery suite exit 1 (3 failures: cases 7/8/9, the section absent at the predecessor), the sev suite exit 1 (the mistyped sheet_section passed clean), zero regressions in either suite (red-01.txt)",
         "observed_at": "2026-10-24T10:53:45.925038+00:00"
+      },
+      {
+        "prior_sha256": "4f3dff68cf944a8f32d31dd5b2b578ca598684188e317efb59d6cccc4cb05dcf",
+        "new_sha256": "f68714803d55f5c5e7a2aec234c927d5fd18d2a4a0eb63532fd7e8a14821da29",
+        "note": "CLAIM-044 (the RED cases + the typed amendment, chained from the #78-merged state): test_sev.py gains the ARV-SEV-009 base-side section expectation group (the renderer-base fixture + the false/absent refusals + the precision-labeled compliant form; the docstring documents the rule) \u2014 observed live: exit 1 with the two expectation cases failing (got []; the rule absent at the predecessor c19d497), the historical fixture's positive cases untouched (no over-refusal). The KB-SEV-009 case + the born-valid report's sheet_section:true modernization ride in harness/known-bad/cases.py (the KB matrix 32 cases; KB-SEV-009 broken at the predecessor \u2014 the guard did not fire).",
+        "observed_at": "2026-10-24T14:28:25.045147+00:00"
+      },
+      {
+        "prior_sha256": "f68714803d55f5c5e7a2aec234c927d5fd18d2a4a0eb63532fd7e8a14821da29",
+        "new_sha256": "ad9bac48f3c127ace900e9569dd2bb874d5cbe81cef48c77878540640cdd89de",
+        "note": "CLAIM-044 (the review-round doc-drift fixes + the one-line suite edit): test_sev.py's RED-path summary line 001..008 -> 001..009 (the fresh-context reviewer's SEV-1, caught in-scope); the edit chains through this typed amendment.",
+        "observed_at": "2026-10-24T15:03:08.672748+00:00"
+      },
+      {
+        "prior_sha256": "ad9bac48f3c127ace900e9569dd2bb874d5cbe81cef48c77878540640cdd89de",
+        "new_sha256": "d91fa3e259ed48fe8c01ff90c7cf42b934fdc0524aba2489efebd81767ba4ff8",
+        "note": "CLAIM-044 (the #79 CodeRabbit round 1 \u2014 the error-class case): test_sev.py gains the expectation-prerenderer-checkout case (the base WITHOUT proofsheet.py while the CHECKOUT HAS it \u2014 git show's 'exists on disk, but not in' error form; the RED observed live at the round head: expected [] got ['ARV-SEV-009'] \u2014 the undecidable refusal over a positive-absence class), then GREEN over the sev.py error-class fix (both absence forms accepted: 'does not exist in' OR 'exists on disk, but not in').",
+        "observed_at": "2026-10-24T15:32:44.786267+00:00"
       }
     ]
   }

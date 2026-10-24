@@ -1,0 +1,5 @@
+- the trusted-leg enforcement of ARV-SEV-009 begins with the NEXT slice's PR (the base c19d497 predates the rule — the recorded bootstrap pattern, the same transition as the original SEV wiring and the section renderer; this slice's own PR is judged by the base's validator).
+- the probe's three stated boundaries (the reviewer's SEV-4 residual): the comment-only marker false-positive (unreachable in this repo's history — the marker's only arrival ec250a1 rides with the renderer code itself); the directory-shaped-proofsheet edge (unreachable for wall-controlled main); the undecidable short-circuit (the sibling ARV-SEV-003 refuses the same condition — fail-closed holds through the named code).
+- the remote CI's five-check run at this PR's head — observed at the PR, never pre-recorded here.
+- the identity limit (LAW-30): the fresh-context reviewer is a subagent on the same host and user — declared independence of context, never cryptographic; the separate grader at the phase gates remains the protocol.
+- the N12 residual (claim-038's notverified) is unchanged; never silently complete by inference from unrelated checks.

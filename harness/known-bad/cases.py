@@ -527,6 +527,7 @@ def _sev_valid_report(sev_mod, copy: pathlib.Path) -> dict:
         "reviewer_context": "kb-reviewer-ctx",
         "disposition": "PASS",
         "review_summary": "the KB-SEV probe's born-valid form (the module's own digest function built it)",
+        "sheet_section": True,
     }
 
 
@@ -657,3 +658,21 @@ def kb_sev_coordination(copy: pathlib.Path) -> None:
     finally:
         if _own_default:
             del _os.environ["ARV_TRUSTED_KB_MACHINERY"]
+
+
+# --- CLAIM-044: the base-side section expectation joins the matrix (ARV-SEV-009).
+#     The probe's git fixture commits the WHOLE copy as the "probe base" — and the
+#     copy carries the REAL harness/proofsheet.py, which knows the sheet_section
+#     switch (the renderer): the fixture's base RENDERS, so the expectation is
+#     ACTIVE. The case opts OUT and must be refused; the born-valid report above
+#     was modernized to sheet_section true for exactly this reason.
+@case("KB-SEV-009", "the base-side section expectation — a renderer base + an opted-OUT report",
+      "ARV-SEV-009")
+def kb_sev_base_side_section(copy: pathlib.Path) -> None:
+    _sev_probe_prepare(copy, git=True)
+    sev = _load(copy, "harness.sev")
+    report = _sev_valid_report(sev, copy)
+    report["sheet_section"] = False  # the renderer base + the explicit opt-out
+    import json as _json
+    (_sev_probe_dir(copy) / "sev.json").write_text(_json.dumps(report, indent=2) + "\n")
+    sev.check_sev(SEV_PROBE_SLICE, "HEAD")

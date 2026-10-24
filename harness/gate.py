@@ -25,7 +25,7 @@ contract). Check order:
   6. KB-01..06         every known-bad case is REJECTED with its named code
                        (a passing known-bad is a broken guard — KB-05)
   7. ARV-PRF-004       the slice's Proof Sheet re-derives byte-identically (LAW-01)
-  8. ARV-SEV-001..008  the slice's SEV report validates (LAW-30, H-02: missing/
+  8. ARV-SEV-001..009  the slice's SEV report validates (LAW-30, H-02: missing/
                        stale/malformed/incomplete/BLOCKED all refuse; the PUBLIC
                        validator through the gate wrapper, never a duplicate)
 

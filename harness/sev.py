@@ -40,6 +40,14 @@ Named codes (frozen in harness/tests/test_sev.py BEFORE this implementation):
   ARV-SEV-008  malformed proof/run records (the A09 schema: mistyped fields,
                prose digests, a binding commit git cannot show — the
                KB-RED-011 class)
+  ARV-SEV-009  the BASE-SIDE SECTION EXPECTATION (CLAIM-044, the #77 reviewer's
+               SEV-3 follow-up adopted at the #78 review): once the PR's own
+               BASE carries the Proof-Sheet SEV section renderer (the base's
+               proofsheet.py knows the sheet_section switch), a committed
+               report MUST set sheet_section true — the candidate-controlled
+               opt-in window closed when the first section-bearing sheet
+               merged. A base WITHOUT the renderer never fires the rule; an
+               UNDECIDABLE renderer state fails closed, never a silent pass
 
 Malformed HISTORICAL records are preserved as historical artifacts with a
 disposition, never forged replacements (A09): this validator only ever
@@ -215,6 +223,42 @@ def _check_run_records(repo: pathlib.Path, slice_name: str, codes: list) -> list
     return names
 
 
+def _base_renders_sections(base_ref: str, repo: pathlib.Path, codes: list) -> bool:
+    """CLAIM-044: does the PR's own BASE carry the section renderer? The probe
+    is the switch's own name in the base's proofsheet.py source (`sheet_section`)
+    — the exact signal the renderer's opt-in reads. Three-state, fail-closed:
+      True  — the base's proofsheet carries the marker (the expectation ACTIVE)
+      False — a POSITIVE absence: the base's proofsheet exists without the
+              marker, OR does not exist at all (the pre-renderer era — the
+              expectation inactive, the historical slices compatible)
+    An UNDECIDABLE state (git cannot resolve/show the base; an unexpected
+    failure distinguishing neither absence class) appends ARV-SEV-009 itself —
+    the expectation's applicability cannot be verified, so the report is
+    refused, never silently passed."""
+    base = merge_base_of(base_ref, repo)
+    if base is None:
+        _fail(codes, "ARV-SEV-009", "the merge-base is not decidable — the base-side section expectation cannot be verified",
+              "an undecidable base is a refusal (ARV-DIFF-002's class); the report never passes on an unverifiable expectation")
+        return False
+    r = _git(repo, "show", f"{base}:harness/proofsheet.py")
+    if r.returncode == 0:
+        return b"sheet_section" in r.stdout
+    err = r.stderr.decode("utf-8", "replace")
+    # the POSITIVE-absence error classes (verified on git 2.47.3): the base
+    # predates proofsheet.py entirely — git names the absence either as
+    # "path '...' does not exist in '<sha>'" (no on-disk counterpart) or as
+    # "path '...' exists on disk, but not in '<sha>'" (the checkout HAS the
+    # file; the base does not — the #79 CodeRabbit round's catch: the second
+    # form is the exact shape of a pre-renderer base under a post-renderer
+    # checkout, and treating it as undecidable refused a class the docstring
+    # promises to pass)
+    if ("does not exist" in err or "exists on disk, but not in" in err) and "in '" in err:
+        return False
+    _fail(codes, "ARV-SEV-009", f"the base's section-renderer state is undecidable (git show failed: {err[:120]})",
+          "an unexpected git failure is a named refusal, never a guess — the expectation never silently passes")
+    return False
+
+
 def validate_report(slice_name: str, base_ref: str, repo=None) -> list:
     """The PUBLIC validator. Returns the failing codes (empty = valid); the
     gate wrapper below prints them. Every refusal names its code — a missing,
@@ -263,6 +307,15 @@ def validate_report(slice_name: str, base_ref: str, repo=None) -> list:
     if "sheet_section" in report and not isinstance(report["sheet_section"], bool):
         _fail(codes, "ARV-SEV-002", "the optional field 'sheet_section' is mistyped (expected bool)",
               "the field is the Proof-Sheet SEV section's opt-in switch (TEMPLATES §6) — typed fields, never prose (A09)")
+
+    # ARV-SEV-009 (CLAIM-044 — the base-side section expectation): the PR's own
+    # base carries the renderer → the committed report MUST opt in. The probe
+    # is the switch's own name in the base's proofsheet source; the historical
+    # bases (pre-renderer) never fire the rule; an undecidable state fails
+    # closed (the helper appends its own refusal)
+    if report.get("sheet_section") is not True and _base_renders_sections(base_ref, repo, codes):
+        _fail(codes, "ARV-SEV-009", "the base carries the Proof-Sheet SEV section renderer but this report does not set sheet_section true",
+              "the candidate-controlled opt-in window closed when the first section-bearing sheet merged (PR #78): a base that can render the section expects the committed sheet to carry it — set sheet_section true (the committed sheet's SEV record surface is not optional for renderer bases)")
 
     # ARV-SEV-003: staleness — base + candidate movement
     observed_base = merge_base_of(base_ref, repo)

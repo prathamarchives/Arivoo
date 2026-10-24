@@ -346,6 +346,48 @@ def run_all(tmp):
         _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "empty not_verified")
         expect_codes(sev, root, "ARV-SEV-006", "placeholder", "(the empty list)")
 
+        # the #75 round 2: an UNKNOWN disposition cannot represent a valid
+        # result — and it previously carried an OPEN P1 past every check
+        root = build_fixture(tmp + "/disposition-unknown")
+        write_report(root, {**valid_report(sev, root), "disposition": "UNVERIFIED",
+                            "findings": [{"id": "SEV-1", "severity": "P1", "status": "open", "evidence": "e", "disposition": "d"}]})
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "unknown disposition")
+        expect_codes(sev, root, "ARV-SEV-005", "falsepass", "(unknown disposition + open P1 — the exact carried-past hole)")
+
+        # the #75 round 2: rename detection emitted ONLY the destination — the
+        # deleted source vanished from the reviewed set (worst case: a rename
+        # INTO the excluded run dir made the whole change invisible). The
+        # renamed file must EXIST AT THE MERGE-BASE (src/a.py — created in the
+        # fixture's base commit), or base-side cancellation erases the rename
+        # from the diff entirely (the case's own first-draft error: renaming a
+        # file the slice itself had added).
+        root = build_fixture(tmp + "/digest-rename")
+        _git(root, "mv", "src/a.py", "src/renamed.py")
+        # a PURE rename (R100): the destination carries the BASE content — the
+        # case's own second-draft fix: the fixture's slice-commit content drift
+        # on src/a.py kept similarity below git's 50% threshold, so no rename
+        # was detected and the pre-fix form PASSED vacuously (the suppression
+        # never fired). Identical content forces the R100 form.
+        (root / "src" / "renamed.py").write_text(SRC_A, encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "rename a -> renamed")
+        paths = sev.reviewed_paths(BASE_REF, SLICE, repo=root)
+        if "src/a.py" not in paths or "src/renamed.py" not in paths:
+            print(f"FAIL digest-rename: the rename endpoints did not both bind: {paths}")
+            FAILED.append("digest-rename")
+        else:
+            print("PASS digest-rename: both rename endpoints bind (the deleted source + the new destination)")
+        # the worst case: a rename INTO the slice's own run dir — the destination
+        # stays excluded, but the DELETED SOURCE must still bind
+        _git(root, "mv", "src/renamed.py", f"harness/runs/{SLICE}/renamed.py")
+        _git(root, "commit", "-q", "-m", "rename into the run dir")
+        paths = sev.reviewed_paths(BASE_REF, SLICE, repo=root)
+        if "src/a.py" not in paths or f"harness/runs/{SLICE}/renamed.py" in [str(p) for p in paths]:
+            print(f"FAIL digest-rename-run: the deleted source lost or the run-dir destination leaked: {paths}")
+            FAILED.append("digest-rename-run")
+        else:
+            print("PASS digest-rename-run: the run-dir destination excluded; the deleted source still binds")
+
 
 def main() -> int:
     tmp = tempfile.mkdtemp(prefix="sev-fixture-")

@@ -356,13 +356,25 @@
     "red_exit": 1,
     "red_code": "ARV-SEV-001..008 all unprovable at the predecessor (the module absent \u2014 the ten suite groups red, exit 1, red-01.txt)",
     "red_evidence": "the CLAIM-040 red observed at the test-only commit: test_sev.py at the predecessor (no harness/sev.py) \u2014 ten failing case groups, every named ARV-SEV code unprovable, exit 1; red-01.txt in the run dir",
-    "current_sha256": "2e140d1b9d4352596eebb1776891fe3eae87b05ee829cce6bc1e55cd5bc23467",
+    "current_sha256": "6da5ba040eaab9c6b640497518e32be08199576ec7b4af6f1cb0cd57e71de837",
     "amendments": [
       {
         "prior_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
         "new_sha256": "2e140d1b9d4352596eebb1776891fe3eae87b05ee829cce6bc1e55cd5bc23467",
         "note": "the #75 CodeRabbit round 1's discriminating cases added to test_sev.py: the non-ASCII path binding (the C-quoted blind spot), the non-UTF-8 report (the named 002, never a traceback), the non-object failure mode (the named 004), the non-40-hex commit strings (the named 008), the empty not-verified list (the named 006). RED observed at the pre-fix form (red-02.txt: the stashed validator, exit 1); GREEN with the fixes. The five cases are the round's five findings' regressions",
         "observed_at": "2026-10-24T07:19:37.801790+00:00"
+      },
+      {
+        "prior_sha256": "2e140d1b9d4352596eebb1776891fe3eae87b05ee829cce6bc1e55cd5bc23467",
+        "new_sha256": "4ba065ec09e197066037954a86b212a7b0ea002ad30ad89951ba4eba3e8d2350",
+        "note": "the #75 CodeRabbit round 2's discriminating cases added to test_sev.py: the unknown-disposition refusal (UNVERIFIED + an open P1 carried past every check at the predecessor \u2014 the Major) + the rename endpoints binding (both directions, including the rename-into-run-dir worst case; the case's own first-draft error corrected in-slice: the renamed file must exist at the merge-base or base-side cancellation erases the rename from the diff). RED observed at the pre-fix form (red-03.txt); GREEN with the fixes (--no-renames + the frozen disposition vocabulary)",
+        "observed_at": "2026-10-24T07:34:52.901297+00:00"
+      },
+      {
+        "prior_sha256": "4ba065ec09e197066037954a86b212a7b0ea002ad30ad89951ba4eba3e8d2350",
+        "new_sha256": "6da5ba040eaab9c6b640497518e32be08199576ec7b4af6f1cb0cd57e71de837",
+        "note": "the rename case's R100 correction (the third iteration, honestly recorded: the content-drift form passed vacuously at the pre-fix validator because git detected no rename \u2014 the discriminating form restores the base content so the R100 suppression fires); red-03.txt re-observed with BOTH round-2 failures at the pre-fix form",
+        "observed_at": "2026-10-24T07:35:58.106688+00:00"
       }
     ]
   }

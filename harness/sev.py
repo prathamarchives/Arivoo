@@ -133,7 +133,13 @@ def reviewed_paths(base_ref: str, slice_name: str, repo=None) -> list:
     # exact path (the R-04(5) class; the #75 CodeRabbit round 1: a quoted path
     # made git show fail and the file silently hashed as deleted — an edit to it
     # left the digest UNCHANGED, blinding the staleness check)
-    r = _git(repo, "diff", "-z", "--name-only", f"{base_ref}...HEAD")
+    # --no-renames: rename detection would emit ONLY the destination — the
+    # deleted SOURCE path vanished from the reviewed set entirely (the #75
+    # round 2: a rename INTO the excluded run dir made the whole change
+    # invisible). With renames off, BOTH endpoints always bind: the deleted
+    # source digests its deletion token, the destination its content, and the
+    # run-dir prefix still excludes only the slice's own artifacts.
+    r = _git(repo, "diff", "-z", "--name-only", "--no-renames", f"{base_ref}...HEAD")
     if r.returncode != 0:
         return []
     prefix = f"harness/runs/{slice_name}/"
@@ -305,8 +311,14 @@ def validate_report(slice_name: str, base_ref: str, repo=None) -> list:
                 _fail(codes, "ARV-SEV-004", f"proof id {pid!r} binds no existing record in the slice's run dir",
                       "evidence binds to records that exist — a dangling proof pointer is a fabricated-evidence class")
 
-    # ARV-SEV-005: the disposition class — BLOCKED, or a false PASS
-    if report["disposition"] == "BLOCKED":
+    # ARV-SEV-005: the disposition class — BLOCKED, or a false PASS, or a
+    # value that cannot represent a valid result at all (the #75 round 2: an
+    # unknown disposition like 'UNVERIFIED' passed every check while carrying
+    # an OPEN P1 — the P0/P1 guard fired only under an exact PASS string)
+    if report["disposition"] not in DISPOSITIONS:
+        _fail(codes, "ARV-SEV-005", f"the disposition {report['disposition']!r} is not PASS|BLOCKED — a value that cannot represent a valid result",
+              "the frozen result vocabulary is PASS and BLOCKED (TEMPLATES §6); every other value refuses")
+    elif report["disposition"] == "BLOCKED":
         _fail(codes, "ARV-SEV-005", "the report is BLOCKED", "a blocked review blocks the slice (LAW-30) — resolve the blocker or split the slice")
     for f in report["findings"]:
         if not isinstance(f, dict):

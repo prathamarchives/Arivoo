@@ -1,0 +1,13 @@
+# CLAIM-040 — H-02 part 1 (a): the SEV validator itself — the standard-library validator module + its
+# focused machinery suite + the typed red mint. The gate wiring + the KB matrix + the activation land
+# in the part-2 slice (CLAIM-041) — one behavior per slice (LAW-05/D-026).
+harness/sev.py D-037
+harness/tests/test_sev.py D-037
+harness/gate.py D-037
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+context/WORKLOG.md D-043
+context/extracted/33-H02A-SEV-VALIDATOR.md D-042
+harness/runs/claim-040-h02a-sev-validator D-041

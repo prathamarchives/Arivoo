@@ -156,14 +156,49 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
     runs.mkdir(parents=True, exist_ok=True)
     (runs / "scope.txt").write_text(
         f"# synthetic declaration\nnotes.txt\nharness/tests D-041\nharness/red-records.json D-041\nCLAIMS.md\nINTENT-LEDGER.md\nharness/runs/{SLICE}\n")
+    # CLAIM-041: the record binds the stub's OWN root commit (the 40-zero ghost
+    # binding is ARV-SEV-008's exact refusal class once the gate step lands) and
+    # the stub carries a PLAN.md row + a born-valid SEV report so the positive
+    # shape satisfies the wired gate's SEV obligation (the same shape it used
+    # to ignore — the fixture modernizes WITH the machinery, never before it:
+    # at the pre-wiring predecessor both additions are inert)
+    (stub / "PLAN.md").write_text(
+        "# PLAN (synthetic stub)\n\n| SYS | property | claims |\n|-----|----------|--------|\n"
+        "| SYS-11 | Each implementation slice closes a V-model trace and has independent systems-engineering verification before merge. | C1-C5 |\n")
     sys.path.insert(0, str(REPO))
     from harness import proofsheet as ps
+    from harness import sev as sev_mod
     ps.RUNS = runs.parent          # RUNS is the runs ROOT — assemble re-joins the slice name
     rec_path = runs / "run-01.json"
     rec_path.write_text(json.dumps({
         "command": "python3 synthetic-stub-suite", "exit_code": 0,
-        "commit": "0" * 40, "output_sha256": hashlib.sha256(b"stub output").hexdigest(),
+        "commit": binding_commit, "output_sha256": hashlib.sha256(b"stub output").hexdigest(),
         "recorded_at": "2026-10-20T00:00:00+00:00"}, indent=2) + "\n")
+    (runs / "sev.json").write_text(json.dumps({
+        "schema_version": 1, "slice_id": SLICE,
+        "base_sha": subprocess.run(["git", "rev-parse", "HEAD"], cwd=stub,
+                                   check=True, capture_output=True, text=True).stdout.strip(),
+        "reviewed_diff_sha256": sev_mod.reviewed_diff_sha256("HEAD", SLICE, repo=stub),
+        "intent_ids": ["INT-100"], "requirement_ids": ["SYS-11"],
+        "system_claims": ["C1"], "changed_components": ["notes.txt"],
+        "interfaces_reviewed": ["the trusted gate phase over the stub's SEV report"],
+        "v_model": {
+            "component_verification": ["the stub's validator run, proof run-01"],
+            "integration_verification": ["the trusted driver boundary, proof run-01"],
+            "system_verification": ["SYS-11 trace, proof run-01"],
+            "validation": ["the trusted gate phase green over the stub, proof run-01"],
+        },
+        "failure_modes": [
+            {"id": "FM-01", "scenario": "a stub report drifting from its diff",
+             "control": "the digest recomputation refuses (ARV-SEV-003)", "proof_ids": ["run-01"]},
+        ],
+        "findings": [],
+        "not_verified": ["the stub boundary: a synthetic candidate, never real evidence; identity separation is declared, never cryptographic"],
+        "builder_context": "stub-builder-ctx",
+        "reviewer_context": "stub-reviewer-ctx",
+        "disposition": "PASS",
+        "review_summary": "the synthetic stub's born-valid report (the module's own digest function built it)",
+    }, indent=2) + "\n")
     (runs / "proofsheet.md").write_text(ps.assemble(SLICE, NOTVERIFIED), encoding="utf-8")
     # --verify re-derives the not-verified section from this FILE — the stub
     # must carry it so the re-derivation is byte-identical (PRF-01)
@@ -209,6 +244,26 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
         (stub / "undeclared-secret.txt").write_text("OUTSIDE the declared scope\n")
     run("git", "add", "-A")
     run("git", "commit", "-q", "-m", "the PR change under test")
+    # CLAIM-041: finalize the SEV report AFTER the PR commit — the binding
+    # digest covers the diff the gate will judge (HEAD~1...HEAD = notes.txt),
+    # never the earlier tree (the same staleness rule the validator enforces).
+    sys.path.insert(0, str(REPO))
+    from harness import sev as sev_mod2
+    rep_path = stub / "harness" / "runs" / SLICE / "sev.json"
+    rep = json.loads(rep_path.read_text())
+    rep["base_sha"] = subprocess.run(["git", "rev-parse", "HEAD~1"], cwd=stub,
+                                     check=True, capture_output=True, text=True).stdout.strip()
+    rep["reviewed_diff_sha256"] = sev_mod2.reviewed_diff_sha256("HEAD~1", SLICE, repo=stub)
+    rep_path.write_text(json.dumps(rep, indent=2) + "\n")
+    codes = sev_mod2.validate_report(SLICE, "HEAD~1", repo=stub)
+    if codes:
+        raise AssertionError(f"stub sev.json not born-valid at the PR commit: {codes}")
+    # the sheet embeds the SEV section — regenerate AFTER the report finalizes
+    sys.path.insert(0, str(REPO))
+    from harness import proofsheet as ps2
+    ps2.RUNS = stub / "harness" / "runs"
+    (stub / "harness" / "runs" / SLICE / "proofsheet.md").write_text(
+        ps2.assemble(SLICE, NOTVERIFIED), encoding="utf-8")
     return stub
 
 
@@ -938,6 +993,37 @@ class TrustedGateTests(unittest.TestCase):
                             "the trusted phase PASSED a function-scoped TESTS 'registration' — the "
                             "AST walk found a scope the module never executes: " + r.stdout[-500:])
         self.assertIn("FAIL ARV-RED-008", r.stdout + r.stderr)
+
+    def test_18_missing_sev_report_is_refused_by_the_trusted_gate_phase(self):
+        """H-02 (CLAIM-041): a candidate whose slice carries NO SEV report is
+        refused by the BASE's machinery re-rooted over the candidate — the
+        obligation is enforced by the trusted path, never only by the
+        candidate's own gate. RED at the predecessor: the gate phase had no SEV
+        step, so the deletion dispatched green."""
+        stub = build_stub(self.td)
+        (stub / "harness" / "runs" / SLICE / "sev.json").unlink()
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("ARV-SEV-001", r.stdout + r.stderr)
+
+    def test_19_candidate_gate_omitting_the_sev_step_is_still_refused(self):
+        """H-02's structural protection (the coordination-weakening class): a
+        candidate that GUTS its own gate.py — removing the SEV step entirely —
+        is still refused by the trusted phase, because the BASE's machinery
+        (never the candidate's gate) carries the obligation. The candidate's
+        own green is never the only evidence for the harness check (F-006's
+        form, applied to the SEV boundary)."""
+        stub = build_stub(self.td)
+        gp = stub / "harness" / "gate.py"
+        gtext = gp.read_text(encoding="utf-8")
+        marker = "sev.check_sev"
+        self.assertIn(marker, gtext, "the candidate gate carries the SEV step at this revision (the wiring landed)")
+        gtext = gtext.replace(marker, "pass  # the omitted gate invocation (the must-reject)")
+        gp.write_text(gtext, encoding="utf-8")
+        (stub / "harness" / "runs" / SLICE / "sev.json").unlink()
+        r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("ARV-SEV-001", r.stdout + r.stderr)
 
     def test_13_self_authorized_red_refresh_is_refused(self):
         """CLAIM-037 / F-007's named defect, end-to-end through the trusted

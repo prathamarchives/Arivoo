@@ -475,3 +475,179 @@ def kb_slot_unparseable(copy: pathlib.Path) -> None:
         ps.write_record(SLICE, "probe-write", 0, "out")
     except SystemExit:
         pass
+
+
+# --- CLAIM-041, H-02 part 2: the KB-SEV matrix (the validator + its coordination class).
+#     KB-SEV-001..007 exercise the PUBLIC validator (check_sev — the same wrapper
+#     the gate calls, never an internal duplicate) over deliberately broken
+#     report states; each is a precision/regression case at the part-2 predecessor
+#     (the validator LANDED in part 1 — labeled honestly, never claimed RED).
+#     KB-SEV-008 is the coordination-weakening form: a candidate that stubs its
+#     own validator is still refused when the machinery source is unweakened
+#     (the KB-RED-008 trusted-routing pattern: locally the live repo's harness,
+#     in CI the BASE's — set via ARV_TRUSTED_KB_MACHINERY, respected if already
+#     set by the trusted driver).
+
+SEV_PROBE_SLICE = "claim-900-sev-probe"
+
+
+def _sev_probe_dir(copy: pathlib.Path):
+    d = copy / "harness" / "runs" / SEV_PROBE_SLICE
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _sev_valid_report(sev_mod, copy: pathlib.Path) -> dict:
+    """A born-valid probe report: base/digest resolved against the COPY's own
+    git context (the probe git-inits it, the KB-RED-011 form) so the deep
+    validations (staleness, trace, run records) are decidable."""
+    import subprocess as _sp
+    head = _sp.run(["git", "-C", str(copy), "rev-parse", "HEAD"],
+                   capture_output=True, text=True).stdout.strip()
+    return {
+        "schema_version": 1, "slice_id": SEV_PROBE_SLICE,
+        "base_sha": head,
+        "reviewed_diff_sha256": sev_mod.reviewed_diff_sha256("HEAD", SEV_PROBE_SLICE, repo=copy),
+        "intent_ids": ["INT-100"], "requirement_ids": ["SYS-11"],
+        "system_claims": ["C1"], "changed_components": ["harness/sev.py"],
+        "interfaces_reviewed": ["validate_report(slice, base, repo) — the KB-SEV matrix"],
+        "v_model": {
+            "component_verification": ["the validator's own suite, proof run-01"],
+            "integration_verification": ["the gate wrapper over the public validator, proof run-01"],
+            "system_verification": ["SYS-11 trace, proof run-01"],
+            "validation": ["the KB-SEV matrix observed green, proof run-01"],
+        },
+        "failure_modes": [
+            {"id": "FM-01", "scenario": "a stubbed validator accepting its own report",
+             "control": "the unweakened machinery source refuses (KB-SEV-008)", "proof_ids": ["run-01"]},
+        ],
+        "findings": [],
+        "not_verified": ["the probe boundary: a synthetic slice, never real evidence; identity is declared, never cryptographic"],
+        "builder_context": "kb-builder-ctx",
+        "reviewer_context": "kb-reviewer-ctx",
+        "disposition": "PASS",
+        "review_summary": "the KB-SEV probe's born-valid form (the module's own digest function built it)",
+    }
+
+
+def _sev_probe_prepare(copy: pathlib.Path, *, git: bool = False):
+    """The probe substrate: a run dir with a valid record; optionally a git
+    context (git init + commit — the deep validations need a decidable base)."""
+    import json as _json
+    import subprocess as _sp
+    d = _sev_probe_dir(copy)
+    if git:
+        _sp.run(["git", "init", "-q"], cwd=copy, capture_output=True)
+        _sp.run(["git", "config", "user.email", "probe@test.local"], cwd=copy, capture_output=True)
+        _sp.run(["git", "config", "user.name", "probe"], cwd=copy, capture_output=True)
+        _sp.run(["git", "add", "-A"], cwd=copy, capture_output=True)
+        _sp.run(["git", "commit", "-q", "-m", "probe base"], cwd=copy, capture_output=True)
+    head = _sp.run(["git", "-C", str(copy), "rev-parse", "HEAD"],
+                   capture_output=True, text=True).stdout.strip() if git else "0" * 40
+    (d / "run-01.json").write_text(_json.dumps({
+        "command": "python3 probe", "exit_code": 0, "commit": head,
+        "output_sha256": "0" * 64, "recorded_at": "2026-10-24T00:00:00+00:00"}, indent=2) + "\n")
+    return d
+
+
+@case("KB-SEV-001", "a slice PR with NO systems-engineering verification report",
+      "ARV-SEV-001")
+def kb_sev_missing(copy: pathlib.Path) -> None:
+    _sev_probe_prepare(copy)
+    _load(copy, "harness.sev").check_sev(SEV_PROBE_SLICE, "origin/main")
+
+
+@case("KB-SEV-002", "an unparseable SEV report (malformed JSON)",
+      "ARV-SEV-002")
+def kb_sev_malformed(copy: pathlib.Path) -> None:
+    d = _sev_probe_prepare(copy)
+    (d / "sev.json").write_text("{not json", encoding="utf-8")
+    _load(copy, "harness.sev").check_sev(SEV_PROBE_SLICE, "origin/main")
+
+
+@case("KB-SEV-003", "a STALE report (the base moved under it — a false revision binding)",
+      "ARV-SEV-003")
+def kb_sev_stale(copy: pathlib.Path) -> None:
+    _sev_probe_prepare(copy, git=True)
+    sev = _load(copy, "harness.sev")
+    report = _sev_valid_report(sev, copy)
+    report["base_sha"] = "f" * 40  # names a commit that is not the merge-base
+    import json as _json
+    (_sev_probe_dir(copy) / "sev.json").write_text(_json.dumps(report, indent=2) + "\n")
+    sev.check_sev(SEV_PROBE_SLICE, "HEAD")
+
+
+@case("KB-SEV-004", "a report with an empty intent trace (no owner intent behind the slice)",
+      "ARV-SEV-004")
+def kb_sev_no_trace(copy: pathlib.Path) -> None:
+    _sev_probe_prepare(copy, git=True)
+    sev = _load(copy, "harness.sev")
+    report = _sev_valid_report(sev, copy)
+    report["intent_ids"] = []
+    import json as _json
+    (_sev_probe_dir(copy) / "sev.json").write_text(_json.dumps(report, indent=2) + "\n")
+    sev.check_sev(SEV_PROBE_SLICE, "HEAD")
+
+
+@case("KB-SEV-005", "a BLOCKED report falsely presented for merge",
+      "ARV-SEV-005")
+def kb_sev_blocked(copy: pathlib.Path) -> None:
+    _sev_probe_prepare(copy, git=True)
+    sev = _load(copy, "harness.sev")
+    report = _sev_valid_report(sev, copy)
+    report["disposition"] = "BLOCKED"
+    import json as _json
+    (_sev_probe_dir(copy) / "sev.json").write_text(_json.dumps(report, indent=2) + "\n")
+    sev.check_sev(SEV_PROBE_SLICE, "HEAD")
+
+
+@case("KB-SEV-006", "a placeholder not-verified list (empty-by-omission's textual twin)",
+      "ARV-SEV-006")
+def kb_sev_placeholder(copy: pathlib.Path) -> None:
+    _sev_probe_prepare(copy, git=True)
+    sev = _load(copy, "harness.sev")
+    report = _sev_valid_report(sev, copy)
+    report["not_verified"] = ["none"]
+    import json as _json
+    (_sev_probe_dir(copy) / "sev.json").write_text(_json.dumps(report, indent=2) + "\n")
+    sev.check_sev(SEV_PROBE_SLICE, "HEAD")
+
+
+@case("KB-SEV-007", "the same declared builder/reviewer context where policy disallows",
+      "ARV-SEV-007")
+def kb_sev_identity(copy: pathlib.Path) -> None:
+    _sev_probe_prepare(copy, git=True)
+    sev = _load(copy, "harness.sev")
+    report = _sev_valid_report(sev, copy)
+    report["builder_context"] = "same-ctx"
+    report["reviewer_context"] = "same-ctx"
+    import json as _json
+    (_sev_probe_dir(copy) / "sev.json").write_text(_json.dumps(report, indent=2) + "\n")
+    sev.check_sev(SEV_PROBE_SLICE, "HEAD")
+
+
+@case("KB-SEV-008", "validator/test coordination weakening — a stubbed own-validator is still refused by the unweakened machinery source",
+      "ARV-SEV-001")
+def kb_sev_coordination(copy: pathlib.Path) -> None:
+    """The coordination class: the copy's OWN validator is stubbed to
+    accept-everything (and its own suite file with it — the weakening a
+    candidate controls together). The case proves the refusal STILL fires when
+    the machinery loads from the UNWEAKENED source: the trusted driver's
+    ARV_TRUSTED_KB_MACHINERY when set, else the live repo's own harness (the
+    local self-check semantics — the KB-RED-008 pattern). The identity limits
+    are the floor's own: same host, same user (Q10's class), stated never
+    claimed closed."""
+    import os as _os
+    (copy / "harness" / "sev.py").write_text(
+        "# the stubbed validator (the must-reject)\ndef check_sev(*a, **k):\n    return []\n"
+        "def validate_report(*a, **k):\n    return []\n", encoding="utf-8")
+    (copy / "harness" / "tests" / "test_sev.py").write_text(
+        "# the stubbed suite (the coordinated weakening)\n", encoding="utf-8")
+    _sev_probe_prepare(copy)
+    # the machinery root is the REPO root — _load joins harness/<mod> itself
+    _os.environ.setdefault("ARV_TRUSTED_KB_MACHINERY",
+                           str(pathlib.Path(__file__).resolve().parents[2]))
+    try:
+        _load(copy, "harness.sev").check_sev(SEV_PROBE_SLICE, "origin/main")
+    finally:
+        pass  # the driver's own value (if any) stays set; a local default leaks nowhere

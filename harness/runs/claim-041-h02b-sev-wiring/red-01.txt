@@ -1,0 +1,23 @@
+CLAIM-041 red-01 — the three RED groups at the test-only commit (the wiring absent at the predecessor fc8b32e):
+
+== python3 harness/tests/test_gate_dispatch.py -> exit 1 (the missing-report case: the dispatch exits 0, the gate silent about the missing SEV):
+PASS A02-hostile-branch exits nonzero: exit=1
+PASS A02-legal-hostile-branch exits nonzero: exit=1
+PASS A01-missing-scope exits nonzero: exit=1
+PASS A01-unclaimed-branch exits nonzero: exit=1
+PASS A01-missing-records-and-sheet exits nonzero: exit=1
+PASS A01-missing-sheet-only exits nonzero: exit=1
+FAIL H02-missing-SEV-report exits nonzero: exit=0
+FAIL H02-missing-SEV-report names ARV-SEV-001: got: dispatch: pull_request event -> PR mode (slice=claim-999-nosev, diff=origin/main) — a PR is judged as a PR, never selfchecked
+PASS H01aR-bad-base exits nonzero: exit=1
+RED — 2 failure(s): H02-missing-SEV-report exits nonzero, H02-missing-SEV-report names ARV-SEV-001
+dispatch exit: 1
+
+== python3 harness/tests/test_trusted_gate.py -> exit 1 (tests 18/19: no SEV step in the gate, no refusal):
+FAIL: test_18_missing_sev_report_is_refused_by_the_trusted_gate_phase (__main__.TrustedGateTests.test_18_missing_sev_report_is_refused_by_the_trusted_gate_phase)
+FAIL: test_19_candidate_gate_omitting_the_sev_step_is_still_refused (__main__.TrustedGateTests.test_19_candidate_gate_omitting_the_sev_step_is_still_refused)
+Ran 19 tests in 7.768s
+FAILED (failures=2)
+
+== python3 harness/tests/test_record_machinery.py -> exit 1 (the sheet carries no SEV section):
+RED — 1 failure(s): the sheet embeds the SEV section (report digest + disposition + findings)

@@ -263,6 +263,53 @@ def main() -> int:
         check("a missing registry bootstraps (the ARV-RED-003 recovery path preserved)",
               rc4 == 0 and bootstrapped,
               f"rc={rc4} bootstrapped={bootstrapped} output={out4[:200]!r} — the recovery path crashed at the round's predecessor (Greptile P2)")
+
+        # CLAIM-041 (H-02 part 2): the Proof Sheet's SEV section — the sheet
+        # records the report + reviewed-diff digests, the disposition, the
+        # findings, and the not-verified count when the slice carries sev.json
+        # (the TEMPLATES §6 rule the card names). RED at the predecessor: no
+        # section existed, the sheet was silent about the SEV record entirely.
+        work5 = pathlib.Path(tmp) / "sev-sheet"
+        work5.mkdir(parents=True)
+        (work5 / "harness" / "runs" / "claim-901-sev-sheet-probe").mkdir(parents=True)
+        rec5 = {"command": "python3 probe", "exit_code": 0, "commit": "0" * 40,
+                "output_sha256": "0" * 64, "recorded_at": "2026-10-24T00:00:00+00:00"}
+        (work5 / "harness" / "runs" / "claim-901-sev-sheet-probe" / "run-01.json").write_text(
+            json.dumps(rec5, indent=2) + "\n", encoding="utf-8")
+        sev_report = {
+            "schema_version": 1, "slice_id": "claim-901-sev-sheet-probe",
+            "base_sha": "0" * 40, "reviewed_diff_sha256": "1" * 64,
+            "intent_ids": ["INT-100"], "requirement_ids": ["SYS-11"],
+            "system_claims": [], "changed_components": ["harness/proofsheet.py"],
+            "interfaces_reviewed": ["assemble(slice, nv)"],
+            "v_model": {"component_verification": ["c"], "integration_verification": ["i"],
+                        "system_verification": ["s"], "validation": ["v"]},
+            "failure_modes": [{"id": "FM-01", "scenario": "s", "control": "c", "proof_ids": ["run-01"]}],
+            "findings": [{"id": "SEV-1", "severity": "P2", "status": "resolved",
+                          "evidence": "e", "disposition": "fixed in probe"}],
+            "not_verified": ["the probe boundary: a synthetic slice, never real evidence"],
+            "builder_context": "probe-builder", "reviewer_context": "probe-reviewer",
+            "disposition": "PASS", "review_summary": "probe report for the sheet-section case",
+        }
+        sev_bytes = json.dumps(sev_report, indent=2) + "\n"
+        (work5 / "harness" / "runs" / "claim-901-sev-sheet-probe" / "sev.json").write_text(
+            sev_bytes, encoding="utf-8")
+        import hashlib as _hl
+        _mods5 = _load_machinery(work5)
+        ps5 = _mods5["proofsheet"]
+        ps5.RUNS = work5 / "harness" / "runs"
+        sheet5 = ps5.assemble("claim-901-sev-sheet-probe", "- probe only\n")
+        import hashlib as _h2
+        want_digest = _h2.sha256(sev_bytes.encode()).hexdigest()
+        check("the sheet embeds the SEV section (report digest + disposition + findings)",
+              "Systems-engineering verification" in sheet5
+              and want_digest in sheet5
+              and "disposition: PASS" in sheet5
+              and "findings: 1" in sheet5
+              and "1111111111111111111111111111111111111111111111111111111111111111" in sheet5,
+              "the TEMPLATES §6 rule: the sheet records the report + reviewed-diff digests, "
+              "the disposition, the findings, and the not-verified count — RED at the predecessor "
+              "(the sheet was silent about the SEV record entirely)")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -273,7 +320,7 @@ def main() -> int:
         return 1
     print("GREEN — the record machinery refuses its named classes: max-based numbering, "
           "the unparseable context, the untyped mint, the changed-since-read write, "
-          "the run-100 boundary, the registry bootstrap")
+          "the run-100 boundary, the registry bootstrap, the SEV sheet section")
     return 0
 
 

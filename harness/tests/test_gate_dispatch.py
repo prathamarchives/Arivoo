@@ -44,6 +44,7 @@ ARV-PRF-001/004 — the card requires the exact code) and the legal-hostile
 refusal (the defense already covers permitted metadata; the case proves it
 stays true). The original 026fead RED forms are preserved in the red record.
 """
+import json
 import os
 import pathlib
 import shutil
@@ -219,6 +220,44 @@ def main() -> int:
                               "ARV_PR_HEAD": "slice/claim-999-nosheet2"})
         pr_refusal(r, "ARV-PRF-002", "A01-missing-sheet-only")
 
+        # ---- H-02 (CLAIM-041): PR mode without a SEV report -> the gate refuses
+        # through the ACTUAL caller (dispatch -> gate -> the SEV step). RED at
+        # the predecessor (no gate step): the dispatch exits 0 over a claimed,
+        # scoped, sheeted PR with NO SEV report at all — the exact silent-pass
+        # hole the H-02 card exists to close.
+        d = fixture_clone(tmp, "nosev")
+        sd = d / "harness" / "runs" / "claim-999-nosev"
+        sd.mkdir(parents=True)
+        (sd / "scope.txt").write_text("harness/tests/test_migrations.py INT-125/D-039\n")
+        head_sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=d,
+                                  capture_output=True, text=True, timeout=60).stdout.strip()
+        (sd / "run-01.json").write_text(
+            '{"command": "probe", "exit_code": 0, "commit": "' + head_sha + '", '
+            '"output_sha256": "' + "0" * 64 + '", "recorded_at": "2026-10-19T00:00:00+00:00"}\n')
+        (sd / "notverified.txt").write_text("- the nosev probe record\n")
+        sys.path.insert(0, str(d))
+        try:
+            import importlib
+            ps = importlib.import_module("harness.proofsheet")
+            ps.REPO = d
+            ps.RUNS = d / "harness" / "runs"
+            (sd / "proofsheet.md").write_text(ps.assemble("claim-999-nosev", "- the nosev probe record\n"))
+        except SystemExit:
+            raise AssertionError("fixture sheet assembly failed")
+        finally:
+            sys.path.remove(str(d))
+            for mod in [m for m in list(sys.modules) if m.startswith("harness")]:
+                del sys.modules[mod]
+        reg = d / "CLAIMS.md"
+        text = reg.read_text()
+        anchor = "|-------|---------|-------|--------|----------------|---------------|---------|-------|\n"
+        row = ("| CLAIM-999 | 20 | test | `slice/claim-999-nosev` | "
+               "`harness/tests/test_migrations.py` | — | 2026-10-19 | probe |\n")
+        reg.write_text(text.replace(anchor, anchor + row, 1))
+        r = run_dispatch(d, {"ARV_EVENT_NAME": "pull_request",
+                             "ARV_PR_HEAD": "slice/claim-999-nosev"})
+        pr_refusal(r, "ARV-SEV-001", "H02-missing-SEV-report")
+
         # ---- positive: a VALID scoped/claimed/sheeted PR dispatches green ----
         # ENVIRONMENT-INDEPENDENT by design (three walls-catches at PR #41 drove
         # this to its final form): (1) the case once exercised the LIVE claim-005
@@ -247,14 +286,49 @@ def main() -> int:
                "— | 2026-10-19 | positive probe — non-overlapping, and the 21- entry is the KB-CLM-002 probe's guaranteed overlap partner (A11's coupling, made deterministic) |\n")
         reg.write_text(text.replace(anchor, anchor + row, 1))
         nv_text = "- fixture probe record (self-contained; no real evidence touched)\n"
+        head_sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=d,
+                                  capture_output=True, text=True, timeout=60).stdout.strip()
+        # CLAIM-041: the record binds a REAL clone commit (the 40-zero ghost
+        # binding is ARV-SEV-008's exact refusal class once the gate step lands)
         (sd / "run-01.json").write_text(
-            '{"command": "probe", "exit_code": 0, "commit": "' + "0" * 40 + '", '
+            '{"command": "probe", "exit_code": 0, "commit": "' + head_sha + '", '
             '"output_sha256": "' + "0" * 64 + '", "recorded_at": "2026-10-19T00:00:00+00:00"}\n')
         (sd / "notverified.txt").write_text(nv_text)
-        # assemble the sheet from the record using the FIXTURE's own module
+        # CLAIM-041 (H-02): the positive shape now carries the SEV surface — a
+        # born-valid report assembled from the FIXTURE's own sev module (the
+        # empty diff makes the binding digest deterministic), so the wired
+        # gate's SEV step passes over the same shape it used to ignore
         sys.path.insert(0, str(d))
         try:
             import importlib
+            sevmod = importlib.import_module("harness.sev")
+            report = {
+                "schema_version": 1, "slice_id": sname, "base_sha": head_sha,
+                "reviewed_diff_sha256": sevmod.reviewed_diff_sha256("origin/main", sname, repo=d),
+                "intent_ids": ["INT-125"], "requirement_ids": ["SYS-11"],
+                "system_claims": ["C1"], "changed_components": ["README.md"],
+                "interfaces_reviewed": ["the dispatch fixture's own sev.json"],
+                "v_model": {
+                    "component_verification": ["the fixture's own validator run, proof run-01"],
+                    "integration_verification": ["the real dispatcher boundary, proof run-01"],
+                    "system_verification": ["SYS-11 trace, proof run-01"],
+                    "validation": ["the positive dispatch shape observed green, proof run-01"],
+                },
+                "failure_modes": [
+                    {"id": "FM-01", "scenario": "a fixture report that drifts from its diff",
+                     "control": "the digest recomputation refuses (ARV-SEV-003)", "proof_ids": ["run-01"]},
+                ],
+                "findings": [],
+                "not_verified": ["the fixture probe boundary: a synthetic slice, never real evidence"],
+                "builder_context": "fixture-builder-ctx",
+                "reviewer_context": "fixture-reviewer-ctx",
+                "disposition": "PASS",
+                "review_summary": "fixture report for the positive dispatch shape (born-valid; the module's own digest functions built it)",
+            }
+            (sd / "sev.json").write_text(json.dumps(report, indent=2) + "\n")
+            codes = sevmod.validate_report(sname, "origin/main", repo=d)
+            if codes:
+                raise AssertionError(f"fixture sev.json not born-valid: {codes}")
             ps = importlib.import_module("harness.proofsheet")
             ps.REPO = d
             ps.RUNS = d / "harness" / "runs"

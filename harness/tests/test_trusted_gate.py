@@ -198,6 +198,10 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
         "reviewer_context": "stub-reviewer-ctx",
         "disposition": "PASS",
         "review_summary": "the synthetic stub's born-valid report (the module's own digest function built it)",
+        # CLAIM-044: the stub's base carries the copy's real proofsheet (the
+        # renderer), so the born-valid form opts in — ARV-SEV-009's expectation
+        # applies to the stub exactly as to a real slice
+        "sheet_section": True,
     }, indent=2) + "\n")
     (runs / "proofsheet.md").write_text(ps.assemble(SLICE, NOTVERIFIED), encoding="utf-8")
     # --verify re-derives the not-verified section from this FILE — the stub

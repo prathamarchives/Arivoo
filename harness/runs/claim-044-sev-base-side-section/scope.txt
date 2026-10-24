@@ -4,6 +4,8 @@
 # bearing sheet merged at #78). ARV-SEV-009, RED-first.
 harness/sev.py D-037
 harness/tests/test_sev.py D-037
+harness/tests/test_gate_dispatch.py D-037
+harness/tests/test_trusted_gate.py D-037
 harness/known-bad/cases.py D-041
 harness/red-records.json D-041
 PLAN.md D-037

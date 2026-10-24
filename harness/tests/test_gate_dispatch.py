@@ -324,6 +324,10 @@ def main() -> int:
                 "reviewer_context": "fixture-reviewer-ctx",
                 "disposition": "PASS",
                 "review_summary": "fixture report for the positive dispatch shape (born-valid; the module's own digest functions built it)",
+                # CLAIM-044: the fixture's base is the whole copy (its proofsheet
+                # carries the renderer), so the born-valid form opts in — the
+                # base-side expectation (ARV-SEV-009) applies here as in reality
+                "sheet_section": True,
             }
             (sd / "sev.json").write_text(json.dumps(report, indent=2) + "\n")
             codes = sevmod.validate_report(sname, "origin/main", repo=d)

@@ -1,6 +1,8 @@
 # CLAIM-041 — H-02 part 2 (b): the gate's SEV step + the KB-SEV matrix + the dispatch/trusted integration
 # cases + the Proof-Sheet SEV section + the PLAN/LAWS activation + the bootstrap-scoped SEV record.
 harness/gate.py D-037
+harness/sev.py D-037
+harness/tests/test_sev.py D-037
 harness/known-bad/cases.py D-041
 harness/proofsheet.py D-041
 harness/tests/test_gate_dispatch.py D-041

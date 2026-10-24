@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-044-sev-base-side-section",
+  "base_sha": "c19d49700539ff30ab3bb404957027ea5d35fe88",
+  "reviewed_diff_sha256": "82b4e2a0650b3c6b8bfe8545f13d1a27774350f32c2014f5ec3914099b3012d2",
+  "intent_ids": [
+    "INT-134",
+    "INT-135",
+    "INT-138",
+    "INT-139"
+  ],
+  "requirement_ids": [
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C5"
+  ],
+  "changed_components": [
+    "harness/sev.py (ARV-SEV-009 \u2014 the base-side section expectation + the _base_renders_sections three-state fail-closed helper)",
+    "harness/tests/test_sev.py (the renderer-base fixture + the expectation-false/absent/true group + the docstring)",
+    "harness/tests/test_gate_dispatch.py + harness/tests/test_trusted_gate.py (the born-valid fixture modernizations \u2014 each caught by the machinery itself)",
+    "harness/known-bad/cases.py (KB-SEV-009 + the born-valid report's opt-in)",
+    "PLAN.md + context/TEMPLATES.md (the NAMED -> ENFORCED flips)",
+    "harness/gate.py + RTM.md + LAWS.md (the live-doc code-list drift repairs, the review's SEV-2/3)",
+    "harness/red-records.json (the typed amendments), STATE/AGENTS/CLAIMS/WORKLOG/record 37 (the slice's truth)"
+  ],
+  "interfaces_reviewed": [
+    "harness/sev.py validate_report: report.get('sheet_section') is not True AND _base_renders_sections(base_ref, repo, codes) -> the ARV-SEV-009 refusal; the probe is the switch's own name in the base's proofsheet source",
+    "the three-state fail-closed contract: renderer-present -> active; POSITIVE absence (no marker, or no proofsheet at all \u2014 the pre-renderer era) -> inactive; undecidable -> the refusal itself",
+    "harness/gate.py step 8 (the same check_sev wrapper \u2014 the 009 refusal reaches the PR-mode gate and the KB matrix through the PUBLIC validator, never an internal duplicate)",
+    "the born-valid fixtures' opt-in (three): every fixture whose base is the whole copy now sets sheet_section true \u2014 the rule is base-relative, applied to fixtures exactly as to real slices"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the sev suite's expectation group: the renderer-base fixture + the false/absent refusals + the precision-labeled compliant form; 46 PASS lines at the fix head; run-09",
+      "the RED observed at the predecessor 3ec1897: the two expectation cases failing with got []; the KB-SEV-009 guard broken; red-01.txt (independently reproduced by the reviewer in a worktree); run-09"
+    ],
+    "integration_verification": [
+      "the KB matrix 32/32 with KB-SEV-009 firing through the PUBLIC validator at the gate path; run-11",
+      "the three born-valid fixtures modernized after the machinery itself caught each (the dispatch assert; the trusted stub's 16 refusals); the reviewer confirmed no missed fixture; run-04/run-06"
+    ],
+    "system_verification": [
+      "SYS-11: the base-side expectation is the #78 review's adopted SEV-3 follow-up \u2014 the opt-in window closed; PLAN/TEMPLATES ENFORCED; this record itself sets sheet_section true under the rule it enforces; run-14",
+      "the fresh-context review PASS: no P0/P1, four P2s (three live-doc lines fixed in-slice; the probe residual recorded); the base-relative behavior verified over the historical records"
+    ],
+    "validation": [
+      "the owner-facing outcome: every future slice's committed Proof Sheet carries its SEV record surface whenever its base can render it \u2014 mechanically enforced, never remembered (the registry-drift catches are the standing proof that remembered state drifts)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a slice over a renderer base silently opts out (or omits the field) \u2014 the committed sheet hides its SEV record surface with no refusal",
+      "control": "ARV-SEV-009: the opted-out/absent forms refuse; the KB-SEV-009 case proves the guard at the gate path",
+      "proof_ids": [
+        "run-11"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "over-refusal: the rule fires for pre-renderer bases, breaking the historical slices' records",
+      "control": "the three-state probe: a POSITIVE absence (no marker / no proofsheet) leaves the expectation inactive \u2014 the suite's historical fixture and the reviewer's own absent-proofsheet fixture prove codes=[]",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "an undecidable renderer state silently passes (a guess, never a refusal)",
+      "control": "the helper's undecidable branches append ARV-SEV-009 themselves; the reviewer's no-such-ref probe: both 003 and 009 named, no traceback",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "a stale born-valid fixture passes the old form and blinds the suites to the new rule",
+      "control": "the three fixture modernizations, each caught by the machinery itself (the dispatch assert; the trusted stub's own gate refusing its own report 16 times); the reviewer's completeness sweep",
+      "proof_ids": [
+        "run-04",
+        "run-06"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "test_sev.py's RED-path summary line still read ARV-SEV-001..008 while the docstring documented 009",
+      "disposition": "fixed in-slice with its typed amendment (001..009)"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "gate.py's check-order docstring (step 8) still read 001..008",
+      "disposition": "fixed with the scope widening (harness/gate.py D-037)"
+    },
+    {
+      "id": "SEV-3",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the two live canonical statements (RTM.md SYS-11's test-path line; LAWS.md LAW-30's LIVE note) still read 001..008 / 31 or 8 cases",
+      "disposition": "both fixed with the scope widening (P-18: live statements never left stale; the historical records stay append-only)"
+    },
+    {
+      "id": "SEV-4",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "evidence": "the probe's three stated boundaries: the comment-only marker false-positive (unreachable in this repo's history \u2014 the marker's only arrival ec250a1 rides with the renderer code); the directory-shaped-proofsheet edge (unreachable for wall-controlled main); the undecidable short-circuit (the sibling ARV-SEV-003 refuses the same condition)",
+      "disposition": "recorded as the stated residual (this not-verified list); each unreachable in wall-controlled history or fail-closed through a sibling named code; a semantic-AST probe would be more fragile than the false positive it avoids"
+    }
+  ],
+  "not_verified": [
+    "the trusted-leg enforcement of ARV-SEV-009 begins with the NEXT slice's PR (the base c19d497 predates the rule \u2014 the recorded bootstrap pattern; this slice's own PR is judged by the base's validator)",
+    "the probe's three stated boundaries (the reviewer's SEV-4 residual): the comment-only marker false-positive; the directory-shaped-proofsheet edge; the undecidable short-circuit's sibling-code path \u2014 each unreachable in wall-controlled history or fail-closed through ARV-SEV-003",
+    "the remote CI's five-check run at this PR's head \u2014 observed at the PR, never pre-recorded here",
+    "the identity limit (LAW-30): the fresh-context reviewer is a subagent on the same host and user \u2014 declared independence of context, never cryptographic; the separate grader at the phase gates remains the protocol",
+    "the N12 residual (claim-038's notverified) is unchanged; never silently complete by inference from unrelated checks"
+  ],
+  "builder_context": "builder-glm-host-session30-claim044",
+  "reviewer_context": "fresh-ctx-glm-sev-claim044-20261024",
+  "disposition": "PASS",
+  "review_summary": "The base-side section expectation (ARV-SEV-009) landed RED-first: the sev suite's expectation group and the KB-SEV-009 guard both observed failing at the predecessor c19d497 (red-01.txt, independently reproduced by the fresh-context reviewer in a worktree), green at the fix head (the sev suite 46 PASS lines; the KB matrix 32/32; make verify 54/0). The rule is three-state fail-closed: a renderer base demands sheet_section true (the opted-out and absent forms refuse \u2014 the candidate-controlled opt-in window closed at #78); a positive absence (the pre-renderer era) leaves the historical slices compatible \u2014 the reviewer's own absent-proofsheet fixture returned codes=[]; an undecidable state refuses, never a silent pass. Three born-valid fixtures were modernized after the machinery itself caught each one (the dispatch assert; the trusted stub's 16 refusals; the reviewer confirmed no missed fixture). The review returned PASS with no P0/P1 and four P2s: three live-doc drift lines (test_sev's summary, gate.py's check order, RTM.md's SYS-11 line, LAWS.md's LIVE note) all fixed in-slice with the scope widened in both homes; the probe's three stated boundaries recorded as the residual. The twice-learned registry lesson is now the chain's standing checklist (commit A retires the previous open row + carries the close row). This record sets sheet_section true under the rule it enforces.",
+  "sheet_section": true
+}

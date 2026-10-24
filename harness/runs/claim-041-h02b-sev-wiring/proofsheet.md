@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-041-h02b-sev-wiring (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 236df2545c835485c2b90da05c6c632eebb21597
-- generated (last record's timestamp): 2026-10-24T09:37:20.136155+00:00
-- run records: 16
+- commit (last run record's): 185b074338ffd4cd1fb4dccfb65aa36aabcf9019
+- generated (last record's timestamp): 2026-10-24T09:50:12.369631+00:00
+- run records: 17
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-24T08:36:01.270656+00:00
@@ -21,6 +21,7 @@
 - `python3 harness/gate.py --slice claim-041-h02b-sev-wiring --diff origin/main` -> exit 0 · output sha256 b2b8a90a3161a91f · 2026-10-24T09:05:31.392311+00:00
 - `python3 harness/gate.py --slice claim-041-h02b-sev-wiring --diff origin/main` -> exit 0 · output sha256 c94b7e4c467a676f · 2026-10-24T09:29:30.054320+00:00
 - `python3 harness/gate.py --slice claim-041-h02b-sev-wiring --diff origin/main` -> exit 0 · output sha256 4eaea758e37dd4e7 · 2026-10-24T09:37:20.136155+00:00
+- `python3 harness/gate.py --slice claim-041-h02b-sev-wiring --diff origin/main` -> exit 0 · output sha256 da1cd860c9e193a4 · 2026-10-24T09:50:12.369631+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - not verified (LAW-04 — the CLAIM-041 honest limits):
@@ -47,4 +48,4 @@
 - the state it reviewed and are retained in the record 34 + the sev.json.
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): cc8e2954fe81c69d2f34e3b61bd18905721fec6566f60a7f96ea36cc27146dd8
+- sheet sha256 (of the content above, excluding this line): d7d1c3cd9f6c8ad0eaef8b9f91e833f7c450dd4e519fae40a0acc96c13ef0248

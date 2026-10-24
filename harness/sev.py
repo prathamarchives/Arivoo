@@ -244,8 +244,16 @@ def _base_renders_sections(base_ref: str, repo: pathlib.Path, codes: list) -> bo
     if r.returncode == 0:
         return b"sheet_section" in r.stdout
     err = r.stderr.decode("utf-8", "replace")
-    if "does not exist" in err and "in " in err:
-        return False  # the POSITIVE absence: the base predates proofsheet.py entirely
+    # the POSITIVE-absence error classes (verified on git 2.47.3): the base
+    # predates proofsheet.py entirely — git names the absence either as
+    # "path '...' does not exist in '<sha>'" (no on-disk counterpart) or as
+    # "path '...' exists on disk, but not in '<sha>'" (the checkout HAS the
+    # file; the base does not — the #79 CodeRabbit round's catch: the second
+    # form is the exact shape of a pre-renderer base under a post-renderer
+    # checkout, and treating it as undecidable refused a class the docstring
+    # promises to pass)
+    if ("does not exist" in err or "exists on disk, but not in" in err) and "in '" in err:
+        return False
     _fail(codes, "ARV-SEV-009", f"the base's section-renderer state is undecidable (git show failed: {err[:120]})",
           "an unexpected git failure is a named refusal, never a guess — the expectation never silently passes")
     return False

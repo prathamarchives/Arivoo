@@ -497,6 +497,23 @@ def run_all(tmp):
         expect_codes(sev, root, None, "expectation-true",
                      "(the renderer base + the compliant opt-in)")
 
+        # (RED at the round-1 head, then GREEN — the #79 CodeRabbit round's
+        # error-class catch): the base WITHOUT proofsheet.py while the CHECKOUT
+        # HAS it — git show's error form is "exists on disk, but not in '...'",
+        # a POSITIVE absence the helper must treat as the pre-renderer era (the
+        # report passes), never an undecidable refusal
+        root = build_fixture(tmp + "/exp-prerenderer-checkout")
+        # the slice commit ADDS a proofsheet.py (the checkout has it; the base
+        # does not — the exact historical shape of the pre-renderer slices)
+        (root / "harness" / "proofsheet.py").write_text(
+            "# the candidate's own proofsheet (the base never had one)\n"
+            "sheet_section_MARKER = True\n", encoding="utf-8")
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "checkout gains proofsheet")
+        write_report(root, valid_report(sev, root))  # no sheet_section field
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "report")
+        expect_codes(sev, root, None, "expectation-prerenderer-checkout",
+                     "(the base lacks proofsheet.py; the checkout has it — the positive-absence class)")
+
         # (precision, not RED) the PRE-RENDERER base never fires the expectation:
         # the historical fixture's positive case (no sheet_section field, a base
         # with no proofsheet.py at all) already passed above — the no-over-refusal

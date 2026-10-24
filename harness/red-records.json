@@ -416,7 +416,7 @@
     "red_exit": 1,
     "red_code": "ARV-SEV-001..008 all unprovable at the predecessor (the module absent \u2014 the ten suite groups red, exit 1, red-01.txt)",
     "red_evidence": "the CLAIM-040 red observed at the test-only commit: test_sev.py at the predecessor (no harness/sev.py) \u2014 ten failing case groups, every named ARV-SEV code unprovable, exit 1; red-01.txt in the run dir",
-    "current_sha256": "ad9bac48f3c127ace900e9569dd2bb874d5cbe81cef48c77878540640cdd89de",
+    "current_sha256": "d91fa3e259ed48fe8c01ff90c7cf42b934fdc0524aba2489efebd81767ba4ff8",
     "amendments": [
       {
         "prior_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
@@ -459,6 +459,12 @@
         "new_sha256": "ad9bac48f3c127ace900e9569dd2bb874d5cbe81cef48c77878540640cdd89de",
         "note": "CLAIM-044 (the review-round doc-drift fixes + the one-line suite edit): test_sev.py's RED-path summary line 001..008 -> 001..009 (the fresh-context reviewer's SEV-1, caught in-scope); the edit chains through this typed amendment.",
         "observed_at": "2026-10-24T15:03:08.672748+00:00"
+      },
+      {
+        "prior_sha256": "ad9bac48f3c127ace900e9569dd2bb874d5cbe81cef48c77878540640cdd89de",
+        "new_sha256": "d91fa3e259ed48fe8c01ff90c7cf42b934fdc0524aba2489efebd81767ba4ff8",
+        "note": "CLAIM-044 (the #79 CodeRabbit round 1 \u2014 the error-class case): test_sev.py gains the expectation-prerenderer-checkout case (the base WITHOUT proofsheet.py while the CHECKOUT HAS it \u2014 git show's 'exists on disk, but not in' error form; the RED observed live at the round head: expected [] got ['ARV-SEV-009'] \u2014 the undecidable refusal over a positive-absence class), then GREEN over the sev.py error-class fix (both absence forms accepted: 'does not exist in' OR 'exists on disk, but not in').",
+        "observed_at": "2026-10-24T15:32:44.786267+00:00"
       }
     ]
   }

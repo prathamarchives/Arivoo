@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-042-sev-sheet-section",
   "base_sha": "1cfee16b89ae901dfb90ce51e8ba18792fc8eed6",
-  "reviewed_diff_sha256": "461b85801ba6c4f777dbce217c056f1fef7f93d08a6e80aebf54889ffa46e3f6",
+  "reviewed_diff_sha256": "652f4c902f49cd3eefff615c97aa63c1207a4e25c5b929e0bdfa6a9490846261",
   "intent_ids": [
     "INT-134",
     "INT-135",

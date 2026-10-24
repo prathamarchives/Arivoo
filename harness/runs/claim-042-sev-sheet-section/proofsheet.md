@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-042-sev-sheet-section (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 563b9a609daaf19e56157f0902eed4d96bac5979
-- generated (last record's timestamp): 2026-10-24T11:43:40.069496+00:00
-- run records: 21
+- commit (last run record's): 8891fa5b7828f1d7a3003fe38441a9f2392d91b5
+- generated (last record's timestamp): 2026-10-24T12:01:40.282219+00:00
+- run records: 22
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-24T11:30:34.017505+00:00
@@ -26,22 +26,14 @@
 - `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-24T11:37:47.038410+00:00
 - `make verify` -> exit 0 · output sha256 908e8a13b292434a · 2026-10-24T11:41:14.710942+00:00
 - `python3 harness/gate.py --slice claim-042-sev-sheet-section --diff origin/main` -> exit 0 · output sha256 7fd1d96253fa28d1 · 2026-10-24T11:43:40.069496+00:00
+- `python3 harness/gate.py --slice claim-042-sev-sheet-section --diff origin/main` -> exit 0 · output sha256 1f38b134f5368f0b · 2026-10-24T12:01:40.282219+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
-- - this slice's own committed Proof Sheet carries NO SEV section (sheet_section false — the opt-in
-- transition per TEMPLATES §6; the section's rendering on a REAL committed sheet is proven at the
-- machinery level (cases 7-9) and lands with the successor slice, whose merged base renders it) —
-- never claimed otherwise.
-- - the trusted-leg SEV enforcement's first CI run is THIS PR's (the bootstrap: the base 1cfee16
-- carries the wiring; observed at the PR's five-check run, never pre-recorded here).
-- - the identity limit (LAW-30/PLAN H-02): the SEV reviewer is a fresh-context subagent on the same
-- host and user as the builder — declared independence of context, never cryptographic; the
-- separate grader at the phase gates remains the protocol.
-- - the post-transition base-side expectation (the reviewer's SEV-3 follow-up: a gate/validator rule
-- requiring sheet_section: true for slices whose base carries the renderer) is NAMED in PLAN/TEMPLATES
-- §6 — not built; its own bounded slice, RED-first, after the first section-bearing sheet merges.
-- - the N12 residual (the self-test-row integration/canary-position extension — claim-038's
-- notverified) is unchanged; never silently complete by inference from unrelated checks.
+- - this slice's own committed Proof Sheet carries NO SEV section (sheet_section false — the opt-in transition per TEMPLATES §6; the rendering on a REAL committed sheet is proven at the machinery level, cases 7-9, and lands with the successor slice whose merged base renders it) — never claimed otherwise.
+- - the trusted-leg SEV enforcement's first CI run is THIS PR's (the bootstrap: the base 1cfee16 carries the wiring; observed at the PR's five-check run, never pre-recorded here).
+- - the identity limit (LAW-30/PLAN H-02): the SEV reviewer is a fresh-context subagent on the same host and user as the builder — declared independence of context, never cryptographic; the separate grader at the phase gates remains the protocol.
+- - the post-transition base-side expectation (the reviewer's SEV-3 follow-up: a gate/validator rule requiring sheet_section true for slices whose base carries the renderer) is NAMED in PLAN/TEMPLATES §6 — not built; its own bounded slice, RED-first, after the first section-bearing sheet merges.
+- - the N12 residual (the self-test-row integration/canary-position extension — claim-038's notverified) is unchanged; never silently complete by inference from unrelated checks.
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 3a0522bf2b7b73684b4b5fee557337e48ad0981c9f5f97d0f8cf200aa040aa73
+- sheet sha256 (of the content above, excluding this line): e40032fb965a65d4c3eb20bb0c724f1c26036cf877e2610f0e7e160507847247

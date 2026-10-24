@@ -41,7 +41,7 @@
 | 0 | `context/raw/` | The verbatim corpus **as received from the owner** — a MIXED archive: owner statements, AI analysis and proposals, pasted documents and reviews, repeated across files. Immutable (AUT-02). **Not owner-only material**: no sentence in `raw/` is an owner decision by virtue of being there. |
 | 1 | `/INTENT-LEDGER.md` | Owner words, verbatim, with source and status. The only path by which owner intent becomes authority. |
 | 2 | `/DECISIONS.md` | Explicit decisions, statused (LOCKED / PRESENTED-LOCKED / ADOPTED / OPEN). AI recommendations rank ADOPTED at most — challengeable, never silently requirements. |
-| 3 | Root canonical documents | The derived authority layer (NORTH-STAR, PRINCIPLES, LAWS, ENGINEERING, OPERATING-MODEL, PLAN, GLOSSARY). |
+| 3 | Root canonical documents | The derived authority layer (NORTH-STAR, PRINCIPLES, LAWS, ENGINEERING, OPERATING-MODEL, PLAN, RTM, GLOSSARY). |
 | 4 | `context/extracted/` | Historical process artifacts — extraction and reasoning history, banner-marked. They never outrank root documents. Exception: `07-ON-THE-LIST.md` is the live register (D-020). |
 
 **The intent rule (selective verification — D-027(3)/INT-107, 2026-10-14).** Owner intent enters this repo ONLY through INTENT-LEDGER entries — owner words, verbatim, statused. A raw-corpus sentence, an AI proposal, or an extracted-brief statement is NOT intent until it is a ledger entry or an adopted decision (LOOP-05: a requirement with no intent behind it fails the audit). A fresh agent verifies the intent entries RELEVANT to its task **before any consequential change**: the ledger is the highest authority, but blanket ledger-first BOOT reading is superseded by the owner's selective read path (AGENTS → STATE → worklog tail → task-relevant sources; INT-107) — knowing the task does not require all owner words; changing something consequential does require the owner words behind it. Every slice card / context pack still carries its INT- IDs and the owner quotes.
@@ -57,7 +57,7 @@
 | 5 | LAWS | Derived executable law book — must trace upward (update invariant 3) |
 | 6 | ENGINEERING | Doctrine (the why) |
 | 7 | OPERATING-MODEL | Execution-contract detail |
-| 8 | PLAN | One phase deep — most volatile |
+| 8 | PLAN + RTM | PLAN: the phase plan and the SYS requirement STATEMENTS, one phase deep — most volatile. RTM: the requirements traceability matrix and the P3 contract FREEZE (the trace, the entity contracts, the state machines, the transaction/acknowledgment semantics). A conflict between a PLAN statement and an RTM contract is a same-rank drift → EXR-04's blocking Question Record — the requirement statement and its frozen contract never silently diverge. |
 | 9 | Slice cards / context packs | Concretize; never broaden |
 | 10 | Agent judgment | Last |
 

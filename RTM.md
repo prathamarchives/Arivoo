@@ -58,7 +58,8 @@ North Star claim ladder, and the user validation scenario (the V-model validatio
   commands (P3-04/05/06) + the client acknowledgment contract (P3-01's §1.6 path) + the outbox
   (P3-08).
 - **Interfaces:** every write command returns `{status, durability_rung, effect_id, …}` where
-  `durability_rung ∈ {in-flight, local-durable, queued, server-durable}` — the acknowledgment
+  `durability_rung ∈ {in_flight, local_durable, queued, server_durable}` (one serialized
+  vocabulary — §3.2/§4's exact tokens) — the acknowledgment
   names the rung the SERVER independently knows, never the request's send state; the derived
   rungs (`keyword-searchable`, later `semantically indexed`, `linked`) are reported by their
   own generation queries, never by the write acknowledgment.
@@ -244,9 +245,16 @@ North Star claim ladder, and the user validation scenario (the V-model validatio
 - **Interfaces:** export = authoritative records + blob references + revision history + the
   governed purge/retention state, under an explicit versioned manifest; restore validates
   references and blob availability BEFORE declaring completion; derived indexes rebuild from
-  the restored authoritative state; the purge ledger applies during restore — purged content
-  and its derived copies cannot resurrect; partial/malformed/interrupted restores fail safely
-  (no half-restored "complete" library).
+  the restored authoritative state. **The purge-ledger reconciliation rule (#78's round-1
+  Major, adopted):** the purge ledger is owner-scoped authoritative state maintained OUTSIDE
+  any single archive; restore RECONCILES the archive's content against the destination's
+  CURRENT purge ledger before declaring completion — a current-ledger entry WINS over older
+  archive content (an export made before a purge cannot resurrect the purged item into a
+  destination that carries the purge); a genuinely clean destination (no prior owner state)
+  adopts the archive's recorded purge state as its ledger base, and the restore event itself
+  is recorded in the ledger — every reconciliation is observable and attributable, never
+  silent; partial/malformed/interrupted restores fail safely (no half-restored "complete"
+  library).
 - **Pre-registered test paths:** clean restore + the canonical authoritative-state hash
   comparison (the documented equality rule); repeated restore; missing blob; malformed/
   interrupted archive; corrupt index → rebuild; purge-then-restore; migration from a declared
@@ -416,7 +424,10 @@ any --delete + rebuild from authoritative rows--> the known expected result set 
 (live library) --export--> manifest_complete    [versioned; authoritative + blob refs + history +
                                                   purge state; the canonical hash computed]
 manifest_complete --restore into clean destination--> restored_pending_validation
-restored_pending_validation --references+blobs valid--> restored   [equality contract holds]
+restored_pending_validation --references+blobs valid--> restored   [equality contract holds;
+                                                 the purge-ledger reconciliation ran FIRST:
+                                                 the destination's current ledger wins over
+                                                 older archive content (SYS-10's rule)]
 restored_pending_validation --missing blob/malformed/interrupted--> failed [safely; nothing half-complete]
 restored --rebuild derived--> fully_operational [indexes rebuilt from the restored authoritative state]
 ```
@@ -467,12 +478,13 @@ restored --rebuild derived--> fully_operational [indexes rebuilt from the restor
 | `ARV-CMD-409` key/body conflict | the named conflict; zero effect | silent overwrite |
 | uncertain ACK (timeout after possible commit) | `uncertain` + the replay resolution | assumed success/failure |
 | validation refusal (missing owner/actor/provenance, invalid scope) | the named refusal code; zero effect | a partial write |
-| dangling/wrong-version Anchor | `unresolved`/`ambiguous` (typed) | nearest-match retarget |
+| an Anchor referencing a Source version it was not created against (the wrong-version/dangling class) | REFUSED at the command boundary (a validation failure, SYS-05's first clause) | accepted into the store |
+| an Anchor that cannot be re-resolved WITHIN its own Source version (drift/ambiguity) | `unresolved`/`ambiguous` (the typed resolution states) | nearest-match retarget |
 | blob absent/corrupt at verify | `failed` (named); staging cleaned | a complete Source without bytes |
 | extraction crash/invalid input | the previous generation stays; the failed generation named | a partial generation as current |
 | index outage | capture unaffected; search reports honestly | capture blocked by derived failure |
 | sync conflict (competing revisions) | `conflicted`; both inputs preserved | last-write-wins destruction |
-| purge/restore interaction | purge permanent across restore | resurrection |
+| purge/restore interaction | the destination's current purge ledger wins over older archive content; a clean destination adopts the archive's purge state and records the restore event | silent resurrection (an export predating a purge re-importing the purged item into a ledger-carrying destination) |
 | cross-owner access | refused at command AND DB boundary | existence leakage |
 
 ## 7. The open-question boundary register (exact scopes)
@@ -532,10 +544,10 @@ work; until ratified, NOTHING in Phase 3 depends on it.
 |---|---|---|
 | P3-M0 | (the migration oracle — §5's machinery) | the fail-closed grammar; zero-effects proofs; bidirectional history |
 | P3-K0 | SYS-04 (the kernel half) | the encoding/UUID/adapter/concurrency primitives |
-| P3-01 | SYS-03, SYS-04, SYS-09, SYS-11 | the §1.6 capture checkpoint end-to-end |
+| P3-01 | SYS-03, SYS-04, SYS-09 (primary; SYS-11 is the standing per-slice protocol for EVERY card, never a per-card closure row) | the §1.6 capture checkpoint end-to-end |
 | P3-02 | SYS-06, SYS-03 | the import state machine + the Q11 baseline |
 | P3-03 | SYS-05, SYS-06, SYS-07 | the Anchor contract + the Q8 spike |
-| P3-04 | SYS-01, SYS-02, SYS-03, SYS-05 | Highlight + the revision/tombstone machine |
+| P3-04 | SYS-01, SYS-02, SYS-05 (primary; SYS-03's matrix re-exercised, its closure row stays P3-01's) | Highlight + the revision/tombstone machine |
 | P3-05 | SYS-01, SYS-05 | Bookmark + the typed resolution |
 | P3-06 | SYS-02, SYS-03 | Note + the revision history |
 | P3-07 | SYS-07 | the rebuildable keyword index |

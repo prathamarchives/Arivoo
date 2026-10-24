@@ -104,10 +104,17 @@ new doc's references; the CLAIMS row.
 
 ## 8. Failures (honest)
 
-- No in-slice walls catch this time beyond the standing environment discipline: the rig env
-  exported in every shell (the record-35 §8 lesson applied, no repeat); the ledger/claims
-  edits append-only (the record-35 INT-138 slip class: no repeat). The honest boundary note
-  from §2 (the REST DELETE 404-masking) is recorded, not a slice failure.
+- **THE REGISTRY-DRIFT CATCH (ARV-CLM-002, the #67 class — the walls live):** the stale
+  CLAIM-042 open row (its PR #77 merged) overlapped this slice's row on PLAN.md/AGENTS.md;
+  caught by the dispatch fixture's gate run at the COMMITTED tree (the working-tree check was
+  clean — the fixture clones HEAD, so the drift was catchable only post-commit), repaired per
+  rule 4 (the open row retired + the close row appended) before the proof captures.
+- **THE PROOF-ID CATCH (ARV-SEV-004):** the first sev.json authoring referenced run-14 before
+  that record existed — the validator's dangling-pointer refusal fired at the local check; the
+  ids bound to the existing records. The named-refusal contract working on its own author.
+- The rig env exported in every shell (the record-35 §8 lesson applied, no repeat); the
+  ledger/claims edits append-only (the record-35 INT-138 slip class: no repeat). The honest
+  boundary note from §2 (the REST DELETE 404-masking) is recorded, not a slice failure.
 
 ## 9. Unverified items
 

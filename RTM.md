@@ -53,8 +53,7 @@ North Star claim ladder, and the user validation scenario (the V-model validatio
 
 ### SYS-01 — truthful acknowledgment at a named durability rung
 
-- **Requirement:** PLAN.md SYS-01 (C1). Every acknowledged capture is committed at a named
-  durability rung; acknowledgment never overstates persistence.
+- **Requirement:** PLAN.md SYS-01 (C1).
 - **Owning component:** the command kernel (`harness/commands.py`, P3-K0) + the capture
   commands (P3-04/05/06) + the client acknowledgment contract (P3-01's §1.6 path) + the outbox
   (P3-08).
@@ -284,7 +283,8 @@ triggers; RLS by `app.current_owner` with `arv_read` as the independent auditor.
 new rows; tombstones are typed events; purge is owner-governed (D-011) and audited.
 
 1. **Work** (P3-02): the logical library item. Identity: a UUID with NO uniqueness constraint
-   on title/filename/content (the Q11 baseline — no auto-merge, ever). Fields: display title
+   on title/filename/content (the Q11 baseline — no auto-merge under this freeze; owner ratification
+   is the only change path). Fields: display title
    (owner-editable via revision), created/provenance, owner. Two Works may reference identical
    bytes as separate Sources; byte-reuse is storage-level, never identity-level.
 2. **Source** (P3-02): a specific imported version/edition/acquisition instance of a Work.
@@ -305,9 +305,9 @@ new rows; tombstones are typed events; purge is owner-governed (D-011) and audit
    never references a different Source version than it was created against.
 5. **Highlight** (P3-04): the committed selected text. Identity: a stable UUID + append-only
    immutable revisions. Revision fields: selected content, source_id, anchor_id, owner/actor,
-   command provenance (the command-log row), input digest, created_at. State transitions:
-   active → revised (a new revision row) → tombstoned (a typed event; hidden from normal
-   retrieval, history retained) → [governed purge only]. The free-text quote words ride the
+   command provenance (the command-log row), input digest, created_at. State transitions (§3.3 governs):
+   edit appends a new revision row (the entity stays active); delete → tombstoned (a typed event;
+   hidden from normal retrieval, history retained); → [governed purge only]. The free-text quote words ride the
    content (D-030: no tag/classification system).
 6. **Bookmark** (P3-05): the stable return location. Identity + the source-versioned
    Anchor/location reference; NO copy of source content. Behavior on re-import/re-extraction/
@@ -317,7 +317,8 @@ new rows; tombstones are typed events; purge is owner-governed (D-011) and audit
    preserved losslessly; the diagram/structured-block serialization contract is NOT frozen
    here (it requires its own round-trip proof before being called supported — P4-C's
    reservation).
-8. **CommandLog** (landed, 0003): the idempotency ledger — `(owner_scope, idempotency_key)`
+8. **CommandLog** (landed, 0003 — the migration is the authority; this row is abridged): the
+   idempotency ledger — `(owner_scope, idempotency_key)`
    PK, body_hash, result_ref, actor, created_at; append-only (SYS-04).
 9. **The derived-state rule (authoritative vs derived):** authoritative = everything an
    owner would call their data (Work, Source, Highlight/Bookmark/Note revisions, tombstone/
@@ -429,8 +430,10 @@ restored --rebuild derived--> fully_operational [indexes rebuilt from the restor
    when local) commit in ONE transaction. No multi-store transaction is ever claimed
    (Q12/D-032): local and cloud durability are bridged by the outbox, not by a distributed
    transaction.
-3. **The durability rung vocabulary** (SYS-01's frozen set): `in_flight` (no promise) →
-   `local_durable` (the local authoritative commit) → `queued/retryable` (sync intent
+3. **The write-side acknowledgment vocabulary** (SYS-01's frozen set — the states a write
+   acknowledgment may name; the canonical five-rung durability LADDER in GLOSSARY/NORTH-STAR
+   governs claimable findability and is unchanged by this set): `in_flight` (no promise) →
+   `local_durable` (the local authoritative commit) → `queued`/`retryable` (sync intent
    recorded) → `server_durable` (independently read-confirmed on the server). The derived
    findability rungs (`keyword-searchable`, later `semantically indexed`, `linked`) are
    generation states of derived systems — reported by their own queries, never by the write
@@ -484,6 +487,10 @@ Blocks math-workflow design only. No Phase 3 contract depends on it.
 ### 7.2 Q6 (research-transcript status)
 Blocks the Part-2 acceptance-scenario finalization + the S5 corpus only. The general owner
 workflow (§1's validation scenarios) never waits on it.
+
+### 7.2b Q7 (semantic-spike budget)
+Blocks paid/selected semantic work only (Phase 5's S6); the deterministic fixtures,
+evaluator, and options preparation proceed. No Phase 3 contract depends on it.
 
 ### 7.3 Q8 (extraction-spike corpus)
 The registered default is synthetic. The P3-03 anchor-stability spike runs on the synthetic

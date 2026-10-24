@@ -55,9 +55,10 @@ transaction/acknowledgment semantics (commit-before-ack; one commit point; the f
 vocabulary; the Q12-neutral content-addressed blob adapter); §5 the migration/compatibility
 plan; §6 the named-failure matrix; §7 the open-question boundary register — each question's
 EXACT boundary against the freeze, with the Q12 comparison table (Supabase Storage vs
-S3-compatible vs DB-bytea across the nine criteria PLAN names) and the Supabase Storage
-recommendation explicitly labeled evidence-preparation for the owner's gate, NEVER a
-ratification; §8 the P3 slice acceptance trace (which RTM rows each slice closes).
+S3-compatible vs DB-bytea across the eight criteria PLAN names + the deployment-fit row RTM
+itself adds as a D-032 consistency observation — the #78 review's SEV-6 count correction,
+recorded here) and the Supabase Storage recommendation explicitly labeled evidence-preparation
+for the owner's gate, NEVER a ratification; §8 the P3 slice acceptance trace (which RTM rows each slice closes).
 
 **THE GREEN:** VER-806 PASS (11/11 traced); VER-901 PASS over the TWELVE root canonical
 documents (RTM.md's INT-/D- references all resolve — the new doc bound by the reference

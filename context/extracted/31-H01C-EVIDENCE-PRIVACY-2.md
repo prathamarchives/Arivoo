@@ -20,3 +20,9 @@ The machinery suite at the pre-fix tree -> exit 1 (4 numbering failures, red-01)
 
 ## 11. Next
 The merge once review-complete, then H-02 (the SEV gate) -> P3-00 (the RTM freeze) -> P3-M0 || P3-K0 -> P3-01..09 -> the Phase 3 exit gate -> P4 — NO PAUSE.
+
+## 12. Session close
+- PR #73 merged 2026-10-23T16:46:37Z at main `3dfa855013158622309c3e1593b51f92eb9a631c` (the API's `merged_at` and the git committer date agree); post-merge CI run `39989587479` completed successfully — all five jobs (`canonical-layer`, `head-tools`, `harness`, `harness-suites`, `harness-trusted`) green.
+- CLAIM-038 is closed by the rule-4 row carried in CLAIM-039's PR. H-01c-evidence/privacy part 2 is merged; this does NOT imply H-02 is built or Phase 3 is entered.
+- Unverified residual retained: the N12 self-test-row integration/canary-position extension is recorded at `harness/runs/claim-038-numbering-canary-a16/notverified.txt`; no silent PASS.
+- Review-session limitation (honest, retained): the review that closed this slice observed remote main CI through the GitHub API; a fresh local clone/make verify was unavailable in THAT session because its host could not resolve github.com. The follow-on session (record 32 §2/§6) restored the remote leg with a fresh credential and ran the fresh-main verify (rig rebuilt, `make verify` 53/0 at `3dfa855`) — the local and remote evidence classes remain distinct, neither substituting for the other.

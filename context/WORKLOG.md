@@ -657,3 +657,10 @@ Stage Summary:
 - Evidence: record 31; harness/runs/claim-038-numbering-canary-a16/ (red-01, the proof set, notverified).
 - Unresolved: the N12-row follow-up (notverified).
 - Next: the merge, then H-02 -> P3-00 -> the phases, NO PAUSE.
+
+## Task 48 (CLAIM-039, session 30) — the post-#73 reconciliation + the pre-P3 review record
+- What: verified live post-#73 state (main `3dfa855`, run `39989587479` five green, protection reread live: 1 approving review + five contexts + admins; 0 open PRs); rebuilt the rig FACT-001-exact after the env-reset corruption (initdb 0, 3 migrations, make verify 53/0 at fresh main); reconciled STATE/AGENTS/CLAIMS to the post-merge facts (CLAIM-038's rule-4 close row + open row retired); preserved turns 32–33 verbatim at record 32 §1 BEFORE the mints; minted INT-137/138 (120 statused, INT-019..138); carried record 31 §12 (the #73 merge facts + the review session's DNS limitation honestly retained); landed the P3→P5 roadmap's text form at `context/reviews/` (D-022 planning banner — the 25-page PDF itself delivered to the owner per turn 32's request).
+- Outcome: the reconciliation slice at its PR — merge outcome records only after it happens; H-01c closed as a workstream; Phase 3 entry still gated by H-02 + P3-00 (neither claimed done).
+- Evidence: record 32; harness/runs/claim-039-p3-roadmap-transition/ (scope, notverified, the 12-record proof set, the sheet); PR #74.
+- Unresolved: the N12 self-test-row integration/canary-position follow-up (claim-038's notverified, unchanged); H-02 unbuilt; P3-00 unaccepted; D-014 + Q6–Q12 open (named scopes only).
+- Next: H-02 (the SEV validator + the actual gate path, RED-first under the trusted floor) → P3-00 → P3-M0 ∥ P3-K0 → P3-01..09 — NO PAUSE.

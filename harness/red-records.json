@@ -342,5 +342,15 @@
         "observed_at": "2026-10-23T16:16:41.944664+00:00"
       }
     ]
+  },
+  "harness/tests/test_sev.py": {
+    "schema": 2,
+    "binding_commit": "3a9e59511746d98ccb3f9fd3033f3ebc340768c3",
+    "binding_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
+    "red_exit": 1,
+    "red_code": "ARV-SEV-001..008 all unprovable at the predecessor (the module absent \u2014 the ten suite groups red, exit 1, red-01.txt)",
+    "red_evidence": "the CLAIM-040 red observed at the test-only commit: test_sev.py at the predecessor (no harness/sev.py) \u2014 ten failing case groups, every named ARV-SEV code unprovable, exit 1; red-01.txt in the run dir",
+    "current_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
+    "amendments": []
   }
 }

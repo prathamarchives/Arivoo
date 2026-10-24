@@ -128,14 +128,21 @@ def reviewed_paths(base_ref: str, slice_name: str, repo=None) -> list:
     EXCLUDING only the slice's own harness/runs/<slice>/ artifacts (generated +
     self-referential evidence). Code under review is never excluded."""
     repo = pathlib.Path(repo) if repo else REPO
-    r = _git(repo, "diff", "--name-only", f"{base_ref}...HEAD")
+    # -z: NUL-separated RAW bytes — a path carrying non-ASCII, quotes, tabs, or
+    # backslashes never arrives in git's C-quoted form, so the digest binds the
+    # exact path (the R-04(5) class; the #75 CodeRabbit round 1: a quoted path
+    # made git show fail and the file silently hashed as deleted — an edit to it
+    # left the digest UNCHANGED, blinding the staleness check)
+    r = _git(repo, "diff", "-z", "--name-only", f"{base_ref}...HEAD")
     if r.returncode != 0:
         return []
     prefix = f"harness/runs/{slice_name}/"
     out = []
-    for ln in r.stdout.decode("utf-8", "surrogateescape").splitlines():
-        p = ln.strip()
-        if p and not (p == prefix.rstrip("/") or p.startswith(prefix)):
+    for raw in r.stdout.split(b"\x00"):
+        if not raw:
+            continue
+        p = os.fsdecode(raw)  # surrogateescape round-trips through subprocess args
+        if not (p == prefix.rstrip("/") or p.startswith(prefix)):
             out.append(p)
     return sorted(out)
 
@@ -168,9 +175,13 @@ def _check_run_records(repo: pathlib.Path, slice_name: str, codes: list) -> list
         path = rdir / name
         try:
             rec = json.loads(path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError) as e:
+        except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
             _fail(codes, "ARV-SEV-008", f"run record {name} is unparseable ({e})",
                   "a malformed record is preserved as a historical artifact with a disposition, never forged — repair forward in a new record")
+            continue
+        if not isinstance(rec, dict):
+            _fail(codes, "ARV-SEV-008", f"run record {name} is not a JSON object",
+                  "the typed schema is required — a non-object record is a malformed shape, never a crash (A01/A09)")
             continue
         for key, typ in RUN_RECORD_FIELDS.items():
             if key not in rec or not isinstance(rec[key], typ) or isinstance(rec[key], bool) and typ is int:
@@ -181,10 +192,20 @@ def _check_run_records(repo: pathlib.Path, slice_name: str, codes: list) -> list
             _fail(codes, "ARV-SEV-008", f"run record {name}: output_sha256 is not full 64-hex",
                   "prose is not SHA-256 — the digest syntax is validated (A09)")
         commit = str(rec.get("commit", ""))
-        if re.fullmatch(r"[0-9a-f]{40}", commit):
+        # A09: each record is BOUND to a revision — '(unrecorded)' is the
+        # proofsheet's own honest degraded form; a 40-hex id must be one git can
+        # show; ANY other string (empty, 'HEAD', 'abc123', prose) is a false
+        # binding and refuses (the #75 round 1: non-hex strings skipped the
+        # check entirely)
+        if commit == "(unrecorded)":
+            pass  # the honest degraded form — stated, never fabricated
+        elif re.fullmatch(r"[0-9a-f]{40}", commit):
             if _git(repo, "cat-file", "-e", f"{commit}^{{commit}}").returncode != 0:
                 _fail(codes, "ARV-SEV-008", f"run record {name}: binding commit {commit[:12]} does not exist in git history",
                       "git's inability to show the commit IS the refusal — a nonexistent binding is a false claim (the KB-RED-011 class)")
+        else:
+            _fail(codes, "ARV-SEV-008", f"run record {name}: the commit field {commit[:20]!r} is neither '(unrecorded)' nor a 40-hex id",
+                  "a binding that names no revision is a false claim (A09) — repair the record forward, never forge it")
     return names
 
 
@@ -201,7 +222,9 @@ def validate_report(slice_name: str, base_ref: str, repo=None) -> list:
         return codes
     try:
         report = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as e:
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
+        # a non-UTF-8 report is a MALFORMED shape (the #75 round 1): a named
+        # refusal, never an uncaught traceback (A01's contract)
         _fail(codes, "ARV-SEV-002", f"the SEV report is unparseable ({e})",
               "a malformed record is preserved as a historical artifact, never forged — repair forward in a new report")
         return codes
@@ -270,6 +293,10 @@ def validate_report(slice_name: str, base_ref: str, repo=None) -> list:
     # a proof id binds by exact filename OR its stem ('run-01' == 'run-01.json')
     existing |= {n[: -len(".json")] if n.endswith(".json") else n for n in existing}
     for fm in report["failure_modes"]:
+        if not isinstance(fm, dict):
+            _fail(codes, "ARV-SEV-004", "a failure mode entry is not a JSON object",
+                  "the TEMPLATES §6 shape is required — a malformed entry is a named refusal, never a crash")
+            continue
         for key in ("id", "scenario", "control"):
             if not str(fm.get(key, "")).strip():
                 _fail(codes, "ARV-SEV-004", f"failure mode {fm.get('id')!r}: '{key}' is empty", "each failure mode carries id/scenario/control/proof_ids (TEMPLATES §6)")
@@ -282,6 +309,10 @@ def validate_report(slice_name: str, base_ref: str, repo=None) -> list:
     if report["disposition"] == "BLOCKED":
         _fail(codes, "ARV-SEV-005", "the report is BLOCKED", "a blocked review blocks the slice (LAW-30) — resolve the blocker or split the slice")
     for f in report["findings"]:
+        if not isinstance(f, dict):
+            _fail(codes, "ARV-SEV-005", "a finding entry is not a JSON object",
+                  "the findings schema is required — a malformed entry is a named refusal, never a crash")
+            continue
         if f.get("severity") not in SEVERITIES:
             _fail(codes, "ARV-SEV-005", f"finding {f.get('id')!r}: severity {f.get('severity')!r} is not P0|P1|P2", "the severities are frozen")
         if f.get("status") not in FINDING_STATUSES:
@@ -290,7 +321,11 @@ def validate_report(slice_name: str, base_ref: str, repo=None) -> list:
             _fail(codes, "ARV-SEV-005", f"PASS carries the OPEN {f.get('severity')} finding {f.get('id')!r}",
                   "an unresolved P0/P1 fails the slice — resolve it or mark the report BLOCKED (never a false PASS)")
 
-    # ARV-SEV-006: placeholder limitations
+    # ARV-SEV-006: placeholder limitations — an EMPTY list declares no honest
+    # limitation at all, the exact "empty-by-omission" form LAW-04 forbids
+    if not report["not_verified"]:
+        _fail(codes, "ARV-SEV-006", "not_verified is EMPTY — no limitation declared at all",
+              "LAW-04 requires an explicit honest statement; the empty list is empty-by-omission (the #75 round 1)")
     for entry in report["not_verified"]:
         if str(entry).strip().lower() in PLACEHOLDERS or len(str(entry).strip()) < 8:
             _fail(codes, "ARV-SEV-006", f"the not-verified entry {entry!r} is a placeholder",

@@ -356,7 +356,14 @@
     "red_exit": 1,
     "red_code": "ARV-SEV-001..008 all unprovable at the predecessor (the module absent \u2014 the ten suite groups red, exit 1, red-01.txt)",
     "red_evidence": "the CLAIM-040 red observed at the test-only commit: test_sev.py at the predecessor (no harness/sev.py) \u2014 ten failing case groups, every named ARV-SEV code unprovable, exit 1; red-01.txt in the run dir",
-    "current_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
-    "amendments": []
+    "current_sha256": "2e140d1b9d4352596eebb1776891fe3eae87b05ee829cce6bc1e55cd5bc23467",
+    "amendments": [
+      {
+        "prior_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
+        "new_sha256": "2e140d1b9d4352596eebb1776891fe3eae87b05ee829cce6bc1e55cd5bc23467",
+        "note": "the #75 CodeRabbit round 1's discriminating cases added to test_sev.py: the non-ASCII path binding (the C-quoted blind spot), the non-UTF-8 report (the named 002, never a traceback), the non-object failure mode (the named 004), the non-40-hex commit strings (the named 008), the empty not-verified list (the named 006). RED observed at the pre-fix form (red-02.txt: the stashed validator, exit 1); GREEN with the fixes. The five cases are the round's five findings' regressions",
+        "observed_at": "2026-10-24T07:19:37.801790+00:00"
+      }
+    ]
   }
 }

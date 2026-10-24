@@ -293,6 +293,59 @@ def run_all(tmp):
         else:
             print(f"PASS digest: the reviewed set excludes the slice's own artifacts and carries the code ({len(paths)} paths)")
 
+        # the #75 CodeRabbit round 1, case (1): a NON-ASCII path must bind by its
+        # EXACT bytes — the C-quoted form made git show fail and the file hashed
+        # as deleted, blinding the staleness check for exactly such files
+        root = build_fixture(tmp + "/digest-nonascii")
+        (root / "src").mkdir(exist_ok=True)
+        (root / "src" / "caf\u00e9.py").write_text("print('nonascii')\n", encoding="utf-8")
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "nonascii path")
+        paths = sev.reviewed_paths(BASE_REF, SLICE, repo=root)
+        if not any("caf\u00e9" in str(p) for p in paths):
+            print(f"FAIL digest-nonascii: the non-ASCII path did not bind into the reviewed set: {paths}")
+            FAILED.append("digest-nonascii")
+        else:
+            d1 = sev.reviewed_diff_sha256(BASE_REF, SLICE, repo=root)
+            (root / "src" / "caf\u00e9.py").write_text("print('nonascii CHANGED after review')\n", encoding="utf-8")
+            _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "nonascii changed")
+            d2 = sev.reviewed_diff_sha256(BASE_REF, SLICE, repo=root)
+            if d1 == d2:
+                print("FAIL digest-nonascii: an edit to the non-ASCII file left the digest UNCHANGED — the staleness blind spot")
+                FAILED.append("digest-nonascii")
+            else:
+                print("PASS digest-nonascii: the non-ASCII path binds by exact bytes and its edit moves the digest")
+
+        # the #75 round 1, case (2): a non-UTF-8 report is a NAMED refusal, never a traceback
+        root = build_fixture(tmp + "/report-bytes")
+        (root / "harness" / "runs" / SLICE / "sev.json").write_bytes(b"\xff\xfe{not utf8}")
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "non-utf8 report")
+        expect_codes(sev, root, "ARV-SEV-002", "malformed", "(non-UTF-8 bytes: a named refusal, never a crash)")
+
+        # the #75 round 1, case (3): a non-object failure-mode entry — a named 004, never a crash
+        root = build_fixture(tmp + "/fm-string")
+        write_report(root, valid_report(sev, root))
+        rep = json.loads((root / "harness" / "runs" / SLICE / "sev.json").read_text())
+        rep["failure_modes"] = ["just a string, not an object"]
+        (root / "harness" / "runs" / SLICE / "sev.json").write_text(json.dumps(rep), encoding="utf-8")
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "fm string")
+        expect_codes(sev, root, "ARV-SEV-004", "trace", "(a non-object failure mode)")
+
+        # the #75 round 1, case (4): a non-40-hex commit string is a false binding
+        for name, commit in (("rr-commit-head", "HEAD"), ("rr-commit-empty", ""), ("rr-commit-prose", "the commit where it ran")):
+            root = build_fixture(tmp + "/" + name)
+            write_report(root, valid_report(sev, root))
+            rec = json.loads((root / "harness" / "runs" / SLICE / "run-01.json").read_text())
+            rec["commit"] = commit
+            (root / "harness" / "runs" / SLICE / "run-01.json").write_text(json.dumps(rec, indent=2) + "\n", encoding="utf-8")
+            _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", name)
+            expect_codes(sev, root, "ARV-SEV-008", "runrecords", f"({name})")
+
+        # the #75 round 1, case (5): an EMPTY not-verified list — empty-by-omission
+        root = build_fixture(tmp + "/placeholder-empty")
+        write_report(root, {**valid_report(sev, root), "not_verified": []})
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "empty not_verified")
+        expect_codes(sev, root, "ARV-SEV-006", "placeholder", "(the empty list)")
+
 
 def main() -> int:
     tmp = tempfile.mkdtemp(prefix="sev-fixture-")

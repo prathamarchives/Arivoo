@@ -248,6 +248,13 @@ def validate_report(slice_name: str, base_ref: str, repo=None) -> list:
     if codes:
         return codes  # shape first: nothing below can trust the fields
 
+    # SEV-4 (#76's reviewer round): the report must name THE SLICE under
+    # judgment — the run-dir path is not the only binding; a transplant from a
+    # sibling must refuse, never ride the judged label
+    if report["slice_id"] != slice_name:
+        _fail(codes, "ARV-SEV-002", f"slice_id {report['slice_id']!r} does not name the slice under judgment ({slice_name!r})",
+              "the report is bound to its slice by ID as well as by path (TEMPLATES §6: slice_id is a required identity field)")
+
     # ARV-SEV-003: staleness — base + candidate movement
     observed_base = merge_base_of(base_ref, repo)
     if observed_base is None:
@@ -306,7 +313,12 @@ def validate_report(slice_name: str, base_ref: str, repo=None) -> list:
         for key in ("id", "scenario", "control"):
             if not str(fm.get(key, "")).strip():
                 _fail(codes, "ARV-SEV-004", f"failure mode {fm.get('id')!r}: '{key}' is empty", "each failure mode carries id/scenario/control/proof_ids (TEMPLATES §6)")
-        for pid in fm.get("proof_ids", []):
+        _pids = fm.get("proof_ids", [])
+        if not isinstance(_pids, list):
+            _fail(codes, "ARV-SEV-004", f"failure mode {fm.get('id')!r}: proof_ids is not a list",
+                  "the TEMPLATES §6 shape is required — a non-iterable proof binding is a named refusal, never an uncaught TypeError (the gate's named-disposition contract)")
+            continue
+        for pid in _pids:
             if str(pid) not in existing and not str(pid).startswith("ci-"):
                 _fail(codes, "ARV-SEV-004", f"proof id {pid!r} binds no existing record in the slice's run dir",
                       "evidence binds to records that exist — a dangling proof pointer is a fabricated-evidence class")

@@ -333,7 +333,7 @@
     "red_exit": 1,
     "red_code": "ARV-PRF-006 + ARV-RED-007/009 (the suite's RED set observed at 048aaa2 \u2014 six failures: the count-based overwrite, the stall, the unparseable-context no-refusal, the untyped-mint no-refusal, the changed-since-read no-refusal; red-01.txt)",
     "red_evidence": "the CLAIM-037 fix-commit amendment: test_trusted_gate.py's build_stub restructured for schema-2 stub records (the binding names the stub's own git history; the typed amendments chain from the base records) + the NEW suite test_record_machinery.py minted with its OBSERVED red",
-    "current_sha256": "6d7c186bac2b6e34b136e64dc0e206372d1818a258b270c2ef308ae35609cae8",
+    "current_sha256": "bb755e2f16b2f6fa1909b9e01750381da562f5b7deb9fb2e372d9014270da129",
     "amendments": [
       {
         "prior_sha256": "a4ee919f0c56a664e874aab871f6d4d6b278f9615ccf705be91b06f40130dcd3",
@@ -370,6 +370,12 @@
         "new_sha256": "6d7c186bac2b6e34b136e64dc0e206372d1818a258b270c2ef308ae35609cae8",
         "note": "the CLAIM-041 RED observed at the test-only commit: the three new-case groups at the wiring-absent predecessor (fc8b32e) \u2014 the dispatch missing-report case (the PR dispatches green with NO SEV report), the trusted tests 18/19 (no SEV step: nothing refuses), the machinery SEV-sheet-section case (the sheet silent about the report) \u2014 red-01.txt; the KB-SEV-001..008 matrix added as precision/regression cases over the landed validator (labeled, never claimed RED)",
         "observed_at": "2026-10-24T08:07:34.779495+00:00"
+      },
+      {
+        "prior_sha256": "6d7c186bac2b6e34b136e64dc0e206372d1818a258b270c2ef308ae35609cae8",
+        "new_sha256": "bb755e2f16b2f6fa1909b9e01750381da562f5b7deb9fb2e372d9014270da129",
+        "note": "the #76 fresh-context reviewer round's fixes + their discriminating cases: SEV-1 (the declarations \u2014 test_record_machinery.py missing from BOTH homes, the same 6037567/claim-040 class, caught by the reviewer's live gate run); SEV-2 (the non-iterable proof_ids guard \u2014 named 004, never the TypeError crash the reviewer observed at the wired gate; red-02: the pre-fix suite died with the exact traceback); SEV-4 (the slice_id binding \u2014 a transplant naming another slice refuses with 002); SEV-3 (the sheet's printed digest computed AFTER the SEV section \u2014 the printed line no longer excludes the bytes it claims to cover; red-02: changing only sev.json left the digest byte-identical); SEV-5 (KB-SEV-008's env default unsets its own finally)",
+        "observed_at": "2026-10-24T08:32:44.949812+00:00"
       }
     ]
   },
@@ -380,7 +386,7 @@
     "red_exit": 1,
     "red_code": "ARV-SEV-001..008 all unprovable at the predecessor (the module absent \u2014 the ten suite groups red, exit 1, red-01.txt)",
     "red_evidence": "the CLAIM-040 red observed at the test-only commit: test_sev.py at the predecessor (no harness/sev.py) \u2014 ten failing case groups, every named ARV-SEV code unprovable, exit 1; red-01.txt in the run dir",
-    "current_sha256": "6da5ba040eaab9c6b640497518e32be08199576ec7b4af6f1cb0cd57e71de837",
+    "current_sha256": "605570e4311d15bf3869be509ac7d88254c2d044b6c46b512f3cb1c93a6c85a8",
     "amendments": [
       {
         "prior_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
@@ -399,6 +405,12 @@
         "new_sha256": "6da5ba040eaab9c6b640497518e32be08199576ec7b4af6f1cb0cd57e71de837",
         "note": "the rename case's R100 correction (the third iteration, honestly recorded: the content-drift form passed vacuously at the pre-fix validator because git detected no rename \u2014 the discriminating form restores the base content so the R100 suppression fires); red-03.txt re-observed with BOTH round-2 failures at the pre-fix form",
         "observed_at": "2026-10-24T07:35:58.106688+00:00"
+      },
+      {
+        "prior_sha256": "6da5ba040eaab9c6b640497518e32be08199576ec7b4af6f1cb0cd57e71de837",
+        "new_sha256": "605570e4311d15bf3869be509ac7d88254c2d044b6c46b512f3cb1c93a6c85a8",
+        "note": "the #76 fresh-context reviewer round's fixes + their discriminating cases: SEV-1 (the declarations \u2014 test_record_machinery.py missing from BOTH homes, the same 6037567/claim-040 class, caught by the reviewer's live gate run); SEV-2 (the non-iterable proof_ids guard \u2014 named 004, never the TypeError crash the reviewer observed at the wired gate; red-02: the pre-fix suite died with the exact traceback); SEV-4 (the slice_id binding \u2014 a transplant naming another slice refuses with 002); SEV-3 (the sheet's printed digest computed AFTER the SEV section \u2014 the printed line no longer excludes the bytes it claims to cover; red-02: changing only sev.json left the digest byte-identical); SEV-5 (KB-SEV-008's env default unsets its own finally)",
+        "observed_at": "2026-10-24T08:32:44.949859+00:00"
       }
     ]
   }

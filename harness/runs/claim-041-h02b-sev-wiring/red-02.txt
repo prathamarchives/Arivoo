@@ -1,0 +1,17 @@
+CLAIM-041 red-02 — the #76 fresh-context reviewer round's discriminating cases at the PRE-FIX form (sev.py + proofsheet.py stashed at a668286's form):
+
+== test_sev.py -> exit 1:
+
+== test_record_machinery.py -> exit 1:
+FAIL  the printed assembly digest covers the SEV section (SEV-3) — changing only sev.json left the printed digest byte-identical: '- sheet sha256 (of the content above, excluding this line): d878ee85c19a26ee5c04d3d38b0001b1aabc01986c5f36d4e1ccbc8b6d26025b' == '- sheet sha256 (of the content above, excluding this line): d878ee85c19a26ee5c04d3d38b0001b1aabc01986c5f36d4e1ccbc8b6d26025b' — the printed line excluded the SEV section its own parenthetical claims to cover
+RED — 1 failure(s): the printed assembly digest covers the SEV section (SEV-3)
+
+The three discriminating failures (the reviewer's SEV-2/3/4, each the pre-fix behavior):
+- SEV-2 (pids-int): an uncaught TypeError at sev.py's proof_ids loop — the wired gate would crash with a traceback, not a named code
+- SEV-4 (slice-id-mismatch): a report naming ANOTHER slice passed — the transplant edge the reviewer found
+- SEV-3 (the printed digest): changing ONLY sev.json left the printed assembly digest byte-identical — the line excluded the SEV section it claims to cover
+
+(the test_sev.py pre-fix form's own honest shape: the pids-int case DIED with the uncaught TypeError — the exact crash the reviewer named — before the slice-id case could run; the RED exit is the crash, and the two cases' clean refusals are the fixed form's GREEN:)
+
+Traceback (most recent call last):
+TypeError: 'int' object is not iterable

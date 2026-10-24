@@ -645,9 +645,15 @@ def kb_sev_coordination(copy: pathlib.Path) -> None:
         "# the stubbed suite (the coordinated weakening)\n", encoding="utf-8")
     _sev_probe_prepare(copy)
     # the machinery root is the REPO root — _load joins harness/<mod> itself
+    # SEV-5 (#76's reviewer round): the case unsets ITS OWN default in finally —
+    # a local-mode default that leaks to process end would silently re-route any
+    # LATER case's machinery loading (the driver's own value, when set, is never
+    # touched)
+    _own_default = "ARV_TRUSTED_KB_MACHINERY" not in _os.environ
     _os.environ.setdefault("ARV_TRUSTED_KB_MACHINERY",
                            str(pathlib.Path(__file__).resolve().parents[2]))
     try:
         _load(copy, "harness.sev").check_sev(SEV_PROBE_SLICE, "origin/main")
     finally:
-        pass  # the driver's own value (if any) stays set; a local default leaks nowhere
+        if _own_default:
+            del _os.environ["ARV_TRUSTED_KB_MACHINERY"]

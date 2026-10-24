@@ -107,7 +107,6 @@ def assemble(slice_name: str, notverified: str) -> str:
         lines.extend(f"- {l}" for l in nv)
     else:
         lines.append("- (none stated — REPAIR: the not-verified list may not be empty; LAW-04)")
-    digest = _sha("\n".join(lines))
     # H-02 (CLAIM-041): the SEV section — the sheet records the report +
     # reviewed-diff digests, the disposition, the findings, and the not-verified
     # count when the slice carries a report (the TEMPLATES §6 rule). The section
@@ -132,6 +131,12 @@ def assemble(slice_name: str, notverified: str) -> str:
         except (json.JSONDecodeError, UnicodeDecodeError, AttributeError):
             lines.append("- sev.json: UNPARSEABLE — the gate refuses (ARV-SEV-002); the digest above is the record")
     lines.append("")
+    # SEV-3 (#76's reviewer round): the digest is computed AFTER the SEV section
+    # so the printed line covers EVERYTHING above it — the predecessor printed a
+    # digest that excluded the SEV section its own parenthetical claimed to cover
+    # (no integrity hole: ARV-PRF-004 binds by whole-file byte comparison — but
+    # the printed line must not misdescribe its coverage)
+    digest = _sha("\n".join(lines))
     lines.append("## Assembly")
     lines.append(f"- sheet sha256 (of the content above, excluding this line): {digest}")
     return "\n".join(lines) + "\n"

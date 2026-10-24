@@ -346,6 +346,28 @@ def run_all(tmp):
         _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "empty not_verified")
         expect_codes(sev, root, "ARV-SEV-006", "placeholder", "(the empty list)")
 
+        # the #76 reviewer round, SEV-2: a NON-ITERABLE proof_ids is a named 004,
+        # never an uncaught TypeError at the gate boundary (the named-disposition
+        # contract; observed live by the fresh-context reviewer: the wired gate
+        # crashed with a traceback instead of a code)
+        root = build_fixture(tmp + "/pids-int")
+        write_report(root, valid_report(sev, root))
+        rep = json.loads((root / "harness" / "runs" / SLICE / "sev.json").read_text())
+        rep["failure_modes"] = [{**rep["failure_modes"][0], "proof_ids": 5}]
+        (root / "harness" / "runs" / SLICE / "sev.json").write_text(json.dumps(rep), encoding="utf-8")
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "pids int")
+        expect_codes(sev, root, "ARV-SEV-004", "trace", "(a non-iterable proof_ids — a named refusal, never a crash)")
+
+        # the #76 reviewer round, SEV-4: the report must name THE SLICE under
+        # judgment — a transplant from a byte-identical sibling refuses
+        root = build_fixture(tmp + "/slice-id-mismatch")
+        write_report(root, valid_report(sev, root))
+        rep = json.loads((root / "harness" / "runs" / SLICE / "sev.json").read_text())
+        rep["slice_id"] = "claim-999-some-other-slice"
+        (root / "harness" / "runs" / SLICE / "sev.json").write_text(json.dumps(rep), encoding="utf-8")
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "slice id mismatch")
+        expect_codes(sev, root, "ARV-SEV-002", "malformed", "(the report names another slice — the transplant refuses)")
+
         # the #75 round 2: an UNKNOWN disposition cannot represent a valid
         # result — and it previously carried an OPEN P1 past every check
         root = build_fixture(tmp + "/disposition-unknown")

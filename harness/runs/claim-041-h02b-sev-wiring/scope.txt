@@ -5,6 +5,7 @@ harness/known-bad/cases.py D-041
 harness/proofsheet.py D-041
 harness/tests/test_gate_dispatch.py D-041
 harness/tests/test_trusted_gate.py D-041
+harness/tests/test_record_machinery.py D-041
 harness/red-records.json D-041
 harness/runs/claim-041-h02b-sev-wiring D-041
 CLAIMS.md D-038

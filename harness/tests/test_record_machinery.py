@@ -310,6 +310,23 @@ def main() -> int:
               "the TEMPLATES §6 rule: the sheet records the report + reviewed-diff digests, "
               "the disposition, the findings, and the not-verified count — RED at the predecessor "
               "(the sheet was silent about the SEV record entirely)")
+
+        # the #76 reviewer round, SEV-3: the PRINTED digest must cover the SEV
+        # section it claims to cover — changing ONLY sev.json must change the
+        # printed assembly digest (the predecessor computed it before the
+        # section, so the printed line excluded the very bytes it claimed to
+        # cover; ARV-PRF-004 was never at risk — the printed line lied)
+        sev_report["disposition"] = "BLOCKED"
+        sev_bytes2 = json.dumps(sev_report, indent=2) + "\n"
+        (work5 / "harness" / "runs" / "claim-901-sev-sheet-probe" / "sev.json").write_text(
+            sev_bytes2, encoding="utf-8")
+        sheet6 = ps5.assemble("claim-901-sev-sheet-probe", "- probe only\n")
+        d1 = [l for l in sheet5.splitlines() if l.startswith("- sheet sha256")][0]
+        d2 = [l for l in sheet6.splitlines() if l.startswith("- sheet sha256")][0]
+        check("the printed assembly digest covers the SEV section (SEV-3)",
+              d1 != d2,
+              f"changing only sev.json left the printed digest byte-identical: {d1!r} == {d2!r} — "
+              "the printed line excluded the SEV section its own parenthetical claims to cover")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

@@ -809,9 +809,14 @@ class TrustedGateTests(unittest.TestCase):
         newsuite.write_text("import unittest\n\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n\nif __name__ == \"__main__\":\n    unittest.main()\n", encoding="utf-8")
         gp = stub / "harness" / "gate.py"
         gtext = gp.read_text(encoding="utf-8")
-        anchor = "harness/tests/test_record_machinery.py\")"
+        # the CLAIM-040 repair: the anchor is the tuple's FIRST entry (stable),
+        # never its mutable tail — the first suite addition after this test's
+        # mint (test_sev.py, CLAIM-040) broke the tail-anchor form; the first-
+        # entry insertion is equivalent (a registered addition, accepted) and
+        # robust to every future tail change
+        anchor = "\"harness/tests/test_migrations.py\","
         assert anchor in gtext
-        gtext = gtext.replace(anchor, anchor[:-1] + ",\n         \"harness/tests/test_brand_new.py\")")
+        gtext = gtext.replace(anchor, anchor + "\n         \"harness/tests/test_brand_new.py\",", 1)
         gp.write_text(gtext, encoding="utf-8")
         # the suite file lands FIRST (its own commit), THEN the record binds to
         # that commit — the real make-red form: the binding names history that

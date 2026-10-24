@@ -164,7 +164,7 @@
     "red_unrecovered": true
   },
   "harness/tests/test_trusted_gate.py": {
-    "current_sha256": "18eaf53ecf322c366cced961e0edd2384a75062c4f4a81de1053f6f467800d23",
+    "current_sha256": "c9f9e9b31a42709c994f45e971ec6f1d2a553542b4512fb414efed55ff39a294",
     "amendments": [
       {
         "note": "AMENDMENT 1 (H-01b-CI implementation slice, assertions strengthened/added \u2014 never removed, LAW-11): test_07's ARV-TG-005 probe strengthened to the real form (an EXISTING-but-empty base dir \u2014 the nonexistent-dir form fires ARV-TG-001 first); the stub builder corrected with the machinery the BASE's KB probes actually load (harness/gate.py, harness/migrate.py) and the slice's notverified.txt (the --verify re-derivation source \u2014 PRF-01); the red_evidence smash in harness/red.py repaired in the same slice (set only on first record)."
@@ -264,6 +264,12 @@
         "new_sha256": "18eaf53ecf322c366cced961e0edd2384a75062c4f4a81de1053f6f467800d23",
         "note": "the fourth pass: test_17 (the function-scoped TESTS assignment \u2014 the ast.walk hole; RED observed at the walk form, GREEN at the module-level form). Tests added, none removed",
         "observed_at": "2026-10-23T15:44:11.089530+00:00"
+      },
+      {
+        "prior_sha256": "18eaf53ecf322c366cced961e0edd2384a75062c4f4a81de1053f6f467800d23",
+        "new_sha256": "c9f9e9b31a42709c994f45e971ec6f1d2a553542b4512fb414efed55ff39a294",
+        "note": "the CLAIM-040 amendment: test_trusted_gate.py's test_15 anchor moved from the TESTS tuple's mutable TAIL (the record_machinery last-entry form, broken by this slice's legitimate suite addition \u2014 test_sev.py) to the stable FIRST entry (the migrations line); the insertion semantics unchanged (a registered addition accepted); the tail-anchor fragility recorded in the claim's \u00a78",
+        "observed_at": "2026-10-24T06:57:13.413455+00:00"
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice).",

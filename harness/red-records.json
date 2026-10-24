@@ -333,7 +333,7 @@
     "red_exit": 1,
     "red_code": "ARV-PRF-006 + ARV-RED-007/009 (the suite's RED set observed at 048aaa2 \u2014 six failures: the count-based overwrite, the stall, the unparseable-context no-refusal, the untyped-mint no-refusal, the changed-since-read no-refusal; red-01.txt)",
     "red_evidence": "the CLAIM-037 fix-commit amendment: test_trusted_gate.py's build_stub restructured for schema-2 stub records (the binding names the stub's own git history; the typed amendments chain from the base records) + the NEW suite test_record_machinery.py minted with its OBSERVED red",
-    "current_sha256": "bb755e2f16b2f6fa1909b9e01750381da562f5b7deb9fb2e372d9014270da129",
+    "current_sha256": "8daccb6db9d7a0a5ba341939bcd5a391dadf57edd943a4470144f44637131ec0",
     "amendments": [
       {
         "prior_sha256": "a4ee919f0c56a664e874aab871f6d4d6b278f9615ccf705be91b06f40130dcd3",
@@ -376,6 +376,12 @@
         "new_sha256": "bb755e2f16b2f6fa1909b9e01750381da562f5b7deb9fb2e372d9014270da129",
         "note": "the #76 fresh-context reviewer round's fixes + their discriminating cases: SEV-1 (the declarations \u2014 test_record_machinery.py missing from BOTH homes, the same 6037567/claim-040 class, caught by the reviewer's live gate run); SEV-2 (the non-iterable proof_ids guard \u2014 named 004, never the TypeError crash the reviewer observed at the wired gate; red-02: the pre-fix suite died with the exact traceback); SEV-4 (the slice_id binding \u2014 a transplant naming another slice refuses with 002); SEV-3 (the sheet's printed digest computed AFTER the SEV section \u2014 the printed line no longer excludes the bytes it claims to cover; red-02: changing only sev.json left the digest byte-identical); SEV-5 (KB-SEV-008's env default unsets its own finally)",
         "observed_at": "2026-10-24T08:32:44.949812+00:00"
+      },
+      {
+        "prior_sha256": "bb755e2f16b2f6fa1909b9e01750381da562f5b7deb9fb2e372d9014270da129",
+        "new_sha256": "8daccb6db9d7a0a5ba341939bcd5a391dadf57edd943a4470144f44637131ec0",
+        "note": "the #76 CI catch repaired: the Proof-Sheet SEV section + its two machinery cases DEFERRED to CLAIM-042 (the first post-merge slice) per the cannot-flip-in-the-same-PR rule \u2014 the CI trusted job's base proofsheet refused the section-bearing committed sheet with ARV-PRF-004 (the base cannot re-derive a format it does not know; record 22 \u00a78's precedent). The machinery suite loses the two section cases (their forms preserved in record 34 \u00a78 as CLAIM-042's RED set); the sheet stays base-format through this PR",
+        "observed_at": "2026-10-24T09:24:45.561615+00:00"
       }
     ]
   },

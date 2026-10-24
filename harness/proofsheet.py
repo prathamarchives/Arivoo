@@ -107,35 +107,18 @@ def assemble(slice_name: str, notverified: str) -> str:
         lines.extend(f"- {l}" for l in nv)
     else:
         lines.append("- (none stated — REPAIR: the not-verified list may not be empty; LAW-04)")
-    # H-02 (CLAIM-041): the SEV section — the sheet records the report +
-    # reviewed-diff digests, the disposition, the findings, and the not-verified
-    # count when the slice carries a report (the TEMPLATES §6 rule). The section
-    # derives from the committed sev.json — deterministic, so --verify re-derives
-    # byte-identically (PRF-01/LAW-01). An unparseable report is RECORDED as such
-    # (the gate's ARV-SEV-002 is the refusal; the sheet never fabricates).
-    sev_path = RUNS / slice_name / "sev.json"
-    if sev_path.is_file():
-        raw = sev_path.read_bytes()
-        lines.append("")
-        lines.append("## Systems-engineering verification (LAW-30; harness/sev.py)")
-        lines.append(f"- report sha256: {hashlib.sha256(raw).hexdigest()}")
-        try:
-            sdata = json.loads(raw.decode("utf-8"))
-            lines.append(f"- reviewed_diff_sha256: {sdata.get('reviewed_diff_sha256', '(absent)')}")
-            lines.append(f"- disposition: {sdata.get('disposition', '(absent)')}")
-            fnd = sdata.get("findings", [])
-            open_p01 = sum(1 for f in fnd if isinstance(f, dict)
-                           and f.get("severity") in ("P0", "P1") and f.get("status") == "open")
-            lines.append(f"- findings: {len(fnd)} (open P0/P1: {open_p01})")
-            lines.append(f"- not-verified entries: {len(sdata.get('not_verified', []))}")
-        except (json.JSONDecodeError, UnicodeDecodeError, AttributeError):
-            lines.append("- sev.json: UNPARSEABLE — the gate refuses (ARV-SEV-002); the digest above is the record")
+    # H-02 (CLAIM-041) — THE SEV SECTION IS DEFERRED TO THE FIRST POST-MERGE
+    # SLICE (the cannot-flip-in-the-same-PR rule, record 22 §8's precedent): the
+    # CI trusted job re-derives every committed sheet with the BASE's
+    # proofsheet — a section the base cannot render makes the committed sheet
+    # unprovable at the very PR that introduces it (observed live: the #76 CI
+    # harness-trusted job refused ARV-PRF-004 over exactly this). The section
+    # (report + reviewed-diff digests, disposition, findings with the open
+    # P0/P1 count, not-verified count — TEMPLATES §6's rule) and its
+    # digest-after-it coverage fix (the reviewer's SEV-3) land with CLAIM-042,
+    # the first slice judged by the merged base. Until then the SEV data lives
+    # in the committed, gate-validated sev.json (never lost, never fabricated).
     lines.append("")
-    # SEV-3 (#76's reviewer round): the digest is computed AFTER the SEV section
-    # so the printed line covers EVERYTHING above it — the predecessor printed a
-    # digest that excluded the SEV section its own parenthetical claimed to cover
-    # (no integrity hole: ARV-PRF-004 binds by whole-file byte comparison — but
-    # the printed line must not misdescribe its coverage)
     digest = _sha("\n".join(lines))
     lines.append("## Assembly")
     lines.append(f"- sheet sha256 (of the content above, excluding this line): {digest}")

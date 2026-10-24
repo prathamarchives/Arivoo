@@ -1,0 +1,21 @@
+not verified (LAW-04 — the CLAIM-039 honest limits):
+- the N12 self-test-row integration/canary-position extension: UNCHANGED residual (routed at
+  harness/runs/claim-038-numbering-canary-a16/notverified.txt; never half-proven, never
+  implied complete by this slice's green suites).
+- this slice is a MEMORY/DOCUMENTATION delta (STATE/AGENTS/CLAIMS/LEDGER/WORKLOG/records +
+  the roadmap text): no product code, no harness code, no test changes — the suites' green is
+  regression evidence for the unchanged code, not new-feature proof.
+- the roadmap PDF and its repo text form are a PLANNING artifact (the D-022 class): the
+  P3→P5 details are engineering elaborations derived from canonical sources, NOT
+  owner-ratified requirements; P3-00 remains the freeze point where they are adopted,
+  corrected, or rejected through the repository process.
+- H-02 is NOT built and P3-00 is NOT accepted at this slice's close; product schema
+  migrations stay gated behind P3-00 acceptance. No Phase 6 exists and none was invented.
+- branch protection was re-read live at this session's preflight (1 approving review,
+  dismiss_stale, admins included, all five contexts required); the observation is a
+  snapshot at read time, not live status (INT-104).
+- this slice's PR merge + post-merge CI are observed AFTER the PR opens — the outcome
+  records only in the rule-4 close row carried by the next slice; never predicted here.
+- the fresh local make verify at main 3dfa855 (this session, the rig rebuilt
+  FACT-001-exact) is LOCAL evidence; the remote five-check CI run on the same revision is
+  the remote evidence class — both observed, neither substitutes for the other.

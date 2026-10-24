@@ -164,7 +164,7 @@
     "red_unrecovered": true
   },
   "harness/tests/test_trusted_gate.py": {
-    "current_sha256": "18eaf53ecf322c366cced961e0edd2384a75062c4f4a81de1053f6f467800d23",
+    "current_sha256": "c9f9e9b31a42709c994f45e971ec6f1d2a553542b4512fb414efed55ff39a294",
     "amendments": [
       {
         "note": "AMENDMENT 1 (H-01b-CI implementation slice, assertions strengthened/added \u2014 never removed, LAW-11): test_07's ARV-TG-005 probe strengthened to the real form (an EXISTING-but-empty base dir \u2014 the nonexistent-dir form fires ARV-TG-001 first); the stub builder corrected with the machinery the BASE's KB probes actually load (harness/gate.py, harness/migrate.py) and the slice's notverified.txt (the --verify re-derivation source \u2014 PRF-01); the red_evidence smash in harness/red.py repaired in the same slice (set only on first record)."
@@ -264,6 +264,12 @@
         "new_sha256": "18eaf53ecf322c366cced961e0edd2384a75062c4f4a81de1053f6f467800d23",
         "note": "the fourth pass: test_17 (the function-scoped TESTS assignment \u2014 the ast.walk hole; RED observed at the walk form, GREEN at the module-level form). Tests added, none removed",
         "observed_at": "2026-10-23T15:44:11.089530+00:00"
+      },
+      {
+        "prior_sha256": "18eaf53ecf322c366cced961e0edd2384a75062c4f4a81de1053f6f467800d23",
+        "new_sha256": "c9f9e9b31a42709c994f45e971ec6f1d2a553542b4512fb414efed55ff39a294",
+        "note": "the CLAIM-040 amendment: test_trusted_gate.py's test_15 anchor moved from the TESTS tuple's mutable TAIL (the record_machinery last-entry form, broken by this slice's legitimate suite addition \u2014 test_sev.py) to the stable FIRST entry (the migrations line); the insertion semantics unchanged (a registered addition accepted); the tail-anchor fragility recorded in the claim's \u00a78",
+        "observed_at": "2026-10-24T06:57:13.413455+00:00"
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice).",
@@ -340,6 +346,35 @@
         "new_sha256": "911a4d651118b3e6a2079bfbb251d2d77950105ee7addc91fd908a585fc8dfe8",
         "note": "CLAIM-038's RED cases restored: the machinery suite's numbering cases 1/2/5 back (the routed rider, its RED re-observed at this slice's commit next). Tests added, none removed",
         "observed_at": "2026-10-23T16:16:41.944664+00:00"
+      }
+    ]
+  },
+  "harness/tests/test_sev.py": {
+    "schema": 2,
+    "binding_commit": "3a9e59511746d98ccb3f9fd3033f3ebc340768c3",
+    "binding_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
+    "red_exit": 1,
+    "red_code": "ARV-SEV-001..008 all unprovable at the predecessor (the module absent \u2014 the ten suite groups red, exit 1, red-01.txt)",
+    "red_evidence": "the CLAIM-040 red observed at the test-only commit: test_sev.py at the predecessor (no harness/sev.py) \u2014 ten failing case groups, every named ARV-SEV code unprovable, exit 1; red-01.txt in the run dir",
+    "current_sha256": "6da5ba040eaab9c6b640497518e32be08199576ec7b4af6f1cb0cd57e71de837",
+    "amendments": [
+      {
+        "prior_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
+        "new_sha256": "2e140d1b9d4352596eebb1776891fe3eae87b05ee829cce6bc1e55cd5bc23467",
+        "note": "the #75 CodeRabbit round 1's discriminating cases added to test_sev.py: the non-ASCII path binding (the C-quoted blind spot), the non-UTF-8 report (the named 002, never a traceback), the non-object failure mode (the named 004), the non-40-hex commit strings (the named 008), the empty not-verified list (the named 006). RED observed at the pre-fix form (red-02.txt: the stashed validator, exit 1); GREEN with the fixes. The five cases are the round's five findings' regressions",
+        "observed_at": "2026-10-24T07:19:37.801790+00:00"
+      },
+      {
+        "prior_sha256": "2e140d1b9d4352596eebb1776891fe3eae87b05ee829cce6bc1e55cd5bc23467",
+        "new_sha256": "4ba065ec09e197066037954a86b212a7b0ea002ad30ad89951ba4eba3e8d2350",
+        "note": "the #75 CodeRabbit round 2's discriminating cases added to test_sev.py: the unknown-disposition refusal (UNVERIFIED + an open P1 carried past every check at the predecessor \u2014 the Major) + the rename endpoints binding (both directions, including the rename-into-run-dir worst case; the case's own first-draft error corrected in-slice: the renamed file must exist at the merge-base or base-side cancellation erases the rename from the diff). RED observed at the pre-fix form (red-03.txt); GREEN with the fixes (--no-renames + the frozen disposition vocabulary)",
+        "observed_at": "2026-10-24T07:34:52.901297+00:00"
+      },
+      {
+        "prior_sha256": "4ba065ec09e197066037954a86b212a7b0ea002ad30ad89951ba4eba3e8d2350",
+        "new_sha256": "6da5ba040eaab9c6b640497518e32be08199576ec7b4af6f1cb0cd57e71de837",
+        "note": "the rename case's R100 correction (the third iteration, honestly recorded: the content-drift form passed vacuously at the pre-fix validator because git detected no rename \u2014 the discriminating form restores the base content so the R100 suppression fires); red-03.txt re-observed with BOTH round-2 failures at the pre-fix form",
+        "observed_at": "2026-10-24T07:35:58.106688+00:00"
       }
     ]
   }

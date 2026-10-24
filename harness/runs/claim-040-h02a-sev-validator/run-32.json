@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_trusted_gate.py",
+  "exit_code": 0,
+  "commit": "a19ca9f0946711a2d802647785ad28c514c42165",
+  "output_sha256": "5ee03d7a5a1e04903f3cc6d1323b819df5c383bbadc3b93b2eb8b518a191588a",
+  "recorded_at": "2026-10-24T07:37:15.688961+00:00"
+}

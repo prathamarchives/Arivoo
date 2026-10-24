@@ -82,7 +82,8 @@ TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          "harness/tests/test_mutation_floor.py",
          "harness/tests/test_trusted_gate.py",
          "harness/tests/test_claims_paths.py",
-         "harness/tests/test_record_machinery.py")
+         "harness/tests/test_record_machinery.py",
+         "harness/tests/test_sev.py")
 
 
 def run_cmd(cmd: list) -> subprocess.CompletedProcess:

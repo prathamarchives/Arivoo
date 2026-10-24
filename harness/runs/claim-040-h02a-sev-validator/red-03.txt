@@ -1,0 +1,10 @@
+CLAIM-040 red-03 — the #75 CodeRabbit round 2's two cases at the PRE-FIX validator (harness/sev.py stashed at a787761's form -> exit 1):
+
+FAIL falsepass: expected ARV-SEV-005; got [] (unknown disposition + open P1 — the exact carried-past hole)
+FAIL digest-rename: the rename endpoints did not both bind: ['src/b.py', 'src/renamed.py']
+FAIL digest-rename-run: the deleted source lost or the run-dir destination leaked: ['src/b.py']
+RED — 3 failing case(s): falsepass, digest-rename, digest-rename-run
+
+The two discriminating failures (the round-2 findings' exact forms, both at the pre-fix form):
+- digest-rename (the pure R100 form): the deleted source did not bind — rename detection emitted only the destination (the case's own honest iterations recorded: the first draft's base-side cancellation erased the rename; the second draft's content drift kept similarity under git's threshold — the R100 form discriminates)
+- falsepass (unknown disposition + open P1): no refusal — the carried-past hole (the Major)

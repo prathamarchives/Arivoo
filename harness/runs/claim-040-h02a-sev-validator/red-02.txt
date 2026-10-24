@@ -1,0 +1,10 @@
+CLAIM-040 red-02 — the #75 CodeRabbit round 1's five cases at the PRE-FIX validator (the suite with the new cases; harness/sev.py stashed at 5f47a62's form -> exit 1):
+
+FAIL digest-nonascii: the non-ASCII path did not bind into the reviewed set: ['"src/caf\\303\\251.py"', 'src/a.py', 'src/b.py']
+
+The five discriminating failures (each the predecessor's own behavior, named by the round's findings):
+- digest-nonascii: the non-ASCII path did not bind / its edit left the digest unchanged
+- malformed (non-UTF-8 bytes): an uncaught UnicodeDecodeError traceback (the predecessor crashed — never a named refusal)
+- trace (a non-object failure mode): an uncaught TypeError at fm.get (crash, never 004)
+- runrecords (commit='HEAD'/''/prose): the false bindings passed silently (no 008)
+- placeholder (the empty list): no refusal (no 006)

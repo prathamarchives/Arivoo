@@ -1,0 +1,15 @@
+CLAIM-040 red-01 — the observed RED at the test-only commit 3a9e595 (python3 harness/tests/test_sev.py -> exit 1):
+
+FAIL positive: harness/sev.py is ABSENT — the target refusals are unprovable (the RED form)
+FAIL missing: harness/sev.py is ABSENT — the target refusals are unprovable (the RED form)
+FAIL malformed: harness/sev.py is ABSENT — the target refusals are unprovable (the RED form)
+FAIL stale: harness/sev.py is ABSENT — the target refusals are unprovable (the RED form)
+FAIL trace: harness/sev.py is ABSENT — the target refusals are unprovable (the RED form)
+FAIL falsepass: harness/sev.py is ABSENT — the target refusals are unprovable (the RED form)
+FAIL placeholder: harness/sev.py is ABSENT — the target refusals are unprovable (the RED form)
+FAIL identity: harness/sev.py is ABSENT — the target refusals are unprovable (the RED form)
+FAIL runrecords: harness/sev.py is ABSENT — the target refusals are unprovable (the RED form)
+FAIL digest: harness/sev.py is ABSENT — the target refusals are unprovable (the RED form)
+
+RED — 10 failing case(s): positive, missing, malformed, stale, trace, falsepass, placeholder, identity, runrecords, digest
+      the SEV validator must refuse its named classes (ARV-SEV-001..008)

@@ -1,0 +1,18 @@
+# red-01 — the RED observed at the predecessor (main c19d497 + this slice's edited cases; sev.py UNCHANGED)
+
+python3 harness/tests/test_sev.py -> exit 1
+  RED — 2 failing case(s): expectation-false (the renderer base + an explicit opt-out: expected
+  ARV-SEV-009, got []), expectation-absent (the renderer base + the absent field: expected
+  ARV-SEV-009, got []). The precision case (expectation-true: the renderer base + the compliant
+  opt-in -> []) PASSES at the predecessor as designed — honestly labeled, never claimed RED.
+  Every pre-existing case green — the historical fixture (a base with NO proofsheet.py at all)
+  proves the expectation never fires in the pre-renderer era (no over-refusal).
+
+python3 harness/gate.py --known-bad-only -> exit 1
+  RED — 1 broken guard(s): KB-SEV-009 (the base-side section expectation — a renderer base +
+  an opted-OUT report -> the guard did NOT fire, expected ARV-SEV-009 — KB-05, building stops).
+  The matrix's other 31 cases green. The probe's git fixture commits the whole copy as its
+  base — the copy's REAL proofsheet.py carries the sheet_section switch, so the fixture's base
+  renders and the expectation is active: the case's opt-out must refuse.
+
+The exits read from the commands themselves, never a pipe's tail (the standing lesson).

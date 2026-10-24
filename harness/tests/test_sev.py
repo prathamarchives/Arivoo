@@ -39,6 +39,17 @@ The validator's PUBLIC surface exercised here (never an internal duplicate):
   validate_report(slice_name, base_ref, repo=None) -> list[str]   (codes; [] = valid)
   reviewed_diff_sha256(base_ref, slice_name, repo=None) -> str     (the binding digest)
   reviewed_paths(base_ref, slice_name, repo=None) -> list[str]
+
+CLAIM-044 adds the BASE-SIDE SECTION EXPECTATION (ARV-SEV-009 — the #77
+reviewer's SEV-3 follow-up, adopted at the #78 review): once the PR's own
+BASE carries the section renderer (the base's proofsheet.py knows the
+sheet_section switch), a committed report MUST set sheet_section true — the
+candidate-controlled opt-in window closed when the first section-bearing
+sheet merged (PR #78). A base WITHOUT the renderer (the historical fixture
+above — no proofsheet.py in its base at all) never fires the expectation:
+the positive cases keep passing there (the no-over-refusal proof). An
+UNDECIDABLE renderer state (git cannot show the base's proofsheet) fails
+closed — never a silent pass.
 """
 import importlib.util
 import json
@@ -148,6 +159,44 @@ def valid_report(sev, root: pathlib.Path) -> dict:
 def write_report(root: pathlib.Path, report: dict) -> None:
     p = root / "harness" / "runs" / SLICE / "sev.json"
     p.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+
+
+def build_renderer_base_fixture(tmp: str) -> pathlib.Path:
+    """CLAIM-044: identical to build_fixture's shape EXCEPT the BASE commit
+    carries a proofsheet.py WITH the sheet_section marker (the renderer
+    witness) — the merge-base renders sections, so the base-side expectation
+    is ACTIVE. The witness is the switch's own name in the base's proofsheet
+    source: the exact signal the validator probes."""
+    root = pathlib.Path(tmp) / "fixture"
+    root.mkdir(parents=True)
+    (root / "harness").mkdir()
+    (root / "INTENT-LEDGER.md").write_text(LEDGER, encoding="utf-8")
+    (root / "PLAN.md").write_text(PLAN, encoding="utf-8")
+    (root / "src").mkdir()
+    (root / "src" / "a.py").write_text(SRC_A, encoding="utf-8")
+    # the renderer witness — IN the base commit (the merge-base must carry it)
+    (root / "harness" / "proofsheet.py").write_text(
+        "# the fixture's section renderer witness\nsheet_section_MARKER = True\n",
+        encoding="utf-8")
+    for cmd in (["init", "-q"], ["config", "user.email", "fixture@test.local"],
+                ["config", "user.name", "fixture"], ["checkout", "-q", "-b", "main"],
+                ["add", "-A"], ["commit", "-q", "-m", "base"]):
+        _git(root, *cmd)
+    _git(root, "checkout", "-q", "-b", SLICE)
+    (root / "src" / "a.py").write_text(SRC_A + "print('changed')\n", encoding="utf-8")
+    (root / "src" / "b.py").write_text(SRC_B, encoding="utf-8")
+    rdir = root / "harness" / "runs" / SLICE
+    rdir.mkdir(parents=True)
+    head = _git(root, "rev-parse", "HEAD").stdout.strip()
+    rec = {"command": "python3 harness/tests/test_fixture.py", "exit_code": 0,
+           "commit": head, "output_sha256": "0" * 64,
+           "recorded_at": "2026-10-24T00:00:00+00:00"}
+    (rdir / "run-01.json").write_text(json.dumps(rec, indent=2) + "\n", encoding="utf-8")
+    (rdir / "red-01.txt").write_text("the fixture's observed red\n", encoding="utf-8")
+    (rdir / "notverified.txt").write_text("the fixture's honest limit\n", encoding="utf-8")
+    _git(root, "add", "-A")
+    _git(root, "commit", "-q", "-m", "slice content")
+    return root
 
 
 def expect_codes(sev, root, want: str, name: str, detail: str = "") -> None:
@@ -421,6 +470,37 @@ def run_all(tmp):
             FAILED.append("digest-rename-run")
         else:
             print("PASS digest-rename-run: the run-dir destination excluded; the deleted source still binds")
+
+        # --- CLAIM-044: ARV-SEV-009 — the base-side section expectation ---
+        # (RED at the predecessor) the ACTIVE expectation: the renderer base +
+        # an explicit false opt-out is REFUSED — the candidate-controlled window
+        # closed when the first section-bearing sheet merged (PR #78)
+        root = build_renderer_base_fixture(tmp + "/exp-false")
+        write_report(root, {**valid_report(sev, root), "sheet_section": False})
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "opted out")
+        expect_codes(sev, root, "ARV-SEV-009", "expectation-false",
+                     "(the renderer base + an explicit opt-out)")
+
+        # (RED at the predecessor) the ABSENT field over a renderer base is the
+        # same refusal — absence is not opt-in
+        root = build_renderer_base_fixture(tmp + "/exp-absent")
+        write_report(root, valid_report(sev, root))  # no sheet_section field at all
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "absent")
+        expect_codes(sev, root, "ARV-SEV-009", "expectation-absent",
+                     "(the renderer base + the absent field)")
+
+        # (precision, not RED — honestly labeled) the COMPLIANT form: the
+        # renderer base + sheet_section true validates clean (no over-refusal)
+        root = build_renderer_base_fixture(tmp + "/exp-true")
+        write_report(root, {**valid_report(sev, root), "sheet_section": True})
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "opted in")
+        expect_codes(sev, root, None, "expectation-true",
+                     "(the renderer base + the compliant opt-in)")
+
+        # (precision, not RED) the PRE-RENDERER base never fires the expectation:
+        # the historical fixture's positive case (no sheet_section field, a base
+        # with no proofsheet.py at all) already passed above — the no-over-refusal
+        # proof is the standing "positive" case, never re-proven here
 
 
 def main() -> int:

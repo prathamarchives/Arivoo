@@ -107,20 +107,69 @@ def assemble(slice_name: str, notverified: str) -> str:
         lines.extend(f"- {l}" for l in nv)
     else:
         lines.append("- (none stated — REPAIR: the not-verified list may not be empty; LAW-04)")
-    # H-02 (CLAIM-041) — THE SEV SECTION IS DEFERRED TO THE FIRST POST-MERGE
-    # SLICE (the cannot-flip-in-the-same-PR rule, record 22 §8's precedent): the
-    # CI trusted job re-derives every committed sheet with the BASE's
-    # proofsheet — a section the base cannot render makes the committed sheet
-    # unprovable at the very PR that introduces it (observed live: the #76 CI
-    # harness-trusted job refused ARV-PRF-004 over exactly this). The section
-    # (report + reviewed-diff digests, disposition, findings with the open
-    # P0/P1 count, not-verified count — TEMPLATES §6's rule) and its
-    # digest-after-it coverage fix (the reviewer's SEV-3) land with CLAIM-042,
-    # the first slice judged by the merged base. Until then the SEV data lives
-    # in the committed, gate-validated sev.json (never lost, never fabricated).
-    # The digest ordering below is byte-faithful to the BASE's form (the #76 CI
-    # catch's own second layer: the deferred refactor had moved the blank line
-    # ahead of the digest, changing the digest semantics for every sheet).
+    # H-02 (CLAIM-042 — record 34 §8's deferred set, the #76 CI catch's
+    # resolution): the SEV section — the sheet records the report + reviewed-
+    # diff digests, the disposition, the findings with the open-P0/P1 count,
+    # and the not-verified count when the slice's report opts in (TEMPLATES
+    # §6's rule). The section derives deterministically from the committed
+    # sev.json so --verify re-derives byte-identically (PRF-01/LAW-01).
+    #
+    # THE OPT-IN TRANSITION SWITCH (sev.json's boolean sheet_section field):
+    # a committed sheet must stay re-derivable by its PR's own BASE — the
+    # base's proofsheet re-derives the candidate's committed sheet in the
+    # trusted gate phase (F-006), and a base that predates this renderer
+    # cannot re-derive a section it does not know (observed live: the #76
+    # trusted job's ARV-PRF-004 — the cannot-flip-in-the-same-PR rule).
+    # Rendering is therefore OPT-IN: this slice's own committed sheet stays
+    # base-format (sheet_section false), and the FIRST real section-bearing
+    # sheet is the first slice whose merged base renders it. The validator
+    # refuses a mistyped (non-bool) field value (ARV-SEV-002, harness/sev.py)
+    # — the switch is typed, never prose. An unparseable report cannot opt in
+    # and renders NO section: the gate's ARV-SEV-002 is the refusal, the
+    # sheet never fabricates.
+    sev_path = RUNS / slice_name / "sev.json"
+    if sev_path.is_file():
+        raw = sev_path.read_bytes()
+        opted_in = False
+        sdata = None
+        try:
+            parsed = json.loads(raw.decode("utf-8"))
+            if isinstance(parsed, dict):
+                sdata = parsed
+                opted_in = parsed.get("sheet_section") is True
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            opted_in = False  # the gate refuses (ARV-SEV-002); the sheet never fabricates
+        if opted_in:
+            lines.append("")
+            lines.append("## Systems-engineering verification (LAW-30; harness/sev.py)")
+            lines.append(f"- report sha256: {hashlib.sha256(raw).hexdigest()}")
+            lines.append(f"- reviewed_diff_sha256: {sdata.get('reviewed_diff_sha256', '(absent)')}")
+            lines.append(f"- disposition: {sdata.get('disposition', '(absent)')}")
+            # the mistyped-field guards (the #76 CodeRabbit round's named
+            # requirement): a non-list findings/not_verified is RECORDED as a
+            # named refusal — the gate's ARV-SEV-002 refuses the report; the
+            # sheet never fabricates and never crashes with a TypeError
+            fnd = sdata.get("findings", [])
+            if isinstance(fnd, list):
+                open_p01 = sum(1 for f in fnd if isinstance(f, dict)
+                               and f.get("severity") in ("P0", "P1") and f.get("status") == "open")
+                lines.append(f"- findings: {len(fnd)} (open P0/P1: {open_p01})")
+            else:
+                lines.append("- findings: MISTYPED (not a list) — the gate refuses the report (ARV-SEV-002); the count is never fabricated")
+            nv_count = sdata.get("not_verified", [])
+            if isinstance(nv_count, list):
+                lines.append(f"- not-verified entries: {len(nv_count)}")
+            else:
+                lines.append("- not-verified entries: MISTYPED (not a list) — the gate refuses the report (ARV-SEV-002); the count is never fabricated")
+    # The digest ordering is byte-faithful to the BASE's form (the #76 CI
+    # catch's own second layer, 236df25: digest over the content, then the
+    # blank line, then Assembly). The digest is computed AFTER the SEV section
+    # so the printed line covers EVERYTHING above it — the reviewer's SEV-3:
+    # the predecessor printed a digest that excluded the SEV section its own
+    # parenthetical claimed to cover (no integrity hole: ARV-PRF-004 binds by
+    # whole-file byte comparison — but the printed line must not misdescribe
+    # its coverage). A non-opted-in sheet derives byte-identically to the
+    # base's own assembly over the same data (the transition guard, case 10).
     digest = _sha("\n".join(lines))
     lines.append("")
     lines.append("## Assembly")

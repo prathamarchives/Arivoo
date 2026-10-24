@@ -170,7 +170,7 @@
     "red_unrecovered": true
   },
   "harness/tests/test_trusted_gate.py": {
-    "current_sha256": "e031ccf7042315b2e5255823e1d3a95d2b187c12ff6e6f1519252e613cc4fbe3",
+    "current_sha256": "6bb6ed04efe30f4bc77df9560b49439f0d9cf944bdb495c54035fa653a7a7a79",
     "amendments": [
       {
         "note": "AMENDMENT 1 (H-01b-CI implementation slice, assertions strengthened/added \u2014 never removed, LAW-11): test_07's ARV-TG-005 probe strengthened to the real form (an EXISTING-but-empty base dir \u2014 the nonexistent-dir form fires ARV-TG-001 first); the stub builder corrected with the machinery the BASE's KB probes actually load (harness/gate.py, harness/migrate.py) and the slice's notverified.txt (the --verify re-derivation source \u2014 PRF-01); the red_evidence smash in harness/red.py repaired in the same slice (set only on first record)."
@@ -288,6 +288,12 @@
         "new_sha256": "e031ccf7042315b2e5255823e1d3a95d2b187c12ff6e6f1519252e613cc4fbe3",
         "note": "the finalize-helper refactor after the first amendment: the SEV re-finalize extracted from build_stub's tail into the reusable finalize_stub_sev() (test_15's own catch \u2014 its legitimate suite addition moved HEAD and left the stub's report STALE at the wired gate, ARV-SEV-003; the re-finalize before its driver run is the legitimate-candidate path: an addition is a new diff, the SEV re-authorizes over it). The chain: the first amendment's new digest -> this form",
         "observed_at": "2026-10-24T08:13:37.539843+00:00"
+      },
+      {
+        "prior_sha256": "e031ccf7042315b2e5255823e1d3a95d2b187c12ff6e6f1519252e613cc4fbe3",
+        "new_sha256": "6bb6ed04efe30f4bc77df9560b49439f0d9cf944bdb495c54035fa653a7a7a79",
+        "note": "the #76 CodeRabbit round's repairs: test_19's complete-statement replacement (the predecessor left 'fails += pass' \u2014 a SyntaxError in the stub's gate; the omission is now a VALID gate that skips the step), the LAW-30 CI-claim scoping (the S4b leg + the recorded run; the trusted leg begins with the next PR), the STATE next-action bullet (merge #76 -> P3-00). The findings/not_verified mistype guard is CLAIM-042's with the section (the finding obsolete-by-deference at this head)",
+        "observed_at": "2026-10-24T09:45:39.450625+00:00"
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice).",

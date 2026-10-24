@@ -1026,8 +1026,11 @@ class TrustedGateTests(unittest.TestCase):
         stub = build_stub(self.td)
         gp = stub / "harness" / "gate.py"
         gtext = gp.read_text(encoding="utf-8")
-        marker = "sev.check_sev"
+        marker = "fails += sev.check_sev(slice_name, a.diff)"
         self.assertIn(marker, gtext, "the candidate gate carries the SEV step at this revision (the wiring landed)")
+        # the COMPLETE statement is replaced (the #76 CodeRabbit round: replacing
+        # only the call left 'fails += pass' — a SyntaxError; the omission must
+        # be a VALID gate that skips the step, never a syntactically broken one)
         gtext = gtext.replace(marker, "pass  # the omitted gate invocation (the must-reject)")
         gp.write_text(gtext, encoding="utf-8")
         (stub / "harness" / "runs" / SLICE / "sev.json").unlink()

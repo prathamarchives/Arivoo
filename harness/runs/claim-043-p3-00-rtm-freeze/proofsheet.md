@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-043-p3-00-rtm-freeze (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): d4aaa5ca8bf4f2f8cc1c735148607edca5ca6929
-- generated (last record's timestamp): 2026-10-24T13:32:57.813922+00:00
-- run records: 16
+- commit (last run record's): b058c0886768ca15d39070ba089c7d750b2fb778
+- generated (last record's timestamp): 2026-10-24T13:53:15.256973+00:00
+- run records: 18
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-24T13:01:32.837910+00:00
@@ -21,6 +21,8 @@
 - `python3 harness/gate.py --slice claim-043-p3-00-rtm-freeze --diff origin/main` -> exit 0 · output sha256 0adcf542f981ec96 · 2026-10-24T13:10:09.009025+00:00
 - `make verify` -> exit 0 · output sha256 3cffedbdf52f1363 · 2026-10-24T13:30:46.767607+00:00
 - `python3 harness/gate.py --slice claim-043-p3-00-rtm-freeze --diff origin/main` -> exit 0 · output sha256 2bab4d3054a51546 · 2026-10-24T13:32:57.813922+00:00
+- `make verify` -> exit 0 · output sha256 9f5987e8277ae3bc · 2026-10-24T13:51:03.799570+00:00
+- `python3 harness/gate.py --slice claim-043-p3-00-rtm-freeze --diff origin/main` -> exit 0 · output sha256 dab3d10cc46c8b9b · 2026-10-24T13:53:15.256973+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - the freeze is ACCEPTED through this slice's review + merge; the independent phase-gate grader walks RTM.md's matrix at the Phase 3 EXIT gate — never claimed done here.
@@ -32,11 +34,11 @@
 - - the N12 residual (claim-038's notverified) is unchanged; never silently complete by inference from unrelated checks.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 28f74e40aaee752c89313e899f5bcd2d7d2140fa79b1d84ce08a1cce72b06833
-- reviewed_diff_sha256: 53c25ea38bdbc3f13956fa4cdc121ecf19187e5ab315baa3ffb7d519ba150ae6
+- report sha256: 1294792e41d7222efa18a250fa94f51d2aafdeb8785214ba43415084784a7c4d
+- reviewed_diff_sha256: 2e1724cfae3c5a34f6db1f7ce0de0d56097c8cdf683ce52b6fc30ef10f3a6c87
 - disposition: PASS
-- findings: 17 (open P0/P1: 0)
+- findings: 18 (open P0/P1: 0)
 - not-verified entries: 7
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 35ef1ec8405d19cbf2822bcfbb6c7247ce1cd4786a27d6fee16f32479915bef6
+- sheet sha256 (of the content above, excluding this line): 18715e43f1099bc11bd37bcec5bd9e6951df2591d3e20636559dccf8be77e6cb

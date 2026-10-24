@@ -118,8 +118,11 @@ def assemble(slice_name: str, notverified: str) -> str:
     # digest-after-it coverage fix (the reviewer's SEV-3) land with CLAIM-042,
     # the first slice judged by the merged base. Until then the SEV data lives
     # in the committed, gate-validated sev.json (never lost, never fabricated).
-    lines.append("")
+    # The digest ordering below is byte-faithful to the BASE's form (the #76 CI
+    # catch's own second layer: the deferred refactor had moved the blank line
+    # ahead of the digest, changing the digest semantics for every sheet).
     digest = _sha("\n".join(lines))
+    lines.append("")
     lines.append("## Assembly")
     lines.append(f"- sheet sha256 (of the content above, excluding this line): {digest}")
     return "\n".join(lines) + "\n"

@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-039-p3-roadmap-transition (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): b86904bf67b1f3cce407cb9fe5560e7d5ed71bfd
-- generated (last record's timestamp): 2026-10-24T06:20:23.839626+00:00
-- run records: 24
+- commit (last run record's): f9ec574895c530e25af1367998f3866fd0537d85
+- generated (last record's timestamp): 2026-10-24T06:32:23.579006+00:00
+- run records: 36
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-24T06:00:44.322877+00:00
@@ -29,6 +29,18 @@
 - `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 6c44222f4a71abc3 · 2026-10-24T06:18:55.272391+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 93b4f86c3cbde489 · 2026-10-24T06:18:55.427669+00:00
 - `make verify` -> exit 0 · output sha256 b8e21287aab4229a · 2026-10-24T06:20:23.839626+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-24T06:29:26.991249+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-24T06:29:27.345663+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-24T06:29:29.238718+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 86b36062c4f3999f · 2026-10-24T06:29:59.422207+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 5652babae8db45a5 · 2026-10-24T06:30:22.008161+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 30b3dceb4540fbc3 · 2026-10-24T06:30:28.315027+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 e2f4315f0ba4fac0 · 2026-10-24T06:30:28.766894+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 2c891f1bdf213996 · 2026-10-24T06:30:28.974914+00:00
+- `python3 tools/isolation_selftest.py` -> exit 0 · output sha256 db0ced9ebcfb3551 · 2026-10-24T06:30:51.756522+00:00
+- `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 6c44222f4a71abc3 · 2026-10-24T06:30:58.686616+00:00
+- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 93b4f86c3cbde489 · 2026-10-24T06:30:58.852104+00:00
+- `make verify` -> exit 0 · output sha256 4fbe7099f2d640b7 · 2026-10-24T06:32:23.579006+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - not verified (LAW-04 — the CLAIM-039 honest limits):
@@ -54,4 +66,4 @@
 - the remote evidence class — both observed, neither substitutes for the other.
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): f3d9173b3e1b09e16565a33c8a01f99d27ff640140c38fd8c8133383174c50d4
+- sheet sha256 (of the content above, excluding this line): f719906879d2451dd1f94cbfbb23eca3d8a4948e471f0c2111b704b96d1f7bec

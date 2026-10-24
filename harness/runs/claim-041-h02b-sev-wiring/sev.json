@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-041-h02b-sev-wiring",
   "base_sha": "fc8b32eef0149c8ab88767fd8f6c11ec92fa3c59",
-  "reviewed_diff_sha256": "82096c86b213136154c6bb9147d60fa41343ecd6762a77393fe58492b2eb3e47",
+  "reviewed_diff_sha256": "ef88bfe2f0a29ca209bfdefe746525275bc98f865841a7c4ea3e8c34b5da479e",
   "intent_ids": [
     "INT-126",
     "INT-127",

@@ -44,11 +44,11 @@
 - the state it reviewed and are retained in the record 34 + the sev.json.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 961ca35c99b9ea2b6ac1e7b50ae6d55d4c0d36718c225c11c7bb1f9f5cb51bb3
-- reviewed_diff_sha256: 82096c86b213136154c6bb9147d60fa41343ecd6762a77393fe58492b2eb3e47
+- report sha256: d6b8503647dc3061d037c09e2dd41affbe02ed58d7fdb7f51df716936f52fdd6
+- reviewed_diff_sha256: ef88bfe2f0a29ca209bfdefe746525275bc98f865841a7c4ea3e8c34b5da479e
 - disposition: PASS
 - findings: 5 (open P0/P1: 0)
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): bf9b3b8a50ef23e92c9be4bcc6b3c7a568aae218114d4e714c8a7d77477a7c3d
+- sheet sha256 (of the content above, excluding this line): 5788472071067792f6ac1a1f561fb4c639a495b49e22d8267145f7404411ea89

@@ -1,0 +1,15 @@
+# CLAIM-043 — P3-00: the requirements/interfaces/schema freeze — the ONE RTM at its single
+# canonical home (D-039(3)): RTM.md (new root canonical doc) + the EXECUTION §1 fold (FX-07) +
+# the verifier's ROOT_DOCS binding + VER-806 (the every-SYS-traced guard, RED-first) + the
+# P3-00 acceptance record + the first section-bearing Proof Sheet (sheet_section true — the
+# CLAIM-042 transition completing) + the SEV-3 follow-up assessment.
+RTM.md D-039
+EXECUTION.md D-021
+PLAN.md D-037
+STATE.md D-043
+AGENTS.md D-043
+CLAIMS.md D-038
+tools/verify_canonical_layer.py D-041
+context/WORKLOG.md D-043
+context/extracted/36-P3-00-RTM-FREEZE.md D-042
+harness/runs/claim-043-p3-00-rtm-freeze D-042

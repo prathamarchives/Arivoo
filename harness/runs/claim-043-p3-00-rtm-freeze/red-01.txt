@@ -1,0 +1,13 @@
+# red-01 — the RED observed at the predecessor (main 647591b + the VER-806 edit; no RTM.md)
+
+python3 tools/verify_canonical_layer.py -> exit 1
+  VER-806 FAIL: every PLAN.md SYS requirement (11 rows) carries a trace section in RTM.md —
+  the ONE requirements traceability matrix at its single canonical home (D-039(3)) —
+  FIX: create /RTM.md with a '### SYS-NN — <name>' trace section for every untraced id:
+  SYS-01, SYS-02, SYS-03, SYS-04, SYS-05, SYS-06, SYS-07, SYS-08, SYS-09, SYS-10, SYS-11.
+
+The spec-slice's discriminating RED: the freeze's absence itself, caught mechanically — the
+ONE-RTM contract (D-039 element 3) had no substrate; every requirement sat untraced. The
+guard is defect-bound (P-17/D-039): it protects the freeze's own contract — a future SYS row
+added to PLAN.md without its RTM trace fails the layer with the named id, and the RTM's
+absence (deletion, rename, never-created) is a named refusal, never a silent gap.

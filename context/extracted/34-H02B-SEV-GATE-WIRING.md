@@ -51,6 +51,7 @@ PLAN card H-02 part 2: wire the obligation into the gate (PR mode requires the r
 - **SEV-2/3/4/5 (the reviewer's P2s):** all real, all fixed with discriminating regressions; the proof_ids crash was the exact fail-closed-but-unnamed form the named-disposition contract forbids.
 - **test_15's stale stub:** the fixture's legitimate addition moved HEAD and the wired gate refused the stale report — the test re-finalizes (the legitimate-candidate path: an addition is a new diff, the SEV re-authorizes over it).
 - **The KB-SEV-008 machinery-root index:** the first draft double-joined `harness/` (FileNotFoundError at the matrix run); fixed to the repo root — the matrix run caught it immediately.
+- **SEV-6 (the reviewer's second-round P1 — the finalize-sequencing drift):** the committed sev.json's reviewed_diff_sha256 bound the `da4c52b` tree; the artifacts commit `194a114` then changed seven COVERED paths (STATE/AGENTS/CLAIMS/LAWS/PLAN/WORKLOG/record-34), and the slice's own wired gate refused its own record with ARV-SEV-003 at the committed head — the staleness rule catching the builder's own finalize sequencing, live and deterministic (red-03.txt). The repair order the reviewer prescribed: the covered-path fixes land FIRST, then the record re-finalizes over the committed tree, then the re-derived sheet + the RECORDED PR-mode gate green — the record's own re-finalization changes only excluded paths, so the binding is stable (the anti-self-referentiality contract). The reviewer's judgment on the round: the review CONTENT was faithful (all five findings resolved, nothing dropped or downgraded), the record's BINDING was dishonest-by-staleness — both true; the first enforced SEV record caught its own author's drift.
 
 ## 9. Unverified items
 
@@ -70,4 +71,4 @@ P3-00 — freeze the RTM (SYS-01..SYS-11 traced to components/tests/proof), the 
 ## 12. Session close
 
 - At this slice's content commit: the branch carries the RED commit `5447477`, the wiring `a668286`, the reviewer-round fixes `da4c52b`, and the records/artifacts commit. PR #76 opens from it; the merge + post-merge CI record only after they happen (the rule-4 close row carried by the next slice).
-- The rig is up (FACT-001-exact); make verify GREEN at the final tree (9 suites, 53/0, 32 known-bads); the PR-mode gate GREEN over the diff with the SEV obligation enforced.
+- The rig is up (FACT-001-exact); make verify GREEN at the final tree (9 suites, 53/0, 32 known-bads); the PR-mode gate GREEN over the diff with the SEV obligation enforced — the RECORDED green (run-14) captured after the SEV-6 re-finalization, never the authoring-state inference.

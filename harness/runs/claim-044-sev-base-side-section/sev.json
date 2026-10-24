@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-044-sev-base-side-section",
   "base_sha": "c19d49700539ff30ab3bb404957027ea5d35fe88",
-  "reviewed_diff_sha256": "82b4e2a0650b3c6b8bfe8545f13d1a27774350f32c2014f5ec3914099b3012d2",
+  "reviewed_diff_sha256": "98e850ccfc65d7cf60224b684ccdf737d8edde70aba1e55e15c3eeb88c5b5c04",
   "intent_ids": [
     "INT-134",
     "INT-135",
@@ -111,6 +111,20 @@
       "status": "owner-accepted-debt",
       "evidence": "the probe's three stated boundaries: the comment-only marker false-positive (unreachable in this repo's history \u2014 the marker's only arrival ec250a1 rides with the renderer code); the directory-shaped-proofsheet edge (unreachable for wall-controlled main); the undecidable short-circuit (the sibling ARV-SEV-003 refuses the same condition)",
       "disposition": "recorded as the stated residual (this not-verified list); each unreachable in wall-controlled history or fail-closed through a sibling named code; a semantic-AST probe would be more fragile than the false positive it avoids"
+    },
+    {
+      "id": "SEV-5",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "CodeRabbit round 1 on #79: the git-show error class 'exists on disk, but not in' (the checkout HAS proofsheet.py, the base does not) was treated as undecidable \u2014 refusing a positive-absence class the docstring promises to pass",
+      "disposition": "fixed RED-first: the discriminating case (expectation-prerenderer-checkout) observed failing at the round head, then both absence forms accepted in the error-class check; GREEN with the typed amendment"
+    },
+    {
+      "id": "SEV-6",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "CodeRabbit round 1 on #79: the STATE snapshot section (lines 21-28) still carried the #78-era facts",
+      "disposition": "fixed: the outstanding-reviews + verification-state lines re-derived to #79/c19d497/the-009 state (the third consecutive slice with the lower-section staleness \u2014 the re-derive-the-WHOLE-snapshot discipline now standing)"
     }
   ],
   "not_verified": [

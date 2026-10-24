@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-044-sev-base-side-section (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 097ddd8d0c99a6562cceade1c504f7ee9407fae9
-- generated (last record's timestamp): 2026-10-24T15:16:18.073868+00:00
-- run records: 14
+- commit (last run record's): 964344598c948594f36288f595c26d063fa8731c
+- generated (last record's timestamp): 2026-10-24T15:41:30.337005+00:00
+- run records: 16
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-24T15:07:16.148939+00:00
@@ -19,6 +19,8 @@
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 65d28a02e88932b2 · 2026-10-24T15:10:06.006995+00:00
 - `make verify` -> exit 0 · output sha256 6578646789cfb9cc · 2026-10-24T15:12:51.340140+00:00
 - `python3 harness/gate.py --slice claim-044-sev-base-side-section --diff origin/main` -> exit 0 · output sha256 c56306132c971d31 · 2026-10-24T15:16:18.073868+00:00
+- `make verify` -> exit 0 · output sha256 11a5286a54266478 · 2026-10-24T15:38:54.169359+00:00
+- `python3 harness/gate.py --slice claim-044-sev-base-side-section --diff origin/main` -> exit 0 · output sha256 b08a3caef7c6da7c · 2026-10-24T15:41:30.337005+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - the trusted-leg enforcement of ARV-SEV-009 begins with the NEXT slice's PR (the base c19d497 predates the rule — the recorded bootstrap pattern, the same transition as the original SEV wiring and the section renderer; this slice's own PR is judged by the base's validator).
@@ -28,11 +30,11 @@
 - - the N12 residual (claim-038's notverified) is unchanged; never silently complete by inference from unrelated checks.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: b85d5c94ee855d914ba2ad30f15272018f780a25135323a97ed4d1165836bb54
-- reviewed_diff_sha256: 82b4e2a0650b3c6b8bfe8545f13d1a27774350f32c2014f5ec3914099b3012d2
+- report sha256: 00e6146aff6ccccb4c6a77227921367c76bf645039ecbb03c836e78677e73413
+- reviewed_diff_sha256: 98e850ccfc65d7cf60224b684ccdf737d8edde70aba1e55e15c3eeb88c5b5c04
 - disposition: PASS
-- findings: 4 (open P0/P1: 0)
+- findings: 6 (open P0/P1: 0)
 - not-verified entries: 5
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): c752d526b54a3736e9fbd1d376e2a2760917ff6be4a5da7fc947d5c2a2ea2d2e
+- sheet sha256 (of the content above, excluding this line): 30d3590b6313927e24acbaa9933af50006e9c8b8a73e6cc12337add07619d326

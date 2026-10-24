@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-043-p3-00-rtm-freeze",
+  "base_sha": "647591be1231fb48f9f472994285e92af9398b5f",
+  "reviewed_diff_sha256": "e6bd9de4e5671365c8f7d78779c0615959cdd09d0db322278bd1fa4b6ec7cd43",
+  "intent_ids": [
+    "INT-134",
+    "INT-135",
+    "INT-138",
+    "INT-139"
+  ],
+  "requirement_ids": [
+    "SYS-11",
+    "SYS-01",
+    "SYS-02",
+    "SYS-03"
+  ],
+  "system_claims": [
+    "C1",
+    "C2",
+    "C5"
+  ],
+  "changed_components": [
+    "RTM.md (NEW \u2014 the ONE requirements traceability matrix at its single canonical home per D-039(3): the SYS-01..11 traces with pre-registered test paths, the authoritative entity contracts, the seven state machines, the transaction/acknowledgment semantics, the migration plan, the failure-behavior matrix, the open-question boundary register, the P3 slice acceptance trace)",
+    "tools/verify_canonical_layer.py (ROOT_DOCS gains RTM.md \u2014 VER-901 over the twelve root docs; the NEW VER-806 every-SYS-traced guard, RED-first: all 11 rows untraced at the predecessor 647591b)",
+    "EXECUTION.md (the \u00a71 authority-map row \u2014 the FX-07 fold in the same commit as the new doc)",
+    "PLAN.md (the P3-00 card status LANDED; the product-schema-migration gate lifted for RTM-citing slices)",
+    "STATE.md + AGENTS.md (Phase 3 EXECUTING: P3-M0 \u2225 P3-K0 next) + CLAIMS.md (the open row + CLAIM-042's rule-4 close row) + context/WORKLOG.md (Task 52) + record 36"
+  ],
+  "interfaces_reviewed": [
+    "VER-806 (tools/verify_canonical_layer.py): every '| SYS-NN |' row in PLAN.md's requirements table must carry a '### SYS-NN \u2014' trace section in RTM.md \u2014 the requirement statement stays in PLAN, the trace lives in RTM.md (one fact, one home); the RTM's absence is a named refusal naming every untraced id",
+    "the EXECUTION \u00a71 map row (the corpus-stays-closed rule: a new root document requires folding its concern into the map in the same commit \u2014 observed)",
+    "RTM.md \u00a74.4 (the Q12-neutral blob adapter): the frozen schema carries a content-addressed digest reference only \u2014 no provider name, no signed-access detail, no cross-store atomicity claim (the reviewer's provider-name scan of the frozen sections: zero hits)",
+    "this record itself: sheet_section TRUE \u2014 the FIRST section-bearing committed Proof Sheet (the CLAIM-042 transition completing; the base 647591b renders sections \u2014 the trusted leg re-derives the section-bearing sheet byte-identically)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "VER-806 RED-first: exit 1 at 01b3252 (all 11 SYS ids named untraced \u2014 red-01.txt, independently reproduced by the reviewer in a detached worktree) -> exit 0 at the fix head (11/11 traced); run-12",
+      "VER-901 over the TWELVE root docs: every INT-/D- reference in RTM.md resolves to a real ledger entry or decision row; run-12",
+      "the canonical verifier's self-test 39/39 (the reviewer's run); run-12"
+    ],
+    "integration_verification": [
+      "the 13-command proof set at the content head 9083efe \u2014 the 9 suites + the isolation selftest + the KB matrix (31/31) + the canonical verifier (54/0) + make verify, every exit 0; run-01..run-13",
+      "the registry walls' live catch in-slice: the stale CLAIM-042 open row overlapped CLAIM-043's row on PLAN.md/AGENTS.md \u2014 ARV-CLM-002 at the dispatch fixture's gate run; repaired per rule 4 (the open row retired + the close row appended) BEFORE the proof captures; run-04"
+    ],
+    "system_verification": [
+      "the P3-00 card's four acceptance clauses, verified by the fresh-context reviewer: no contradictory source-of-truth rule (the contradiction hunt across PLAN/GLOSSARY/DECISIONS/NORTH-STAR/LAWS: clean); every requirement has tests and proof paths (11/11 trace sections complete); unresolved dependencies have exact boundaries (no owner question closed/narrowed/promoted; VER-504's four mirrors agree); independent SEV finds no P0/P1 (ten P2s: six fixed in-PR, four recorded with named revisits); run-13",
+      "the substrate conventions confirmed verbatim against the 0002/0003 migrations (owner_scope/actor/run_id/input_hash, the closed actor vocabulary, ARV-EV-001/002, RLS + arv_read, the (owner_scope, idempotency_key) PK); the seven state machines adversarially checked (no unreachable states; every crash window has a recovery walk; no partial-as-complete; no resurrection; no commit-before-ack violation)"
+    ],
+    "validation": [
+      "the owner-facing outcome: Phase 3 may now build on a frozen, traceable, non-contradictory contract set \u2014 every future slice cites its RTM sections, every future SYS row lands with its trace (VER-806 enforces), and the owner's Q11/Q12/Q8 gates keep their exact registered boundaries (RTM.md \u00a77) with the Q12 comparison + recommendation prepared for their decision"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a SYS requirement added to PLAN.md without its RTM trace \u2014 the traceability contract silently gapped",
+      "control": "VER-806: the canonical layer refuses, naming the untraced ids; the RTM's absence itself is a named refusal (RED-first at the predecessor: all 11 untraced)",
+      "proof_ids": [
+        "run-12"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "a new root canonical document outside the authority map \u2014 a second authority surface (the corpus-stays-closed rule)",
+      "control": "the EXECUTION \u00a71 fold landed in the SAME commit as RTM.md (FX-07); VER-901 binds the new doc's INT-/D- references; the map row names the doc's concern exactly",
+      "proof_ids": [
+        "run-12"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "the freeze implicitly closing, narrowing, or promoting an owner question (Q11/Q12/Q8/D-014/Q6/Q7)",
+      "control": "RTM.md \u00a77 keeps every question at its EXACT registered scope with the frozen AROUND-baselines named; VER-504's four mirrors agree (the register unchanged); the Q12 recommendation is labeled evidence-preparation, NEVER a ratification",
+      "proof_ids": [
+        "run-12"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "the freeze contradicting a canonical source (a second source-of-truth rule)",
+      "control": "the fresh-context reviewer's contradiction hunt across PLAN/GLOSSARY/DECISIONS/NORTH-STAR/LAWS: clean \u2014 the substrate conventions confirmed verbatim against the 0002/0003 migrations; OBS-1 (the pre-existing NORTH-STAR layer-2 wording vs the Q11 baseline) flagged for the owner's Q11 gate, never silently reconciled",
+      "proof_ids": [
+        "run-13"
+      ]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "registry drift: a merged claim's stale open row overlapping the next claim (the #67 class)",
+      "control": "the ARV-CLM-002 walls catch, live in-slice (the dispatch fixture's gate run at the committed tree): the stale CLAIM-042 row retired + its rule-4 close row appended before the proof captures",
+      "proof_ids": [
+        "run-04"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "evidence": "RTM.md \u00a76's 'conflicted' trigger row conflates the ARV-CMD-409 key/body collision (which refuses) with competing authored revisions (which apply, both persisting \u2014 \u00a73.5's governing machine is precise); the safety invariants are identical in both places (no LWW, both preserved)",
+      "disposition": "recorded with its named revisit: P3-08's card pins the trigger to \u00a73.5; the \u00a76 row relabels at the next RTM-touching change"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "evidence": "RTM.md \u00a73.4's terminal 'failed' outbox state is not enumerated in PLAN P3-08's acceptance letter ('server-durable or explicitly queued/retryable') \u2014 a faithful P3-08 could fail the letter in the terminal-failure case",
+      "disposition": "recorded with its named revisit: reconciled at P3-08 card time (the acceptance read as 'server-durable or an explicit named sync state', or PLAN amended through the canonical process)"
+    },
+    {
+      "id": "SEV-3",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "\u00a74.3's 'frozen rung vocabulary' phrasing invited reading the 4-value acknowledgment set as a redefinition of the canonical five-rung ladder, with hyphen/underscore variance",
+      "disposition": "fixed in-PR: relabeled the write-side ACKNOWLEDGMENT vocabulary with the canonical ladder named as unchanged (GLOSSARY/NORTH-STAR govern claimable findability); one spelling"
+    },
+    {
+      "id": "SEV-4",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "evidence": "two derived-entity state vocabularies (\u00a72.3's extraction generation vs \u00a73.6's index machine) frozen without a distinguishing note \u2014 a LAW-25 one-schema-per-vocabulary drift risk",
+      "disposition": "recorded with its named revisit: P3-03 and P3-07 pin each enum against its own section when they implement"
+    },
+    {
+      "id": "SEV-5",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "\u00a70 promised Q7 visibility in \u00a77 but no subsection existed",
+      "disposition": "fixed in-PR: the Q7 subsection added (blocks paid/selected semantic work only)"
+    },
+    {
+      "id": "SEV-6",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the slice's own record/commit message said the Q12 comparison ran 'across the nine criteria PLAN names' \u2014 PLAN names EIGHT; RTM adds the deployment-fit row (a D-032 consistency observation) itself (the #77 SEV-1 count class, recurring)",
+      "disposition": "corrected forward: record 36 \u00a74 + this finding carry the real counts (eight named by PLAN + the one RTM adds); the historical commit messages stay append-only; the lesson re-learned \u2014 every count derives from the tool's own text"
+    },
+    {
+      "id": "SEV-7",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "\u00a71 SYS-01 restated the PLAN requirement statement verbatim against the RTM's own pointer-only rule (a duplicated fact is a synchronization obligation)",
+      "disposition": "fixed in-PR: the restatement deleted (pointer-only like the other ten)"
+    },
+    {
+      "id": "SEV-8",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "\u00a72.8's CommandLog summary omitted client_id/command_name (the landed 0003 table has both)",
+      "disposition": "fixed in-PR: the row marked abridged \u2014 the migration stays the authority"
+    },
+    {
+      "id": "SEV-9",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "\u00a72.5's notation treated 'revised' as a state while \u00a73.3's machine correctly keeps the entity active",
+      "disposition": "fixed in-PR: the notation aligned with \u00a73.3 (edit appends a revision row; the entity stays active)"
+    },
+    {
+      "id": "SEV-10",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "\u00a72.1's 'no auto-merge, ever' overstated the horizon in isolation (the register: no auto-merge UNTIL the owner ratifies)",
+      "disposition": "fixed in-PR: reworded to 'no auto-merge under this freeze; owner ratification is the only change path'"
+    }
+  ],
+  "not_verified": [
+    "the freeze is accepted through this slice's review + merge; the independent phase-gate grader walks RTM.md's matrix at the Phase 3 EXIT gate \u2014 never claimed done here",
+    "the state machines and test paths are PRE-REGISTERED contracts; their proofs land with the implementation slices (P3-01..09) \u2014 this slice freezes, it does not implement",
+    "the Q11/Q12/Q8 baselines remain owner-gated at their exact registered scopes (RTM.md \u00a77); the Q12 recommendation awaits the owner's ratification \u2014 nothing in the frozen contracts depends on the choice",
+    "the four recorded P2 debts (SEV-1/2/4 + OBS-1's pre-existing NORTH-STAR layer-2 wording) each carry their named revisit \u2014 P3-08/P3-03/P3-07 card time and the owner's Q11 gate",
+    "the remote CI's five-check run at this PR's head \u2014 observed at the PR, never pre-recorded here",
+    "the identity limit (LAW-30): the reviewer is a fresh-context subagent on the same host and user \u2014 declared independence of context, never cryptographic; the separate grader at the phase gates remains the protocol",
+    "the N12 residual (claim-038's notverified) is unchanged; never silently complete by inference from unrelated checks"
+  ],
+  "builder_context": "builder-glm-host-session30-claim043",
+  "reviewer_context": "sev043-p300-r1-freshctx-83526c3-20261024",
+  "disposition": "PASS",
+  "review_summary": "P3-00's four acceptance clauses verified by the independent fresh-context review: no contradictory source-of-truth rule (the contradiction hunt across PLAN/GLOSSARY/DECISIONS/NORTH-STAR/LAWS clean; the substrate conventions confirmed verbatim against the 0002/0003 migrations); every SYS-01..11 requirement traced with pre-registered test paths, claims, and validation scenarios (VER-806 PASS 11/11, RED-first at the predecessor with all ids named); the unresolved dependencies at exact boundaries (no owner question closed/narrowed/promoted; VER-504's mirrors agree; the Q12 comparison + recommendation labeled evidence-preparation); independent SEV with no P0/P1 \u2014 ten P2s, six fixed in-PR (all one-liners: the restatement deletion, the 'ever' rewording, the notation alignment, the vocabulary relabel, the abridged mark, the Q7 subsection) and four recorded with named revisits (P3-08/P3-03/P3-07 card time; the count correction carried here and in record 36: PLAN names eight criteria, RTM adds the deployment-fit row). The seven state machines adversarially checked sound; the test paths verified discriminating; the registry walls caught the stale-row drift in-slice (ARV-CLM-002, repaired per rule 4). The 13-command proof set is green at the content head (the 9 suites, the isolation selftest, the KB matrix 31/31, the canonical verifier 54/0 \u2014 VER-806 among them \u2014 make verify). This record sets sheet_section true: the FIRST section-bearing committed Proof Sheet, completing the CLAIM-042 transition exactly as named; the SEV-3 follow-up (the base-side sheet_section expectation) is adopted per the reviewer's recommendation as CLAIM-044, its own bounded slice immediately after this merge.",
+  "sheet_section": true
+}

@@ -672,3 +672,10 @@ Stage Summary:
 - Evidence: record 33; harness/runs/claim-040-h02a-sev-validator/ (red-01, the proof set, the sheet); PR #75.
 - Unresolved: the N12 residual (unchanged); part 2's gate/KB/activation work; P3-00 unaccepted.
 - Next: CLAIM-041 (H-02 part 2) → P3-00 — NO PAUSE.
+
+## Task 50 (CLAIM-041, session 30) — H-02 part 2: the SEV gate wiring + the first enforced record
+- What: the gate's PR-mode SEV step (the public validator's wrapper) + the KB-SEV-001..008 matrix (32 known-bads total) + the actual-caller dispatch case + trusted tests 18/19 (the base machinery enforces even over a gutted candidate gate) + the Proof-Sheet SEV section + the PLAN/LAWS activation (LAW-30 LIVE) + the bootstrap SEV record.
+- Outcome: the fresh-context reviewer round returned BLOCKED at the mid-slice state (a live-reproduced P1 — the declarations missing test_record_machinery.py — + four P2s: the proof_ids TypeError, the printed digest's coverage, the unbound slice_id, the KB env default); all five fixed RED-first (red-02 at the stashed pre-fix forms; the proof_ids case died with the reviewer's exact traceback); the resolved record validates and the PR-mode gate GREEN over the diff with the obligation enforced on this slice's own report.
+- Evidence: record 34; harness/runs/claim-041-h02b-sev-wiring/ (red-01/red-02, 13 records, sev.json, the sheet); the reviewer's returned record (agent-7904d83a); PR #76.
+- Unresolved: the bootstrap transition (CI-enforced SEV begins with the NEXT slice's PR — the CI base predates the wiring); identity declared, never cryptographic; the N12 residual unchanged.
+- Next: P3-00 (the RTM/interface/schema freeze) — NO PAUSE.

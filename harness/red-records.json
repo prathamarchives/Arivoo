@@ -66,7 +66,7 @@
     "red_code": "ARV-TEST-000/011/019"
   },
   "harness/tests/test_gate_dispatch.py": {
-    "current_sha256": "3ffee856c59b2d6119903f8c28497ca6fa6b17e4134642bb85cea6345bbb5911",
+    "current_sha256": "b688d10a8e652222e1d4a743ae02d6be9c9a49547838d1338a07b31315a32378",
     "amendments": [
       {
         "note": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
@@ -100,6 +100,12 @@
         "new_sha256": "3ffee856c59b2d6119903f8c28497ca6fa6b17e4134642bb85cea6345bbb5911",
         "note": "the schema-2 typing migration (CLAIM-037, F-007): the binding recovered from git history (the file's first commit \u2014 the earliest verifiable revision); the smash class: this record's creation-time red evidence was overwritten before any commit preserved it (the record's own prose) \u2014 the observation is honestly unrecoverable, never fabricated",
         "observed_at": "2026-10-23T00:00:00+00:00"
+      },
+      {
+        "prior_sha256": "3ffee856c59b2d6119903f8c28497ca6fa6b17e4134642bb85cea6345bbb5911",
+        "new_sha256": "b688d10a8e652222e1d4a743ae02d6be9c9a49547838d1338a07b31315a32378",
+        "note": "the CLAIM-041 RED observed at the test-only commit: the three new-case groups at the wiring-absent predecessor (fc8b32e) \u2014 the dispatch missing-report case (the PR dispatches green with NO SEV report), the trusted tests 18/19 (no SEV step: nothing refuses), the machinery SEV-sheet-section case (the sheet silent about the report) \u2014 red-01.txt; the KB-SEV-001..008 matrix added as precision/regression cases over the landed validator (labeled, never claimed RED)",
+        "observed_at": "2026-10-24T08:07:34.779308+00:00"
       }
     ],
     "red_evidence": "Amendment 2 (H-01a-R, narrowed not weakened): the bad-base assertion's first draft counted raw 'ARV-DIFF-001' substring mentions \u2014 but the ARV-CLM-000 skip note and the REQUIRED consolidated summary ('RED \u2014 the gate refuses: ...') legitimately contain the code string; the assertion is narrowed to the disposition form (lines starting 'FAIL ARV-DIFF-001' == exactly one) \u2014 no assertion removed, the traceback/exit/skip-note/selfcheck assertions unchanged; the underlying defect (a second disposition print or a crash-repeated code) stays refused",
@@ -164,7 +170,7 @@
     "red_unrecovered": true
   },
   "harness/tests/test_trusted_gate.py": {
-    "current_sha256": "c9f9e9b31a42709c994f45e971ec6f1d2a553542b4512fb414efed55ff39a294",
+    "current_sha256": "6bb6ed04efe30f4bc77df9560b49439f0d9cf944bdb495c54035fa653a7a7a79",
     "amendments": [
       {
         "note": "AMENDMENT 1 (H-01b-CI implementation slice, assertions strengthened/added \u2014 never removed, LAW-11): test_07's ARV-TG-005 probe strengthened to the real form (an EXISTING-but-empty base dir \u2014 the nonexistent-dir form fires ARV-TG-001 first); the stub builder corrected with the machinery the BASE's KB probes actually load (harness/gate.py, harness/migrate.py) and the slice's notverified.txt (the --verify re-derivation source \u2014 PRF-01); the red_evidence smash in harness/red.py repaired in the same slice (set only on first record)."
@@ -270,6 +276,24 @@
         "new_sha256": "c9f9e9b31a42709c994f45e971ec6f1d2a553542b4512fb414efed55ff39a294",
         "note": "the CLAIM-040 amendment: test_trusted_gate.py's test_15 anchor moved from the TESTS tuple's mutable TAIL (the record_machinery last-entry form, broken by this slice's legitimate suite addition \u2014 test_sev.py) to the stable FIRST entry (the migrations line); the insertion semantics unchanged (a registered addition accepted); the tail-anchor fragility recorded in the claim's \u00a78",
         "observed_at": "2026-10-24T06:57:13.413455+00:00"
+      },
+      {
+        "prior_sha256": "c9f9e9b31a42709c994f45e971ec6f1d2a553542b4512fb414efed55ff39a294",
+        "new_sha256": "0665e25472caa70426ad965aaca112700533ab9e0415fc6cff5acfe0fd8515bf",
+        "note": "the CLAIM-041 RED observed at the test-only commit: the three new-case groups at the wiring-absent predecessor (fc8b32e) \u2014 the dispatch missing-report case (the PR dispatches green with NO SEV report), the trusted tests 18/19 (no SEV step: nothing refuses), the machinery SEV-sheet-section case (the sheet silent about the report) \u2014 red-01.txt; the KB-SEV-001..008 matrix added as precision/regression cases over the landed validator (labeled, never claimed RED)",
+        "observed_at": "2026-10-24T08:07:34.779437+00:00"
+      },
+      {
+        "prior_sha256": "0665e25472caa70426ad965aaca112700533ab9e0415fc6cff5acfe0fd8515bf",
+        "new_sha256": "e031ccf7042315b2e5255823e1d3a95d2b187c12ff6e6f1519252e613cc4fbe3",
+        "note": "the finalize-helper refactor after the first amendment: the SEV re-finalize extracted from build_stub's tail into the reusable finalize_stub_sev() (test_15's own catch \u2014 its legitimate suite addition moved HEAD and left the stub's report STALE at the wired gate, ARV-SEV-003; the re-finalize before its driver run is the legitimate-candidate path: an addition is a new diff, the SEV re-authorizes over it). The chain: the first amendment's new digest -> this form",
+        "observed_at": "2026-10-24T08:13:37.539843+00:00"
+      },
+      {
+        "prior_sha256": "e031ccf7042315b2e5255823e1d3a95d2b187c12ff6e6f1519252e613cc4fbe3",
+        "new_sha256": "6bb6ed04efe30f4bc77df9560b49439f0d9cf944bdb495c54035fa653a7a7a79",
+        "note": "the #76 CodeRabbit round's repairs: test_19's complete-statement replacement (the predecessor left 'fails += pass' \u2014 a SyntaxError in the stub's gate; the omission is now a VALID gate that skips the step), the LAW-30 CI-claim scoping (the S4b leg + the recorded run; the trusted leg begins with the next PR), the STATE next-action bullet (merge #76 -> P3-00). The findings/not_verified mistype guard is CLAIM-042's with the section (the finding obsolete-by-deference at this head)",
+        "observed_at": "2026-10-24T09:45:39.450625+00:00"
       }
     ],
     "red_evidence": "RED-FIRST (H-01b-CI, session 23): NEW suite harness/tests/test_trusted_gate.py first recorded \u2014 all seven cases observed FAILING at the predecessor 212b1f8 with the named missing-mechanism form ('tools/trusted_gate.py does not exist at the predecessor'); the stub-builder correction (proofsheet RUNS override = the runs ROOT) recorded at the observation. This note is the NEW file's initial red evidence; the five predecessor records keep their own evidence texts (the smash defect repaired in red.py this slice).",
@@ -315,7 +339,7 @@
     "red_exit": 1,
     "red_code": "ARV-PRF-006 + ARV-RED-007/009 (the suite's RED set observed at 048aaa2 \u2014 six failures: the count-based overwrite, the stall, the unparseable-context no-refusal, the untyped-mint no-refusal, the changed-since-read no-refusal; red-01.txt)",
     "red_evidence": "the CLAIM-037 fix-commit amendment: test_trusted_gate.py's build_stub restructured for schema-2 stub records (the binding names the stub's own git history; the typed amendments chain from the base records) + the NEW suite test_record_machinery.py minted with its OBSERVED red",
-    "current_sha256": "911a4d651118b3e6a2079bfbb251d2d77950105ee7addc91fd908a585fc8dfe8",
+    "current_sha256": "8daccb6db9d7a0a5ba341939bcd5a391dadf57edd943a4470144f44637131ec0",
     "amendments": [
       {
         "prior_sha256": "a4ee919f0c56a664e874aab871f6d4d6b278f9615ccf705be91b06f40130dcd3",
@@ -346,6 +370,24 @@
         "new_sha256": "911a4d651118b3e6a2079bfbb251d2d77950105ee7addc91fd908a585fc8dfe8",
         "note": "CLAIM-038's RED cases restored: the machinery suite's numbering cases 1/2/5 back (the routed rider, its RED re-observed at this slice's commit next). Tests added, none removed",
         "observed_at": "2026-10-23T16:16:41.944664+00:00"
+      },
+      {
+        "prior_sha256": "911a4d651118b3e6a2079bfbb251d2d77950105ee7addc91fd908a585fc8dfe8",
+        "new_sha256": "6d7c186bac2b6e34b136e64dc0e206372d1818a258b270c2ef308ae35609cae8",
+        "note": "the CLAIM-041 RED observed at the test-only commit: the three new-case groups at the wiring-absent predecessor (fc8b32e) \u2014 the dispatch missing-report case (the PR dispatches green with NO SEV report), the trusted tests 18/19 (no SEV step: nothing refuses), the machinery SEV-sheet-section case (the sheet silent about the report) \u2014 red-01.txt; the KB-SEV-001..008 matrix added as precision/regression cases over the landed validator (labeled, never claimed RED)",
+        "observed_at": "2026-10-24T08:07:34.779495+00:00"
+      },
+      {
+        "prior_sha256": "6d7c186bac2b6e34b136e64dc0e206372d1818a258b270c2ef308ae35609cae8",
+        "new_sha256": "bb755e2f16b2f6fa1909b9e01750381da562f5b7deb9fb2e372d9014270da129",
+        "note": "the #76 fresh-context reviewer round's fixes + their discriminating cases: SEV-1 (the declarations \u2014 test_record_machinery.py missing from BOTH homes, the same 6037567/claim-040 class, caught by the reviewer's live gate run); SEV-2 (the non-iterable proof_ids guard \u2014 named 004, never the TypeError crash the reviewer observed at the wired gate; red-02: the pre-fix suite died with the exact traceback); SEV-4 (the slice_id binding \u2014 a transplant naming another slice refuses with 002); SEV-3 (the sheet's printed digest computed AFTER the SEV section \u2014 the printed line no longer excludes the bytes it claims to cover; red-02: changing only sev.json left the digest byte-identical); SEV-5 (KB-SEV-008's env default unsets its own finally)",
+        "observed_at": "2026-10-24T08:32:44.949812+00:00"
+      },
+      {
+        "prior_sha256": "bb755e2f16b2f6fa1909b9e01750381da562f5b7deb9fb2e372d9014270da129",
+        "new_sha256": "8daccb6db9d7a0a5ba341939bcd5a391dadf57edd943a4470144f44637131ec0",
+        "note": "the #76 CI catch repaired: the Proof-Sheet SEV section + its two machinery cases DEFERRED to CLAIM-042 (the first post-merge slice) per the cannot-flip-in-the-same-PR rule \u2014 the CI trusted job's base proofsheet refused the section-bearing committed sheet with ARV-PRF-004 (the base cannot re-derive a format it does not know; record 22 \u00a78's precedent). The machinery suite loses the two section cases (their forms preserved in record 34 \u00a78 as CLAIM-042's RED set); the sheet stays base-format through this PR",
+        "observed_at": "2026-10-24T09:24:45.561615+00:00"
       }
     ]
   },
@@ -356,7 +398,7 @@
     "red_exit": 1,
     "red_code": "ARV-SEV-001..008 all unprovable at the predecessor (the module absent \u2014 the ten suite groups red, exit 1, red-01.txt)",
     "red_evidence": "the CLAIM-040 red observed at the test-only commit: test_sev.py at the predecessor (no harness/sev.py) \u2014 ten failing case groups, every named ARV-SEV code unprovable, exit 1; red-01.txt in the run dir",
-    "current_sha256": "6da5ba040eaab9c6b640497518e32be08199576ec7b4af6f1cb0cd57e71de837",
+    "current_sha256": "605570e4311d15bf3869be509ac7d88254c2d044b6c46b512f3cb1c93a6c85a8",
     "amendments": [
       {
         "prior_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
@@ -375,6 +417,12 @@
         "new_sha256": "6da5ba040eaab9c6b640497518e32be08199576ec7b4af6f1cb0cd57e71de837",
         "note": "the rename case's R100 correction (the third iteration, honestly recorded: the content-drift form passed vacuously at the pre-fix validator because git detected no rename \u2014 the discriminating form restores the base content so the R100 suppression fires); red-03.txt re-observed with BOTH round-2 failures at the pre-fix form",
         "observed_at": "2026-10-24T07:35:58.106688+00:00"
+      },
+      {
+        "prior_sha256": "6da5ba040eaab9c6b640497518e32be08199576ec7b4af6f1cb0cd57e71de837",
+        "new_sha256": "605570e4311d15bf3869be509ac7d88254c2d044b6c46b512f3cb1c93a6c85a8",
+        "note": "the #76 fresh-context reviewer round's fixes + their discriminating cases: SEV-1 (the declarations \u2014 test_record_machinery.py missing from BOTH homes, the same 6037567/claim-040 class, caught by the reviewer's live gate run); SEV-2 (the non-iterable proof_ids guard \u2014 named 004, never the TypeError crash the reviewer observed at the wired gate; red-02: the pre-fix suite died with the exact traceback); SEV-4 (the slice_id binding \u2014 a transplant naming another slice refuses with 002); SEV-3 (the sheet's printed digest computed AFTER the SEV section \u2014 the printed line no longer excludes the bytes it claims to cover; red-02: changing only sev.json left the digest byte-identical); SEV-5 (KB-SEV-008's env default unsets its own finally)",
+        "observed_at": "2026-10-24T08:32:44.949859+00:00"
       }
     ]
   }

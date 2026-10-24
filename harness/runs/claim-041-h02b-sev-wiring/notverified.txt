@@ -1,0 +1,22 @@
+not verified (LAW-04 — the CLAIM-041 honest limits):
+- the bootstrap transition (the H-02 card's own scope): the CI harness-trusted job
+  for THIS PR runs on the base fc8b32e, which predates the wiring — the SEV
+  obligation becomes mechanically enforced by CI from the NEXT slice's PR onward;
+  this slice's own enforcement is the local PR-mode gate (green at the head) + the
+  five-check CI run on the same head. Never a permanent bypass: the transition is
+  scoped, independently reviewed (the #76 fresh-context round), and recorded.
+- identity separation is DECLARED, not cryptographic: the fresh-context reviewer
+  subagent ran on the same host and OS user as the builder — process-level
+  separation only; the separate phase-gate grader remains part of the protocol.
+- base-SIDE additions do not move a merge-base: base-movement staleness rides the
+  strict=true required-status binding (up-to-date branches force a new head and
+  revalidation at merge) — stated, never claimed closed.
+- the same-host/same-user residual (the mutation floor's BOUNDARY; Q10) is
+  unchanged and untouched by this slice.
+- this slice is harness machinery: no product code, no migrations, no C1-C5
+  product behavior — the suites' green is machinery evidence, never product proof.
+- the PR merge + post-merge CI observe after the PR opens — recorded in the rule-4
+  close row carried by the next slice; never predicted here.
+- the fresh-context reviewer's own not-verified items (the artifacts absent at its
+  review head; make verify not run as one command by the reviewer) were true of
+  the state it reviewed and are retained in the record 34 + the sev.json.

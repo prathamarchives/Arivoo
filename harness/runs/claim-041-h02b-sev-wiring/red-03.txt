@@ -1,0 +1,6 @@
+CLAIM-041 red-03 — the #76 reviewer round 2's SEV-6 observed live (the gate at the committed head 194a114 -> exit 1):
+
+FAIL ARV-SEV-003: reviewed_diff_sha256 does not match the recomputed digest — the reviewed code changed after the report
+RED — the gate refuses: 1 failure(s): ARV-SEV-003
+
+The slice's own wired gate refusing its own record — the reviewed_diff_sha256 bound the da4c52b tree; the artifacts commit changed seven covered paths; the staleness rule caught the builder's own finalize sequencing (the reviewer's exact reproduction, independently confirmed here).

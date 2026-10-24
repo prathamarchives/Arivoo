@@ -1,0 +1,19 @@
+# CLAIM-041 — H-02 part 2 (b): the gate's SEV step + the KB-SEV matrix + the dispatch/trusted integration
+# cases + the Proof-Sheet SEV section + the PLAN/LAWS activation + the bootstrap-scoped SEV record.
+harness/gate.py D-037
+harness/sev.py D-037
+harness/tests/test_sev.py D-037
+harness/known-bad/cases.py D-041
+harness/proofsheet.py D-041
+harness/tests/test_gate_dispatch.py D-041
+harness/tests/test_trusted_gate.py D-041
+harness/tests/test_record_machinery.py D-041
+harness/red-records.json D-041
+harness/runs/claim-041-h02b-sev-wiring D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+LAWS.md D-037
+context/WORKLOG.md D-043
+context/extracted/34-H02B-SEV-GATE-WIRING.md D-042

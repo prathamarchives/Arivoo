@@ -107,6 +107,20 @@ def assemble(slice_name: str, notverified: str) -> str:
         lines.extend(f"- {l}" for l in nv)
     else:
         lines.append("- (none stated — REPAIR: the not-verified list may not be empty; LAW-04)")
+    # H-02 (CLAIM-041) — THE SEV SECTION IS DEFERRED TO THE FIRST POST-MERGE
+    # SLICE (the cannot-flip-in-the-same-PR rule, record 22 §8's precedent): the
+    # CI trusted job re-derives every committed sheet with the BASE's
+    # proofsheet — a section the base cannot render makes the committed sheet
+    # unprovable at the very PR that introduces it (observed live: the #76 CI
+    # harness-trusted job refused ARV-PRF-004 over exactly this). The section
+    # (report + reviewed-diff digests, disposition, findings with the open
+    # P0/P1 count, not-verified count — TEMPLATES §6's rule) and its
+    # digest-after-it coverage fix (the reviewer's SEV-3) land with CLAIM-042,
+    # the first slice judged by the merged base. Until then the SEV data lives
+    # in the committed, gate-validated sev.json (never lost, never fabricated).
+    # The digest ordering below is byte-faithful to the BASE's form (the #76 CI
+    # catch's own second layer: the deferred refactor had moved the blank line
+    # ahead of the digest, changing the digest semantics for every sheet).
     digest = _sha("\n".join(lines))
     lines.append("")
     lines.append("## Assembly")

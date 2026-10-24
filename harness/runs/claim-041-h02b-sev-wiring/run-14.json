@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-041-h02b-sev-wiring --diff origin/main",
+  "exit_code": 0,
+  "commit": "496cc6111cf16ab12786dfb4676f1d5e1b5b2330",
+  "output_sha256": "b2b8a90a3161a91fc2ab7518949fe89e7f294ca67d29d203350ff586a005fd2a",
+  "recorded_at": "2026-10-24T09:05:31.392311+00:00"
+}

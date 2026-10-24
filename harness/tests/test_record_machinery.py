@@ -263,6 +263,14 @@ def main() -> int:
         check("a missing registry bootstraps (the ARV-RED-003 recovery path preserved)",
               rc4 == 0 and bootstrapped,
               f"rc={rc4} bootstrapped={bootstrapped} output={out4[:200]!r} — the recovery path crashed at the round's predecessor (Greptile P2)")
+
+        # CLAIM-041 (H-02 part 2) — THE SEV SHEET-SECTION CASES ARE DEFERRED TO
+        # CLAIM-042 (the first post-merge slice) with the section itself: the
+        # cannot-flip-in-the-same-PR rule (record 22 §8's precedent, observed
+        # live by the #76 CI trusted job's ARV-PRF-004 — the base's proofsheet
+        # cannot re-derive a section it does not know, so the section and its
+        # discriminating cases land together post-merge). The cases' forms are
+        # preserved verbatim in record 34 §8 for the next slice's RED set.
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

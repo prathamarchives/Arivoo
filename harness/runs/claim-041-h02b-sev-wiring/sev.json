@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-041-h02b-sev-wiring",
+  "base_sha": "fc8b32eef0149c8ab88767fd8f6c11ec92fa3c59",
+  "reviewed_diff_sha256": "d6a45433f276f58918699bc3f368900639c3c0f24149b6bbf979396c715d51c7",
+  "intent_ids": [
+    "INT-126",
+    "INT-127",
+    "INT-134",
+    "INT-135",
+    "INT-138"
+  ],
+  "requirement_ids": [
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C5"
+  ],
+  "changed_components": [
+    "harness/gate.py (the SEV step \u2014 PR mode requires the report; selfcheck NOTEs it)",
+    "harness/proofsheet.py (the SEV section \u2014 the report + reviewed-diff digests, disposition, findings, not-verified count)",
+    "harness/known-bad/cases.py (the KB-SEV-001..008 matrix)",
+    "harness/tests/test_gate_dispatch.py (the ACTUAL-caller missing-report case + the positive fixture's SEV surface)",
+    "harness/tests/test_trusted_gate.py (tests 18/19 + the stub's SEV surface + the finalize helper)",
+    "harness/tests/test_record_machinery.py (the SEV sheet-section + digest-coverage cases)",
+    "harness/sev.py (the reviewer-round guards: proof_ids iteration, slice_id binding)"
+  ],
+  "interfaces_reviewed": [
+    "harness/gate.py main(): step 8 \u2014 sev.check_sev(slice_name, a.diff) in PR mode; the ARV-SEV-000 NOTE in selfcheck (the scope/claims pattern)",
+    "harness/proofsheet.py assemble(): the SEV section derived from the committed sev.json (deterministic; the printed digest computed after it \u2014 SEV-3)",
+    "harness/sev.py check_sev: the PUBLIC validator's wrapper (never an internal duplicate)",
+    "harness/dispatch.py -> gate.py --slice/--diff: the ACTUAL caller path the dispatch case proves end-to-end"
+  ],
+  "v_model": {
+    "component_verification": [
+      "harness/sev.py's refusal matrix: test_sev.py 35 case groups green (the reviewer's round added the proof_ids + slice_id discriminations); run-01",
+      "the gate wrapper delegates to the public validator (no duplicate validation logic in the gate); run-01"
+    ],
+    "integration_verification": [
+      "the ACTUAL caller end-to-end: the dispatch case (a real clone, the real dispatcher, PR mode) refuses the missing report with ARV-SEV-001 and the positive shape (born-valid sev.json) dispatches green; run-01",
+      "the Proof Sheet's SEV section re-derives byte-identically with the report committed (ARV-PRF-004 green at the gate); run-01"
+    ],
+    "system_verification": [
+      "the trusted path enforces the obligation from the base machinery: tests 18/19 (a missing report refused; a candidate whose own gate omits the step still refused); run-01",
+      "the KB-SEV matrix 8/8 (missing/malformed/stale/trace/BLOCKED/placeholder/identity/coordination-weakening) firing at --known-bad-only; run-01"
+    ],
+    "validation": [
+      "the #76 fresh-context reviewer round: an independent subagent traced intent (INT-134/135/138 verified), the SYS-11 requirement, and every acceptance claim to command output; its BLOCKED verdict on the mid-slice state drove five fixes (SEV-1..5) \u2014 the record you are reading is the resolved form; red-01/red-02"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a claimed/scoped/sheeted PR carries NO SEV report and silently passes",
+      "control": "the gate's PR-mode step 8 through the public validator; selfcheck only NOTEs it (the scope/claims pattern)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "the candidate stubs its own validator AND its own suite (coordination weakening)",
+      "control": "KB-SEV-008: the machinery loads from the unweakened source (the trusted driver's env, else the live repo root; the case's own default now unsets in finally \u2014 SEV-5)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "the candidate removes the SEV step from its own gate (the omitted invocation)",
+      "control": "the trusted gate phase runs the BASE's machinery over the candidate's data; the candidate's own gate is never the only evidence",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "code changed after review \u2014 a stale report over a moved base or a new diff",
+      "control": "ARV-SEV-003: base_sha vs the observed merge-base + the recomputed reviewed-diff digest (the exact-path byte-safe form)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "a BLOCKED report presented for merge, or a PASS carrying an open P0/P1",
+      "control": "ARV-SEV-005: the frozen PASS|BLOCKED vocabulary + the per-finding open-P0/P1 guard",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-06",
+      "scenario": "a sheet that lies about the SEV record",
+      "control": "the SEV section derives deterministically from the committed sev.json; ARV-PRF-004 binds by whole-file byte comparison; the printed digest covers the section (SEV-3)",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "the reviewer's live gate run at a668286: ARV-SCOPE-002 + ARV-CLM-002 \u2014 harness/tests/test_record_machinery.py outside BOTH declaration homes",
+      "disposition": "both homes widened (scope.txt + the CLAIM-041 row's Scope cell) in the finalize commit; the gate green over the declared diff"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the reviewer's scratch probe: proof_ids=5 raised an uncaught TypeError at sev.py's loop \u2014 the wired gate crashed with a traceback instead of a named code (fail-closed, unnamed)",
+      "disposition": "the isinstance(list) guard + the discriminating case; red-02 records the pre-fix crash (the suite died with the exact traceback) and the fixed form's clean 004"
+    },
+    {
+      "id": "SEV-3",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the reviewer's probe: the printed assembly digest excluded the SEV section it claims to cover (computed before it)",
+      "disposition": "the digest now computes after the section; the discriminating case proves changing only sev.json changes the printed digest; ARV-PRF-004 was never at risk (whole-file byte comparison)"
+    },
+    {
+      "id": "SEV-4",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "validate_report never bound report['slice_id'] to the judged slice \u2014 a byte-identical-diff transplant would pass with a wrong id",
+      "disposition": "the ARV-SEV-002 slice_id binding + the discriminating case (the transplant names another slice and refuses)"
+    },
+    {
+      "id": "SEV-5",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "KB-SEV-008's local-mode env default leaked to process end (finally: pass) \u2014 a later case's machinery loading would silently re-route",
+      "disposition": "the case unsets its own default in finally (the driver's own value never touched)"
+    }
+  ],
+  "not_verified": [
+    "the bootstrap transition (the card's own scope): the CI harness-trusted job for THIS PR runs on the base fc8b32e, which predates the wiring \u2014 the SEV obligation becomes mechanically enforced by CI from the NEXT slice's PR onward; this slice's own enforcement is the local PR-mode gate + the five-check CI run on its head",
+    "the identity limit is real and unchanged: the fresh-context reviewer ran on the same host and OS user as the builder \u2014 process-level separation, never cryptographic (the separate phase-gate grader remains part of the protocol; Q10 untouched)",
+    "base-SIDE additions do not move a merge-base: base-movement staleness rides the strict=true required-status binding (up-to-date branches force a new head and revalidation) \u2014 stated, never claimed closed",
+    "the same-host/same-user residual (the mutation floor's BOUNDARY; Q10) is unchanged by this slice",
+    "the reviewer's mid-slice observations (the artifacts absent at a668286; make verify not run as one command by the reviewer) were true of the state it reviewed; the finalize commits carry the artifacts and the single-command runs recorded in the proof set",
+    "no clean-clone or cross-host observation for this slice; all runs on this host's rig (FACT-001 parity)"
+  ],
+  "builder_context": "the CLAIM-041 host session (Super Z, GLM host) \u2014 implemented the wiring, the KB matrix, the fixtures",
+  "reviewer_context": "fresh-context SEV reviewer subagent (agent-7904d83a; adversarial, read-only; did not implement the slice; same host+user as the builder \u2014 identity separation declared, never cryptographic)",
+  "disposition": "PASS",
+  "review_summary": "The H-02 obligation is wired end-to-end: the gate's PR-mode step requires the SEV report through the public validator (missing/stale/malformed/incomplete/BLOCKED all refuse with named codes), the actual dispatcher path is proven by the end-to-end case, the trusted base machinery enforces the obligation even over a candidate that guts its own gate, the KB-SEV matrix (8 cases) holds, and the Proof Sheet records the report and reviewed-diff digests with the disposition, findings, and not-verified count. The fresh-context reviewer's five findings (one P1, four P2s) are all resolved with discriminating regressions recorded (red-01/red-02); its honest not-verified items are retained above. This bootstrap record is itself the first enforced SEV \u2014 the transition is scoped, independently reviewed, and never a permanent bypass."
+}

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-043-p3-00-rtm-freeze",
   "base_sha": "647591be1231fb48f9f472994285e92af9398b5f",
-  "reviewed_diff_sha256": "2e1724cfae3c5a34f6db1f7ce0de0d56097c8cdf683ce52b6fc30ef10f3a6c87",
+  "reviewed_diff_sha256": "34e514aca77f1765e142ddf1afe0be729253f6dc85eca8f7cd0c416b59af5738",
   "intent_ids": [
     "INT-134",
     "INT-135",
@@ -219,6 +219,13 @@
       "status": "resolved",
       "evidence": "CodeRabbit round 2 (the Major): the no-ledger clean-destination path adopted the archive's pre-purge ledger, letting a post-archive purge return \u2014 contradicting SYS-10's letter as written",
       "disposition": "partially accepted, fixed in-PR with the owner's LOCKED contract as the binding authority: the no-ledger path completes as an EXPLICITLY scoped owner action (the typed state names the ledger as-of time + the D-029 documented backup-expiry window + the residual stated in the open; the restore event recorded in the new ledger) \u2014 never silent; the 'refuse when unavailable' alternative REJECTED with the stated reasoning (it contradicts D-029's locked default \u2014 the documented expiry IS the owner's chosen reconciliation \u2014 and trades the disaster-recovery case for the edge case; EXR-02)"
+    },
+    {
+      "id": "SEV-19",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "CodeRabbit round 3 (the Major): the no-ledger path covered a nonexistent ledger but not an unreadable one \u2014 a read error/timeout/outage could be treated as absence, silently downgrading into the archive-only path",
+      "disposition": "fixed in-PR: the FAIL-CLOSED ledger rule frozen in all three homes (SYS-10's interface, section 3.7's machine edge, the failure-matrix row) \u2014 the archive-only path requires a POSITIVE absence determination; an unreadable ledger is a typed non-restoring outcome naming the reason, never a silent downgrade"
     }
   ],
   "not_verified": [

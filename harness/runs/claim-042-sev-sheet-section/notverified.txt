@@ -1,14 +1,5 @@
-- this slice's own committed Proof Sheet carries NO SEV section (sheet_section false — the opt-in
-  transition per TEMPLATES §6; the section's rendering on a REAL committed sheet is proven at the
-  machinery level (cases 7-9) and lands with the successor slice, whose merged base renders it) —
-  never claimed otherwise.
-- the trusted-leg SEV enforcement's first CI run is THIS PR's (the bootstrap: the base 1cfee16
-  carries the wiring; observed at the PR's five-check run, never pre-recorded here).
-- the identity limit (LAW-30/PLAN H-02): the SEV reviewer is a fresh-context subagent on the same
-  host and user as the builder — declared independence of context, never cryptographic; the
-  separate grader at the phase gates remains the protocol.
-- the post-transition base-side expectation (the reviewer's SEV-3 follow-up: a gate/validator rule
-  requiring sheet_section: true for slices whose base carries the renderer) is NAMED in PLAN/TEMPLATES
-  §6 — not built; its own bounded slice, RED-first, after the first section-bearing sheet merges.
-- the N12 residual (the self-test-row integration/canary-position extension — claim-038's
-  notverified) is unchanged; never silently complete by inference from unrelated checks.
+- this slice's own committed Proof Sheet carries NO SEV section (sheet_section false — the opt-in transition per TEMPLATES §6; the rendering on a REAL committed sheet is proven at the machinery level, cases 7-9, and lands with the successor slice whose merged base renders it) — never claimed otherwise.
+- the trusted-leg SEV enforcement's first CI run is THIS PR's (the bootstrap: the base 1cfee16 carries the wiring; observed at the PR's five-check run, never pre-recorded here).
+- the identity limit (LAW-30/PLAN H-02): the SEV reviewer is a fresh-context subagent on the same host and user as the builder — declared independence of context, never cryptographic; the separate grader at the phase gates remains the protocol.
+- the post-transition base-side expectation (the reviewer's SEV-3 follow-up: a gate/validator rule requiring sheet_section true for slices whose base carries the renderer) is NAMED in PLAN/TEMPLATES §6 — not built; its own bounded slice, RED-first, after the first section-bearing sheet merges.
+- the N12 residual (the self-test-row integration/canary-position extension — claim-038's notverified) is unchanged; never silently complete by inference from unrelated checks.

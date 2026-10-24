@@ -65,6 +65,7 @@ Review whether all Phase 3 prerequisites are complete; reconcile the stale navig
 - **Blocked write path (the review session):** the GitHub integration returned HTTP 403 on branch creation and the host could not resolve `github.com`. Disposition: no bypass, no write to main; the artifacts were prepared locally and the exact update bundle was preserved. Turn 33's fresh credential restored the governed write path; the bundle's text landed through THIS slice's PR.
 - **Rig corruption at the environment reset:** `pgdata` carried invalid permissions and then missing subdirectories (`pg_notify`) — the server could not start. Disposition: full FACT-001-exact rebuild (wipe, `initdb` exit 0, 3 migrations, checksums, health OK) — the same form as the recorded prior env-resets.
 - **The stale-state defects themselves** (STATE/AGENTS phase pointers, the open CLAIM-038 row) were findings of the review session, repaired by this slice — the repair is the diff, never a claim that it predated the diff.
+- **The in-PR review round (CodeRabbit 2 Minors, both ACCEPTED, both fixed in-PR):** (a) the Phase-4 slice spelling standardized to PLAN.md's canonical `P4-A..F` form (this record's §11 and STATE's next-action bullet had carried the legacy `P4A..P4F` form — one spelling for roadmap references and acceptance records); (b) the roadmap text's banner now states that the delivered PDF's §16.1 item numbering continues the preceding section's list (items 7..14 as delivered) — the verbatim body is never renumbered (the delivered artifact keeps its own form; the ambiguity resolved by the note, not by altering the archive). Greptile's review carried no findings (its trial credit limit is the only content — the absence NOTED, never silently accepted).
 
 ## 9. Unverified items
 
@@ -87,7 +88,7 @@ Review whether all Phase 3 prerequisites are complete; reconcile the stale navig
 
 ## 11. Next action
 
-Implement **H-02** — the diff-bound SEV validator and the actual gate path, RED-first: known-bad records call the public validator and the actual gate caller; the H-01b base-anchored floor judges the validator and gate path; the independent SEV review completes before merge. Then **P3-00** — freeze the RTM, interfaces, state machines, failure matrix and schema contract through the repository acceptance process. Only after those gates: P3-M0 ∥ P3-K0 → P3-01..09 → the Phase 3 exit gate → P4-00 → P4A..P4F → the Phase 4 exit gate, NO PAUSE between slices (INT-134/135/138: the standing chain). Keep product schema migrations blocked until P3-00 is accepted.
+Implement **H-02** — the diff-bound SEV validator and the actual gate path, RED-first: known-bad records call the public validator and the actual gate caller; the H-01b base-anchored floor judges the validator and gate path; the independent SEV review completes before merge. Then **P3-00** — freeze the RTM, interfaces, state machines, failure matrix and schema contract through the repository acceptance process. Only after those gates: P3-M0 ∥ P3-K0 → P3-01..09 → the Phase 3 exit gate → P4-00 → P4-A..F → the Phase 4 exit gate, NO PAUSE between slices (INT-134/135/138: the standing chain). Keep product schema migrations blocked until P3-00 is accepted.
 
 ## 12. Session close
 

@@ -8,7 +8,7 @@
 > Its P3→P5 details are engineering elaborations — nothing in it is adopted until P3-00 accepts it through
 > the repository process. The artifact was generated as a 25-page PDF and delivered to the owner as
 > `arivoo_p3_to_p5_systems_engineering_roadmap_2026-10-24.pdf`; the text below is that PDF's verbatim text
-> content (extraction page markers and the PDF's repeated running headers removed; no other change).
+> content (extraction page markers and the PDF's repeated running headers removed; no other change). The PDF's own §16.1 list numbering continues the preceding section's numbered list (items 7..14 as delivered) — kept verbatim, never renumbered.
 > Status labels in the text (CANONICAL / ENGINEERING ELABORATION / OWNER GATE / NOT VERIFIED) are preserved
 > exactly as delivered.
 

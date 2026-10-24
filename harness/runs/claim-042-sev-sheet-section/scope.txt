@@ -1,0 +1,19 @@
+# CLAIM-042 — H-02's completion rider: the deferred Proof-Sheet SEV section (the #76 CI catch's
+# resolution, record 34 §8) + the mistyped-field guards + the two machinery cases + the optional
+# typed sheet_section transition switch + CLAIM-041's rule-4 close row + the slice's own enforced
+# SEV record (the second; the first judged by the merged base — the trusted-leg enforcement's
+# bootstrap slice).
+harness/proofsheet.py D-037
+harness/sev.py D-037
+harness/tests/test_record_machinery.py D-037
+harness/tests/test_sev.py D-037
+harness/red-records.json D-041
+harness/runs/claim-042-sev-sheet-section D-042
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/TEMPLATES.md D-027
+context/WORKLOG.md D-043
+context/extracted/35-SEV-SHEET-SECTION.md D-042
+INTENT-LEDGER.md INT-139

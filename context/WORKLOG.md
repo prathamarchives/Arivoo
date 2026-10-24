@@ -679,3 +679,11 @@ Stage Summary:
 - Evidence: record 34; harness/runs/claim-041-h02b-sev-wiring/ (red-01/red-02, 13 records, sev.json, the sheet); the reviewer's returned record (agent-7904d83a); PR #76.
 - Unresolved: the bootstrap transition (CI-enforced SEV begins with the NEXT slice's PR — the CI base predates the wiring); identity declared, never cryptographic; the N12 residual unchanged.
 - Next: P3-00 (the RTM/interface/schema freeze) — NO PAUSE.
+
+## Task 51 (CLAIM-042, session 30) — H-02's completion rider: the Proof-Sheet SEV section
+- What: the deferred section landed OPT-IN (the typed `sheet_section` field, TEMPLATES §6 — the cannot-flip rule's only honest form: this slice's own sheet stays base-format; the first section-bearing sheet is the successor's) + the mistyped-field guards (RECORDED named ARV-SEV-002 refusals, never a TypeError — the #76 CodeRabbit requirement) + the digest-after-it coverage (SEV-3) + the validator's typed check + the machinery cases 7-10 + INT-139 (the turn-34 mint).
+- Outcome: RED-first (cases 7/8/9 failing at 1cfee16, zero regressions), GREEN at the fix (machinery 10/10, sev 43 PASS lines, make verify 53/0, KB 31/31); the fresh-context reviewer round returned PASS — four P2s dispositioned: SEV-1 the count drift (corrected forward: 31 known-bads, 43 lines), SEV-2 the TEMPLATES §6 amendment (landed), SEV-3 the post-transition expectation (NAMED in PLAN/TEMPLATES), SEV-4 the absent-fields asymmetry (reasoned no-fix, gate-refused class).
+- Catches: the ledger one-liner edit briefly REPLACED the INT-138 row instead of appending — caught in-process, restored, INT-139 appended; the pipe-tail exit class once (record 35 §8); the eighth env-reset rig repair.
+- Evidence: record 35; harness/runs/claim-042-sev-sheet-section/; the reviewer's record (agent-f2838018); PR #77.
+- Unresolved: this slice's own sheet carries no section (the transition); the trusted-leg SEV enforcement's first run is THIS PR's CI; the N12 residual unchanged.
+- Next: merge #77 → P3-00 (the RTM/interface/schema freeze; sheet_section: true) — NO PAUSE.

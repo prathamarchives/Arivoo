@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-042-sev-sheet-section",
+  "base_sha": "1cfee16b89ae901dfb90ce51e8ba18792fc8eed6",
+  "reviewed_diff_sha256": "652f4c902f49cd3eefff615c97aa63c1207a4e25c5b929e0bdfa6a9490846261",
+  "intent_ids": [
+    "INT-134",
+    "INT-135",
+    "INT-138",
+    "INT-139"
+  ],
+  "requirement_ids": [
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C5"
+  ],
+  "changed_components": [
+    "harness/proofsheet.py (the SEV section \u2014 the report + reviewed-diff digests, the disposition, the findings with the open-P0/P1 count, the not-verified count; the mistyped-field guards; the digest-after-it ordering; the sheet_section opt-in)",
+    "harness/sev.py (the optional sheet_section typed check \u2014 ARV-SEV-002 on a non-bool value)",
+    "harness/tests/test_record_machinery.py (cases 7-10: the opted-in assembly, the digest coverage, the mistyped-field recording, the precision-labeled transition guard)",
+    "harness/tests/test_sev.py (the positive-optin + the malformed-sheet-section cases)",
+    "harness/red-records.json (the two typed amendments from the #76-merged state)",
+    "context/TEMPLATES.md (the section 6 amendment: the optional typed field, the opt-in transition rule, the post-transition expectation)",
+    "INTENT-LEDGER.md (INT-139, the turn-34 restatement mint) + CLAIMS.md + STATE.md + AGENTS.md + PLAN.md + context/WORKLOG.md + record 35 (the slice's own navigation and history truth)"
+  ],
+  "interfaces_reviewed": [
+    "harness/proofsheet.py assemble(): the SEV section renders ONLY for a committed sev.json whose boolean sheet_section is true; absent/false/unparseable/non-object renders byte-identically to the base format (the cannot-flip transition, machine case 10); the digest computes after the section (SEV-3)",
+    "harness/sev.py validate_report(): the optional sheet_section field refuses a non-bool value with ARV-SEV-002 (named, never a silent default); true/false/absent pass",
+    "harness/gate.py step 8 (the SEV obligation) over THIS record at the PR-mode gate run \u2014 the second slice to pass its own enforced gate, and the first whose trusted-leg CI (base 1cfee16) enforces the obligation",
+    "the base/candidate byte-identity contract: the trusted gate re-derives this slice's committed sheet with the BASE's proofsheet (F-006) \u2014 the committed sheet must contain no section this PR (reviewer probe D reproduced the divergence for the opted-in shape and the identity for every non-opted shape)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the machinery suite's section cases 7/8/9 (RED at 1cfee16, GREEN at the fix) + the transition guard case 10; run-08",
+      "the SEV validator's typed check: the opt-in positive + the string refusal; 43 PASS lines at run-09",
+      "the red-record typed amendments chained from the #76-merged state (ARV-RED-005); run-08/run-09"
+    ],
+    "integration_verification": [
+      "the 13-command proof set at the content head 223e2c2 \u2014 the 9 suites + the isolation selftest + the KB matrix (31/31) + the canonical verifier + make verify, every exit 0; run-01..run-13",
+      "the base/candidate byte-identity over identical data for every non-opted shape, independently reproduced by the fresh-context reviewer (its probe D), and the all-45-committed-sheets re-derivation under the candidate code"
+    ],
+    "system_verification": [
+      "SYS-11: this record is the second enforced SEV (the gate step 8 validates it at the recorded PR-mode run); run-21",
+      "the #77 fresh-context reviewer round: PASS, no P0/P1, four P2s each with a recorded disposition; the reviewer's independent command table reproduced in record 35 section 4"
+    ],
+    "validation": [
+      "the owner-facing outcome: every future slice's committed Proof Sheet can carry its SEV record surface (report + reviewed-diff digests, disposition, findings, not-verified) once its base renders it \u2014 the successor slice (P3-00) is the first, and the TEMPLATES section 6 amendment documents the contract the owner can hold the repository to"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "the section renders unconditionally and this slice's own committed sheet carries it \u2014 the trusted job's base (1cfee16) cannot re-derive a format it does not know and refuses ARV-PRF-004 (the #76 CI catch repeated)",
+      "control": "the opt-in transition switch: the section renders only for a committed sev.json with boolean sheet_section true; machine case 10 pins the non-opted-in byte-form; this record itself sets sheet_section false",
+      "proof_ids": [
+        "run-08"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "a mistyped findings/not_verified (a non-list) crashes assemble with an uncaught TypeError, or a fabricated count renders",
+      "control": "the mistyped-field guards: a non-list is RECORDED as a named refusal naming the gate's ARV-SEV-002 \u2014 never a crash, never a fabricated count; machine case 9",
+      "proof_ids": [
+        "run-08"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "the printed assembly digest excludes the SEV section its own parenthetical claims to cover (the reviewer's SEV-3 class)",
+      "control": "the digest computes AFTER the section; machine case 8 proves changing ONLY sev.json changes the printed digest",
+      "proof_ids": [
+        "run-08"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "a mistyped sheet_section value (a string) silently defaults the switch and weakens the typed-fields rule",
+      "control": "the validator's ARV-SEV-002 named refusal on a non-bool value (machine case: malformed-sheet-section); the bool passes clean (positive-optin)",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "the known-bad matrix or any existing committed sheet breaks under the new rendering (a regression hidden by the section change)",
+      "control": "the KB matrix green (31/31 \u2014 the probe slice carries no sev.json, byte-unchanged) + the fresh-context reviewer's independent re-derivation of ALL 45 committed sheets under the candidate code, byte-identical",
+      "proof_ids": [
+        "run-11"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the reviewer's live count: python3 harness/gate.py --known-bad-only -> 31 PASS lines (len(kbcases.CASES) = 31) while the slice's commit-B message claimed '32 known-bads'; the sev suite emits 43 PASS lines, not the claimed '35 case groups' (no constructible count equals 35)",
+      "disposition": "corrected forward: this record, STATE, and the review_summary carry the derived counts (31 KB cases; 43 PASS lines); the historical records stay append-only, never rewritten; the lesson in record 35 section 8 \u2014 a count in a commit message is COMPUTED from the tool's own output line, never carried from memory"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the code comments cite 'TEMPLATES section 6' as the sheet_section switch's home, but section 6 did not define the field at the reviewed commits (rg 'sheet_section' context/TEMPLATES.md -> no match)",
+      "disposition": "fixed in-slice: the section 6 amendment landed in the finalize content commit 223e2c2 \u2014 the optional typed field, the opt-in transition rule with its rationale (the cannot-flip constraint, the #76 observation), and the post-transition expectation"
+    },
+    {
+      "id": "SEV-3",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "evidence": "the opt-in is indefinitely candidate-controlled: nothing mechanical requires a post-transition slice to set sheet_section true, so a future slice could silently omit the sheet's SEV record surface; bounded \u2014 the obligation itself is enforced by gate step 8 on the committed sev.json regardless, and the report file remains review-visible in every diff",
+      "disposition": "reasoned accept for this PR + the follow-up NAMED: PLAN H-02 and TEMPLATES section 6 carry the post-transition expectation \u2014 a base-side mechanical expectation (a gate/validator rule requiring sheet_section true for slices whose base carries the renderer) lands as its own bounded slice, RED-first, once the first section-bearing sheet has merged; the revisit condition is explicit (the successor slice's own review assesses it)"
+    },
+    {
+      "id": "SEV-4",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "evidence": "under opt-in, ABSENT reviewed_diff_sha256/disposition render '(absent)' while ABSENT findings/not_verified render empty-default counts \u2014 an asymmetry; mistyped-but-present scalars render raw; never a crash in any probed shape",
+      "disposition": "reasoned no-fix (the gate-refused class): no fabricated count can reach a committed, trusted-re-derivable sheet \u2014 the gate refuses every such report first (ARV-SEV-002 missing/mistyped required field; ARV-SEV-005 bad disposition); the cosmetic symmetry follow-up is noted in record 35, never silently built"
+    }
+  ],
+  "not_verified": [
+    "this slice's own committed Proof Sheet carries NO SEV section (sheet_section false \u2014 the opt-in transition per TEMPLATES section 6; the section's rendering on a REAL committed sheet is proven at the machinery level (cases 7-9) and lands with the successor slice, whose merged base renders it) \u2014 never claimed otherwise",
+    "the trusted-leg SEV enforcement's first CI run is THIS PR's (the bootstrap: the base 1cfee16 carries the wiring; observed at the PR's five-check run, never pre-recorded here)",
+    "the identity limit (LAW-30/PLAN H-02): the SEV reviewer is a fresh-context subagent on the same host and user as the builder \u2014 declared independence of context, never cryptographic; the separate grader at the phase gates remains the protocol",
+    "the post-transition base-side expectation (the reviewer's SEV-3 follow-up: a gate/validator rule requiring sheet_section true for slices whose base carries the renderer) is NAMED in PLAN/TEMPLATES section 6 \u2014 not built; its own bounded slice, RED-first, after the first section-bearing sheet merges",
+    "the N12 residual (the self-test-row integration/canary-position extension \u2014 claim-038's notverified) is unchanged; never silently complete by inference from unrelated checks"
+  ],
+  "builder_context": "builder-glm-host-session30-claim042",
+  "reviewer_context": "fresh-glm-sev-reviewer-2026-10-24-claim042",
+  "disposition": "PASS",
+  "review_summary": "The deferred Proof-Sheet SEV section landed with its discriminating machinery cases (7/8/9 RED at the predecessor 1cfee16, GREEN at the fix; case 10 the precision-labeled transition guard), the mistyped-field guards, the digest-after-it coverage, and the validator's typed check for the opt-in field. The 13-command proof set is green at the content head (the 9 suites, the isolation selftest, the KB matrix 31/31, the canonical verifier 53/0, make verify). The fresh-context reviewer round returned PASS with no P0/P1; its four P2s carry recorded dispositions (the count drift corrected forward \u2014 31 KB cases, 43 PASS lines, never '32'/'35'; the TEMPLATES section 6 amendment landed; the post-transition expectation NAMED in PLAN/TEMPLATES; the absent-fields asymmetry reasoned no-fix, gate-refused class). The reviewer independently reproduced the cannot-flip constraint (base/candidate divergence for the opted-in shape), proved byte-identity for every non-opted shape, and re-derived all 45 committed sheets under the candidate code. This record binds the reviewed diff at base 1cfee16; the slice's own committed sheet stays base-format by the recorded transition; the trusted-leg CI enforcement of the SEV obligation begins with this PR.",
+  "sheet_section": false
+}

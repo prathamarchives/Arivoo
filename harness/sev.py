@@ -255,6 +255,15 @@ def validate_report(slice_name: str, base_ref: str, repo=None) -> list:
         _fail(codes, "ARV-SEV-002", f"slice_id {report['slice_id']!r} does not name the slice under judgment ({slice_name!r})",
               "the report is bound to its slice by ID as well as by path (TEMPLATES §6: slice_id is a required identity field)")
 
+    # CLAIM-042: the OPTIONAL sheet_section field (the Proof-Sheet SEV
+    # section's opt-in transition switch, TEMPLATES §6) is TYPED: the field
+    # controls the committed sheet's format, so a mistyped value must be a
+    # NAMED refusal, never a silent default (A09's typed-fields rule — the
+    # #76 CodeRabbit round's mistyped-fields class, closed for the switch)
+    if "sheet_section" in report and not isinstance(report["sheet_section"], bool):
+        _fail(codes, "ARV-SEV-002", "the optional field 'sheet_section' is mistyped (expected bool)",
+              "the field is the Proof-Sheet SEV section's opt-in switch (TEMPLATES §6) — typed fields, never prose (A09)")
+
     # ARV-SEV-003: staleness — base + candidate movement
     observed_base = merge_base_of(base_ref, repo)
     if observed_base is None:

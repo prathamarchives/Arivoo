@@ -188,7 +188,8 @@ Required fields (JSON, standard library only):
       "builder_context": "<builder-session identifier>",
       "reviewer_context": "<fresh, separate context identifier>",
       "disposition": "PASS|BLOCKED",
-      "review_summary": "<traceability conclusion; no unsupported claims>"
+      "review_summary": "<traceability conclusion; no unsupported claims>",
+      "sheet_section": true
     }
 
 Rules:
@@ -197,3 +198,4 @@ Rules:
 - The report cannot close Q6–Q11, change a law, or promote a proposal to adopted status.
 - A reviewer-context identifier does not cryptographically prove independence. Fresh-context execution and a separate grader remain part of the protocol; state the identity limitation honestly.
 - The Proof Sheet records report and reviewed-diff digests, disposition, findings, and not-verified items. Generated evidence is never hand-edited.
+- **The optional `sheet_section` field (CLAIM-042, boolean, typed — a non-bool value is a named ARV-SEV-002 refusal) is the Proof-Sheet SEV section's OPT-IN transition switch.** The section renders in the committed sheet ONLY when the report sets `sheet_section: true`; absent or false keeps the sheet byte-identical to the base format. Rationale (the cannot-flip-in-the-same-PR rule): the trusted gate re-derives a candidate's committed sheet with the PR's own BASE machinery, so a section may appear in a committed sheet only once the base renders it (observed live: the #76 trusted job's ARV-PRF-004). The FIRST section-bearing sheet is the first slice whose merged base carries the renderer (CLAIM-042's successor); slices landing the section earlier set `sheet_section: false` with the transition stated in their own not-verified list. **Post-transition expectation (the named follow-up, PLAN H-02):** once the first section-bearing sheet has merged, a base-side mechanical expectation — a gate/validator rule requiring `sheet_section: true` for slices whose base carries the renderer — lands as its own bounded slice, RED-first; until then the obligation itself is enforced by the gate on the committed sev.json regardless of the switch (the section is the RECORD in the sheet, never the enforcement).

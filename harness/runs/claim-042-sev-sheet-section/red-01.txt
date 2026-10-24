@@ -1,0 +1,16 @@
+# red-01 — the RED observed at the predecessor (main 1cfee16 + this slice's edited suites; the modules proofsheet.py/sev.py UNCHANGED from main)
+
+python3 harness/tests/test_record_machinery.py -> exit 1
+  RED — 3 failure(s): case 7 (the opted-in sev.json assembles the SEV section — record 34 §8 (a));
+  case 8 (changing ONLY sev.json changes the printed assembly digest — the reviewer's SEV-3, record 34 §8 (b));
+  case 9 (mistyped findings/not_verified RECORDED as named refusals, never an uncaught TypeError).
+  case 10 (the cannot-flip transition guard) PASSES at the predecessor — the PRECISION case, honestly
+  labeled in the suite's docstring, never claimed RED (the 5447477 convention).
+
+python3 harness/tests/test_sev.py -> exit 1
+  RED — 1 failing case: malformed (malformed-sheet-section) — a mistyped optional sheet_section
+  (a string, not a bool) passed the validator clean at the predecessor form (got []; the typed
+  refusal absent). Every pre-existing case green — zero regressions.
+
+The observed exits read from the commands themselves (PIPESTATUS[0]), never a pipe's tail —
+the standing record-26 §8 lesson.

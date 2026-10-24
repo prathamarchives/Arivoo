@@ -34,6 +34,23 @@ Cases (each names its target failure):
   5. the 100-capture boundary (run-100 must parse — the writer's own :02d
      output past 99).
   6. a missing registry bootstraps (the ARV-RED-003 recovery path preserved).
+  7. (CLAIM-042, RED at the predecessor — record 34 §8 (a)) an OPTED-IN
+     sev.json assembles the Proof-Sheet SEV section: the report sha256, the
+     reviewed-diff digest, the disposition, the findings count with the
+     open-P0/P1 count, the not-verified count (TEMPLATES §6's rule).
+  8. (CLAIM-042, RED at the predecessor — record 34 §8 (b)) changing ONLY
+     sev.json changes the PRINTED assembly digest — the digest is computed
+     AFTER the section (the reviewer's SEV-3: the printed line must cover
+     what its parenthetical claims).
+  9. (CLAIM-042, RED at the predecessor — the #76 CodeRabbit round's named
+     requirement) mistyped findings/not_verified (non-lists) are RECORDED as
+     named refusals in the section, never an uncaught TypeError at assemble.
+  10. (CLAIM-042, PRECISION — honestly labeled, never claimed RED: it passes
+     at the predecessor trivially) a NON-opted-in sev.json (sheet_section
+     absent OR explicit false) keeps the sheet BYTE-IDENTICAL to the
+     no-report form — the cannot-flip transition guard: a committed sheet
+     must stay re-derivable by its PR's own base (the #76 CI catch, observed
+     live by the trusted job's ARV-PRF-004).
 """
 import contextlib
 import hashlib
@@ -264,13 +281,76 @@ def main() -> int:
               rc4 == 0 and bootstrapped,
               f"rc={rc4} bootstrapped={bootstrapped} output={out4[:200]!r} — the recovery path crashed at the round's predecessor (Greptile P2)")
 
-        # CLAIM-041 (H-02 part 2) — THE SEV SHEET-SECTION CASES ARE DEFERRED TO
-        # CLAIM-042 (the first post-merge slice) with the section itself: the
-        # cannot-flip-in-the-same-PR rule (record 22 §8's precedent, observed
-        # live by the #76 CI trusted job's ARV-PRF-004 — the base's proofsheet
-        # cannot re-derive a section it does not know, so the section and its
-        # discriminating cases land together post-merge). The cases' forms are
-        # preserved verbatim in record 34 §8 for the next slice's RED set.
+        # ---- CLAIM-042 (the deferred RED set, record 34 §8 — the #76 CI
+        # catch's resolution, the cannot-flip-in-the-same-PR rule): the
+        # Proof-Sheet SEV section, OPT-IN through sev.json's boolean
+        # sheet_section field. A committed sheet must stay re-derivable by
+        # its PR's own BASE (the #76 trusted job's ARV-PRF-004 — the base's
+        # proofsheet cannot re-derive a section it does not know), so the
+        # section renders only for reports that opt in; the first real
+        # section-bearing sheet is the first slice whose merged base renders
+        # it. Case 10 pins the non-opted-in byte-form this transition keeps.
+        sev_slice = ps.RUNS / "sev-section-probe"
+        sev_slice.mkdir()
+        (sev_slice / "run-01.json").write_text(seed)
+        sev_report = {
+            "schema_version": 1, "slice_id": "sev-section-probe",
+            "reviewed_diff_sha256": "f" * 64, "disposition": "PASS",
+            "findings": [{"id": "SEV-1", "severity": "P2", "status": "resolved"}],
+            "not_verified": ["the fixture boundary: an honest limitation"],
+            "sheet_section": True,
+        }
+        sev_raw = json.dumps(sev_report, indent=2) + "\n"
+        (sev_slice / "sev.json").write_text(sev_raw)
+        sec_out = ps.assemble("sev-section-probe", "- probe only")
+        sec_ok = ("## Systems-engineering verification (LAW-30; harness/sev.py)" in sec_out
+                  and f"report sha256: {hashlib.sha256(sev_raw.encode()).hexdigest()}" in sec_out
+                  and f"reviewed_diff_sha256: {'f' * 64}" in sec_out
+                  and "disposition: PASS" in sec_out
+                  and "findings: 1 (open P0/P1: 0)" in sec_out
+                  and "not-verified entries: 1" in sec_out)
+        check("case 7 (RED at the predecessor): an opted-in sev.json assembles the SEV section (the report sha256, the reviewed-diff digest, the disposition, the findings count — record 34 §8 (a))",
+              sec_ok, "the section is absent or incomplete in the assembled sheet")
+
+        def _printed_digest(text: str) -> str:
+            for line in text.splitlines():
+                if line.startswith("- sheet sha256"):
+                    return line
+            return ""
+        d1 = _printed_digest(sec_out)
+        sev_report["disposition"] = "BLOCKED"  # changing ONLY the report
+        (sev_slice / "sev.json").write_text(json.dumps(sev_report, indent=2) + "\n")
+        d2 = _printed_digest(ps.assemble("sev-section-probe", "- probe only"))
+        check("case 8 (RED at the predecessor): changing ONLY sev.json changes the printed assembly digest (the digest computed AFTER the section — the reviewer's SEV-3, record 34 §8 (b))",
+              bool(d1) and d1 != d2,
+              "the printed digest did not cover the SEV section")
+
+        sev_report["disposition"] = "PASS"
+        sev_report["findings"] = 5           # a non-list (the #76 CodeRabbit round's mistyped-fields class)
+        sev_report["not_verified"] = "none"  # a non-list placeholder
+        (sev_slice / "sev.json").write_text(json.dumps(sev_report, indent=2) + "\n")
+        guarded_out = ps.assemble("sev-section-probe", "- probe only")
+        check("case 9 (RED at the predecessor): mistyped findings/not_verified are RECORDED as named refusals in the section, never an uncaught TypeError at assemble (the #76 CodeRabbit requirement)",
+              "MISTYPED" in guarded_out and "ARV-SEV-002" in guarded_out,
+              f"assemble crashed or fabricated over the mistyped fields: {guarded_out[-300:]!r}")
+
+        # ---- case 10 (PRECISION — honestly labeled, never claimed RED): the
+        # non-opted-in byte-form. sheet_section absent OR explicit false must
+        # keep the sheet byte-identical to the no-report form: this slice's own
+        # committed sheet must stay re-derivable by its PR's base (1cfee16's
+        # proofsheet knows no section) — the #76 CI catch cannot repeat.
+        no_opt = {k: v for k, v in sev_report.items() if k != "sheet_section"}
+        no_opt["findings"] = [{"id": "SEV-1", "severity": "P2", "status": "resolved"}]
+        no_opt["not_verified"] = ["the fixture boundary: an honest limitation"]
+        (sev_slice / "sev.json").write_text(json.dumps(no_opt, indent=2) + "\n")
+        opted_out = ps.assemble("sev-section-probe", "- probe only")
+        (sev_slice / "sev.json").unlink()
+        without = ps.assemble("sev-section-probe", "- probe only")
+        (sev_slice / "sev.json").write_text(json.dumps({**no_opt, "sheet_section": False}, indent=2) + "\n")
+        explicit_off = ps.assemble("sev-section-probe", "- probe only")
+        check("case 10 (precision, not RED): a non-opted-in sev.json (absent OR explicit false) keeps the sheet BYTE-IDENTICAL to the no-report form (the cannot-flip transition guard)",
+              opted_out == without and explicit_off == without,
+              "the section rendered for a non-opted-in report — the base-format preservation broken")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -281,7 +361,9 @@ def main() -> int:
         return 1
     print("GREEN — the record machinery refuses its named classes: max-based numbering, "
           "the unparseable context, the untyped mint, the changed-since-read write, "
-          "the run-100 boundary, the registry bootstrap")
+          "the run-100 boundary, the registry bootstrap; the SEV sheet-section: "
+          "opt-in assembly, digest-after-it coverage, the mistyped-field guards, "
+          "the non-opted-in byte-form")
     return 0
 
 

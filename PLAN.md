@@ -264,7 +264,8 @@ Only adapters may access ambient time, randomness/ID generation, and environment
 Every slice gets its own branch/PR, one behavior, pre-registered acceptance tests, a declared file scope, current LAW-05 limits, no unapproved dependency, actual real-stack run, independent state reads, Proof Sheet, independent test verification, and SEV verification. If a slice exceeds size limits, split it; never relax the limit. Stop after three failed cycles.
 
 **P3-00 — Requirements, interfaces, and schema freeze**
-- Trace SYS-01–SYS-11 to owning component, interface, tests, C1–C5 claims, and user validation scenario.
+**Status: LANDED (CLAIM-043, PR #78 — RTM.md created as the ONE requirements traceability matrix at its single canonical home per D-039(3): the SYS-01..11 traces, the entity contracts, the seven state machines, the transaction/acknowledgment semantics, the migration plan, the failure-behavior matrix, the open-question boundary register with the Q12 comparison + recommendation as evidence-preparation; VER-806 makes the every-SYS-traced contract mechanical (RED-first: all 11 rows untraced at the predecessor); the EXECUTION §1 map row folded in the same commit (FX-07); the acceptance observed at the slice's SEV review + the phase gate.) The product-schema-migration gate is LIFTED for slices citing RTM sections.**
+- Trace SYS-01–SYS-11 to owning component, interface, tests, C1–C5 claims, and user validation scenario. (Landed: `/RTM.md` §1 — the single canonical home.)
 - Draw data-lifecycle and state machines for import; capture; revision/tombstone; local outbox; server sync; indexing; export/restore.
 - Specify authoritative entities, IDs, ownership, actor, revisions, provenance, transaction boundaries, migration plan, kernel interfaces, and failure behavior.
 - Q11, Q12, and Q8 must remain visible at their named scopes; other owner decisions block only the dependent work.

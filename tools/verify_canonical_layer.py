@@ -105,6 +105,7 @@ ROOT_DOCS = (
     "DECISIONS.md",
     "EXECUTION.md",
     "PLAN.md",
+    "RTM.md",
     "NORTH-STAR.md",
     "PRINCIPLES.md",
     "LAWS.md",

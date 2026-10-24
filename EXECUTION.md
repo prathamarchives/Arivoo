@@ -19,6 +19,7 @@
 | Doctrine | `/ENGINEERING.md` | Why the laws are what they are (transcript + upstream) |
 | Roles, loop, growth, healing, verification | `/OPERATING-MODEL.md` | The slice loop; six operating models; memory-update protocol; self-healing; the verification stack |
 | Phase sequence | `/PLAN.md` | One phase deep (NG-04); guardrails; Phase 1 detail |
+| Requirements traceability matrix + the P3 contract freeze | `/RTM.md` | The ONE RTM at its single canonical home (D-039(3), created at P3-00): the SYS-01..SYS-11 trace (owning component, interfaces, pre-registered test paths, claims, validation scenario — the requirement statements stay in PLAN.md), the authoritative entity contracts, the seven state machines, the transaction/acknowledgment semantics, the migration plan, the failure-behavior matrix, and the open-question boundary register |
 | Vocabulary | `/GLOSSARY.md` | Term definitions — the definitional authority (§4) |
 | Entry map | `/AGENTS.md` | Cold-start read order; binding rules (≤80 lines) |
 | Current-state index | `/STATE.md` | Where things stand NOW: the five-area contract (D-027) — position, work (active task ≠ exact next action), dependencies (every unresolved owner question, repo-wide), evidence (label + one direct pointer per claim), coordination (snapshot at last update, never live). A navigation snapshot pointing at authority — never a second authority, ledger, or plan; canonical wins on conflict (D-024/D-027) |

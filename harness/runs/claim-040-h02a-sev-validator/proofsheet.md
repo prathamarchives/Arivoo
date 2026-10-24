@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-040-h02a-sev-validator (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 5f47a6247be55396790bb3e3b1bece962c658b4f
-- generated (last record's timestamp): 2026-10-24T07:03:11.209400+00:00
-- run records: 13
+- commit (last run record's): a78776188a0412ad72baec00092d26d245ae3411
+- generated (last record's timestamp): 2026-10-24T07:22:44.294106+00:00
+- run records: 26
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-24T07:00:07.195498+00:00
@@ -18,6 +18,19 @@
 - `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 6c44222f4a71abc3 · 2026-10-24T07:01:37.613431+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 04a2d3d3d4b5149e · 2026-10-24T07:01:37.768651+00:00
 - `make verify` -> exit 0 · output sha256 dfe86213e9fd4450 · 2026-10-24T07:03:11.209400+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-24T07:19:54.768471+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-24T07:19:55.157388+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-24T07:19:57.230582+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 86b36062c4f3999f · 2026-10-24T07:20:30.425239+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 0118206e30a361f5 · 2026-10-24T07:20:49.406807+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 56301f4eeadd826e · 2026-10-24T07:20:54.160797+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 e2d2f60896c9582b · 2026-10-24T07:20:54.523619+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 2c891f1bdf213996 · 2026-10-24T07:20:54.702070+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 b38e722171bb3b38 · 2026-10-24T07:20:56.451337+00:00
+- `python3 tools/isolation_selftest.py` -> exit 0 · output sha256 db0ced9ebcfb3551 · 2026-10-24T07:21:09.109993+00:00
+- `python3 harness/gate.py --known-bad-only` -> exit 0 · output sha256 6c44222f4a71abc3 · 2026-10-24T07:21:16.897064+00:00
+- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 04a2d3d3d4b5149e · 2026-10-24T07:21:17.068103+00:00
+- `make verify` -> exit 0 · output sha256 cd76d7df3bba7037 · 2026-10-24T07:22:44.294106+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - not verified (LAW-04 — the CLAIM-040 honest limits):
@@ -39,4 +52,4 @@
 - close row carried by CLAIM-041; never predicted here.
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 93549c894db7a192376c612adc00bee485a6201b68d7caa9aff4b7f4728e1d6e
+- sheet sha256 (of the content above, excluding this line): bc013200f52a5304fb443e02b0ab2704c2528a70c4080304a64f9d2e10e7d080

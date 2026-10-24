@@ -16,3 +16,4 @@ PLAN.md D-037
 context/TEMPLATES.md D-027
 context/WORKLOG.md D-043
 context/extracted/35-SEV-SHEET-SECTION.md D-042
+INTENT-LEDGER.md INT-139

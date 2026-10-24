@@ -250,10 +250,17 @@ North Star claim ladder, and the user validation scenario (the V-model validatio
   any single archive; restore RECONCILES the archive's content against the destination's
   CURRENT purge ledger before declaring completion — a current-ledger entry WINS over older
   archive content (an export made before a purge cannot resurrect the purged item into a
-  destination that carries the purge); a genuinely clean destination (no prior owner state)
-  adopts the archive's recorded purge state as its ledger base, and the restore event itself
-  is recorded in the ledger — every reconciliation is observable and attributable, never
-  silent; partial/malformed/interrupted restores fail safely (no half-restored "complete"
+  destination that carries the purge). **The no-ledger path, bound to the owner's LOCKED
+  default (D-029 — "documented backup expiry, purge ledger applied on restore"):** a
+  genuinely clean destination (no live ledger anywhere — the archive is the only surviving
+  owner state, the disaster-recovery case) does NOT silently claim purge-safety: the restore
+  completes as an EXPLICITLY scoped owner action whose typed completion state names (a) the
+  adopted ledger's as-of time, (b) the documented backup-expiry window that bounds the
+  archive's validity (D-029's own mechanism — an archive past its expiry window is not a
+  restore source), and (c) the residual, stated in the open: a purge recorded after the
+  archive's as-of time, in a ledger that no longer exists, can return in this path — the
+  resurrection is OBSERVABLE, ATTRIBUTABLE, and re-purgeable (the restore event itself is
+  recorded in the new ledger), never silent; partial/malformed/interrupted restores fail safely (no half-restored "complete"
   library).
 - **Pre-registered test paths:** clean restore + the canonical authoritative-state hash
   comparison (the documented equality rule); repeated restore; missing blob; malformed/
@@ -484,7 +491,7 @@ restored --rebuild derived--> fully_operational [indexes rebuilt from the restor
 | extraction crash/invalid input | the previous generation stays; the failed generation named | a partial generation as current |
 | index outage | capture unaffected; search reports honestly | capture blocked by derived failure |
 | sync conflict (competing revisions) | `conflicted`; both inputs preserved | last-write-wins destruction |
-| purge/restore interaction | the destination's current purge ledger wins over older archive content; a clean destination adopts the archive's purge state and records the restore event | silent resurrection (an export predating a purge re-importing the purged item into a ledger-carrying destination) |
+| purge/restore interaction | the destination's current purge ledger wins over older archive content; the no-ledger disaster path completes as an explicitly scoped owner action (the typed state names the ledger as-of time + the D-029 backup-expiry window + the stated residual; the restore event recorded in the new ledger) | silent resurrection (an export predating a purge re-importing the purged item into a ledger-carrying destination; or a no-ledger restore claiming purge-safety it cannot know) |
 | cross-owner access | refused at command AND DB boundary | existence leakage |
 
 ## 7. The open-question boundary register (exact scopes)

@@ -105,6 +105,7 @@ ROOT_DOCS = (
     "DECISIONS.md",
     "EXECUTION.md",
     "PLAN.md",
+    "RTM.md",
     "NORTH-STAR.md",
     "PRINCIPLES.md",
     "LAWS.md",
@@ -881,6 +882,28 @@ class Layer:
             bool(state_refs) and max(state_refs) == highest,
             f"STATE.md's session-record pointer ({max(state_refs) if state_refs else 'none'}) equals the highest-numbered record on disk ({highest}) — staleness is caught, not remembered",
             "update /STATE.md at session exit to point at the newest numbered session record (AGENTS.md session-exit rule; a stale STATE.md is a drift finding)",
+        )
+
+        # VER-806 (P3-00, CLAIM-043; D-039 element 3 — the ONE-RTM contract made
+        # mechanical): every SYS row in PLAN.md's requirements table carries a
+        # trace section in RTM.md, the single canonical RTM home. A requirement
+        # added to PLAN without its trace — or the RTM's absence itself — fails
+        # the layer with the named untraced ids (never a silent gap; the
+        # requirement statement stays in PLAN, the trace lives in RTM.md —
+        # one fact, one home).
+        plan = self.read("PLAN.md")
+        plan_sys = re.findall(r"^\|\s*(SYS-\d{2})\s*\|", plan, flags=re.M)
+        rtm_path = self.repo / "RTM.md"
+        rtm = rtm_path.read_text(encoding="utf-8", errors="replace") if rtm_path.is_file() else ""
+        rtm_sys = set(re.findall(r"^###\s+(SYS-\d{2})\s+—", rtm, flags=re.M))
+        untraced = [s for s in plan_sys if s not in rtm_sys]
+        self.check(
+            "VER-806",
+            bool(plan_sys) and rtm_path.is_file() and not untraced,
+            f"every PLAN.md SYS requirement ({len(plan_sys)} rows) carries a trace section in RTM.md — the ONE requirements traceability matrix at its single canonical home (D-039(3))",
+            ("create /RTM.md with a '### SYS-NN — <name>' trace section for every untraced id: "
+             + (", ".join(untraced) if untraced else "(none)")
+             + " — the requirement statement stays in PLAN.md; the trace (owning component, interfaces, tests, claims, validation scenario) lives in RTM.md, never duplicated into navigation files"),
         )
 
     # ------------------------------------------------------------ open-question register mirrors (VER-504)

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-043-p3-00-rtm-freeze --diff origin/main",
+  "exit_code": 0,
+  "commit": "9083efe2941306dd4478f431cb8b94e121a0f004",
+  "output_sha256": "0adcf542f981ec9612a9134023435555ac428f26942120d3572acb82aad81eef",
+  "recorded_at": "2026-10-24T13:10:09.009025+00:00"
+}

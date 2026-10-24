@@ -1,0 +1,7 @@
+- the freeze is ACCEPTED through this slice's review + merge; the independent phase-gate grader walks RTM.md's matrix at the Phase 3 EXIT gate — never claimed done here.
+- the state machines and test paths are PRE-REGISTERED contracts; their proofs land with the implementation slices (P3-01..09) — this slice freezes, it does not implement.
+- the Q11/Q12/Q8 baselines remain owner-gated at their exact registered scopes (RTM.md §7); the Q12 recommendation awaits the owner's ratification — nothing in the frozen contracts depends on the choice.
+- the four recorded P2 debts (the §6 conflicted-trigger label; §3.4's terminal failed vs PLAN P3-08's letter; the two derived-entity enums' distinguishing note; OBS-1's pre-existing NORTH-STAR layer-2 wording) each carry their named revisit — P3-08/P3-03/P3-07 card time and the owner's Q11 gate.
+- the remote CI's five-check run at this PR's head — observed at the PR, never pre-recorded here.
+- the identity limit (LAW-30): the reviewer is a fresh-context subagent on the same host and user — declared independence of context, never cryptographic; the separate grader at the phase gates remains the protocol.
+- the N12 residual (claim-038's notverified) is unchanged; never silently complete by inference from unrelated checks.

@@ -687,3 +687,10 @@ Stage Summary:
 - Evidence: record 35; harness/runs/claim-042-sev-sheet-section/; the reviewer's record (agent-f2838018); PR #77.
 - Unresolved: this slice's own sheet carries no section (the transition); the trusted-leg SEV enforcement's first run is THIS PR's CI; the N12 residual unchanged.
 - Next: merge #77 → P3-00 (the RTM/interface/schema freeze; sheet_section: true) — NO PAUSE.
+
+## Task 52 (CLAIM-043, session 30) — P3-00: the RTM/interface/schema freeze
+- What: RTM.md — the ONE requirements traceability matrix at its single canonical home (D-039(3)): the SYS-01..11 traces (owning component, interfaces, PRE-REGISTERED test paths, claims, validation scenarios — the statements stay in PLAN.md), the authoritative entity contracts (identity/ownership/actor/revisions/provenance; authoritative-vs-derived), the seven state machines (import, capture, revision/tombstone, outbox, sync, indexing, export/restore), the transaction/acknowledgment semantics (commit-before-ack, one commit point, the rung vocabulary, the Q12-neutral blob adapter), the migration plan, the failure-behavior matrix, the open-question boundary register (Q12's comparison + Supabase Storage recommendation as evidence-preparation) + VER-806 (every-SYS-traced, RED-first: all 11 untraced at 647591b) + the EXECUTION §1 fold + the ROOT_DOCS binding + the first section-bearing Proof Sheet (sheet_section true).
+- Outcome: the canonical verifier GREEN (VER-806 PASS; VER-901 over the 12 root docs); the product-schema-migration gate lifted for RTM-citing slices; the fresh-context SEV review per the card's acceptance (no P0/P1).
+- Evidence: record 36; harness/runs/claim-043-p3-00-rtm-freeze/ (red-01, the proof set, sev.json, the sheet); PR #78.
+- Unresolved: Q11/Q12/Q8 baselines frozen around (never closed); the SEV-3 follow-up assessment at this slice's review; the N12 residual unchanged.
+- Next: merge #78 → P3-M0 ∥ P3-K0 → P3-01 — NO PAUSE.

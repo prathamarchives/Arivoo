@@ -182,6 +182,14 @@ red-record amendments; CLAIM-041's rule-4 close row (the #76 merge facts).
   first RED observation read `EXIT=$?` after `suite | tail` — the pipe's tail exit (0), not
   the suite's (1). Caught in the same minute (the zero contradicted the printed "RED — 3
   failure(s)"), re-observed with the direct read: exit 1. Never committed, never pushed.
+- **THE ENV-ARTIFACT RE-CAPTURE (the record-26 seventh-catch class, repeated):** the sheet
+  assembly was invoked through `make prove` in a shell WITHOUT the PG env exports — the recipe
+  re-captured the migrations/substrate/commands suites at exit 1 (records 14-16: the adapter
+  could not find psql — the environment, never the tree). The green retries captured at once
+  with the env restored (records 17-19, every exit 0); the failed captures stay in the sheet
+  side by side with their retries, never smoothed over (LAW-04/AGENTS' actual-commands contract).
+  The standing lesson re-learned: the rig env is exported in EVERY shell invocation, never
+  assumed to persist.
 - **THE EIGHTH ENV-RESET:** the rig rebuilt (§2) — the standing repair, honestly counted.
 
 ## 9. Unverified items

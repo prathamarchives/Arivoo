@@ -174,6 +174,14 @@ def run_all(tmp):
         _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "report")
         expect_codes(sev, root, None, "positive")
 
+        # --- CLAIM-042: the OPTIONAL sheet_section field (the Proof-Sheet SEV
+        # section's transition switch, TEMPLATES §6) is TYPED: a bool passes
+        # (no over-refusal — the opted-in form the section renders on) ---
+        root = build_fixture(tmp + "/pos-optin")
+        write_report(root, {**valid_report(sev, root), "sheet_section": True})
+        _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "report opt-in")
+        expect_codes(sev, root, None, "positive-optin")
+
         # --- ARV-SEV-001: missing ---
         root = build_fixture(tmp + "/missing")
         _git(root, "add", "-A"); _git(root, "commit", "-q", "-m", "no report")
@@ -186,6 +194,10 @@ def run_all(tmp):
             ("malformed-missing-field", lambda r, p: p.write_text(json.dumps({k: v for k, v in r.items() if k != "review_summary"}), encoding="utf-8")),
             ("malformed-prose-digest", lambda r, p: p.write_text(json.dumps({**r, "reviewed_diff_sha256": "the diff, honestly reviewed"}), encoding="utf-8")),
             ("malformed-typed-field", lambda r, p: p.write_text(json.dumps({**r, "intent_ids": "INT-100 (a string, not a list)"}), encoding="utf-8")),
+            # CLAIM-042: the optional sheet_section field must be a BOOL when
+            # present — the field controls the committed sheet's format; a
+            # mistyped value is a named refusal, never a silent default
+            ("malformed-sheet-section", lambda r, p: p.write_text(json.dumps({**r, "sheet_section": "yes (a string, not a bool)"}), encoding="utf-8")),
         ):
             root = build_fixture(tmp + "/" + name)
             p = root / "harness" / "runs" / SLICE / "sev.json"

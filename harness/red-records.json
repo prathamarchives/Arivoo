@@ -339,7 +339,7 @@
     "red_exit": 1,
     "red_code": "ARV-PRF-006 + ARV-RED-007/009 (the suite's RED set observed at 048aaa2 \u2014 six failures: the count-based overwrite, the stall, the unparseable-context no-refusal, the untyped-mint no-refusal, the changed-since-read no-refusal; red-01.txt)",
     "red_evidence": "the CLAIM-037 fix-commit amendment: test_trusted_gate.py's build_stub restructured for schema-2 stub records (the binding names the stub's own git history; the typed amendments chain from the base records) + the NEW suite test_record_machinery.py minted with its OBSERVED red",
-    "current_sha256": "8daccb6db9d7a0a5ba341939bcd5a391dadf57edd943a4470144f44637131ec0",
+    "current_sha256": "0b6a7ff7b0891dbbd16055ff476963f62b75c5547bc868a3c96b6d86a4a94aeb",
     "amendments": [
       {
         "prior_sha256": "a4ee919f0c56a664e874aab871f6d4d6b278f9615ccf705be91b06f40130dcd3",
@@ -388,6 +388,12 @@
         "new_sha256": "8daccb6db9d7a0a5ba341939bcd5a391dadf57edd943a4470144f44637131ec0",
         "note": "the #76 CI catch repaired: the Proof-Sheet SEV section + its two machinery cases DEFERRED to CLAIM-042 (the first post-merge slice) per the cannot-flip-in-the-same-PR rule \u2014 the CI trusted job's base proofsheet refused the section-bearing committed sheet with ARV-PRF-004 (the base cannot re-derive a format it does not know; record 22 \u00a78's precedent). The machinery suite loses the two section cases (their forms preserved in record 34 \u00a78 as CLAIM-042's RED set); the sheet stays base-format through this PR",
         "observed_at": "2026-10-24T09:24:45.561615+00:00"
+      },
+      {
+        "prior_sha256": "8daccb6db9d7a0a5ba341939bcd5a391dadf57edd943a4470144f44637131ec0",
+        "new_sha256": "0b6a7ff7b0891dbbd16055ff476963f62b75c5547bc868a3c96b6d86a4a94aeb",
+        "note": "CLAIM-042 (the RED cases + the typed amendments, chained from the #76-merged state): test_record_machinery.py gains the deferred SEV sheet-section cases 7-10 (record 34 \u00a78's RED set: the opted-in section assembly, the digest-after-it coverage, the mistyped-field guards; case 10 the precision-labeled transition guard) + test_sev.py gains the optional sheet_section typed check (the bool positive + the string refusal) \u2014 the RED observed live: the machinery suite exit 1 (3 failures: cases 7/8/9, the section absent at the predecessor), the sev suite exit 1 (the mistyped sheet_section passed clean), zero regressions in either suite (red-01.txt)",
+        "observed_at": "2026-10-24T10:53:45.924979+00:00"
       }
     ]
   },
@@ -398,7 +404,7 @@
     "red_exit": 1,
     "red_code": "ARV-SEV-001..008 all unprovable at the predecessor (the module absent \u2014 the ten suite groups red, exit 1, red-01.txt)",
     "red_evidence": "the CLAIM-040 red observed at the test-only commit: test_sev.py at the predecessor (no harness/sev.py) \u2014 ten failing case groups, every named ARV-SEV code unprovable, exit 1; red-01.txt in the run dir",
-    "current_sha256": "605570e4311d15bf3869be509ac7d88254c2d044b6c46b512f3cb1c93a6c85a8",
+    "current_sha256": "4f3dff68cf944a8f32d31dd5b2b578ca598684188e317efb59d6cccc4cb05dcf",
     "amendments": [
       {
         "prior_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
@@ -423,6 +429,12 @@
         "new_sha256": "605570e4311d15bf3869be509ac7d88254c2d044b6c46b512f3cb1c93a6c85a8",
         "note": "the #76 fresh-context reviewer round's fixes + their discriminating cases: SEV-1 (the declarations \u2014 test_record_machinery.py missing from BOTH homes, the same 6037567/claim-040 class, caught by the reviewer's live gate run); SEV-2 (the non-iterable proof_ids guard \u2014 named 004, never the TypeError crash the reviewer observed at the wired gate; red-02: the pre-fix suite died with the exact traceback); SEV-4 (the slice_id binding \u2014 a transplant naming another slice refuses with 002); SEV-3 (the sheet's printed digest computed AFTER the SEV section \u2014 the printed line no longer excludes the bytes it claims to cover; red-02: changing only sev.json left the digest byte-identical); SEV-5 (KB-SEV-008's env default unsets its own finally)",
         "observed_at": "2026-10-24T08:32:44.949859+00:00"
+      },
+      {
+        "prior_sha256": "605570e4311d15bf3869be509ac7d88254c2d044b6c46b512f3cb1c93a6c85a8",
+        "new_sha256": "4f3dff68cf944a8f32d31dd5b2b578ca598684188e317efb59d6cccc4cb05dcf",
+        "note": "CLAIM-042 (the RED cases + the typed amendments, chained from the #76-merged state): test_record_machinery.py gains the deferred SEV sheet-section cases 7-10 (record 34 \u00a78's RED set: the opted-in section assembly, the digest-after-it coverage, the mistyped-field guards; case 10 the precision-labeled transition guard) + test_sev.py gains the optional sheet_section typed check (the bool positive + the string refusal) \u2014 the RED observed live: the machinery suite exit 1 (3 failures: cases 7/8/9, the section absent at the predecessor), the sev suite exit 1 (the mistyped sheet_section passed clean), zero regressions in either suite (red-01.txt)",
+        "observed_at": "2026-10-24T10:53:45.925038+00:00"
       }
     ]
   }

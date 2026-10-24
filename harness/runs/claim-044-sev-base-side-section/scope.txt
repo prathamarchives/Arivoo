@@ -15,4 +15,7 @@ AGENTS.md D-043
 CLAIMS.md D-038
 context/WORKLOG.md D-043
 context/extracted/37-SEV-BASE-SIDE-SECTION.md D-042
+harness/gate.py D-037
+RTM.md D-039
+LAWS.md D-037
 harness/runs/claim-044-sev-base-side-section D-042

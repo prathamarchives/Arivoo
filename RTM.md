@@ -284,7 +284,7 @@ North Star claim ladder, and the user validation scenario (the V-model validatio
   its Proof Sheet + run records + the gate's green, its sev.json binding the reviewed diff,
   and the fresh-context review's findings with dispositions; a defect that invalidates an
   earlier gate reopens that gate.
-- **Pre-registered test paths:** the standing machinery (ARV-SEV-001..008, the KB matrix 31
+- **Pre-registered test paths:** the standing machinery (ARV-SEV-001..009, the KB matrix 32
   cases, the trusted leg) — live and enforced per PR; the phase exit gates run the independent
   grader over THIS matrix's rows.
 - **User validation scenario:** at the Phase 3 exit gate, an independent grader walks every

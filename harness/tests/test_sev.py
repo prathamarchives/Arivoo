@@ -512,7 +512,7 @@ def main() -> int:
     print()
     if FAILED:
         print(f"RED — {len(FAILED)} failing case(s): {', '.join(FAILED)}")
-        print("      the SEV validator must refuse its named classes (ARV-SEV-001..008)")
+        print("      the SEV validator must refuse its named classes (ARV-SEV-001..009)")
         return 1
     print("GREEN — the SEV validator's refusal matrix holds: every named code discriminated "
           "(missing/malformed/stale/trace/false-PASS/placeholder/identity/run-records)")

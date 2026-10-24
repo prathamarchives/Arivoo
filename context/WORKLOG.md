@@ -694,3 +694,11 @@ Stage Summary:
 - Evidence: record 36; harness/runs/claim-043-p3-00-rtm-freeze/ (red-01, the proof set, sev.json, the sheet); PR #78.
 - Unresolved: Q11/Q12/Q8 baselines frozen around (never closed); the SEV-3 follow-up assessment at this slice's review; the N12 residual unchanged.
 - Next: merge #78 → P3-M0 ∥ P3-K0 → P3-01 — NO PAUSE.
+
+## Task 53 (CLAIM-044, session 30) — the SEV-3 follow-up: ARV-SEV-009
+- What: the base-side sheet_section expectation — a slice whose PR base carries the section renderer MUST set sheet_section true (the opt-in window closed at #78); three-state fail-closed (renderer → active; positive absence → the pre-renderer era compatible; undecidable → the refusal); KB-SEV-009 (the matrix 32); the three born-valid fixtures modernized (each caught by the machinery itself); PLAN/TEMPLATES flipped NAMED → ENFORCED.
+- Outcome: RED-first (the expectation group + KB-SEV-009 both RED at c19d497); GREEN (the sev suite 46 lines, the KB 32/32, make verify 54/0); the fresh-context review PASS — four P2s: three live-doc drift lines fixed in-slice (test_sev/gate/RTM/LAWS 001..008 → 001..009), the probe's stated residual recorded.
+- Catches: the stale CLAIM-043 row (the SECOND consecutive registry catch — the twice-learned lesson now the standing checklist: commit A retires the previous open row + carries the close row); the dispatch born-valid assert; the trusted stub's 16 refusals.
+- Evidence: record 37; harness/runs/claim-044-sev-base-side-section/; the reviewer's report (agent-f906baad); PR #79.
+- Unresolved: the trusted-leg 009 enforcement begins with the NEXT slice's PR (the bootstrap); the probe's three stated boundaries recorded; the N12 residual unchanged.
+- Next: merge #79 → P3-M0 ∥ P3-K0 → P3-01 — NO PAUSE.

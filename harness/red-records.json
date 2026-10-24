@@ -416,7 +416,7 @@
     "red_exit": 1,
     "red_code": "ARV-SEV-001..008 all unprovable at the predecessor (the module absent \u2014 the ten suite groups red, exit 1, red-01.txt)",
     "red_evidence": "the CLAIM-040 red observed at the test-only commit: test_sev.py at the predecessor (no harness/sev.py) \u2014 ten failing case groups, every named ARV-SEV code unprovable, exit 1; red-01.txt in the run dir",
-    "current_sha256": "f68714803d55f5c5e7a2aec234c927d5fd18d2a4a0eb63532fd7e8a14821da29",
+    "current_sha256": "ad9bac48f3c127ace900e9569dd2bb874d5cbe81cef48c77878540640cdd89de",
     "amendments": [
       {
         "prior_sha256": "31345125dea6bf1726b824919ee4b5b4b354f3c74e80fd917826ba2b2928d92a",
@@ -453,6 +453,12 @@
         "new_sha256": "f68714803d55f5c5e7a2aec234c927d5fd18d2a4a0eb63532fd7e8a14821da29",
         "note": "CLAIM-044 (the RED cases + the typed amendment, chained from the #78-merged state): test_sev.py gains the ARV-SEV-009 base-side section expectation group (the renderer-base fixture + the false/absent refusals + the precision-labeled compliant form; the docstring documents the rule) \u2014 observed live: exit 1 with the two expectation cases failing (got []; the rule absent at the predecessor c19d497), the historical fixture's positive cases untouched (no over-refusal). The KB-SEV-009 case + the born-valid report's sheet_section:true modernization ride in harness/known-bad/cases.py (the KB matrix 32 cases; KB-SEV-009 broken at the predecessor \u2014 the guard did not fire).",
         "observed_at": "2026-10-24T14:28:25.045147+00:00"
+      },
+      {
+        "prior_sha256": "f68714803d55f5c5e7a2aec234c927d5fd18d2a4a0eb63532fd7e8a14821da29",
+        "new_sha256": "ad9bac48f3c127ace900e9569dd2bb874d5cbe81cef48c77878540640cdd89de",
+        "note": "CLAIM-044 (the review-round doc-drift fixes + the one-line suite edit): test_sev.py's RED-path summary line 001..008 -> 001..009 (the fresh-context reviewer's SEV-1, caught in-scope); the edit chains through this typed amendment.",
+        "observed_at": "2026-10-24T15:03:08.672748+00:00"
       }
     ]
   }

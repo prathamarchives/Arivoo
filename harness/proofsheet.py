@@ -108,6 +108,29 @@ def assemble(slice_name: str, notverified: str) -> str:
     else:
         lines.append("- (none stated — REPAIR: the not-verified list may not be empty; LAW-04)")
     digest = _sha("\n".join(lines))
+    # H-02 (CLAIM-041): the SEV section — the sheet records the report +
+    # reviewed-diff digests, the disposition, the findings, and the not-verified
+    # count when the slice carries a report (the TEMPLATES §6 rule). The section
+    # derives from the committed sev.json — deterministic, so --verify re-derives
+    # byte-identically (PRF-01/LAW-01). An unparseable report is RECORDED as such
+    # (the gate's ARV-SEV-002 is the refusal; the sheet never fabricates).
+    sev_path = RUNS / slice_name / "sev.json"
+    if sev_path.is_file():
+        raw = sev_path.read_bytes()
+        lines.append("")
+        lines.append("## Systems-engineering verification (LAW-30; harness/sev.py)")
+        lines.append(f"- report sha256: {hashlib.sha256(raw).hexdigest()}")
+        try:
+            sdata = json.loads(raw.decode("utf-8"))
+            lines.append(f"- reviewed_diff_sha256: {sdata.get('reviewed_diff_sha256', '(absent)')}")
+            lines.append(f"- disposition: {sdata.get('disposition', '(absent)')}")
+            fnd = sdata.get("findings", [])
+            open_p01 = sum(1 for f in fnd if isinstance(f, dict)
+                           and f.get("severity") in ("P0", "P1") and f.get("status") == "open")
+            lines.append(f"- findings: {len(fnd)} (open P0/P1: {open_p01})")
+            lines.append(f"- not-verified entries: {len(sdata.get('not_verified', []))}")
+        except (json.JSONDecodeError, UnicodeDecodeError, AttributeError):
+            lines.append("- sev.json: UNPARSEABLE — the gate refuses (ARV-SEV-002); the digest above is the record")
     lines.append("")
     lines.append("## Assembly")
     lines.append(f"- sheet sha256 (of the content above, excluding this line): {digest}")

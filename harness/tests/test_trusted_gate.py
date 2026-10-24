@@ -244,9 +244,18 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
         (stub / "undeclared-secret.txt").write_text("OUTSIDE the declared scope\n")
     run("git", "add", "-A")
     run("git", "commit", "-q", "-m", "the PR change under test")
-    # CLAIM-041: finalize the SEV report AFTER the PR commit — the binding
-    # digest covers the diff the gate will judge (HEAD~1...HEAD = notes.txt),
-    # never the earlier tree (the same staleness rule the validator enforces).
+    finalize_stub_sev(stub)
+    return stub
+
+
+def finalize_stub_sev(stub: Path) -> None:
+    """CLAIM-041: re-finalize the stub's SEV report + sheet at the CURRENT PR
+    commit — the binding digest covers the diff the gate will judge (HEAD~1...HEAD),
+    never an earlier tree (the same staleness rule the validator enforces). Any
+    test that legitimately mutates the stub AFTER build_stub calls this again
+    (the addition is a new diff; the SEV is re-authored over it — test_15's own
+    catch: its suite addition left the report stale and the wired gate refused
+    the legitimately-registered form until the re-finalize)."""
     sys.path.insert(0, str(REPO))
     from harness import sev as sev_mod2
     rep_path = stub / "harness" / "runs" / SLICE / "sev.json"
@@ -258,13 +267,11 @@ def build_stub(td: Path, *, suite_mutations: dict | None = None,
     codes = sev_mod2.validate_report(SLICE, "HEAD~1", repo=stub)
     if codes:
         raise AssertionError(f"stub sev.json not born-valid at the PR commit: {codes}")
-    # the sheet embeds the SEV section — regenerate AFTER the report finalizes
     sys.path.insert(0, str(REPO))
     from harness import proofsheet as ps2
     ps2.RUNS = stub / "harness" / "runs"
     (stub / "harness" / "runs" / SLICE / "proofsheet.md").write_text(
         ps2.assemble(SLICE, NOTVERIFIED), encoding="utf-8")
-    return stub
 
 
 def run_driver(td: Path, stub: Path, phase: str, *, event: str | None = None,
@@ -873,6 +880,8 @@ class TrustedGateTests(unittest.TestCase):
         assert anchor in gtext
         gtext = gtext.replace(anchor, anchor + "\n         \"harness/tests/test_brand_new.py\",", 1)
         gp.write_text(gtext, encoding="utf-8")
+        # CLAIM-041: the addition is a NEW diff — the SEV report re-finalizes
+        # over it (the legitimate-candidate path; the stale form is KB-SEV-003's)
         # the suite file lands FIRST (its own commit), THEN the record binds to
         # that commit — the real make-red form: the binding names history that
         # actually carries the file (the fixture's own catch: binding to the
@@ -894,6 +903,7 @@ class TrustedGateTests(unittest.TestCase):
         subprocess.run(["git", "add", "-A"], cwd=stub, check=True, capture_output=True)
         subprocess.run(["git", "commit", "-q", "-m", "the registered new-suite probe"],
                        cwd=stub, check=True, capture_output=True)
+        finalize_stub_sev(stub)  # the addition is a new diff: the SEV re-authorizes over it
         r = run_driver(self.td, stub, "gate", event="pull_request", head=BRANCH)
         self.assertEqual(r.returncode, 0,
                          "the trusted phase REFUSED a legitimately-registered new suite — "

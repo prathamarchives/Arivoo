@@ -25,6 +25,9 @@ contract). Check order:
   6. KB-01..06         every known-bad case is REJECTED with its named code
                        (a passing known-bad is a broken guard — KB-05)
   7. ARV-PRF-004       the slice's Proof Sheet re-derives byte-identically (LAW-01)
+  8. ARV-SEV-001..008  the slice's SEV report validates (LAW-30, H-02: missing/
+                       stale/malformed/incomplete/BLOCKED all refuse; the PUBLIC
+                       validator through the gate wrapper, never a duplicate)
 
 Diff modes: --diff <base> (git diff base..HEAD vs the slice's declaration) or
 --no-diff (main/selfcheck: the diff-scoped checks ran at PR time on the same
@@ -45,7 +48,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from harness import proofsheet, scope, claims  # noqa: E402
+from harness import proofsheet, scope, claims, sev  # noqa: E402
 
 # known-bad cases load BY FILE PATH (the doc-conventional directory carries a
 # hyphen — not a Python package name; spec-loading keeps it importable anyway)
@@ -433,6 +436,19 @@ def main() -> int:
             sys.argv = argv
     else:
         print("NOTE ARV-PRF-000: selfcheck mode (no slice named) — per-slice Proof Sheets verify at slice time")
+
+    # H-02 (LAW-30, CLAIM-041): the systems-engineering verification obligation.
+    # PR mode (--diff set by dispatch or the trusted driver) requires the slice's
+    # SEV report — missing/stale/malformed/incomplete/BLOCKED all refuse, each
+    # with its named code (harness/sev.py — the PUBLIC validator invoked through
+    # its wrapper, never an internal duplicate). Selfcheck NOTEs it: the
+    # obligation ran at PR time on the same changes through the protected
+    # workflow (the scope/claims pattern).
+    if a.diff and not a.no_diff:
+        print(f"systems-engineering verification (LAW-30, H-02):")
+        fails += sev.check_sev(slice_name, a.diff)
+    else:
+        print("NOTE ARV-SEV-000: no-diff mode (main/selfcheck) — the SEV obligation ran at PR time on the same changes")
 
     print()
     if fails:

@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-041-h02b-sev-wiring (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 496cc6111cf16ab12786dfb4676f1d5e1b5b2330
-- generated (last record's timestamp): 2026-10-24T09:05:31.392311+00:00
-- run records: 14
+- commit (last run record's): 52276fcaba13aa12132b1f1751af237867e9b2df
+- generated (last record's timestamp): 2026-10-24T09:29:30.054320+00:00
+- run records: 15
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 c738a1d358389965 · 2026-10-24T08:36:01.270656+00:00
@@ -19,6 +19,7 @@
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 04a2d3d3d4b5149e · 2026-10-24T08:38:32.122697+00:00
 - `make verify` -> exit 0 · output sha256 b14f8cc74d98a2d3 · 2026-10-24T08:41:01.905104+00:00
 - `python3 harness/gate.py --slice claim-041-h02b-sev-wiring --diff origin/main` -> exit 0 · output sha256 b2b8a90a3161a91f · 2026-10-24T09:05:31.392311+00:00
+- `python3 harness/gate.py --slice claim-041-h02b-sev-wiring --diff origin/main` -> exit 0 · output sha256 c94b7e4c467a676f · 2026-10-24T09:29:30.054320+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - not verified (LAW-04 — the CLAIM-041 honest limits):
@@ -44,12 +45,5 @@
 - review head; make verify not run as one command by the reviewer) were true of
 - the state it reviewed and are retained in the record 34 + the sev.json.
 
-## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: d6b8503647dc3061d037c09e2dd41affbe02ed58d7fdb7f51df716936f52fdd6
-- reviewed_diff_sha256: ef88bfe2f0a29ca209bfdefe746525275bc98f865841a7c4ea3e8c34b5da479e
-- disposition: PASS
-- findings: 5 (open P0/P1: 0)
-- not-verified entries: 6
-
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): ed087f44bb5a38afbcfc49a9ae43666accefada0ffee1b01647d9ad538ead0d8
+- sheet sha256 (of the content above, excluding this line): f31b2a3bebae5bf1df492a20a7337108908f60d119f274ccd6c9550c019d6795

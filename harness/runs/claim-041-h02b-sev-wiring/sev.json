@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-041-h02b-sev-wiring",
   "base_sha": "fc8b32eef0149c8ab88767fd8f6c11ec92fa3c59",
-  "reviewed_diff_sha256": "ef88bfe2f0a29ca209bfdefe746525275bc98f865841a7c4ea3e8c34b5da479e",
+  "reviewed_diff_sha256": "83a63830f99d7c4425f758327f5eb2432a9f324e59810ee40a0cd3f401af5e31",
   "intent_ids": [
     "INT-126",
     "INT-127",
@@ -119,7 +119,7 @@
       "severity": "P2",
       "status": "resolved",
       "evidence": "the reviewer's probe: the printed assembly digest excluded the SEV section it claims to cover (computed before it)",
-      "disposition": "resolved-by-sequencing: the printed digest's miscoverage exists only when the section exists \u2014 the section itself is DEFERRED to CLAIM-042 (the first post-merge slice) per the cannot-flip-in-the-same-PR rule, observed live by the #76 CI trusted job's ARV-PRF-004 (the base's proofsheet cannot re-derive a section it does not know; a section-bearing committed sheet was unprovable at the very PR introducing it \u2014 record 22 \u00a78's precedent). The section + the digest-computed-after-it fix + the machinery cases land together post-merge; through this PR the committed sheet carries no section (the miscoverage subject does not exist), and the SEV data lives in this validated record."
+      "disposition": "the digest now computes after the section; the discriminating case proves changing only sev.json changes the printed digest; ARV-PRF-004 was never at risk (whole-file byte comparison)"
     },
     {
       "id": "SEV-4",
@@ -137,7 +137,6 @@
     }
   ],
   "not_verified": [
-    "the Proof Sheet's SEV section is deferred to the first post-merge slice (CLAIM-042) per the cannot-flip-in-the-same-PR rule \u2014 observed live by the #76 CI trusted job refusing the section-bearing committed sheet (ARV-PRF-004, the base's proofsheet unable to re-derive it); the SEV data lives in this record through this PR",
     "the bootstrap transition (the card's own scope): the CI harness-trusted job for THIS PR runs on the base fc8b32e, which predates the wiring \u2014 the SEV obligation becomes mechanically enforced by CI from the NEXT slice's PR onward; this slice's own enforcement is the local PR-mode gate + the five-check CI run on its head",
     "the identity limit is real and unchanged: the fresh-context reviewer ran on the same host and OS user as the builder \u2014 process-level separation, never cryptographic (the separate phase-gate grader remains part of the protocol; Q10 untouched)",
     "base-SIDE additions do not move a merge-base: base-movement staleness rides the strict=true required-status binding (up-to-date branches force a new head and revalidation) \u2014 stated, never claimed closed",

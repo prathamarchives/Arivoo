@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-048-p3k0-kernel-primitives",
   "base_sha": "a6b5f496aadb499b79fcca16fb62273d8208d2c9",
-  "reviewed_diff_sha256": "faa39dcaa0d2295f5bf4b1c35ad41676b13cec5eac5d3176678d4083d7d27f68",
+  "reviewed_diff_sha256": "6b9b630dd658a03c4c115fa6c6d26d95d89b7b6e9ca23dea5e8d008389f9c834",
   "intent_ids": [
     "INT-127",
     "INT-131",
@@ -79,7 +79,43 @@
       ]
     }
   ],
-  "findings": [],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "the #83 Major: the command Session spawned psql directly, bypassing the ARV-DB-004 target guard",
+      "disposition": "FIXED: the Session constructor enforces pg.LOOPBACK through pg.config() \u2014 the command path and the adapter share one approved boundary"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #83 Major: the stopped-server diagnostic class missed ARV-DB-003",
+      "disposition": "FIXED: the Connection-refused patterns added"
+    },
+    {
+      "id": "SEV-3",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #83 Major: test_kernel.py's red record carried binding!=current with an empty amendments list",
+      "disposition": "FIXED: the typed amendment chained with the full evolution note (the schema-2 rule)"
+    },
+    {
+      "id": "SEV-4",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #83 Major: the suite's independent sql() read hardcoded port 5433 (CI's service is 5432)",
+      "disposition": "FIXED: the adapter-configured target"
+    },
+    {
+      "id": "SEV-5",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #83 Minor: K-08 compared shape only; and the CLAIMS Notes cell's literal pipes broke the table",
+      "disposition": "FIXED: the stored-vs-acked byte comparison + the pipe-free spelling"
+    }
+  ],
   "not_verified": [
     "the notverified.txt list: the encoding's pinned-choice contracts; the loser's in-flight window (the winner's transaction length, bounded by the crash matrix); the process-local monotonicity floor; the loopback-only approved target set (the deployed Supabase target joins as its own owner-scoped decision at P4-00); ARV-DB-003's mapping scope",
     "the ARV-SEV-009 undecidable-base regression remains ROUTED (CLAIM-044's close row)"

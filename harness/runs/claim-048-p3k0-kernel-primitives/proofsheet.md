@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-048-p3k0-kernel-primitives (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 2bcdb00970dd05b268fa93063044a684c7288cba
-- generated (last record's timestamp): 2026-10-25T13:30:20.896146+00:00
-- run records: 5
+- commit (last run record's): 0b0d1d88f7badb7575c9d9dfe60b5af985ac5657
+- generated (last record's timestamp): 2026-10-25T13:54:56.007921+00:00
+- run records: 8
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 f9686edbb769e783 · 2026-10-25T13:13:54.527464+00:00
@@ -10,6 +10,9 @@
 - `make verify` -> exit 0 · output sha256 247fdb53ac785e04 · 2026-10-25T13:16:44.924386+00:00
 - `python3 harness/gate.py --slice claim-048-p3k0-kernel-primitives --diff origin/main` -> exit 1 · output sha256 6a7afa6f7b857dc7 · 2026-10-25T13:19:25.225719+00:00
 - `python3 harness/gate.py --slice claim-048-p3k0-kernel-primitives --diff origin/main` -> exit 0 · output sha256 be3cba38357bfcfc · 2026-10-25T13:30:20.896146+00:00
+- `make verify` -> exit 0 · output sha256 f91928a06c395e2b · 2026-10-25T13:47:00.989354+00:00
+- `python3 harness/gate.py --slice claim-048-p3k0-kernel-primitives --diff origin/main` -> exit 1 · output sha256 913127589c271321 · 2026-10-25T13:49:31.860520+00:00
+- `python3 harness/gate.py --slice claim-048-p3k0-kernel-primitives --diff origin/main` -> exit 0 · output sha256 515628169b050531 · 2026-10-25T13:54:56.007921+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - the canonical encoding's pinned choices are contracts, not defaults-by-silence: NFC normalization (the same logical text in different normalizations is the SAME body); json-serialized with sorted keys and a version field (the 'arv_body_version' tag); any future change to either is a compatibility decision with its own bounded slice (persisted body_hash values are history — a re-encoding would change same-body equivalence for existing rows).
@@ -20,11 +23,11 @@
 - - the ARV-SEV-009 undecidable-base regression remains ROUTED as its own bounded follow-up (CLAIM-044's close row) — never folded here (scope exclusivity, LAW-06).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 8ec9627ec157db736b43d8b9d3d8a6f7e76b987ec4aad89d6a4bc1e6e0e07ec4
-- reviewed_diff_sha256: faa39dcaa0d2295f5bf4b1c35ad41676b13cec5eac5d3176678d4083d7d27f68
+- report sha256: 65d1851842fb2770e9637f6aa2e20edf74156dade5e23f2100f899a5fd1fc63f
+- reviewed_diff_sha256: 6b9b630dd658a03c4c115fa6c6d26d95d89b7b6e9ca23dea5e8d008389f9c834
 - disposition: PASS
-- findings: 0 (open P0/P1: 0)
+- findings: 5 (open P0/P1: 0)
 - not-verified entries: 2
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): f550809e838737d0e656444878bd507ba7d157f89fc9fb9daace7c9c86564790
+- sheet sha256 (of the content above, excluding this line): 9962034be93b1b8453615e5e2484b3aa92a5552898f7e4070aea8be27861835f

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_capture.py",
+  "exit_code": 0,
+  "commit": "44bf098fac35dbf11b9b7a119e5a0b69d50c2d3e",
+  "output_sha256": "fe81a5752e4e3dfb7a86960975560833a22c5b4764f522ca3fdbca0e151836cd",
+  "recorded_at": "2026-10-25T15:59:10.485308+00:00"
+}

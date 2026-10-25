@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the capture machinery is absent (machinery-absent class; missing commands: ['import_source', 'create_highlight']; missing files: ['query.py', 'blob.py', '0004_p3_01_capture_skeleton.sql']) — P3-01's implementation lands after this RED, never before it

@@ -514,5 +514,15 @@
         "observed_at": "2026-10-25T13:41:12.436905+00:00"
       }
     ]
+  },
+  "harness/tests/test_capture.py": {
+    "schema": 2,
+    "binding_commit": "c77c14f5e7bcf5ba99b09e941d25422505c36b59",
+    "binding_sha256": "6283a7edfde056210b35766988fcbf6a9fe63e554f6a9f868b1499e2d1cb4114",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-049 (P3-01) RED: the capture suite's machinery-absent class observed at the predecessor 5c04375 (commit A c77c14f carries the suite; import_source/create_highlight absent from the REGISTRY, query.py/blob.py/0004_p3_01_capture_skeleton.sql absent \u2014 the waiting-for-harness form, the S1/record-18 \u00a74.1 + P3-K0 precedent; exit 1, red-01.txt) \u2014 the implementation lands AFTER this RED, never before it (LAW-11)",
+    "current_sha256": "6283a7edfde056210b35766988fcbf6a9fe63e554f6a9f868b1499e2d1cb4114",
+    "amendments": []
   }
 }

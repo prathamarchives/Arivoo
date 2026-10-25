@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-045-p3m0-migration-oracle",
   "base_sha": "762588a116d8842f3413b04846a213d50034ffbd",
-  "reviewed_diff_sha256": "9e83ba827c386acf3a01da409dc9fdff0b3077819efe70cc8727e024bc590ad1",
+  "reviewed_diff_sha256": "19a261f360b301e11e4424e1d5a55f28af445898e0e6d4031efc936a9762ce17",
   "intent_ids": [
     "INT-127",
     "INT-131",
@@ -22,7 +22,7 @@
     "C5"
   ],
   "changed_components": [
-    "harness/migrate.py (rebuilt as the M0 oracle: the byte-oriented character-level mask \u2014 identifier context exactly as PG's scan.l, astral planes included; ARV-MIG-011 embedded transaction control refused pre-execution, directive-proof, two-phase forms included; ARV-MIG-003 comment-proof + IF-EXISTS-proof destructive detection; ARV-MIG-015 the fail-closed admitted grammar with the name-scoped 0001_baseline bootstrap exemption and the data-modifying-body scan; ARV-MIG-014 the safe filename alphabet; ARV-MIG-012 the complete bidirectional history check; ARV-MIG-013 observation-only verify; ARV-MIG-016 the fail-closed ScanError; the pending-file pre-scan before the first DB write)",
+    "harness/migrate.py (rebuilt as the M0 oracle: the byte-oriented char-level mask; ARV-MIG-011 transaction control refused at STATEMENT-HEAD level, directive-proof (END included), two-phase forms included; ARV-MIG-003 comment-proof + statement-level ALTER-DROP destructive detection; ARV-MIG-015 the fail-closed grammar + the data-modifying-body scan + the name-scoped baseline exemption; ARV-MIG-014 the safe alphabet; ARV-MIG-012 the complete bidirectional history + the fail-closed ledger parser; ARV-MIG-013 observation-only verify; ARV-MIG-016 the fail-closed ScanError; the pending-file pre-scan; the SIZE-002 compression (the DRY ledger parser, the dead-constant removals, the prose tightened \u2014 400 added lines at the LAW-05 bound)",
     "harness/tests/test_migrations.py (the 39-case suite \u2014 every case an independent-psql oracle; the reachable RED-01 capture: 22 REDs at the single predecessor 762588a)",
     "harness/red-records.json (the four-amendment chain for the suite's evolution)",
     "CLAIMS.md (CLAIM-046/047's rule-4 close rows carried in sequence; CLAIM-045's open row at the rebuilt scope)",
@@ -47,8 +47,8 @@
     ],
     "system_verification": [
       "make verify GREEN (canonical 54/0, the gate green in selfcheck); proof run-17",
-      "the PR-mode gate over the actual diff (the SEV obligation, the scope, the red records, the KB matrix, the section-bearing sheet, the SIZE-005 check at ZERO migration files) \u2014 RECORDED green; proof run-18 (the final green capture; run-14's honest RED \u2014 the branch-identity catch \u2014 and run-15's pre-round green stay preserved in the record set)",
-      "the SEV three-round chain (the fresh-context reviewer agent-ff3e3170, uncoached): round 1 BLOCKED (the phantom-dollar-quote P0 end-to-end), round 2 re-BLOCKED (the astral cap), round 3 PASS (the reviewer's own end-to-end re-runs + attack probes closing every dangerous direction). THE REVIEW COVERED THE BYTE-IDENTICAL ORACLE CORE: migrate.py and test_migrations.py are checked out unchanged from the archive branch's round-3-PASS head; the re-bind covers this slice's tree"
+      "the PR-mode gate over the actual diff (the SEV obligation, the scope, the red records, the KB matrix, the section-bearing sheet, the SIZE checks \u2014 400 added source lines at the LAW-05 bound, ZERO migration files) \u2014 RECORDED green; proof run-19 (the FINAL green capture; run-14's honest RED (the branch-identity catch) and run-18's honest RED (the SIZE-002 refusal) stay preserved in the record set \u2014 the failed captures never smoothed)",
+      "the SEV three-round chain (the fresh-context reviewer agent-ff3e3170, uncoached): round 1 BLOCKED (the phantom-dollar-quote P0 end-to-end), round 2 re-BLOCKED (the astral cap), round 3 PASS (the reviewer's own end-to-end re-runs + attack probes closing every dangerous direction). THE REVIEW COVERED THE BYTE-IDENTICAL ORACLE CORE: migrate.py and test_migrations.py are checked out from the archive branch's round-3-PASS head, extended by the #82 round's fixes (SEV-14..17); the re-bind covers this slice's final tree"
     ],
     "validation": [
       "the A08 discipline: every new case compares actual values via independent reads \u2014 never a count alone",

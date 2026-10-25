@@ -1,4 +1,8 @@
 -- 0003_command_log.sql — the idempotency ledger (S3; D-036).
+
+-- arv-baseline-bump: 1  (P3-M0's admitted grammar: this file declares the plpgsql command-log
+-- immutability trigger function — a procedural construct the fail-closed grammar cannot classify; the
+-- directive is the owner-visible paper trail that admits it, per PLAN's P3-M0 card / ARV-MIG-015.)
 --
 -- The command registry's exactly-once substrate (LAW-23's pattern, early):
 --   (owner_scope, idempotency_key) composite PK — per-owner keyspaces (LAW-22:

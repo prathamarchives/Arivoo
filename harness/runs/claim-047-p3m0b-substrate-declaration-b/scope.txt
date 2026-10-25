@@ -1,0 +1,12 @@
+# CLAIM-047 — P3-M0b: the substrate's grammar declarations, part 2 — the
+# -- arv-baseline-bump directive on 0003_command_log.sql (the SIZE-005 split's
+# second half; the oracle slice CLAIM-045 lands immediately after with zero
+# migration files in its diff). The comment is behaviorally inert at this slice
+# (BUMP_RE is read only by the landing oracle; the old runner's destructive
+# check never trips on 0003); the checksum change re-derives the rig's ledger.
+harness/migrations/0003_command_log.sql D-036
+CLAIMS.md D-038
+AGENTS.md D-043
+STATE.md D-043
+context/WORKLOG.md D-043
+harness/runs/claim-047-p3m0b-substrate-declaration-b D-042

@@ -709,3 +709,10 @@ Stage Summary:
 - Evidence: the slice's runs dir (sev.json, the proof set, the sheet); record 38 (the session record, landing with the oracle slice).
 - Unresolved: Q6–Q12 unchanged; the ARV-SEV-009 undecidable-base regression routed at CLAIM-044's close row.
 - Next: CLAIM-047 (0003's declaration) → the oracle (CLAIM-045) — NO PAUSE (INT-134/135/138/139/140).
+
+## Task 55 (CLAIM-047, session 31) — P3-M0b: the substrate's grammar declarations, part 2
+- What: the `-- arv-baseline-bump: 1` directive on 0003_command_log.sql (the split's second half — the oracle's first assembled diff carried BOTH substrate files; ARV-SIZE-005 refused 2 > 1; the gate's repair text prescribes the split).
+- Outcome: behaviorally inert at this head (the old runner's destructive check never trips on 0003); the checksum change re-derives the rig's ledger; CLAIM-046's rule-4 close row carried (#80 = f546dff, run 40186116666 five green, the protection restored byte-identical); STATE/AGENTS's active-task/next-action refreshed proactively (the staleness class the last three review rounds caught).
+- Evidence: the slice's runs dir (sev.json, the proof set, the sheet); record 38 (landing with the oracle slice).
+- Unresolved: Q6–Q12 unchanged; the routed SEV-009 follow-up unchanged.
+- Next: CLAIM-045 (the oracle) → P3-K0 → P3-01 — NO PAUSE (INT-134/135/138/139/140).

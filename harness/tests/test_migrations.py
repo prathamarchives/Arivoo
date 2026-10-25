@@ -458,7 +458,8 @@ def main() -> int:
         rls_ok = len(rls.splitlines()) == 2 and all(l.endswith("|t") for l in rls.splitlines())
         trig = sql(db_or, "SELECT count(*) FROM pg_trigger WHERE tgrelid IN "
                           "('arv.evidence_event'::regclass, 'arv.command_log'::regclass) AND NOT tgisinternal;").stdout.strip()
-        pol = sql(db_or, "SELECT count(*) FROM pg_policies WHERE schemaname='arv';").stdout.strip()
+        pol = sql(db_or, "SELECT count(*) FROM pg_policies WHERE schemaname='arv' "
+                         "AND tablename IN ('evidence_event','command_log');").stdout.strip()
         check("ARV-TEST-024", rows_or == want and rls_ok and trig == "2" and pol == "2",
               f"the nonempty oracle: every ledger row equals the file digest triple ({rows_or == want}), both tables RLS-forced, both immutable triggers present, both owner policies present",
               "A08: a row count is not a recovery proof — the oracle compares actual values")

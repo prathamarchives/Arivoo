@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-048-p3k0-kernel-primitives",
   "base_sha": "a6b5f496aadb499b79fcca16fb62273d8208d2c9",
-  "reviewed_diff_sha256": "fe57f5422fc91abf7daec901611acda64f74f1a11648edcb4a352ba41733f24d",
+  "reviewed_diff_sha256": "faa39dcaa0d2295f5bf4b1c35ad41676b13cec5eac5d3176678d4083d7d27f68",
   "intent_ids": [
     "INT-127",
     "INT-131",
@@ -20,7 +20,8 @@
     "harness/adapters/ids.py (the RFC-4122 v7 layout repair \u2014 the variant byte was one byte right since S2; the process-local ms monotonicity floor)",
     "harness/adapters/pg.py (the approved boundary's stable named errors ARV-DB-001..004 + the loopback target guard)",
     "harness/tests/test_kernel.py (the 12-case kernel suite, RED-first: ARV-TEST-000 at the predecessor + the two live probes) + gate.py's TESTS registration",
-    "harness/red-records.json (the new suite's typed record + the amendment chain)"
+    "harness/red-records.json (the new suite's typed record + the amendment chain)",
+    "harness/gate.py (the TESTS registration \u2014 the walls' scope catch) + the scope repairs (the tmp-artifact removal)"
   ],
   "interfaces_reviewed": [
     "commands.canonical_body: versioned, field-order independent, NFC-pinned, empty-vs-absent unambiguous",

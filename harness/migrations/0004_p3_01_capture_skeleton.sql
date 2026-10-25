@@ -68,6 +68,10 @@ CREATE TABLE IF NOT EXISTS arv.anchor (
     created_at     TIMESTAMPTZ NOT NULL,
     CHECK (end_off > start_off),
     UNIQUE (id, owner_scope),
+    -- the tie to the anchor's OWN source (#84's CodeRabbit Minor: two independent
+    -- owner-scoped FKs accepted a highlight whose source_id differed from its
+    -- anchor's source — the composite FK below makes the pair inseparable)
+    UNIQUE (id, source_id, owner_scope),
     FOREIGN KEY (source_id, owner_scope) REFERENCES arv.source (id, owner_scope)
 );
 
@@ -88,7 +92,7 @@ CREATE TABLE IF NOT EXISTS arv.highlight (
     created_at      TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (id, revision),
     FOREIGN KEY (source_id, owner_scope) REFERENCES arv.source (id, owner_scope),
-    FOREIGN KEY (anchor_id, owner_scope) REFERENCES arv.anchor (id, owner_scope)
+    FOREIGN KEY (anchor_id, source_id, owner_scope) REFERENCES arv.anchor (id, source_id, owner_scope)
 );
 CREATE INDEX IF NOT EXISTS highlight_owner ON arv.highlight (owner_scope, created_at);
 

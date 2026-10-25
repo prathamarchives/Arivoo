@@ -53,6 +53,9 @@ import tempfile
 REPO = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
+import re as _re
+_HEX64 = _re.compile(r"^[0-9a-f]{64}$")
+
 FAILS: list[str] = []
 
 
@@ -444,7 +447,32 @@ def main() -> int:
                                   "--idem-key", "imp-race", "--file", str(src_file), "--work-id", wid],
                                  env=ENV, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         import time as _t
-        _t.sleep(2.5)  # the loser computes the same ordinal and blocks on the unique index
+        # #84's CodeRabbit Minor: a FIXED sleep can lose to a slow runner's startup —
+        # wait on the REAL lock state instead: the loser is observed waiting on the
+        # plant's tuple lock (an arv_app backend, wait_event_type='Lock'), then the
+        # plant commits; a deadline miss fails the case honestly (never sleeps past).
+        locked = False
+        deadline = _t.monotonic() + 60
+        while _t.monotonic() < deadline:
+            # arv_read cannot see other roles' rows in pg_stat_activity (no
+            # pg_read_all_stats) — the rig's superuser observes the lock wait.
+            wl = subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                                 "-U", "postgres", "-d", DB, "-c",
+                                 "SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' "
+                                 "AND wait_event_type='Lock' AND state='active';"],
+                                capture_output=True, text=True, timeout=30).stdout.strip()
+            if wl and int(wl) >= 1:
+                locked = True
+                break
+            _t.sleep(0.25)
+        if not locked:
+            loser.kill()
+            s1.stdin.write("ROLLBACK;\n\\q\n")
+            s1.stdin.flush()
+            s1.wait(timeout=30)
+            check("CAP-21", False, "the race arm could not observe the loser's lock wait within the deadline (the environment starved the probe — refused honestly, never slept past)",
+                  "wait on pg_stat_activity's Lock wait, never a fixed sleep")
+            raise SystemExit(1)
         s1.stdin.write("COMMIT;\n\\q\n")
         s1.stdin.flush()
         s1.wait(timeout=30)
@@ -457,6 +485,50 @@ def main() -> int:
               and "3" in n21b and "4" in n21b,
               f"the ordinal-race loser names ARV-CMD-011 (never the doubled stall misdiagnosis), zero effect (the held plant's row + the two originals); the SAME key retries clean at the re-read ordinal",
               "the spine must distinguish the dead-session unique-violation class from a live stall — the honest name carries the honest repair (retry the same key)")
+
+        # CAP-22 — the anchor/source inseparability (#84's CodeRabbit Minor: two
+        # independent owner-scoped FKs accepted a highlight whose source_id
+        # differed from its anchor's source — the retrieval would return a
+        # mismatched source/digest pair). The composite (anchor_id, source_id,
+        # owner_scope) FK makes the pair inseparable at the DB layer: the
+        # hostile highlight pairs source-1 with source-2's anchor.
+        a1 = highlight("hl-a1", sid, start, end)
+        a2 = highlight("hl-a2", sid2, 0, 5)
+        a2_id = audit(f"SELECT anchor_id FROM arv.highlight WHERE id='{ack_field(a2, 'result_ref')}';")
+        hostile_hl = subprocess.run(["psql", "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                                    "-U", "arv_app", "-d", DB, "-c",
+                                    f"SET app.current_owner='A'; INSERT INTO arv.highlight (id, revision, "
+                                    f"selected_text, source_id, anchor_id, owner_scope, actor, run_id, input_hash, "
+                                    f"idempotency_key, created_at) VALUES ('44444444-4444-7444-8444-444444444444', 1, "
+                                    f"'x', '{sid}', '{a2_id}', 'A', 'owner', 'r', 'h', 'k-mismatch', "
+                                    f"'2026-01-01T00:00:00Z');"],
+                                   capture_output=True, text=True, timeout=60)
+        check("CAP-22", a1.returncode == 0 and hostile_hl.returncode != 0
+              and "highlight_anchor_id_source_id_owner_scope_fkey" in hostile_hl.stderr
+              and audit("SELECT count(*) FROM arv.highlight WHERE idempotency_key='k-mismatch';") == "0",
+              "a highlight pairing source-1 with source-2's anchor is REFUSED at the DB layer (the composite FK) — the anchor and its source are inseparable; zero rows",
+              "the two references must agree as a PAIR, not merely each exist: the composite FK closes the mismatch class the independent FKs left open")
+
+        # CAP-23 — the blob store's atomicity invariant (#84's CodeRabbit Major:
+        # the pre-fix put() wrote at the FINAL path — a killed writer's truncated
+        # residue poisoned the digest path forever and a concurrent reader saw
+        # half-written files; red-04.txt reproduces the false-refusal harm).
+        # Post-fix: put() writes a same-directory temp + ONE os.replace — every
+        # resident blob re-hashes to its name; a clean import leaves NO .put-
+        # residue; a planted .put- orphan (a killed writer's only possible
+        # residue) is ignored by the digest-alphabet guards.
+        # every resident EXCEPT CAP-15's planted corruption (the refusal case's own
+        # artifact — the store's KNOWN corrupt resident, cleaned by P3-02's walk)
+        hex_residents = [p for p in pathlib.Path(BLOB_DIR).iterdir()
+                         if p.is_file() and _HEX64.match(p.name) and p.name != d3]
+        all_verify = all(hashlib.sha256(p.read_bytes()).hexdigest() == p.name for p in hex_residents)
+        no_residue = not any(p.name.startswith(".put-") for p in pathlib.Path(BLOB_DIR).iterdir())
+        pathlib.Path(BLOB_DIR, ".put-orphan").write_bytes(b"stale staging tmp")  # the killed writer's class
+        probe = import_src("imp-after-orphan", "After Orphan", str(src_file))
+        check("CAP-23", all_verify and no_residue and probe.returncode == 0
+              and "status=committed" in probe.stdout,
+              f"every resident blob re-hashes to its name ({all_verify}); clean imports leave NO .put- residue ({no_residue}); a planted .put- orphan (the killed writer's only possible residue) never blocks an import — the §3.1 staging class, P3-02's recovery walk",
+              "atomic put = same-directory temp + ONE os.replace: the store's residents are ALWAYS complete — a partial can never sit at a digest path")
 
         # CAP-17 — the §2 substrate conventions on the four new tables
         defs = audit("SELECT table_name, column_name FROM information_schema.columns "
@@ -487,7 +559,7 @@ def main() -> int:
     if FAILS:
         print(f"RED — {len(FAILS)} broken case(s): {', '.join(FAILS)}")
         return 1
-    print("GREEN — the §1.6 capture checkpoint holds end-to-end (CAP-01..21)")
+    print("GREEN — the §1.6 capture checkpoint holds end-to-end (CAP-01..23)")
     return 0
 
 

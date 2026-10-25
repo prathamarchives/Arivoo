@@ -528,7 +528,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-049 (P3-01) RED: the capture suite's machinery-absent class observed at the predecessor 5c04375 (commit A c77c14f carries the suite; import_source/create_highlight absent from the REGISTRY, query.py/blob.py/0004_p3_01_capture_skeleton.sql absent \u2014 the waiting-for-harness form, the S1/record-18 \u00a74.1 + P3-K0 precedent; exit 1, red-01.txt) \u2014 the implementation lands AFTER this RED, never before it (LAW-11)",
-    "current_sha256": "e4f6ddcebf8230cae25b37880f08f5fd17d2e1e3637ee8a26377cfba054818a5",
+    "current_sha256": "af7683c4603a1971b8660d4b50f1a85f57f2a166983075de5f7ffa6401e96ec1",
     "amendments": [
       {
         "prior_sha256": "6283a7edfde056210b35766988fcbf6a9fe63e554f6a9f868b1499e2d1cb4114",
@@ -541,6 +541,12 @@
         "new_sha256": "e4f6ddcebf8230cae25b37880f08f5fd17d2e1e3637ee8a26377cfba054818a5",
         "note": "CLAIM-049 (the SEV round-1 fixes, every finding RED-first pinned by a NEW suite case \u2014 the four disclosed evolutions): CAP-18/18b pin the P1 (the structured retrieval: free text with pipes/newlines returns WHOLE \u2014 row_to_json at the SQL boundary, never the pipe-split parse; red-03.txt preserves the pre-fix silent corruption and crash); CAP-19 pins the P2 media_type grammar (ARV-CAP-009 at the entry boundary); CAP-20 pins the P2 composite owner-scoped FKs (UNIQUE(id, owner_scope) on parents + composite FKs \u2014 the cross-owner plant and the FK existence oracle both REFUSED, both arms the SAME error); CAP-21 pins the P3 named concurrent-loser code (ARV-CMD-011 \u2014 the dead-session unique-violation class, never the doubled ARV-CMD-010 stall misdiagnosis; the de-doubled prefix) + the P3 acquired_via joins the canonical body (a different channel is a different body \u2014 the 409 discriminator can now fire for it). The checkpoint contracts CAP-01..17 UNCHANGED",
         "observed_at": "2026-10-25T16:29:41.762699+00:00"
+      },
+      {
+        "prior_sha256": "e4f6ddcebf8230cae25b37880f08f5fd17d2e1e3637ee8a26377cfba054818a5",
+        "new_sha256": "af7683c4603a1971b8660d4b50f1a85f57f2a166983075de5f7ffa6401e96ec1",
+        "note": "CLAIM-049 (the #84 CodeRabbit round \u2014 all four findings REAL, all four FIXED RED-first with new suite pins): [Major] the atomic put (blob.py: same-directory temp + ONE os.replace \u2014 the pre-fix write_bytes at the final path let concurrent readers see half-written files and a killed writer poison the digest path forever; red-04.txt reproduces the false-refusal harm) \u2014 pinned by CAP-23 (every resident re-hashes; no .put- residue from clean imports; the orphan class ignored); [Minor] the anchor/source inseparability (0004: UNIQUE(id, source_id, owner_scope) on anchor + the highlight's composite (anchor_id, source_id, owner_scope) FK \u2014 a mismatched pair is refused at the DB layer) \u2014 pinned by CAP-22; [Minor] CAP-21's fixed sleep replaced by the REAL lock-state wait (pg_stat_activity's arv_app Lock wait observed via the rig's superuser \u2014 arv_read lacks pg_read_all_stats; a deadline miss fails the case honestly); [Minor] the STATE/AGENTS/PLAN current-state counts corrected (CAP-01..23, eleven boundaries \u2014 the historical record text untouched, per the finding's own instruction). The checkpoint contracts unchanged",
+        "observed_at": "2026-10-25T17:23:27.650464+00:00"
       }
     ]
   }

@@ -17,6 +17,7 @@ import hashlib
 import os
 import pathlib
 import re
+import tempfile
 
 _DEFAULT = pathlib.Path(__file__).resolve().parents[2] / "blobs"
 _SAFE = re.compile(r"^[0-9a-f]{64}$")  # the path-traversal guard: a digest is hex-only
@@ -31,12 +32,27 @@ def digest_of(data: bytes) -> str:
 
 
 def put(data: bytes) -> str:
-    """Write bytes; a re-put of the same bytes is a no-op (content-addressed)."""
+    """Write bytes ATOMICALLY (the #84 CodeRabbit Major): the full content
+    lands in a same-directory temp file, then ONE os.replace — a reader ever
+    sees NO file or the COMPLETE file, never a partial (write_bytes at the
+    final path let a concurrent put's exists() see a half-written file and
+    false-refuse a valid import; a killed writer left a truncated file that
+    poisoned the digest path forever — red-04.txt). A killed writer now
+    leaves only an ignorable .put- orphan (the §3.1 staging class, P3-02's
+    recovery walk); an EXISTING file is never touched (healing is forbidden
+    — CAP-15's corruption refusal stands)."""
     d = digest_of(data)
     p = _dir() / d
     if not p.exists():
         _dir().mkdir(parents=True, exist_ok=True)
-        p.write_bytes(data)
+        fd, tmp = tempfile.mkstemp(dir=_dir(), prefix=".put-")
+        try:
+            with os.fdopen(fd, "wb") as f:
+                f.write(data)
+            os.replace(tmp, p)  # atomic on the same filesystem
+        except BaseException:
+            pathlib.Path(tmp).unlink(missing_ok=True)
+            raise
     return d
 
 

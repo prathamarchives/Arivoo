@@ -1,4 +1,8 @@
 -- 0002_evidence_event.sql — the substrate-convention table (S2; D-036; Rider A:
+
+-- arv-baseline-bump: 1  (P3-M0's admitted grammar: this file declares the plpgsql immutability trigger
+-- function — a procedural construct the fail-closed grammar cannot classify; the directive is the
+-- owner-visible paper trail that admits it, per PLAN's P3-M0 card / ARV-MIG-015.)
 -- the Phase 2 exit's "evidence immutability, owner scoping, independent reads"
 -- proven on ONE representative table carrying every convention).
 --

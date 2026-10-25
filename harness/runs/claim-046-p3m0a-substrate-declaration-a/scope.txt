@@ -1,0 +1,19 @@
+# CLAIM-046 — P3-M0a: the substrate's grammar declarations, part 1 — the
+# -- arv-baseline-bump directive on 0002_evidence_event.sql (the SIZE-005 split:
+# the oracle slice's first assembled diff carried BOTH 0002 and 0003 and the
+# PR-mode gate refused ARV-SIZE-005 — 2 migrations > 1, LAW-05 — the gate's own
+# repair text prescribes this bounded split; the oracle (CLAIM-045) lands after,
+# with zero migration files in its diff). The comment is behaviorally inert at
+# this slice (BUMP_RE is read only by the landing oracle; the old runner's
+# destructive check never trips on 0002); the checksum change re-derives the
+# rig's ledger. THE HONEST CONTEXT (record 38 §2): the owner-reported local
+# branch at 5467ec0 was lost to the environment reset — this session rebuilds
+# the declared acceptance at the same predecessor (ff25cdf).
+harness/migrations/0002_evidence_event.sql D-036
+CLAIMS.md D-038
+INTENT-LEDGER.md INT-140
+AGENTS.md D-043
+STATE.md D-043
+context/WORKLOG.md D-043
+context/reviews/arivoo-phase3-4-continuation-directive-2026-10-25.md D-022
+harness/runs/claim-046-p3m0a-substrate-declaration-a D-042

@@ -1,22 +1,22 @@
 # PROOF SHEET — slice claim-049-p301-capture-checkpoint (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 44bf098fac35dbf11b9b7a119e5a0b69d50c2d3e
-- generated (last record's timestamp): 2026-10-25T16:04:57.244127+00:00
+- commit (last run record's): 6a3d7edb8737a508740be4923172345f58398a37
+- generated (last record's timestamp): 2026-10-25T16:39:23.146494+00:00
 - run records: 12
 
 ## Run records (command, exit, output digest)
-- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 fe81a5752e4e3dfb · 2026-10-25T15:59:10.485308+00:00
-- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-25T15:59:13.086979+00:00
-- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 a8d9c54f2cbd4403 · 2026-10-25T15:59:14.775617+00:00
-- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 7b2d41a24189d7ed · 2026-10-25T15:59:23.127463+00:00
-- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-25T15:59:23.584340+00:00
-- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-25T16:00:57.905330+00:00
-- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 5232d2c6ffdbfe83 · 2026-10-25T16:01:26.782616+00:00
-- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 87c48c71a571b4ac · 2026-10-25T16:01:39.602793+00:00
-- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 123c3bb731e5ff51 · 2026-10-25T16:01:40.024943+00:00
-- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-25T16:01:40.287748+00:00
-- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 adde379ed2c3ced5 · 2026-10-25T16:01:43.167421+00:00
-- `make verify` -> exit 0 · output sha256 e8dfbcbe0eae98f1 · 2026-10-25T16:04:57.244127+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 db34fe31a44008b3 · 2026-10-25T16:33:39.634723+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-25T16:33:42.252220+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 e51d49325fbdddb4 · 2026-10-25T16:33:43.930566+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 7b2d41a24189d7ed · 2026-10-25T16:33:51.116864+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-25T16:33:51.545210+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-25T16:35:25.971254+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 f23adeb0a2f0a425 · 2026-10-25T16:35:51.415161+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 2f94bfeeb149f45c · 2026-10-25T16:36:02.938301+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 58ac4070de7b6ee7 · 2026-10-25T16:36:03.496922+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-25T16:36:03.804582+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 b0ac848602160920 · 2026-10-25T16:36:06.551365+00:00
+- `make verify` -> exit 0 · output sha256 4c0777eb221d3bf6 · 2026-10-25T16:39:23.146494+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-049 / P3-01 (LAW-04; never empty-by-omission)
@@ -57,18 +57,24 @@
 - durability promise beyond the local store — Q12 unratified; the first
 - real deployment bootstraps fresh. Corrupt-blob cleanup is P3-02's.
 - 6. Concurrency: the same-key loser rides the P3-K0 conflict path (replayed
-- or 409, proven by the kernel suite's K-06). The CROSS-KEY concurrent
-- same-work import race (two different idem keys, one work: the unique
-- edition-ordinal makes the loser abort honestly; a fresh retry re-reads
-- the ordinal) is NOT suite-pinned — the sequential CAP cases cover the
-- declared behavior; the concurrent matrix is P3-08's SYS-08 acceptance.
+- or 409, proven by the kernel suite's K-06). The cross-key concurrent
+- same-work import race is now SUITE-PINNED (CAP-21, the SEV round's fix):
+- the loser of the unique edition-ordinal is refused by NAME (ARV-CMD-011,
+- zero effect, the same key retries at the re-read ordinal) — never the
+- pre-fix doubled ARV-CMD-010 stall misdiagnosis. The FULL concurrent
+- matrix (out-of-order sync, duplicate delivery, server outage) remains
+- P3-08's SYS-08 acceptance.
 - 7. Migration 0004's DDL is applied by the M0 oracle under its directive
 - (arv-baseline-bump for the plpgsql guard). The oracle's residual classes
 - (lexer-drift over-refusals, extension catalogue, concurrency) stand as
 - recorded at claim-045's notverified.txt — unchanged by this slice.
 - 8. The query surface (get-capture/get-source/list-captures) is the
-- SYS-09 read path for THIS checkpoint. Pagination, ordering contracts,
-- and the later agent-adapter API surface are the P4 client slices'.
+- SYS-09 read path for THIS checkpoint, and its DATA CORRECTNESS is
+- suite-pinned (CAP-18/18b, the SEV round's P1 fix: free text with
+- pipes and newlines returns WHOLE — structured at the SQL boundary,
+- never a re-parse of psql text; the pre-fix silent-truncation is
+- preserved in red-03.txt). Pagination, ordering contracts, and the
+- later agent-adapter API surface are the P4 client slices'.
 - 9. Work title editing (revisions), Work deletion, and any identity policy
 - beyond the Q11 baseline (no auto-merge, no uniqueness) are owner-gated —
 - nothing here implements or implies them.
@@ -78,4 +84,4 @@
 - as recorded.
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 63daa7016e2445572122a219efbb4a43a0736b7080aed6743270013acd279f21
+- sheet sha256 (of the content above, excluding this line): 1b64af8c8a4fa5a8ee7c034916c49a04ecc20f44492268403a5cb84c5cc46685

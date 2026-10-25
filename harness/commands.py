@@ -51,6 +51,10 @@ class Session:
     verified empirically, record 18 §4.3)."""
 
     def __init__(self, db: str, user: str, owner: str):
+        cfg = pg.config()
+        if cfg["PGHOST"] not in pg.LOOPBACK:  # the same approved-boundary guard as pg.psql (the #83 round)
+            raise RuntimeError("ARV-DB-004: the configured target is outside the approved adapter boundary "
+                               "(loopback only) — the command session refuses, never a hidden path")
         self.proc = subprocess.Popen(
             ["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
              "-U", user, "-d", db],

@@ -74,7 +74,8 @@ def _run_psql(cmd, timeout):  # fail-closed: every failure class is a NAMED code
         err = r.stderr or ""
         if r.returncode == 2 and ("could not connect" in err or "role " not in err):
             pass
-        if r.returncode != 0 and ("could not connect" in err or 'role "' in err
+        if r.returncode != 0 and ("could not connect" in err or "connection to server" in err
+                                  or "Connection refused" in err or 'role "' in err
                                   or "password authentication" in err or "no password" in err):
             err = f"ARV-DB-003: the connection was refused at the approved boundary — {err.strip()[:200]}"
         elif r.returncode != 0:

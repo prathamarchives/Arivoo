@@ -81,8 +81,11 @@ def run_cmd(owner, actor, client_id, idem_key, payload, env=None, timeout=90):
 
 
 def sql(db: str, query: str) -> str:
+    """An independent psql read using the ADAPTER'S configured target (never a
+    hardcoded port — CI's service and the local rig differ, the #83 round)."""
+    cfg = pg.config()
     r = subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
-                        "-h", "127.0.0.1", "-p", "5433", "-U", "postgres", "-d", db, "-c", query],
+                        "-h", cfg["PGHOST"], "-p", cfg["PGPORT"], "-U", cfg["PGUSER"], "-d", db, "-c", query],
                        capture_output=True, text=True, timeout=60)
     return r.stdout.strip()
 
@@ -188,12 +191,20 @@ def main() -> int:
           "random tail orders freely)",
           "ids.py must mint UUIDv7-class IDs: the 48-bit clock ms + version/variant + controlled randomness, time-ordered")
 
-    # (b) K-08 compatibility: a persisted ID is never rewritten — a recorded
-    # result_ref from the committed row round-trips byte-identically.
-    ref = sql(db, "SELECT result_ref FROM arv.command_log WHERE idempotency_key='k-c1';")
-    check("K-08", ref != "" and len(ref) == 36 and ref[14] in "789ab" and ref[19] in "89ab",
-          f"the persisted result_ref ({ref}) round-trips byte-identically — a valid UUIDv7-class value, never rewritten",
-          "persisted IDs are immutable identity: no migration or replay may rewrite them without an explicit compatibility decision")
+    # (b) K-08 compatibility: a persisted ID is never rewritten — the stored
+    # result_ref equals the ACKNOWLEDGED one byte-for-byte (the #83 round's
+    # strengthening: the comparison is against the ack itself, not just shape).
+    ack_ref = ""
+    for ln in (r1.stdout + r1.stderr).splitlines():
+        if "result_ref=" in ln:
+            ack_ref = ln.split("result_ref=")[1].split()[0]
+    stored_ref = sql(db, "SELECT result_ref FROM arv.command_log WHERE idempotency_key='k-c1';")
+    check("K-08", ack_ref != "" and stored_ref == ack_ref and len(stored_ref) == 36
+          and stored_ref[14] == "7" and stored_ref[19] in "89ab",
+          f"the stored result_ref equals the ACKNOWLEDGED ref byte-identically ({stored_ref}) — a valid "
+          "UUIDv7-class value, never rewritten",
+          "persisted IDs are immutable identity: the stored ref must equal the acked ref byte-for-byte, "
+          "and no migration or replay may rewrite them without an explicit compatibility decision")
 
     # (c) K-09 the adapter's NAMED missing-client error (not a bare 127).
     import harness.adapters.pg as pgmod

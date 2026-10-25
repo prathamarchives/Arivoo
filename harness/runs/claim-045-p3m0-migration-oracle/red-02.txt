@@ -1,0 +1,71 @@
+# CLAIM-045 (P3-M0) — RED-02: the PR #82 CodeRabbit round's RED capture — the two Majors
+# (the ALTER-DROP evasion family; the bare END committing the runner's transaction)
+# and the two data-integrity Minors (the '|' ledger row; the UPDATE ONLY CTE form),
+# each observed failing at the pre-fix content head.
+#
+# Command: python3 harness/tests/test_migrations.py
+# Exit: 1 (RED — 5 failure(s): ARV-TEST-040/041/042/043/044)
+# Observed at: 1c0140bf888e20c5285f9579654f6cf8c53cf38b (the pre-fix oracle head)
+# Captured: 2026-10-25T12:05:35Z
+#
+#   040/041: 'ALTER TABLE ONLY x DROP c' / 'ADD ..., DROP c' / the quoted-identifier and
+#        spaced-dot object forms — destructive without the directive, EVADED the one-token regex
+#   042: a bare END (PG's COMMIT synonym) WITH the directive reached psql and committed —
+#        the runner's prepended BEGIN made it live, the §6.2 class again
+#   043: a ledger row carrying '|' in the name — the parser SILENTLY DROPPED it; migrate AND
+#        verify reported success while the poisoned row hid outside the parsed set
+#   044: 'UPDATE ONLY x SET' inside a CTAS CTE — the single-token UPDATE pattern missed it
+#
+# The 39 PASS lines at this head prove ZERO regressions on the merged-oracle behaviors.
+#
+PASS ARV-TEST-001: PostgreSQL reachable through the adapter (the real stack, not a mock)
+PASS ARV-TEST-002: migrate on a fresh DB exits 0 (stderr tail: none)
+PASS ARV-TEST-003: INDEPENDENT psql read: schema_migrations has all 3 migration(s) applied and both roles exist (2) — the baseline is real
+PASS ARV-TEST-004: second migrate run is a no-op (rows before=3, after=3, exit=0)
+PASS ARV-TEST-005: migrate on a populated DB preserves every row (count=3, checksum=5ebda042ce65e7e1, new migration applied)
+PASS ARV-TEST-006: replay from scratch yields the identical schema hash (103b77755d564e90...)
+PASS ARV-TEST-007: an APPLIED migration file edited after apply is REFUSED with ARV-MIG-005 (applied-migration drift)
+PASS ARV-TEST-008: starting at version 5 (hole below) is REFUSED with ARV-MIG-004 (forward-only, from the baseline)
+PASS ARV-TEST-009: a destructive migration WITHOUT -- arv-baseline-bump is REFUSED with ARV-MIG-003
+PASS ARV-TEST-010: positive control: WITH the -- arv-baseline-bump directive the destructive migration applies
+PASS ARV-TEST-011: a destructive statement with comments BETWEEN keywords is REFUSED with ARV-MIG-003 pre-execution — the DB completely untouched (the SEV-7 strongest form: no arv schema, nothing applied)
+PASS ARV-TEST-012: destructive words inside COMMENTS ONLY do not refuse (comment content is never executable — no false positive)
+PASS ARV-TEST-013: an embedded COMMIT (CREATE; COMMIT; SELECT 1/0) is REFUSED with ARV-MIG-011 BEFORE execution — the DB completely untouched (the SEV-7 strongest form: no ghost, no ledger table, nothing applied; the predecessor's persisted ghost is red-01.txt)
+PASS ARV-TEST-014: an embedded BEGIN is REFUSED with ARV-MIG-011 pre-execution (zero effects)
+PASS ARV-TEST-015: a procedural construct (DO block) OUTSIDE the baseline WITHOUT -- arv-baseline-bump is REFUSED with ARV-MIG-015 (fail closed)
+PASS ARV-TEST-016: positive control: WITH the -- arv-baseline-bump directive the procedural construct applies (the refusal gates, never blocks)
+PASS ARV-TEST-017: the crafted-quote filename (the ledger-poisoning payload) is REFUSED with ARV-MIG-014 at discovery, BEFORE any execution — the DB untouched (no arv schema, no ledger — the discovery refusal precedes even 0001's apply; the predecessor's poisoned ledger is red-01.txt)
+PASS ARV-TEST-018: a filename outside the safe alphabet (uppercase/hyphen) is REFUSED with ARV-MIG-014 with the DB completely untouched (the 017-sibling assertion, SEV-9d)
+PASS ARV-TEST-019: an extra ledger row (version 999, not in the directory) is REFUSED by BOTH migrate and verify with ARV-MIG-012 (bidirectional history)
+PASS ARV-TEST-020: verify on a never-migrated DB REFUSES with ARV-MIG-013 and CREATES NOTHING (no arv schema, no bootstrapped table — observation-only)
+PASS ARV-TEST-021: verify on a healthy DB exits 0 and leaves every ledger row byte-identical INCLUDING applied_at (no rewrites, no bookkeeping — the SEV-9b strengthening)
+PASS ARV-TEST-022: a normal multi-statement runtime failure rolls back to ZERO effects (ok_b absent, ok_a preserved from the earlier file, ledger unchanged beyond it)
+PASS ARV-TEST-023: the declared 0001_baseline bootstrap exemption: the baseline's own DO block applies WITHOUT a directive (the exemption is scoped to exactly version 1, name 'baseline')
+PASS ARV-TEST-024: the nonempty oracle: every ledger row equals the file digest triple (True), both tables RLS-forced, both immutable triggers present, both owner policies present
+PASS ARV-TEST-025: an applied file removed from the directory (a ledger row the directory cannot account for) is REFUSED by BOTH verify and migrate with ARV-MIG-012
+PASS ARV-TEST-026: a '$' inside an unquoted identifier (b$$c) is identifier text, NOT a dollar-quote opener — the hidden DROP TABLE is REFUSED with ARV-MIG-003 pre-execution, the DB untouched (SEV-1)
+PASS ARV-TEST-027: a COMMIT hidden behind a phantom dollar-quote is REFUSED with ARV-MIG-011 pre-execution — no persisted ghost, no false rollback claim, the DB untouched (SEV-1's §6.2 repro)
+PASS ARV-TEST-028: ALTER TABLE IF EXISTS ... DROP CONSTRAINT is REFUSED with ARV-MIG-003 without the directive (the IF EXISTS modifier no longer breaks the destructive match — SEV-2)
+PASS ARV-TEST-029: a data-modifying CTE inside an admitted head (CTAS with INSERT) is REFUSED with ARV-MIG-015 without the directive — zero effects (SEV-3)
+PASS ARV-TEST-030: positive control: WITH the -- arv-baseline-bump directive the data-modifying CTE applies (the refusal gates, never blocks)
+PASS ARV-TEST-031: an INTERIOR HOLE in the applied ledger (a hand-deleted row leaving {1,3}) is REFUSED by BOTH migrate and verify with ARV-MIG-012 — never a silent out-of-order re-application (SEV-4)
+PASS ARV-TEST-032: an applied file renamed in the directory (the ledger row still carries the old name) is REFUSED by BOTH migrate and verify with ARV-MIG-012 (SEV-5)
+PASS ARV-TEST-033: PREPARE TRANSACTION (two-phase commit control) is REFUSED with ARV-MIG-011 pre-execution — even under the directive, the runner owns the transaction boundary (SEV-8)
+PASS ARV-TEST-034: CREATE INDEX CONCURRENTLY is REFUSED by the admitted grammar with its named construct (it cannot run inside the runner's single transaction — never a misleading runtime 009)
+PASS ARV-TEST-035: the bootstrap exemption is scoped to EXACTLY (version 1, name 'baseline') — the same DO block at 0002_baseline is REFUSED with ARV-MIG-015 (the exemption-scope pin, SEV-9a)
+PASS ARV-TEST-036: an empty migrations directory is REFUSED with ARV-MIG-008 and the DB untouched (the card's listed behavior, pinned — SEV-9c)
+PASS ARV-TEST-037: a valid E'...' escaped-string default APPLIES cleanly (E-strings process backslash escapes regardless of standard_conforming_strings — the mask knows the E-prefix rule; SEV-6)
+FAIL ARV-TEST-040: 'ALTER TABLE ONLY x DROP c' (and the ADD-then-DROP form, asserted next) is REFUSED with ARV-MIG-003 without the directive — the ONLY modifier and a non-leading DROP no longer evade the destructive guard (the #82 CodeRabbit Major)
+      repair: the destructive ALTER check must be statement-aware: any DROP action inside an ALTER TABLE statement, whatever tokens precede it
+FAIL ARV-TEST-041: the ADD-then-DROP form, the quoted-identifier object form, and the spaced-dot object form are each REFUSED with ARV-MIG-003 (every DROP action inside an ALTER TABLE statement is destructive-class, whatever the token shape)
+      repair: a statement-level ALTER scan, never a fixed one-token regex
+FAIL ARV-TEST-042: a bare END (PG's COMMIT synonym — the runner's own prepended BEGIN made it a live commit) is REFUSED with ARV-MIG-011 pre-execution, directive-proof — while CASE's mid-statement END never fires the guard (the statement-head distinction)
+      repair: transaction control is checked at STATEMENT-HEAD level: END/COMMIT/ROLLBACK/... as a statement's head is control; a CASE expression's END is mid-statement and never a head
+FAIL ARV-TEST-043: a ledger row that cannot parse (a '|' smuggled into the name/checksum fields) is REFUSED fail-closed by BOTH migrate and verify with ARV-MIG-007 — never silently dropped from the parsed set (the #82 CodeRabbit Minor)
+      repair: the ledger parser must refuse on any unparseable row: a poisoned ledger is a named refusal, never an invisible row
+FAIL ARV-TEST-044: 'UPDATE ONLY x SET' (and the alias/qualified-target forms) inside a data-modifying CTE is REFUSED with ARV-MIG-015 without the directive — the data-modifying scan tolerates the ONLY/alias tokens between UPDATE and SET
+      repair: the data-modifying pattern must cover the valid target forms (ONLY, aliases, qualified names), never a single fixed token
+PASS ARV-TEST-038: an ASTRAL-plane identifier char (PG's byte-oriented lexer: every high-bit byte continues an identifier) keeps identifier context through its '$$' — the hidden DROP TABLE is REFUSED with ARV-MIG-003 pre-execution, the DB untouched (SEV-10)
+PASS ARV-TEST-039: a COMMIT hidden behind an astral identifier's '$$' is REFUSED with ARV-MIG-011 pre-execution — no persisted g4, no false rollback claim, the DB untouched (SEV-10's §6.2 repro)
+
+RED — 5 failure(s): ARV-TEST-040, ARV-TEST-041, ARV-TEST-042, ARV-TEST-043, ARV-TEST-044 — S1 + P3-M0 acceptance not met

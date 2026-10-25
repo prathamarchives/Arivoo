@@ -85,7 +85,7 @@ TXN_RE = re.compile(
     r"PREPARE\s+TRANSACTION|COMMIT\s+PREPARED|ROLLBACK\s+PREPARED)\b"
 )
 DATA_MODIFY_RE = re.compile(
-    r"(?i)\b(INSERT\s+INTO|UPDATE\s+\S+\s+SET|DELETE\s+FROM|MERGE\s+INTO|SELECT\s+INTO)\b"
+    r"(?i)\b(INSERT\s+INTO|UPDATE(?:\s+\S+){1,3}\s+SET|DELETE\s+FROM|MERGE\s+INTO|SELECT\s+INTO)\b"
 )
 BUMP_RE = re.compile(r"(?m)^\s*--\s*arv-baseline-bump:\s*(\d+)")
 DOLLAR_OPEN_RE = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*)?\$")
@@ -299,6 +299,47 @@ def _classify(masked: str) -> str:
     return "ok"
 
 
+def _statement_tokens(masked: str):
+    """Yield the word-token list of each top-level statement (';' is safe to
+    split on: every literal/comment/quote body is already a placeholder)."""
+    for stmt in masked.split(";"):
+        words = re.findall(r"[A-Za-z_][A-Za-z0-9_]*", stmt)
+        if words:
+            yield [w.upper() for w in words]
+
+
+def _txn_control_head(w: list) -> bool:
+    """The #82 CodeRabbit Major: transaction control judged at STATEMENT-HEAD
+    level — a bare END (PG's own COMMIT synonym; the runner's prepended BEGIN
+    made it a live commit) is control when it HEADS a statement, while CASE's
+    mid-statement END never does. START/SET/PREPARE are control only in their
+    transaction forms; a plain config SET stays admitted."""
+    if not w:
+        return False
+    if w[0] in ("BEGIN", "COMMIT", "ROLLBACK", "SAVEPOINT", "ABORT", "END"):
+        return True
+    if w[0] == "START" and len(w) > 1 and w[1] == "TRANSACTION":
+        return True
+    if w[0] == "SET" and len(w) > 1 and w[1] in ("TRANSACTION", "SESSION"):
+        return True
+    if w[0] == "PREPARE" and len(w) > 1 and w[1] == "TRANSACTION":
+        return True
+    if w[0] in ("COMMIT", "ROLLBACK") and len(w) > 1 and w[1] == "PREPARED":
+        return True
+    return False
+
+
+def _alter_drop(w: list) -> bool:
+    """The #82 CodeRabbit Major: ANY DROP action inside an ALTER TABLE
+    statement is destructive-class, whatever tokens precede it — the one-token
+    regex missed 'ALTER TABLE ONLY x DROP c', 'ADD ..., DROP ...', the
+    quoted-identifier object (the masked 'QID' placeholder splits tokens), and
+    the spaced-dot qualified name. Exact-token matching: a column or role
+    merely CONTAINING 'drop' never fires (and any identifier that must be
+    quoted is masked as 'QID')."""
+    return len(w) > 2 and w[0] == "ALTER" and w[1] == "TABLE" and "DROP" in w[2:]
+
+
 def oracle(v: int, name: str, text: str, has_directive: bool) -> None:
     """The M0 oracle: refuses, BEFORE any execution, what the runner cannot
     prove transaction-safe. Zero effects are structural from here on."""
@@ -308,13 +349,16 @@ def oracle(v: int, name: str, text: str, has_directive: bool) -> None:
         _die("ARV-MIG-016",
              f"migration {v:04d}_{name} cannot be scanned fail-closed ({e})",
              "repair the SQL so every string/comment/quote terminates — an untrustworthy mask never scans")
-    txn = TXN_RE.search(masked)
-    if txn:
-        _die("ARV-MIG-011",
-             f"migration {v:04d}_{name} contains embedded transaction control ('{txn.group(0).strip()}')",
-             "the runner owns the ONE transaction boundary — remove BEGIN/COMMIT/ROLLBACK/SAVEPOINT from the file; "
-             "a mid-file COMMIT would persist partial effects while the runner reports a rollback")
-    if DESTRUCTIVE_RE.search(masked) and not has_directive:
+    tokens = list(_statement_tokens(masked))
+    for w in tokens:
+        if _txn_control_head(w):
+            _die("ARV-MIG-011",
+                 f"migration {v:04d}_{name} contains embedded transaction control (statement head '{w[0]}')",
+                 "the runner owns the ONE transaction boundary — remove BEGIN/COMMIT/END/ROLLBACK/SAVEPOINT/"
+                 "PREPARE TRANSACTION from the file; a mid-file commit (END included — PG's own COMMIT synonym) "
+                 "would persist partial effects while the runner reports a rollback")
+    destructive = bool(DESTRUCTIVE_RE.search(masked)) or any(_alter_drop(w) for w in tokens)
+    if destructive and not has_directive:
         _die("ARV-MIG-003",
              f"migration {v:04d}_{name} contains a destructive statement without an explicit baseline bump",
              "destructive operations require a '-- arv-baseline-bump: <n>' directive line in the file (the owner-visible paper trail)")
@@ -365,8 +409,12 @@ def applied(db: str, bootstrap: bool = True) -> dict:
     rows = {}
     for line in r.out.splitlines():
         parts = line.split("|")
-        if len(parts) == 3:
+        if len(parts) == 3 and parts[0].lstrip("-").isdigit():
             rows[int(parts[0])] = (parts[1], parts[2])
+        elif line.strip():
+            _die("ARV-MIG-007",
+                 f"the bookkeeping table carries an unparseable row ({line.strip()[:60]!r}) — a poisoned ledger",
+                 "every ledger row must parse (version|name|checksum); a row that does not is a named refusal, never silently dropped — reconcile the ledger with the history (never edit it by hand)")
     return rows
 
 
@@ -384,8 +432,12 @@ def _ledger_opt(db: str):
     rows = {}
     for line in r.out.splitlines():
         parts = line.split("|")
-        if len(parts) == 3:
+        if len(parts) == 3 and parts[0].lstrip("-").isdigit():
             rows[int(parts[0])] = (parts[1], parts[2])
+        elif line.strip():
+            _die("ARV-MIG-007",
+                 f"the bookkeeping table carries an unparseable row ({line.strip()[:60]!r}) — a poisoned ledger",
+                 "every ledger row must parse (version|name|checksum); a row that does not is a named refusal, never silently dropped — reconcile the ledger with the history (never edit it by hand)")
     return rows
 
 

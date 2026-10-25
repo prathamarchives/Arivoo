@@ -3,7 +3,7 @@
     "red_commit": "8b17c7a99d66be35502d07c99d499ea88e53c904",
     "red_evidence": "exit 1, ARV-TEST-000/011/019 waiting-for-harness (observed at the red commit; record 18 \u00a74.1-\u00a74.3)",
     "red_sha256": "a83a4ce600e87d8dcd507d506ba6867bf1ac876220eb43fd4ea73861eb393c11",
-    "current_sha256": "aa269541ce5980035c196c3fb1b302dd98b7ebbbea5994db3e3f559baf525dea",
+    "current_sha256": "658b6f4fa12fac82ce28abd634055e34d89d2708254b201418205bf496c32ad1",
     "amendments": [
       {
         "note": "test-side defect repairs documented in record 18 \u00a74.1-\u00a74.3 (S1: count made dynamic; S2: dual-layer expectations, scoped effective view; S3: content-level fingerprint) \u2014 amendments correct assertions, none removed"
@@ -37,6 +37,12 @@
         "new_sha256": "aa269541ce5980035c196c3fb1b302dd98b7ebbbea5994db3e3f559baf525dea",
         "note": "CLAIM-045 (P3-M0) the SEV RE-REVIEW round (RED-03, the reviewer's SEV-10 P0): the suite gains ARV-TEST-038/039 \u2014 the astral-plane phantom-dollar-quote repros (PG's BYTE-oriented lexer continues identifiers through every high-bit byte; the \\uFFFF-capped mask dropped context at astral chars); 2 REDs observed at the 39a56e0 head (red-03.txt), the other 37 green \u2014 assertions ADD, none weakened",
         "observed_at": "2026-10-25T09:23:06.373330+00:00"
+      },
+      {
+        "prior_sha256": "aa269541ce5980035c196c3fb1b302dd98b7ebbbea5994db3e3f559baf525dea",
+        "new_sha256": "658b6f4fa12fac82ce28abd634055e34d89d2708254b201418205bf496c32ad1",
+        "note": "CLAIM-045 (P3-M0) the PR #82 CodeRabbit round (RED-02): the suite gains ARV-TEST-040..044 \u2014 the ALTER-DROP evasion family (ONLY/ADD-then-DROP/quoted-identifier/spaced-dot), the bare-END transaction control (the statement-head distinction from CASE's mid-statement END), the unparseable-ledger-row fail-closed refusal, and the UPDATE ONLY CTE form; 5 REDs observed at the pre-fix head (red-02.txt), the other 39 green \u2014 assertions ADD, none weakened",
+        "observed_at": "2026-10-25T12:05:35.587872+00:00"
       }
     ],
     "schema": 2,

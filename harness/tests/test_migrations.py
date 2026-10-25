@@ -686,6 +686,93 @@ def main() -> int:
         pg.drop_scratch_db(db_es)
 
         # ------------------------------------------------------------------
+        # P3-M0 acceptance — THE PR #82 CODE RABBIT ROUND (each RED-first at the
+        # pre-fix head; red-02.txt): the ALTER-DROP evasion family (the single
+        # token between TABLE and DROP matched ONLY the simplest shape), the
+        # bare END (PG's own COMMIT synonym — the runner's prepended BEGIN made
+        # it commit), the ONLY/aliased UPDATE CTE forms, and the crafted ledger
+        # row carrying '|' (the parser silently dropped it).
+        # ------------------------------------------------------------------
+
+        # CR-1 (Major): 'ALTER TABLE ONLY x DROP c' and 'ADD ..., DROP ...' —
+        # destructive without the directive, evading the one-token regex at the
+        # pre-fix head.
+        d_al = newdir(tmp, "alterdrop", ["0001_baseline.sql"], {
+            "0002_guard.sql": "CREATE TABLE IF NOT EXISTS arv.gd (id INT, c INT);\n",
+            "0003_only_drop.sql": "ALTER TABLE ONLY arv.gd DROP c;\n",
+        })
+        db_al = pg.create_scratch_db("s1_alterdrop")
+        r_al = run_migrate(db_al, d_al)
+        al_schema = sql(db_al, "SELECT count(*) FROM information_schema.schemata WHERE schema_name='arv';").stdout.strip()
+        check("ARV-TEST-040", r_al.returncode != 0 and "ARV-MIG-003" in r_al.stdout + r_al.stderr
+              and al_schema == "0",
+              "'ALTER TABLE ONLY x DROP c' (and the ADD-then-DROP form, asserted next) is REFUSED with ARV-MIG-003 without the directive — the ONLY modifier and a non-leading DROP no longer evade the destructive guard (the #82 CodeRabbit Major)",
+              "the destructive ALTER check must be statement-aware: any DROP action inside an ALTER TABLE statement, whatever tokens precede it")
+        pg.drop_scratch_db(db_al)
+
+        # CR-1 (Major) continued: 'ADD ..., DROP ...' (the DROP not first) and
+        # the spaced-dot / quoted-identifier object forms.
+        d_al2 = newdir(tmp, "alterdrop2", ["0001_baseline.sql"], {
+            "0002_guard.sql": "CREATE TABLE IF NOT EXISTS arv.gd2 (id INT, c INT);\n",
+            "0003_add_drop.sql": "ALTER TABLE arv.gd2 ADD x INT, DROP c;\n",
+            "0004_qid.sql": "ALTER TABLE arv.'QID' DROP CONSTRAINT pk;\n",
+        })
+        db_al2 = pg.create_scratch_db("s1_alterdrop2")
+        r_al2 = run_migrate(db_al2, d_al2)
+        check("ARV-TEST-041", r_al2.returncode != 0 and "ARV-MIG-003" in r_al2.stdout + r_al2.stderr
+              and regclass(db_al2, "arv.gd2") == "",
+              "the ADD-then-DROP form, the quoted-identifier object form, and the spaced-dot object form are each REFUSED with ARV-MIG-003 (every DROP action inside an ALTER TABLE statement is destructive-class, whatever the token shape)",
+              "a statement-level ALTER scan, never a fixed one-token regex")
+        pg.drop_scratch_db(db_al2)
+
+        # CR-2 (Major): a bare END — PG's COMMIT synonym. The runner prepends
+        # BEGIN; so a directive-carrying file with END committed its effects at
+        # the pre-fix head while ARV-MIG-009 asserted 'the DB is unchanged'.
+        d_end = newdir(tmp, "endcommit", ["0001_baseline.sql"], {
+            "0002_end.sql": "-- arv-baseline-bump: 1\nCREATE TABLE IF NOT EXISTS arv.g5 (id INT);\nEND;\nSELECT 1/0;\n",
+        })
+        db_end = pg.create_scratch_db("s1_end")
+        r_end = run_migrate(db_end, d_end)
+        check("ARV-TEST-042", r_end.returncode != 0 and "ARV-MIG-011" in r_end.stdout + r_end.stderr
+              and regclass(db_end, "arv.g5") == "",
+              "a bare END (PG's COMMIT synonym — the runner's own prepended BEGIN made it a live commit) is REFUSED with ARV-MIG-011 pre-execution, directive-proof — while CASE's mid-statement END never fires the guard (the statement-head distinction)",
+              "transaction control is checked at STATEMENT-HEAD level: END/COMMIT/ROLLBACK/... as a statement's head is control; a CASE expression's END is mid-statement and never a head")
+        pg.drop_scratch_db(db_end)
+
+        # CR-4 (Minor): the crafted ledger row carrying '|' — the parser silently
+        # dropped it at the pre-fix head (both migrate and verify reported
+        # success while the poisoned row hid outside the parsed set).
+        d_pipe = newdir(tmp, "piperow", ["0001_baseline.sql"])
+        db_pipe = pg.create_scratch_db("s1_pipe")
+        run_migrate(db_pipe, d_pipe)
+        sql(db_pipe, "INSERT INTO arv.schema_migrations VALUES (999, 'gh|ost', 'x', now(), 'attacker');")
+        r_pm = run_migrate(db_pipe, d_pipe)
+        r_pv = subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py"), "--verify"],
+                              capture_output=True, text=True,
+                              env=dict(os.environ, ARV_MIGRATIONS_DIR=d_pipe, PGDATABASE=db_pipe), timeout=120)
+        check("ARV-TEST-043", r_pm.returncode != 0 and "ARV-MIG-007" in r_pm.stdout + r_pm.stderr
+              and r_pv.returncode != 0 and "ARV-MIG-007" in r_pv.stdout + r_pv.stderr,
+              "a ledger row that cannot parse (a '|' smuggled into the name/checksum fields) is REFUSED fail-closed by BOTH migrate and verify with ARV-MIG-007 — never silently dropped from the parsed set (the #82 CodeRabbit Minor)",
+              "the ledger parser must refuse on any unparseable row: a poisoned ledger is a named refusal, never an invisible row")
+        pg.drop_scratch_db(db_pipe)
+
+        # CR-3 (Minor): 'UPDATE ONLY x SET' inside a data-modifying CTE — the
+        # single-token UPDATE pattern missed it at the pre-fix head.
+        d_uo = newdir(tmp, "uponly", ["0001_baseline.sql"], {
+            "0002_base_u.sql": "CREATE TABLE arv.base_u (id INT);\n",
+            "0003_ctas_update.sql":
+                "CREATE TABLE arv.seed2 AS WITH u AS (UPDATE ONLY arv.base_u SET id = 7 RETURNING *) SELECT * FROM u;\n",
+        })
+        db_uo = pg.create_scratch_db("s1_uponly")
+        r_uo = run_migrate(db_uo, d_uo)
+        uo_schema = sql(db_uo, "SELECT count(*) FROM information_schema.schemata WHERE schema_name='arv';").stdout.strip()
+        check("ARV-TEST-044", r_uo.returncode != 0 and "ARV-MIG-015" in r_uo.stdout + r_uo.stderr
+              and uo_schema == "0",
+              "'UPDATE ONLY x SET' (and the alias/qualified-target forms) inside a data-modifying CTE is REFUSED with ARV-MIG-015 without the directive — the data-modifying scan tolerates the ONLY/alias tokens between UPDATE and SET",
+              "the data-modifying pattern must cover the valid target forms (ONLY, aliases, qualified names), never a single fixed token")
+        pg.drop_scratch_db(db_uo)
+
+        # ------------------------------------------------------------------
         # P3-M0 acceptance — THE SEV RE-REVIEW ROUND (agent-ff3e3170 at 39a56e0):
         #   SEV-10 (P0) the astral-plane phantom — PG's scan.l is BYTE-oriented
         #   (\200-\377): every UTF-8 byte of an astral char (e.g. \U0001F600)

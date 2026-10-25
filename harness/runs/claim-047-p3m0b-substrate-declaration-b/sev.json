@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-047-p3m0b-substrate-declaration-b",
   "base_sha": "f546dfffe7ff2abc32319376a021f29e45f7b740",
-  "reviewed_diff_sha256": "13e35aea97de77ba99e09096aad6c8a78175152a308e2e7240250c78477da230",
+  "reviewed_diff_sha256": "c05e77885f2e2a23081322664bb04b96152bf2ecbdf394e79032bd954371778c",
   "intent_ids": [
     "INT-140"
   ],

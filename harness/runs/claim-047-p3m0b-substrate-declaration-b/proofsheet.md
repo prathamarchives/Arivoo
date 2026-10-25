@@ -18,11 +18,11 @@
 - - the ARV-SEV-009 undecidable-base regression (the late #79 nitpick) remains routed as its own bounded follow-up — never folded into this slice (scope exclusivity, LAW-06).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 002deb30ea515949dc81a2680c3c02fc2b2907371f1e17990bddb8e5890d6fa3
-- reviewed_diff_sha256: 13e35aea97de77ba99e09096aad6c8a78175152a308e2e7240250c78477da230
+- report sha256: 5fe1038d31a2fa5457ab5f2974e3162dd9f9b82e478e1e7fd45d15aff717568b
+- reviewed_diff_sha256: c05e77885f2e2a23081322664bb04b96152bf2ecbdf394e79032bd954371778c
 - disposition: PASS
 - findings: 3 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 64fc6f01aaabaf93ee6c28c3231782f6a8d9b55e6b47e1cf1661af26bbfa8962
+- sheet sha256 (of the content above, excluding this line): 74a49150b8a2f5b3ac39ba3f0f7e318c8eb15ddeb4220caacbe34cacb36ddfd1

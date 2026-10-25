@@ -73,3 +73,13 @@ THE EXPLICIT BOUNDARIES (named, never silently narrowed):
     exercise the same suites on the service container; host-level claims
     (workflow-definition protection, runner integrity) remain Q10/EXTERNAL
     as recorded.
+
+11. SEV-7 (the round-2 P3, ROUTED): ARV-CMD-011's diagnosis is inferred from
+   the session's death (poll()), not the observed stderr cause — an
+   infrastructure failure (postmaster crash, connection drop) would take
+   the concurrency name. Within the shipped commands the only reachable
+   class at that point is the unique violation and the same-key-retry
+   repair stays safe (the reviewer's own deferral reasoning); the
+   stderr-classification refinement (duplicate-key vs connection error)
+   rides P3-02's import-state-machine work — its own bounded follow-up,
+   never silently dropped.

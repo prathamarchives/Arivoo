@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-047-p3m0b-substrate-declaration-b",
+  "base_sha": "f546dfffe7ff2abc32319376a021f29e45f7b740",
+  "reviewed_diff_sha256": "13e35aea97de77ba99e09096aad6c8a78175152a308e2e7240250c78477da230",
+  "intent_ids": [
+    "INT-140"
+  ],
+  "requirement_ids": [
+    "SYS-02",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1"
+  ],
+  "changed_components": [
+    "harness/migrations/0003_command_log.sql (the -- arv-baseline-bump: 1 directive lines \u2014 the plpgsql command-log immutability trigger function declared as the procedural construct P3-M0's fail-closed grammar requires; behaviorally inert at this head)",
+    "CLAIMS.md (CLAIM-046 retired + closed with the full #80 merge facts; CLAIM-047 opened)",
+    "AGENTS.md/STATE.md (the active-task + exact-next-action refresh \u2014 the staleness class applied proactively)",
+    "context/WORKLOG.md (Task 55)"
+  ],
+  "interfaces_reviewed": [
+    "harness/migrations/0003_command_log.sql: the directive placement (the same form as 0002's at #80); the ARV-MIG-005 checksum change recorded by the rig's re-derivation",
+    "the SIZE-005 split boundary: this diff touches exactly ONE migration file; the oracle lands next with zero"
+  ],
+  "v_model": {
+    "component_verification": [
+      "make verify GREEN (the gate selfcheck, the 9 suites, the KB matrix, canonical 54/0); proof run-02",
+      "the migration suite green over the re-derived rig (the real 0001..0003 with both declarations); proof run-01"
+    ],
+    "integration_verification": [
+      "the rig re-derived under the checksum change (the full replay, never a hand-edited ledger)"
+    ],
+    "system_verification": [
+      "the PR-mode gate RECORDED green over the actual diff (the SEV obligation, the scope coverage, the size check at ONE migration file); proof run-03"
+    ],
+    "validation": [
+      "the directive's justification is mechanically proven by the oracle slice's suite (the sequenced acceptance, record 38 \u00a78's split story); the STATE/AGENTS refresh applied proactively \u2014 the staleness class the last three review rounds caught, now fixed before the bots see it"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "the oracle lands while 0003's procedural construct is undeclared (the grammar would refuse the real directory)",
+      "control": "this declaration lands before the oracle \u2014 the split's order guarantees the directive exists",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "the checksum change leaves the rig's ledger in drift",
+      "control": "the rig re-derived by the honest full replay",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the directive's reader (the oracle) does not exist at this head \u2014 sequenced by the split; the acceptance proof is the oracle slice's suite",
+    "the applied-migration checksum boundary stands as dispositioned at #80 (disposable-by-contract; ARV-MIG-005 the permanent guard once the oracle lands; F-06 unratified)",
+    "the ARV-SEV-009 undecidable-base regression remains a routed bounded follow-up"
+  ],
+  "builder_context": "builder-glm-host-session31-claim047",
+  "reviewer_context": "fresh-ctx-glm-sev-claim047-20261025 (a fresh-context reviewer reviews at the PR)",
+  "disposition": "PASS",
+  "review_summary": "The SIZE-005 split's second half \u2014 the arv-baseline-bump directive on 0003_command_log.sql, comment-only and behaviorally inert at this head, its reader (the oracle) landing immediately after. This slice also closes CLAIM-046's registry row with the full #80 merge facts (the review dispositions, the flip-path merge, the protection restored byte-identical) and applies the STATE/AGENTS staleness lesson proactively \u2014 the exact class the last three review rounds caught, refreshed before the bots this time.",
+  "sheet_section": true
+}

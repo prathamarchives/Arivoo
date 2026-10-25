@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-046-p3m0a-substrate-declaration-a",
   "base_sha": "ff25cdf1073c2e8536da63092e5d62daef2690c1",
-  "reviewed_diff_sha256": "926d5dad29722c763ab8c768a1aebda57227e76eb2caf95c8b5c6204df2eb85f",
+  "reviewed_diff_sha256": "d08fcc975c042b19212dcd5d59b2e9bcd1bff9cd777ac45c261368cca615deb2",
   "intent_ids": [
     "INT-140"
   ],
@@ -17,7 +17,8 @@
     "CLAIMS.md (CLAIM-044 retired + closed with the routed SEV-009 follow-up; CLAIM-046 opened with the RETROACTIVE INT-140 notation)",
     "INTENT-LEDGER.md (INT-140 \u2014 owner turn 35 verbatim, credential redacted per D-025/INT-092)",
     "AGENTS.md/STATE.md (the 122 statused-intent count)",
-    "context/WORKLOG.md (Task 54) + context/reviews/arivoo-phase3-4-continuation-directive-2026-10-25.md (the D-022 preservation)"
+    "context/WORKLOG.md (Task 54) + context/reviews/arivoo-phase3-4-continuation-directive-2026-10-25.md (the D-022 preservation)",
+    "STATE.md + AGENTS.md (the #80 CodeRabbit Minor fixed in-PR: the five-area snapshot re-derived to the mid-session truth \u2014 SESSION 31, the split sequence, the record pointer at 37)"
   ],
   "interfaces_reviewed": [
     "harness/migrations/0002_evidence_event.sql: the directive comment block placement (after the file's title line, before the substantive contract comments; the ARV-MIG-005 checksum change recorded by the rig's ledger re-derivation)",
@@ -56,7 +57,22 @@
       ]
     }
   ],
-  "findings": [],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #80 CodeRabbit Major: 'Do not change the bytes of applied migration 0002' \u2014 a database that applied the previous 0002 hits ARV-MIG-005 on the changed checksum and cannot continue",
+      "disposition": "REASONED NO-FIX with the evidence: the guard it invokes IS the oracle's own ARV-MIG-005 (applied-migration immutability \u2014 the class's permanent guard once CLAIM-045 lands); its premise (a persistent database that must continue across this change) names a deployment that does not exist in this repo's contract \u2014 every DB here is disposable-by-contract (FACT-001/D-036: the rig's documented reset procedure, CI's ephemeral service container; RTM \u00a75's machinery; the product's first real deployment bootstraps fresh; F-06 unratified); the rig's re-derivation recorded at every home; the out-of-contract-DB boundary + its repair (the same recorded procedure) recorded here and in-thread"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #80 CodeRabbit Minor: STATE.md lines 7-10 still carried the SESSION-30/CLAIM-044 story while CLAIM-046 was the active claim (the third consecutive slice's lower-section staleness class)",
+      "disposition": "FIXED IN-PR (the commit c8a1b1a, covered paths first per the SEV-6 discipline): STATE's five-area snapshot re-derived to the mid-session truth + AGENTS aligned + the record pointer at 37 (the newest on-disk record at this branch); the canonical verifier GREEN (VER-702/804) and make verify GREEN at the repaired tree"
+    }
+  ],
   "not_verified": [
     "the directive's reader (the oracle) does not exist at this head \u2014 the declaration is sequenced ahead of its consumer by the SIZE-005 split; the acceptance proof is the oracle slice's suite (record 38 \u00a78 carries the split's story)",
     "the ARV-SEV-009 undecidable-base regression remains a routed bounded follow-up (CLAIM-044's close row)"
@@ -64,6 +80,6 @@
   "builder_context": "builder-glm-host-session31-claim046",
   "reviewer_context": "fresh-ctx-glm-sev-claim046-20261025 (a fresh-context reviewer reviews at the PR)",
   "disposition": "PASS",
-  "review_summary": "A deliberately minimal, bounded slice forced by the walls' first real firing of ARV-SIZE-005: the oracle's first assembled diff carried BOTH substrate migration files and the PR-mode gate refused (2 migrations > 1, LAW-05). The gate's own repair text prescribes the split, and this slice is the first half \u2014 the arv-baseline-bump directive on 0002_evidence_event.sql, a comment-only, behaviorally-inert declaration whose consumer (the oracle) lands in the sequenced next slices. The observable effect at this head: the checksum change and the rig's honest re-derivation (no drift residue); the declaration's justification (the plpgsql trigger function is procedural) is mechanically proven by the oracle's own suite when it lands. The slice also carries the session's registry work (CLAIM-044's close row with the routed SEV-009 follow-up, INT-140's mint with the retroactive notation, the 122 count, the D-022 preservation of the owner's continuation directive).",
+  "review_summary": "A deliberately minimal, bounded slice forced by the walls' first real firing of ARV-SIZE-005 (the oracle's assembled diff carried both substrate migration files; the gate refused 2 > 1; its own repair text prescribes the split). The #80 review round: CodeRabbit's Major (applied-migration checksum drift) dispositioned as a reasoned no-fix with evidence \u2014 the guard it invokes is the oracle's own ARV-MIG-005, and the persistent database its premise requires is out of this repo's contract (every DB disposable-by-contract; the product's first deployment bootstraps fresh; F-06 unratified); its Minor (the STATE lower-section staleness) was real and fixed in-PR with the covered paths first (the mid-session five-area re-derivation, AGENTS aligned, the record pointer satisfied) \u2014 this report re-finalized over the repaired tree per the SEV-6 discipline. Greptile's trial credit exhausted \u2014 NOTED, never silently accepted.",
   "sheet_section": true
 }

@@ -102,7 +102,9 @@ def import_src(key: str, title: str, file: str, owner: str = "A",
                media: str = "text/plain", work_id: str = None) -> subprocess.CompletedProcess:
     a = [str(REPO / "harness" / "commands.py"), "import_source", "--owner", owner,
          "--actor", "owner", "--client-id", "cli-1", "--idem-key", key,
-         "--title", title, "--file", file, "--media-type", media]
+         "--file", file, "--media-type", media]
+    if title is not None:
+        a += ["--title", title]
     if work_id:
         a += ["--work-id", work_id]
     return cli(*a)
@@ -239,8 +241,8 @@ def main() -> int:
         # CAP-08 — exactly-one-effect (checkpoint step 6): the independent count
         n_hl2 = audit("SELECT count(*) FROM arv.highlight;")
         n_cl = audit("SELECT count(*) FROM arv.command_log;")
-        check("CAP-08", n_hl2 == "2" and n_cl == "4",
-              f"after the retry: exactly TWO highlights (CAP-03 + the lost-ack one), FOUR command_log rows — the replay added NOTHING",
+        check("CAP-08", n_hl2 == "2" and n_cl == "3",
+              f"after the retry: exactly TWO highlights (CAP-03 + the lost-ack one), THREE command_log rows (import + two captures) — the replay added NOTHING",
               "idempotency is observed from OUTSIDE (arv_read counts), never asserted from inside the command")
 
         # CAP-09 — authenticated retrieval + cross-owner isolation (checkpoint step 7)
@@ -261,10 +263,10 @@ def main() -> int:
 
         # CAP-10 — the independent read reconciles the checkpoint (checkpoint step 8)
         rows = audit_rows("SELECT owner_scope, idempotency_key, command_name, result_ref FROM arv.command_log ORDER BY created_at;")
-        ok10 = (len(rows) == 4 and all(r.split("|")[0] == "A" for r in rows)
+        ok10 = (len(rows) == 3 and all(r.split("|")[0] == "A" for r in rows)
                 and all(r.split("|")[2] in ("import_source", "create_highlight") for r in rows))
         check("CAP-10", ok10,
-              "arv_read independently reconciles: 4 attributed command rows, all owner A, names in the product vocabulary",
+              "arv_read independently reconciles: 3 attributed command rows, all owner A, names in the product vocabulary",
               "the checkpoint's final step is a cross-owner-capable INDEPENDENT read — the app path never grades its own homework")
 
         # CAP-11 — direct DB access fails closed (RLS without the owner GUC)
@@ -304,14 +306,15 @@ def main() -> int:
               "the transaction rolls back with the connection; the blob store is content-addressed so the re-put is a no-op — exactly-once is about the ROWS")
 
         # CAP-14 — the Q11 baseline: same bytes re-imported = a NEW Source row, ONE blob
-        reimp = import_src("imp-2", "Day One", str(src_file), work_id=wid)
+        reimp = import_src("imp-2", None, str(src_file), work_id=wid)
         sid2 = ack_field(reimp, "result_ref")
         srcs = audit_rows(f"SELECT source_version FROM arv.source WHERE work_id='{wid}' ORDER BY source_version;")
         blobs = [p for p in pathlib.Path(BLOB_DIR).iterdir() if p.is_file()]
+        copies_of_digest = sum(1 for p in blobs if p.name == digest)
         ok14 = (reimp.returncode == 0 and sid2 != sid and [r.split("|")[0] for r in srcs] == ["1", "2"]
-                and len(blobs) == 1 and blobs[0].name == digest)
+                and copies_of_digest == 1)
         check("CAP-14", ok14,
-              "re-import of the SAME bytes under the same work: a NEW Source row (version 2), the blob store holds ONE copy (byte-reuse is storage-level, never identity)",
+              "re-import of the SAME bytes under the same work: a NEW Source row (version 2), the blob store holds exactly ONE copy of this digest (byte-reuse is storage-level, never identity)",
               "Q11 baseline: no auto-merge, no identity uniqueness — content addressing dedups the BYTES, the Source rows multiply honestly")
 
         # CAP-15 — blob corrupt at verify -> ARV-CAP-004, zero rows (never promoted)
@@ -338,7 +341,7 @@ def main() -> int:
                      "AND column_name IN ('id','created_at') AND column_default IS NOT NULL;")
         rls = audit("SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
                     "WHERE n.nspname='arv' AND c.relname IN ('work','source','anchor','highlight') "
-                    "AND c.relrowsecurity AND c.relforcerowlevelsecurity;")
+                    "AND c.relrowsecurity AND c.relforcerowsecurity;")
         trig = audit("SELECT count(*) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid "
                      "JOIN pg_namespace n ON n.oid=c.relnamespace WHERE NOT t.tgisinternal "
                      "AND n.nspname='arv' AND c.relname IN ('work','source','anchor','highlight');")

@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-049-p301-capture-checkpoint (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 6a3d7edb8737a508740be4923172345f58398a37
-- generated (last record's timestamp): 2026-10-25T16:39:23.146494+00:00
-- run records: 12
+- commit (last run record's): b190e3acb1995c800dd1c4b0adbce36b3561f853
+- generated (last record's timestamp): 2026-10-25T17:00:23.172280+00:00
+- run records: 14
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 db34fe31a44008b3 · 2026-10-25T16:33:39.634723+00:00
@@ -17,6 +17,8 @@
 - `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-25T16:36:03.804582+00:00
 - `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 b0ac848602160920 · 2026-10-25T16:36:06.551365+00:00
 - `make verify` -> exit 0 · output sha256 4c0777eb221d3bf6 · 2026-10-25T16:39:23.146494+00:00
+- `python3 harness/gate.py --slice claim-049-p301-capture-checkpoint --diff origin/main` -> exit 1 · output sha256 7cf21d73803bc94e · 2026-10-25T16:54:22.629131+00:00
+- `python3 harness/gate.py --slice claim-049-p301-capture-checkpoint --diff origin/main` -> exit 0 · output sha256 83cfc681bb933466 · 2026-10-25T17:00:23.172280+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-049 / P3-01 (LAW-04; never empty-by-omission)
@@ -82,6 +84,22 @@
 - exercise the same suites on the service container; host-level claims
 - (workflow-definition protection, runner integrity) remain Q10/EXTERNAL
 - as recorded.
+- 11. SEV-7 (the round-2 P3, ROUTED): ARV-CMD-011's diagnosis is inferred from
+- the session's death (poll()), not the observed stderr cause — an
+- infrastructure failure (postmaster crash, connection drop) would take
+- the concurrency name. Within the shipped commands the only reachable
+- class at that point is the unique violation and the same-key-retry
+- repair stays safe (the reviewer's own deferral reasoning); the
+- stderr-classification refinement (duplicate-key vs connection error)
+- rides P3-02's import-state-machine work — its own bounded follow-up,
+- never silently dropped.
+
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 9b1ed2764a715a91396cb039a9090a04b537d7bde9886afb2baf5e78cf32e054
+- reviewed_diff_sha256: 60f9b12106840c7c6868be09d8bcd82406982d9f253e78a054b3fe7221cb794c
+- disposition: PASS
+- findings: 8 (open P0/P1: 0)
+- not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 1b64af8c8a4fa5a8ee7c034916c49a04ecc20f44492268403a5cb84c5cc46685
+- sheet sha256 (of the content above, excluding this line): 4f65e23f04762e5bcdd9519a36d23b964108ec2717014fbcdfa427a760033fb8

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-049-p301-capture-checkpoint --diff origin/main",
+  "exit_code": 0,
+  "commit": "b190e3acb1995c800dd1c4b0adbce36b3561f853",
+  "output_sha256": "83cfc681bb933466a1ec9c5f821fb724b9af4ae798546005e762cd5cf281f3c7",
+  "recorded_at": "2026-10-25T17:00:23.172280+00:00"
+}

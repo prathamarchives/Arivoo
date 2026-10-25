@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-049-p301-capture-checkpoint",
+  "base_sha": "5c04375f28468fd525948c375711ccfb52e2f98e",
+  "reviewed_diff_sha256": "60f9b12106840c7c6868be09d8bcd82406982d9f253e78a054b3fe7221cb794c",
+  "intent_ids": [
+    "INT-127",
+    "INT-131",
+    "INT-134",
+    "INT-135",
+    "INT-138",
+    "INT-139",
+    "INT-140"
+  ],
+  "requirement_ids": [
+    "SYS-03",
+    "SYS-04",
+    "SYS-09",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
+  "changed_components": [
+    "harness/migrations/0004_p3_01_capture_skeleton.sql (work/source/anchor/highlight per RTM §2's frozen shapes; the §2 conventions on every table; composite owner-scoped FKs; the arv-baseline-bump directive)",
+    "harness/adapters/blob.py (the Q12-neutral content-addressed store; the re-hashing get; the digest-alphabet traversal guard)",
+    "harness/commands.py (the _spine generalization — record_event itself now rides it; import_source: put->verify->one transaction; create_highlight: the anchor derived from the stored bytes; the MIME grammar ARV-CAP-009; the named concurrent-loser code ARV-CMD-011; acquired_via in the canonical body)",
+    "harness/query.py (the structured retrieval: row_to_json at the SQL boundary; the identical ARV-QRY-001 for absent and cross-owner)",
+    "harness/crash.py (the injector extended to both product commands)",
+    "harness/tests/test_capture.py (CAP-01..21) + gate.py's TESTS registration + the A08 oracle's disclosed scope evolution (test_migrations.py)",
+    "harness/red-records.json (the typed record + the three amendment links)",
+    "the registry/ledger/navigation homes (CLAIMS rows, STATE/AGENTS/PLAN re-derivation, record 40, WORKLOG Task 57, the runs dir)"
+  ],
+  "interfaces_reviewed": [
+    "commands._spine: replay check -> build/validation -> BEGIN -> effects+command_log -> COMMIT -> ack; the crash points; the dead-session ARV-CMD-011 class vs the live-stall ARV-CMD-010",
+    "import_source: read -> sha256 -> put -> get+re-hash verify (§3.1's tail) -> work+source+command_log in ONE transaction; ARV-CAP-001/004/006/007/009",
+    "create_highlight: the source lookup RLS-scoped on the session; the anchor minted against the CURRENT digest (the version tie by construction); offsets validated against the decoded length; ARV-CAP-002/003/008",
+    "query.py: the GUC+SELECT batch through arv_app; row_to_json output; the privacy-preserving not-found",
+    "adapters/blob.py: put/get with the re-hash verify; the digest alphabet; corruption named, never healed",
+    "migration 0004's composite owner-scoped FKs: every reference resolves within the writer's keyspace (the FK existence oracle closed)",
+    "crash.py: the same crash points on both product commands (the §1.6 lost-ack arm)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the capture suite CAP-01..21 on the real rig — the §1.6 checkpoint story in order (CAP-01..10), the kernel-contract set (CAP-11..17), the SEV-round pins (CAP-18..21); proof run-01",
+      "RED-01 (the machinery-absent ARV-TEST-000 at the reachable declaration commit) + RED-02 (the command-tag defect caught live at the intermediate tree) + RED-03 (the round-1 P1 reproduced at the pre-fix tree) preserved; the amendment chain carries every evolution (ARV-RED-006)",
+      "the migration oracle 40/40 at the four-table tree (the A08 policy-count scope disclosed and amendment-chained); proof run-04"
+    ],
+    "integration_verification": [
+      "the S3 command suite green across the record_event-rides-the-spine refactor (five cases — the behavior pinned, never assumed); proof run-02",
+      "the kernel suite twelve green over the changed commands surface (K-06's concurrent semantics exercised by the shared spine); proof run-03",
+      "the dispatch fixture green in a CLEAN CLONE (the binding-orphan repair proven — the same-repo selfcheck would have passed; proof run-06)"
+    ],
+    "system_verification": [
+      "make verify GREEN at the content head (canonical 54/0 over all ELEVEN suites + the gate selfcheck + the KB matrix); proof run-12",
+      "the PR-mode gate over the actual diff: scope (owner-ref'd, widened at the walls' demand), size (378/400 after the honest compression), the claim coverage, the proof sheet"
+    ],
+    "validation": [
+      "the §1.6 capture checkpoint walked END-TO-END through the real boundary — the owner's own day-one path: import a real file, highlight it, lose the ack, retry, retrieve, and have an independent reader confirm exactly-one-effect (record 40 §4 quotes the observable outputs)",
+      "the fresh-context SEV two-round chain: round 1 BLOCKED (1 P1 + 2 P2 + 3 P3 — every finding real, every finding fixed RED-first and pinned); round 2 PASS with independent re-verification of every fix (13 probe classes; the byte-truth retrieval, the diff-identical FK oracle arms, the held-transaction race, the blob swap, the lost-ack crash arm)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "data loss: a crash at any transactional boundary (after-begin / pre-commit / post-commit-pre-ack) — the §1.6 lost-ack is the product's own day-one risk",
+      "control": "the crash matrix on both product commands: zero effect pre-commit; committed-NO-ack post-commit; the SAME idem key replays the RECORDED result; exactly-one-effect graded by arv_read",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "stale/wrong anchors: a highlight pointing at bytes that changed underneath, or a client-supplied anchor text",
+      "control": "the anchor is DERIVED from the stored bytes at command time (offsets only from the client); the digest tie read from the source row; the blob swap refused at capture AND re-import (the re-hashing get)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "owner leakage: cross-owner reads/writes through any surface (query, commands, direct psql, the FK backdoor)",
+      "control": "RLS forced on all four tables + the unscoped write fails closed + the retrieval's identical refusal for absent-vs-foreign + the composite owner-scoped FKs closing the plant and the existence oracle",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "duplicate side effects: a retry or a concurrent duplicate creating two logical effects",
+      "control": "the replay/409 semantics on the shared spine (record_event's protocol); the content-addressed blob re-put no-op; K-06's concurrent same-key semantics",
+      "proof_ids": [
+        "run-01",
+        "run-02",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "crash/restart: the process dies mid-command — the client's outcome is uncertain",
+      "control": "commit-before-acknowledgment (§4.1): the lost-ack arm proves committed-no-ack, and the replay resolution answers the retry from the ledger",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-06",
+      "scenario": "provenance loss: a write without owner/actor/run/input lineage",
+      "control": "owner/actor/run_id/input_hash NOT NULL on every row + the closed actor vocabulary + the idempotency_key provenance ref on the highlight + the catalog-level no-defaults proof (LAW-24)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-07",
+      "scenario": "the retrieval surface silently corrupting free text (the round-1 P1 — the worst class: plausible-but-wrong, exit 0)",
+      "control": "structured output AT the SQL boundary (row_to_json — ONE escaped line per row); the pipe-split parse deleted; the byte-truth pins across newlines/pipes/quotes",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-08",
+      "scenario": "the concurrent same-work ordinal race: two imports claim one edition number",
+      "control": "the unique edition ordinal + the NAMED loser code ARV-CMD-011 (the dead-session class) + the same-key retry at the re-read ordinal; never the pre-fix doubled stall misdiagnosis",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "round 1: query.py's pipe-split parse silently truncated context at newlines, dropped trailing fields, emptied a newline-spanning selected_text, and crashed on a piped title — all exit 0/1 with plausible output; the builder's suite fixture was blind to it; reproduced at the pre-fix tree in red-03.txt",
+      "disposition": "FIXED RED-first: the structured output at the SQL boundary (row_to_json); pinned by CAP-18/18b; round 2 re-verified byte-true with the reviewer's own repros (three-newline context, quotes/backslashes/tabs, the piped title)"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1: a pipe-carrying media_type committed at import and crashed the capture path later with an unnamed ValueError (red-03.txt)",
+      "disposition": "FIXED RED-first: the MIME token grammar at the entry boundary (ARV-CAP-009, zero rows); pinned by CAP-19; round 2 re-verified (legitimate pairs pass, the hostile form refuses)"
+    },
+    {
+      "id": "SEV-3",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1: the FKs were owner-blind — an arv_app session could plant cross-owner references, gaining an FK-error existence oracle and permanently poisoning the referenced owner's ordinals",
+      "disposition": "FIXED RED-first: composite owner-scoped FKs (UNIQUE(id, owner_scope) on work/source/anchor + composite references); pinned by CAP-20; round 2 re-verified: both oracle arms BYTE-IDENTICAL stderr, the victim's ordinals unpoisoned"
+    },
+    {
+      "id": "SEV-4",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1 (the reviewer's P3): the ordinal-race loser misdiagnosed as the doubled 'FAIL ARV-CMD-010: ARV-CMD-010:' stall — the doubled prefix proved the path never exercised",
+      "disposition": "FIXED RED-first: the named ARV-CMD-011 (the dead-session unique-violation class) + the de-doubled prefix; pinned by CAP-21's held-transaction deterministic arm; round 2 re-verified zero-effect + the same-key retry"
+    },
+    {
+      "id": "SEV-5",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1 (the reviewer's P3): acquired_via absent from the canonical body — a different channel replayed as the same command",
+      "disposition": "FIXED: acquired_via joins the body; round 2 re-verified (different channel -> 409; same -> the recorded replay)"
+    },
+    {
+      "id": "SEV-6",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1 (the reviewer's P3): record 40 §7 listed sev.json as present evidence before the file existed",
+      "disposition": "FIXED: §7 reworded (the report lands with the finalize); the report is this file"
+    },
+    {
+      "id": "SEV-7",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "evidence": "round 2 (the reviewer's P3): ARV-CMD-011's diagnosis is inferred from the session's death (poll()), not the observed stderr cause — an infrastructure failure would take the concurrency name; the reviewer's own deferral reasoning: within the shipped commands the only reachable class at that point IS the unique violation, and the same-key-retry repair stays safe",
+      "disposition": "ROUTED (the ARV-SEV-009 regression precedent — its own bounded follow-up, never silently dropped): the stderr-classification refinement rides P3-02's import-state-machine work; recorded at notverified.txt item 11"
+    },
+    {
+      "id": "SEV-8",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "evidence": "round 2 (the reviewer's observation): the CAP-009 grammar is deliberately narrower than RFC 6838 — no parameters, a reduced token set; 'text/plain; charset=utf-8' refuses by name with the pinned repair hint",
+      "disposition": "ACCEPTED AS-DESIGNED: a whitelist at the entry boundary (parameters are metadata this rung does not carry); real-world type/subtype pairs pass (the reviewer's re-verification); documented in notverified.txt"
+    }
+  ],
+  "not_verified": [
+    "the ten named boundaries at harness/runs/claim-049-p301-capture-checkpoint/notverified.txt — the credential layer (owner-scoped RLS is the P3-01 rung); the §3.1 staging states + the recovery walk (P3-02); the anchor resolution/drift machinery (P3-03); the revision machine beyond 1 (P3-04); the blob delete/exists arms (P3-02); the FULL concurrent matrix (P3-08 — the ordinal race IS pinned, CAP-21); the oracle's standing residuals; the read-surface pagination/ordering contracts (P4); the owner-gated identity policy (Q11); CI-host observation (the standing class)",
+    "SEV-7's stderr-classification refinement (routed, P3-02's path)",
+    "no claim is made about any media format beyond UTF-8 readable text (ARV-CAP-008 names the boundary)"
+  ],
+  "builder_context": "builder-glm-host-session31-claim049 (the host GLM agent that authored the slice: the RED declaration, the implementation, the compression, the session close, and the round-1 fixes — every fix RED-first with a suite pin)",
+  "reviewer_context": "fresh-context GLM SEV reviewer rounds 1+2, session-31, claim-049 slice slice/claim-049-p301-capture-checkpoint (round 1 BLOCKED at the pre-fix head 303f45c: 1 P1 + 2 P2 + 3 P3, 12 probe classes on own scratch DB arv_sevprobe_*; round 2 PASS at the fix head ccc09c7: all six findings independently re-verified RESOLVED, 13 probe classes on own scratch DB arv_sev2_10694_946716915 — the byte-truth retrieval, the diff-identical FK oracle arms, the held-transaction race, the media grammar, the acquired_via 409, the blob swap, the lost-ack crash arm, the injection, the cross-owner refusals; worktree left clean), 2026-10-25",
+  "disposition": "PASS",
+  "review_summary": "Round 1 BLOCKED: the retrieval surface silently corrupted free text (P1 — the worst failure class: plausible-but-wrong with exit 0), the media_type and FK boundaries were both real (P2), and three precision defects (P3). Every finding was real, every finding was fixed RED-first with a new suite pin, and round 2 independently re-verified each fix with fresh reproductions on a fresh scratch database — the P1's byte-truth round-trips, the P2's diff-identical oracle arms, the P3's held-transaction race. No P0/P1/P2 remains. The SYS-03/04/09 trace holds with the reviewer's own runs; the §1.6 checkpoint is genuinely walked end-to-end through the real boundary. The two-round chain is exactly what the fresh-context obligation exists to force: the builder's own suite was blind to the P1 its fixture avoided.",
+  "sheet_section": true
+}

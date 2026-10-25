@@ -17,7 +17,8 @@
     "harness/migrations/0003_command_log.sql (the -- arv-baseline-bump: 1 directive lines \u2014 the plpgsql command-log immutability trigger function declared as the procedural construct P3-M0's fail-closed grammar requires; behaviorally inert at this head)",
     "CLAIMS.md (CLAIM-046 retired + closed with the full #80 merge facts; CLAIM-047 opened)",
     "AGENTS.md/STATE.md (the active-task + exact-next-action refresh \u2014 the staleness class applied proactively)",
-    "context/WORKLOG.md (Task 55)"
+    "context/WORKLOG.md (Task 55)",
+    "STATE.md (the #81 CodeRabbit Minor fixed in-PR: the lower snapshot fields re-derived to the current truth \u2014 #81 under review, main at f546dff, the protection restored byte-identical)"
   ],
   "interfaces_reviewed": [
     "harness/migrations/0003_command_log.sql: the directive placement (the same form as 0002's at #80); the ARV-MIG-005 checksum change recorded by the rig's re-derivation",
@@ -35,7 +36,8 @@
       "the PR-mode gate RECORDED green over the actual diff (the SEV obligation, the scope coverage, the size check at ONE migration file); proof run-03"
     ],
     "validation": [
-      "the directive's justification is mechanically proven by the oracle slice's suite (the sequenced acceptance, record 38 \u00a78's split story); the STATE/AGENTS refresh applied proactively \u2014 the staleness class the last three review rounds caught, now fixed before the bots see it"
+      "PLANNED acceptance, not a completed proof at this head: the directive's justification is mechanically proven by the ORACLE slice's suite (its grammar-refusal cases) \u2014 sequenced immediately after this slice, per the SIZE-005 split; the not-verified list records the sequencing explicitly",
+      "the STATE/AGENTS staleness lesson applied PROACTIVELY this round (the active-task + exact-next-action refreshed at commit A, the lower snapshot fields refreshed in this round) \u2014 the class the last three review rounds caught"
     ]
   },
   "failure_modes": [
@@ -56,7 +58,29 @@
       ]
     }
   ],
-  "findings": [],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #81 CodeRabbit Major: the applied-migration checksum boundary on 0003 (version 3 already applied in a supported database would stop at ARV-MIG-005)",
+      "disposition": "REASONED NO-FIX, the same evidence as #80's identical thread: the only databases this branch supports are disposable-by-contract (the rig, re-derived by the recorded full-replay procedure \u2014 3/3, verify OK; CI's ephemeral container); NO supported persistent database exists in this repo's contract (FACT-001/D-036; RTM \u00a75; the product's first deployment bootstraps fresh; F-06 unratified); ARV-MIG-005 (landing with the oracle) is the class's permanent guard; the confirmation the finding asks for is exactly the recorded rig re-derivation"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #81 CodeRabbit Minor on this very file: the validation entry read as a completed proof while the oracle's suite has not landed",
+      "disposition": "FIXED IN-PR: the validation entry now states the PLANNED acceptance explicitly (the sequenced proof, the not-verified sequencing) \u2014 this report re-finalized and the sheet re-derived"
+    },
+    {
+      "id": "SEV-3",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #81 CodeRabbit Minor on STATE.md: the lower snapshot fields still reported #80 under review and main at #79",
+      "disposition": "FIXED IN-PR (covered path first): the Outstanding-reviews + verified-by-run + observed-live bullets re-derived to the current truth (#81 under review; main at f546dff = the #80 merge; the protection restored byte-identical after the flip-merge); the record-37 pointer kept per the finding's own note"
+    }
+  ],
   "not_verified": [
     "the directive's reader (the oracle) does not exist at this head \u2014 sequenced by the split; the acceptance proof is the oracle slice's suite",
     "the applied-migration checksum boundary stands as dispositioned at #80 (disposable-by-contract; ARV-MIG-005 the permanent guard once the oracle lands; F-06 unratified)",

@@ -1,0 +1,7 @@
+{
+  "command": "make verify",
+  "exit_code": 0,
+  "commit": "58733367ef3ddda7615ee9abbbe167984b655837",
+  "output_sha256": "75d7ffa11e5c45b4737ac65f09a5934fe9c1828509d4c65804131a0ae44345b0",
+  "recorded_at": "2026-10-25T11:16:11.507459+00:00"
+}

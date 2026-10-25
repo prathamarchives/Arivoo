@@ -258,10 +258,8 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
             if recorded == "conflict":
                 return 1
             if sess.proc.poll() is not None:
-                # The SEV round's P3: the session DIED (ON_ERROR_STOP) on a
-                # unique violation this idem key does not own — e.g. the
-                # concurrent same-work edition ordinal (a zero-effect loss,
-                # NOT a stall). Named honestly, retryable honestly.
+                # The SEV round's P3: the session DIED (ON_ERROR_STOP) on a unique
+                # violation this key does not own — a zero-effect race loss, NOT a stall.
                 print(f"FAIL ARV-CMD-011: the session ended before the commit marker — a concurrent "
                       "writer won a unique constraint this key does not own (zero effect, the transaction rolled back)")
                 print("      repair: retry the SAME idempotency key (the ordinal is re-read) or use a new one")
@@ -302,9 +300,8 @@ def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=
         return 1
     data = path.read_bytes()
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*", media_type):
-        # The SEV round's P2: a media_type carrying '|'/newline/newlines later
-        # crashed the capture path's pipe-delimited session reads; the token
-        # grammar is the boundary where it enters — refuse it HERE, by name.
+        # The SEV round's P2: a pipe-carrying media_type later crashed the capture
+        # path's pipe-delimited reads; the token grammar is where it enters.
         print(f"FAIL ARV-CAP-009: media_type {media_type!r} is not a MIME token pair (type/subtype, "
               "token charset only) — free-form text is a title/payload, never a media type")
         print("      repair: pass a MIME pair like text/plain or text/markdown")

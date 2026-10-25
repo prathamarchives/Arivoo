@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """harness/query.py — the authenticated retrieval surface (P3-01; RTM SYS-09).
 
-The read boundary: every query runs through the approved adapter as the
-arv_app role WITH the owner GUC set — RLS scopes every row; an id outside
-the caller's scope and an id that does not exist are the SAME refusal
-(ARV-QRY-001), never a side channel revealing another owner's object
-existence (RTM §2.10's privacy principle on the read path). Reads are
-side-effect-free: no command-log rows, no derived state. Exit 0 = rows
-printed (one JSON object per line for get-*; one id per line for
+Every query runs through the approved adapter as arv_app WITH the owner GUC
+set — RLS scopes every row; an id outside the caller's scope and a nonexistent
+id are the SAME refusal (ARV-QRY-001), never a side channel revealing another
+owner's object existence (RTM §2.10 on the read path). Reads are
+side-effect-free. Exit 0 = rows (one JSON line for get-*; one id per line for
 list-captures); exit 1 = the named refusal.
 """
 import argparse

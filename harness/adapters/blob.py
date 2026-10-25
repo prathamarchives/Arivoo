@@ -32,15 +32,11 @@ def digest_of(data: bytes) -> str:
 
 
 def put(data: bytes) -> str:
-    """Write bytes ATOMICALLY (the #84 CodeRabbit Major): the full content
-    lands in a same-directory temp file, then ONE os.replace — a reader ever
-    sees NO file or the COMPLETE file, never a partial (write_bytes at the
-    final path let a concurrent put's exists() see a half-written file and
-    false-refuse a valid import; a killed writer left a truncated file that
-    poisoned the digest path forever — red-04.txt). A killed writer now
-    leaves only an ignorable .put- orphan (the §3.1 staging class, P3-02's
-    recovery walk); an EXISTING file is never touched (healing is forbidden
-    — CAP-15's corruption refusal stands)."""
+    """Write bytes ATOMICALLY (the #84 Major; red-04.txt): same-directory temp
+    + ONE os.replace — a reader sees NO file or the COMPLETE file, never a
+    partial; a killed writer leaves only an ignorable .put- orphan (the §3.1
+    staging class). An EXISTING file is never touched (healing is forbidden —
+    CAP-15's corruption refusal stands)."""
     d = digest_of(data)
     p = _dir() / d
     if not p.exists():

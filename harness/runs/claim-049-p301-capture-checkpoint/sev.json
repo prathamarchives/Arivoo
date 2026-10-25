@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-049-p301-capture-checkpoint",
   "base_sha": "5c04375f28468fd525948c375711ccfb52e2f98e",
-  "reviewed_diff_sha256": "60f9b12106840c7c6868be09d8bcd82406982d9f253e78a054b3fe7221cb794c",
+  "reviewed_diff_sha256": "ed6da43efdf1a7d397d5f023446fd7b03b8894c5019b8937b97da57697d9d31e",
   "intent_ids": [
     "INT-127",
     "INT-131",

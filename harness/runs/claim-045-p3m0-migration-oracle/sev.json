@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-045-p3m0-migration-oracle",
   "base_sha": "762588a116d8842f3413b04846a213d50034ffbd",
-  "reviewed_diff_sha256": "b99037ca1736c1bd727c3cea3588c5848b5b5c7d8cf1b370784f511c08c09214",
+  "reviewed_diff_sha256": "9e83ba827c386acf3a01da409dc9fdff0b3077819efe70cc8727e024bc590ad1",
   "intent_ids": [
     "INT-127",
     "INT-131",
@@ -38,17 +38,17 @@
   ],
   "v_model": {
     "component_verification": [
-      "the 39-case suite on the real rig (PostgreSQL 17.11, scratch DBs): the 10 S1 behaviors + every oracle guard + the controls; proof run-01",
-      "RED-01: the 22 REDs at the single reachable predecessor 762588a (the old runner restored for the capture) \u2014 the guards' absences observed live: the poisoned ledger, the persisted ghosts (both phantom-dollar-quote shapes), the history holes, the verify side effect"
+      "the 44-case suite on the real rig (PostgreSQL 17.11, scratch DBs): the 10 S1 behaviors + every oracle guard + the controls; proof run-16",
+      "RED-01: the 22 REDs at the single reachable predecessor 762588a; RED-02: the #82 CodeRabbit round's 5 REDs at the pre-fix head (the ALTER-DROP evasion family, the bare END, the '|' ledger row, the UPDATE ONLY CTE) \u2014 the guards' absences observed live, never asserted"
     ],
     "integration_verification": [
       "the real stack end-to-end: the substrate/commands suites green over the re-derived rig (the real 0001..0003 with the merged directive comments); proofs run-02/03/13",
       "the dispatch/trusted/mutation-floor/claims-paths/record-machinery/sev suites all green at this head (zero regressions); proofs run-04..09"
     ],
     "system_verification": [
-      "make verify GREEN (canonical 54/0, the gate green in selfcheck); proof run-13",
-      "the PR-mode gate over the actual diff (the SEV obligation, the scope, the red records, the KB matrix, the section-bearing sheet, the SIZE-005 check at ZERO migration files) \u2014 RECORDED green; proof run-14",
-      "the SEV three-round chain (the fresh-context reviewer agent-ff3e3170, uncoached): round 1 BLOCKED (the phantom-dollar-quote P0 end-to-end \u2014 a hidden DROP applied exit 0, a hidden COMMIT persisted a table while ARV-MIG-009 asserted 'the DB is unchanged'), round 2 re-BLOCKED (the astral cap residual), round 3 PASS (the reviewer's own end-to-end re-runs + its attack probes \u2014 diacritics, C1 controls, NBSP, surrogates, dollar-tags \u2014 closing every dangerous direction). THE REVIEW COVERED THE BYTE-IDENTICAL CONTENT: migrate.py and test_migrations.py are checked out unchanged from the archive branch's round-3-PASS head; the re-bind covers this slice's tree"
+      "make verify GREEN (canonical 54/0, the gate green in selfcheck); proof run-17",
+      "the PR-mode gate over the actual diff (the SEV obligation, the scope, the red records, the KB matrix, the section-bearing sheet, the SIZE-005 check at ZERO migration files) \u2014 RECORDED green; proof run-18 (the final green capture; run-14's honest RED \u2014 the branch-identity catch \u2014 and run-15's pre-round green stay preserved in the record set)",
+      "the SEV three-round chain (the fresh-context reviewer agent-ff3e3170, uncoached): round 1 BLOCKED (the phantom-dollar-quote P0 end-to-end), round 2 re-BLOCKED (the astral cap), round 3 PASS (the reviewer's own end-to-end re-runs + attack probes closing every dangerous direction). THE REVIEW COVERED THE BYTE-IDENTICAL ORACLE CORE: migrate.py and test_migrations.py are checked out unchanged from the archive branch's round-3-PASS head; the re-bind covers this slice's tree"
     ],
     "validation": [
       "the A08 discipline: every new case compares actual values via independent reads \u2014 never a count alone",
@@ -188,6 +188,34 @@
       "status": "resolved",
       "evidence": "(the reviewer's P3, at P2) the high-bit dollar-tag over-refusal class unnamed; the suite-count illustration stale",
       "disposition": "FIXED in the finalize: the class named (fail-closed only \u2014 mask-tags a strict subset of PG-tags) + the count corrected; the reviewer's recommendation adopted in full"
+    },
+    {
+      "id": "SEV-14",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "the #82 CodeRabbit Major: the one-token ALTER regex missed 'ALTER TABLE ONLY x DROP c', 'ADD ..., DROP ...', the quoted-identifier object, and the spaced-dot name \u2014 destructive without the directive",
+      "disposition": "FIXED RED-first: the statement-level _alter_drop check (any exact DROP token inside an ALTER TABLE statement); ARV-TEST-040/041; 44/44 green"
+    },
+    {
+      "id": "SEV-15",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "the #82 CodeRabbit Major: a bare END is PG's COMMIT synonym \u2014 the runner's prepended BEGIN made a directive-carrying file's END a live commit (the reviewer's trigger reproduced: partial effects persisted while ARV-MIG-009 asserted 'the DB is unchanged')",
+      "disposition": "FIXED RED-first: the statement-head _txn_control_head check \u2014 END/COMMIT/... as a statement HEAD is control (directive-proof), CASE's mid-statement END never is; the wrong docstring reasoning replaced; ARV-TEST-042"
+    },
+    {
+      "id": "SEV-16",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #82 CodeRabbit Minors: the '|' ledger row silently dropped by the parser (poisoned rows invisible to both paths); 'UPDATE ONLY x SET' evading the data-modifying pattern; the SEV summary pointing at run-14's RED instead of the green gate; the notverified scoping (extension/concurrency read as fail-closed claims)",
+      "disposition": "ALL FIXED: the fail-closed unparseable-row refusal (ARV-MIG-007, ARV-TEST-043); the 1-3-token UPDATE window (ARV-TEST-044); the green-gate proof pointer at the final green record with run-14 preserved; the UNVERIFIED-BY-SCOPE scoping in notverified"
+    },
+    {
+      "id": "SEV-17",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the #82 CodeRabbit Minor: PLAN marks P3-M0 complete while CLAIMS shows CLAIM-045 open and STATE directs the merge of #82",
+      "disposition": "REASONED NO-FIX with the repo's own precedent: the status line lands WITH its slice's merge (H-02, P3-00 \u2014 every prior status was written in its own PR); the open-claim row and the merge-next exact action are the registry's DESIGNED states (a claim IS open until its PR merges \u2014 rule 4); after the governed merge every layer agrees; an agent reading main never sees the intermediate state"
     }
   ],
   "not_verified": [
@@ -201,6 +229,6 @@
   "builder_context": "builder-glm-host-session31-claim045",
   "reviewer_context": "fresh-ctx-glm-sev-claim045-20261025 (the subagent agent-ff3e3170; three rounds: BLOCKED -> re-BLOCKED -> PASS, over the byte-identical oracle content)",
   "disposition": "PASS",
-  "review_summary": "P3-M0's migration oracle lands as the SIZE-005 split's final slice \u2014 the substrate's two directive declarations landed first as PRs #80/#81 (each review dispositioned, each flip-merge restored the protection byte-identical), so this diff carries zero migration files and the walls' one-behavior bound holds unbypassed. The oracle itself: a character-level mask that lexes EXACTLY as PostgreSQL's byte-oriented scan.l (identifier context through every high-bit codepoint, astral planes included), every guard firing BEFORE psql (embedded transaction control directive-proof including the two-phase forms; comment-proof and IF-EXISTS-proof destructive detection; the fail-closed admitted grammar with the data-modifying-body scan and the name-scoped baseline exemption; the safe filename alphabet; the complete bidirectional ledger history; observation-only verify; the pending-file pre-scan). The adversarial SEV chain found and closed the real holes: the reviewer's round-1 P0 (the phantom dollar-quote \u2014 an identifier '$$' that PG reads as one identifier but the mask read as a string opener, hiding a live DROP TABLE and a \u00a76.2-breaking COMMIT behind it), its round-2 astral residual, and eleven more findings \u2014 each fixed RED-first and verified by the reviewer's own end-to-end re-runs plus its attack probes. The residual classes are fail-closed-only over-refusals, named honestly at notverified.txt. The evidence chain: 22 REDs at the single reachable predecessor (the poisoned ledger and the persisted ghosts observed live), the 39/39 suite on the real stack, the 14-record proof set, and the section-bearing sheet \u2014 honest at every link.",
+  "review_summary": "P3-M0's migration oracle lands as the SIZE-005 split's final slice \u2014 the substrate's two directive declarations landed first as PRs #80/#81 (each review dispositioned, each flip-merge restored the protection byte-identical), so this diff carries zero migration files. The oracle: a character-level mask lexing EXACTLY as PostgreSQL's byte-oriented scan.l (astral planes included), every guard firing BEFORE psql \u2014 transaction control at statement-head level (END included: PG's own COMMIT synonym, the #82 round's catch), destructive detection comment-proof AND token-shape-proof (any DROP inside an ALTER TABLE statement), the fail-closed admitted grammar with the data-modifying-body scan and the name-scoped baseline exemption, the safe filename alphabet, the complete bidirectional ledger history with the fail-closed unparseable-row refusal, observation-only verify, and the pending-file pre-scan. THE ADVERSARIAL CHAIN: the fresh-context reviewer's three rounds closed the phantom-dollar-quote P0 in all three of its forms (verified by its own end-to-end re-runs and attack probes); the #82 CodeRabbit round then found two more real Majors (the ALTER-DROP evasion family; the bare-END live commit) and four actionable Minors \u2014 every one fixed RED-first (RED-02: the 5 new cases observed failing at the pre-fix head) or dispositioned with reasoned evidence (the status-line timing). The suite: 44/44 on the real stack. The residual classes: fail-closed-only lexer over-refusals, named at notverified.txt, with the extension-catalogue and concurrency boundaries scoped as unverified-by-scope, never claimed fail-closed.",
   "sheet_section": true
 }

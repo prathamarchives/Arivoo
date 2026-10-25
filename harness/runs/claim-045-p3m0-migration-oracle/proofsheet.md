@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-045-p3m0-migration-oracle (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 039cba1b73bffff126b31babfb05aac62e62c922
-- generated (last record's timestamp): 2026-10-25T11:52:12.568069+00:00
-- run records: 15
+- commit (last run record's): 628659b845bc8b87ab854b498e2f43cd40dcad3d
+- generated (last record's timestamp): 2026-10-25T12:15:22.496418+00:00
+- run records: 18
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 4966fdb2170ba60c · 2026-10-25T11:34:44.754433+00:00
@@ -20,6 +20,9 @@
 - `make verify` -> exit 0 · output sha256 7ca1899a5ed28b44 · 2026-10-25T11:40:20.033762+00:00
 - `python3 harness/gate.py --slice claim-045-p3m0-migration-oracle --diff origin/main` -> exit 1 · output sha256 6d15d58ffde5004d · 2026-10-25T11:43:45.503851+00:00
 - `python3 harness/gate.py --slice claim-045-p3m0-migration-oracle --diff origin/main` -> exit 0 · output sha256 5271d612a6864954 · 2026-10-25T11:52:12.568069+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 ac32f490f5bebc8c · 2026-10-25T12:09:46.863123+00:00
+- `make verify` -> exit 0 · output sha256 6a9ff9bb89093aea · 2026-10-25T12:12:39.904663+00:00
+- `python3 harness/gate.py --slice claim-045-p3m0-migration-oracle --diff origin/main` -> exit 1 · output sha256 182883eeeb5707ba · 2026-10-25T12:15:22.496418+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - the identifier-context rule is now BYTE-ORIENTED exactly as PG's scan.l (any codepoint >= U+0080 starts/continues an identifier; astral planes included — SEV-10's cap lesson, closed with ARV-TEST-038/039); the residual lexer-drift classes above remain the fail-closed direction only.
@@ -27,17 +30,17 @@
 - - the ARV-MIG-009 'the DB is unchanged (transaction proof)' message is conditional on the scanner's fidelity for the guarded classes — the identifier-aware mask (SEV-1's fix) restores that fidelity for embedded transaction control and destructive statements; a runtime failure therefore rolls back everything the oracle admitted, and what the directive admits is owner-declared (the directive is the paper trail, not a proof).
 - - the ledger-name bidirectional check (SEV-5) compares the directory filename's name field against the ledger's name column; applied_at/applied_by are not part of identity and are not compared (0002/0003's rows carry harness/migrate.py; any future runner identity change is its own bounded slice).
 - - the pre-scan (SEV-7) reads the ledger observationally to decide pending files; on a ledger that exists, oracle refusals for pending files still happen before the first WRITE, but the (pre-existing, empty-or-populated) ledger table itself remains — the zero-effects claim for those DBs covers application effects, never the scaffolding that predates the run.
-- - CREATE EXTENSION is admitted by classification (the card's declared admitted set); extension scripts run inside the migration transaction — the extension catalogue's own review is out of the oracle's scope (the SEV reviewer's own not-verified note, adopted).
+- - CREATE EXTENSION is admitted by classification (the card's declared admitted set); extension scripts run inside the migration transaction — UNVERIFIED BY SCOPE, never claimed fail-closed: the extension catalogue's own review is out of the oracle's scope (the SEV reviewer's own not-verified note, adopted; the fail-closed-direction claims in this record cover the LEXER-drift classes only).
 - - the migration suite's case count (39 named checks at this slice's close) is its own declaration — never a contract number; the card's coverage contract is the guards + proofs, not the count.
-- - concurrency (racing migrators on one DB) remains outside the declared contract (the runner is single-writer by protocol; a concurrency guard is its own bounded slice if the owner ever wants parallel migrators).
+- - concurrency (racing migrators on one DB) — UNVERIFIED BY SCOPE, never claimed fail-closed: the runner is single-writer by protocol; a concurrency guard is its own bounded slice if the owner ever wants parallel migrators.
 - - the ARV-SEV-009 undecidable-base test gap (the late #79 nitpick, routed at CLAIM-044's close row): its own bounded regression follow-up — deliberately NOT folded into this slice's SEV machinery scope (scope exclusivity, LAW-06).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 065d92ebd48614e82861254eb9d08bf56e4d5d77fcb92d0bb6bf658bc14c8d69
-- reviewed_diff_sha256: b99037ca1736c1bd727c3cea3588c5848b5b5c7d8cf1b370784f511c08c09214
+- report sha256: 7f9e2d786be3f17a2e1ef0ef07b75ef05c6e5ca36e3d670cd1994b30d0e30e18
+- reviewed_diff_sha256: 9e83ba827c386acf3a01da409dc9fdff0b3077819efe70cc8727e024bc590ad1
 - disposition: PASS
-- findings: 13 (open P0/P1: 0)
+- findings: 17 (open P0/P1: 0)
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 684d4e8dc24d6fbf7e1e59473ffeb0e6f2516b636f013b1f8f6657e35251ad47
+- sheet sha256 (of the content above, excluding this line): cd36061aedfe01e0725f2cdff38468106cfb14c10ecfad00623a5e579f53acee

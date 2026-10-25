@@ -1,69 +1,44 @@
 #!/usr/bin/env python3
 r"""harness/migrate.py — the forward-only migrations runner + the M0 migration
 oracle (S1; D-036; P3-M0 — PLAN's P3-M0 card, RTM §5, the §6.2 eight-point
-contract; F-009/F-010 RED-first per red-01.txt).
+contract; F-009/F-010 RED-first; the SEV/#82 rounds' repairs).
 
-Contract (the 2026-10-16 review §7 S1 + the P3-M0 card, made mechanical):
-  * forward-only: no down/rollback exists by design (history is append-only)
-  * versioned:    NNNN_name.sql, strictly increasing, unique versions
-  * safe names:   the filename alphabet is [0-9]{4}_[a-z][a-z0-9_]*\.sql
-                  (ARV-MIG-014) — a name OUTSIDE the alphabet is refused at
-                  discovery, BEFORE any name can reach the ledger INSERT; within
-                  the alphabet the interpolated literal is provably safe (no
-                  quote, backslash, comment, or escape character can occur —
-                  psql has no parameter binding, so the alphabet IS the
-                  reliable quoting, the card's F-010 clause)
-  * baseline:     the version set must start at 0001 — a hole below the applied
-                  head is refused (ARV-MIG-004), an applied file edited after
-                  apply is refused (ARV-MIG-005), a destructive statement without
-                  "-- arv-baseline-bump:" is refused (ARV-MIG-003)
-  * oracle:       the runner OWNS the transaction boundary — embedded
-                  transaction control in executable text (BEGIN/COMMIT/
-                  ROLLBACK/SAVEPOINT/START TRANSACTION/...) is refused BEFORE
-                  execution (ARV-MIG-011): a mid-file COMMIT would persist
-                  partial effects while the runner reports a rollback
-  * grammar:      a deliberately narrow ADMITTED grammar, fail closed
-                  (ARV-MIG-015): executable constructs the checker cannot
-                  classify (procedural/dynamic SQL: DO, CREATE FUNCTION/
-                  PROCEDURE, EXECUTE, CALL, ...) require the
-                  '-- arv-baseline-bump:' directive — the owner-visible
-                  paper trail; the DECLARED 0001_baseline bootstrap exemption
-                  is name-scoped (exactly version 1, name 'baseline': the
-                  baseline creates the roles before anything else exists and
-                  is the owner-reviewed foundation; its text is still scanned
-                  for transaction control and destructive phrases)
-  * history:      directory<->ledger BOTH ways (ARV-MIG-012) — a ledger row
-                  the directory cannot account for (an extra row, or an
-                  applied file removed from the directory) is refused by both
-                  migrate and --verify
-  * observation:  --verify CREATES NOTHING (ARV-MIG-013) — on a DB whose
-                  ledger does not exist, verify refuses honestly; it never
-                  bootstraps the table it claims to observe
-  * re-runnable:  applying nothing new is a no-op exit 0 (ARV-MIG-001 reports it);
-                  the bookkeeping row for a fully-applied, unchanged set is NEVER
-                  rewritten (double application is structurally impossible: each
-                  file applies inside ONE transaction together with its row)
-  * atomic:       file + bookkeeping row commit together or not at all — and
-                  the guards fire BEFORE psql runs, so a refused migration has
-                  structurally zero effects (the suite proves it by independent
-                  reads: no tables, no rows, no bookkeeping)
-  * verifiable:   --verify re-checks every recorded checksum against the files
+Contract (mechanical; every failure prints rule ID + what + repair):
+  * forward-only, versioned NNNN_name.sql from a gapless baseline 0001
+  * safe names: [0-9]{4}_[a-z][a-z0-9_]*.sql (ARV-MIG-014 at discovery —
+    within the alphabet the ledger INSERT's literal is provably safe; psql
+    has no parameter binding, so the alphabet IS the reliable quoting, F-010)
+  * applied-file immutability (ARV-MIG-005); destructive statements require
+    '-- arv-baseline-bump: <n>' (ARV-MIG-003, comment-proof + token-proof)
+  * the runner owns the ONE transaction boundary: embedded transaction
+    control refused pre-execution at statement-head level, directive-proof
+    (ARV-MIG-011 — END included: PG's own COMMIT synonym)
+  * the ADMITTED GRAMMAR fails closed (ARV-MIG-015): constructs the checker
+    cannot classify (procedural/dynamic, data-modifying bodies) require the
+    directive; the DECLARED 0001_baseline bootstrap exemption is name-scoped
+    (exactly version 1, name 'baseline'; its text is still scanned for
+    transaction control and destructive statements)
+  * bidirectional directory<->ledger history, BOTH paths (ARV-MIG-012):
+    extra rows, interior holes, name drift; the ledger parser fails closed on
+    unparseable rows (ARV-MIG-007 — a poisoned row is never invisible)
+  * --verify is observation-only (ARV-MIG-013: a missing ledger is an honest
+    refusal, never a CREATE side effect)
+  * the pending-file pre-scan: every file about to run passes the oracle
+    BEFORE the first DB write — a refusal leaves the DB untouched; each file
+    applies inside ONE transaction together with its bookkeeping row
+  * re-runnable: nothing to apply is a no-op (ARV-MIG-001); --verify
+    re-checks every checksum
 
-The scanner (F-009): destructive/transaction-control detection runs on a
-character-level MASK of the file — line comments, nested block comments,
-single-quoted strings ('' escape), double-quoted identifiers, and dollar-quoted
-strings ($tag$...$tag$, $$...$$) are masked to fixed placeholders BEFORE any
-keyword scan. Comments BETWEEN keywords cannot evade a guard, and words that
-exist only inside comments or string bodies cannot trigger one. Unterminated
-constructs fail closed (ScanError -> ARV-MIG-016). Admitted limit (recorded at
-the runs dir's notverified.txt): single-quoted string masking assumes
-standard_conforming_strings=on (PostgreSQL 17's default; the rig never sets it
-off); the token END is excluded from the transaction-control set because CASE
-expressions end with it (its transaction meaning is legacy psql syntax — BEGIN,
-COMMIT, ROLLBACK and SAVEPOINT cover the real threat, and a leading BEGIN is
-always caught first).
+The scanner (F-009): a character-level mask — line/nested-block comments,
+strings, E-strings, quoted identifiers, dollar-quoted bodies — runs before
+every keyword scan. Identifier context is tracked EXACTLY as PG's byte-
+oriented scan.l (any codepoint >= U+0080 starts/continues an identifier,
+astral planes included): '$' inside an identifier never opens a dollar-quote
+(the SEV rounds' phantom-quote P0s, closed). Unterminated constructs fail
+closed (ARV-MIG-016). The residual lexer-drift classes (hex adjacency,
+E-space/nameE shapes, high-bit dollar-tags, U& spellings) are fail-closed
+over-refusals only — named at the runs dir's notverified.txt.
 
-Every failure prints: rule ID, what, repair (diagnostics contract).
 Exit 0 = ok; exit 1 = refusal/failure.
 """
 import hashlib
@@ -75,18 +50,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import pg  # noqa: E402
 
 SAFE_NAME_RE = re.compile(r"^(\d{4})_([a-z][a-z0-9_]*)\.sql$")  # F-010: the safe alphabet
-FILE_RE = SAFE_NAME_RE
-DESTRUCTIVE_RE = re.compile(
-    r"(?i)\b(DROP\s+TABLE|DROP\s+COLUMN|DROP\s+SCHEMA|TRUNCATE|ALTER\s+TABLE(\s+IF\s+EXISTS)?\s+\S+\s+DROP|DELETE\s+FROM)\b"
-)
-TXN_RE = re.compile(
-    r"(?i)\b(BEGIN|COMMIT|ROLLBACK|SAVEPOINT|ABORT|START\s+TRANSACTION|"
-    r"SET\s+TRANSACTION|SET\s+SESSION\s+CHARACTERISTICS|"
-    r"PREPARE\s+TRANSACTION|COMMIT\s+PREPARED|ROLLBACK\s+PREPARED)\b"
-)
-DATA_MODIFY_RE = re.compile(
-    r"(?i)\b(INSERT\s+INTO|UPDATE(?:\s+\S+){1,3}\s+SET|DELETE\s+FROM|MERGE\s+INTO|SELECT\s+INTO)\b"
-)
+DESTRUCTIVE_RE = re.compile(r"(?i)\b(DROP\s+TABLE|DROP\s+COLUMN|DROP\s+SCHEMA|TRUNCATE|ALTER\s+TABLE(\s+IF\s+EXISTS)?\s+\S+\s+DROP|DELETE\s+FROM)\b")
+DATA_MODIFY_RE = re.compile(r"(?i)\b(INSERT\s+INTO|UPDATE(?:\s+\S+){1,3}\s+SET|DELETE\s+FROM|MERGE\s+INTO|SELECT\s+INTO)\b")
 BUMP_RE = re.compile(r"(?m)^\s*--\s*arv-baseline-bump:\s*(\d+)")
 DOLLAR_OPEN_RE = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*)?\$")
 
@@ -106,16 +71,15 @@ def _ident_start(ch: str) -> bool:
 def _ident_cont(ch: str) -> bool:
     return _ident_start(ch) or ch in "0123456789$"
 
-# The admitted grammar: statement heads the checker can classify as
-# non-procedural. Everything else fails closed to ARV-MIG-015 without the
-# directive (procedural/dynamic SQL is NEVER admitted by classification —
-# only by the owner-visible directive, or the name-scoped baseline exemption).
-_PLAIN_CREATE = {
-    "TABLE", "INDEX", "SCHEMA", "SEQUENCE", "VIEW", "TRIGGER", "POLICY",
-    "ROLE", "TYPE", "EXTENSION", "COLLATION", "DOMAIN",
-}
+# The admitted grammar: heads classifiable as non-procedural. Everything else
+# fails closed to ARV-MIG-015 without the directive (procedural/dynamic SQL is
+# never admitted by classification — only by the owner-visible directive, or
+# the name-scoped baseline exemption). _DROP_IFEXISTS: the idempotent-recreate
+# pattern the substrate migrations use.
+_PLAIN_CREATE = {"TABLE", "INDEX", "SCHEMA", "SEQUENCE", "VIEW", "TRIGGER",
+                 "POLICY", "ROLE", "TYPE", "EXTENSION", "COLLATION", "DOMAIN"}
 _PROCEDURAL_CREATE = {"FUNCTION", "PROCEDURE", "AGGREGATE"}
-_DROP_IFEXISTS = {"TRIGGER", "POLICY", "INDEX", "VIEW"}  # the idempotent-recreate pattern
+_DROP_IFEXISTS = {"TRIGGER", "POLICY", "INDEX", "VIEW"}
 _CREATE_SKIP = {"OR", "REPLACE", "UNIQUE", "TEMP", "TEMPORARY", "IF", "NOT", "CONSTRAINT"}
 
 
@@ -130,31 +94,18 @@ def _die(code: str, what: str, repair: str) -> "None":
     sys.exit(1)
 
 
-def _fail(code: str, what: str, repair: str) -> tuple:
-    print(f"FAIL {code}: {what}")
-    print(f"      repair: {repair}")
-    return None, code
-
-
 def mask(text: str) -> str:
-    """The character-level mask (F-009): comments, single-quoted strings,
-    double-quoted identifiers, and dollar-quoted bodies become fixed
-    placeholders; everything else passes through. Unterminated constructs
-    raise ScanError (fail closed — an untrustworthy mask never scans).
-
-    PG-lexer fidelity (the SEV rounds' repairs):
-    * identifier context is tracked exactly as PG's scan.l does — BYTE-ORIENTED
-      (start [_A-Za-z] or any codepoint >= U+0080, continue +[0-9$]; astral
-      planes included — SEV-10's cap lesson) — a '$' inside an identifier does
-      NOT open a dollar-quote ('b$$c' is ONE identifier; SEV-1's P0), while a
-      '$' after a NUMBER still does (PG's number lexing excludes '$');
-    * E'...' strings process backslash escapes regardless of
-      standard_conforming_strings (SEV-6) — the E must sit immediately before
-      the quote, not as the tail of a longer identifier.
-    Admitted drift (recorded at the runs dir's notverified.txt): hex numbers
-    adjacent to a '$' (the mask enters identifier context at 'x' — over-scan
-    only, the fail-closed direction), and U&'...' strings whose backslash
-    escape spelling can mis-balance the mask into a 016 refusal.
+    """The character-level mask (F-009): comments, strings, E-strings, quoted
+    identifiers and dollar-quoted bodies become fixed placeholders; everything
+    else passes through. PG-lexer fidelity: identifier context is tracked
+    exactly as scan.l (byte-oriented — any codepoint >= U+0080 continues an
+    identifier, astral planes included: 'b$$c' and 'c\U0001F600$$' are ONE
+    identifier, so '$' inside an identifier never opens a dollar-quote; '$'
+    after a NUMBER still does); E'...' processes backslash escapes always (the
+    E must be glued to the quote, not an identifier tail). Unterminated
+    constructs raise ScanError (fail closed). Admitted drift (notverified.txt):
+    hex-adjacent '$', E-space/nameE shapes, high-bit dollar-tags, U& spellings
+    — over-refusal/both-reject only.
     """
     out = []
     i, n = 0, len(text)
@@ -276,22 +227,18 @@ def _classify(masked: str) -> str:
             body = [x for x in w[1:] if x not in _CREATE_SKIP]
             kind = body[0] if body else ""
             if kind == "INDEX" and "CONCURRENTLY" in w:
-                # SEV-8b: it cannot run inside the runner's single transaction —
-                # the grammar names it fail-closed, never admits it into a
-                # guaranteed psql failure with a misleading 'fix the SQL'
                 return "construct (CREATE INDEX CONCURRENTLY — cannot run inside the runner's single transaction)"
             if kind in _PLAIN_CREATE:
                 # SEV-3: an admitted head's BODY may still carry a data-modifying
-                # CTE (CTAS with INSERT..RETURNING inserted a row at the review)
-                # — migrations declare schema, never queries
+                # CTE — migrations declare schema, never queries
                 if DATA_MODIFY_RE.search(stmt):
                     return "data-modifying statement inside an admitted head (the grammar admits schema, never queries)"
                 continue
             return f"procedural/dynamic construct (CREATE {kind or '?'}) the grammar cannot classify"
-        if w[0] in ("DO", "EXECUTE", "CALL", "PREPARE", "DEALLOCATE", "COPY", "INSERT",
-                    "UPDATE", "MERGE", "SELECT", "WITH", "VALUES", "REVOKE", "ANALYZE",
-                    "VACUUM", "REINDEX", "REFRESH", "TRUNCATE", "LOCK", "LISTEN",
-                    "NOTIFY", "LOAD", "IMPORT", "SECURITY"):
+        if w[0] in ("DO", "EXECUTE", "CALL", "PREPARE", "DEALLOCATE", "COPY",
+                    "INSERT", "UPDATE", "MERGE", "SELECT", "WITH", "VALUES",
+                    "REVOKE", "ANALYZE", "VACUUM", "REINDEX", "REFRESH", "TRUNCATE",
+                    "LOCK", "LISTEN", "NOTIFY", "LOAD", "IMPORT", "SECURITY"):
             if w[0] == "SELECT":
                 return "unclassified construct (SELECT) — migrations declare schema, not queries"
             return f"procedural/dynamic or data construct ({w[0]}) the grammar cannot classify"
@@ -309,11 +256,10 @@ def _statement_tokens(masked: str):
 
 
 def _txn_control_head(w: list) -> bool:
-    """The #82 CodeRabbit Major: transaction control judged at STATEMENT-HEAD
-    level — a bare END (PG's own COMMIT synonym; the runner's prepended BEGIN
-    made it a live commit) is control when it HEADS a statement, while CASE's
-    mid-statement END never does. START/SET/PREPARE are control only in their
-    transaction forms; a plain config SET stays admitted."""
+    """Transaction control at STATEMENT-HEAD level (the #82 Major): a bare END
+    (PG's COMMIT synonym — live under the runner's prepended BEGIN) is control
+    when it HEADS a statement; CASE's mid-statement END never does. START/SET/
+    PREPARE count only in their transaction forms (a config SET stays admitted)."""
     if not w:
         return False
     if w[0] in ("BEGIN", "COMMIT", "ROLLBACK", "SAVEPOINT", "ABORT", "END"):
@@ -330,13 +276,10 @@ def _txn_control_head(w: list) -> bool:
 
 
 def _alter_drop(w: list) -> bool:
-    """The #82 CodeRabbit Major: ANY DROP action inside an ALTER TABLE
-    statement is destructive-class, whatever tokens precede it — the one-token
-    regex missed 'ALTER TABLE ONLY x DROP c', 'ADD ..., DROP ...', the
-    quoted-identifier object (the masked 'QID' placeholder splits tokens), and
-    the spaced-dot qualified name. Exact-token matching: a column or role
-    merely CONTAINING 'drop' never fires (and any identifier that must be
-    quoted is masked as 'QID')."""
+    """Any DROP action inside an ALTER TABLE statement is destructive-class,
+    whatever tokens precede it (the #82 Major: the one-token regex missed
+    ONLY/ADD-then-DROP/QID-object/spaced-dot forms). Exact-token matching — a
+    name merely containing 'drop' never fires (quoted identifiers are masked)."""
     return len(w) > 2 and w[0] == "ALTER" and w[1] == "TABLE" and "DROP" in w[2:]
 
 
@@ -377,19 +320,34 @@ def discover(mdir: str) -> list:
         m = SAFE_NAME_RE.match(name)
         if not m:
             _die("ARV-MIG-014", f"migration filename outside the safe alphabet: {name!r}",
-                 "migration files are NNNN_name.sql with a 4-digit version and a name of lowercase "
-                 "letters/digits/underscores only (first char a letter) — the alphabet is what makes the "
-                 "ledger INSERT's literal interpolation provably safe (F-010); a name carrying quotes, "
-                 "dashes, or case cannot reach the bookkeeping INSERT")
+                 "migration files are NNNN_name.sql, the name lowercase letters/digits/underscores "
+                 "only (first char a letter) — the alphabet makes the ledger INSERT's literal provably "
+                 "safe (F-010); quotes/dashes/case never reach the bookkeeping INSERT")
         out.append((int(m.group(1)), m.group(2), os.path.join(mdir, name)))
     return out
+
+
+def _parse_ledger(r) -> dict:
+    """{version: (name, checksum)}. Fail-closed (the #82 round): an unparseable
+    row (a '|' smuggled into name/checksum) is a NAMED ARV-MIG-007 refusal —
+    never a silently dropped row hiding a poisoned ledger from both paths."""
+    rows = {}
+    for line in r.out.splitlines():
+        parts = line.split("|")
+        if len(parts) == 3 and parts[0].lstrip("-").isdigit():
+            rows[int(parts[0])] = (parts[1], parts[2])
+        elif line.strip():
+            _die("ARV-MIG-007",
+                 f"the bookkeeping table carries an unparseable row ({line.strip()[:60]!r}) — a poisoned ledger",
+                 "every ledger row must parse (version|name|checksum); a row that does not is a named refusal, never "
+                 "silently dropped — reconcile the ledger with the history (never edit it by hand)")
+    return rows
 
 
 def applied(db: str, bootstrap: bool = True) -> dict:
     """The ledger read: {version: (name, checksum)} (SEV-5: the bidirectional
     check compares NAMES too, never versions+checksums alone)."""
-    if bootstrap:
-        # The WRITE path's bootstrap: the ledger is created by the migrator only.
+    if bootstrap:  # the WRITE path's bootstrap: the migrator creates the ledger
         pg.psql(
             "CREATE SCHEMA IF NOT EXISTS arv; "
             "CREATE TABLE IF NOT EXISTS arv.schema_migrations ("
@@ -406,49 +364,27 @@ def applied(db: str, bootstrap: bool = True) -> dict:
                  "(no CREATE under a claimed read-only pass)")
         _die("ARV-MIG-007", "cannot read the migrations bookkeeping table",
              f"the rig's DB must be reachable and arv.schema_migrations readable: {r.stderr.strip()[:200]}")
-    rows = {}
-    for line in r.out.splitlines():
-        parts = line.split("|")
-        if len(parts) == 3 and parts[0].lstrip("-").isdigit():
-            rows[int(parts[0])] = (parts[1], parts[2])
-        elif line.strip():
-            _die("ARV-MIG-007",
-                 f"the bookkeeping table carries an unparseable row ({line.strip()[:60]!r}) — a poisoned ledger",
-                 "every ledger row must parse (version|name|checksum); a row that does not is a named refusal, never silently dropped — reconcile the ledger with the history (never edit it by hand)")
-    return rows
+    return _parse_ledger(r)
 
 
 def _ledger_opt(db: str):
-    """The observation-only ledger read for the WRITE path's pre-scan (SEV-7):
-    None when the table does not exist yet (a never-migrated DB — every
-    directory file is pending), the {v: (name, checksum)} read otherwise.
-    A read failure OTHER than the positive absence fails closed here."""
+    """The pre-scan's observation-only read (SEV-7): None when the table does
+    not exist (never-migrated — every file pending); any failure other than
+    the positive absence fails closed here."""
     r = pg.psql("SELECT version, name, checksum FROM arv.schema_migrations ORDER BY version;", db=db)
     if r.returncode != 0:
         if "does not exist" in r.stderr:
             return None
         _die("ARV-MIG-007", "cannot read the migrations bookkeeping table",
              f"the rig's DB must be reachable and arv.schema_migrations readable: {r.stderr.strip()[:200]}")
-    rows = {}
-    for line in r.out.splitlines():
-        parts = line.split("|")
-        if len(parts) == 3 and parts[0].lstrip("-").isdigit():
-            rows[int(parts[0])] = (parts[1], parts[2])
-        elif line.strip():
-            _die("ARV-MIG-007",
-                 f"the bookkeeping table carries an unparseable row ({line.strip()[:60]!r}) — a poisoned ledger",
-                 "every ledger row must parse (version|name|checksum); a row that does not is a named refusal, never silently dropped — reconcile the ledger with the history (never edit it by hand)")
-    return rows
+    return _parse_ledger(r)
 
 
 def _check_bidirectional(db: str, files: list, done: dict) -> None:
-    """History consistency, BOTH ways (ARV-MIG-012):
-      * extra rows — ledger versions the directory cannot account for;
-      * interior holes — the applied set must be a contiguous prefix of the
-        directory's versions (SEV-4: a hand-deleted middle row silently
-        re-applied an old file out of order at the review);
-      * name drift — a ledger row's name must equal the directory file's name
-        (SEV-5: a renamed applied file passed both paths at the review)."""
+    """History consistency, BOTH ways (ARV-MIG-012): extra rows; interior holes
+    (the applied set must be a contiguous prefix — a hand-deleted middle row
+    would silently re-apply an old file out of order); name drift (a renamed
+    applied file)."""
     versions = [v for v, _, _ in files]
     names = {v: nm for v, nm, _ in files}
     extra = sorted(set(done) - set(versions))
@@ -482,10 +418,7 @@ def run(db: str, mdir: str) -> int:
     if versions[0] != 1 or versions != list(range(1, len(versions) + 1)):
         _die("ARV-MIG-004", f"the version set is not a gapless sequence from the baseline: {versions}",
              "migrations are forward-only from 0001; renumber the directory (no holes, no recycling)")
-    # SEV-7: the oracle pre-scan runs BEFORE the first DB touch. The observation
-    # read of the ledger decides which files are pending; on a never-migrated DB
-    # (no table yet) EVERY file is pending and a refusal leaves the DB
-    # completely untouched — no bootstrapped scaffolding, nothing applied.
+    # SEV-7: the pre-scan BEFORE the first DB write — a refusal leaves the DB untouched.
     done_opt = _ledger_opt(db)
     pending = [f for f in files if done_opt is None or f[0] not in done_opt]
     for v, name, path in pending:
@@ -505,9 +438,8 @@ def run(db: str, mdir: str) -> int:
                      "an applied migration is immutable history — revert the file edit or add a new migration")
             continue  # already applied, unchanged: the no-op path
         text = blob.decode("utf-8", "replace")
-        # ONE transaction: the migration AND its bookkeeping row commit together.
-        # (The -c argument travels via subprocess argv — no shell, no quoting
-        # layer; the filename alphabet makes the {name} literal provably safe.)
+        # ONE transaction: the migration AND its bookkeeping row commit together
+        # (argv-travelled -c, no shell; the alphabet makes {name} provably safe).
         stmt = (
             "BEGIN;\n" + text +
             f"\nINSERT INTO arv.schema_migrations (version, name, checksum, applied_by) "
@@ -547,9 +479,8 @@ def main() -> int:
     mdir = cfg["ARV_MIGRATIONS_DIR"]
     if "--verify" in sys.argv:
         return verify(db, mdir)
-    # No pre-count bootstrap here (the P3-M0 zero-effects contract): discovery,
-    # the sequence check and the filename alphabet all fire BEFORE the first DB
-    # touch inside run() — a refusal at those stages leaves the DB untouched.
+    # No pre-count bootstrap (the zero-effects contract): discovery, the
+    # sequence check and the alphabet all fire before the first DB touch in run().
     return run(db, mdir)
 
 

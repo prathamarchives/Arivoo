@@ -107,6 +107,55 @@ class Session:
             self.proc.kill()
 
 
+def canonical_body(*, command: str, client_id: str, owner_scope: str, actor: str, payload: str) -> str:
+    """P3-K0's first contract: the canonical versioned structured request
+    encoding. Delimiter concatenation was the card's named defect (two
+    DIFFERENT commands sharing one body hash — a false provenance equivalence,
+    observed live at the predecessor). The canonical form:
+      * VERSIONED: 'arv_body_version' is explicit in the structure itself;
+      * STRUCTURED: typed named fields, never positional tokens — an empty
+        value is unambiguous with a missing one (K-05);
+      * FIELD-ORDER INDEPENDENT: the fields are serialized with sorted keys;
+      * NFC-NORMALIZED: text fields are normalized (the pinned choice, K-04) —
+        the same logical text in different normalizations is the SAME body, so
+        the same key replays across them.
+    Same canonical body + same key -> the same recorded result (the replay);
+    a different canonical body under the same key -> ARV-CMD-409."""
+    import json
+    import unicodedata
+    nfc = lambda t: unicodedata.normalize("NFC", t)
+    return json.dumps(
+        {"arv_body_version": 1, "actor": nfc(actor), "client_id": nfc(client_id),
+         "command": nfc(command), "owner_scope": nfc(owner_scope), "payload": nfc(payload)},
+        sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+    )
+
+
+def _recorded_ref(*, db: str, owner: str, idem_key: str) -> str:
+    """An independent read of the recorded result_ref (the replay answer)."""
+    r = pg.psql(f"SELECT result_ref FROM arv.command_log "
+                f"WHERE owner_scope={_q(owner)} AND idempotency_key={_q(idem_key)};", db=db)
+    return r.out.strip()
+
+
+def _replay_after_conflict(*, db: str, owner: str, idem_key: str, body_hash: str) -> str:
+    """The concurrent loser's resolution path (SYS-04's explicit semantics):
+    same canonical body -> 'replayed' (the caller answers the recorded result);
+    different body -> 'conflict' (ARV-CMD-409 printed); neither -> '' (honest
+    unknown). A unique constraint is not a replay promise — THIS is."""
+    r = pg.psql(f"SELECT body_hash FROM arv.command_log "
+                f"WHERE owner_scope={_q(owner)} AND idempotency_key={_q(idem_key)};", db=db)
+    recorded_hash = r.out.strip()
+    if not recorded_hash:
+        return ""
+    if recorded_hash != body_hash:
+        print(f"FAIL ARV-CMD-409: idempotency key {idem_key!r} is already recorded with a DIFFERENT body "
+              "(the concurrent writer's body won the race — no silent overwrite)")
+        print("      repair: use a new idempotency key for a new body; the same key must mean the same command")
+        return "conflict"
+    return "replayed"
+
+
 def record_event(*, db: str, owner: str, actor: str, client_id: str,
                  idem_key: str, payload: str, crash_at: str = None) -> int:
     """The first registered command: append one evidence event, exactly once.
@@ -115,7 +164,9 @@ def record_event(*, db: str, owner: str, actor: str, client_id: str,
       SET owner -> replay check -> BEGIN; INSERT evidence; INSERT command_log;
       COMMIT -> ack.
     """
-    body_hash = hashlib.sha256(f"record_event|{client_id}|{owner}|{actor}|{payload}".encode()).hexdigest()
+    body_hash = hashlib.sha256(canonical_body(command="record_event", client_id=client_id,
+                                              owner_scope=owner, actor=actor,
+                                              payload=payload).encode()).hexdigest()
     sess = Session(db, "arv_app", owner)
     try:
         # Phase 0: replay check (RLS scopes it to this owner's keyspace)
@@ -148,7 +199,23 @@ def record_event(*, db: str, owner: str, actor: str, client_id: str,
         sess.send(f"INSERT INTO arv.command_log (owner_scope, idempotency_key, client_id, command_name, body_hash, result_ref, actor, created_at) "
                   f"VALUES ({_q(owner)}, {_q(idem_key)}, {_q(client_id)}, 'record_event', {_q(body_hash)}, {_q(ev_id)}, {_q(actor)}, {_q(ts)});")
         sess.send(f"\\echo {MARK_INSERTS}")
-        sess.read_until(MARK_INSERTS)
+        try:
+            sess.read_until(MARK_INSERTS)
+        except TimeoutError:
+            # P3-K0 (SYS-04): a CONCURRENT same-key loser lands here — the other
+            # transaction's row won the composite PK, the INSERT died on the unique
+            # violation (ON_ERROR_STOP ended the session before the marker). A
+            # unique constraint is NOT a replay promise: the loser re-reads the
+            # recorded row and answers the REPLAY when the body matches — the
+            # caller is told the truth about a command that DID commit.
+            recorded = _replay_after_conflict(db=db, owner=owner, idem_key=idem_key, body_hash=body_hash)
+            if recorded == "replayed":
+                ref = _recorded_ref(db=db, owner=owner, idem_key=idem_key)
+                print(f"ACK command=record_event idem_key={idem_key} status=replayed result_ref={ref}")
+                return 0
+            if recorded == "conflict":
+                return 1  # the 409 already printed by _replay_after_conflict
+            raise  # an honest unknown: the marker genuinely never came
         if crash_at == "pre-commit":
             sess.kill()
             return 2  # crashed: no ack (the open transaction rolls back with the connection)

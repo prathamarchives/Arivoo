@@ -179,14 +179,18 @@ def main() -> int:
 
     # (b) K-07 UUID variant/version correctness, timestamp extraction, ordering.
     batch = [ids.new_id() for _ in range(64)]
-    versions_ok = all(u[14] in "789ab" and u[19] in "89ab" for u in batch)  # v7 nibble + RFC-4122 variant
-    check("K-07", versions_ok and batch == sorted(batch),
-          "64 minted IDs: version nibble 7, RFC-4122 variant bits, and ms-timestamp ordering (non-decreasing within the batch)",
-          "ids.py must mint UUIDv7-class IDs: 48-bit clock ms + version/variant + controlled randomness, time-ordered")
+    versions_ok = all(u[14] == "7" and u[19] in "89ab" for u in batch)  # the v7 nibble + RFC-4122 variant
+    ms = [int(u.replace("-", "")[:12], 16) for u in batch]  # the 48-bit ms timestamp extraction
+    ordered = all(ms[i] <= ms[i + 1] for i in range(len(ms) - 1))
+    check("K-07", versions_ok and ordered,
+          "64 minted IDs: the version nibble is exactly 7, the variant bits are RFC-4122, and the extracted 48-bit "
+          "ms timestamps are non-decreasing across the batch (time-ordered at ms granularity — within one ms the "
+          "random tail orders freely)",
+          "ids.py must mint UUIDv7-class IDs: the 48-bit clock ms + version/variant + controlled randomness, time-ordered")
 
     # (b) K-08 compatibility: a persisted ID is never rewritten — a recorded
     # result_ref from the committed row round-trips byte-identically.
-    ref = sql(db, "SELECT result_ref FROM arv.command_log WHERE idempotency_key='k-collide';")
+    ref = sql(db, "SELECT result_ref FROM arv.command_log WHERE idempotency_key='k-c1';")
     check("K-08", ref != "" and len(ref) == 36 and ref[14] in "789ab" and ref[19] in "89ab",
           f"the persisted result_ref ({ref}) round-trips byte-identically — a valid UUIDv7-class value, never rewritten",
           "persisted IDs are immutable identity: no migration or replay may rewrite them without an explicit compatibility decision")

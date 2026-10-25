@@ -497,5 +497,15 @@
         "observed_at": "2026-10-24T15:32:44.786267+00:00"
       }
     ]
+  },
+  "harness/tests/test_kernel.py": {
+    "schema": 2,
+    "binding_commit": "4b2afea",
+    "binding_sha256": "3c32a5ec7639141c419c68eece97722a6cebc424bb56cd61a2cf43b13051d144",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-048 (P3-K0) RED: the new kernel suite harness/tests/test_kernel.py declared RED-first \u2014 the machinery-absent class (commands.canonical_body did not exist at the predecessor a6b5f49; the waiting-for-harness form, the S1/record-18 precedent) + the two live probes (the delimiter-collision hash equivalence; the concurrent loser's marker-timeout refusal) \u2014 red-01.txt. The suite joined gate.py's TESTS list (the KB-RED-010 registration class caught by the walls); its evolution (the K-02 ledger-observable reshape, the K-07 honest ms-ordering form, the K-08 key fix) is amendment-chained from this binding",
+    "current_sha256": "e1434b562bf8fb7180d49c9499d832505daff7c6fcce10cd9aa83981a0d54db1",
+    "amendments": []
   }
 }

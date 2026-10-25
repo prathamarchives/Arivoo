@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-045-p3m0-migration-oracle --diff origin/main",
+  "exit_code": 0,
+  "commit": "6813976e6781614cf0e3ea7f217303c641ea601a",
+  "output_sha256": "a53d59aba7c14dadae6e8dc0c98584e6863cc365b001338c2cfaad1956569ece",
+  "recorded_at": "2026-10-25T12:27:03.538349+00:00"
+}

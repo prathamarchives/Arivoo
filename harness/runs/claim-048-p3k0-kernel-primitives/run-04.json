@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-048-p3k0-kernel-primitives --diff origin/main",
+  "exit_code": 1,
+  "commit": "9c29cd835b75c62df1c03c66cf48fadec66aaa62",
+  "output_sha256": "6a7afa6f7b857dc7e8e502e5c2fa434fd51c77967b7bb42d7e621c7f6ccddca3",
+  "recorded_at": "2026-10-25T13:19:25.225719+00:00"
+}

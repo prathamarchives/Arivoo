@@ -1,0 +1,16 @@
+PASS K-01: PostgreSQL reachable through the adapter (the real stack, not a mock)
+PASS K-02: two commands that collide only under delimiter concatenation (client 'a|b'/owner 'c' vs client 'a'/owner 'b|c') record DIFFERENT body hashes — the ledger's provenance distinguishes them (observed identical at the predecessor)
+PASS K-03: the canonical body is a versioned structured encoding: field-order independent, explicitly versioned
+PASS K-04: NFC vs NFD of one payload produce the SAME canonical body (the pinned normalization choice: NFC)
+PASS K-05: an empty client_id and an empty owner_scope are DIFFERENT bodies (every field is positionally explicit in the structure)
+PASS K-06: two SIMULTANEOUS identical commands: both exit 0, exactly ONE recorded row, and the SAME result_ref to both (the loser re-reads and answers the replay — never a bare unique-violation refusal; observed: codes=[0, 0], rows=1, refs=['01a1731b-6129-7f1e-788d-f32e4bb9d401'])
+FAIL K-07: 64 minted IDs: the version nibble is exactly 7, the variant bits are RFC-4122, and the extracted 48-bit ms timestamps are non-decreasing across the batch (time-ordered at ms granularity — within one ms the random tail orders freely)
+      repair: ids.py must mint UUIDv7-class IDs: the 48-bit clock ms + version/variant + controlled randomness, time-ordered
+FAIL K-08: the persisted result_ref (01a1731b-6049-7cfb-0fb4-c360f09fb2d2) round-trips byte-identically — a valid UUIDv7-class value, never rewritten
+      repair: persisted IDs are immutable identity: no migration or replay may rewrite them without an explicit compatibility decision
+PASS K-09: a missing psql client is the NAMED error ARV-DB-001 (stable across environments), never a bare 127
+PASS K-10: a refused connection/role is the NAMED error ARV-DB-003, never a raw psql diagnostic
+PASS K-11: a non-loopback connection target is REFUSED with the NAMED error ARV-DB-004 (the approved adapter boundary — no hidden direct path can select a different database)
+PASS K-12: an operation exceeding its timeout is the NAMED error ARV-DB-002 in the result surface — never an unhandled TimeoutExpired crash
+
+RED — 2 failure(s): K-07, K-08 — P3-K0 acceptance not met

@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-048-p3k0-kernel-primitives",
+  "base_sha": "a6b5f496aadb499b79fcca16fb62273d8208d2c9",
+  "reviewed_diff_sha256": "fe57f5422fc91abf7daec901611acda64f74f1a11648edcb4a352ba41733f24d",
+  "intent_ids": [
+    "INT-127",
+    "INT-131",
+    "INT-140"
+  ],
+  "requirement_ids": [
+    "SYS-04",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1"
+  ],
+  "changed_components": [
+    "harness/commands.py (canonical_body \u2014 the versioned structured encoding; the concurrent loser's replay path; the body_hash deriving from the canonical form)",
+    "harness/adapters/ids.py (the RFC-4122 v7 layout repair \u2014 the variant byte was one byte right since S2; the process-local ms monotonicity floor)",
+    "harness/adapters/pg.py (the approved boundary's stable named errors ARV-DB-001..004 + the loopback target guard)",
+    "harness/tests/test_kernel.py (the 12-case kernel suite, RED-first: ARV-TEST-000 at the predecessor + the two live probes) + gate.py's TESTS registration",
+    "harness/red-records.json (the new suite's typed record + the amendment chain)"
+  ],
+  "interfaces_reviewed": [
+    "commands.canonical_body: versioned, field-order independent, NFC-pinned, empty-vs-absent unambiguous",
+    "record_event's unique-violation path: _replay_after_conflict + _recorded_ref \u2014 the loser answers the REPLAY",
+    "ids.new_id: the RFC-4122 v7 byte layout + the monotonicity floor",
+    "pg.psql/_run_psql: the named-error mapping + the loopback-only target guard"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the 12-case kernel suite on the real rig \u2014 the collision, the versioned form, NFC, the boundary, the UUID correctness/compatibility, the four named errors; proof run-01",
+      "RED-01 (ARV-TEST-000 + the two live probes at a6b5f49) + RED-02 (the UUID variant defect caught live at the intermediate tree) preserved"
+    ],
+    "integration_verification": [
+      "the S3 command suite green over the changed body-hash form (the replay/conflict/crash semantics unchanged \u2014 zero regressions); proof run-02"
+    ],
+    "system_verification": [
+      "make verify GREEN at the committed head (canonical 54/0, the gate green over all TEN suites); proof run-03",
+      "the PR-mode gate over the actual diff \u2014 RECORDED; proof run-04"
+    ],
+    "validation": [
+      "the A08 discipline: the collision and race cases read the LEDGER's actual rows (independent psql), never a count alone; the concurrency case drives TWO real simultaneous CLI processes"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "two different commands share one body hash (the delimiter-collision false equivalence)",
+      "control": "the versioned structured encoding \u2014 K-02 proves the ledger distinguishes the colliding pair",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "a concurrent same-key loser is told FAILED for a command that committed",
+      "control": "the loser's re-read-and-replay path \u2014 K-06 proves both callers get the recorded result",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "mis-minted IDs (invalid variant bits; backward timestamps)",
+      "control": "the RFC-4122 layout + the monotonicity floor \u2014 K-07/K-08 (red-02: the defect caught live)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "an adapter failure surfaces raw (a hidden path to a different DB; an unhandled timeout crash)",
+      "control": "the named-error mapping + the loopback guard \u2014 K-09..K-12",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the notverified.txt list: the encoding's pinned-choice contracts; the loser's in-flight window (the winner's transaction length, bounded by the crash matrix); the process-local monotonicity floor; the loopback-only approved target set (the deployed Supabase target joins as its own owner-scoped decision at P4-00); ARV-DB-003's mapping scope",
+    "the ARV-SEV-009 undecidable-base regression remains ROUTED (CLAIM-044's close row)"
+  ],
+  "builder_context": "builder-glm-host-session31-claim048",
+  "reviewer_context": "fresh-ctx-glm-sev-claim048-20261025 (a fresh-context reviewer reviews at the PR)",
+  "disposition": "PASS",
+  "review_summary": "P3-K0's kernel primitives landed RED-first: the canonical versioned structured encoding (the delimiter-collision defect demonstrated live at the predecessor \u2014 two different commands, one shared body hash \u2014 and dead in K-02); the explicit concurrent same-key semantics (the card's own words: a unique constraint is not a replay promise \u2014 the loser re-reads and answers the REPLAY, proven live with two simultaneous CLI processes: both exit 0, one row, the same result_ref); the UUID repair the suite itself forced (the S2-era byte layout was one byte right \u2014 minted IDs carried invalid RFC-4122 variant bits since the substrate landed; caught by K-07/K-08 at the intermediate tree, red-02 preserved, the layout + the process-local monotonicity floor fixed); and the approved adapter boundary's stable named errors (missing client, timeout, refusal, target mismatch \u2014 with the loopback-only guard so no hidden path can select a different database than the migrations'). The walls caught the new suite's registration gap in-slice (KB-RED-010). The pinned choices (NFC, the versioned json form, the loopback set) are contracts recorded at notverified.txt, never silent defaults.",
+  "sheet_section": true
+}

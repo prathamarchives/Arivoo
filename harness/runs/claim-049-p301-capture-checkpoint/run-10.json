@@ -1,7 +1,7 @@
 {
   "command": "python3 harness/tests/test_record_machinery.py",
   "exit_code": 0,
-  "commit": "3397d1ac1878755d73bb8327faed008122089614",
+  "commit": "84d1f8bf07c76b7cf437cc4c74cab516ec7a95c7",
   "output_sha256": "4ff391be99427e0a278e9d416fb5c89ae954dcaf09a0e11e79f570fce333d776",
-  "recorded_at": "2026-10-25T17:29:13.217725+00:00"
+  "recorded_at": "2026-10-25T17:47:10.479491+00:00"
 }

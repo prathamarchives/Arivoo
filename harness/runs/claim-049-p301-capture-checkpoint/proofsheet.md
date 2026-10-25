@@ -1,24 +1,23 @@
 # PROOF SHEET — slice claim-049-p301-capture-checkpoint (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 3397d1ac1878755d73bb8327faed008122089614
-- generated (last record's timestamp): 2026-10-25T17:37:41.209400+00:00
-- run records: 14
+- commit (last run record's): 84d1f8bf07c76b7cf437cc4c74cab516ec7a95c7
+- generated (last record's timestamp): 2026-10-25T17:52:54.901160+00:00
+- run records: 13
 
 ## Run records (command, exit, output digest)
-- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 b07354816b2e142a · 2026-10-25T17:26:53.795253+00:00
-- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-25T17:26:56.152022+00:00
-- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 d30e5aebf4d62f9a · 2026-10-25T17:26:57.787308+00:00
-- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 7b2d41a24189d7ed · 2026-10-25T17:27:03.816483+00:00
-- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-25T17:27:04.207110+00:00
-- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-25T17:28:41.716105+00:00
-- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 0c3f698e5ae40e60 · 2026-10-25T17:29:03.674382+00:00
-- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 6a822f94bdc28fd5 · 2026-10-25T17:29:12.634293+00:00
-- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 5d48484f37b83787 · 2026-10-25T17:29:12.990472+00:00
-- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-25T17:29:13.217725+00:00
-- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 054dacc47c69eb9a · 2026-10-25T17:29:16.380608+00:00
-- `make verify` -> exit 0 · output sha256 13d58a75c44d7e87 · 2026-10-25T17:32:16.958332+00:00
-- `python3 harness/gate.py --slice claim-049-p301-capture-checkpoint --diff origin/main` -> exit 1 · output sha256 0aaa4bd7abe30cf7 · 2026-10-25T17:34:54.235854+00:00
-- `python3 harness/gate.py --slice claim-049-p301-capture-checkpoint --diff origin/main` -> exit 1 · output sha256 286b401758f0cdf7 · 2026-10-25T17:37:41.209400+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 692994d96afc6c04 · 2026-10-25T17:44:56.683369+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-25T17:44:58.951163+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 367f5b907cad9f77 · 2026-10-25T17:45:00.608102+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 7b2d41a24189d7ed · 2026-10-25T17:45:05.986373+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-25T17:45:06.379588+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-25T17:46:42.093302+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 3128e4ed7f57a4d2 · 2026-10-25T17:47:01.304846+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 e328abcaaaadba80 · 2026-10-25T17:47:09.917625+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 e2d2f60896c9582b · 2026-10-25T17:47:10.286918+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-25T17:47:10.479491+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 4767c137de6cf154 · 2026-10-25T17:47:13.857013+00:00
+- `make verify` -> exit 0 · output sha256 f08731d8b1193dae · 2026-10-25T17:50:14.068665+00:00
+- `python3 harness/gate.py --slice claim-049-p301-capture-checkpoint --diff origin/main` -> exit 0 · output sha256 28c8600a62b8a835 · 2026-10-25T17:52:54.901160+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-049 / P3-01 (LAW-04; never empty-by-omission)
@@ -95,11 +94,11 @@
 - never silently dropped.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: e59c947c178d6aa677fa89f069c0127ffc5b1585d5907121ab5a478346a59f8c
-- reviewed_diff_sha256: ed6da43efdf1a7d397d5f023446fd7b03b8894c5019b8937b97da57697d9d31e
+- report sha256: 7b17508b290a13f0501a6d17bb61ac8d80186a857ad8d2c4c431da1f7a9b2087
+- reviewed_diff_sha256: a7e5691a6fcd472c2d632d4d2211ebbc56933a74396d75d4508865c45040761c
 - disposition: PASS
 - findings: 8 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): c1f669a7bd63b662f28fc1008963d82397f5aa60d8f67690fb190eb9f0bf35c8
+- sheet sha256 (of the content above, excluding this line): cf1498fdea6f7936a949bc62d9149cec5f17f479f225e47ab4378035dd6053e4

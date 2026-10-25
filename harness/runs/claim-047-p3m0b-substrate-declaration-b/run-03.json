@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-047-p3m0b-substrate-declaration-b --diff origin/main",
+  "exit_code": 0,
+  "commit": "8492721fa7a985b779a645f0f27ca1b2607fce36",
+  "output_sha256": "0b5857823d379104406d0e0a796eddbe792b70ad45c3b2ff7ffe582ee30e4083",
+  "recorded_at": "2026-10-25T11:01:32.613141+00:00"
+}

@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-045-p3m0-migration-oracle (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 0f0c6a7041224c309d97ee357a1ae4b169097512
-- generated (last record's timestamp): 2026-10-25T11:43:45.503851+00:00
-- run records: 14
+- commit (last run record's): 039cba1b73bffff126b31babfb05aac62e62c922
+- generated (last record's timestamp): 2026-10-25T11:52:12.568069+00:00
+- run records: 15
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 4966fdb2170ba60c · 2026-10-25T11:34:44.754433+00:00
@@ -19,6 +19,7 @@
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 b96415808d37d3f5 · 2026-10-25T11:37:28.262530+00:00
 - `make verify` -> exit 0 · output sha256 7ca1899a5ed28b44 · 2026-10-25T11:40:20.033762+00:00
 - `python3 harness/gate.py --slice claim-045-p3m0-migration-oracle --diff origin/main` -> exit 1 · output sha256 6d15d58ffde5004d · 2026-10-25T11:43:45.503851+00:00
+- `python3 harness/gate.py --slice claim-045-p3m0-migration-oracle --diff origin/main` -> exit 0 · output sha256 5271d612a6864954 · 2026-10-25T11:52:12.568069+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - the identifier-context rule is now BYTE-ORIENTED exactly as PG's scan.l (any codepoint >= U+0080 starts/continues an identifier; astral planes included — SEV-10's cap lesson, closed with ARV-TEST-038/039); the residual lexer-drift classes above remain the fail-closed direction only.
@@ -32,11 +33,11 @@
 - - the ARV-SEV-009 undecidable-base test gap (the late #79 nitpick, routed at CLAIM-044's close row): its own bounded regression follow-up — deliberately NOT folded into this slice's SEV machinery scope (scope exclusivity, LAW-06).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 9298b8153ad63ff5a8667ce7e3f8553e9496f5fe654e310173af670af5d491aa
-- reviewed_diff_sha256: 975c842925487d3fb642ef948bac2b72b66f4d5ef10a500263a06c2968ee02d6
+- report sha256: 065d92ebd48614e82861254eb9d08bf56e4d5d77fcb92d0bb6bf658bc14c8d69
+- reviewed_diff_sha256: b99037ca1736c1bd727c3cea3588c5848b5b5c7d8cf1b370784f511c08c09214
 - disposition: PASS
 - findings: 13 (open P0/P1: 0)
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 9b79994b8e0caff972a37d55268c0c8f8f221e140b8c110e224e9399fba36ded
+- sheet sha256 (of the content above, excluding this line): 684d4e8dc24d6fbf7e1e59473ffeb0e6f2516b636f013b1f8f6657e35251ad47

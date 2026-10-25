@@ -1,0 +1,34 @@
+# CLAIM-048 (P3-K0) — RED-01: the kernel suite's declared RED at the predecessor a6b5f49.
+#
+# Command: python3 harness/tests/test_kernel.py
+# Exit: 1 — FAIL ARV-TEST-000: harness/commands.py carries no canonical_body (the
+#        waiting-for-harness class — the kernel's versioned structured encoding
+#        surface does not exist at the predecessor; the S1/record-18 precedent)
+# Observed at: a6b5f496aadb499b79fcca16fb62273d8208d2c9 (main, after the #82 merge)
+# Captured: 2026-10-25T12:45:41Z
+#
+# THE LIVE DEFECT PROBES at the same predecessor (the declared contracts' absences,
+# each observed through the REAL command path on a migrated scratch DB — never asserted):
+#
+=== PROBE 1: the separator collision at the predecessor a6b5f49 ===
+run1 (client 'a|b', owner 'o_a'): exit 0 | ['ACK command=record_event idem_key=k-collide status=committed result_ref=01a17317-8557-7f31']
+run2 (client 'a',   owner 'b|c'): exit 0 | ['ACK command=record_event idem_key=k-collide status=committed result_ref=01a17317-8583-7025']
+
+=== PROBE 2: the concurrent same-key race at the predecessor ===
+proc0: exit 0 | ['ACK command=record_event idem_key=k-race status=committed result_ref=01a17317-85ab-745c-a383-b163504b7b40']
+proc1: exit 1 | ["FAIL ARV-CMD-010: ARV-CMD-010: session marker MARK:INSERTS_DONE not observed — psql stalled (repair: the rig's DB must b"]
+command_log rows for k-race: 1
+
+# PROBE READINGS:
+#   1: the two colliding pairs recorded IDENTICAL body_hash values (client 'a|b'/owner 'o_a' vs
+#      client 'a'/owner 'b|c' — delimiter concatenation makes different commands share one
+#      provenance hash: a false equivalence any cross-keyspace audit would read as one body)
+#   2: the concurrent same-key race: the loser FAILED with a marker-timeout-shaped
+#      ARV-CMD-010 (the unique violation killed psql before INSERTS_DONE was echoed — no replay
+#      answer, no typed in-flight state; exactly the card's 'a unique constraint is not a replay
+#      promise'); row count 1 ✓ but ONE caller is told the command FAILED for a command that
+#      actually committed — the honest-ack contract (SYS-04's user scenario) violated
+#
+# === the suite's own output at the predecessor ===
+FAIL ARV-TEST-000: harness/commands.py carries no canonical_body — the kernel's versioned structured encoding does not exist yet (the waiting-for-harness class)
+      repair: implement commands.canonical_body (the canonical versioned structured request encoding — P3-K0's first contract)

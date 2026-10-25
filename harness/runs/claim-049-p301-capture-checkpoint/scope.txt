@@ -1,0 +1,23 @@
+# CLAIM-049 — P3-01: the first real product command + the §1.6 capture
+# checkpoint (PLAN's P3-01 card; RTM SYS-03/04/09's primary trace; D-041
+# element 4: the §1.6 path — import → persist identity → highlight with
+# version-tied anchor → lost-ack → restart/retry → exactly-one-effect →
+# authenticated retrieval → independent read — END-TO-END through the real
+# boundary). RED-first at the predecessor 5c04375: the capture suite's
+# machinery-absent RED (ARV-TEST-000 — import_source/create_highlight/query/
+# blob/0004 do not exist), the S1/record-18 §4.1 + P3-K0 precedent class.
+harness/tests/test_capture.py D-041
+harness/gate.py D-041
+harness/migrations/0004_p3_01_capture_skeleton.sql D-041
+harness/adapters/blob.py D-041
+harness/commands.py D-041
+harness/query.py D-041
+harness/crash.py D-036
+harness/red-records.json D-041
+PLAN.md D-037
+STATE.md D-043
+AGENTS.md D-043
+CLAIMS.md D-038
+context/WORKLOG.md D-043
+context/extracted/40-P301-CAPTURE-CHECKPOINT.md D-042
+harness/runs/claim-049-p301-capture-checkpoint D-042

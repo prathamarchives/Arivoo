@@ -82,6 +82,7 @@ REPO = _repo_root()
 # harness/tests/test_*.py MUST appear here (ARV-RED-008 refuses the gap).
 TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          "harness/tests/test_commands.py", "harness/tests/test_kernel.py",
+         "harness/tests/test_capture.py",
          "harness/tests/test_gate_dispatch.py",
          "harness/tests/test_mutation_floor.py",
          "harness/tests/test_trusted_gate.py",

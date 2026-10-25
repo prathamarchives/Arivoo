@@ -702,3 +702,10 @@ Stage Summary:
 - Evidence: record 37; harness/runs/claim-044-sev-base-side-section/; the reviewer's report (agent-f906baad); PR #79.
 - Unresolved: the trusted-leg 009 enforcement begins with the NEXT slice's PR (the bootstrap); the probe's three stated boundaries recorded; the N12 residual unchanged.
 - Next: merge #79 → P3-M0 ∥ P3-K0 → P3-01 — NO PAUSE.
+
+## Task 54 (CLAIM-046, session 31) — P3-M0a: the substrate's grammar declarations, part 1
+- What: the `-- arv-baseline-bump: 1` directive on 0002_evidence_event.sql (its plpgsql immutability trigger function is a procedural construct P3-M0's fail-closed grammar cannot classify — the directive is the owner-visible paper trail; the oracle slice requires it). THE SIZE-005 SPLIT: the oracle's first assembled diff carried BOTH 0002 and 0003 — ARV-SIZE-005 refused (2 migrations > 1, LAW-05) at the PR-mode gate; the repair is the gate's own prescription (one slice changes ONE behavior), the declaration pair split into bounded slices.
+- Outcome: the comment is behaviorally inert at this slice (BUMP_RE is read only by the landing oracle; the old runner's destructive check never trips on 0002); the checksum change re-derives the rig's ledger; make verify GREEN at this tree.
+- Evidence: the slice's runs dir (sev.json, the proof set, the sheet); record 38 (the session record, landing with the oracle slice).
+- Unresolved: Q6–Q12 unchanged; the ARV-SEV-009 undecidable-base regression routed at CLAIM-044's close row.
+- Next: CLAIM-047 (0003's declaration) → the oracle (CLAIM-045) — NO PAUSE (INT-134/135/138/139/140).

@@ -335,6 +335,129 @@ def main() -> int:
               "a missing import file -> ARV-CAP-001, zero rows (named refusal, zero effect)",
               "the file is read and hashed BEFORE anything persists; absence is a named refusal, never a partial import")
 
+        # CAP-18 — the structured retrieval (the SEV round's P1: free text legally
+        # carries pipes and newlines — the old pipe-split parse silently truncated
+        # context fields, dropped trailing fields, and crashed on '|'; observed at
+        # the pre-fix tree in red-03.txt). The output is structured AT the SQL
+        # boundary now — every field whole, whatever it contains.
+        nl_file = src_file.with_suffix(".nl")
+        NL_TEXT = "First line holds the chosen words: gamma\nSecond line lives here.\nThird\n"
+        nl_file.write_text(NL_TEXT, encoding="utf-8")
+        pnl = import_src("imp-nl", "Multi Line", str(nl_file))
+        nlsid = ack_field(pnl, "result_ref")
+        gsel = NL_TEXT.index("gamma")
+        phl = highlight("hl-nl", nlsid, gsel, gsel + len("gamma"))
+        nlhid = ack_field(phl, "result_ref")
+        t18 = cmd("query.py", "get-capture", "--owner", "A", "--id", nlhid)
+        try:
+            j18 = json.loads(t18.stdout)
+        except Exception:
+            j18 = {}
+        # a selection SPANNING the newline (selected_text contains '\n')
+        span = NL_TEXT.index("gamma\nSecond")
+        phl2 = highlight("hl-nl2", nlsid, span, span + len("gamma\nSecond"))
+        t18b = cmd("query.py", "get-capture", "--owner", "A", "--id", ack_field(phl2, "result_ref"))
+        try:
+            j18b = json.loads(t18b.stdout)
+        except Exception:
+            j18b = {}
+        t18c = cmd("query.py", "get-source", "--owner", "A", "--id", nlsid)
+        try:
+            j18c = json.loads(t18c.stdout)
+        except Exception:
+            j18c = {}
+        truth_after = NL_TEXT[gsel + len("gamma"):gsel + len("gamma") + 32]
+        check("CAP-18", t18.returncode == 0 and j18.get("context_after") == truth_after
+              and "media_type" in j18 and "created_at" in j18
+              and j18b.get("selected_text") == "gamma\nSecond"
+              and t18c.returncode == 0,
+              f"the retrieval returns free text WHOLE (context_after == the true 32-char slice, media_type/created_at present, a newline-spanning selected_text intact) — structured at the SQL boundary",
+              "row_to_json emits ONE escaped line per row; NEVER re-parse owner text by splitting psql output — a silent plausible-but-wrong field is the worst failure class (the SEV round's P1)")
+
+        # CAP-18b — the piped title retrieves cleanly (P1's crash arm)
+        pipe_file = src_file.with_suffix(".pipe")
+        pipe_file.write_text("pipe title body\n", encoding="utf-8")
+        ppl = import_src("imp-pipe", "Part 1 | Intro", str(pipe_file))
+        t18d = cmd("query.py", "get-source", "--owner", "A", "--id", ack_field(ppl, "result_ref"))
+        try:
+            j18d = json.loads(t18d.stdout)
+        except Exception:
+            j18d = {}
+        check("CAP-18b", t18d.returncode == 0 and j18d.get("title") == "Part 1 | Intro",
+              "a title containing '|' retrieves exactly (exit 0, the byte-true title)",
+              "the retrieval surface must be indifferent to every legal text byte — pipes are content, not delimiters")
+
+        # CAP-19 — media_type validated at the boundary where it enters (the SEV
+        # round's P2: a pipe-carrying media_type committed at import and crashed
+        # the capture path later with an unnamed ValueError; red-03.txt)
+        m19 = import_src("imp-badmt", "Bad Media", str(src_file), media="text/plain; charset|x")
+        check("CAP-19", m19.returncode != 0 and "ARV-CAP-009" in m19.stdout + m19.stderr
+              and audit("SELECT count(*) FROM arv.source;") == "5",
+              "a non-token media_type is refused AT IMPORT (ARV-CAP-009, zero rows) — never committed to crash the capture path later",
+              "the MIME token grammar is the entry boundary; free-form text is a title, never a media type")
+
+        # CAP-20 — the cross-owner FK plant refused at the DB layer (the SEV
+        # round's P2: FKs are owner-blind — owner B could plant a source row
+        # referencing owner A's work, gaining an existence oracle and poisoning
+        # A's edition ordinals). The composite owner-scoped FKs close both arms:
+        # every reference must resolve within the writer's own keyspace.
+        def plant_source(work_id_ref, owner):
+            ins = ("INSERT INTO arv.source (id, work_id, digest, media_type, byte_size, blob_ref, "
+                   "acquired_via, import_state, source_version, owner_scope, actor, run_id, input_hash, "
+                   "idempotency_key, created_at) VALUES ('22222222-2222-7222-8222-222222222222', "
+                   f"'{work_id_ref}', 'deadbeef', 'text/plain', 1, 'deadbeef', 'probe', 'complete', 9, "
+                   f"'{owner}', 'owner', 'r', 'h', 'k-plant', '2026-01-01T00:00:00Z');")
+            return subprocess.run(["psql", "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                                   "-U", "arv_app", "-d", DB, "-c",
+                                   f"SET app.current_owner='{owner}'; {ins}"],
+                                  capture_output=True, text=True, timeout=60)
+        pA = plant_source(wid, "B")          # B referencing A's REAL work id
+        pG = plant_source(ghost, "B")        # B referencing a nonexistent id
+        n_src20 = audit("SELECT count(*) FROM arv.source;")
+        check("CAP-20", pA.returncode != 0 and "source_work_id_owner_scope_fkey" in pA.stderr
+              and pG.returncode != 0 and "source_work_id_owner_scope_fkey" in pG.stderr
+              and n_src20 == "5"
+              and plant_source("22222222-2222-7222-8222-222222222222", "B").returncode != 0,
+              "owner B cannot plant a source against A's work (the composite FK refuses BOTH arms identically — a real id and a nonexistent one are the SAME refusal, no existence oracle; the plant leaves zero rows)",
+              "every reference must resolve within the writer's own keyspace: UNIQUE(id, owner_scope) on parents + composite FKs — the DB layer enforces what RLS cannot (FK checks bypass RLS)")
+
+        # CAP-21 — the concurrent ordinal loser's NAMED refusal (the SEV round's
+        # P3: the loser of the source_work_version race surfaced as the doubled
+        # 'FAIL ARV-CMD-010: ARV-CMD-010:' stall diagnosis — wrong name, wrong
+        # repair). Deterministic arm: a held transaction plants the next ordinal,
+        # the CLI import collides, the plant commits — the loser must name
+        # ARV-CMD-011 with zero effect, and the SAME key must retry clean.
+        ver_next = audit(f"SELECT COALESCE(MAX(source_version), 0) + 1 FROM arv.source WHERE work_id='{wid}';")
+        s1 = subprocess.Popen(["psql", "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                               "-U", "arv_app", "-d", DB],
+                              stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE, text=True, bufsize=1)
+        s1.stdin.write("SET app.current_owner='A';\nBEGIN;\n")
+        s1.stdin.write(f"INSERT INTO arv.source (id, work_id, digest, media_type, byte_size, blob_ref, "
+                       f"acquired_via, import_state, source_version, owner_scope, actor, run_id, input_hash, "
+                       f"idempotency_key, created_at) VALUES ('33333333-3333-7333-8333-333333333333', "
+                       f"'{wid}', 'deadbeef', 'text/plain', 1, 'deadbeef', 'held-tx', 'complete', {ver_next}, "
+                       f"'A', 'owner', 'r', 'h', 'k-held', '2026-01-01T00:00:00Z');\n")
+        s1.stdin.flush()
+        loser = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"),
+                                  "import_source", "--owner", "A", "--actor", "owner", "--client-id", "cli-race",
+                                  "--idem-key", "imp-race", "--file", str(src_file), "--work-id", wid],
+                                 env=ENV, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        import time as _t
+        _t.sleep(2.5)  # the loser computes the same ordinal and blocks on the unique index
+        s1.stdin.write("COMMIT;\n\\q\n")
+        s1.stdin.flush()
+        s1.wait(timeout=30)
+        lo, _ = loser.communicate(timeout=60)
+        n21 = audit(f"SELECT count(*) FROM arv.source WHERE work_id='{wid}';")
+        rr21 = import_src("imp-race", None, str(src_file), work_id=wid)
+        n21b = audit(f"SELECT source_version FROM arv.source WHERE work_id='{wid}' ORDER BY source_version;")
+        check("CAP-21", "FAIL ARV-CMD-011" in lo and "ARV-CMD-010" not in lo
+              and n21 == "3" and rr21.returncode == 0 and "status=committed" in rr21.stdout
+              and "3" in n21b and "4" in n21b,
+              f"the ordinal-race loser names ARV-CMD-011 (never the doubled stall misdiagnosis), zero effect (the held plant's row + the two originals); the SAME key retries clean at the re-read ordinal",
+              "the spine must distinguish the dead-session unique-violation class from a live stall — the honest name carries the honest repair (retry the same key)")
+
         # CAP-17 — the §2 substrate conventions on the four new tables
         defs = audit("SELECT table_name, column_name FROM information_schema.columns "
                      "WHERE table_schema='arv' AND table_name IN ('work','source','anchor','highlight') "
@@ -364,7 +487,7 @@ def main() -> int:
     if FAILS:
         print(f"RED — {len(FAILS)} broken case(s): {', '.join(FAILS)}")
         return 1
-    print("GREEN — the §1.6 capture checkpoint holds end-to-end (CAP-01..17)")
+    print("GREEN — the §1.6 capture checkpoint holds end-to-end (CAP-01..21)")
     return 0
 
 

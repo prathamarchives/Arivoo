@@ -19,12 +19,13 @@ CREATE TABLE IF NOT EXISTS arv.work (
     actor       TEXT        NOT NULL CHECK (actor IN ('owner', 'runtime-agent', 'worker', 'model-decision')),
     run_id      TEXT        NOT NULL,
     input_hash  TEXT        NOT NULL,
-    created_at  TIMESTAMPTZ NOT NULL
+    created_at  TIMESTAMPTZ NOT NULL,
+    UNIQUE (id, owner_scope)  -- the owner-scoped reference target (the SEV round's P2: FKs are owner-blind — composite FKs make every reference owner-consistent at the DB layer, closing the cross-owner plant and the FK-error existence oracle)
 );
 
 CREATE TABLE IF NOT EXISTS arv.source (
     id              UUID        PRIMARY KEY,
-    work_id         UUID        NOT NULL REFERENCES arv.work(id),
+    work_id         UUID        NOT NULL,
     digest          TEXT        NOT NULL,
     media_type      TEXT        NOT NULL,
     byte_size       BIGINT      NOT NULL,
@@ -37,7 +38,9 @@ CREATE TABLE IF NOT EXISTS arv.source (
     run_id          TEXT        NOT NULL,
     input_hash      TEXT        NOT NULL,
     idempotency_key TEXT        NOT NULL,
-    created_at      TIMESTAMPTZ NOT NULL
+    created_at      TIMESTAMPTZ NOT NULL,
+    UNIQUE (id, owner_scope),
+    FOREIGN KEY (work_id, owner_scope) REFERENCES arv.work (id, owner_scope)
 );
 CREATE INDEX IF NOT EXISTS source_owner ON arv.source (owner_scope, created_at);
 CREATE INDEX IF NOT EXISTS source_work  ON arv.source (work_id, source_version);
@@ -51,7 +54,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS source_work_version ON arv.source (work_id, so
 -- location evidence); the context slices are the fallback matching evidence.
 CREATE TABLE IF NOT EXISTS arv.anchor (
     id             UUID        PRIMARY KEY,
-    source_id      UUID        NOT NULL REFERENCES arv.source(id),
+    source_id      UUID        NOT NULL,
     source_digest  TEXT        NOT NULL,
     start_off      INTEGER     NOT NULL,
     end_off        INTEGER     NOT NULL,
@@ -63,7 +66,9 @@ CREATE TABLE IF NOT EXISTS arv.anchor (
     run_id         TEXT        NOT NULL,
     input_hash     TEXT        NOT NULL,
     created_at     TIMESTAMPTZ NOT NULL,
-    CHECK (end_off > start_off)
+    CHECK (end_off > start_off),
+    UNIQUE (id, owner_scope),
+    FOREIGN KEY (source_id, owner_scope) REFERENCES arv.source (id, owner_scope)
 );
 
 -- The Highlight (RTM §2.5): stable UUID identity + append-only revisions.
@@ -73,15 +78,17 @@ CREATE TABLE IF NOT EXISTS arv.highlight (
     id              UUID        NOT NULL,
     revision        INTEGER     NOT NULL CHECK (revision >= 1),
     selected_text   TEXT        NOT NULL,
-    source_id       UUID        NOT NULL REFERENCES arv.source(id),
-    anchor_id       UUID        NOT NULL REFERENCES arv.anchor(id),
+    source_id       UUID        NOT NULL,
+    anchor_id       UUID        NOT NULL,
     owner_scope     TEXT        NOT NULL,
     actor           TEXT        NOT NULL CHECK (actor IN ('owner', 'runtime-agent', 'worker', 'model-decision')),
     run_id          TEXT        NOT NULL,
     input_hash      TEXT        NOT NULL,
     idempotency_key TEXT        NOT NULL,
     created_at      TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY (id, revision)
+    PRIMARY KEY (id, revision),
+    FOREIGN KEY (source_id, owner_scope) REFERENCES arv.source (id, owner_scope),
+    FOREIGN KEY (anchor_id, owner_scope) REFERENCES arv.anchor (id, owner_scope)
 );
 CREATE INDEX IF NOT EXISTS highlight_owner ON arv.highlight (owner_scope, created_at);
 

@@ -18,18 +18,18 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import pg  # noqa: E402
 
-CAP_SQL = ("SELECT h.id, h.revision, h.selected_text, h.source_id, a.source_digest, "
-           "a.start_off, a.end_off, a.context_before, a.context_after, a.media_type, h.created_at "
-           "FROM arv.highlight h JOIN arv.anchor a ON a.id = h.anchor_id "
-           "WHERE h.id = {id} ORDER BY h.revision DESC LIMIT 1;")
-CAP_FIELDS = ("id", "revision", "selected_text", "source_id", "source_digest", "start",
-              "end", "context_before", "context_after", "media_type", "created_at")
-SRC_SQL = ("SELECT s.id, s.work_id, w.title, s.digest, s.media_type, s.byte_size, "
-           "s.import_state, s.source_version, s.created_at "
-           "FROM arv.source s JOIN arv.work w ON w.id = s.work_id WHERE s.id = {id};")
-SRC_FIELDS = ("id", "work_id", "title", "digest", "media_type", "byte_size",
-              "import_state", "source_version", "created_at")
-LIST_SQL = "SELECT id FROM arv.highlight ORDER BY created_at, id;"
+# THE P1 SEV FIX (the round-1 BLOCKED finding): free-text fields legally carry
+# pipes and newlines, so the output is structured AT THE SQL BOUNDARY (row_to_json
+# emits ONE escaped JSON line per row) — never re-parsed by splitting psql text.
+CAP_SQL = ("SELECT row_to_json(t)::text FROM (SELECT h.id AS id, h.revision, h.selected_text, "
+           "h.source_id, a.source_digest, a.start_off AS start, a.end_off AS end, a.context_before, "
+           "a.context_after, a.media_type, h.created_at FROM arv.highlight h "
+           "JOIN arv.anchor a ON a.id = h.anchor_id WHERE h.id = {id} "
+           "ORDER BY h.revision DESC LIMIT 1) t;")
+SRC_SQL = ("SELECT row_to_json(t)::text FROM (SELECT s.id AS id, s.work_id, w.title, s.digest, "
+           "s.media_type, s.byte_size, s.import_state, s.source_version, s.created_at "
+           "FROM arv.source s JOIN arv.work w ON w.id = s.work_id WHERE s.id = {id}) t;")
+LIST_SQL = "SELECT row_to_json(t)::text FROM (SELECT id FROM arv.highlight ORDER BY created_at, id) t;"
 
 
 def _read(db: str, owner: str, sql: str) -> list:
@@ -65,20 +65,15 @@ def main() -> int:
         if rows is None:
             return 1
         for ln in rows:
-            print(ln)
+            print(json.loads(ln)["id"])
         return 0
-    sql, fields = (CAP_SQL, CAP_FIELDS) if a.what == "get-capture" else (SRC_SQL, SRC_FIELDS)
+    sql = CAP_SQL if a.what == "get-capture" else SRC_SQL
     rows = _read(db, a.owner, sql.format(id="'" + a.id.replace("'", "''") + "'"))
     if rows is None:
         return 1
     if not rows:
         return _refuse(a.id)
-    vals = rows[0].split("|")
-    obj = {k: v for k, v in zip(fields, vals)}
-    for k in ("revision", "byte_size", "source_version", "start", "end"):
-        if k in obj:
-            obj[k] = int(obj[k])
-    print(json.dumps(obj, ensure_ascii=False))
+    print(json.dumps(json.loads(rows[0]), ensure_ascii=False))
     return 0
 
 

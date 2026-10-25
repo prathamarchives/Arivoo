@@ -44,11 +44,13 @@ THE EXPLICIT BOUNDARIES (named, never silently narrowed):
    real deployment bootstraps fresh. Corrupt-blob cleanup is P3-02's.
 
 6. Concurrency: the same-key loser rides the P3-K0 conflict path (replayed
-   or 409, proven by the kernel suite's K-06). The CROSS-KEY concurrent
-   same-work import race (two different idem keys, one work: the unique
-   edition-ordinal makes the loser abort honestly; a fresh retry re-reads
-   the ordinal) is NOT suite-pinned — the sequential CAP cases cover the
-   declared behavior; the concurrent matrix is P3-08's SYS-08 acceptance.
+   or 409, proven by the kernel suite's K-06). The cross-key concurrent
+   same-work import race is now SUITE-PINNED (CAP-21, the SEV round's fix):
+   the loser of the unique edition-ordinal is refused by NAME (ARV-CMD-011,
+   zero effect, the same key retries at the re-read ordinal) — never the
+   pre-fix doubled ARV-CMD-010 stall misdiagnosis. The FULL concurrent
+   matrix (out-of-order sync, duplicate delivery, server outage) remains
+   P3-08's SYS-08 acceptance.
 
 7. Migration 0004's DDL is applied by the M0 oracle under its directive
    (arv-baseline-bump for the plpgsql guard). The oracle's residual classes
@@ -56,8 +58,12 @@ THE EXPLICIT BOUNDARIES (named, never silently narrowed):
    recorded at claim-045's notverified.txt — unchanged by this slice.
 
 8. The query surface (get-capture/get-source/list-captures) is the
-   SYS-09 read path for THIS checkpoint. Pagination, ordering contracts,
-   and the later agent-adapter API surface are the P4 client slices'.
+   SYS-09 read path for THIS checkpoint, and its DATA CORRECTNESS is
+   suite-pinned (CAP-18/18b, the SEV round's P1 fix: free text with
+   pipes and newlines returns WHOLE — structured at the SQL boundary,
+   never a re-parse of psql text; the pre-fix silent-truncation is
+   preserved in red-03.txt). Pagination, ordering contracts, and the
+   later agent-adapter API surface are the P4 client slices'.
 
 9. Work title editing (revisions), Work deletion, and any identity policy
    beyond the Q11 baseline (no auto-merge, no uniqueness) are owner-gated —

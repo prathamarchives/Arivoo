@@ -1,0 +1,93 @@
+# CLAIM-045 (P3-M0 — the migration oracle, REBUILT on the merged declarations) — RED-01:
+# the FULL P3-M0 guard group observed failing at the single reachable predecessor
+# 762588a (main after PRs #80/#81 — the old runner, the directive comments present and inert).
+#
+# Command: python3 harness/tests/test_migrations.py
+# Exit: 1 (RED — 22 failure(s): ARV-TEST-011/012/013/014/015/017/018/019/020/025/026/027/028/029/031/032/033/034/035/036/038/039)
+# Observed at: 762588a116d8842f3413b04846a213d50034ffbd (main, after the #81 merge — the declarations' comments
+#              are behaviorally inert under the old runner, so every guard case fails identically to the
+#              organic discovery's captures)
+# Captured: 2026-10-25T11:29:22Z
+#
+# THE OBSERVED PRE-ORACLE BEHAVIORS (each in this output, never asserted):
+#   011/012 (F-009): the comment-split DROP applied silently / the comment-mention file falsely refused
+#   013/027/038/039: the ghost forms — embedded COMMIT persisted tables while the runner reported rollback
+#        (the plain form; the phantom-dollar-quote forms, ASCII and astral — the SEV reviewer's P0 repros)
+#   014: an embedded BEGIN applied; 015/035: DO blocks applied (no grammar; no name-scoped exemption)
+#   017/018 (F-010): the crafted-quote filename POISONED the ledger (fake-checksum row 2 + smuggled row 999, echo #        exit 0); the alphabet-free filename applied
+#   019/025/031/032 (history): the extra row, the removed tail, the interior hole, the renamed file — each
+#        silent under migrate and/or verify
+#   020/036 (observation-only): verify CREATED the table on a never-migrated DB; the empty-dir refusal came
+#        AFTER the bootstrap (arv schema present — the SEV-7 class)
+#   028 (SEV-2): ALTER IF EXISTS ... DROP CONSTRAINT applied; 029 (SEV-3): the CTAS-with-INSERT CTE applied
+#   033/034 (SEV-8): PREPARE TRANSACTION reached psql under the directive; CONCURRENTLY died a misleading 009
+#
+# The 17 PASS lines at this head (the 10 S1 cases + the 016/021/022/023/024/030/037 controls) prove ZERO
+# regressions on the old behaviors. THE ORGANIC DISCOVERY note (record 38 §8): the first rebuild's
+# three-round RED structure (10 + 11 + 2) was observed at the archive branch's internal commits
+# (slice/claim-045-p3m0-migration-oracle-archive, local-historical SHAs e14033a/946719e/39a56e0 — never
+# pushed); this single-capture RED supersedes it as the REACHABLE evidence at the merged predecessor.
+#
+PASS ARV-TEST-001: PostgreSQL reachable through the adapter (the real stack, not a mock)
+PASS ARV-TEST-002: migrate on a fresh DB exits 0 (stderr tail: none)
+PASS ARV-TEST-003: INDEPENDENT psql read: schema_migrations has all 3 migration(s) applied and both roles exist (2) — the baseline is real
+PASS ARV-TEST-004: second migrate run is a no-op (rows before=3, after=3, exit=0)
+PASS ARV-TEST-005: migrate on a populated DB preserves every row (count=3, checksum=5ebda042ce65e7e1, new migration applied)
+PASS ARV-TEST-006: replay from scratch yields the identical schema hash (103b77755d564e90...)
+PASS ARV-TEST-007: an APPLIED migration file edited after apply is REFUSED with ARV-MIG-005 (applied-migration drift)
+PASS ARV-TEST-008: starting at version 5 (hole below) is REFUSED with ARV-MIG-004 (forward-only, from the baseline)
+PASS ARV-TEST-009: a destructive migration WITHOUT -- arv-baseline-bump is REFUSED with ARV-MIG-003
+PASS ARV-TEST-010: positive control: WITH the -- arv-baseline-bump directive the destructive migration applies
+FAIL ARV-TEST-011: a destructive statement with comments BETWEEN keywords is REFUSED with ARV-MIG-003 pre-execution — the DB completely untouched (the SEV-7 strongest form: no arv schema, nothing applied)
+      repair: the destructive guard must scan comment-stripped executable text AND fire before the first DB touch — a text-regex on raw bytes is evadable (F-009)
+FAIL ARV-TEST-012: destructive words inside COMMENTS ONLY do not refuse (comment content is never executable — no false positive)
+      repair: the guard must strip comments before scanning — comment text is not executable (F-009's mirror)
+FAIL ARV-TEST-013: an embedded COMMIT (CREATE; COMMIT; SELECT 1/0) is REFUSED with ARV-MIG-011 BEFORE execution — the DB completely untouched (the SEV-7 strongest form: no ghost, no ledger table, nothing applied; the predecessor's persisted ghost is red-01.txt)
+      repair: the runner owns the ONE transaction boundary — embedded transaction control must be refused by a comment/string-aware scan BEFORE any DB touch, never executed (the §6.2 zero-effects proof)
+FAIL ARV-TEST-014: an embedded BEGIN is REFUSED with ARV-MIG-011 pre-execution (zero effects)
+      repair: the runner owns the transaction boundary — BEGIN/COMMIT/ROLLBACK/SAVEPOINT tokens in executable text must refuse
+FAIL ARV-TEST-015: a procedural construct (DO block) OUTSIDE the baseline WITHOUT -- arv-baseline-bump is REFUSED with ARV-MIG-015 (fail closed)
+      repair: the admitted grammar cannot classify procedural/dynamic bodies — the directive is the owner-visible paper trail that admits them (the card's fail-closed contract)
+PASS ARV-TEST-016: positive control: WITH the -- arv-baseline-bump directive the procedural construct applies (the refusal gates, never blocks)
+FAIL ARV-TEST-017: the crafted-quote filename (the ledger-poisoning payload) is REFUSED with ARV-MIG-014 at discovery, BEFORE any execution — the DB untouched (no arv schema, no ledger — the discovery refusal precedes even 0001's apply; the predecessor's poisoned ledger is red-01.txt)
+      repair: migration filenames are restricted to the documented safe alphabet — a name outside [a-z0-9_] can never be interpolated into the bookkeeping INSERT (F-010)
+FAIL ARV-TEST-018: a filename outside the safe alphabet (uppercase/hyphen) is REFUSED with ARV-MIG-014 with the DB completely untouched (the 017-sibling assertion, SEV-9d)
+      repair: discover() must enforce the safe filename alphabet before any name reaches the ledger — and before the first DB touch
+FAIL ARV-TEST-019: an extra ledger row (version 999, not in the directory) is REFUSED by BOTH migrate and verify with ARV-MIG-012 (bidirectional history)
+      repair: history consistency is directory<->ledger BOTH ways — an applied version the directory cannot account for is a poisoned bookkeeping (ARV-MIG-012)
+FAIL ARV-TEST-020: verify on a never-migrated DB REFUSES with ARV-MIG-013 and CREATES NOTHING (no arv schema, no bootstrapped table — observation-only)
+      repair: verify must never fabricate the ledger it claims to observe — a missing ledger is an honest typed refusal, never a CREATE side effect (ARV-MIG-013)
+PASS ARV-TEST-021: verify on a healthy DB exits 0 and leaves every ledger row byte-identical INCLUDING applied_at (no rewrites, no bookkeeping — the SEV-9b strengthening)
+PASS ARV-TEST-022: a normal multi-statement runtime failure rolls back to ZERO effects (ok_b absent, ok_a preserved from the earlier file, ledger unchanged beyond it)
+PASS ARV-TEST-023: the declared 0001_baseline bootstrap exemption: the baseline's own DO block applies WITHOUT a directive (the exemption is scoped to exactly version 1, name 'baseline')
+PASS ARV-TEST-024: the nonempty oracle: every ledger row equals the file digest triple (True), both tables RLS-forced, both immutable triggers present, both owner policies present
+FAIL ARV-TEST-025: an applied file removed from the directory (a ledger row the directory cannot account for) is REFUSED by BOTH verify and migrate with ARV-MIG-012
+      repair: bidirectional history: the directory missing an applied version is a broken history — never a silent 'OK: 1 migration(s)'
+FAIL ARV-TEST-026: a '$' inside an unquoted identifier (b$$c) is identifier text, NOT a dollar-quote opener — the hidden DROP TABLE is REFUSED with ARV-MIG-003 pre-execution, the DB untouched (SEV-1)
+      repair: the mask must be identifier-aware (PG's own rule: $ does not open a dollar-quote when the previous char is an identifier char) — a phantom mask swallows executable text
+FAIL ARV-TEST-027: a COMMIT hidden behind a phantom dollar-quote is REFUSED with ARV-MIG-011 pre-execution — no persisted ghost, no false rollback claim, the DB untouched (SEV-1's §6.2 repro)
+      repair: the identifier-aware mask restores the ARV-MIG-011 guard's view of ALL executable transaction control
+FAIL ARV-TEST-028: ALTER TABLE IF EXISTS ... DROP CONSTRAINT is REFUSED with ARV-MIG-003 without the directive (the IF EXISTS modifier no longer breaks the destructive match — SEV-2)
+      repair: the destructive ALTER branch must tolerate the IF EXISTS modifier between TABLE and the object name
+FAIL ARV-TEST-029: a data-modifying CTE inside an admitted head (CTAS with INSERT) is REFUSED with ARV-MIG-015 without the directive — zero effects (SEV-3)
+      repair: the grammar must inspect admitted heads' bodies for data-modifying statements — migrations declare schema, never queries
+PASS ARV-TEST-030: positive control: WITH the -- arv-baseline-bump directive the data-modifying CTE applies (the refusal gates, never blocks)
+FAIL ARV-TEST-031: an INTERIOR HOLE in the applied ledger (a hand-deleted row leaving {1,3}) is REFUSED by BOTH migrate and verify with ARV-MIG-012 — never a silent out-of-order re-application (SEV-4)
+      repair: the applied set must be a contiguous prefix of the directory versions — a hole is a broken history, exactly like an extra row
+FAIL ARV-TEST-032: an applied file renamed in the directory (the ledger row still carries the old name) is REFUSED by BOTH migrate and verify with ARV-MIG-012 (SEV-5)
+      repair: the bidirectional check must compare NAMES, not only versions and checksums — 'every ledger row must correspond to a directory file' means the whole identity
+FAIL ARV-TEST-033: PREPARE TRANSACTION (two-phase commit control) is REFUSED with ARV-MIG-011 pre-execution — even under the directive, the runner owns the transaction boundary (SEV-8)
+      repair: transaction control includes the two-phase forms: PREPARE TRANSACTION / COMMIT PREPARED / ROLLBACK PREPARED join the refused token set
+FAIL ARV-TEST-034: CREATE INDEX CONCURRENTLY is REFUSED by the admitted grammar with its named construct (it cannot run inside the runner's single transaction — never a misleading runtime 009)
+      repair: the grammar must name CONCURRENTLY as unclassified fail-closed, not admit it into a guaranteed psql failure
+FAIL ARV-TEST-035: the bootstrap exemption is scoped to EXACTLY (version 1, name 'baseline') — the same DO block at 0002_baseline is REFUSED with ARV-MIG-015 (the exemption-scope pin, SEV-9a)
+      repair: the exemption is (v==1 and name=='baseline'), never a name-only or version-only match
+FAIL ARV-TEST-036: an empty migrations directory is REFUSED with ARV-MIG-008 and the DB untouched (the card's listed behavior, pinned — SEV-9c)
+      repair: S1 ships 0001_baseline.sql — the directory cannot be empty; the refusal precedes any DB touch
+PASS ARV-TEST-037: a valid E'...' escaped-string default APPLIES cleanly (E-strings process backslash escapes regardless of standard_conforming_strings — the mask knows the E-prefix rule; SEV-6)
+FAIL ARV-TEST-038: an ASTRAL-plane identifier char (PG's byte-oriented lexer: every high-bit byte continues an identifier) keeps identifier context through its '$$' — the hidden DROP TABLE is REFUSED with ARV-MIG-003 pre-execution, the DB untouched (SEV-10)
+      repair: the mask's identifier classes must cover ALL codepoints >= U+0080 (PG's scan.l rule is byte-based, never codepoint-capped at U+FFFF)
+FAIL ARV-TEST-039: a COMMIT hidden behind an astral identifier's '$$' is REFUSED with ARV-MIG-011 pre-execution — no persisted g4, no false rollback claim, the DB untouched (SEV-10's §6.2 repro)
+      repair: byte-oriented identifier continuation: ALL codepoints >= U+0080 are identifier material to PG's lexer — the mask must agree exactly
+
+RED — 22 failure(s): ARV-TEST-011, ARV-TEST-012, ARV-TEST-013, ARV-TEST-014, ARV-TEST-015, ARV-TEST-017, ARV-TEST-018, ARV-TEST-019, ARV-TEST-020, ARV-TEST-025, ARV-TEST-026, ARV-TEST-027, ARV-TEST-028, ARV-TEST-029, ARV-TEST-031, ARV-TEST-032, ARV-TEST-033, ARV-TEST-034, ARV-TEST-035, ARV-TEST-036, ARV-TEST-038, ARV-TEST-039 — S1 + P3-M0 acceptance not met

@@ -3,7 +3,7 @@
     "red_commit": "8b17c7a99d66be35502d07c99d499ea88e53c904",
     "red_evidence": "exit 1, ARV-TEST-000/011/019 waiting-for-harness (observed at the red commit; record 18 \u00a74.1-\u00a74.3)",
     "red_sha256": "a83a4ce600e87d8dcd507d506ba6867bf1ac876220eb43fd4ea73861eb393c11",
-    "current_sha256": "4e313652d6d29a3bacbfbf771e20b63e60942575f52074dcd5b1893d6fa005a8",
+    "current_sha256": "aa269541ce5980035c196c3fb1b302dd98b7ebbbea5994db3e3f559baf525dea",
     "amendments": [
       {
         "note": "test-side defect repairs documented in record 18 \u00a74.1-\u00a74.3 (S1: count made dynamic; S2: dual-layer expectations, scoped effective view; S3: content-level fingerprint) \u2014 amendments correct assertions, none removed"
@@ -13,6 +13,30 @@
         "new_sha256": "4e313652d6d29a3bacbfbf771e20b63e60942575f52074dcd5b1893d6fa005a8",
         "note": "the schema-2 typing migration (CLAIM-037, F-007): the binding recovered from git history (the existing red_commit); the typed observed-red recovered from the record's own prose",
         "observed_at": "2026-10-23T00:00:00+00:00"
+      },
+      {
+        "prior_sha256": "4e313652d6d29a3bacbfbf771e20b63e60942575f52074dcd5b1893d6fa005a8",
+        "new_sha256": "a580569c74a91890f69391ecb16440865955abf901148d7761bf4ff5db95efb4",
+        "note": "CLAIM-045 (P3-M0) commit A: the migration suite gains the P3-M0 guard group (ARV-TEST-011..025) \u2014 the rebuilt RED-first declaration for the migration oracle; every named refusal observed failing at the predecessor ff25cdf (red-01.txt: 10 REDs, the ledger-poisoning payload live); assertions ADD, none removed \u2014 the S1 group's 10 cases unchanged",
+        "observed_at": "2026-10-25T08:17:30.071172+00:00"
+      },
+      {
+        "prior_sha256": "a580569c74a91890f69391ecb16440865955abf901148d7761bf4ff5db95efb4",
+        "new_sha256": "5f577ba64f5143cbb8a7f86ade87fb311b97f41829d74c30f906090757612cba",
+        "note": "CLAIM-045 (P3-M0) commit B prep: two test-shape repairs discovered at the first GREEN run against the implemented oracle \u2014 (1) 017's assertion strengthened to the observed truth (the discovery refusal fires BEFORE any DB touch: no arv schema, no ledger \u2014 stronger than the earlier row-1 expectation); (2) 022's runtime-failure control rebuilt INSIDE the admitted grammar (a duplicate CREATE \u2014 the grammar's fail-closed SELECT refusal made the SELECT 1/0 form unreachable as a runtime case; the control's purpose, the ARV-MIG-009 rollback proof, is unchanged). Assertions corrected forward, never weakened; the red-01.txt capture at the predecessor remains the honest RED evidence",
+        "observed_at": "2026-10-25T08:33:21.651990+00:00"
+      },
+      {
+        "prior_sha256": "5f577ba64f5143cbb8a7f86ade87fb311b97f41829d74c30f906090757612cba",
+        "new_sha256": "536e896cbe56a5b044e39dee35177ef29fde47a355627c8ed85c512945c3332b",
+        "note": "CLAIM-045 (P3-M0) the SEV review round (RED-02, the reviewer agent-ff3e3170's findings): the suite gains ARV-TEST-026..037 (the phantom dollar-quote P0 pair, the ALTER IF EXISTS destructive modifier, the data-modifying CTE pair, the ledger interior hole, the renamed applied file, the two-phase PREPARE TRANSACTION, the CONCURRENTLY construct, the exemption-scope pin, the empty-directory pin, the E-string escaped literal) + the SEV-7/9 strengthenings of 011/013 (the DB-untouched strongest form), 018 (the 017-sibling assertion) and 021 (applied_at); 11 REDs observed at the 946719e head (red-02.txt), assertions ADD, none weakened",
+        "observed_at": "2026-10-25T09:00:46.530808+00:00"
+      },
+      {
+        "prior_sha256": "536e896cbe56a5b044e39dee35177ef29fde47a355627c8ed85c512945c3332b",
+        "new_sha256": "aa269541ce5980035c196c3fb1b302dd98b7ebbbea5994db3e3f559baf525dea",
+        "note": "CLAIM-045 (P3-M0) the SEV RE-REVIEW round (RED-03, the reviewer's SEV-10 P0): the suite gains ARV-TEST-038/039 \u2014 the astral-plane phantom-dollar-quote repros (PG's BYTE-oriented lexer continues identifiers through every high-bit byte; the \\uFFFF-capped mask dropped context at astral chars); 2 REDs observed at the 39a56e0 head (red-03.txt), the other 37 green \u2014 assertions ADD, none weakened",
+        "observed_at": "2026-10-25T09:23:06.373330+00:00"
       }
     ],
     "schema": 2,

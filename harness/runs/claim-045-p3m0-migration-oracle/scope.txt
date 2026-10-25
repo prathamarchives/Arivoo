@@ -1,0 +1,26 @@
+# CLAIM-045 — P3-M0: the migration oracle (REBUILT on the merged declarations —
+# the SIZE-005 split's oracle slice; the substrate's directive comments landed at
+# PRs #80/#81, so this diff carries ZERO migration files). The oracle: the
+# byte-oriented char-level scanner (identifier context exactly as PG's scan.l,
+# astral planes included), ARV-MIG-011 embedded transaction control refused
+# pre-execution (directive-proof, two-phase forms included), comment-proof
+# destructive detection (ARV-MIG-003), the fail-closed admitted grammar
+# (ARV-MIG-015 + the name-scoped 0001_baseline bootstrap exemption), the safe
+# filename alphabet (ARV-MIG-014, F-010), the complete bidirectional
+# directory<->ledger history (ARV-MIG-012), observation-only verify
+# (ARV-MIG-013), and the pending-file pre-scan. RED-first: red-01.txt (22 REDs
+# at the single reachable predecessor 762588a).
+# HONEST CONTEXT (record 38 §2): the owner-reported branch at 5467ec0 was lost
+# to the environment reset; the first rebuild's organic three-round RED
+# structure lived at the archive branch's internal commits (local-historical);
+# this slice re-captures all 22 REDs at the merged predecessor.
+harness/migrate.py D-036
+harness/tests/test_migrations.py D-036
+harness/red-records.json D-041
+PLAN.md D-037
+STATE.md D-043
+AGENTS.md D-043
+CLAIMS.md D-038
+context/WORKLOG.md D-043
+context/extracted/38-P3M0-MIGRATION-ORACLE.md D-042
+harness/runs/claim-045-p3m0-migration-oracle D-042

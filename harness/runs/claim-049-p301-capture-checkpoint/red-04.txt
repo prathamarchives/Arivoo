@@ -1,0 +1,9 @@
+the first import (the clean put): exit 0 ACK command=import_source idem_key=k1 status=committed result_ref=01a17413-53ec-
+simulated the killed writer: truncated 3600010 -> 1800005 bytes at the digest path (the exact residue class)
+the re-import of the SAME VALID bytes: exit 1
+FAIL ARV-CAP-004: the blob verify failed — 'ARV-BLOB-003: blob a63929ff3172 failed re-verification (stored bytes do not re-hash to their digest — store corruption, never promoted)'
+      repair: the store is corrupt at t
+==> the FALSE refusal: put() no-ops on the poisoned exists(), the verify fails, and a VALID import
+    is refused ARV-CAP-004 until someone removes the file by hand — the Major's exact harm, reproduced.
+    PRE-FIX put(): write_bytes() at the final path — a partial file IS observable to concurrent readers
+    (B's exists() is true before A's write completes -> the same false refusal on a live race).

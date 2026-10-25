@@ -3,7 +3,7 @@
     "red_commit": "8b17c7a99d66be35502d07c99d499ea88e53c904",
     "red_evidence": "exit 1, ARV-TEST-000/011/019 waiting-for-harness (observed at the red commit; record 18 \u00a74.1-\u00a74.3)",
     "red_sha256": "a83a4ce600e87d8dcd507d506ba6867bf1ac876220eb43fd4ea73861eb393c11",
-    "current_sha256": "658b6f4fa12fac82ce28abd634055e34d89d2708254b201418205bf496c32ad1",
+    "current_sha256": "8aa3f1325a1c0ee73fc3c59f7bb2641b23468e24047737ed65ebc683e0ea5e26",
     "amendments": [
       {
         "note": "test-side defect repairs documented in record 18 \u00a74.1-\u00a74.3 (S1: count made dynamic; S2: dual-layer expectations, scoped effective view; S3: content-level fingerprint) \u2014 amendments correct assertions, none removed"
@@ -43,6 +43,12 @@
         "new_sha256": "658b6f4fa12fac82ce28abd634055e34d89d2708254b201418205bf496c32ad1",
         "note": "CLAIM-045 (P3-M0) the PR #82 CodeRabbit round (RED-02): the suite gains ARV-TEST-040..044 \u2014 the ALTER-DROP evasion family (ONLY/ADD-then-DROP/quoted-identifier/spaced-dot), the bare-END transaction control (the statement-head distinction from CASE's mid-statement END), the unparseable-ledger-row fail-closed refusal, and the UPDATE ONLY CTE form; 5 REDs observed at the pre-fix head (red-02.txt), the other 39 green \u2014 assertions ADD, none weakened",
         "observed_at": "2026-10-25T12:05:35.587872+00:00"
+      },
+      {
+        "prior_sha256": "658b6f4fa12fac82ce28abd634055e34d89d2708254b201418205bf496c32ad1",
+        "new_sha256": "8aa3f1325a1c0ee73fc3c59f7bb2641b23468e24047737ed65ebc683e0ea5e26",
+        "note": "CLAIM-049 (P3-01) \u2014 test_migrations.py's ARV-TEST-024 policy-count query scoped to its own declared two substrate tables (the case's message has always claimed 'both owner policies present' \u2014 the query counted the WHOLE arv schema, which was correct in the two-table era and silently became stale the moment the product tables carried their own policies per the same \u00a72 conventions; the trigger and RLS subqueries were already table-scoped and unchanged). The four product tables' policies are proven where they live: the capture suite's CAP-17 (RLS forced on all four) + CAP-09/CAP-11 (the behavioral scoping and the fail-closed unscoped write). The A08 nonempty oracle's semantics unchanged",
+        "observed_at": "2026-10-25T15:49:08.663247+00:00"
       }
     ],
     "schema": 2,
@@ -512,6 +518,35 @@
         "new_sha256": "f87da1cd45e1da3dee35e6a034d2d6d5e2861c3d7e7d2b25a07c4240920a8038",
         "note": "CLAIM-048 (the #83 CodeRabbit round): the suite's evolution from the RED-bound form amendment-chained (the K-02 ledger-observable reshape, the K-07 honest ms-ordering form, the K-08 ack-comparison strengthening + the adapter-configured independent read) \u2014 the binding_sha256 (the ARV-TEST-000 form at 4b2afea) differs from current by these recorded amendments, per the schema-2 chain rule the round's Major named",
         "observed_at": "2026-10-25T13:41:12.436905+00:00"
+      }
+    ]
+  },
+  "harness/tests/test_capture.py": {
+    "schema": 2,
+    "binding_commit": "c77c14f5e7bcf5ba99b09e941d25422505c36b59",
+    "binding_sha256": "6283a7edfde056210b35766988fcbf6a9fe63e554f6a9f868b1499e2d1cb4114",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-049 (P3-01) RED: the capture suite's machinery-absent class observed at the predecessor 5c04375 (commit A c77c14f carries the suite; import_source/create_highlight absent from the REGISTRY, query.py/blob.py/0004_p3_01_capture_skeleton.sql absent \u2014 the waiting-for-harness form, the S1/record-18 \u00a74.1 + P3-K0 precedent; exit 1, red-01.txt) \u2014 the implementation lands AFTER this RED, never before it (LAW-11)",
+    "current_sha256": "af7683c4603a1971b8660d4b50f1a85f57f2a166983075de5f7ffa6401e96ec1",
+    "amendments": [
+      {
+        "prior_sha256": "6283a7edfde056210b35766988fcbf6a9fe63e554f6a9f868b1499e2d1cb4114",
+        "new_sha256": "de25d4894f0dcb6c5839e8d24f24dafe9106ab6bcce5a3caa1a22c9b233ff972",
+        "note": "CLAIM-049 (P3-01) \u2014 the capture suite's evolution, amendment-chained per ARV-RED-006 (the test-shape repairs, each disclosed; the machinery contracts UNTOUCHED): (1) CAP-08/CAP-10's expected counts corrected 4->3 (my arithmetic miss \u2014 three command_log rows at that point: import + two captures; observed from the independent read, never asserted from inside); (2) CAP-14's helper no longer passes --title together with --work-id (the command's own ARV-CAP-007 arity refusal fired \u2014 a suite fixture bug, never a command defect) and the assertion now counts ONE COPY PER DIGEST (the real content-addressing claim: multiple imports, one stored copy; CAP-12's refused import leaves its staged blob \u2014 the \u00a73.1 orphan class, P3-02's recovery walk); (3) CAP-17's catalog query fixed to PG17's real column relforcerowsecurity (relforcerowlevelsecurity does not exist; the migration's FORCE ROW LEVEL SECURITY was always applied \u2014 the probe's UPDATE now targets an existing row); (4) the import helper skips --title when None. The 17 contracts' semantics unchanged \u2014 every repair asserts the ORIGINAL declared behavior, honestly counted",
+        "observed_at": "2026-10-25T15:46:18.548982+00:00"
+      },
+      {
+        "prior_sha256": "de25d4894f0dcb6c5839e8d24f24dafe9106ab6bcce5a3caa1a22c9b233ff972",
+        "new_sha256": "e4f6ddcebf8230cae25b37880f08f5fd17d2e1e3637ee8a26377cfba054818a5",
+        "note": "CLAIM-049 (the SEV round-1 fixes, every finding RED-first pinned by a NEW suite case \u2014 the four disclosed evolutions): CAP-18/18b pin the P1 (the structured retrieval: free text with pipes/newlines returns WHOLE \u2014 row_to_json at the SQL boundary, never the pipe-split parse; red-03.txt preserves the pre-fix silent corruption and crash); CAP-19 pins the P2 media_type grammar (ARV-CAP-009 at the entry boundary); CAP-20 pins the P2 composite owner-scoped FKs (UNIQUE(id, owner_scope) on parents + composite FKs \u2014 the cross-owner plant and the FK existence oracle both REFUSED, both arms the SAME error); CAP-21 pins the P3 named concurrent-loser code (ARV-CMD-011 \u2014 the dead-session unique-violation class, never the doubled ARV-CMD-010 stall misdiagnosis; the de-doubled prefix) + the P3 acquired_via joins the canonical body (a different channel is a different body \u2014 the 409 discriminator can now fire for it). The checkpoint contracts CAP-01..17 UNCHANGED",
+        "observed_at": "2026-10-25T16:29:41.762699+00:00"
+      },
+      {
+        "prior_sha256": "e4f6ddcebf8230cae25b37880f08f5fd17d2e1e3637ee8a26377cfba054818a5",
+        "new_sha256": "af7683c4603a1971b8660d4b50f1a85f57f2a166983075de5f7ffa6401e96ec1",
+        "note": "CLAIM-049 (the #84 CodeRabbit round \u2014 all four findings REAL, all four FIXED RED-first with new suite pins): [Major] the atomic put (blob.py: same-directory temp + ONE os.replace \u2014 the pre-fix write_bytes at the final path let concurrent readers see half-written files and a killed writer poison the digest path forever; red-04.txt reproduces the false-refusal harm) \u2014 pinned by CAP-23 (every resident re-hashes; no .put- residue from clean imports; the orphan class ignored); [Minor] the anchor/source inseparability (0004: UNIQUE(id, source_id, owner_scope) on anchor + the highlight's composite (anchor_id, source_id, owner_scope) FK \u2014 a mismatched pair is refused at the DB layer) \u2014 pinned by CAP-22; [Minor] CAP-21's fixed sleep replaced by the REAL lock-state wait (pg_stat_activity's arv_app Lock wait observed via the rig's superuser \u2014 arv_read lacks pg_read_all_stats; a deadline miss fails the case honestly); [Minor] the STATE/AGENTS/PLAN current-state counts corrected (CAP-01..23, eleven boundaries \u2014 the historical record text untouched, per the finding's own instruction). The checkpoint contracts unchanged",
+        "observed_at": "2026-10-25T17:23:27.650464+00:00"
       }
     ]
   }

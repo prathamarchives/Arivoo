@@ -1,0 +1,104 @@
+# PROOF SHEET — slice claim-049-p301-capture-checkpoint (harness-built; never hand-edited — PRF-01, LAW-01)
+
+- commit (last run record's): 84d1f8bf07c76b7cf437cc4c74cab516ec7a95c7
+- generated (last record's timestamp): 2026-10-25T17:52:54.901160+00:00
+- run records: 13
+
+## Run records (command, exit, output digest)
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 692994d96afc6c04 · 2026-10-25T17:44:56.683369+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-25T17:44:58.951163+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 367f5b907cad9f77 · 2026-10-25T17:45:00.608102+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 7b2d41a24189d7ed · 2026-10-25T17:45:05.986373+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-25T17:45:06.379588+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-25T17:46:42.093302+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 3128e4ed7f57a4d2 · 2026-10-25T17:47:01.304846+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 e328abcaaaadba80 · 2026-10-25T17:47:09.917625+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 e2d2f60896c9582b · 2026-10-25T17:47:10.286918+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-25T17:47:10.479491+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 4767c137de6cf154 · 2026-10-25T17:47:13.857013+00:00
+- `make verify` -> exit 0 · output sha256 f08731d8b1193dae · 2026-10-25T17:50:14.068665+00:00
+- `python3 harness/gate.py --slice claim-049-p301-capture-checkpoint --diff origin/main` -> exit 0 · output sha256 28c8600a62b8a835 · 2026-10-25T17:52:54.901160+00:00
+
+## Not verified (LAW-04 — required, never empty-by-omission)
+- NOT VERIFIED — the honest limits of CLAIM-049 / P3-01 (LAW-04; never empty-by-omission)
+- WHAT THIS SLICE PROVES, ON WHAT STACK: the §1.6 capture checkpoint end-to-end
+- (import -> persist identity -> highlight with version-tied anchor -> lost-ack
+- -> restart/retry -> exactly-one-effect -> authenticated retrieval ->
+- independent read) through the real boundary — the kernel Session, the real
+- psql, the content-addressed blob store, the RLS-scoped reads — on the rig
+- (PostgreSQL 17.11, loopback, trust auth) and CI's ephemeral service
+- container. Every state claim is graded by the arv_read INDEPENDENT reader.
+- THE EXPLICIT BOUNDARIES (named, never silently narrowed):
+- 1. Authentication is OWNER-SCOPOPED RLS, not a credential layer. The rig is
+- trust-auth (D-036's grounded default); the "authenticated" rung at P3-01
+- means: every read/write runs as arv_app with app.current_owner set and
+- RLS fails closed without it (CAP-11). A real credential boundary
+- (JWT/service roles/Supa auth) is the deployment slice's work; nothing
+- here claims it.
+- 2. The import state machine is the §3.1 TAIL only: put -> verify (get +
+- re-hash) -> commit (complete). The staging/staging_verified states EXIST
+- in the schema but no command writes them yet; the recovery walk (orphaned
+- staging artifacts, interrupted imports) is P3-02's acceptance. An orphaned
+- blob from a refused import (e.g. CAP-12's 409 path stages the blob before
+- the replay check refuses) is EXPECTED at this rung — named here, cleaned
+- by P3-02.
+- 3. The anchor format is the text/* pinned choice: UTF-8 character offsets
+- into the decoded text, ±32-char context as fallback matching evidence.
+- The typed resolution states (resolved/unresolved/ambiguous), drift
+- detection, re-resolution after re-import, and format-specific locators
+- for non-text media are P3-03's card. A non-UTF-8 source is REFUSED
+- (ARV-CAP-008), never guessed at.
+- 4. Highlight is REVISION 1 ONLY. The revision/tombstone machine (§3.3:
+- edit-appends, tombstone-hides, restore, governed purge) is P3-04's
+- acceptance; the (id, revision) PK and the append-only trigger carry the
+- shape, no command exercises n+1 yet.
+- 5. The blob store is the rig's local filesystem implementation behind the
+- §4.4 adapter interface. delete/exists arms land with P3-02's recovery
+- walk (their only consumer). NO provider, NO cross-store atomicity, NO
+- durability promise beyond the local store — Q12 unratified; the first
+- real deployment bootstraps fresh. Corrupt-blob cleanup is P3-02's.
+- 6. Concurrency: the same-key loser rides the P3-K0 conflict path (replayed
+- or 409, proven by the kernel suite's K-06). The cross-key concurrent
+- same-work import race is now SUITE-PINNED (CAP-21, the SEV round's fix):
+- the loser of the unique edition-ordinal is refused by NAME (ARV-CMD-011,
+- zero effect, the same key retries at the re-read ordinal) — never the
+- pre-fix doubled ARV-CMD-010 stall misdiagnosis. The FULL concurrent
+- matrix (out-of-order sync, duplicate delivery, server outage) remains
+- P3-08's SYS-08 acceptance.
+- 7. Migration 0004's DDL is applied by the M0 oracle under its directive
+- (arv-baseline-bump for the plpgsql guard). The oracle's residual classes
+- (lexer-drift over-refusals, extension catalogue, concurrency) stand as
+- recorded at claim-045's notverified.txt — unchanged by this slice.
+- 8. The query surface (get-capture/get-source/list-captures) is the
+- SYS-09 read path for THIS checkpoint, and its DATA CORRECTNESS is
+- suite-pinned (CAP-18/18b, the SEV round's P1 fix: free text with
+- pipes and newlines returns WHOLE — structured at the SQL boundary,
+- never a re-parse of psql text; the pre-fix silent-truncation is
+- preserved in red-03.txt). Pagination, ordering contracts, and the
+- later agent-adapter API surface are the P4 client slices'.
+- 9. Work title editing (revisions), Work deletion, and any identity policy
+- beyond the Q11 baseline (no auto-merge, no uniqueness) are owner-gated —
+- nothing here implements or implies them.
+- 10. CI-host observation only (the standing class): the GitHub Actions runs
+- exercise the same suites on the service container; host-level claims
+- (workflow-definition protection, runner integrity) remain Q10/EXTERNAL
+- as recorded.
+- 11. SEV-7 (the round-2 P3, ROUTED): ARV-CMD-011's diagnosis is inferred from
+- the session's death (poll()), not the observed stderr cause — an
+- infrastructure failure (postmaster crash, connection drop) would take
+- the concurrency name. Within the shipped commands the only reachable
+- class at that point is the unique violation and the same-key-retry
+- repair stays safe (the reviewer's own deferral reasoning); the
+- stderr-classification refinement (duplicate-key vs connection error)
+- rides P3-02's import-state-machine work — its own bounded follow-up,
+- never silently dropped.
+
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 7b17508b290a13f0501a6d17bb61ac8d80186a857ad8d2c4c431da1f7a9b2087
+- reviewed_diff_sha256: a7e5691a6fcd472c2d632d4d2211ebbc56933a74396d75d4508865c45040761c
+- disposition: PASS
+- findings: 8 (open P0/P1: 0)
+- not-verified entries: 3
+
+## Assembly
+- sheet sha256 (of the content above, excluding this line): cf1498fdea6f7936a949bc62d9149cec5f17f479f225e47ab4378035dd6053e4

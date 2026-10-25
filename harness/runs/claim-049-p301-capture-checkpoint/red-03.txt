@@ -1,0 +1,14 @@
+== P1(a): get-capture with a context crossing a newline ==
+exit: 0 | json: {"id": "01a173e0-0c00-77e5-8b1a-cb621a89b330", "revision": 1, "selected_text": "gamma", "source_id": "01a173e0-0bc4-7619-9481-df4bd57e4c88", "source_digest": "4b8ff02009d7ec1ced10266749b85a4aec08e13c5ee5d8e33aa819f29b3e8a1b", "start": 35, "end": 40, "context_before": "st line holds the chosen words: ", "context_after": ""}
+--> context_after is 'TRUTH-SILENT': the stored truth is 'lives here.\nSecond' continues — psql splits on newline; media_type and created_at are MISSING from the JSON
+
+== P1(b): selected_text spanning a newline ==
+exit: 0 | json: {"id": "01a173e0-0c66-76f2-868b-d69a00351e6f", "revision": 1, "selected_text": "hird l", "source_id": "01a173e0-0bc4-7619-9481-df4bd57e4c88", "source_digest": "4b8ff02009d7ec1ced10266749b85a4aec08e13c5ee5d8e33aa819f29b3e8a1b", "start": 66, "end": 72, "context_before": " gamma"}
+--> selected_text silently WRONG (pipe-split eats the field), exit 0 — the silent lie
+
+== P1(c): title with a pipe ==
+exit: 1 | stderr tail: ValueError: invalid literal for int() with base 10: 'text/plain'
+
+== P2-1: media_type with a pipe ==
+import exit (committed 0 rows? no — the import SUCCEEDS): 0
+highlight exit: 1 | stderr tail: ValueError: too many values to unpack (expected 2)

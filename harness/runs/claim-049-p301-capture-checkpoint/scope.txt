@@ -21,3 +21,5 @@ CLAIMS.md D-038
 context/WORKLOG.md D-043
 context/extracted/40-P301-CAPTURE-CHECKPOINT.md D-042
 harness/runs/claim-049-p301-capture-checkpoint D-042
+harness/tests/test_migrations.py D-041
+.gitignore D-041

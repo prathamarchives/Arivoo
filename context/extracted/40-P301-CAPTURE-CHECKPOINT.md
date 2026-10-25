@@ -1,0 +1,81 @@
+# 40 — P3-01: the first real product command + the §1.6 capture checkpoint (CLAIM-049)
+
+> STATUS: SESSION ENGINEERING RECORD (2026-10-25; intent refs INT-127/131/134/135/138/139/140; decision refs D-036/D-038/D-039/D-041/D-042/D-043). Historical process artifact per D-022: NOT owner intent, outranks nothing. Worklog entry: Task 57. PR this session: #84 (this slice; outcome recorded only after it happens). THE SEV record for this slice: `harness/runs/claim-049-p301-capture-checkpoint/sev.json` (sheet_section TRUE — ARV-SEV-009's enforced form; the base 5c04375 carries the renderer).
+
+## 1. What the owner asked (verbatim — owner turn 36, the standing chain)
+
+> "work towards it, P3-01 — the first real product command through the kernel + the §1.6 capture checkpoint (import → capture → replay → retrieve through the real boundary), then P3-02..09 → the Phase 3 exit gate → P4-00 → P4-A..F → the Phase 4 exit gate — no pause (INT-134/135/138/139/140). The routed follow-ups (the ARV-SEV-009 undecidable-base regression; N12) are recorded so they're never lost. Rotate the PAT when the project completes, per the standing reminder. do not stop..."
+
+The routed follow-ups stand recorded: the ARV-SEV-009 undecidable-base regression (its own bounded slice, never folded here — scope exclusivity) and the N12 self-test-row extension (routed at `harness/runs/claim-038-numbering-canary-a16/notverified.txt`). The PAT rotation remains the standing completion-time reminder (the credential lives out-of-repo at `.secrets/ghtoken`, the value never in any repo file — D-025).
+
+## 2. Starting state — the preflight and the tenth env-reset repair
+
+Remote main `5c04375` (the PR #83 merge, CLAIM-048/P3-K0; post-merge run `40200331002` five green, observed live); protection re-read live (strict, enforce_admins, 1 approving review, dismiss_stale, no force pushes, no deletions, all five contexts required); 0 open PRs; the token live-verified (login `prathamarchives`). Local main fast-forwarded from the stale `53046dd` (the clone had been reset to the CLAIM-034 era — the recurring env-reset class).
+
+**THE TENTH ENV-RESET RIG REPAIR** (record 38 §2's series): pgdata lost 0700 perms AND eight subdirectories to the reset (pg_notify, pg_serial, pg_stat_snapshot, pg_snapshots, pg_commit_ts, pg_replslot, pg_tblspc, pg_twophase, pg_logical/snapshots+mappings). Repaired per the recorded pattern; rig healthy (17.11 on 5433, FACT-001 parity); migrations 3/3; make verify GREEN at the fresh main (canonical 54/0).
+
+**THE INHERITED STALENESS, caught at session entry** (the class the review rounds caught three slices running — this time caught BEFORE any bot could): the #83 slice (CLAIM-048) declared PLAN.md/STATE.md/AGENTS.md in its scope but the five-area navigation re-derivation did not land with it — STATE/AGENTS still read CLAIM-045-active at main and PLAN's P3-K0 card carried no COMPLETE block. The repair rides THIS slice's session close (below), and the catch is recorded in CLAIM-048's close row.
+
+## 3. Task and scope
+
+CLAIM-049 — P3-01 per PLAN's card, RTM §8's trace (SYS-03, SYS-04, SYS-09 primary) and D-041 element 4's §1.6 checkpoint: the migration (0004: work/source/anchor/highlight — the §2 frozen shapes), the blob adapter, the two product commands through the kernel spine, the authenticated retrieval surface, the crash injector's extension, the capture suite (CAP-01..17), the A08 oracle's disclosed evolution, the registry/ledger/navigation homes, the runs dir (scope, red-01/02, notverified, the proof set, sev.json, the section-bearing sheet), this record.
+
+## 4. Results
+
+**THE CHECKPOINT, WALKED END-TO-END THROUGH THE REAL BOUNDARY (CAP-01..10, the story in order):**
+- **import** (CAP-01): read -> sha256 -> blob.put -> blob.get RE-HASH verify (§3.1's tail: a Source NEVER commits without verified readable bytes) -> ONE transaction (work + source + command_log) -> the ack carries result_ref (the source id) + work_id. The independent read: ONE work row (title), ONE source row (digest-true, complete, version 1, byte-true).
+- **persist identity** (CAP-02): get_source through the owner-scoped read returns the identity (title, digest, state, version).
+- **highlight with version-tied anchor** (CAP-03): the anchor is DERIVED inside the command from the STORED BYTES (a client supplies only source-id + offsets; the selected text is extracted, the context slices cut, the digest tied from the source row itself — the wrong-version class is refused BY CONSTRUCTION); the anchor row carries source_digest == the source's digest.
+- **the adversarial refusals** (CAP-04/05): a dangling source → ARV-CAP-002 at the command boundary, zero rows; invalid offsets (start>=end, end>length) → ARV-CAP-003, zero effect.
+- **lost-ack** (CAP-06): crash post-commit-pre-ack → the capture IS committed (the independent read counts it), NO ack emitted — commit-before-acknowledgment.
+- **restart/retry** (CAP-07): the SAME idem key re-run → status=replayed, the RECORDED result_ref — the client never assumes failure.
+- **exactly-one-effect** (CAP-08): the independent count: two highlights, three command_log rows — the replay added NOTHING.
+- **authenticated retrieval** (CAP-09): the owner reads the capture through the scoped surface; owner B gets the SAME ARV-QRY-001 for A's capture (existence never revealed — RTM §2.10's privacy principle on the read path) and lists nothing.
+- **independent read** (CAP-10): arv_read reconciles the whole checkpoint — every row attributed (owner A), names in the product vocabulary.
+
+**THE KERNEL-CONTRACT SET (the PLAN card's test list, CAP-11..17):** the direct unscoped DB write fails CLOSED (RLS, zero rows); same key + different bytes → ARV-CMD-409 with state unchanged (the canonical body includes the digest); crash pre-commit on import → zero effect, the retry commits exactly one; the Q11 baseline — the same bytes re-imported under the same work: a NEW Source row (version 2) with ONE stored copy per digest (byte-reuse is storage-level, never identity); the corrupt-blob verify refusal (ARV-CAP-004 — a planted wrong-bytes-under-right-digest copy never promotes); the missing file (ARV-CAP-001, zero rows); the §2 substrate conventions proven at the catalog/trigger level (NO defaults on id/created_at, RLS forced on all four, mutations refused on BOTH layers: arv_app permission-denied + even the superuser hits the trigger's ARV-CAP-005).
+
+**THE IMPLEMENTATION SHAPE (every contract riding the ONE kernel spine):** the record_event protocol generalized into `_spine` (replay check → build/validation → BEGIN → effects + command_log → COMMIT → ack; the crash points; the P3-K0 concurrent-loser resolution) — and record_event ITSELF now rides it (the SIZE-002 compression's DRY: one protocol, not one protocol written twice; the S3 five + kernel twelve green across the refactor). The commands: import_source (ARV-CAP-001/004/006/007) and create_highlight (ARV-CAP-002/003/008). The retrieval: query.py's get-capture/get-source/list-captures (the GUC+SELECT batch through arv_app — RLS is the scope, never a filter bolted on after).
+
+**SIZES:** SIZE-002 measured at 426 > 400 BEFORE the gate could refuse — REAL compression (the record_event DRY ~55 lines, blob's unused delete/exists arms landing with P3-02's walk, the docstrings tightened in place): **378 added source lines**, 5 source files, 1 test file (+372), ONE migration file — every bound held, never limit-gaming.
+
+## 5. Files changed
+
+`harness/migrations/0004_p3_01_capture_skeleton.sql` (the §2 shapes + the directive), `harness/adapters/blob.py`, `harness/commands.py` (the spine + two commands + the record_event DRY + the CLI subparsers), `harness/query.py`, `harness/crash.py` (the injector extended), `harness/tests/test_capture.py` (CAP-01..17), `harness/tests/test_migrations.py` (the A08 oracle's policy-count scope — disclosed evolution), `harness/gate.py` (the TESTS registration), `harness/red-records.json` (the record + two amendments), `PLAN.md` (P3-K0's COMPLETE block + P3-01's status), `AGENTS.md`/`STATE.md` (the full re-derivation to the post-#83 truth — the inherited staleness repaired), `CLAIMS.md` (CLAIM-048's close row + CLAIM-049's open row), `context/WORKLOG.md` (Task 57), this record, the runs dir (scope, red-01/02, notverified, the proof set, sev.json, the section-bearing sheet), `.gitignore` (the blob default home).
+
+## 6. Commands and external actions (ACTUAL — never reconstructed)
+
+- The RED: the suite committed at `c77c14f` (machinery-absent), observed exit 1 + ARV-TEST-000 (red-01.txt); the record minted bound to that REACHABLE commit (the binding repair — §8); `make red --exit 1 --code ARV-TEST-000`.
+- The GREEN: the implementation commits; the suite's intermediate-tree defect caught live (red-02.txt: the 16-case cascade + the isolated ValueError — the psql command-tag misread); the pipe-delimited `_sess_row` fix; the suite 17/17; the S3 five + kernel twelve green; `make verify` GREEN (canonical 54/0); the PR-mode gate over the actual diff (the honest REFUSALS recorded — §8).
+- The amendments: `make red NOTE=...` twice (the capture suite's four disclosed test-shape repairs; the A08 oracle's policy-count scope), each the typed ARV-RED-006 chain.
+- The rig: `source /home/z/my-project/pgbuild/rig.sh` (status/start) after the tenth reset repair; the scratch DBs created and dropped per suite run; `make migrate` 4/4 + `make verify-schema` at the rig's `postgres` DB.
+
+## 7. Evidence
+
+`harness/runs/claim-049-p301-capture-checkpoint/`: scope.txt (17 paths, owner refs per LAW-07), red-01.txt (the machinery-absent RED at c77c14f), red-02.txt (the intermediate-tree RED — the command-tag defect, the honest preserved capture), notverified.txt (the ten named boundaries — §4's list), the proof set (run-01..N: the suites, make verify, the PR-mode gate RECORDED — every record typed {command, exit_code, commit, output_sha256}), sev.json (sheet_section TRUE; the findings with dispositions; builder/reviewer contexts distinct), proofsheet.md (the section-bearing sheet, PASS ARV-PRF-004). The suite's own output lines quoted in §4 are the observable behaviors (PASS CAP-xx).
+
+## 8. Failures (each honestly recorded, each repaired in-slice)
+
+- **THE BINDING ORPHAN (the sequence defect, caught live by the walls):** my first assembly AMENDED the RED-declaration commit to carry its own red record — orphaning the binding commit (a clean clone cannot git-show an orphaned sha; the K0 pattern binds the record to the REACHABLE declaration and carries the record in the follow-up commit). Caught by the DISPATCH FIXTURE's positive-PR case failing on the unresolvable binding — never by a same-repo selfcheck (which shares the reflog and would have passed). THE REPAIR: the chain rebuilt (the declaration reachable; the record in its own commit; the implementation re-cherry-picked) — nothing had been pushed, the remote never carried the defect.
+- **THE COMMIT-MESSAGE OVERCLAIMS (the #66 class, caught by my own re-read before the push):** commit B's first message claimed "(red-02.txt, the honest RED preserved)" while red-02.txt did not exist, and "make verify GREEN at this tree (canonical 55/0)" which had NOT been run at that tree (and the stack was RED there on the binding). Both claims removed in the rebuilt message; red-02.txt now EXISTS (written from the actual captured outputs); the verified-at-this-tree list states exactly what was run.
+- **THE AMENDMENT-MINT INVOCATION MISS:** the first `make red` with the real note passed `--note` as a make argument (make's usage error); a no-args run then minted a generic-note amendment; the record was restored to the pre-mint state and re-minted with the true note BEFORE any commit — the wrong-note amendment never entered history.
+- **THE _SESS_ROW COMMAND-TAG DEFECT** (red-02): the first implementation accepted psql command tags (SET / INSERT 0 1) as result rows — every command crashed at the replay check. The fix: pipe-delimited reads + the record_event-proven '|' filter. THE LESSON: that filter was never formatting; it is the load-bearing separation of result rows from psql's own chatter.
+- **THE A08 ORACLE'S STALE POLICY COUNT** (the walls' catch at the PR-mode gate): ARV-TEST-024 counted ALL arv-schema policies (correct in the two-table era; stale the moment the product tables carried their own) — scoped to the case's own declared two tables, the evolution amendment-chained. The product tables' policies are proven where they live (CAP-17 + CAP-09/11).
+- **THE SCOPE BREACHES the PR-mode gate caught:** `.gitignore` and `harness/tests/test_migrations.py` outside the declared scope — widened WITH owner refs (never silently), the claim row's cell updated to match.
+- **THE ARITHMETIC/EXPECTED-COUNT REPAIRS in the suite** (CAP-08/10: three command_log rows, not four; CAP-14's per-digest copy count) — each asserted from the INDEPENDENT read, each disclosed in the amendment chain.
+
+## 9. Unverified items
+
+notverified.txt at the runs dir (the complete list, ten named boundaries): the credential layer (owner-scoped RLS is the P3-01 rung); the §3.1 staging states + recovery walk (P3-02); the anchor format's typed resolution/drift machinery (P3-03); highlight revisions beyond 1 (P3-04); the blob delete/exists arms (P3-02); the cross-key concurrent same-work import race (P3-08's matrix); the oracle's standing residual classes (claim-045's notverified); the read surface's pagination/ordering contracts (P4); the owner-gated identity policy (Q11).
+
+## 10. Open decisions
+
+None opened, none closed. D-014 + Q6–Q12 stand at their exact scopes (RTM §7). The Q11/Q12 baselines are IMPLEMENTED as frozen (no auto-merge, no identity uniqueness; the provider-neutral blob boundary) — no policy implied beyond them. The routed follow-ups (the ARV-SEV-009 undecidable-base regression; N12) remain recorded at their homes.
+
+## 11. Next action
+
+Merge this slice's PR (#84) through the governed path once review-complete (D-042's single-actor bar → the recorded flip procedure → restore → the post-merge five-check run + branch delete observed), then **P3-02 (Work and Source intake: the import state machine + the recovery walk + the Q11 baseline's full depth) → P3-03..09 → the Phase 3 exit gate → P4-00 → P4-A..F → the Phase 4 exit gate** — NO PAUSE (INT-134/135/138/139/140).
+
+## 12. Session close
+
+CLAIM-049 closes by its PR's merge (rule 4 — the close row carried by the NEXT slice's commit A per the standing registry checklist). STATE/AGENTS/PLAN re-derived HERE (the inherited staleness repaired in the same session it was caught). The do-not-stop chain continues: the product is the object of the work.

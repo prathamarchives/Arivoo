@@ -522,7 +522,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-049 (P3-01) RED: the capture suite's machinery-absent class observed at the predecessor 5c04375 (commit A c77c14f carries the suite; import_source/create_highlight absent from the REGISTRY, query.py/blob.py/0004_p3_01_capture_skeleton.sql absent \u2014 the waiting-for-harness form, the S1/record-18 \u00a74.1 + P3-K0 precedent; exit 1, red-01.txt) \u2014 the implementation lands AFTER this RED, never before it (LAW-11)",
-    "current_sha256": "6283a7edfde056210b35766988fcbf6a9fe63e554f6a9f868b1499e2d1cb4114",
-    "amendments": []
+    "current_sha256": "de25d4894f0dcb6c5839e8d24f24dafe9106ab6bcce5a3caa1a22c9b233ff972",
+    "amendments": [
+      {
+        "prior_sha256": "6283a7edfde056210b35766988fcbf6a9fe63e554f6a9f868b1499e2d1cb4114",
+        "new_sha256": "de25d4894f0dcb6c5839e8d24f24dafe9106ab6bcce5a3caa1a22c9b233ff972",
+        "note": "CLAIM-049 (P3-01) \u2014 the capture suite's evolution, amendment-chained per ARV-RED-006 (the test-shape repairs, each disclosed; the machinery contracts UNTOUCHED): (1) CAP-08/CAP-10's expected counts corrected 4->3 (my arithmetic miss \u2014 three command_log rows at that point: import + two captures; observed from the independent read, never asserted from inside); (2) CAP-14's helper no longer passes --title together with --work-id (the command's own ARV-CAP-007 arity refusal fired \u2014 a suite fixture bug, never a command defect) and the assertion now counts ONE COPY PER DIGEST (the real content-addressing claim: multiple imports, one stored copy; CAP-12's refused import leaves its staged blob \u2014 the \u00a73.1 orphan class, P3-02's recovery walk); (3) CAP-17's catalog query fixed to PG17's real column relforcerowsecurity (relforcerowlevelsecurity does not exist; the migration's FORCE ROW LEVEL SECURITY was always applied \u2014 the probe's UPDATE now targets an existing row); (4) the import helper skips --title when None. The 17 contracts' semantics unchanged \u2014 every repair asserts the ORIGINAL declared behavior, honestly counted",
+        "observed_at": "2026-10-25T15:46:18.548982+00:00"
+      }
+    ]
   }
 }

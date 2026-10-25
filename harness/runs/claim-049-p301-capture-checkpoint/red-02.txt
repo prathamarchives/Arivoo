@@ -1,0 +1,54 @@
+RED-02 — the intermediate-tree RED (the implementation defect caught live at the pre-fix tree, 2026-10-25)
+
+The honest capture of what the suite observed BEFORE the pipe-filter fix, and
+the root cause isolated by the direct probe. Nothing here is reconstructed:
+both outputs below are the actual runs (the cascade from the suite; the
+traceback from the isolated probe at the same tree).
+
+THE OBSERVED CASCADE (the suite at the pre-fix tree — 16 of 17 cases failing):
+
+  FAIL CAP-01: import_source commits ONE work + ONE source (digest-true, complete, version 1)
+  FAIL CAP-02: get_source returns the persisted identity through the owner-scoped read
+  FAIL CAP-03: create_highlight derives the selected text FROM THE BYTES and ties the anchor to the source digest (version-tied)
+  FAIL CAP-04: a highlight against a nonexistent source -> ARV-CAP-002, zero rows
+  FAIL CAP-05: start>=end and end>length each -> ARV-CAP-003, zero effect
+  FAIL CAP-06: crash post-commit-pre-ack: the capture IS committed, NO ack emitted
+  FAIL CAP-07: the retry with the SAME key replays the RECORDED result
+  FAIL CAP-08: after the retry: exactly TWO highlights, THREE command_log rows
+  FAIL CAP-09: the owner retrieves the capture; owner B gets the SAME ARV-QRY-001 and lists nothing
+  FAIL CAP-10: arv_read independently reconciles: 3 attributed command rows
+  FAIL CAP-11: a direct psql INSERT as arv_app without the owner GUC is REFUSED by RLS
+  FAIL CAP-12: same idem key + different bytes -> the named conflict, source count unchanged
+  FAIL CAP-13: crash pre-commit on import: zero effect; the SAME key retries to exactly one
+  FAIL CAP-14: re-import of the SAME bytes under the same work: a NEW Source row, ONE copy per digest
+  PASS CAP-15: a blob whose content does not re-hash to its digest -> ARV-CAP-004
+  FAIL CAP-16: a missing import file -> ARV-CAP-001, zero rows
+  FAIL CAP-17: the four tables: §2 conventions on all four tables
+  RED — 16 broken case(s): CAP-01, CAP-02, CAP-03, CAP-04, CAP-05, CAP-06, CAP-07,
+        CAP-08, CAP-09, CAP-10, CAP-11, CAP-12, CAP-13, CAP-14, CAP-16, CAP-17
+
+THE ROOT CAUSE (the isolated probe — a single import, direct CLI):
+
+  File "harness/commands.py", in _spine
+      recorded_hash, recorded_ref = row.split("|")
+  ValueError: not enough values to unpack (expected 2, got 1)
+
+  The first implementation's _sess_row filter was
+      next((l for l in lines if l and "MARK" not in l), "")
+  — it accepted ANY non-empty non-marker line as a result row. psql prints
+  COMMAND TAGS (SET / INSERT 0 1 / BEGIN / COMMIT) on stdout even in -A -t
+  mode; the Session's own `SET app.current_owner=...` emitted "SET" as the
+  first line of every read, so the replay check's two-column unpack crashed
+  on every command. CAP-15 alone passed — the only case whose refusal path
+  runs before any session read.
+
+  THE FIX (commit B, same slice): every _sess_row read is now pipe-delimited
+  (multi-column rows via `|| '|' ||`; scalars carry a trailing '|') and the
+  filter is the record_event-proven form — `"|" in l and "MARK" not in l` —
+  which command tags can never satisfy. The lesson re-learned: the '|' filter
+  on the original replay check was never a formatting accident; it is the
+  load-bearing separation of RESULT ROWS from psql's own chatter. A reader
+  that would accept a command tag would accept a forged row.
+
+THE REPAIRED TREE: the suite 17/17 (the §1.6 checkpoint end-to-end); the S3
+five + the kernel twelve green across the same fix.

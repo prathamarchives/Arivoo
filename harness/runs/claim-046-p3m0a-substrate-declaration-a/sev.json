@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-046-p3m0a-substrate-declaration-a",
+  "base_sha": "ff25cdf1073c2e8536da63092e5d62daef2690c1",
+  "reviewed_diff_sha256": "926d5dad29722c763ab8c768a1aebda57227e76eb2caf95c8b5c6204df2eb85f",
+  "intent_ids": [
+    "INT-140"
+  ],
+  "requirement_ids": [
+    "SYS-02"
+  ],
+  "system_claims": [
+    "C1"
+  ],
+  "changed_components": [
+    "harness/migrations/0002_evidence_event.sql (the -- arv-baseline-bump: 1 directive lines \u2014 the plpgsql immutability trigger function declared as the procedural construct P3-M0's fail-closed grammar requires; behaviorally inert at this head)",
+    "CLAIMS.md (CLAIM-044 retired + closed with the routed SEV-009 follow-up; CLAIM-046 opened with the RETROACTIVE INT-140 notation)",
+    "INTENT-LEDGER.md (INT-140 \u2014 owner turn 35 verbatim, credential redacted per D-025/INT-092)",
+    "AGENTS.md/STATE.md (the 122 statused-intent count)",
+    "context/WORKLOG.md (Task 54) + context/reviews/arivoo-phase3-4-continuation-directive-2026-10-25.md (the D-022 preservation)"
+  ],
+  "interfaces_reviewed": [
+    "harness/migrations/0002_evidence_event.sql: the directive comment block placement (after the file's title line, before the substantive contract comments; the ARV-MIG-005 checksum change recorded by the rig's ledger re-derivation)",
+    "the SIZE-005 split boundary itself: this slice's diff touches exactly ONE migration file (the gate's LAW-05 bound); the oracle slice lands after with zero migration files"
+  ],
+  "v_model": {
+    "component_verification": [
+      "make verify GREEN at this tree (the gate's selfcheck, the 9 suites, the KB matrix, canonical 54/0); proof run-02",
+      "the migration suite green over the re-derived rig (the real 0001..0003 applying with the new 0002 checksum; verify-schema OK 3/3); proof run-01"
+    ],
+    "integration_verification": [
+      "the rig's postgres DB re-derived under the checksum change (the ledger's honest re-replay: DROP arv CASCADE + make migrate \u2192 3/3 applied, verify OK \u2014 no drift residue)"
+    ],
+    "system_verification": [
+      "the PR-mode gate RECORDED green over the actual diff (the SEV obligation, the scope/scope.txt coverage, the red records, the KB matrix, the size check \u2014 one migration file); proof run-03"
+    ],
+    "validation": [
+      "the directive's justification (the plpgsql function is procedural under the landing grammar) is mechanically proven by the oracle slice's own suite cases \u2014 the sequenced acceptance; the split itself is the walls' own prescription for the ARV-SIZE-005 refusal"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "the oracle lands while a substrate migration's procedural construct is undeclared (the grammar would refuse the real directory and every suite run)",
+      "control": "this declaration slice lands FIRST \u2014 the sequenced split guarantees the directive exists before the oracle's grammar reads it",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "an applied migration file's checksum change leaves the rig's ledger in drift (ARV-MIG-005)",
+      "control": "the rig's postgres DB re-derived by the honest full replay (the ledger re-derived, never hand-edited)",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the directive's reader (the oracle) does not exist at this head \u2014 the declaration is sequenced ahead of its consumer by the SIZE-005 split; the acceptance proof is the oracle slice's suite (record 38 \u00a78 carries the split's story)",
+    "the ARV-SEV-009 undecidable-base regression remains a routed bounded follow-up (CLAIM-044's close row)"
+  ],
+  "builder_context": "builder-glm-host-session31-claim046",
+  "reviewer_context": "fresh-ctx-glm-sev-claim046-20261025 (a fresh-context reviewer reviews at the PR)",
+  "disposition": "PASS",
+  "review_summary": "A deliberately minimal, bounded slice forced by the walls' first real firing of ARV-SIZE-005: the oracle's first assembled diff carried BOTH substrate migration files and the PR-mode gate refused (2 migrations > 1, LAW-05). The gate's own repair text prescribes the split, and this slice is the first half \u2014 the arv-baseline-bump directive on 0002_evidence_event.sql, a comment-only, behaviorally-inert declaration whose consumer (the oracle) lands in the sequenced next slices. The observable effect at this head: the checksum change and the rig's honest re-derivation (no drift residue); the declaration's justification (the plpgsql trigger function is procedural) is mechanically proven by the oracle's own suite when it lands. The slice also carries the session's registry work (CLAIM-044's close row with the routed SEV-009 follow-up, INT-140's mint with the retroactive notation, the 122 count, the D-022 preservation of the owner's continuation directive).",
+  "sheet_section": true
+}

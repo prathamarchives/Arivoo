@@ -1,3 +1,0 @@
-export PGB=/home/z/my-project/pgbuild; export PATH="$PGB/pgroot/usr/lib/postgresql/17/bin:$PATH"; export PGHOST=127.0.0.1 PGPORT=5433 PGUSER=postgres; python3 harness/tests/test_kernel.py > /tmp/k0_g3.txt 2>&1; echo "SUITE=$?"; tail -2 /tmp/k0_g3.txt; rg -c "^PASS" /tmp/k0_g3.txt
-__workspace_agent_exit_code=$?
-printf "\n<<workspace_agent_exit_code:1792932593480:%s>>\n" "$__workspace_agent_exit_code"

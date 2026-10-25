@@ -13,6 +13,7 @@ harness/adapters/ids.py D-036
 harness/adapters/pg.py D-036
 harness/state.py D-036
 harness/tests/test_kernel.py D-036
+harness/gate.py D-037
 harness/tests/test_commands.py D-036
 harness/red-records.json D-041
 PLAN.md D-037

@@ -166,81 +166,22 @@ def record_event(*, db: str, owner: str, actor: str, client_id: str,
                  idem_key: str, payload: str, crash_at: str = None) -> int:
     """The first registered command: append one evidence event, exactly once.
 
-    ONE session, phases in order (the crash points sit between them):
-      SET owner -> replay check -> BEGIN; INSERT evidence; INSERT command_log;
-      COMMIT -> ack.
+    Rides the shared _spine (P3-01's DRY: the S3 protocol and the product
+    commands' protocol are ONE protocol — replay check -> BEGIN; INSERT
+    evidence; INSERT command_log; COMMIT -> ack; the crash points between
+    phases; the concurrent-loser resolution).  The behavior is S3-accepted;
+    the suites (S3's five + the kernel's twelve) pin it across the refactor.
     """
-    body_hash = hashlib.sha256(canonical_body(command="record_event", client_id=client_id,
-                                              owner_scope=owner, actor=actor,
-                                              payload=payload).encode()).hexdigest()
-    sess = Session(db, "arv_app", owner)
-    try:
-        # Phase 0: replay check (RLS scopes it to this owner's keyspace)
-        sess.send(f"SELECT body_hash, result_ref FROM arv.command_log "
-                  f"WHERE idempotency_key={_q(idem_key)};")
-        sess.send(f"\\echo {MARK_CHECK}")
-        lines = sess.read_until(MARK_CHECK)
-        row = next((l for l in lines if "|" in l and "MARK" not in l), "")
-        if row:
-            recorded_hash, recorded_ref = row.split("|")
-            if recorded_hash != body_hash:
-                print(f"FAIL ARV-CMD-409: idempotency key {idem_key!r} is already recorded with a DIFFERENT body "
-                      "(no silent overwrite — exactly-once is a contract, not a preference)")
-                print("      repair: use a new idempotency key for a new body; the same key must mean the same command")
-                return 1
-            print(f"ACK command=record_event idem_key={idem_key} status=replayed result_ref={recorded_ref}")
-            return 0
-
-        # Phases 1..3: the transaction (effect + idempotency record, atomically)
+    def build(sess: "Session", body_hash: str):
         ev_id = ids.new_id()
-        ts = clock.now()
-        sess.send("BEGIN;")
-        sess.send(f"\\echo {MARK_BEGUN}")
-        sess.read_until(MARK_BEGUN)
-        if crash_at == "after-begin":
-            sess.kill()
-            return 2  # crashed: no ack (nothing written yet)
-        sess.send(f"INSERT INTO arv.evidence_event (id, event_type, payload, owner_scope, actor, run_id, input_hash, created_at) "
-                  f"VALUES ({_q(ev_id)}, 'event', {_q(payload)}, {_q(owner)}, {_q(actor)}, {_q('run-' + client_id)}, {_q(body_hash[:16])}, {_q(ts)});")
-        sess.send(f"INSERT INTO arv.command_log (owner_scope, idempotency_key, client_id, command_name, body_hash, result_ref, actor, created_at) "
-                  f"VALUES ({_q(owner)}, {_q(idem_key)}, {_q(client_id)}, 'record_event', {_q(body_hash)}, {_q(ev_id)}, {_q(actor)}, {_q(ts)});")
-        sess.send(f"\\echo {MARK_INSERTS}")
-        try:
-            sess.read_until(MARK_INSERTS)
-        except TimeoutError:
-            # P3-K0 (SYS-04): a CONCURRENT same-key loser lands here — the other
-            # transaction's row won the composite PK, the INSERT died on the unique
-            # violation (ON_ERROR_STOP ended the session before the marker). A
-            # unique constraint is NOT a replay promise: the loser re-reads the
-            # recorded row and answers the REPLAY when the body matches — the
-            # caller is told the truth about a command that DID commit.
-            recorded = _replay_after_conflict(db=db, owner=owner, idem_key=idem_key, body_hash=body_hash)
-            if recorded == "replayed":
-                ref = _recorded_ref(db=db, owner=owner, idem_key=idem_key)
-                print(f"ACK command=record_event idem_key={idem_key} status=replayed result_ref={ref}")
-                return 0
-            if recorded == "conflict":
-                return 1  # the 409 already printed by _replay_after_conflict
-            raise  # an honest unknown: the marker genuinely never came
-        if crash_at == "pre-commit":
-            sess.kill()
-            return 2  # crashed: no ack (the open transaction rolls back with the connection)
-        sess.send("COMMIT;")
-        sess.send(f"\\echo {MARK_COMMITTED}")
-        sess.read_until(MARK_COMMITTED)
-        if crash_at == "post-commit-pre-ack":
-            sess.kill()
-            return 2  # crashed: committed, NO ack emitted — the re-run returns the recorded ack
-        print(f"ACK command=record_event idem_key={idem_key} status=committed result_ref={ev_id}")
-        return 0
-    except TimeoutError as e:
-        print(f"FAIL ARV-CMD-010: {e}")
-        return 1
-    finally:
-        try:
-            sess.close()
-        except Exception:
-            pass
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmt = (f"INSERT INTO arv.evidence_event (id, event_type, payload, owner_scope, actor, run_id, input_hash, created_at) "
+                f"VALUES ({_q(ev_id)}, 'event', {_q(payload)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, {_q(ts)});")
+        return ev_id, [stmt], ""
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id,
+                  idem_key=idem_key, command="record_event", payload=payload,
+                  build=build, crash_at=crash_at)
 
 
 class _CapRefusal(Exception):

@@ -2,16 +2,13 @@
 """harness/query.py — the authenticated retrieval surface (P3-01; RTM SYS-09).
 
 The read boundary: every query runs through the approved adapter as the
-arv_app role WITH the owner GUC set — RLS scopes every row; an id outside the
-caller's scope and an id that does not exist are the SAME refusal
+arv_app role WITH the owner GUC set — RLS scopes every row; an id outside
+the caller's scope and an id that does not exist are the SAME refusal
 (ARV-QRY-001), never a side channel revealing another owner's object
-existence (the RTM §2.10 privacy principle applied to the read path).
-Reads are side-effect-free: no command-log rows, no derived state — the
-§1.6 checkpoint's retrieval step runs through THIS surface, and the
-independent read (arv_read, BYPASSRLS) grades it from outside.
-
-Exit 0 = rows printed (one JSON object per line for get-*; one id per line
-for list-captures); exit 1 = the named not-found refusal.
+existence (RTM §2.10's privacy principle on the read path). Reads are
+side-effect-free: no command-log rows, no derived state. Exit 0 = rows
+printed (one JSON object per line for get-*; one id per line for
+list-captures); exit 1 = the named refusal.
 """
 import argparse
 import json
@@ -45,7 +42,7 @@ def _read(db: str, owner: str, sql: str) -> list:
     return [ln for ln in r.out.splitlines() if ln.strip()]
 
 
-def _refuse(db: str, id_: str) -> int:
+def _refuse(id_: str) -> int:
     print(f"FAIL ARV-QRY-001: no such object ({id_}) in the caller's scope — absent and "
           "another owner's are the SAME refusal, never a side channel")
     print("      repair: check the id against the caller's own capture list (query.py list-captures)")
@@ -75,7 +72,7 @@ def main() -> int:
     if rows is None:
         return 1
     if not rows:
-        return _refuse(db, a.id)
+        return _refuse(a.id)
     vals = rows[0].split("|")
     obj = {k: v for k, v in zip(fields, vals)}
     for k in ("revision", "byte_size", "source_version", "start", "end"):

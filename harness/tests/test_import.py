@@ -43,7 +43,8 @@ Cases (the IMP registry — this file is the contract's declaration):
   IMP-08 crash after-verify (staging_verified, blob present): the walk
         re-drives -> complete; exactly one source
   IMP-09 the lost metadata ack (post-commit-pre-ack): committed, NO ack, the
-        journal row still staging_verified -> the walk REPLAYS -> complete
+        journal row rode the commit (complete in-transaction) -> the walk
+        reports already-complete; the same-key replay answers the recorded ack
         (zero-or-one: the source count stays ONE)
   IMP-10 the vanished blob at staging_verified: the re-drive re-verifies ->
         failed(ARV-BLOB-002) — NEVER a phantom complete Source
@@ -53,9 +54,9 @@ Cases (the IMP registry — this file is the contract's declaration):
   IMP-12 the walk's convergence: run TWICE = identical end states; terminal
         rows' updated_at UNCHANGED (the terminal discipline)
   IMP-13 the two-crash re-drive: OLDEST-FIRST, both complete, each
-        exactly-one; the same-work variant: versions 1,2 (the re-read ordinal)
+        exactly-one; the same-work variant: versions 1,2,3 (the re-read ordinal)
   IMP-14 owner isolation: the journal RLS-scoped; B's walk is blind to A's
-        rows; the direct-DB journal access fails closed
+        rows; the direct-DB journal access fails closed (both layers)
   IMP-15 the 409 conflict stages NO blob (the P3-01 notverified's orphan class
         dead by construction: the replay check precedes the put)
   IMP-16 the orphan sweep: journal-less residue deleted; a live-staging row's
@@ -63,18 +64,16 @@ Cases (the IMP registry — this file is the contract's declaration):
   IMP-17 the journal's §2/§2.9 conventions: NO defaults on id/created_at, RLS
         forced, arv_read SELECT, the actor/state CHECKs, UNIQUE(owner,key), and
         the declared ABSENCE of the append-only trigger (mutable by design)
-  IMP-18 the concurrent-loser classification (SEV-7's refinement): the
-        planted-trigger duplicate-key death -> ARV-CMD-011 FROM THE DRAINED
-        STDERR (never poll()-inferred), zero effect; the same-key retry
-        re-reads the ordinal -> commits
-  IMP-19 the infrastructure death (SEV-7's refinement): the killed backend ->
-        ARV-CMD-012 (the §4.1 uncertain class) -> the same-key replay RESOLVES
-        it (committed, exactly one) — never an assumed outcome
+
+The SEV-7 stderr-classification cases (the planted-trigger dup-key -> 011 from
+the DRAINED stderr; the killed-backend connection-class -> the §4.1 uncertain
+012 resolved by the same-key replay) are CLAIM-051's own bounded slice — the
+P3-01 SEV-11 routing's split form, adopted when SIZE-002's bound forced the
+one-behavior-per-slice rule (LAW-05): they declare their own RED there.
 
 Run: python3 harness/tests/test_import.py   (exit 0 = green)
 """
 import hashlib
-import json
 import os
 import pathlib
 import subprocess
@@ -99,7 +98,7 @@ def check(code: str, ok: bool, what: str, repair: str) -> None:
 # ---------------------------------------------------------------- the RED gate
 try:
     from harness.adapters import pg  # noqa: E402
-    from harness.commands import REGISTRY, Session  # noqa: E402
+    from harness.commands import REGISTRY  # noqa: E402
     from harness.crash import POINTS  # noqa: E402
 except ImportError as e:
     print(f"FAIL ARV-TEST-000: the kernel does not exist (waiting-for-harness) — {e}")
@@ -109,10 +108,9 @@ _absent_files = [str(p) for p in (REPO / "harness" / "recover.py",
                                   REPO / "harness" / "migrations" / "0005_import_journal.sql")
                  if not p.is_file()]
 _absent_points = [pt for pt in ("after-staging", "after-put", "after-verify") if pt not in POINTS]
-if _absent_files or "import_source" not in REGISTRY or not hasattr(Session, "dead_reason"):
+if _absent_files or "import_source" not in REGISTRY:
     print(f"FAIL ARV-TEST-000: the import-state machinery is absent (machinery-absent class; "
-          f"missing files: {[p.split('/')[-1] for p in _absent_files]}; missing crash points: {_absent_points}; "
-          f"missing the stderr-drained death classifier: {not hasattr(Session, 'dead_reason')}) — "
+          f"missing files: {[p.split('/')[-1] for p in _absent_files]}; missing crash points: {_absent_points}) — "
           "P3-02's implementation lands after this RED, never before it")
     sys.exit(1)
 
@@ -512,94 +510,13 @@ def main() -> int:
               "the journal's conventions: NO defaults on id/created_at/updated_at (LAW-24), RLS enabled+forced, the state CHECK refuses unknown states, arv_app INSERT/SELECT/UPDATE with NO DELETE (rows transition, never erased), arv_read SELECT — and NO append-only trigger (the §2.9 disposable class, mutable by design)",
               "the staging journal is the recovery substrate, not authoritative data: state transitions are UPDATEs by design, bounded by the state CHECK and RLS — the declared absence of the immutability trigger is the design, pinned here")
 
-        # IMP-18 — the concurrent-loser classification (SEV-7): dup-key death -> ARV-CMD-011 from the DRAINED stderr
-        fJ = fresh_file("juliet.md", "Juliet bytes: the planted-trigger loser case.\n")
-        p18a = import_src("imp-18", "Race Work", fJ)
-        wJ = ack_field(p18a, "work_id")
-        plant = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
-                                f"CREATE OR REPLACE FUNCTION arv._race_kill() RETURNS trigger AS $$ "
-                                f"BEGIN IF NEW.work_id='{wJ}' AND NEW.idempotency_key='imp-18b' THEN "
-                                f"RAISE EXCEPTION 'duplicate key value violates unique constraint "
-                                f"\"source_work_version\"'; END IF; RETURN NEW; END; $$ LANGUAGE plpgsql; "
-                                f"CREATE TRIGGER race_kill BEFORE INSERT ON arv.source "
-                                f"FOR EACH ROW EXECUTE FUNCTION arv._race_kill();"],
-                               capture_output=True, text=True, timeout=60)
-        p18b = import_src("imp-18b", None, fJ, work_id=wJ)  # the loser: the source INSERT dies mid-transaction
-        _n18 = audit("SELECT count(*) FROM arv.source WHERE work_id='" + wJ + "';")  # MID-SEQUENCE: the loser's zero effect
-        drop = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
-                               "DROP TRIGGER IF EXISTS race_kill ON arv.source; "
-                               "DROP FUNCTION IF EXISTS arv._race_kill();"],
-                              capture_output=True, text=True, timeout=60)
-        p18c = import_src("imp-18b", None, fJ, work_id=wJ)  # the SAME-key retry re-reads the ordinal
-        _v18 = audit("SELECT string_agg(source_version::text, ',' ORDER BY source_version) "
-                     "FROM arv.source WHERE work_id='" + wJ + "';")
-        ok18 = (plant.returncode == 0 and drop.returncode == 0
-                and p18b.returncode == 1 and "ARV-CMD-011" in p18b.stdout
-                and "ARV-CMD-010" not in p18b.stdout
-                and _n18 == "1"
-                and p18c.returncode == 0
-                and _v18 == "1,2"
-                and jrow("imp-18b").split("|")[0] == "complete")
-        check("IMP-18", ok18,
-              "the duplicate-key death classifies as ARV-CMD-011 FROM THE DRAINED STDERR (zero effect, one source) — never the poll()-inferred guess; the same-key retry re-reads the ordinal and lands version 2",
-              "the Session drains stderr from construction and the spine's death classifier reads the DRAINED cause: duplicate-key -> 011 (retry the same key); the planted trigger is the deterministic arm — no process choreography, no flake")
-
-        # IMP-19 — the infrastructure death (SEV-7): the killed backend -> ARV-CMD-012 -> the replay resolves (§4.1)
-        import io
-        import harness.commands as commands
-        DB2 = pg.create_scratch_db("p302x")
-        try:
-            subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
-                           capture_output=True, text=True, timeout=180,
-                           env=dict(os.environ, PGDATABASE=DB2, ARV_BLOB_DIR=BLOB_DIR), check=True)
-            body = json.dumps({"work_id": None, "title": "Uncertain", "digest": "0" * 64,
-                              "media_type": "text/plain", "acquired_via": "cli-import", "byte_size": 1},
-                             sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-
-            def build(sess: "commands.Session", body_hash: str):
-                sess.send("SELECT pg_backend_pid();")
-                sess.send(f"\\echo {commands.MARK_CHECK}")
-                lines = sess.read_until(commands.MARK_CHECK)
-                pid = next(l for l in lines if l.strip().isdigit())
-                pg.psql(f"SELECT pg_terminate_backend({pid});", db=DB2)  # the backend dies NOW, deterministically
-                return "uncertain-ref", ["SELECT 1;"], ""
-
-            captured = io.StringIO()
-            real_stdout = sys.stdout
-            sys.stdout = captured
-            try:
-                rc = commands._spine(db=DB2, owner="A", actor="owner", client_id="cli-1",
-                                     idem_key="imp-19", command="import_source", payload=body,
-                                     build=build)
-            finally:
-                sys.stdout = real_stdout
-            spine_out = captured.getvalue()
-            fK = fresh_file("kilo.md", "Kilo bytes: the §4.1 replay-resolution case.\n")
-            global_env_save = dict(ENV)
-            ENV["PGDATABASE"] = DB2  # the CLI replay runs against DB2
-            r19 = import_src("imp-19", "Uncertain", fK)
-            ENV.clear(); ENV.update(global_env_save)
-            n19 = subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
-                                   "-U", "arv_read", "-d", DB2, "-c",
-                                   "SELECT count(*) FROM arv.source;"],
-                                  capture_output=True, text=True, timeout=60).stdout.strip()
-            ok19 = (rc == 1 and "ARV-CMD-012" in spine_out
-                    and "ARV-CMD-011" not in spine_out
-                    and r19.returncode == 0 and "status=committed" in r19.stdout
-                    and n19 == "1")
-        finally:
-            pg.drop_scratch_db(DB2)
-        check("IMP-19", ok19,
-              "the infrastructure death (the killed backend) classifies as ARV-CMD-012 — the §4.1 UNCERTAIN class, never an assumed outcome — and the SAME-key replay resolves it: the retry commits exactly one source",
-              "the death classifier separates duplicate-key (011, zero effect) from connection-class deaths (012, uncertain): the client replays the same key and the recorded state answers committed-vs-rolled-back")
-
     finally:
         if not os.environ.get("ARV_KEEP_DB"):
             pg.drop_scratch_db(DB)
     if FAILS:
         print(f"RED — {len(FAILS)} broken case(s): {', '.join(FAILS)}")
         return 1
-    print("GREEN — the §3.1 import state machine + the recovery walk hold end-to-end (IMP-01..19)")
+    print("GREEN — the §3.1 import state machine + the recovery walk hold end-to-end (IMP-01..17)")
     return 0
 
 

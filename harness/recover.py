@@ -1,34 +1,20 @@
 #!/usr/bin/env python3
 """harness/recover.py — the §3.1 recovery walk (P3-02; SYS-06's acceptance arm).
 
-The convergence-idempotent walk over the staging journal (the §2.9 disposable
-recovery substrate): OLDEST-FIRST (created_at,id — the stable total order; a
-multi-row re-drive assigns edition ordinals deterministically, never by
-arrival luck), terminal rows NEVER touched (the terminal discipline — complete
-and failed are final; a second walk is a byte-identical no-op), every row's
-outcome NAMED on its own line (a row's failure never stops the walk — the
-next row proceeds), and the journal reads are row_to_json — ONE escaped line
-per row, JSON-parsed at the boundary, never a re-parse of psql text (a title
-carrying pipes, newlines, or a 'MARK' token can never corrupt the read).
-
-The metadata re-drive: the canonical body is reconstructed from the journal
-row's recorded FIELDS (the one construction home, commands._import_body) and
-HASH-CHECKED against the row's body_hash BEFORE any drive — a mismatch is the
-named ARV-IMP-001 (never a drive with an invented body, never a silent 409).
-The drive itself re-verifies the blob FIRST (the phantom-closure: a complete
-Source without bytes is impossible — §4.4), then rides the SAME spine under
-the ORIGINAL idempotency key (replayed -> the recorded result; committed ->
-exactly-once by the command_log's composite key).
-
-The orphan sweep (the P3-01 notverified's named promise): a blob resident with
-NO source row referencing it (any owner — the arv_read cross-owner check) and
-NO non-terminal journal row carrying it is pure residue -> deleted (the §4.4
-delete arm; a REFERENCED blob is never deleted, even corrupt — CAP-15's
-refusal stands). .put- temps are ignored (the #84 pin's ignorable class).
-
-Exit 0 = the walk completed and every row's outcome is named (a failed row is
-a NAMED product of the walk, not a walk failure); exit 1 = the machinery
-itself failed (the rig unreachable, a batch refused).
+Convergence-idempotent, OLDEST-FIRST (created_at,id), terminal rows NEVER
+touched (a second walk is a byte-identical no-op, pinned by updated_at), every
+row's outcome NAMED on its own line (a row's failure never stops the walk).
+Journal reads are row_to_json — ONE escaped line per row, JSON-parsed at the
+boundary, never a re-parse of psql text (pipes/newlines/'MARK' cannot corrupt).
+The re-drive reconstructs the canonical body from the row's recorded FIELDS and
+HASH-CHECKS it against body_hash BEFORE any drive (a mismatch is ARV-IMP-001);
+re-verifies the blob FIRST (the phantom-closure: a complete Source without
+bytes is impossible — §4.4); rides the SAME spine under the ORIGINAL key.
+The sweep deletes journal-less residue, protecting referenced (any owner, the
+arv_read cross-owner check — Q11 byte-reuse) and live-staging blobs; a
+REFERENCED blob is never deleted, even corrupt (CAP-15 stands); .put- temps
+are ignored (the #84 pin's ignorable class). Exit 0 = every row's outcome
+named; exit 1 = a named machinery failure (ARV-IMP-003 — never a silent guess).
 """
 import argparse
 import io
@@ -44,16 +30,15 @@ import hashlib  # noqa: E402
 
 
 def _batch(sql: str, *, db: str, user: str = "arv_app") -> "str | None":
-    """One owner-scoped batch through arv_app (the GUC set in the same batch —
-    RLS is the scope); None on a named machinery failure (the caller REPORTS it,
-    never treats it as zero rows — a silent empty is a guessed state)."""
+    """One owner-scoped batch (GUC set in the same batch); None = a NAMED
+    machinery failure — a silent empty is a guessed state."""
     r = pg.psql(sql, db=db, user=user)
     return r.out if r.returncode == 0 else None
 
 
 def _fail(db: str, owner: str, r: dict, code: str, *, clean: bool = False) -> None:
     """Mark the row failed with the named reason; a corrupt artifact is cleaned
-    ONLY when unreferenced by any source row (the arv_read cross-owner check)."""
+    only when unreferenced by any source row (the cross-owner check)."""
     _batch(f"SET app.current_owner={commands._q(owner)}; "
            f"UPDATE arv.import_journal SET state='failed', fail_reason={commands._q(code)}, "
            f"updated_at={commands._q(clock.now())} WHERE id={commands._q(r['id'])};", db=db)
@@ -63,10 +48,8 @@ def _fail(db: str, owner: str, r: dict, code: str, *, clean: bool = False) -> No
 
 
 def _referenced(db: str, digest: str) -> bool:
-    """Cross-owner byte-reuse check (Q11: another owner's Source may reference
-    the same digest) — the arv_read auditor's count; an UNREADABLE check is
-    fail-closed to True (the blob is KEPT, never deleted on a guessed
-    reference set)."""
+    """The arv_read cross-owner count; an UNREADABLE check is fail-closed True
+    (the blob is KEPT — never deleted on a guessed reference set)."""
     out = _batch(f"SELECT count(*) FROM arv.source WHERE digest={commands._q(digest)};",
                  db=db, user="arv_read")
     if out is None:
@@ -75,9 +58,8 @@ def _referenced(db: str, digest: str) -> bool:
 
 
 def _verify(db: str, owner: str, r: dict) -> bool:
-    """The staging exit condition (§3.1) and the phantom-closure arm (§4.4):
-    re-verify the blob BEFORE any drive — absent/corrupt is a NAMED failure,
-    never a promoted or phantom Source."""
+    """§3.1's staging exit + §4.4's phantom-closure: re-verify the blob BEFORE
+    any drive — absent/corrupt is a NAMED failure, never a promoted Source."""
     try:
         blob.get(r["digest"])
         return True
@@ -88,10 +70,9 @@ def _verify(db: str, owner: str, r: dict) -> bool:
 
 
 def _drive(db: str, owner: str, r: dict) -> None:
-    """The metadata re-drive: the hash-checked body reconstruction, then the
-    SAME spine under the ORIGINAL key (replayed/committed -> complete; the
-    011 race -> the row stays staging_verified for the next walk; any other
-    named refusal -> failed)."""
+    """The hash-checked body reconstruction, then the SAME spine under the
+    ORIGINAL key (replayed/committed -> complete; 011 -> retry-race, the row
+    stays staging_verified for the next walk; any other refusal -> failed)."""
     body = commands._import_body(title=r["title"], work_id=r["work_id"], digest=r["digest"],
                                  media_type=r["media_type"], byte_size=r["byte_size"],
                                  acquired_via=r["acquired_via"])
@@ -139,18 +120,15 @@ def _drive(db: str, owner: str, r: dict) -> None:
 
 
 def walk(*, db: str, owner: str) -> int:
-    """The whole walk: the non-terminal rows oldest-first, then the orphan
-    sweep, then the named summary. The rows batch is row_to_json — one escaped
-    line per row; a malformed line is a NAMED refusal for that row, never a
-    walk-crashing parse; a machinery failure is a NAMED exit-1, never a silent
-    zero-rows guess."""
+    """The non-terminal rows oldest-first, then the sweep, then the named
+    summary; a malformed line is a NAMED refusal for that row (ARV-IMP-002);
+    a machinery failure is a NAMED exit-1 (ARV-IMP-003)."""
     raw = _batch(f"SET app.current_owner={commands._q(owner)}; "
                  f"SELECT row_to_json(j) FROM (SELECT id, idempotency_key, client_id, work_id, title, digest, "
                  f"media_type, byte_size, acquired_via, state, body_hash, actor, created_at FROM arv.import_journal "
                  f"WHERE state IN ('staging','staging_verified')) j ORDER BY created_at, id;", db=db)
     if raw is None:
-        print("FAIL ARV-IMP-003: the walk's journal read was refused at the boundary — the walk exits, "
-              "never a guessed zero-rows state")
+        print("FAIL ARV-IMP-003: the walk's journal read was refused at the boundary — the walk exits, never a guessed zero-rows state")
         return 1
     rows = []
     for ln in (l for l in raw.splitlines() if l.strip()):
@@ -182,8 +160,7 @@ def walk(*, db: str, owner: str) -> int:
     live_out = _batch(f"SELECT digest FROM arv.import_journal "
                       f"WHERE state IN ('staging','staging_verified');", db=db, user="arv_read")
     if kept_out is None or live_out is None:
-        print("FAIL ARV-IMP-003: the walk's sweep reads were refused at the boundary — the sweep is skipped, "
-              "never a guessed keep-set")
+        print("FAIL ARV-IMP-003: the walk's sweep reads were refused at the boundary — the sweep is skipped, never a guessed keep-set")
         return 1
     kept = set(kept_out.split()) | set(live_out.split())
     swept = [d for d in blob.residents() if d not in kept]
@@ -210,10 +187,8 @@ def main() -> int:
     ap.add_argument("--owner", required=True)
     a = ap.parse_args()
     db = os.environ.get("PGDATABASE", "postgres")
-    health = pg.psql("SELECT 1;", db=db, user="arv_read")
-    if health.returncode != 0:
-        print(f"FAIL ARV-DB-003: the rig is unreachable at the approved boundary — the walk refuses, "
-              f"never a guessed state; raw: {health.stderr.strip()[:200]}")
+    if pg.psql("SELECT 1;", db=db, user="arv_read").returncode != 0:
+        print("FAIL ARV-DB-003: the rig is unreachable at the approved boundary — the walk refuses, never a guessed state")
         return 1
     return walk(db=db, owner=a.owner)
 

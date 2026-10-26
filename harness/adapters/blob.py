@@ -65,16 +65,10 @@ def get(digest: str) -> bytes:
     return data
 
 
-def exists(digest: str) -> bool:
-    """The §4.4 arm (its consumer: P3-02's recovery walk). Digest-alphabet guarded."""
-    return bool(_SAFE.match(digest)) and (_dir() / digest).is_file()
-
-
 def delete(digest: str) -> bool:
-    """The §4.4 arm — the staging-artifact cleanup (P3-02's walk, the ONLY caller
-    contract: delete ONLY blobs unreferenced by any arv.source row — the walk's
-    arv_read cross-owner check precedes every call; a REFERENCED blob is never
-    deleted even if corrupt (CAP-15's refusal stands). Returns True when removed."""
+    """The §4.4 arm — the staging-artifact cleanup (the walk, the ONLY caller
+    contract: delete ONLY blobs unreferenced by any arv.source row; a REFERENCED
+    blob is never deleted even if corrupt — CAP-15's refusal stands)."""
     if not _SAFE.match(digest):
         return False
     try:
@@ -85,9 +79,8 @@ def delete(digest: str) -> bool:
 
 
 def residents() -> list:
-    """The digest-named store residents (the sweep's enumeration arm — the
-    walk's residue scan; .put- temps are IGNORED, never returned: the #84 pin's
-    ignorable class, cleaned by OS hygiene, never by a time-guessing walk)."""
+    """The digest-named store residents (the sweep's enumeration arm; .put-
+    temps are IGNORED — the #84 pin's ignorable class, never time-guessed)."""
     try:
         return [p.name for p in _dir().iterdir() if p.is_file() and _SAFE.match(p.name)]
     except FileNotFoundError:

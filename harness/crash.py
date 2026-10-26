@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 """harness/crash.py — the crash-injection helper (S3; extended P3-01 + P3-02).
 
-Runs a command through the kernel driver with SIGKILL armed at one of the
-injection points. The spine's three (S3): after-begin (nothing written) /
-pre-commit (rows inserted, COMMIT not sent) / post-commit-pre-ack (COMMIT
-confirmed, the ack NOT yet emitted — §1.6's lost-ack step). The import's three
-phase boundaries (P3-02): after-staging (the journal row committed, NO blob
-yet) / after-put (the blob landed, the verify not run) / after-verify (the
-journal staging_verified, the metadata transaction not begun). Exit 2 =
-crashed (no ack, by design); the server rolls the open transaction back when
-the connection drops. A usage error is exit 1 with a named line — NEVER the
-argparse default 2 (which would masquerade as a crash; the exit-2 lesson).
+SIGKILL armed at one injection point. The spine's three (S3): after-begin /
+pre-commit / post-commit-pre-ack (§1.6's lost-ack). The import's three phase
+boundaries (P3-02): after-staging / after-put / after-verify. Exit 2 = crashed
+(no ack, by design); the server rolls the open transaction back. A usage error
+is exit 1 with a named line — NEVER the argparse default 2 (which would
+masquerade as a crash; the exit-2 lesson).
 """
 import argparse
 import os

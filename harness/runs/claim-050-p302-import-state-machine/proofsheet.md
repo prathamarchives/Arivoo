@@ -1,0 +1,107 @@
+# PROOF SHEET — slice claim-050-p302-import-state-machine (harness-built; never hand-edited — PRF-01, LAW-01)
+
+- commit (last run record's): 7973c91bc93fcb621ef4c5b1e1dc1a31325d5a8d
+- generated (last record's timestamp): 2026-10-26T04:11:39.439203+00:00
+- run records: 14
+
+## Run records (command, exit, output digest)
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 8396b9951f835293 · 2026-10-26T04:03:24.034654+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 9a74cebc12826061 · 2026-10-26T04:03:30.173882+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-26T04:03:30.585480+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-26T04:03:33.074211+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 4ac56d06bfee780a · 2026-10-26T04:03:34.755064+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 288c811e4a7d4ffb · 2026-10-26T04:03:37.186172+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-26T04:05:12.010312+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 4b9f98d6090fb979 · 2026-10-26T04:05:33.864330+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 ce93293e89b8fd78 · 2026-10-26T04:05:42.760424+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 07f871b7af7804b3 · 2026-10-26T04:05:43.091010+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-26T04:05:43.299947+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 e4f6bfeee99e7572 · 2026-10-26T04:05:45.829814+00:00
+- `make verify` -> exit 0 · output sha256 1b1f715a49204001 · 2026-10-26T04:08:53.910020+00:00
+- `python3 harness/gate.py --slice claim-050-p302-import-state-machine --diff main` -> exit 1 · output sha256 4c066088128fa2ca · 2026-10-26T04:11:39.439203+00:00
+
+## Not verified (LAW-04 — required, never empty-by-omission)
+- NOT VERIFIED — the honest limits of CLAIM-050 / P3-02 (LAW-04; never empty-by-omission)
+- WHAT THIS SLICE PROVES, ON WHAT STACK: the §3.1 import state machine
+- (request -> staging -> put+verify INSIDE staging -> staging_verified -> ONE
+- metadata transaction born-complete) + the convergence-idempotent recovery walk
+- (oldest-first, terminal-untouched, named per-row outcomes, the phantom-closure
+- re-verify, the orphan sweep) through the real boundary — the kernel Session,
+- the real psql, the content-addressed blob store, the RLS-scoped reads — on the
+- rig (PostgreSQL 17.11, loopback, trust auth) and CI's ephemeral service
+- container. Every state claim is graded by the arv_read INDEPENDENT reader, and
+- the suite pins the Q11 baseline (IMP-02/03), the crash matrix at every phase
+- boundary (IMP-05..10), the hostile-text journal reads (IMP-11), and the
+- mutable-journal design (IMP-17).
+- THE EXPLICIT BOUNDARIES (named, never silently narrowed):
+- 1. Authentication is OWNER-SCOPED RLS, not a credential layer (the standing
+- P3-01 class, unchanged): the rig is trust-auth; every journal read/write
+- runs as arv_app with app.current_owner set and RLS fails closed without it
+- (IMP-14, both layers — the zero-rows SELECT and the WITH CHECK INSERT
+- refusal). A real credential boundary is the deployment slice's work.
+- 2. THE SEV-7 SPLIT (this slice's own honest routing): the stderr-drained death
+- classifier — duplicate-key -> ARV-CMD-011 from the OBSERVED stderr, the
+- connection-class -> the NEW ARV-CMD-012 (the §4.1 uncertain class resolved
+- by the same-key replay) — is CLAIM-051's own bounded slice, split at
+- SIZE-002's 519>400 refusal per LAW-05's one-behavior-per-slice rule. Until
+- 051 lands, the spine's dead-session 011 remains the poll()-inferred form
+- (the P3-01 SEV-11 record's honest residual); the routing is carried in the
+- spine's in-code comment, the suite's header, the red-records amendment, and
+- CLAIM-050's Notes — never silently dropped.
+- 3. The journal is DISPOSABLE recovery substrate (§2.9), not owner data: a
+- failed row carries the named reason but a same-key retry REWINDS the row
+- (the UPSERT's state/fail_reason/source_id reset) — failure HISTORY does not
+- accumulate in the journal; the durable record of what committed is the
+- command_log + the source rows themselves. The journal has NO append-only
+- trigger BY DESIGN (IMP-17 pins the declared absence), and no DELETE grant:
+- rows transition, they are never erased.
+- 4. The walk's blob cleanup is UNREFERENCED-ONLY: a corrupt artifact is
+- deleted only when no arv.source row references its digest (the arv_read
+- cross-owner count — Q11 byte-reuse means another owner may hold the same
+- digest); a REFERENCED corrupt blob is kept and named (CAP-15's refusal
+- stands — a store-level incident is out of the walk's authority). An
+- unreadable reference check is fail-closed to KEEP, never a guessed delete.
+- The .put- temp residue is IGNORED by the walk (the #84 pin's ignorable
+- class — "stale" is undecidable without a time-guessing policy, which the
+- walk refuses to invent); OS temp hygiene owns it.
+- 5. The walk's sweep enumerates the RIG's local-store residents (blob.
+- residents()); a different §4.4 backend implements its own listing at its
+- own deployment slice — Q12 is UNRATIFIED, no provider name enters the
+- schema, and no cross-store atomicity or durability promise is made or
+- implied by this slice (the adapter boundary holds; RTM §7.4's table names
+- the per-backend orphan-cleanup variance as expected).
+- 6. The walk is a single sequential process: the multi-row re-drive's
+- oldest-first order makes edition ordinals deterministic WITHIN one walk
+- (IMP-13's versions 1,2,3), and the real cross-key concurrent same-work
+- race is CAP-21's pinned arm (the unique index + the spine's 011 path).
+- A TRUE simultaneous import+walk drive of the same work (two processes in
+- phase 3 at the same instant) is not choreographed in the suite — the loser
+- of that interleaving takes the spine's existing unique-violation path
+- (zero effect, the same-key retry re-reads the ordinal); 051's classifier
+- work sharpens that path's NAME, and the walk's retry-race arm reports the
+- row honestly until the next walk.
+- 7. The journal's total order (created_at, id): two rows in the same
+- microsecond fall back to the id comparison — the ids adapter's RFC-4122 v7
+- ms-monotonicity (P3-K0's floor) makes the fallback deterministic by
+- construction; not separately re-proven here (K-08/K-07 own the id
+- contract's proofs).
+- 8. The migration oracle's standing residuals (the A08 lexer-drift
+- over-refusals, the extension catalogue, the concurrency classes) are
+- unchanged by 0005 — the migration rides the oracle's fail-closed grammar
+- with no plpgsql construct (no baseline-bump directive needed this time;
+- the pure-DDL admitted grammar covered it, observed at the migrate run).
+- 9. CI-host observation only (the standing class): the GitHub Actions runs
+- exercise the same suites on the service container; host-level claims
+- (workflow-definition protection, runner integrity) remain Q10/EXTERNAL.
+- 10. The import-state column on arv.source is 'complete' AT BIRTH — staging
+- states exist ONLY in the journal (the §3.1 "no phantom Source" shape).
+- The source table never carries a partial import; retrieval surfaces
+- (query.py) are unchanged by this slice and report only complete sources.
+- 11. The record-41 §6 command log below is the OPERATIVE evidence form (the
+- exact commands with exits); the runs dir carries the machine-verified
+- digest form. Where a transient diagnostic (a probe DB name, a tmp path)
+- appears in a preserved RED file, it is the OBSERVED session's fact, never
+- a reproducibility promise — the rerunnable form is the suite itself.
+
+## Assembly
+- sheet sha256 (of the content above, excluding this line): 64c36e3a0638c34e8f62980081b2fe54ed915a192b9d52f0010ddda398d1e754

@@ -1,5 +1,11 @@
 # 43 — CLAIM-052: P3-03a — the extraction generations (the §3.6 derived-state machine's first instantiation)
 
+Session 31 continuation (the standing do-not-stop chain INT-134/135/138/139/140);
+PLAN's P3-03 card's generation half, the bounded split per LAW-05 (the anchor
+resolution + the Q8 spike are CLAIM-053's).
+
+> STATUS: SESSION ENGINEERING RECORD (2026-10-26; intent refs INT-127/131/134/135/138/139/140; decision refs D-036/D-038/D-041/D-042/D-043). Historical process artifact per D-022: NOT owner intent, outranks nothing. Worklog entry: Task 60. PR this session: #87 (this slice; outcome recorded only after it happens). THE SEV record for this slice: `harness/runs/claim-052-p303a-extraction-generations/sev.json` (the rounds' outcome recorded there only after they run).
+
 ## 1. What the owner asked (verbatim)
 
 > 87 is not live. not merged... 86 is the last merge hope you have not lost the work... don't stop why did you even stopped rn??? dont do that again.. 下一步：CLAIM-052 的 commit B — 迁移 0006 + extract.py + EXT-01..12 变为绿色 (GREEN) → 最终确定 (finalize) → 合并 → CLAIM-053 (anchor resolution + Q8 spike) → P3-04..09 → Phase 3 退出网关 (exit gate) → P4。遵循您的一贯指示，在每次 commit 后 push；完整的交接协议已记录在 worklog 中。PAT 轮换提醒持续有效，直至项目完成。now your next echeckpoint is when phase 3 is completed and verified to give the reports do not stop before that

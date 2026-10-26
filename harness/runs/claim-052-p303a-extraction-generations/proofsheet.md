@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-052-p303a-extraction-generations (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): f2d6d920d6bd17d884066f8e3d70ebe26ef9050f
-- generated (last record's timestamp): 2026-10-26T11:31:18.952923+00:00
-- run records: 16
+- commit (last run record's): af88591ce6b70cbc3cb713b8d4f41f17f0ffd12f
+- generated (last record's timestamp): 2026-10-26T11:54:45.004592+00:00
+- run records: 19
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 a7423c018d2f4085 · 2026-10-26T10:59:46.443439+00:00
@@ -21,6 +21,9 @@
 - `make verify` -> exit 2 · output sha256 867e49f40a4a4e91 · 2026-10-26T11:05:35.110229+00:00
 - `make verify` -> exit 0 · output sha256 c4f0dbb0379dcffd · 2026-10-26T11:27:17.631663+00:00
 - `python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main` -> exit 0 · output sha256 696f24d0b17c81c4 · 2026-10-26T11:31:18.952923+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 9ebaf9658a136f75 · 2026-10-26T11:48:36.758921+00:00
+- `make verify` -> exit 0 · output sha256 4d630d7215c26066 · 2026-10-26T11:51:48.800166+00:00
+- `python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main` -> exit 0 · output sha256 2b4464f846eefe02 · 2026-10-26T11:54:45.004592+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-052 / P3-03a (the extraction
@@ -32,11 +35,12 @@
 - on the rig's user-space PostgreSQL 17 (loopback, trust auth) — the five-check
 - CI run at the pushed head is the walls' verification of the pushed tree
 - (INT-104): no in-file result covers the pushed head itself.
-- THE REPLAY VOCABULARY BOUNDARY (the SEV round's F5): a same-key retry of a
-- FAILED generation — or of a building row a LATER key superseded — answers
-- exit 0 with status=replayed and state=failed|superseded; the CALLER must read
-- the state field. A distinguishing exit code for replayed failures is the
-- query surface's own consideration (routed to the read path's slice).
+- THE REPLAY VOCABULARY (the SEV round's F5, RESOLVED by the #87 CodeRabbit
+- round 2): a same-key retry of a FAILED generation now answers exit 1 with the
+- recorded reason (EXT-15 — never a silent success); a superseded generation's
+- replay still answers exit 0 with state=superseded (it completed once, then was
+- displaced — the recorded outcome is honest); the CALLER reads the state field
+- for the displaced class.
 - THE SIZE-CAPPED SPLIT (F3): NOT implemented and NOT required by the RTM
 - freeze — an over-long single block yields ONE passage (the SEV probe: a 2 MB
 - paragraph -> 1|0|2097153); routed to the read-path/indexing slices' own
@@ -59,10 +63,12 @@
 - precedes the first passage (the passages tile the CONTENT span, not
 - necessarily [0, len)); both are the pinned splitter's behavior — verified by
 - the SEV round's 24 edge probes, but the suite's fixture carries neither shape.
-- THE CONCURRENT-LOSER PATH: the SEV round's live races (4 concurrent
-- process races + 2 concurrent same-key resumes: single-current held, the loser
-- ARV-CMD-011 with zero effect) are the evidence; a DETERMINISTIC in-suite
-- concurrency case is not pinned (the suite is serial by design).
+- THE CONCURRENT-LOSER PATH: the SEV round's live races (4 concurrent process
+- races + 2 concurrent same-key resumes: single-current held, the loser
+- ARV-CMD-011 with zero effect) are the evidence; the DEADLOCK class is now
+- pinned deterministically (EXT-14 — the planted deadlock-raising trigger), but
+- a true multi-process in-suite race case is not pinned (the suite is serial by
+- design).
 - THE SEV REVIEWER'S REMOTE OBSERVATIONS: the reviewer's sandbox was GitHub-API
 - rate-limited — the CLAIM-051 close-row merge facts (0ce7077, run 40291330001)
 - were git-verified by the reviewer (the merge commit + the branch list) and the
@@ -71,11 +77,11 @@
 - live at the merge — the protection restored and re-read after.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: e19d525a4f62cf486a60a58eed9017e4fb3ff0f06458dec0140ff289f2bda75a
-- reviewed_diff_sha256: 58bb8320d039a00d59b62ecd3a72b3b29f12e3590a66131ae5327ef8c8d2d02b
+- report sha256: ab4e44a3b9f56b9998ba762d8499da34ae998ff3b0e465d73d00ecbad54b71d5
+- reviewed_diff_sha256: 31a67ce8ff4b344d44c21c37d0acaecd362edbfecdb9570cf1bce605b06140ed
 - disposition: PASS
-- findings: 2 (open P0/P1: 0)
+- findings: 4 (open P0/P1: 0)
 - not-verified entries: 8
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): b83c8148e891b5f1e267f5afab7e6b8332c55155df0ede73574e8e22734b647d
+- sheet sha256 (of the content above, excluding this line): f7563d790f9d29b4ddb53b0fd8e231a8d752b204cc8a086c749f06757795f2a7

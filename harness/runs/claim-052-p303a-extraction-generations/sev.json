@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-052-p303a-extraction-generations",
   "base_sha": "0ce707741cc554eca4a4e18cb8acc472c122d39c",
-  "reviewed_diff_sha256": "58bb8320d039a00d59b62ecd3a72b3b29f12e3590a66131ae5327ef8c8d2d02b",
+  "reviewed_diff_sha256": "31a67ce8ff4b344d44c21c37d0acaecd362edbfecdb9570cf1bce605b06140ed",
   "intent_ids": [
     "INT-127",
     "INT-131",
@@ -56,6 +56,7 @@
     "validation": [
       "the independent two-round SEV chain: round 1 BLOCKED (agent-7de931cd: the REAL NUL-corruption P1 + 7 P3) -> every finding fixed RED-first or routed -> round 2 PASS (the reviewer's own five NUL variants + eight transport siblings + the four suite runs + make verify); proof run-15",
       "the CodeRabbit round 1's five inline findings all fixed in-PR, every thread dispositioned BEFORE resolution; proof the PR thread record",
+      "the CodeRabbit round 2's two findings (the deadlock-race class — the SEV round's own live observation, now the retryable ARV-EXT-006 pinned by EXT-14; the failed-generation replay — exit 1 + the recorded reason, pinned by EXT-15) both fixed RED-first (red-03.txt at dc76e29); proof run-17, run-18",
       "make verify GREEN 54/0 at the repair trees (the run-14 exit-2 at the banner-defect tree preserved beside the run-15 retry — the honest red, never smoothed); proof run-14, run-15"
     ]
   },
@@ -116,16 +117,30 @@
       "status": "resolved",
       "what": "the overclaim 'a heading alone is never a passage' (a trailing heading IS its own passage — the tiling forces coverage)",
       "resolution": "the docstrings corrected to the true behavior; round 2 re-verified CLOSED"
+    },
+    {
+      "id": "CR-R2-F1",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the deadlock-race loser was sent to the generic SQL-error branch — a generation PERMANENTLY failed over a transient infrastructure race (the class the SEV round's choreographed completions observed live)",
+      "resolution": "fixed RED-first: 'deadlock detected' (SQLSTATE 40P01's message) classifies as the retryable ARV-EXT-006 before the generic branch — zero effect, the building row persists, the same-key retry completes it; pinned by EXT-14 (red-03.txt at dc76e29)"
+    },
+    {
+      "id": "CR-R2-F2",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the same-key replay of a FAILED generation answered ACK status=replayed exit 0 — a silent success for a recorded failure (the SEV round's F5)",
+      "resolution": "fixed RED-first: the replay answers the recorded failure — exit 1 + the stored fail_reason, zero new rows; pinned by EXT-15 (red-03.txt at dc76e29)"
     }
   ],
   "not_verified": [
-    "the replay vocabulary: a same-key retry of a FAILED or superseded-by-recovery generation answers exit 0 with state=failed|superseded — the caller must read the state field; a distinguishing exit for replayed failures is the query surface's consideration (routed)",
+    "the displaced-class replay: a superseded generation's same-key replay still answers exit 0 with state=superseded (its recorded outcome — completed then displaced — is honest); the FAILED class now answers exit 1 with the recorded reason (EXT-15)",
     "the size-capped split of an over-long block: NOT implemented, NOT required by the RTM freeze (a 2 MB paragraph yields ONE passage); routed to the read-path/indexing slices if the corpus needs it",
     "the typed stale REPORTING: the digest-bind substrate is proven (EXT-09); the typed stale-state query surface is the read path's own slice",
     "the NUL class in the SPINE's own literal paths (record_event's payload, import_source's title): the same pre-existing psql C-string boundary — routed as the spine's bounded follow-up, never silently dropped",
     "the media-type non-gate: an application/pdf that decodes as UTF-8 extracts cleanly — the boundary is the DECODE by design (P3-01's convention)",
     "the splitter's two unpinned edges (the trailing-heading passage, the leading-blank prefix): SEV-probed (24 edge cases) but not suite-pinned — the fixture carries neither shape",
-    "the concurrent-loser path: the SEV round's live races are the evidence; a deterministic in-suite concurrency case is not pinned (the suite is serial by design)",
+    "a true multi-process in-suite race case is not pinned (the suite is serial by design; the deadlock CLASS itself is pinned by EXT-14's planted trigger)",
     "the CI-host class: the five-check run at the pushed head is the walls' verification of the pushed tree (INT-104) — no in-file result covers the pushed head itself"
   ],
   "builder_context": "builder-glm-host-session31-claim052 (the host GLM agent that authored the slice: commit A's RED declaration [the previous session], commit B's GREEN, the CodeRabbit round's five fixes, the SEV round-1 repairs, and the finalize — every fix in-slice)",

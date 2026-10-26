@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main",
+  "exit_code": 0,
+  "commit": "af88591ce6b70cbc3cb713b8d4f41f17f0ffd12f",
+  "output_sha256": "2b4464f846eefe0261554410d8b0b8eb83da3b6783cf69ab76f1d03060ee4b9a",
+  "recorded_at": "2026-10-26T11:54:45.004592+00:00"
+}

@@ -741,3 +741,10 @@ Stage Summary:
 - Evidence: the slice's runs dir; record 41; the red-records binding + amendments.
 - Unresolved: Q6–Q12 unchanged; the routed follow-ups never lost (ARV-SEV-009 undecidable-base; N12; CLAIM-051 next).
 - Next: the SEV rounds + the merge under D-042 → CLAIM-051 → P3-03..09 → the gates — NO PAUSE (INT-134/135/138/139/140).
+
+## Task 59 (CLAIM-051, session 31) — the SEV-7 death classifier
+- What: the split's routed follow-up — the Session's stderr pump + dead_reason + _dead_exit at every spine marker (dup-key → 011 from the DRAINED stderr; the connection-class → the NEW 012 the §4.1 uncertain class resolved by the same-key replay); the restored IMP-18/19 in their validated pre-split forms.
+- Outcome at write: RED observed at 360b24c (red-01.txt), the branch pushed at the RED + PR #86 opened EARLY; the GREEN landed at 917dc64 (the suite 24/24, three runs; make verify 54/0; source adds 87/400); the proof set captured; record 42 + the nav re-derivation; the SEV rounds next.
+- Evidence: the runs dir (red-01, the proof set, notverified, the sheet); record 42; the red-records amendment chain.
+- Unresolved: the routed follow-ups unchanged (notverified item 7).
+- Next: the SEV rounds → the merge under D-042 → P3-03 (Extraction + Anchor + the Q8 spike) — NO PAUSE (INT-134/135/138/139/140).

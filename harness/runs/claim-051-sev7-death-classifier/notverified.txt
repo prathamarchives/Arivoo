@@ -1,0 +1,58 @@
+NOT VERIFIED — the honest limits of CLAIM-051 / the SEV-7 death classifier
+(LAW-04; never empty-by-omission)
+
+WHAT THIS SLICE PROVES, ON WHAT STACK: the spine's dead-session classification
+reads the DRAINED, OBSERVED stderr cause (the Session's second pump from
+construction + dead_reason's wait()-certain read) — the duplicate-key class
+names ARV-CMD-011 with zero effect and the same-key-retry repair; the
+connection-class names the NEW ARV-CMD-012 (the §4.1 UNCERTAIN class — the
+client never assumes committed-or-rolled-back; the same-key replay resolves
+it); an unrecognized death stays the honest ARV-CMD-010 with the raw cause
+appended. Wired at every spine marker (BEGIN/INSERTS/COMMITTED) and the
+journal-phase transactions; a LIVE session's stall raises to the existing
+010 path unchanged. Pinned by IMP-18 (the planted-trigger deterministic
+dup-key arm) and IMP-19 (the killed-backend probe + the replay resolution),
+plus the capture suite's own CAP-21 arm (the real unique-index race still
+classifies 011 — from the drained stderr now).
+
+THE EXPLICIT BOUNDARIES (named, never silently narrowed):
+
+1. The classification is by SUBSTRING over the drained stderr — the named
+   psql/server error phrases (duplicate-key, connection-loss classes), not a
+   structured protocol. A server message outside the phrase lists falls to
+   the honest ARV-CMD-010 with the raw cause appended — named, never guessed;
+   extending a phrase list is a bounded future refinement, never urgent.
+
+2. The TRUE mid-commit network partition remains undecidable to stage
+   deterministically (the honest class the P3-01 SEV-11 record already
+   named): IMP-19's deterministic arm terminates the backend BEFORE the
+   spine's BEGIN (from the client's view the marker flow broke — the same
+   unknowability); the 012 CONTRACT (uncertain + the same-key replay
+   resolves) is what is pinned, and it is position-independent by §4.1's
+   semantics.
+
+3. The classifier names the OBSERVED cause of the session's death only — it
+   does not and cannot know whether the server committed before the
+   connection dropped (that is 012's whole point); the replay IS the
+   resolution and it is the client's only safe move.
+
+4. The stderr pump is a daemon thread reading a pipe — under a catastrophic
+   host failure both pumps can die with the process; dead_reason then
+   returns what was drained (possibly empty), and the classification falls
+   to the honest 010. The wait()+join ordering makes this the exhausted-
+   buffer class, never the lagging-read class (IMP-18/19 pin the ordering).
+
+5. The 011/012 exit codes and repair texts preserve the frozen kernel
+   vocabulary (010/011 unchanged; 012 NEW — declared in the suite, the
+   records, and the RTM §4.1/§6 alignment is the record's text, never a
+   schema change); the S3/K0 suites' pins (test_commands, test_kernel) pass
+   over the re-wiring (make verify green).
+
+6. CI-host observation only (the standing class): the five checks green on
+   the service container; host-level claims remain Q10/EXTERNAL.
+
+7. The follow-ups still routed and never lost: the ARV-SEV-009
+   undecidable-base regression; the N12 self-test-row extension; the sweep
+   micro-gap + the _fail version-guard (P3-08's serialization); the
+   num_nonnulls DB CHECK (its own migration slice); the read-side state
+   filter (query.py's own slice).

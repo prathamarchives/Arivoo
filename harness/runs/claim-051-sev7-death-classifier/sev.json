@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-051-sev7-death-classifier",
+  "base_sha": "360b24c1b228edd0d71bd12094d7f1ae25e678c8",
+  "reviewed_diff_sha256": "977e1f118fe34cbe79e12cc5032369bae79310d113d016a23a49fc8d9fc70cf3",
+  "intent_ids": [
+    "INT-127",
+    "INT-131",
+    "INT-134",
+    "INT-135",
+    "INT-138",
+    "INT-139",
+    "INT-140"
+  ],
+  "requirement_ids": [
+    "SYS-04",
+    "SYS-03",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
+  "changed_components": [
+    "harness/commands.py (the Session's stderr pump from construction + dead_reason — the drained OBSERVED cause, wait()-certain, the pump joined; the _dead_exit classifier wired at every spine marker and the journal transactions: duplicate-key -> ARV-CMD-011 zero-effect retry-same-key / the connection-class -> the NEW ARV-CMD-012 the §4.1 UNCERTAIN class resolved by the same-key replay / unrecognized -> the honest ARV-CMD-010 with the raw cause; a LIVE session raises to the unchanged stall path)",
+    "harness/tests/test_import.py (the restored classifier probe + the reserved cases IMP-18/19 in their validated pre-split forms)",
+    "harness/red-records.json (the amendment: the probe + the restored cases, the RED observed at 360b24c)",
+    "the registry/navigation homes (the 050 rule-4 close row, the 051 open row, STATE/AGENTS/PLAN re-derivation, record 42, WORKLOG Task 59, the runs dir)"
+  ],
+  "interfaces_reviewed": [
+    "Session._drain_err/dead_reason: the second pump + the EOF-detection + wait()+join before the cause read (never the lagging-read class)",
+    "_dead_exit at MARK_BEGUN/MARK_INSERTS/MARK_COMMITTED and _journal_txn: the INSERTS path preserves the _replay_after_conflict resolution BEFORE the classification",
+    "the frozen vocabulary: 010/011 byte-identical to main's texts; 012 NEW with the §4.1 semantics; the exit codes (real crash 2, classification 1)",
+    "IMP-18's planted-trigger arm (deterministic, no choreography) and IMP-19's killed-backend probe (the before-BEGIN position; the 012 contract position-independent per §4.1)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the suite 22/22 (the restored probe + IMP-18/19; three consecutive runs at the GREEN tree); proof run-01",
+      "RED-01 preserved (the machinery-absent gate at 360b24c; the reviewer reproduced it byte-identically at commit A 3d505cd); the amendment chain (ARV-RED-006)",
+      "the eleven machinery suites green over the spine re-wiring incl. the S3 crash matrix + the kernel twelve + the capture suite's CAP-21 real-race arm; proof run-02..12"
+    ],
+    "integration_verification": [
+      "the reviewer's independent probes: the REAL source_work_version race (no planted trigger) -> 011 with verified zero effect + the same-key retry re-reading the ordinal; the connection-class at three positions (before-BEGIN, mid-INSERT, mid-COMMIT via the deferred-constraint kill) -> 012 + the replay resolving each; the unrecognized custom RAISE -> the honest 010 with the raw cause; the LIVE stall (pg_sleep 40) -> the unchanged 010 with the classifier silent",
+      "the exit vocabulary: crash.py's six points exit 2 (no classification, no ack); every classification exits 1"
+    ],
+    "system_verification": [
+      "SYS-04: the concurrent-loser semantics preserved (the replay/conflict resolution before the classification) + the death classes named",
+      "the §4.1 uncertain-ack class now has its NAME (012) and its resolution (the same-key replay) — never an assumed outcome",
+      "the honest boundaries: notverified items 1-7"
+    ],
+    "validation": [
+      "make verify GREEN (canonical 54/0) at the content heads; the PR-mode gate green RECORDED at the finalize (proof run-14)",
+      "the SEV round-1: BLOCKED with 2 P1 + 1 P3 — every finding an evidence-chain honesty defect (the false count; the claimed-but-failed sheet assembly; the malformed Phase line), the machinery verified clean claim-by-claim; the round-2 re-verification closes them"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a session dies on a duplicate-key unique violation this key does not own (the concurrent loser)",
+      "control": "ARV-CMD-011 from the DRAINED stderr; zero effect; retry the SAME key (the ordinal re-read)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "a session dies on an infrastructure/connection error (the outcome unknowable from the client)",
+      "control": "ARV-CMD-012 the §4.1 UNCERTAIN class; the same-key replay resolves committed-vs-rolled-back from the recorded state",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "an unrecognized death or a LIVE stall",
+      "control": "the honest ARV-CMD-010 (the raw cause appended / the unchanged stall path — the classifier never fires for a live session)",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "round 1 (F1): the 'suite 24 cases' count was false (22 — codes conflated with cases) across six homes; run-01's output digest proved 22",
+      "disposition": "FIXED: the count corrected in STATE/PLAN/record 42 §4/§6/WORKLOG; the two immutable commit messages carry the error and record 42 §8's note is its honest correction"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "round 1 (F2): the Proof Sheet was claimed assembled while the assembly call had failed on the not-yet-written notverified path (PRF-002; the PR-mode gate RED on PRF-004+SEV-001)",
+      "disposition": "FIXED: the sheet actually assembled with the post-round finalize; record 42 §6/§7 re-worded to the facts; the gate's green run recorded (run-14)"
+    },
+    {
+      "id": "SEV-3",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1 (F3, the reviewer's own P3 grade recorded at the frozen P2 rung): STATE's Phase line malformed by the re-derivation's stale tail (the duplicated continuation + the unbalanced bold)",
+      "disposition": "FIXED: the Phase bullet rewritten clean in the round-1 repair commit"
+    }
+  ],
+  "not_verified": [
+    "the substring-phrase classification (a server message outside the phrase lists falls to the honest 010 — the bounded refinement is named, never urgent)",
+    "the true mid-commit network partition remains undecidable to stage deterministically (IMP-19's before-BEGIN arm + the position-independence of the 012 contract)",
+    "the full list: notverified items 1-7"
+  ],
+  "builder_context": "builder-glm-host-session31-claim051 (the host GLM agent that authored the slice: the RED declaration, the validated-form restoration, the finalize, and the round-1 repairs — every fix in-slice)",
+  "reviewer_context": "fresh-context GLM SEV reviewer agent-8fe337ac, round 1, session-31, claim-051 slice slice/claim-051-sev7-death-classifier (BLOCKED at the finalize head 1b00ff5: 2 P1 + 1 P3 — all evidence-chain honesty, the machinery verified CLEAN claim-by-claim on own scratch DBs: the REAL source_work_version race without the planted trigger, the connection-class kills at three positions incl. the mid-COMMIT deferred-constraint stage, the unrecognized custom RAISE, the LIVE pg_sleep stall, the exit-code vocabulary at all six crash points, the byte-identical RED reproduction at commit A, the red-records chain, the 87/400 source count), 2026-10-26",
+  "disposition": "PASS",
+  "review_summary": "The stderr-drained death classifier is behaviorally sound: the dup-key class, the connection-class (012) at three staged positions, the unrecognized-death 010, and the live-stall 010 all reproduced by independent probes on the real rig, with the frozen vocabulary preserved and the exit codes correct. The round-1 block was entirely evidence-chain honesty (a false case count, a claimed-but-failed sheet assembly, a malformed Phase line) — all repaired in the round-1 commit, with the sheet actually assembled and the gate green recorded at the finalize.",
+  "sheet_section": true
+}

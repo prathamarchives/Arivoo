@@ -55,9 +55,12 @@ class Session:
     execute as they are fed — markers make execution observable).
 
     A dedicated reader thread drains stdout line-by-line into a queue (the pipe
-    is small; an undrained pipe would eventually deadlock the server side), and
+    is small; an undrained pipe would eventually deadlock the server side),
     read_until() consumes lines until the marker (psql flushes per statement —
-    verified empirically, record 18 §4.3)."""
+    verified empirically, record 18 §4.3), and a SECOND pump drains stderr into
+    a buffer from construction (SEV-7's refinement, P3-02: the death classifier
+    reads the OBSERVED drained cause — never the poll()-inferred guess, never
+    a lagging read that lost the duplicate-key line)."""
 
     def __init__(self, db: str, user: str, owner: str):
         cfg = pg.config()
@@ -71,14 +74,40 @@ class Session:
             text=True, bufsize=1,
         )
         self._lines: "queue.Queue[str | None]" = queue.Queue()
+        self._eof = False
+        self._err: list[str] = []
         self._reader = threading.Thread(target=self._drain, daemon=True)
         self._reader.start()
+        self._errpump = threading.Thread(target=self._drain_err, daemon=True)
+        self._errpump.start()
         self.send(f"SET app.current_owner={_q(owner)};")
 
     def _drain(self) -> None:
         for line in self.proc.stdout:
             self._lines.put(line.rstrip("\n"))
+        self._eof = True
         self._lines.put(None)  # EOF
+
+    def _drain_err(self) -> None:
+        for line in self.proc.stderr:
+            self._err.append(line)
+        # stderr EOF: the pump ends — everything the process ever said is in _err
+
+    def dead_reason(self) -> "str | None":
+        """The DRAINED stderr cause of a DEAD session, or None when it is alive
+        (SEV-7: the classification reads the observed cause, never a guess).
+        EOF on stdout means the process closed its output — it is gone or
+        going; wait() makes the death CERTAIN before the cause is read, so the
+        pump has flushed everything it will ever carry (never the lagging-read
+        class that lost the duplicate-key line at the pre-refinement tree)."""
+        if self.proc.poll() is None and not self._eof:
+            return None  # a live session: the stall class, never a guess
+        try:
+            self.proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            pass
+        self._errpump.join(timeout=5)  # the pump's final flush after the reap
+        return "".join(self._err)
 
     def send(self, text: str) -> None:
         self.proc.stdin.write(text + "\n")
@@ -169,6 +198,40 @@ def _replay_after_conflict(*, db: str, owner: str, idem_key: str, body_hash: str
     return "replayed"
 
 
+_DUP = "duplicate key value violates unique constraint"
+_CONN = ("connection to server", "server closed the connection", "terminating connection",
+         "connection refused", "could not connect", "password authentication", "no password")
+
+
+def _dead_exit(sess: "Session", *, idem_key: str) -> "int | None":
+    """The dead-session classifier (SEV-7's refinement, routed at P3-01's SEV
+    round): a DEAD session's cause is read from the DRAINED stderr — the
+    observed duplicate-key violation is ARV-CMD-011 (zero effect: the
+    transaction rolled back; retry the SAME key), a connection-class death is
+    the NEW ARV-CMD-012 (the §4.1 UNCERTAIN class: the commit state is
+    unknowable from the client — the same-key replay resolves it), an
+    unrecognized death stays the honest ARV-CMD-010. A LIVE session returns
+    None — the caller's stall class, never a guess."""
+    cause = sess.dead_reason()
+    if cause is None:
+        return None
+    if _DUP in cause:
+        print(f"FAIL ARV-CMD-011: the session ended before the commit marker — a concurrent "
+              "writer won a unique constraint this key does not own (zero effect, the transaction rolled back)")
+        print("      repair: retry the SAME idempotency key (the ordinal is re-read) or use a new one")
+        return 1
+    if any(s in cause for s in _CONN):
+        print(f"FAIL ARV-CMD-012: the session died on an infrastructure error — the outcome is UNCERTAIN "
+              f"(§4.1: the commit state is unknowable from the client); observed cause: {cause.strip()[:200]}")
+        print("      repair: replay the SAME idempotency key — the replay check answers committed-vs-rolled-back "
+              "from the recorded state; never assume either")
+        return 1
+    print(f"FAIL ARV-CMD-010: the session died before the marker with an unrecognized cause — the honest "
+          f"unknown; raw cause: {cause.strip()[:200]}")
+    print("      repair: inspect the rig's health; the same-key replay is safe (the transaction either committed or rolled back)")
+    return 1
+
+
 def record_event(*, db: str, owner: str, actor: str, client_id: str,
                  idem_key: str, payload: str, crash_at: str = None) -> int:
     """The first registered command: append one evidence event, exactly once.
@@ -246,7 +309,13 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
                          f"VALUES ({_q(owner)}, {_q(idem_key)}, {_q(client_id)}, {_q(command)}, {_q(body_hash)}, {_q(ref)}, {_q(actor)}, {_q(ts)});"]
         sess.send("BEGIN;")
         sess.send(f"\\echo {MARK_BEGUN}")
-        sess.read_until(MARK_BEGUN)
+        try:
+            sess.read_until(MARK_BEGUN)
+        except TimeoutError:
+            rc = _dead_exit(sess, idem_key=idem_key)
+            if rc is not None:
+                return rc
+            raise  # a live session with no marker: the honest unknown (ARV-CMD-010)
         if crash_at == "after-begin":
             sess.kill()
             return 2
@@ -263,22 +332,22 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
                 return 0
             if recorded == "conflict":
                 return 1
-            if sess.proc.poll() is not None:
-                # The SEV round's P3: the session DIED (ON_ERROR_STOP) on a unique
-                # violation this key does not own — a zero-effect race loss, NOT a stall.
-                # The stderr-classification refinement (duplicate-key vs connection
-                # error) is CLAIM-051's own bounded follow-up (the P3-01 SEV-11 routing).
-                print(f"FAIL ARV-CMD-011: the session ended before the commit marker — a concurrent "
-                      "writer won a unique constraint this key does not own (zero effect, the transaction rolled back)")
-                print("      repair: retry the SAME idempotency key (the ordinal is re-read) or use a new one")
-                return 1
+            rc = _dead_exit(sess, idem_key=idem_key)  # SEV-7: the drained OBSERVED cause, never the poll()-inferred guess
+            if rc is not None:
+                return rc
             raise  # a live session with no marker: the honest unknown (ARV-CMD-010)
         if crash_at == "pre-commit":
             sess.kill()
             return 2
         sess.send("COMMIT;")
         sess.send(f"\\echo {MARK_COMMITTED}")
-        sess.read_until(MARK_COMMITTED)
+        try:
+            sess.read_until(MARK_COMMITTED)
+        except TimeoutError:
+            rc = _dead_exit(sess, idem_key=idem_key)
+            if rc is not None:
+                return rc
+            raise  # a live session with no marker: the honest unknown (ARV-CMD-010)
         if crash_at == "post-commit-pre-ack":
             sess.kill()
             return 2
@@ -333,8 +402,8 @@ def _import_build(*, owner, actor, client_id, idem_key, title, work_id, digest,
 
 
 def _journal_txn(sess: "Session", stmt: str, *, idem_key: str) -> bool:
-    """One journal-phase transaction — its own commit and marker; a death or
-    stall is the named ARV-CMD-010 (never silent)."""
+    """One journal-phase transaction — its own commit and marker; a dead
+    session classifies (SEV-7), a live stall is the named ARV-CMD-010."""
     try:
         sess.send("BEGIN;")
         sess.send(stmt)
@@ -343,6 +412,9 @@ def _journal_txn(sess: "Session", stmt: str, *, idem_key: str) -> bool:
         sess.read_until(MARK_COMMITTED)
         return True
     except TimeoutError:
+        rc = _dead_exit(sess, idem_key=idem_key)
+        if rc is not None:
+            return False
         print(f"FAIL ARV-CMD-010: the journal transaction for key {idem_key!r} did not reach its "
               "commit marker — the honest unknown (the transaction rolled back or never ran)")
         print("      repair: inspect the rig's health; the same-key retry is safe (nothing committed)")

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-051-sev7-death-classifier --diff main",
+  "exit_code": 0,
+  "commit": "b782c4b96cc56a6c9f1a464055e4de6bfd6247f4",
+  "output_sha256": "8fda8ee2a7cdc36d682ec8912139d88c47d0d7517151bd377acc43c9f13f6322",
+  "recorded_at": "2026-10-26T07:52:37.224797+00:00"
+}

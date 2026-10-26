@@ -1,0 +1,25 @@
+# CLAIM-051 — P3-02's bounded follow-up: the SEV-7 stderr-drained death
+# classifier (the P3-01 notverified SEV-11 routing's split form, adopted at
+# CLAIM-050 when SIZE-002's 519>400 refusal forced LAW-05's
+# one-behavior-per-slice rule; the routing carried in four homes there). The
+# spine's dead-session 011 stays main's poll()-inferred form until this slice
+# refines it: the Session's stderr pump from construction + dead_reason (the
+# drained OBSERVED cause, wait()-certain before classification), the
+# _dead_exit classifier at every spine marker (duplicate-key -> ARV-CMD-011
+# zero-effect retry-same-key; the connection-class -> the NEW ARV-CMD-012 the
+# §4.1 uncertain class resolved by the same-key replay; unrecognized -> the
+# honest ARV-CMD-010), the suite cases IMP-18/19 (the planted-trigger
+# deterministic dup-key arm — no choreography; the killed-backend probe + the
+# replay resolution), the CLAIM-050 rule-4 close row (the #85 merge facts)
+# + the post-#85 navigation re-derivation. RED-first at the predecessor
+# 360b24c (machinery-absent: no Session.dead_reason, no _dead_exit).
+harness/tests/test_import.py D-041
+harness/commands.py D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/42-SEV7-DEATH-CLASSIFIER.md D-042
+harness/runs/claim-051-sev7-death-classifier D-042

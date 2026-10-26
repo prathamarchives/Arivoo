@@ -557,7 +557,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-050 (P3-02) RED: the import suite's machinery-absent class observed at the predecessor ab22029 (commit A 1c556b36 carries the suite; recover.py/0005_import_journal.sql absent, the phased crash points absent from POINTS, the stderr-drained death classifier absent from the Session — the waiting-for-harness form, the S1/record-18 §4.1 + P3-01 capture-suite precedent; exit 1, red-01.txt) — the implementation lands AFTER this RED, never before it (LAW-11)",
-    "current_sha256": "a756ce2fdd1fa46dccaa1310c9b4fbc3fec11a1266d25dacf360a886db454c5c",
+    "current_sha256": "93b13e8a8936c4b1195adf8f348b7b6fe1ab89e6c4c714decdcfc50eb63762a9",
     "amendments": [
       {
         "prior_sha256": "f8a5c1d75ac50e2e956ee527214e2a66ee1cba9a9417d6c5d29681fc9f5ec3f8",
@@ -576,6 +576,12 @@
         "new_sha256": "a756ce2fdd1fa46dccaa1310c9b4fbc3fec11a1266d25dacf360a886db454c5c",
         "note": "CLAIM-050 (P3-02) the CodeRabbit round (11 inline findings: 4 real fixes, 1 routed, 3 stale-already-fixed, 3 wordings) — the suite gains IMP-21 (the #4 crash-domain 409 guard: a different body under the same key over a crashed attempt is the named conflict — the guard reads the journal row's body_hash recomputed under the ROW'S client_id, so a fresh retry from a different client re-issuing the SAME import is legal while a genuinely different import is refused; the UPSERT syncs client_id/body_hash/run_id/input_hash on the rewind) and IMP-22 (the #7 named refused-write: the planted RAISE on the failed-UPDATE makes the walk print ARV-IMP-003 and leave the row nonterminal — the state captured at its moment before the re-walk, the case-plumbing ordering fix recorded); IMP-09's replay assert gains the work_id pin (#6: the replay ACK must carry the recorded Work ID so a post-crash retry can recover it); red-03.txt preserves the observed RED at the pre-fix tree (17 PASS + IMP-09/21/22 FAIL). The #3/#5 sweep recheck (per-unlink, source + live-journal, fail-closed), the #9 STATE compression, the #10 + micro-gap routing to the sync slice (notverified item 13) ride the same round. 22/22 GREEN after; the capture suite 23/23 over the client-id-aware guard (its CAP-13/21 retries use different client-ids — the guard's re-drive-domain identity is the IMPORT, not the client)",
         "observed_at": "2026-10-26T08:30:00+00:00"
+      },
+      {
+        "prior_sha256": "a756ce2fdd1fa46dccaa1310c9b4fbc3fec11a1266d25dacf360a886db454c5c",
+        "new_sha256": "93b13e8a8936c4b1195adf8f348b7b6fe1ab89e6c4c714decdcfc50eb63762a9",
+        "note": "CLAIM-051 (P3-02's bounded follow-up — the SEV-7 stderr-drained death classifier, the P3-01 SEV-11 routing's split form): the suite's machinery-absent gate restores the classifier probe (hasattr(Session, 'dead_reason')) and the reserved cases IMP-18/19 return in their validated pre-split forms — IMP-18 the planted-trigger duplicate-key death classified ARV-CMD-011 FROM THE DRAINED STDERR (never poll()-inferred; zero effect; the same-key retry re-reads the ordinal and commits), IMP-19 the killed-backend connection-class death classified the NEW ARV-CMD-012 (the §4.1 UNCERTAIN class) and resolved by the same-key replay (committed, exactly one). The RED observed at the predecessor 360b24c (exit 1, ARV-TEST-000 machinery-absent: the classifier absent; red-01.txt); the implementation lands after this RED (LAW-11). Assertions ADD (two cases restored + the probe), none weakened; the summary line updated",
+        "observed_at": "2026-10-26T10:10:00+00:00"
       }
     ]
   }

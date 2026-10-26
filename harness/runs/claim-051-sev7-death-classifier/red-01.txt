@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the death classifier is absent (machinery-absent class; missing files: []; missing crash points: []; missing the stderr-drained death classifier: True) — CLAIM-051's implementation lands after this RED, never before it (LAW-11)

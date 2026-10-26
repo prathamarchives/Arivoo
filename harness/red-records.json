@@ -592,7 +592,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-052 (P3-03a) RED: the extraction suite's machinery-absent class observed at the predecessor 0ce7077 (commit A b9c8920 carries the suite; extract.py/0006_extraction_generations.sql absent, the extract_source command absent from the REGISTRY — the waiting-for-harness form, the S1/record-18 §4.1 + P3-01/P3-02 precedent; exit 1, red-01.txt) — the implementation lands AFTER this RED, never before it (LAW-11)",
-    "current_sha256": "b229160d436ea5248ccb2f408037b554f5813ebf6b8d748e09eff35f4953a08e",
+    "current_sha256": "88317dabaea77e48d5a2511beb44a68eaeab7ab698ab41c96d88d621a24e0373",
     "amendments": [
       {
         "prior_sha256": "55ea59a5c5c3610ffff0e2dc104e74c04756bfd5af91b5b8b95a759a6a90b9e8",
@@ -604,6 +604,12 @@
         "new_sha256": "b229160d436ea5248ccb2f408037b554f5813ebf6b8d748e09eff35f4953a08e",
         "note": "the fresh-context SEV round 1 (reviewer agent-7de931cd, BLOCKED with 1 P1 + 7 P3) — F1 the P1 REAL DEFECT pinned RED-first as the NEW EXT-13 (a NUL-bearing valid-UTF-8 source: the psql literal transport cannot carry U+0000 — the C-string boundary truncated the statement mid-literal and the pre-fix extractor COMMITTED a corrupted current generation (exit 0, the stored passage text truncated while the offsets and digest claimed the full slice); red-02.txt preserves the observed RED at 0be970f; the repair is the named ARV-EXT-005 refusal BEFORE any row — zero generations, the corrupted-commit class dead by construction); F3/F4 the EXT-04/EXT-09 case texts corrected to what is pinned (the size-capped over-long-block split and the typed stale REPORTING were declared-but-unimplemented claims — the size cap routed to the read-path/indexing slices, the stale reporting named the read path's own slice, never silently narrowed); the summary line EXT-01..12 -> EXT-01..13. Assertions ADD (one case), none removed",
         "observed_at": "2026-10-26T11:30:00+00:00"
+      },
+      {
+        "prior_sha256": "b229160d436ea5248ccb2f408037b554f5813ebf6b8d748e09eff35f4953a08e",
+        "new_sha256": "88317dabaea77e48d5a2511beb44a68eaeab7ab698ab41c96d88d621a24e0373",
+        "note": "the SEV round-2's N1 (cosmetic, the reviewer's own merge-condition list): the stale inline comment at the EXT-09 case ('the source-hash mismatch: the typed stale state' — the pre-repair wording) corrected to the substrate form, matching the corrected header case text and the PASS message. Comments carry no assertions; zero behavioral change; assertions untouched",
+        "observed_at": "2026-10-26T12:10:00+00:00"
       }
     ]
   }

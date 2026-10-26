@@ -280,7 +280,9 @@ def main() -> int:
               "the new edition (a NEW source row of the same work): its generation binds the NEW source only; the old source's generations untouched (a generation NEVER crosses source rows)",
               "the generation's input bind is the source ROW (the version): the ordinal is per-source, the lineage never mixes")
 
-        # EXT-09 — the source-hash mismatch: the typed stale state
+        # EXT-09 — the stale-detection substrate: the digest MATCH binds the
+        # source row it was built from (the typed stale REPORTING is the read
+        # path's own slice — the corrected header case text)
         st9 = audit(f"SELECT (g.input_digest = s.digest) FROM arv.extraction_generation g "
                     f"JOIN arv.source s ON s.id=g.source_id WHERE g.source_id='{sid8}' AND g.state='current';")
         ok9 = st9 == "t"

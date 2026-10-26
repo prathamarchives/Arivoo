@@ -166,7 +166,7 @@ def ack_field(p: subprocess.CompletedProcess, field: str) -> str:
 
 
 def resident(digest: str) -> bool:
-    return (BLOB_DIR / digest).is_file()
+    return (pathlib.Path(BLOB_DIR) / digest).is_file()
 
 
 def fresh_file(name: str, text: str) -> str:
@@ -245,10 +245,11 @@ def main() -> int:
               "the retry is the recovery substrate's re-drive: the journal row rewinds, the metadata commit runs once under the same idempotency key")
 
         # IMP-05 — crash after-staging: journal staging, NO blob -> the walk: failed(absent); the same-key retry completes
+        fE5 = fresh_file("echo5.md", "Echo five bytes: the absent-blob staging case — never imported before this point.\n")
+        d5 = hashlib.sha256(pathlib.Path(fE5).read_bytes()).hexdigest()
         c5 = crash("--command", "import_source", "--point", "after-staging",
                    "--owner", "A", "--client-id", "cli-1", "--idem-key", "imp-05",
-                   "--title", "Absent Blob", "--file", fA2)
-        d5 = hashlib.sha256(pathlib.Path(fA2).read_bytes()).hexdigest()
+                   "--title", "Absent Blob", "--file", fE5)
         ok5a = (c5.returncode == 2 and jrow("imp-05").split("|")[0] == "staging"
                 and not resident(d5)
                 and audit("SELECT count(*) FROM arv.source WHERE idempotency_key='imp-05';") == "0")
@@ -256,7 +257,7 @@ def main() -> int:
         ok5b = (w5.returncode == 0 and "ARV-BLOB-002" in w5.stdout
                 and jrow("imp-05", "state, fail_reason").split("|")[0] == "failed"
                 and "ARV-BLOB-002" in jrow("imp-05", "state, fail_reason"))
-        r5 = import_src("imp-05", "Absent Blob", fA2)  # failed is RETRYABLE (the card's acceptance)
+        r5 = import_src("imp-05", "Absent Blob", fE5)  # failed is RETRYABLE (the card's acceptance)
         ok5 = (ok5a and ok5b and r5.returncode == 0
                and audit("SELECT count(*) FROM arv.source WHERE idempotency_key='imp-05';") == "1"
                and jrow("imp-05").split("|")[0] == "complete")
@@ -315,22 +316,29 @@ def main() -> int:
               "crash before the metadata commit (staging_verified): the walk re-drives the SAME key -> complete; exactly one source, exactly one work",
               "the staging_verified exit is the metadata commit: the walk re-drives it via the recorded fields under the original idempotency key")
 
-        # IMP-09 — the lost metadata ack: committed, NO ack -> the walk replays -> complete (zero-or-one)
+        # IMP-09 — the lost metadata ack (post-commit-pre-ack): the metadata
+        # transaction carried the journal's complete update ATOMICALLY (P3-02's
+        # in-transaction convergence — one transaction, one truth: the journal can
+        # NEVER lag the commit), so the crash leaves the row complete, the source
+        # committed, and NO ack; the walk reports already-complete and the
+        # same-key replay answers from the recorded state (zero-or-one).
         c9 = crash("--command", "import_source", "--point", "post-commit-pre-ack",
                    "--owner", "A", "--client-id", "cli-1", "--idem-key", "imp-09",
                    "--title", "Lost Ack", "--file", fA)
         ok9a = (c9.returncode == 2 and "status=committed" not in c9.stdout
                 and audit("SELECT count(*) FROM arv.source WHERE idempotency_key='imp-09';") == "1"
-                and jrow("imp-09").split("|")[0] == "staging_verified")  # the journal update lost
+                and jrow("imp-09", "state, source_id").split("|")[0] == "complete")  # converged in-transaction
         w9 = walk("A")
         sid9 = audit("SELECT id FROM arv.source WHERE idempotency_key='imp-09';")
-        ok9 = (ok9a and w9.returncode == 0
+        r9 = import_src("imp-09", "Lost Ack", fA)  # the same-key replay answers the recorded state
+        ok9 = (ok9a and w9.returncode == 0 and "already-complete" in w9.stdout
                and jrow("imp-09", "state, source_id").split("|")[0] == "complete"
                and jrow("imp-09", "state, source_id").split("|")[1].strip() == sid9
+               and r9.returncode == 0 and "status=replayed" in r9.stdout
                and audit("SELECT count(*) FROM arv.source WHERE idempotency_key='imp-09';") == "1")
         check("IMP-09", ok9,
-              "the lost metadata ack: the command committed but the journal row stayed staging_verified — the walk's re-drive hits the recorded REPLAY and marks complete; the source count stays ONE (zero-or-one effect)",
-              "the re-drive rides the spine's replay semantics: same key + same reconstructed body -> the recorded result, never a second effect")
+              "the lost metadata ack: the journal rode the commit (complete in-transaction, source_id set), no ack emitted; the walk reports already-complete and the SAME-key replay answers status=replayed — the source count stays ONE (zero-or-one effect)",
+              "the journal's complete transition rides the metadata transaction itself — one transaction, one truth; the lost-ack is recovered by the replay's recorded answer, never a second effect")
 
         # IMP-10 — the vanished blob at staging_verified: NEVER a phantom complete Source
         fD = fresh_file("delta.md", "Delta bytes: the phantom-closure case.\n")
@@ -366,36 +374,50 @@ def main() -> int:
               "a title carrying pipes, quotes, a 'MARK:' marker, and a NEWLINE: the walk's row_to_json reads never corrupt, the canonical body reconstructs hash-exact (no ARV-IMP-001), and the title round-trips WHOLE",
               "journal reads are JSON at the SQL boundary (one escaped line per row) and the re-drive rebuilds the canonical body from the recorded FIELDS — never a re-parse of psql text, never marker-fragile")
 
-        # IMP-12 — the walk's convergence: twice-run = identical states; terminal rows untouched
+        # IMP-12 — the walk's convergence: run over a FRESH staging row, then
+        # twice-run = identical states; terminal rows untouched
+        fL = fresh_file("lima.md", "Lima bytes: the convergence discipline case.\n")
+        dL = hashlib.sha256(pathlib.Path(fL).read_bytes()).hexdigest()
+        crash("--command", "import_source", "--point", "after-put",
+              "--owner", "A", "--client-id", "cli-1", "--idem-key", "imp-12x",
+              "--title", "Convergence", "--file", fL)
+        w12a = walk("A")  # the first walk drives imp-12x to complete + sweeps
+        ok12a = (w12a.returncode == 0 and jrow("imp-12x").split("|")[0] == "complete"
+                and resident(dL))
         before = audit("SELECT id, state, updated_at FROM arv.import_journal ORDER BY created_at, id;")
         n_src = audit("SELECT count(*) FROM arv.source;")
         wa, wb = walk("A"), walk("A")
         after = audit("SELECT id, state, updated_at FROM arv.import_journal ORDER BY created_at, id;")
-        ok12 = (wa.returncode == 0 and wb.returncode == 0
+        ok12 = (ok12a and wa.returncode == 0 and wb.returncode == 0
                 and before == after  # the terminal discipline: updated_at UNCHANGED across two walks
                 and audit("SELECT count(*) FROM arv.source;") == n_src)
         check("IMP-12", ok12,
-              "the walk is convergence-idempotent: running it TWICE over the same journal changes NOTHING (states and updated_at byte-identical; no new sources)",
+              "the walk is convergence-idempotent: after the first walk drives the fresh staging row to complete, running it TWICE MORE changes NOTHING (states and updated_at byte-identical; no new sources)",
               "the walk touches only non-terminal rows; complete/failed are terminal by §3.1 — the second walk must be a no-op, never a re-drive")
 
-        # IMP-13 — the two-crash re-drive: oldest-first; both complete; the same-work variant versions 1,2
+        # IMP-13 — the two-crash re-drive: oldest-first; both complete; the same-work variant re-reads the ordinal.
+        # A --work-id crash needs an EXISTING work (the --title path creates the work INSIDE phase 3 — a crashed
+        # --title import has no work yet, and crash.py prints no ACK to harvest a work_id from) — the base import
+        # lands the work first, then two crashed --work-id imports pile up at staging_verified for ONE walk.
+        fF0 = fresh_file("foxtrot0.md", "Foxtrot base bytes: the work-existence anchor.\n")
+        p13w = import_src("imp-13w", "Foxtrot", fF0)
+        wF = ack_field(p13w, "work_id")
         fF1, fF2 = fresh_file("foxtrot1.md", "Foxtrot one bytes.\n"), fresh_file("foxtrot2.md", "Foxtrot two bytes.\n")
         c13a = crash("--command", "import_source", "--point", "after-verify",
                      "--owner", "A", "--client-id", "cli-1", "--idem-key", "imp-13a",
-                     "--title", "Foxtrot", "--file", fF1)
-        wF = ack_field(c13a, "work_id")
+                     "--work-id", wF, "--file", fF1)
         c13b = crash("--command", "import_source", "--point", "after-verify",
                      "--owner", "A", "--client-id", "cli-1", "--idem-key", "imp-13b",
-                     "--work-id", wF, "--file", fF2)  # crash.py carries --work-id (the exit-2 lesson)
+                     "--work-id", wF, "--file", fF2)
         w13 = walk("A")
         versions = audit(f"SELECT source_version FROM arv.source WHERE work_id='{wF}' ORDER BY source_version;")
-        ok13 = (c13a.returncode == 2 and c13b.returncode == 2 and w13.returncode == 0
+        ok13 = (p13w.returncode == 0 and c13a.returncode == 2 and c13b.returncode == 2 and w13.returncode == 0
                 and jrow("imp-13a").split("|")[0] == "complete"
                 and jrow("imp-13b").split("|")[0] == "complete"
-                and versions.splitlines() == ["1", "2"]
-                and audit(f"SELECT count(*) FROM arv.source WHERE work_id='{wF}';") == "2")
+                and versions.splitlines() == ["1", "2", "3"]
+                and audit(f"SELECT count(*) FROM arv.source WHERE work_id='{wF}';") == "3")
         check("IMP-13", ok13,
-              "two crashed imports re-driven by ONE walk: oldest-first, both complete, each exactly-one; the same-work second import re-reads the ordinal and lands version 2",
+              "two crashed imports re-driven by ONE walk: oldest-first, both complete, each exactly-one; the same-work imports re-read the ordinal and land versions 2,3 after the base's 1",
               "the walk processes the journal in created_at,id order (the stable total order); the edition ordinal is re-read at every drive — the loser never duplicates")
 
         # IMP-14 — owner isolation: the journal RLS-scoped; B's walk blind to A; direct-DB fails closed
@@ -410,13 +432,24 @@ def main() -> int:
                 and wB.returncode == 0
                 and audit("SELECT state FROM arv.import_journal WHERE idempotency_key='imp-14';") == "complete"
                 and "imp-14" not in wA.stdout)
-        noguc = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "arv_app", "-d", DB, "-c",
-                                "SELECT count(*) FROM arv.import_journal;"],
-                               capture_output=True, text=True, timeout=60)
-        ok14 = ok14 and noguc.returncode != 0
+        noguc_sel = subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1", "-U", "arv_app", "-d", DB, "-c",
+                                    "SELECT count(*) FROM arv.import_journal;"],
+                                   capture_output=True, text=True, timeout=60)
+        noguc_ins = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "arv_app", "-d", DB, "-c",
+                                    "INSERT INTO arv.import_journal (id, owner_scope, actor, idempotency_key, "
+                                    "client_id, digest, media_type, byte_size, acquired_via, state, body_hash, "
+                                    "run_id, input_hash, created_at, updated_at) VALUES "
+                                    "('22222222-2222-7222-8222-222222222222', 'A', 'owner', 'rogue', 'cli', "
+                                    "'" + "0" * 64 + "', 'text/plain', 1, 'rogue', 'staging', 'x', 'r', 'h', "
+                                    "'2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z');"],
+                                   capture_output=True, text=True, timeout=60)
+        ok14 = ok14 and noguc_sel.returncode == 0 and noguc_sel.stdout.strip() == "0" \
+            and noguc_ins.returncode != 0 \
+            and ("row-level security" in noguc_ins.stdout + noguc_ins.stderr
+                 or "violates row-level" in noguc_ins.stdout + noguc_ins.stderr)
         check("IMP-14", ok14,
-              "the journal is owner-scoped end-to-end: B's walk completes only B's row, A's walk never sees it (RLS), and arv_app without the owner GUC fails closed",
-              "the staging journal inherits the substrate's RLS discipline: same policy shape, same fail-closed, the walk's scope is the walking owner's rows only")
+              "the journal is owner-scoped end-to-end: B's walk completes only B's row, A's walk never sees it (RLS); arv_app WITHOUT the owner GUC sees ZERO rows (the fail-closed SELECT) and its INSERT is refused by the RLS WITH CHECK (CAP-11's form)",
+              "the staging journal inherits the substrate's RLS discipline: same policy shape, same fail-closed on both layers — the walk's scope is the walking owner's rows only")
 
         # IMP-15 — the 409 conflict stages NO blob (the P3-01 orphan class dead by construction)
         fH = fresh_file("hotel.md", "Hotel bytes: the conflict-path no-staging case.\n")
@@ -458,18 +491,25 @@ def main() -> int:
         trig = audit("SELECT count(*) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid "
                      "JOIN pg_namespace n ON n.oid=c.relnamespace WHERE NOT t.tgisinternal "
                      "AND n.nspname='arv' AND c.relname='import_journal';")
-        grants = audit("SELECT privilege_type FROM information_schema.role_table_grants "
-                       "WHERE table_schema='arv' AND table_name='import_journal' "
-                       "AND grantee IN ('arv_app','arv_read') ORDER BY grantee, privilege_type;")
+        # the grants are read by the SUPERUSER (information_schema.role_table_grants
+        # shows a role only its own grants — arv_read's audit read cannot see arv_app's;
+        # has_table_privilege from postgres sees both)
+        privs = subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                                "SELECT has_table_privilege('arv_app','arv.import_journal','INSERT') || '|' || "
+                                "has_table_privilege('arv_app','arv.import_journal','SELECT') || '|' || "
+                                "has_table_privilege('arv_app','arv.import_journal','UPDATE') || '|' || "
+                                "has_table_privilege('arv_read','arv.import_journal','SELECT') || '|' || "
+                                "has_table_privilege('arv_app','arv.import_journal','DELETE');"],
+                               capture_output=True, text=True, timeout=60).stdout.strip()
         badstate = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "arv_app", "-d", DB, "-c",
                                   "SET app.current_owner='A'; UPDATE arv.import_journal "
                                   "SET state='nonsense' WHERE idempotency_key='imp-01';"],
                                  capture_output=True, text=True, timeout=60)
         ok17 = (defs == "" and rls == "1" and trig == "0"
-                and "INSERT" in grants and "SELECT" in grants and "UPDATE" in grants
+                and privs == "true|true|true|true|false"  # arv_app: INSERT+SELECT+UPDATE, arv_read: SELECT, and NO DELETE (rows transition, never erased)
                 and badstate.returncode != 0 and "check" in badstate.stdout + badstate.stderr)
         check("IMP-17", ok17,
-              "the journal's conventions: NO defaults on id/created_at/updated_at (LAW-24), RLS enabled+forced, the state CHECK refuses unknown states, arv_app INSERT/SELECT/UPDATE + arv_read SELECT — and NO append-only trigger (the §2.9 disposable class, mutable by design)",
+              "the journal's conventions: NO defaults on id/created_at/updated_at (LAW-24), RLS enabled+forced, the state CHECK refuses unknown states, arv_app INSERT/SELECT/UPDATE with NO DELETE (rows transition, never erased), arv_read SELECT — and NO append-only trigger (the §2.9 disposable class, mutable by design)",
               "the staging journal is the recovery substrate, not authoritative data: state transitions are UPDATEs by design, bounded by the state CHECK and RLS — the declared absence of the immutability trigger is the design, pinned here")
 
         # IMP-18 — the concurrent-loser classification (SEV-7): dup-key death -> ARV-CMD-011 from the DRAINED stderr
@@ -485,18 +525,20 @@ def main() -> int:
                                 f"FOR EACH ROW EXECUTE FUNCTION arv._race_kill();"],
                                capture_output=True, text=True, timeout=60)
         p18b = import_src("imp-18b", None, fJ, work_id=wJ)  # the loser: the source INSERT dies mid-transaction
+        _n18 = audit("SELECT count(*) FROM arv.source WHERE work_id='" + wJ + "';")  # MID-SEQUENCE: the loser's zero effect
         drop = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
                                "DROP TRIGGER IF EXISTS race_kill ON arv.source; "
                                "DROP FUNCTION IF EXISTS arv._race_kill();"],
                               capture_output=True, text=True, timeout=60)
         p18c = import_src("imp-18b", None, fJ, work_id=wJ)  # the SAME-key retry re-reads the ordinal
+        _v18 = audit("SELECT string_agg(source_version::text, ',' ORDER BY source_version) "
+                     "FROM arv.source WHERE work_id='" + wJ + "';")
         ok18 = (plant.returncode == 0 and drop.returncode == 0
                 and p18b.returncode == 1 and "ARV-CMD-011" in p18b.stdout
                 and "ARV-CMD-010" not in p18b.stdout
-                and audit("SELECT count(*) FROM arv.source WHERE work_id='{wJ}'".replace("{wJ}", wJ)) == "1"
+                and _n18 == "1"
                 and p18c.returncode == 0
-                and audit("SELECT string_agg(source_version::text, ',' ORDER BY source_version) "
-                          f"FROM arv.source WHERE work_id='{wJ}';") == "1,2"
+                and _v18 == "1,2"
                 and jrow("imp-18b").split("|")[0] == "complete")
         check("IMP-18", ok18,
               "the duplicate-key death classifies as ARV-CMD-011 FROM THE DRAINED STDERR (zero effect, one source) — never the poll()-inferred guess; the same-key retry re-reads the ordinal and lands version 2",

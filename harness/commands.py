@@ -44,14 +44,23 @@ def _q(s: str) -> str:
     return "'" + s.replace("'", "''") + "'"
 
 
+def _qn(s: "str | None") -> str:
+    """The journal's nullable fields (work_id XOR title): a real NULL for None,
+    never the string 'None' — the re-drive's JSON round-trip depends on it."""
+    return _q(s) if s is not None else "NULL"
+
+
 class Session:
     """ONE persistent psql session (the command's transaction boundary; statements
     execute as they are fed — markers make execution observable).
 
     A dedicated reader thread drains stdout line-by-line into a queue (the pipe
-    is small; an undrained pipe would eventually deadlock the server side), and
+    is small; an undrained pipe would eventually deadlock the server side),
     read_until() consumes lines until the marker (psql flushes per statement —
-    verified empirically, record 18 §4.3)."""
+    verified empirically, record 18 §4.3), and a SECOND pump drains stderr into
+    a buffer from construction (SEV-7's refinement, P3-02: the death classifier
+    reads the OBSERVED drained cause — never the poll()-inferred guess, never
+    a lagging read that lost the duplicate-key line)."""
 
     def __init__(self, db: str, user: str, owner: str):
         cfg = pg.config()
@@ -65,14 +74,40 @@ class Session:
             text=True, bufsize=1,
         )
         self._lines: "queue.Queue[str | None]" = queue.Queue()
+        self._eof = False
+        self._err: list[str] = []
         self._reader = threading.Thread(target=self._drain, daemon=True)
         self._reader.start()
+        self._errpump = threading.Thread(target=self._drain_err, daemon=True)
+        self._errpump.start()
         self.send(f"SET app.current_owner={_q(owner)};")
 
     def _drain(self) -> None:
         for line in self.proc.stdout:
             self._lines.put(line.rstrip("\n"))
+        self._eof = True
         self._lines.put(None)  # EOF
+
+    def _drain_err(self) -> None:
+        for line in self.proc.stderr:
+            self._err.append(line)
+        # stderr EOF: the pump ends — everything the process ever said is in _err
+
+    def dead_reason(self) -> "str | None":
+        """The DRAINED stderr cause of a DEAD session, or None when it is alive
+        (SEV-7: the classification reads the observed cause, never a guess).
+        EOF on stdout means the process closed its output — it is gone or
+        going; wait() makes the death CERTAIN before the cause is read, so the
+        pump has flushed everything it will ever carry (never the lagging-read
+        class that lost the duplicate-key line at the pre-refinement tree)."""
+        if self.proc.poll() is None and not self._eof:
+            return None  # a live session: the stall class, never a guess
+        try:
+            self.proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            pass
+        self._errpump.join(timeout=5)  # the pump's final flush after the reap
+        return "".join(self._err)
 
     def send(self, text: str) -> None:
         self.proc.stdin.write(text + "\n")
@@ -163,6 +198,50 @@ def _replay_after_conflict(*, db: str, owner: str, idem_key: str, body_hash: str
     return "replayed"
 
 
+def _answer_replayed(command: str, idem_key: str, ref: str) -> None:
+    print(f"ACK command={command} idem_key={idem_key} status=replayed result_ref={ref}")
+
+
+def _answer_conflict(idem_key: str) -> None:
+    print(f"FAIL ARV-CMD-409: idempotency key {idem_key!r} is already recorded with a DIFFERENT body "
+          "(no silent overwrite — exactly-once is a contract, not a preference)")
+    print("      repair: use a new idempotency key for a new body; the same key must mean the same command")
+
+
+_DUP = "duplicate key value violates unique constraint"
+_CONN = ("connection to server", "server closed the connection", "terminating connection",
+         "connection refused", "could not connect", "password authentication", "no password")
+
+
+def _dead_exit(sess: "Session", *, idem_key: str) -> "int | None":
+    """The dead-session classifier (SEV-7's refinement, routed at P3-01's SEV
+    round): a DEAD session's cause is read from the DRAINED stderr — the
+    observed duplicate-key violation is ARV-CMD-011 (zero effect: the
+    transaction rolled back; retry the SAME key), a connection-class death is
+    the NEW ARV-CMD-012 (the §4.1 UNCERTAIN class: the commit state is
+    unknowable from the client — the same-key replay resolves it), an
+    unrecognized death stays the honest ARV-CMD-010. A LIVE session returns
+    None — the caller's stall class, never a guess."""
+    cause = sess.dead_reason()
+    if cause is None:
+        return None
+    if _DUP in cause:
+        print(f"FAIL ARV-CMD-011: the session ended before the commit marker — a concurrent "
+              "writer won a unique constraint this key does not own (zero effect, the transaction rolled back)")
+        print("      repair: retry the SAME idempotency key (the ordinal is re-read) or use a new one")
+        return 1
+    if any(s in cause for s in _CONN):
+        print(f"FAIL ARV-CMD-012: the session died on an infrastructure error — the outcome is UNCERTAIN "
+              f"(§4.1: the commit state is unknowable from the client); observed cause: {cause.strip()[:200]}")
+        print("      repair: replay the SAME idempotency key — the replay check answers committed-vs-rolled-back "
+              "from the recorded state; never assume either")
+        return 1
+    print(f"FAIL ARV-CMD-010: the session died before the marker with an unrecognized cause — the honest "
+          f"unknown; raw cause: {cause.strip()[:200]}")
+    print("      repair: inspect the rig's health; the same-key replay is safe (the transaction either committed or rolled back)")
+    return 1
+
+
 def record_event(*, db: str, owner: str, actor: str, client_id: str,
                  idem_key: str, payload: str, crash_at: str = None) -> int:
     """The first registered command: append one evidence event, exactly once.
@@ -223,11 +302,9 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
         if row:
             recorded_hash, recorded_ref = row.split("|")
             if recorded_hash != body_hash:
-                print(f"FAIL ARV-CMD-409: idempotency key {idem_key!r} is already recorded with a DIFFERENT body "
-                      "(no silent overwrite — exactly-once is a contract, not a preference)")
-                print("      repair: use a new idempotency key for a new body; the same key must mean the same command")
+                _answer_conflict(idem_key)
                 return 1
-            print(f"ACK command={command} idem_key={idem_key} status=replayed result_ref={recorded_ref}")
+            _answer_replayed(command, idem_key, recorded_ref)
             return 0
         try:
             ref, stmts, extra = build(sess, body_hash)
@@ -240,7 +317,13 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
                          f"VALUES ({_q(owner)}, {_q(idem_key)}, {_q(client_id)}, {_q(command)}, {_q(body_hash)}, {_q(ref)}, {_q(actor)}, {_q(ts)});"]
         sess.send("BEGIN;")
         sess.send(f"\\echo {MARK_BEGUN}")
-        sess.read_until(MARK_BEGUN)
+        try:
+            sess.read_until(MARK_BEGUN)
+        except TimeoutError:
+            rc = _dead_exit(sess, idem_key=idem_key)
+            if rc is not None:
+                return rc
+            raise  # a live session with no marker: the honest unknown (ARV-CMD-010)
         if crash_at == "after-begin":
             sess.kill()
             return 2
@@ -253,24 +336,26 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
             recorded = _replay_after_conflict(db=db, owner=owner, idem_key=idem_key, body_hash=body_hash)
             if recorded == "replayed":
                 ref_r = _recorded_ref(db=db, owner=owner, idem_key=idem_key)
-                print(f"ACK command={command} idem_key={idem_key} status=replayed result_ref={ref_r}")
+                _answer_replayed(command, idem_key, ref_r)
                 return 0
             if recorded == "conflict":
                 return 1
-            if sess.proc.poll() is not None:
-                # The SEV round's P3: the session DIED (ON_ERROR_STOP) on a unique
-                # violation this key does not own — a zero-effect race loss, NOT a stall.
-                print(f"FAIL ARV-CMD-011: the session ended before the commit marker — a concurrent "
-                      "writer won a unique constraint this key does not own (zero effect, the transaction rolled back)")
-                print("      repair: retry the SAME idempotency key (the ordinal is re-read) or use a new one")
-                return 1
+            rc = _dead_exit(sess, idem_key=idem_key)
+            if rc is not None:
+                return rc
             raise  # a live session with no marker: the honest unknown (ARV-CMD-010)
         if crash_at == "pre-commit":
             sess.kill()
             return 2
         sess.send("COMMIT;")
         sess.send(f"\\echo {MARK_COMMITTED}")
-        sess.read_until(MARK_COMMITTED)
+        try:
+            sess.read_until(MARK_COMMITTED)
+        except TimeoutError:
+            rc = _dead_exit(sess, idem_key=idem_key)
+            if rc is not None:
+                return rc
+            raise  # a live session with no marker: the honest unknown (ARV-CMD-010)
         if crash_at == "post-commit-pre-ack":
             sess.kill()
             return 2
@@ -286,66 +371,170 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
             pass
 
 
-def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=None,
-                  file=None, media_type="text/plain", acquired_via="cli-import",
-                  crash_at: str = None) -> int:
-    """The first real product command: import a Source (P3-01; RTM §3.1's tail:
-    blob verified readable+digest-matched BEFORE the metadata commit, then the
-    work+source+command_log rows in ONE transaction).  Q12-neutral: the blob
-    rides the adapter; the Source stores the ref, never the bytes."""
-    path = pathlib.Path(file) if file else None
-    if path is None or not path.is_file():
-        print(f"FAIL ARV-CAP-001: the import file {file!r} is absent or unreadable — the bytes are read and hashed BEFORE any effect")
-        print("      repair: pass --file with a readable path; a missing file is a named refusal, never a partial import")
-        return 1
-    data = path.read_bytes()
-    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*", media_type):
-        # The SEV round's P2: a pipe-carrying media_type later crashed the capture
-        # path's pipe-delimited reads; the token grammar is where it enters.
-        print(f"FAIL ARV-CAP-009: media_type {media_type!r} is not a MIME token pair (type/subtype, "
-              "token charset only) — free-form text is a title/payload, never a media type")
-        print("      repair: pass a MIME pair like text/plain or text/markdown")
-        return 1
-    digest = blob.put(data)
-    try:
-        blob.get(digest)  # the §3.1 verify: readable AND digest-matched (get re-hashes)
-    except KeyError as e:
-        print(f"FAIL ARV-CAP-004: the blob verify failed — {e}")
-        print("      repair: the store is corrupt at this digest; the staging cleanup is P3-02's recovery walk — a Source NEVER commits without verified bytes")
-        return 1
-    body = json.dumps({"work_id": work_id, "title": title, "digest": digest,
+def _import_body(*, title, work_id, digest, media_type, byte_size, acquired_via) -> str:
+    """The canonical import payload — ONE construction home: the command and
+    the walk's re-drive build the SAME bytes, and the journal's body_hash proves
+    it (P3-02's F1 lesson: the re-drive NEVER hashes a different body — a
+    mismatch is the named ARV-IMP-001, never a silent 409)."""
+    return json.dumps({"work_id": work_id, "title": title, "digest": digest,
                       "media_type": media_type, "acquired_via": acquired_via,
-                      "byte_size": len(data)},
+                      "byte_size": byte_size},
                      sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
+
+def _import_build(*, owner, actor, client_id, idem_key, title, work_id, digest,
+                  media_type, byte_size, acquired_via):
+    """Phase 3's statements (ONE construction home, shared by the command and
+    the walk's re-drive): the work insert when --title, the Source row BORN
+    complete (§3.1 — staging states live only in the journal, never here),
+    the edition ordinal re-read (race-honest), and the journal's complete
+    update RIDING the same transaction — a lost ack converges in-transaction."""
     def build(sess: "Session", body_hash: str):
-        if (title is None) == (work_id is None):
-            raise _CapRefusal("ARV-CAP-007",
-                              "exactly one of --title (a new work) or --work-id (an existing work) is required — an import names its work",
-                              "pass --title OR --work-id, never both, never neither")
         ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
-        stmts = []
-        new_work = work_id
+        stmts, new_work = [], work_id
         if work_id is None:
             new_work = ids.new_id()
             stmts.append(f"INSERT INTO arv.work (id, title, owner_scope, actor, run_id, input_hash, created_at) "
                          f"VALUES ({_q(new_work)}, {_q(title)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, {_q(ts)});")
         elif not _sess_row(sess, f"SELECT id || '|' FROM arv.work WHERE id={_q(work_id)};"):
-            raise _CapRefusal("ARV-CAP-006",
-                              f"work {work_id} does not exist in the caller's scope",
+            raise _CapRefusal("ARV-CAP-006", f"work {work_id} does not exist in the caller's scope",
                               "import against an existing work id, or create a new work with --title")
         sid = ids.new_id()
         version = _sess_row(sess, f"SELECT (COALESCE(MAX(source_version), 0) + 1) || '|' FROM arv.source "
                                   f"WHERE work_id={_q(new_work)};").split("|")[0] or "1"
         stmts.append(f"INSERT INTO arv.source (id, work_id, digest, media_type, byte_size, blob_ref, acquired_via, "
                      f"import_state, source_version, owner_scope, actor, run_id, input_hash, idempotency_key, created_at) "
-                     f"VALUES ({_q(sid)}, {_q(new_work)}, {_q(digest)}, {_q(media_type)}, {len(data)}, {_q(digest)}, "
+                     f"VALUES ({_q(sid)}, {_q(new_work)}, {_q(digest)}, {_q(media_type)}, {byte_size}, {_q(digest)}, "
                      f"{_q(acquired_via)}, 'complete', {version}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
                      f"{_q(idem_key)}, {_q(ts)});")
+        stmts.append(f"UPDATE arv.import_journal SET state='complete', source_id={_q(sid)}, updated_at={_q(ts)} "
+                     f"WHERE owner_scope={_q(owner)} AND idempotency_key={_q(idem_key)};")
         return sid, stmts, f" work_id={new_work}"
+    return build
 
-    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
-                  command="import_source", payload=body, build=build, crash_at=crash_at)
+
+def _journal_txn(sess: "Session", stmt: str, *, idem_key: str) -> bool:
+    """One journal-phase transaction on the open session (the staging UPSERT,
+    the staging_verified update, the failed marking) — its own commit, its own
+    marker; a dead session classifies through _dead_exit, a live stall is the
+    named ARV-CMD-010 (never a silent refusal)."""
+    try:
+        sess.send("BEGIN;")
+        sess.send(stmt)
+        sess.send("COMMIT;")
+        sess.send(f"\\echo {MARK_COMMITTED}")
+        sess.read_until(MARK_COMMITTED)
+        return True
+    except TimeoutError:
+        if _dead_exit(sess, idem_key=idem_key) is not None:
+            return False
+        print(f"FAIL ARV-CMD-010: the journal transaction for key {idem_key!r} did not reach its "
+              "commit marker on a LIVE session — the honest unknown (psql stalled)")
+        print("      repair: inspect the rig's health; the same-key retry is safe (nothing committed)")
+        return False
+
+
+def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=None,
+                  file=None, media_type="text/plain", acquired_via="cli-import",
+                  crash_at: str = None) -> int:
+    """The phased import (P3-02; RTM §3.1's frozen machine): request validation
+    -> the replay/conflict check BEFORE any staging -> the staging journal row
+    (its own transaction — the crash anchor; the UPSERT rewinds a crashed prior
+    attempt of the same key) -> put + verify INSIDE staging (the machine's
+    staging exit condition) -> staging_verified -> ONE metadata transaction
+    (work + Source-born-complete + command_log + the journal's complete update,
+    atomically).  Q12-neutral: the blob rides the adapter; the Source stores
+    the ref, never the bytes.  A refused request stages NOTHING (the P3-01
+    notverified's orphan class dead by construction)."""
+    path = pathlib.Path(file) if file else None
+    if path is None or not path.is_file():
+        print(f"FAIL ARV-CAP-001: the import file {file!r} is absent or unreadable — the bytes are read and hashed BEFORE any effect")
+        print("      repair: pass --file with a readable path; a missing file is a named refusal, never a partial import")
+        return 1
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*", media_type):
+        print(f"FAIL ARV-CAP-009: media_type {media_type!r} is not a MIME token pair (type/subtype, "
+              "token charset only) — free-form text is a title/payload, never a media type")
+        print("      repair: pass a MIME pair like text/plain or text/markdown")
+        return 1
+    if (title is None) == (work_id is None):
+        print("FAIL ARV-CAP-007: exactly one of --title (a new work) or --work-id (an existing work) "
+              "is required — an import names its work")
+        print("      repair: pass --title OR --work-id, never both, never neither")
+        return 1
+    data = path.read_bytes()
+    digest = blob.digest_of(data)
+    body = _import_body(title=title, work_id=work_id, digest=digest, media_type=media_type,
+                        byte_size=len(data), acquired_via=acquired_via)
+    body_hash = hashlib.sha256(canonical_body(command="import_source", client_id=client_id,
+                                              owner_scope=owner, actor=actor,
+                                              payload=body).encode()).hexdigest()
+    sess = Session(db, "arv_app", owner)
+    try:
+        # phase 0.5 — the replay/conflict check BEFORE any staging (a refused
+        # command stages nothing — the P3-01 orphan class's construction death)
+        row = _sess_row(sess, f"SELECT body_hash || '|' || result_ref FROM arv.command_log "
+                              f"WHERE idempotency_key={_q(idem_key)};")
+        if row:
+            recorded_hash, recorded_ref = row.split("|")
+            if recorded_hash != body_hash:
+                _answer_conflict(idem_key)
+                return 1
+            _answer_replayed("import_source", idem_key, recorded_ref)
+            return 0
+        if work_id is not None and not _sess_row(sess, f"SELECT id || '|' FROM arv.work WHERE id={_q(work_id)};"):
+            print(f"FAIL ARV-CAP-006: work {work_id} does not exist in the caller's scope")
+            print("      repair: import against an existing work id, or create a new work with --title")
+            return 1
+        # phase 1 — the staging journal row (its own transaction; the UPSERT rewinds)
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        if not _journal_txn(sess,
+                            f"INSERT INTO arv.import_journal (id, owner_scope, actor, idempotency_key, client_id, "
+                            f"work_id, title, digest, media_type, byte_size, acquired_via, state, body_hash, run_id, "
+                            f"input_hash, created_at, updated_at) VALUES ({_q(ids.new_id())}, {_q(owner)}, {_q(actor)}, "
+                            f"{_q(idem_key)}, {_q(client_id)}, {_qn(work_id)}, {_qn(title)}, {_q(digest)}, {_q(media_type)}, "
+                            f"{len(data)}, {_q(acquired_via)}, 'staging', {_q(body_hash)}, {_q(run_id)}, {_q(ih)}, "
+                            f"{_q(ts)}, {_q(ts)}) ON CONFLICT (owner_scope, idempotency_key) DO UPDATE SET "
+                            f"state='staging', fail_reason=NULL, source_id=NULL, updated_at={_q(ts)};",
+                            idem_key=idem_key):
+            return 1
+        if crash_at == "after-staging":
+            sess.kill()
+            return 2
+        # phase 2 — put + verify INSIDE staging (§3.1's staging exit condition)
+        blob.put(data)
+        if crash_at == "after-put":
+            sess.kill()
+            return 2
+        try:
+            blob.get(digest)  # the §3.1 verify: readable AND digest-matched (get re-hashes)
+        except KeyError as e:
+            reason = e.args[0].split(":")[0] if e.args else "ARV-BLOB-000"  # e.args[0]: str(e) would carry KeyError's repr quotes
+            _journal_txn(sess, f"UPDATE arv.import_journal SET state='failed', "
+                          f"fail_reason={_q(reason)}, updated_at={_q(clock.now())} "
+                          f"WHERE owner_scope={_q(owner)} AND idempotency_key={_q(idem_key)};",
+                         idem_key=idem_key)
+            print(f"FAIL ARV-CAP-004: the blob verify failed — {e.args[0] if e.args else e}")
+            print("      repair: the store is corrupt at this digest; the row is failed(retryable) and the recovery walk cleans the unreferenced artifact — a Source NEVER commits without verified bytes")
+            return 1
+        # phase 2b — staging_verified (its own transaction)
+        if not _journal_txn(sess, f"UPDATE arv.import_journal SET state='staging_verified', "
+                            f"updated_at={_q(clock.now())} WHERE owner_scope={_q(owner)} "
+                            f"AND idempotency_key={_q(idem_key)};", idem_key=idem_key):
+            return 1
+        if crash_at == "after-verify":
+            sess.kill()
+            return 2
+        # phase 3 — the ONE metadata transaction (§3.1's complete transition)
+        build = _import_build(owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                              title=title, work_id=work_id, digest=digest, media_type=media_type,
+                              byte_size=len(data), acquired_via=acquired_via)
+        return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                      command="import_source", payload=body, build=build, crash_at=crash_at)
+    finally:
+        try:
+            sess.close()
+        except Exception:
+            pass
 
 
 def create_highlight(*, db, owner, actor, client_id, idem_key, source_id,

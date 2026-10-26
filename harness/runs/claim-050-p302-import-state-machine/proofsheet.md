@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-050-p302-import-state-machine (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 999c9f297cd8a2c4f3a1b88534bdb0749d9022fe
-- generated (last record's timestamp): 2026-10-26T05:15:57.383345+00:00
-- run records: 14
+- commit (last run record's): 11a8dc9a413d4219fe23bf0064e275ab75874dbb
+- generated (last record's timestamp): 2026-10-26T05:39:11.011590+00:00
+- run records: 15
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_import.py` -> exit 0 · output sha256 f56ad44261ac836f · 2026-10-26T05:06:39.477902+00:00
@@ -19,6 +19,7 @@
 - `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 00db18e14fda53df · 2026-10-26T05:09:10.883127+00:00
 - `make verify` -> exit 0 · output sha256 dea68c2344eff55c · 2026-10-26T05:12:44.685143+00:00
 - `python3 harness/gate.py --slice claim-050-p302-import-state-machine --diff main` -> exit 1 · output sha256 c14f0083c62e994b · 2026-10-26T05:15:57.383345+00:00
+- `python3 harness/gate.py --slice claim-050-p302-import-state-machine --diff main` -> exit 0 · output sha256 515fd88445858f9c · 2026-10-26T05:39:11.011590+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-050 / P3-02 (LAW-04; never empty-by-omission)
@@ -119,11 +120,11 @@
 - own writes are the XOR-checked ones.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 713a9a3247e0326fa288eeff94b47e2b41ee7fef8962386e6ccdd656d4cb636c
-- reviewed_diff_sha256: a62f5916be2ade5ffb530cdc4ca66846365b9704352e1fa9ad89871373c3bfe3
+- report sha256: 9a3867c31fe84c9f2f0316f25dcdf4ae32feb0745b2a8c3f09357ef39584e3cc
+- reviewed_diff_sha256: adb5d86cece4b974d082b5052c204b8df14e63746d4e01ebb0b5960d3d6c749f
 - disposition: PASS
 - findings: 11 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 0c3c308408727fa196e3ddee92d98a3857fb717f8a6a229f0e95d072a9521030
+- sheet sha256 (of the content above, excluding this line): 9e1380999797c521db0ea8213491323015e106302ce125d39107e291fec9cf0d

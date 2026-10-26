@@ -2,10 +2,26 @@
   "schema_version": 1,
   "slice_id": "claim-050-p302-import-state-machine",
   "base_sha": "ab22029e58048006edc87051bfa537340886d282",
-  "reviewed_diff_sha256": "a62f5916be2ade5ffb530cdc4ca66846365b9704352e1fa9ad89871373c3bfe3",
-  "intent_ids": ["INT-127", "INT-131", "INT-134", "INT-135", "INT-138", "INT-139", "INT-140"],
-  "requirement_ids": ["SYS-06", "SYS-03", "SYS-04", "SYS-11"],
-  "system_claims": ["C1", "C2"],
+  "reviewed_diff_sha256": "adb5d86cece4b974d082b5052c204b8df14e63746d4e01ebb0b5960d3d6c749f",
+  "intent_ids": [
+    "INT-127",
+    "INT-131",
+    "INT-134",
+    "INT-135",
+    "INT-138",
+    "INT-139",
+    "INT-140"
+  ],
+  "requirement_ids": [
+    "SYS-06",
+    "SYS-03",
+    "SYS-04",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
   "changed_components": [
     "harness/migrations/0005_import_journal.sql (the §2.9 disposable staging substrate: RLS-scoped, the state CHECK, UNIQUE(owner_scope, idempotency_key), NO append-only trigger, NO DELETE — mutable by design; every re-drive input + body_hash recorded)",
     "harness/commands.py (the phased import_source: request validation -> the replay/conflict check BEFORE any staging -> the staging UPSERT with the same-key rewind -> put+verify INSIDE staging per §3.1's exit condition -> staging_verified -> ONE metadata transaction carrying work + Source-born-complete + command_log + the journal's complete update atomically; _qn for the nullable fields; _import_body/_import_build as the ONE construction home shared with the walk; _journal_txn; the spine kept byte-exact to main's 011 form with the CLAIM-051 routing comment)",
@@ -46,23 +62,117 @@
     ]
   },
   "failure_modes": [
-    {"id": "FM-01", "scenario": "a crash at any import phase boundary leaves the journal row naming the machine's state; the walk or the same-key retry converges it", "control": "the phase transactions + the crash points + the walk's named re-drive", "proof_ids": ["run-01"]},
-    {"id": "FM-02", "scenario": "the bytes fail verification (absent/corrupt) at the staging exit or before a re-drive", "control": "the named ARV-BLOB-002/003 failures; the unreferenced artifact cleaned; the referenced kept; the phantom-closure re-verify before every commit", "proof_ids": ["run-01"]},
-    {"id": "FM-03", "scenario": "a hostile journal row (pipes/newlines/'MARK' in a title; a coherent-forged work binding; an unreadable line; a refused batch)", "control": "row_to_json reads, the hash-checked reconstruction, ARV-IMP-001/002/003/004 — every outcome named, the walk continues", "proof_ids": ["run-01", "red-02"]},
-    {"id": "FM-04", "scenario": "a same-key retry after a crash, a conflict, or a completed import", "control": "the replay/conflict check BEFORE any staging; the UPSERT rewind; the in-transaction journal convergence; exactly-one effects", "proof_ids": ["run-01"]}
+    {
+      "id": "FM-01",
+      "scenario": "a crash at any import phase boundary leaves the journal row naming the machine's state; the walk or the same-key retry converges it",
+      "control": "the phase transactions + the crash points + the walk's named re-drive",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "the bytes fail verification (absent/corrupt) at the staging exit or before a re-drive",
+      "control": "the named ARV-BLOB-002/003 failures; the unreferenced artifact cleaned; the referenced kept; the phantom-closure re-verify before every commit",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "a hostile journal row (pipes/newlines/'MARK' in a title; a coherent-forged work binding; an unreadable line; a refused batch)",
+      "control": "row_to_json reads, the hash-checked reconstruction, ARV-IMP-001/002/003/004 — every outcome named, the walk continues",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "a same-key retry after a crash, a conflict, or a completed import",
+      "control": "the replay/conflict check BEFORE any staging; the UPSERT rewind; the in-transaction journal convergence; exactly-one effects",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
   ],
   "findings": [
-    {"id": "SEV-1", "severity": "P0", "status": "resolved", "evidence": "round 1: the finalize commit broke the canonical layer — record 41 shipped without the D-022 STATUS banner (VER-205's live catch; make verify RED at the pushed head while STATE claimed a green recorded run there)", "disposition": "FIXED: the banner added (record-40's form); make verify GREEN re-run at the round-fix tree; STATE's verified-by-run bullet re-bound to the shas that actually carry the green; round 2 re-verified the banner + the green + the honest binding"},
-    {"id": "SEV-2", "severity": "P1", "status": "resolved", "evidence": "round 1: record 41's §5/§7 forward-dated a sev.json and a two-round chain that did not exist at the shipping tree (ARV-SEV-001 still refused)", "disposition": "FIXED: the record's tenses corrected to the truth at ship; the real sev.json lands with this very round-2 record (the 049 precedent's post-round form); round 2 verified the wording true at ship"},
-    {"id": "SEV-3", "severity": "P1", "status": "resolved", "evidence": "round 1: a coherent-forged journal row with BOTH work_id and title NULL (direct SQL, hash-consistent — the CLI's CAP-007 blocks only the request shape) crashed the walk UN-NAMED at _q(None), aborting the later rows and the sweep", "disposition": "FIXED RED-first: the suite case IMP-20 (red-02.txt preserves the observed crash at the pre-fix tree); _drive's work-binding pre-check mirrors CAP-007's XOR — the forge fails NAMED (ARV-IMP-004), the row marks failed, the walk CONTINUES (round 2 re-probed both arms live: both-NULL and both-SET, WALK-DONE printed, the later row driven)"},
-    {"id": "SEV-4", "severity": "P2", "status": "resolved", "evidence": "round 1: crash.py's docstring claimed the exit-2 masquerade closed while argparse-level usage errors (a typo'd point, missing args) still exited 2", "disposition": "FIXED: the _UsageParser.error override — every argparse error path exits 1 with the named CRASH-USAGE line; round 2 probed every class (bad choice, missing args, no args, --help, the handled per-command class, the real-crash exit 2 preserved)"},
-    {"id": "SEV-5", "severity": "P2", "status": "resolved", "evidence": "round 1: _fail's UPDATE lacked the terminal-row guard the walk's other two updates carry — a concurrent completion between the snapshot and the write could flip a complete row to failed", "disposition": "FIXED: AND state IN ('staging','staging_verified'); round 2 verified the guard live through the ARV-IMP-004/001 failure paths (staging and staging_verified rows still fail honestly)"},
-    {"id": "SEV-6", "severity": "P3", "status": "resolved", "evidence": "round 1: IMP-16's 'journal-less residue' understated the sweep's predicate (a terminal-FAILED row's unreferenced digest is also swept — observed live)", "disposition": "FIXED: the check text names the true predicate; round 2 verified the wording + the passing case"},
-    {"id": "SEV-7", "severity": "P3", "status": "resolved", "evidence": "round 1: the notverified's item-10 claimed the retrieval surfaces 'report only complete sources' — construction-true, not surface-true (a direct-SQL planted 'staging' source row returned verbatim; no read-side filter)", "disposition": "FIXED by honest re-wording (the birth-complete invariant is the MACHINE's; the read named unfiltered; query.py outside this slice's scope — its filter is its own slice's call) + the new item-12 declaring the num_nonnulls DB CHECK deferred to its own migration slice (SIZE-005's one-migration bound)"},
-    {"id": "SEV-8", "severity": "P3", "status": "resolved", "evidence": "round 1: the CLAIMS-050 row still named the removed exists() arm", "disposition": "FIXED: the row's Notes corrected (delete/residents; exists lands with its own consumer)"},
-    {"id": "SEV-9", "severity": "P1", "status": "resolved", "evidence": "round 2 (N1): the round-fix commit left the runs-dir evidence stale — the sheet no longer re-derived (ARV-PRF-004) and record-41/STATE claimed a clean re-captured proof set one commit ahead of the facts", "disposition": "FIXED in this finalize: the proof set re-captured clean at the final tree together with this sev.json's landing (the 049 order); the sheet re-derived over the full record set; the record's §7 wording matches the actual tree"},
-    {"id": "SEV-10", "severity": "P2", "status": "resolved", "evidence": "round 2 (N2): the round-fix diff grew to 403 source lines against LAW-05's 400 (ARV-SIZE-002)", "disposition": "FIXED by honest compression (the 049 precedent): the F4/F5/F3 inline comment blocks compressed to their operative clauses (the full lesson lives in red-02/record 41 §8), the module docstring's sweep paragraph tightened with the ARV-IMP-004 vocabulary synced in — exactly 400/400, every remaining line load-bearing"},
-    {"id": "SEV-11", "severity": "P3", "status": "resolved", "evidence": "round 2 (N3): recover.py's module docstring enumerated the row-level codes without the new ARV-IMP-004", "disposition": "FIXED: the docstring's named-codes line now carries 001/002/003/004 (folded into the N2 compression, same line count)"}
+    {
+      "id": "SEV-1",
+      "severity": "P0",
+      "status": "resolved",
+      "evidence": "round 1: the finalize commit broke the canonical layer — record 41 shipped without the D-022 STATUS banner (VER-205's live catch; make verify RED at the pushed head while STATE claimed a green recorded run there)",
+      "disposition": "FIXED: the banner added (record-40's form); make verify GREEN re-run at the round-fix tree; STATE's verified-by-run bullet re-bound to the shas that actually carry the green; round 2 re-verified the banner + the green + the honest binding"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "round 1: record 41's §5/§7 forward-dated a sev.json and a two-round chain that did not exist at the shipping tree (ARV-SEV-001 still refused)",
+      "disposition": "FIXED: the record's tenses corrected to the truth at ship; the real sev.json lands with this very round-2 record (the 049 precedent's post-round form); round 2 verified the wording true at ship"
+    },
+    {
+      "id": "SEV-3",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "round 1: a coherent-forged journal row with BOTH work_id and title NULL (direct SQL, hash-consistent — the CLI's CAP-007 blocks only the request shape) crashed the walk UN-NAMED at _q(None), aborting the later rows and the sweep",
+      "disposition": "FIXED RED-first: the suite case IMP-20 (red-02.txt preserves the observed crash at the pre-fix tree); _drive's work-binding pre-check mirrors CAP-007's XOR — the forge fails NAMED (ARV-IMP-004), the row marks failed, the walk CONTINUES (round 2 re-probed both arms live: both-NULL and both-SET, WALK-DONE printed, the later row driven)"
+    },
+    {
+      "id": "SEV-4",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1: crash.py's docstring claimed the exit-2 masquerade closed while argparse-level usage errors (a typo'd point, missing args) still exited 2",
+      "disposition": "FIXED: the _UsageParser.error override — every argparse error path exits 1 with the named CRASH-USAGE line; round 2 probed every class (bad choice, missing args, no args, --help, the handled per-command class, the real-crash exit 2 preserved)"
+    },
+    {
+      "id": "SEV-5",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1: _fail's UPDATE lacked the terminal-row guard the walk's other two updates carry — a concurrent completion between the snapshot and the write could flip a complete row to failed",
+      "disposition": "FIXED: AND state IN ('staging','staging_verified'); round 2 verified the guard live through the ARV-IMP-004/001 failure paths (staging and staging_verified rows still fail honestly)"
+    },
+    {
+      "id": "SEV-6",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1 (the reviewer's own P3 grade, recorded at the frozen P2 rung): IMP-16's 'journal-less residue' understated the sweep's predicate (a terminal-FAILED row's unreferenced digest is also swept — observed live)",
+      "disposition": "FIXED: the check text names the true predicate; round 2 verified the wording + the passing case"
+    },
+    {
+      "id": "SEV-7",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1 (the reviewer's own P3 grade, recorded at the frozen P2 rung): the notverified's item-10 claimed the retrieval surfaces 'report only complete sources' — construction-true, not surface-true (a direct-SQL planted 'staging' source row returned verbatim; no read-side filter)",
+      "disposition": "FIXED by honest re-wording (the birth-complete invariant is the MACHINE's; the read named unfiltered; query.py outside this slice's scope — its filter is its own slice's call) + the new item-12 declaring the num_nonnulls DB CHECK deferred to its own migration slice (SIZE-005's one-migration bound)"
+    },
+    {
+      "id": "SEV-8",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 1 (the reviewer's own P3 grade, recorded at the frozen P2 rung): the CLAIMS-050 row still named the removed exists() arm",
+      "disposition": "FIXED: the row's Notes corrected (delete/residents; exists lands with its own consumer)"
+    },
+    {
+      "id": "SEV-9",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "round 2 (N1): the round-fix commit left the runs-dir evidence stale — the sheet no longer re-derived (ARV-PRF-004) and record-41/STATE claimed a clean re-captured proof set one commit ahead of the facts",
+      "disposition": "FIXED in this finalize: the proof set re-captured clean at the final tree together with this sev.json's landing (the 049 order); the sheet re-derived over the full record set; the record's §7 wording matches the actual tree"
+    },
+    {
+      "id": "SEV-10",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 2 (N2): the round-fix diff grew to 403 source lines against LAW-05's 400 (ARV-SIZE-002)",
+      "disposition": "FIXED by honest compression (the 049 precedent): the F4/F5/F3 inline comment blocks compressed to their operative clauses (the full lesson lives in red-02/record 41 §8), the module docstring's sweep paragraph tightened with the ARV-IMP-004 vocabulary synced in — exactly 400/400, every remaining line load-bearing"
+    },
+    {
+      "id": "SEV-11",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "round 2 (N3): recover.py's module docstring enumerated the row-level codes without the new ARV-IMP-004",
+      "disposition": "FIXED: the docstring's named-codes line now carries 001/002/003/004 (folded into the N2 compression, same line count)"
+    }
   ],
   "not_verified": [
     "the standing credential layer (owner-scoped RLS, trust-auth rig — a real credential boundary is the deployment slice's work)",

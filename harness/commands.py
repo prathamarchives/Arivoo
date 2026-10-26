@@ -44,6 +44,12 @@ def _q(s: str) -> str:
     return "'" + s.replace("'", "''") + "'"
 
 
+def _qn(s: "str | None") -> str:
+    """The journal's nullable fields (work_id XOR title): a real NULL for None — the
+    re-drive's JSON round-trip depends on it (never the string 'None')."""
+    return _q(s) if s is not None else "NULL"
+
+
 class Session:
     """ONE persistent psql session (the command's transaction boundary; statements
     execute as they are fed — markers make execution observable).
@@ -260,6 +266,8 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
             if sess.proc.poll() is not None:
                 # The SEV round's P3: the session DIED (ON_ERROR_STOP) on a unique
                 # violation this key does not own — a zero-effect race loss, NOT a stall.
+                # The stderr-classification refinement (duplicate-key vs connection
+                # error) is CLAIM-051's own bounded follow-up (the P3-01 SEV-11 routing).
                 print(f"FAIL ARV-CMD-011: the session ended before the commit marker — a concurrent "
                       "writer won a unique constraint this key does not own (zero effect, the transaction rolled back)")
                 print("      repair: retry the SAME idempotency key (the ordinal is re-read) or use a new one")
@@ -286,66 +294,174 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
             pass
 
 
-def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=None,
-                  file=None, media_type="text/plain", acquired_via="cli-import",
-                  crash_at: str = None) -> int:
-    """The first real product command: import a Source (P3-01; RTM §3.1's tail:
-    blob verified readable+digest-matched BEFORE the metadata commit, then the
-    work+source+command_log rows in ONE transaction).  Q12-neutral: the blob
-    rides the adapter; the Source stores the ref, never the bytes."""
-    path = pathlib.Path(file) if file else None
-    if path is None or not path.is_file():
-        print(f"FAIL ARV-CAP-001: the import file {file!r} is absent or unreadable — the bytes are read and hashed BEFORE any effect")
-        print("      repair: pass --file with a readable path; a missing file is a named refusal, never a partial import")
-        return 1
-    data = path.read_bytes()
-    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*", media_type):
-        # The SEV round's P2: a pipe-carrying media_type later crashed the capture
-        # path's pipe-delimited reads; the token grammar is where it enters.
-        print(f"FAIL ARV-CAP-009: media_type {media_type!r} is not a MIME token pair (type/subtype, "
-              "token charset only) — free-form text is a title/payload, never a media type")
-        print("      repair: pass a MIME pair like text/plain or text/markdown")
-        return 1
-    digest = blob.put(data)
-    try:
-        blob.get(digest)  # the §3.1 verify: readable AND digest-matched (get re-hashes)
-    except KeyError as e:
-        print(f"FAIL ARV-CAP-004: the blob verify failed — {e}")
-        print("      repair: the store is corrupt at this digest; the staging cleanup is P3-02's recovery walk — a Source NEVER commits without verified bytes")
-        return 1
-    body = json.dumps({"work_id": work_id, "title": title, "digest": digest,
+def _import_body(*, title, work_id, digest, media_type, byte_size, acquired_via) -> str:
+    """The canonical import payload — ONE construction home (command + walk; the
+    journal's body_hash proves it — a mismatch is ARV-IMP-001)."""
+    return json.dumps({"work_id": work_id, "title": title, "digest": digest,
                       "media_type": media_type, "acquired_via": acquired_via,
-                      "byte_size": len(data)},
+                      "byte_size": byte_size},
                      sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
+
+def _import_build(*, owner, actor, client_id, idem_key, title, work_id, digest,
+                  media_type, byte_size, acquired_via):
+    """Phase 3's statements (shared with the walk's re-drive): the work insert
+    when --title, the Source BORN complete, the ordinal re-read, and the
+    journal's complete update RIDING the same transaction."""
     def build(sess: "Session", body_hash: str):
-        if (title is None) == (work_id is None):
-            raise _CapRefusal("ARV-CAP-007",
-                              "exactly one of --title (a new work) or --work-id (an existing work) is required — an import names its work",
-                              "pass --title OR --work-id, never both, never neither")
         ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
-        stmts = []
-        new_work = work_id
+        stmts, new_work = [], work_id
         if work_id is None:
             new_work = ids.new_id()
             stmts.append(f"INSERT INTO arv.work (id, title, owner_scope, actor, run_id, input_hash, created_at) "
                          f"VALUES ({_q(new_work)}, {_q(title)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, {_q(ts)});")
         elif not _sess_row(sess, f"SELECT id || '|' FROM arv.work WHERE id={_q(work_id)};"):
-            raise _CapRefusal("ARV-CAP-006",
-                              f"work {work_id} does not exist in the caller's scope",
+            raise _CapRefusal("ARV-CAP-006", f"work {work_id} does not exist in the caller's scope",
                               "import against an existing work id, or create a new work with --title")
         sid = ids.new_id()
         version = _sess_row(sess, f"SELECT (COALESCE(MAX(source_version), 0) + 1) || '|' FROM arv.source "
                                   f"WHERE work_id={_q(new_work)};").split("|")[0] or "1"
         stmts.append(f"INSERT INTO arv.source (id, work_id, digest, media_type, byte_size, blob_ref, acquired_via, "
                      f"import_state, source_version, owner_scope, actor, run_id, input_hash, idempotency_key, created_at) "
-                     f"VALUES ({_q(sid)}, {_q(new_work)}, {_q(digest)}, {_q(media_type)}, {len(data)}, {_q(digest)}, "
+                     f"VALUES ({_q(sid)}, {_q(new_work)}, {_q(digest)}, {_q(media_type)}, {byte_size}, {_q(digest)}, "
                      f"{_q(acquired_via)}, 'complete', {version}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
                      f"{_q(idem_key)}, {_q(ts)});")
+        stmts.append(f"UPDATE arv.import_journal SET state='complete', source_id={_q(sid)}, updated_at={_q(ts)} "
+                     f"WHERE owner_scope={_q(owner)} AND idempotency_key={_q(idem_key)};")
         return sid, stmts, f" work_id={new_work}"
+    return build
 
-    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
-                  command="import_source", payload=body, build=build, crash_at=crash_at)
+
+def _journal_txn(sess: "Session", stmt: str, *, idem_key: str) -> bool:
+    """One journal-phase transaction — its own commit and marker; a death or
+    stall is the named ARV-CMD-010 (never silent)."""
+    try:
+        sess.send("BEGIN;")
+        sess.send(stmt)
+        sess.send("COMMIT;")
+        sess.send(f"\\echo {MARK_COMMITTED}")
+        sess.read_until(MARK_COMMITTED)
+        return True
+    except TimeoutError:
+        print(f"FAIL ARV-CMD-010: the journal transaction for key {idem_key!r} did not reach its "
+              "commit marker — the honest unknown (the transaction rolled back or never ran)")
+        print("      repair: inspect the rig's health; the same-key retry is safe (nothing committed)")
+        return False
+
+
+def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=None,
+                  file=None, media_type="text/plain", acquired_via="cli-import",
+                  crash_at: str = None) -> int:
+    """The phased import (P3-02; RTM §3.1): validation -> the replay/conflict
+    check BEFORE any staging -> the staging UPSERT (the same-key rewind) ->
+    put+verify INSIDE staging -> staging_verified -> ONE metadata transaction
+    (work + Source born complete + command_log + the journal's complete update,
+    atomically). Q12-neutral; a refused request stages NOTHING."""
+    path = pathlib.Path(file) if file else None
+    if path is None or not path.is_file():
+        print(f"FAIL ARV-CAP-001: the import file {file!r} is absent or unreadable — the bytes are read and hashed BEFORE any effect")
+        print("      repair: pass --file with a readable path; a missing file is a named refusal, never a partial import")
+        return 1
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*", media_type):
+        print(f"FAIL ARV-CAP-009: media_type {media_type!r} is not a MIME token pair (type/subtype, "
+              "token charset only) — free-form text is a title/payload, never a media type")
+        print("      repair: pass a MIME pair like text/plain or text/markdown")
+        return 1
+    if (title is None) == (work_id is None):
+        print("FAIL ARV-CAP-007: exactly one of --title (a new work) or --work-id (an existing work) "
+              "is required — an import names its work")
+        print("      repair: pass --title OR --work-id, never both, never neither")
+        return 1
+    data = path.read_bytes()
+    digest = blob.digest_of(data)
+    body = _import_body(title=title, work_id=work_id, digest=digest, media_type=media_type,
+                        byte_size=len(data), acquired_via=acquired_via)
+    body_hash = hashlib.sha256(canonical_body(command="import_source", client_id=client_id,
+                                              owner_scope=owner, actor=actor,
+                                              payload=body).encode()).hexdigest()
+    sess = Session(db, "arv_app", owner)
+    try:
+        # phase 0.5 — the replay/conflict check BEFORE any staging; the CRASH-DOMAIN guard
+        # (#4): the journal row's body_hash extends the same-key rule past the command_log's reach
+        row = _sess_row(sess, f"SELECT body_hash || '|' || result_ref FROM arv.command_log "
+                              f"WHERE idempotency_key={_q(idem_key)};")
+        if row:
+            recorded_hash, recorded_ref = row.split("|")
+            if recorded_hash != body_hash:
+                print(f"FAIL ARV-CMD-409: idempotency key {idem_key!r} is already recorded with a DIFFERENT body "
+                      "(no silent overwrite — exactly-once is a contract, not a preference)")
+                print("      repair: use a new idempotency key for a new body; the same key must mean the same command")
+                return 1
+            wid_ack = _sess_row(sess, f"SELECT work_id || '|' FROM arv.source WHERE id={_q(recorded_ref)};")
+            print(f"ACK command=import_source idem_key={idem_key} status=replayed result_ref={recorded_ref}"
+                  f" work_id={wid_ack.split('|')[0] if wid_ack else ''}")
+            return 0
+        jrowj = _sess_row(sess, f"SELECT row_to_json(j) || '|' FROM (SELECT body_hash, client_id FROM "
+                                f"arv.import_journal WHERE idempotency_key={_q(idem_key)}) j;")
+        if jrowj:
+            jr = json.loads(jrowj.split("|", 1)[0])
+            # the re-drive domain's identity is the IMPORT itself: a fresh retry may carry a
+            # different client_id (provenance) — recompute the row's body under the ROW'S client
+            # and only a genuinely different import (same key, different payload) is the 409
+            alt = hashlib.sha256(canonical_body(command="import_source", client_id=jr["client_id"],
+                                                owner_scope=owner, actor=actor,
+                                                payload=body).encode()).hexdigest()
+            if alt != jr["body_hash"]:
+                print(f"FAIL ARV-CMD-409: idempotency key {idem_key!r} is already recorded with a DIFFERENT body "
+                      "(a crashed attempt's journal row carries a different import — the crash-domain replay guard)")
+                print("      repair: use a new idempotency key for a new body; the same key must mean the same command")
+                return 1
+        if work_id is not None and not _sess_row(sess, f"SELECT id || '|' FROM arv.work WHERE id={_q(work_id)};"):
+            print(f"FAIL ARV-CAP-006: work {work_id} does not exist in the caller's scope")
+            print("      repair: import against an existing work id, or create a new work with --title")
+            return 1
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]  # phase 1: the staging UPSERT (own txn; the rewind)
+        if not _journal_txn(sess,
+                            f"INSERT INTO arv.import_journal (id, owner_scope, actor, idempotency_key, client_id, "
+                            f"work_id, title, digest, media_type, byte_size, acquired_via, state, body_hash, run_id, "
+                            f"input_hash, created_at, updated_at) VALUES ({_q(ids.new_id())}, {_q(owner)}, {_q(actor)}, "
+                            f"{_q(idem_key)}, {_q(client_id)}, {_qn(work_id)}, {_qn(title)}, {_q(digest)}, {_q(media_type)}, "
+                            f"{len(data)}, {_q(acquired_via)}, 'staging', {_q(body_hash)}, {_q(run_id)}, {_q(ih)}, "
+                            f"{_q(ts)}, {_q(ts)}) ON CONFLICT (owner_scope, idempotency_key) DO UPDATE SET "
+                            f"state='staging', fail_reason=NULL, source_id=NULL, updated_at={_q(ts)}, "
+                            f"client_id={_q(client_id)}, body_hash={_q(body_hash)}, run_id={_q(run_id)}, input_hash={_q(ih)};",
+                            idem_key=idem_key):
+            return 1
+        if crash_at == "after-staging":
+            sess.kill()
+            return 2
+        blob.put(data)  # phase 2: put + verify INSIDE staging (§3.1's exit condition)
+        if crash_at == "after-put":
+            sess.kill()
+            return 2
+        try:
+            blob.get(digest)  # the §3.1 verify: readable AND digest-matched (get re-hashes)
+        except KeyError as e:
+            reason = e.args[0].split(":")[0] if e.args else "ARV-BLOB-000"  # e.args[0]: str(e) would carry KeyError's repr quotes
+            _journal_txn(sess, f"UPDATE arv.import_journal SET state='failed', "
+                          f"fail_reason={_q(reason)}, updated_at={_q(clock.now())} "
+                          f"WHERE owner_scope={_q(owner)} AND idempotency_key={_q(idem_key)};",
+                         idem_key=idem_key)
+            print(f"FAIL ARV-CAP-004: the blob verify failed — {e.args[0] if e.args else e}")
+            print("      repair: the store is corrupt at this digest; the row is failed(retryable) and the recovery walk cleans the unreferenced artifact — a Source NEVER commits without verified bytes")
+            return 1
+        if not _journal_txn(sess, f"UPDATE arv.import_journal SET state='staging_verified', "
+                            f"updated_at={_q(clock.now())} WHERE owner_scope={_q(owner)} "
+                            f"AND idempotency_key={_q(idem_key)};", idem_key=idem_key):
+            return 1
+        if crash_at == "after-verify":
+            sess.kill()
+            return 2
+        build = _import_build(owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,  # phase 3: the ONE metadata txn
+                              title=title, work_id=work_id, digest=digest, media_type=media_type,
+                              byte_size=len(data), acquired_via=acquired_via)
+        return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                      command="import_source", payload=body, build=build, crash_at=crash_at)
+    finally:
+        try:
+            sess.close()
+        except Exception:
+            pass
 
 
 def create_highlight(*, db, owner, actor, client_id, idem_key, source_id,

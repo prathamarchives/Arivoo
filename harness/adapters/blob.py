@@ -63,3 +63,23 @@ def get(digest: str) -> bytes:
     if digest_of(data) != digest:
         raise KeyError(f"ARV-BLOB-003: blob {digest[:12]} failed re-verification (stored bytes do not re-hash to their digest — store corruption, never promoted)")
     return data
+
+
+def delete(digest: str) -> bool:
+    """The §4.4 arm — the staging-artifact cleanup: delete ONLY blobs unreferenced
+    by any arv.source row (a REFERENCED blob is never deleted, even corrupt — CAP-15)."""
+    if not _SAFE.match(digest):
+        return False
+    try:
+        (_dir() / digest).unlink()
+        return True
+    except FileNotFoundError:
+        return False
+
+
+def residents() -> list:
+    """The digest-named residents (the sweep's enumeration; .put- temps IGNORED)."""
+    try:
+        return [p.name for p in _dir().iterdir() if p.is_file() and _SAFE.match(p.name)]
+    except FileNotFoundError:
+        return []

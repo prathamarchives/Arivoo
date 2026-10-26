@@ -1,0 +1,25 @@
+# CLAIM-050 — P3-02: the import state machine (Work/Source intake) + the
+# recovery walk (PLAN's P3-02 card; RTM §3.1's frozen machine + SYS-06/SYS-03's
+# primary trace; the Q11 baseline at RTM §7.5; the P3-01 notverified's named
+# P3-02 promises: the staging/staging_verified states, the recovery walk, the
+# blob delete/exists arms, the corrupt-blob cleanup, the orphaned-staging-artifact
+# cleanup, and SEV-7's stderr-classification refinement). RED-first at the
+# predecessor ab22029: the import suite's machinery-absent RED (ARV-TEST-000 —
+# recover.py/migration 0005/the phased crash points/the drained death classifier
+# do not exist), the S1/record-18 §4.1 + P3-01 capture-suite precedent class.
+harness/tests/test_import.py D-041
+harness/gate.py D-041
+harness/migrations/0005_import_journal.sql D-041
+harness/adapters/blob.py D-041
+harness/commands.py D-041
+harness/recover.py D-041
+harness/crash.py D-036
+harness/red-records.json D-041
+PLAN.md D-037
+STATE.md D-043
+AGENTS.md D-043
+CLAIMS.md D-038
+context/WORKLOG.md D-043
+context/extracted/41-P302-IMPORT-STATE-MACHINE.md D-042
+harness/runs/claim-050-p302-import-state-machine D-042
+harness/tests/test_capture.py D-041

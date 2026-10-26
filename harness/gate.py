@@ -83,6 +83,7 @@ REPO = _repo_root()
 TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          "harness/tests/test_commands.py", "harness/tests/test_kernel.py",
          "harness/tests/test_capture.py",
+         "harness/tests/test_import.py",
          "harness/tests/test_gate_dispatch.py",
          "harness/tests/test_mutation_floor.py",
          "harness/tests/test_trusted_gate.py",

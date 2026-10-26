@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-051-sev7-death-classifier",
   "base_sha": "360b24c1b228edd0d71bd12094d7f1ae25e678c8",
-  "reviewed_diff_sha256": "d99d8ee954a1360caa87da62c02a60c889b2bb2502407072138aa15bdd9c6d70",
+  "reviewed_diff_sha256": "977e1f118fe34cbe79e12cc5032369bae79310d113d016a23a49fc8d9fc70cf3",
   "intent_ids": [
     "INT-127",
     "INT-131",

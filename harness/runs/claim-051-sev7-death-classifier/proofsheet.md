@@ -72,11 +72,11 @@
 - filter (query.py's own slice).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 111d15d2d5f639f685aa313256bfbebd1c472bb7dbc684fe784c4f5348ddf2c1
-- reviewed_diff_sha256: d99d8ee954a1360caa87da62c02a60c889b2bb2502407072138aa15bdd9c6d70
+- report sha256: 5b12fb46b9be6be77297c47e6d9cf069bea200f7a523c0b4856d956fa00dab60
+- reviewed_diff_sha256: 977e1f118fe34cbe79e12cc5032369bae79310d113d016a23a49fc8d9fc70cf3
 - disposition: PASS
 - findings: 3 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 3daf3384074ecbd9cf8de3272db5c588b9e044c7bf600daae678ed424d36ca10
+- sheet sha256 (of the content above, excluding this line): eb48981d0537f25188564e1f70042717c9ad809e461542cd3cd3654b0fe3110d

@@ -1,7 +1,7 @@
 {
   "command": "python3 harness/tests/test_import.py",
   "exit_code": 0,
-  "commit": "7973c91bc93fcb621ef4c5b1e1dc1a31325d5a8d",
-  "output_sha256": "8396b9951f8352931a52320828d2ecfea9e7c6d1c8d2fe64390f5ef45cd0ccad",
-  "recorded_at": "2026-10-26T04:03:24.034654+00:00"
+  "commit": "999c9f297cd8a2c4f3a1b88534bdb0749d9022fe",
+  "output_sha256": "f56ad44261ac836f78697f580f32504895434356260412c611abbe1f4da8866d",
+  "recorded_at": "2026-10-26T05:06:39.477902+00:00"
 }

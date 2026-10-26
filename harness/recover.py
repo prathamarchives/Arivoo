@@ -7,14 +7,14 @@ row's outcome NAMED on its own line (a row's failure never stops the walk).
 Journal reads are row_to_json — ONE escaped line per row, JSON-parsed at the
 boundary, never a re-parse of psql text (pipes/newlines/'MARK' cannot corrupt).
 The re-drive reconstructs the canonical body from the row's recorded FIELDS and
-HASH-CHECKS it against body_hash BEFORE any drive (a mismatch is ARV-IMP-001);
+HASH-CHECKS it against body_hash BEFORE any drive (a mismatch is ARV-IMP-001;
+a forged work binding ARV-IMP-004; an unreadable row line ARV-IMP-002; a
+refused batch ARV-IMP-003 — every outcome named, never a silent guess);
 re-verifies the blob FIRST (the phantom-closure: a complete Source without
 bytes is impossible — §4.4); rides the SAME spine under the ORIGINAL key.
-The sweep deletes journal-less residue, protecting referenced (any owner, the
-arv_read cross-owner check — Q11 byte-reuse) and live-staging blobs; a
-REFERENCED blob is never deleted, even corrupt (CAP-15 stands); .put- temps
-are ignored (the #84 pin's ignorable class). Exit 0 = every row's outcome
-named; exit 1 = a named machinery failure (ARV-IMP-003 — never a silent guess).
+The sweep deletes residue (a REFERENCED blob is never deleted, even corrupt —
+CAP-15 stands; .put- temps ignored, the #84 class). Exit 0 = every outcome
+named; exit 1 = a named machinery failure (never a silent guess).
 """
 import argparse
 import io
@@ -42,7 +42,7 @@ def _fail(db: str, owner: str, r: dict, code: str, *, clean: bool = False) -> No
     _batch(f"SET app.current_owner={commands._q(owner)}; "
            f"UPDATE arv.import_journal SET state='failed', fail_reason={commands._q(code)}, "
            f"updated_at={commands._q(clock.now())} WHERE id={commands._q(r['id'])} "
-           f"AND state IN ('staging','staging_verified');", db=db)  # the round-1 F5 guard: never flip a terminal row (a concurrent completion between the snapshot and this write is a lying journal row otherwise)
+           f"AND state IN ('staging','staging_verified');", db=db)  # F5's guard: never flip a terminal row (record 41 §8)
     if clean and not _referenced(db, r["digest"]):
         blob.delete(r["digest"])
     print(f"WALK key={r['idempotency_key']} from={r['state']} to=failed reason={code} source=-")
@@ -75,9 +75,8 @@ def _drive(db: str, owner: str, r: dict) -> None:
     ORIGINAL key (replayed/committed -> complete; 011 -> retry-race, the row
     stays staging_verified for the next walk; any other refusal -> failed)."""
     if (r["title"] is None) == (r["work_id"] is None):
-        # the round-1 F3 fix: a coherent-forged row (both NULL / both set — the
-        # CLI's CAP-007 blocks the request shape, direct SQL does not) is a
-        # NAMED refusal, never the _q(None) crash that aborted the walk
+        # F3's fix: a coherent-forged row (CAP-007 blocks only the CLI shape) is
+        # a NAMED refusal, never the _q(None) crash that aborted the walk
         _fail(db, owner, r, "ARV-IMP-004")
         return
     body = commands._import_body(title=r["title"], work_id=r["work_id"], digest=r["digest"],

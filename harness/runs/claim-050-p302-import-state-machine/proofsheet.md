@@ -1,24 +1,24 @@
 # PROOF SHEET — slice claim-050-p302-import-state-machine (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 7973c91bc93fcb621ef4c5b1e1dc1a31325d5a8d
-- generated (last record's timestamp): 2026-10-26T04:11:39.439203+00:00
+- commit (last run record's): 999c9f297cd8a2c4f3a1b88534bdb0749d9022fe
+- generated (last record's timestamp): 2026-10-26T05:15:57.383345+00:00
 - run records: 14
 
 ## Run records (command, exit, output digest)
-- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 8396b9951f835293 · 2026-10-26T04:03:24.034654+00:00
-- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 9a74cebc12826061 · 2026-10-26T04:03:30.173882+00:00
-- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-26T04:03:30.585480+00:00
-- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-26T04:03:33.074211+00:00
-- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 4ac56d06bfee780a · 2026-10-26T04:03:34.755064+00:00
-- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 288c811e4a7d4ffb · 2026-10-26T04:03:37.186172+00:00
-- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-26T04:05:12.010312+00:00
-- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 4b9f98d6090fb979 · 2026-10-26T04:05:33.864330+00:00
-- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 ce93293e89b8fd78 · 2026-10-26T04:05:42.760424+00:00
-- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 07f871b7af7804b3 · 2026-10-26T04:05:43.091010+00:00
-- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-26T04:05:43.299947+00:00
-- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 e4f6bfeee99e7572 · 2026-10-26T04:05:45.829814+00:00
-- `make verify` -> exit 0 · output sha256 1b1f715a49204001 · 2026-10-26T04:08:53.910020+00:00
-- `python3 harness/gate.py --slice claim-050-p302-import-state-machine --diff main` -> exit 1 · output sha256 4c066088128fa2ca · 2026-10-26T04:11:39.439203+00:00
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 f56ad44261ac836f · 2026-10-26T05:06:39.477902+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 9a74cebc12826061 · 2026-10-26T05:06:44.877768+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-26T05:06:45.245465+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-26T05:06:47.868192+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 a66c09105c93f972 · 2026-10-26T05:06:49.481951+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 425268b9eaa2212c · 2026-10-26T05:06:51.756475+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-26T05:08:30.040485+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 e65bda51faafa749 · 2026-10-26T05:08:53.036733+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 d60c7028d708ea70 · 2026-10-26T05:09:07.060045+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 56e18aea6956c7e9 · 2026-10-26T05:09:07.375402+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-26T05:09:07.544863+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 00db18e14fda53df · 2026-10-26T05:09:10.883127+00:00
+- `make verify` -> exit 0 · output sha256 dea68c2344eff55c · 2026-10-26T05:12:44.685143+00:00
+- `python3 harness/gate.py --slice claim-050-p302-import-state-machine --diff main` -> exit 1 · output sha256 c14f0083c62e994b · 2026-10-26T05:15:57.383345+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-050 / P3-02 (LAW-04; never empty-by-omission)
@@ -95,13 +95,35 @@
 - (workflow-definition protection, runner integrity) remain Q10/EXTERNAL.
 - 10. The import-state column on arv.source is 'complete' AT BIRTH — staging
 - states exist ONLY in the journal (the §3.1 "no phantom Source" shape).
-- The source table never carries a partial import; retrieval surfaces
-- (query.py) are unchanged by this slice and report only complete sources.
+- The MACHINE never writes a non-complete source; that birth invariant is
+- the machine's, NOT the read's — the retrieval surface (query.py, this
+- slice unchanged) has NO state filter, and 0004's CHECK permits the whole
+- vocabulary: a DIRECT-SQL planted partial source row would be reported
+- verbatim (the round-1 reviewer's F7 probe, observed live). The read-side
+- state filter is its own slice's call (query.py is outside this slice's
+- claim scope), never silently claimed closed here.
 - 11. The record-41 §6 command log below is the OPERATIVE evidence form (the
 - exact commands with exits); the runs dir carries the machine-verified
 - digest form. Where a transient diagnostic (a probe DB name, a tmp path)
 - appears in a preserved RED file, it is the OBSERVED session's fact, never
 - a reproducibility promise — the rerunnable form is the suite itself.
+- 12. The journal's WORK BINDING is enforced at the CLI (CAP-007's XOR) and —
+- after the round-1 F3 fix — at the WALK's drive (a coherent-forged row with
+- both work_id and title NULL, or both set, fails ARV-IMP-004 named, the row
+- marks failed, the walk CONTINUES; red-02.txt preserves the pre-fix crash).
+- The DB-level CHECK constraint (num_nonnulls(work_id,title)=1) is deferred
+- to its own migration slice: SIZE-005 bounds THIS slice to one migration
+- (0005), and a second migration cannot ride this diff — the boundary is
+- named here, never silently narrowed. Direct-SQL journal rows remain
+- writable by arv_app+GUC by design (the mutable substrate); the machine's
+- own writes are the XOR-checked ones.
+
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 713a9a3247e0326fa288eeff94b47e2b41ee7fef8962386e6ccdd656d4cb636c
+- reviewed_diff_sha256: a62f5916be2ade5ffb530cdc4ca66846365b9704352e1fa9ad89871373c3bfe3
+- disposition: PASS
+- findings: 11 (open P0/P1: 0)
+- not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 64c36e3a0638c34e8f62980081b2fe54ed915a192b9d52f0010ddda398d1e754
+- sheet sha256 (of the content above, excluding this line): 0c3c308408727fa196e3ddee92d98a3857fb717f8a6a229f0e95d072a9521030

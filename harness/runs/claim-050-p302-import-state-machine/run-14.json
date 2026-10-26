@@ -1,7 +1,7 @@
 {
   "command": "python3 harness/gate.py --slice claim-050-p302-import-state-machine --diff main",
   "exit_code": 1,
-  "commit": "7973c91bc93fcb621ef4c5b1e1dc1a31325d5a8d",
-  "output_sha256": "4c066088128fa2ca5089c9a24c0240ba01782e343ac9dcf468dd1dfdc9b854eb",
-  "recorded_at": "2026-10-26T04:11:39.439203+00:00"
+  "commit": "999c9f297cd8a2c4f3a1b88534bdb0749d9022fe",
+  "output_sha256": "c14f0083c62e994b05d3d33dec1d9b874c21e3f12698631789812b4ee6cb80ea",
+  "recorded_at": "2026-10-26T05:15:57.383345+00:00"
 }

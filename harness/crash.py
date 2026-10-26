@@ -21,10 +21,8 @@ SPINE_POINTS = ("after-begin", "pre-commit", "post-commit-pre-ack")
 
 
 class _UsageParser(argparse.ArgumentParser):
-    """The round-1 F4 fix: EVERY argparse error path (a typo'd point, a missing
-    required arg, a bad choice) prints the named CRASH-USAGE line and exits 1 —
-    argparse's default exit-2 is the crash vocabulary and must never fire for a
-    usage error (the exit-2 masquerade lesson)."""
+    """F4's fix: every argparse error path prints the named CRASH-USAGE line and
+    exits 1 (exit 2 is the crash vocabulary — never a usage error's)."""
 
     def error(self, message: str):
         print(f"CRASH-USAGE: {message} — a named usage refusal (exit 1), never "

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-050-p302-import-state-machine",
   "base_sha": "ab22029e58048006edc87051bfa537340886d282",
-  "reviewed_diff_sha256": "adb5d86cece4b974d082b5052c204b8df14e63746d4e01ebb0b5960d3d6c749f",
+  "reviewed_diff_sha256": "5e0f474393bd1fab4a07b82c61366b2f114fb39831b2cc7eee42723d0572e617",
   "intent_ids": [
     "INT-127",
     "INT-131",

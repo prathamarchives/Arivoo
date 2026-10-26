@@ -170,7 +170,7 @@
       "id": "SEV-11",
       "severity": "P2",
       "status": "resolved",
-      "evidence": "round 2 (N3): recover.py's module docstring enumerated the row-level codes without the new ARV-IMP-004",
+      "evidence": "round 2 (N3 — the reviewer's own P3 grade, recorded at the frozen P2 rung): recover.py's module docstring enumerated the row-level codes without the new ARV-IMP-004",
       "disposition": "FIXED: the docstring's named-codes line now carries 001/002/003/004 (folded into the N2 compression, same line count)"
     }
   ],

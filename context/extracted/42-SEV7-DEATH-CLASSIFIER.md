@@ -45,7 +45,7 @@ transactions; the INSERTS block's routing comment resolved to the landed
 form. IMP-18's planted-trigger arm is deterministic (no choreography, no
 flake — the #83/#84 lesson family); IMP-19's killed-backend probe is
 deterministic (the backend terminated in-build, before BEGIN — notverified
-item 2 names the true-mid-commit-partition residual). The suite: 24 cases
+item 2 names the true-mid-commit-partition residual). The suite: 22 cases
 GREEN (three consecutive runs); make verify GREEN 54/0 over the spine
 re-wiring (the capture suite's CAP-21 real-race arm still classifies 011 —
 from the drained stderr now). Source adds 87/400.
@@ -64,11 +64,15 @@ dir (scope, red-01, the proof set, notverified, the sheet, sev.json).
 - The RED: python3 harness/tests/test_import.py at 360b24c → exit 1,
   ARV-TEST-000 (the classifier absent; red-01.txt); the branch pushed at the
   RED commit (3d505cd) and PR #86 opened EARLY per the standing instruction.
-- The GREEN: the classifier landed at 917dc64 (the suite 24/24, three
+- The GREEN: the classifier landed at 917dc64 (the suite 22/22, three
   consecutive runs; make verify GREEN 54/0); pushed.
-- The proof set: run-01 (the suite) run-02..12 (the eleven machinery suites,
-  all exit 0) run-13 (make verify, exit 0) + the PR-mode gate RECORDED at the
-  finalize; the sheet assembled from the records (PASS ARV-PRF-004).
+- The proof set: run-01 (the suite 22/22) run-02..12 (the eleven machinery
+  suites, all exit 0) run-13 (make verify, exit 0); the PR-mode gate's
+  RECORDED green run and the sheet's assembly land with the post-round
+  finalize (the round-1 F2 repair: the first finalize's assembly call failed
+  silently on the not-yet-written notverified path, making its "the sheet
+  assembled" claim false — caught by the round-1 reviewer, the sheet now
+  actually assembled and the gate green recorded).
 - The merge sequence: the five checks observed green at the head; the
   single-actor bar reproduced (422/405); the flip; the merge; the RESTORE;
   the post-merge run; the branch deletion — all recorded at §12 on merge.
@@ -76,8 +80,8 @@ dir (scope, red-01, the proof set, notverified, the sheet, sev.json).
 ## 7. Evidence
 
 The runs dir: scope.txt, red-01.txt (the machinery-absent RED), the proof
-set, the re-derived sheet, the notverified's seven boundaries, sev.json (the
-rounds' record, written only after they run). The red-records chain: the
+set, the sheet (assembled with the post-round finalize), the notverified's
+seven boundaries, sev.json (the rounds' record, written only after they run). The red-records chain: the
 CLAIM-050 binding + the CLAIM-051 amendment (the probe + the restored cases,
 the RED observed at 360b24c).
 
@@ -85,7 +89,15 @@ the RED observed at 360b24c).
 
 None at the implementation (the classifier's forms were VALIDATED at the
 pre-split tree 3230330 and restored verbatim — the first run of the restored
-suite was green; the rehearsal lesson of the lost session paying its dividend).
+suite was green; the rehearsal lesson of the lost session paying its
+dividend). The ROUND-1 findings (agent-8fe337ac, BLOCKED): F1 the '24 cases'
+count was FALSE (22 — codes conflated with cases; corrected across the
+homes; the two immutable commit messages carry the error and this note is
+its only honest correction) + F2 the finalize claimed the sheet assembled
+while the assembly call had failed on the not-yet-written notverified path
+(the claim false; the sheet now actually assembled at the post-round
+finalize) + F3 STATE's Phase line malformed by the re-derivation's stale
+tail (repaired in the same pass).
 The digest-binding lesson from CLAIM-050 (reviewed_diff_sha256 reads the
 blobs AT HEAD; the sheet's SEV section embeds the report digest) is applied
 HERE from the first step: the sev re-bind runs only AFTER the content commit,

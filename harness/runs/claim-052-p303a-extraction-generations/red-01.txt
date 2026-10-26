@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the extraction machinery is absent (machinery-absent class; missing files: ['extract.py', '0006_extraction_generations.sql']; missing the extract_source command: True) — P3-03a's implementation lands after this RED, never before it (LAW-11)

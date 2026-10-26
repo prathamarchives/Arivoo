@@ -1,0 +1,24 @@
+# CLAIM-052 — P3-03a: the extraction generations (RTM §2.3/§3.6, SYS-06/07's
+# primary trace; PLAN's P3-03 card's generation half — the bounded split of
+# the card per LAW-05: the extraction machine here, the anchor resolution +
+# the Q8 spike in the following slice). The derived-state pattern's first
+# instantiation: complete-or-failed publication, the versioned lineage (the
+# generation ordinal per source, superseded retained), the disposable §2.9
+# class (NO append-only trigger, NO command_log row — a derived build, never
+# an owner command), the stale-detection substrate (the input digest = the
+# source's digest). RED-first at the predecessor 0ce7077 (machinery-absent
+# ARV-TEST-000: extract.py/0006/the extract_source command absent).
+harness/tests/test_extract.py D-041
+harness/gate.py D-041
+harness/migrations/0006_extraction_generations.sql D-041
+harness/extract.py D-041
+harness/commands.py D-041
+harness/crash.py D-036
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/43-P303A-EXTRACTION-GENERATIONS.md D-042
+harness/runs/claim-052-p303a-extraction-generations D-042

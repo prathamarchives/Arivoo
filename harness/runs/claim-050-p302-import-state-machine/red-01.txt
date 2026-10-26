@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the import-state machinery is absent (machinery-absent class; missing files: ['recover.py', '0005_import_journal.sql']; missing crash points: ['after-staging', 'after-put', 'after-verify']; missing the stderr-drained death classifier: True) — P3-02's implementation lands after this RED, never before it

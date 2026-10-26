@@ -1,5 +1,7 @@
 # 41 — P3-02: the import state machine + the recovery walk (CLAIM-050)
 
+> STATUS: SESSION ENGINEERING RECORD (2026-10-26; intent refs INT-127/131/134/135/138/139/140; decision refs D-036/D-038/D-041/D-042/D-043). Historical process artifact per D-022: NOT owner intent, outranks nothing. Worklog entry: Task 58. PR this session: #85 (this slice; outcome recorded only after it happens). THE SEV record for this slice: `harness/runs/claim-050-p302-import-state-machine/sev.json` — the two-round chain's outcome is recorded there only after the rounds run; at this record's first shipping the round-1 reviewer's findings were open and the fixes landed in the same session (the F1-F8 chain, §8).
+
 Session 31 continuation (the standing do-not-stop chain INT-134/135/138/139/140);
 the turn-36 execution directive: P3-01's merge → P3-02 (the §3.1 machine) → P3-03..09 → the gates.
 
@@ -107,13 +109,13 @@ harness/migrations/0005_import_journal.sql (NEW); harness/recover.py (NEW);
 harness/commands.py (the phased import + _qn + _import_body/_import_build +
 _journal_txn; the spine reverted to main's 011 form with the 051 routing
 comment); harness/adapters/blob.py (delete + residents; exists removed);
-harness/crash.py (the phase points + --work-id + the exit-2 lesson);
-harness/tests/test_import.py (NEW, IMP-01..17); harness/gate.py (TESTS);
-harness/red-records.json (the typed binding + the amendment chain); CLAIMS.md
-(the 050 open row + the 049 rule-4 close + the split note);
-harness/runs/claim-050-p302-import-state-machine (scope, red-01, the proof
-set, notverified, the sheet, sev.json); STATE/AGENTS/PLAN/WORKLOG (the
-re-derivation); this record.
+harness/crash.py (the phase points + --work-id + the argparse error-override);
+harness/tests/test_import.py (NEW, IMP-01..20 — the round-1 case added);
+harness/gate.py (TESTS); harness/red-records.json (the typed binding + the
+amendment chain); CLAIMS.md (the 050 open row + the 049 rule-4 close + the
+split note); harness/runs/claim-050-p302-import-state-machine (scope, red-01,
+red-02, the proof set, notverified, the sheet, sev.json); STATE/AGENTS/PLAN/
+WORKLOG (the re-derivation); this record.
 
 ## 6. Commands and external actions (ACTUAL — never reconstructed)
 
@@ -123,10 +125,11 @@ re-derivation); this record.
   ("4 migrations" then "5") → harness-health (OK ARV-RIG-001) → make verify
   (GREEN 54/0 at ab22029; GREEN at each content head).
 - The suite: python3 harness/tests/test_import.py — the RED (exit 1,
-  ARV-TEST-000, red-01.txt) then the GREEN iterations (exit 0, 17/17, three
-  consecutive runs); the forensic keep-runs (ARV_KEEP_DB) for the IMP-17/18
-  debug; the standalone replications (probe/walkdbg/dbg18b scratch DBs — all
-  dropped after use).
+  ARV-TEST-000, red-01.txt), the GREEN iterations (exit 0, 17/17, three
+  consecutive runs), and the round-1 case IMP-20 added at the F3 fix (red-02
+  preserves the observed crash at the pre-fix tree; 18/18 green after); the
+  forensic keep-runs (ARV_KEEP_DB) for the IMP-17/18 debug; the standalone
+  replications (probe/walkdbg/dbg18b scratch DBs — all dropped after use).
 - The proof set: run-01 (the import suite) run-02..12 (the eleven machinery
   suites, all exit 0) run-13 (make verify, exit 0) run-14 (the PR-mode gate,
   exit 1 — the HONEST pre-finalize RED: the notverified/sev/sheet not yet
@@ -139,12 +142,17 @@ re-derivation); this record.
 ## 7. Evidence
 
 The slice's runs dir: scope.txt (the owner-referenced protected paths), red-01
-(the machinery-absent RED), the proof set (the command list above), the
-re-derived Proof Sheet (PASS ARV-PRF-004 byte-identical at the finalize), the
-notverified (eleven named boundaries), sev.json (the two-round chain's
-record, sheet_section true). The registry: CLAIM-050's open row + the 049
-close row. The red-records chain: the binding at 1c556b36 + the amendments
-(the nine suite-shape repairs and the split, each with the honest note).
+(the machinery-absent RED), red-02 (the round-1 F3 crash observed at the
+pre-fix tree), the proof set re-captured clean at the round-fix tree (the
+ARV-FLOOR-002 lesson: capture from clean before the count-based numbering),
+the re-derived Proof Sheet (PASS ARV-PRF-004 byte-identical at the finalize),
+the notverified (eleven named boundaries, item 10 re-worded per the round-1
+F7), and sev.json — the two-round SEV chain's record, written with the
+round-2 re-verification and bound to the final content head (sheet_section
+true, ARV-SEV-009's enforced form; the runs dir excluded by the
+anti-self-referentiality contract). The registry: CLAIM-050's open row + the
+049 close row. The red-records chain: the binding at 1c556b36 + the
+amendments (the nine suite-shape repairs, the split, and the round-1 case).
 
 ## 8. Failures (each honestly recorded, each repaired in-slice)
 
@@ -173,6 +181,52 @@ close row. The red-records chain: the binding at 1c556b36 + the amendments
 - The pre-split commands.py surgery (the stderr pump + _dead_exit) was
   REVERTED to main's exact spine form when the split was adopted — the
   classifier work belongs to 051, and this slice's diff must not carry it.
+
+THE ROUND-1 SEV CHAIN (the fresh-context reviewer agent-b2d3174f; every finding
+real, every one fixed in-slice):
+- F1 (P0): the finalize commit itself broke the canonical layer — record 41
+  shipped without the D-022 STATUS banner every other record carries (VER-205
+  caught it: make verify RED at the pushed head while STATE claimed a green
+  recorded run at the finalize). Fixed: the banner added (the record-40 form),
+  make verify re-run green at the round-fix head, and STATE's verified-by-run
+  bullet re-bound to the sha that actually carries the green (INT-104).
+- F2 (P1): the record's §5/§7 named a sev.json and a two-round chain that did
+  not exist at the shipping tree (forward-dated claims; ARV-SEV-001 still
+  refused). Fixed: the record's tenses corrected to the truth at ship time;
+  the real sev.json lands with the round-2 re-verification.
+- F3 (P1): a COHERENT-forged journal row with BOTH work_id and title NULL
+  (reachable only via direct SQL — the CLI's CAP-007 blocks the request shape)
+  crashed the walk UN-NAMED at _q(None) inside the spine's build, aborting the
+  remaining rows and the sweep (the walk's own fail-closed contract violated).
+  Fixed RED-first: the new suite case IMP-20 (the forged row planted, the walk
+  must NAME it, mark the row failed, and COMPLETE with the later rows driven
+  + WALK-DONE); red-02.txt preserves the observed crash at the pre-fix tree;
+  the fix is _drive's XOR pre-check — a coherent forged row fails
+  ARV-IMP-004 (named), the walk continues.
+- F4 (P2): crash.py's docstring claimed the exit-2 masquerade closed, but
+  argparse-level usage errors (a typo'd point, a missing required arg) still
+  exited 2 — exactly the vocabulary collision the lesson named. Fixed: the
+  ArgumentParser.error override prints the named CRASH-USAGE line and exits 1
+  (every argparse error path now exits 1, never 2).
+- F5 (P2): _fail's UPDATE lacked the state guard the walk's other two
+  updates carry — a concurrent completion between the snapshot and the _fail
+  write could flip a complete row to failed (a lying journal row against a
+  committed source). Fixed: AND state IN ('staging','staging_verified').
+- F6 (P3): the suite's IMP-16 wording "journal-less residue" understated the
+  sweep's actual predicate (a terminal-FAILED row's unreferenced digest is
+  also swept — the designed staging-artifact cleanup; observed live by the
+  reviewer). Fixed: the check text names the true predicate (residue referenced
+  by no source row AND no non-terminal journal row).
+- F7 (P3): the notverified's item-10 wording "retrieval surfaces report only
+  complete sources" was construction-true, not surface-true (the reviewer
+  planted a direct-SQL 'staging' source row and query.py returned it
+  verbatim — no state filter exists, and 0004's CHECK permits the vocabulary).
+  Fixed by re-wording (the birth-complete invariant is the MACHINE's; the
+  read's boundary named honestly) — query.py is OUT OF THIS SLICE'S CLAIM
+  SCOPE, its state filter is its own slice's call.
+- F8 (P3): CLAIM-050's open-row Notes still named the removed exists() arm.
+  Fixed: the row's Notes corrected (delete/residents; exists lands with its
+  own consumer).
 
 ## 9. Unverified items
 

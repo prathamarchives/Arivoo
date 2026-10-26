@@ -84,11 +84,27 @@ THE EXPLICIT BOUNDARIES (named, never silently narrowed):
 
 10. The import-state column on arv.source is 'complete' AT BIRTH — staging
    states exist ONLY in the journal (the §3.1 "no phantom Source" shape).
-   The source table never carries a partial import; retrieval surfaces
-   (query.py) are unchanged by this slice and report only complete sources.
+   The MACHINE never writes a non-complete source; that birth invariant is
+   the machine's, NOT the read's — the retrieval surface (query.py, this
+   slice unchanged) has NO state filter, and 0004's CHECK permits the whole
+   vocabulary: a DIRECT-SQL planted partial source row would be reported
+   verbatim (the round-1 reviewer's F7 probe, observed live). The read-side
+   state filter is its own slice's call (query.py is outside this slice's
+   claim scope), never silently claimed closed here.
 
 11. The record-41 §6 command log below is the OPERATIVE evidence form (the
    exact commands with exits); the runs dir carries the machine-verified
    digest form. Where a transient diagnostic (a probe DB name, a tmp path)
    appears in a preserved RED file, it is the OBSERVED session's fact, never
    a reproducibility promise — the rerunnable form is the suite itself.
+
+12. The journal's WORK BINDING is enforced at the CLI (CAP-007's XOR) and —
+   after the round-1 F3 fix — at the WALK's drive (a coherent-forged row with
+   both work_id and title NULL, or both set, fails ARV-IMP-004 named, the row
+   marks failed, the walk CONTINUES; red-02.txt preserves the pre-fix crash).
+   The DB-level CHECK constraint (num_nonnulls(work_id,title)=1) is deferred
+   to its own migration slice: SIZE-005 bounds THIS slice to one migration
+   (0005), and a second migration cannot ride this diff — the boundary is
+   named here, never silently narrowed. Direct-SQL journal rows remain
+   writable by arv_app+GUC by design (the mutable substrate); the machine's
+   own writes are the XOR-checked ones.

@@ -41,7 +41,8 @@ def _fail(db: str, owner: str, r: dict, code: str, *, clean: bool = False) -> No
     only when unreferenced by any source row (the cross-owner check)."""
     _batch(f"SET app.current_owner={commands._q(owner)}; "
            f"UPDATE arv.import_journal SET state='failed', fail_reason={commands._q(code)}, "
-           f"updated_at={commands._q(clock.now())} WHERE id={commands._q(r['id'])};", db=db)
+           f"updated_at={commands._q(clock.now())} WHERE id={commands._q(r['id'])} "
+           f"AND state IN ('staging','staging_verified');", db=db)  # the round-1 F5 guard: never flip a terminal row (a concurrent completion between the snapshot and this write is a lying journal row otherwise)
     if clean and not _referenced(db, r["digest"]):
         blob.delete(r["digest"])
     print(f"WALK key={r['idempotency_key']} from={r['state']} to=failed reason={code} source=-")
@@ -73,6 +74,12 @@ def _drive(db: str, owner: str, r: dict) -> None:
     """The hash-checked body reconstruction, then the SAME spine under the
     ORIGINAL key (replayed/committed -> complete; 011 -> retry-race, the row
     stays staging_verified for the next walk; any other refusal -> failed)."""
+    if (r["title"] is None) == (r["work_id"] is None):
+        # the round-1 F3 fix: a coherent-forged row (both NULL / both set — the
+        # CLI's CAP-007 blocks the request shape, direct SQL does not) is a
+        # NAMED refusal, never the _q(None) crash that aborted the walk
+        _fail(db, owner, r, "ARV-IMP-004")
+        return
     body = commands._import_body(title=r["title"], work_id=r["work_id"], digest=r["digest"],
                                  media_type=r["media_type"], byte_size=r["byte_size"],
                                  acquired_via=r["acquired_via"])

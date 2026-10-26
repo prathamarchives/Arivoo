@@ -1,0 +1,20 @@
+PASS IMP-01: the phased import lands the journal row complete + source_id and the source row complete; a walk over it is a no-op (already-complete)
+PASS IMP-02: identical bytes imported twice = TWO Source rows under TWO works, ONE blob (byte-reuse is storage-level, never identity — the Q11 baseline)
+PASS IMP-03: two similar-but-different works with the SAME title both land (no auto-merge, no uniqueness constraint fires — Q11)
+PASS IMP-04: a crashed import retried under the SAME key re-drives the phases and commits EXACTLY ONE source (never two, never zero)
+PASS IMP-05: crash after staging (no blob put): the walk names failed(ARV-BLOB-002 absent) with NO phantom source; the SAME-key retry re-puts and completes — failed/retryable, never falsely complete
+PASS IMP-06: crash after the put (blob present, staging): the walk re-verifies, drives staging_verified, and commits the metadata exactly once
+PASS IMP-07: a corrupt blob at the walk: failed(ARV-BLOB-003), the unreferenced artifact DELETED (the delete arm), and the same-key retry re-puts clean bytes and completes — never a promoted corrupt Source
+PASS IMP-08: crash before the metadata commit (staging_verified): the walk re-drives the SAME key -> complete; exactly one source, exactly one work
+PASS IMP-09: the lost metadata ack: the journal rode the commit (complete in-transaction, source_id set), no ack emitted; the walk reports already-complete and the SAME-key replay answers status=replayed — the source count stays ONE (zero-or-one effect)
+PASS IMP-10: a blob that vanishes after verify: the re-drive RE-VERIFIES before the commit -> failed(ARV-BLOB-002), NO source row — a complete Source without bytes is impossible (§4.4)
+PASS IMP-11: a title carrying pipes, quotes, a 'MARK:' marker, and a NEWLINE: the walk's row_to_json reads never corrupt, the canonical body reconstructs hash-exact (no ARV-IMP-001), and the title round-trips WHOLE
+PASS IMP-12: the walk is convergence-idempotent: after the first walk drives the fresh staging row to complete, running it TWICE MORE changes NOTHING (states and updated_at byte-identical; no new sources)
+PASS IMP-13: two crashed imports re-driven by ONE walk: oldest-first, both complete, each exactly-one; the same-work imports re-read the ordinal and land versions 2,3 after the base's 1
+PASS IMP-14: the journal is owner-scoped end-to-end: B's walk completes only B's row, A's walk never sees it (RLS); arv_app WITHOUT the owner GUC sees ZERO rows (the fail-closed SELECT) and its INSERT is refused by the RLS WITH CHECK (CAP-11's form)
+PASS IMP-15: a same-key/different-body conflict refuses with ZERO staging: the replay check precedes the put, the store's residents unchanged (the P3-01 notverified's orphan class is dead by construction)
+PASS IMP-16: the orphan sweep deletes residue referenced by no source row AND no non-terminal journal row (including a terminal-FAILED row's unreferenced digest — the designed staging-artifact cleanup) while protecting live-staging and referenced blobs
+PASS IMP-17: the journal's conventions: NO defaults on id/created_at/updated_at (LAW-24), RLS enabled+forced, the state CHECK refuses unknown states, arv_app INSERT/SELECT/UPDATE with NO DELETE (rows transition, never erased), arv_read SELECT — and NO append-only trigger (the §2.9 disposable class, mutable by design)
+FAIL IMP-20: the coherent-forged both-NULL row (direct SQL, hash-consistent): the walk names ARV-IMP-004, marks the row failed, and CONTINUES — the later crashed row still driven to complete, WALK-DONE still printed, never the un-named crash that aborted the walk
+      repair: the walk's drive pre-checks the work binding (the CLI's CAP-007 XOR mirrored at the row level): a forge is a NAMED refusal, the row fails, the walk proceeds — the fail-closed contract holds for rows no code path of the machine could have written
+RED — 1 broken case(s): IMP-20

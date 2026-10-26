@@ -59,11 +59,18 @@ Cases (the IMP registry — this file is the contract's declaration):
         rows; the direct-DB journal access fails closed (both layers)
   IMP-15 the 409 conflict stages NO blob (the P3-01 notverified's orphan class
         dead by construction: the replay check precedes the put)
-  IMP-16 the orphan sweep: journal-less residue deleted; a live-staging row's
-        blob and a referenced blob PROTECTED
+  IMP-16 the orphan sweep: residue referenced by no source row AND no
+        non-terminal journal row deleted (incl. a terminal-FAILED row's
+        unreferenced digest); a live-staging row's blob and a referenced blob
+        PROTECTED
   IMP-17 the journal's §2/§2.9 conventions: NO defaults on id/created_at, RLS
         forced, arv_read SELECT, the actor/state CHECKs, UNIQUE(owner,key), and
         the declared ABSENCE of the append-only trigger (mutable by design)
+  IMP-20 the coherent-forged row (round-1 F3): BOTH work_id and title NULL
+        with a CONSISTENT body_hash, planted by direct SQL (the CLI's CAP-007
+        blocks the request shape): the walk NAMES it (ARV-IMP-004), marks the
+        row failed, and CONTINUES — the later rows still driven, WALK-DONE
+        still printed (never the _q(None) crash that aborted the walk)
 
 The SEV-7 stderr-classification cases (the planted-trigger dup-key -> 011 from
 the DRAINED stderr; the killed-backend connection-class -> the §4.1 uncertain
@@ -74,6 +81,7 @@ one-behavior-per-slice rule (LAW-05): they declare their own RED there.
 Run: python3 harness/tests/test_import.py   (exit 0 = green)
 """
 import hashlib
+import json
 import os
 import pathlib
 import subprocess
@@ -98,7 +106,7 @@ def check(code: str, ok: bool, what: str, repair: str) -> None:
 # ---------------------------------------------------------------- the RED gate
 try:
     from harness.adapters import pg  # noqa: E402
-    from harness.commands import REGISTRY  # noqa: E402
+    from harness.commands import REGISTRY, canonical_body  # noqa: E402
     from harness.crash import POINTS  # noqa: E402
 except ImportError as e:
     print(f"FAIL ARV-TEST-000: the kernel does not exist (waiting-for-harness) — {e}")
@@ -476,8 +484,8 @@ def main() -> int:
                 and resident(dI) and resident(digest)
                 and jrow("imp-16").split("|")[0] == "complete")
         check("IMP-16", ok16,
-              "the orphan sweep deletes journal-less blob residue while protecting live-staging rows' blobs (completed into references) and already-referenced blobs",
-              "the sweep keeps any digest a source row references AND any digest a non-terminal journal row carries; only pure residue goes")
+              "the orphan sweep deletes residue referenced by no source row AND no non-terminal journal row (including a terminal-FAILED row's unreferenced digest — the designed staging-artifact cleanup) while protecting live-staging and referenced blobs",
+              "the keep-set is the source-referenced digests (any owner) united with the non-terminal journal rows' digests; everything else is residue and goes")
 
         # IMP-17 — the journal's §2/§2.9 conventions (mutable by design: NO append-only trigger)
         defs = audit("SELECT column_name FROM information_schema.columns "
@@ -510,13 +518,49 @@ def main() -> int:
               "the journal's conventions: NO defaults on id/created_at/updated_at (LAW-24), RLS enabled+forced, the state CHECK refuses unknown states, arv_app INSERT/SELECT/UPDATE with NO DELETE (rows transition, never erased), arv_read SELECT — and NO append-only trigger (the §2.9 disposable class, mutable by design)",
               "the staging journal is the recovery substrate, not authoritative data: state transitions are UPDATEs by design, bounded by the state CHECK and RLS — the declared absence of the immutability trigger is the design, pinned here")
 
+        # IMP-20 — the coherent-forged row (round-1 F3): BOTH NULL, a consistent
+        # body_hash, planted by direct SQL (CAP-007 blocks the CLI shape only):
+        # the walk NAMES it, marks failed, and CONTINUES (never the crash)
+        fM = fresh_file("mike.md", "Mike bytes: the walk-continues case.\n")
+        mbytes = pathlib.Path(fM).read_bytes()
+        mput = hashlib.sha256(mbytes).hexdigest()
+        (pathlib.Path(BLOB_DIR) / mput).write_bytes(mbytes)  # the blob resident: the verify passes
+        forge_body = json.dumps({"work_id": None, "title": None, "digest": mput,
+                                "media_type": "text/plain", "acquired_via": "cli-import",
+                                "byte_size": len(mbytes)},
+                               sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        forge_hash = hashlib.sha256(canonical_body(command="import_source", client_id="cli-1",
+                                                    owner_scope="A", actor="owner",
+                                                    payload=forge_body).encode()).hexdigest()
+        plant20 = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "arv_app", "-d", DB, "-c",
+                                 f"SET app.current_owner='A'; INSERT INTO arv.import_journal "
+                                 f"(id, owner_scope, actor, idempotency_key, client_id, work_id, title, "
+                                 f"digest, media_type, byte_size, acquired_via, state, body_hash, run_id, "
+                                 f"input_hash, created_at, updated_at) VALUES ('44444444-4444-7444-8444-444444444444', "
+                                 f"'A', 'owner', 'imp-20-forged', 'cli-1', NULL, NULL, '{mput}', 'text/plain', "
+                                 f"{len(mbytes)}, 'cli-import', 'staging_verified', '{forge_hash}', 'r', 'h', "
+                                 f"'2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z');"],
+                                capture_output=True, text=True, timeout=60)
+        c20b = crash("--command", "import_source", "--point", "after-put",
+                     "--owner", "A", "--client-id", "cli-1", "--idem-key", "imp-20b",
+                     "--title", "Walk Continues", "--file", fM)  # the LATER row: must still be driven
+        w20 = walk("A")
+        ok20 = (plant20.returncode == 0 and c20b.returncode == 2 and w20.returncode == 0
+                and "ARV-IMP-004" in w20.stdout and "WALK-DONE" in w20.stdout
+                and jrow("imp-20-forged", "state, fail_reason").split("|")[0] == "failed"
+                and "ARV-IMP-004" in jrow("imp-20-forged", "state, fail_reason")
+                and jrow("imp-20b").split("|")[0] == "complete")
+        check("IMP-20", ok20,
+              "the coherent-forged both-NULL row (direct SQL, hash-consistent): the walk names ARV-IMP-004, marks the row failed, and CONTINUES — the later crashed row still driven to complete, WALK-DONE still printed, never the un-named crash that aborted the walk",
+              "the walk's drive pre-checks the work binding (the CLI's CAP-007 XOR mirrored at the row level): a forge is a NAMED refusal, the row fails, the walk proceeds — the fail-closed contract holds for rows no code path of the machine could have written")
+
     finally:
         if not os.environ.get("ARV_KEEP_DB"):
             pg.drop_scratch_db(DB)
     if FAILS:
         print(f"RED — {len(FAILS)} broken case(s): {', '.join(FAILS)}")
         return 1
-    print("GREEN — the §3.1 import state machine + the recovery walk hold end-to-end (IMP-01..17)")
+    print("GREEN — the §3.1 import state machine + the recovery walk hold end-to-end (IMP-01..17 + IMP-20)")
     return 0
 
 

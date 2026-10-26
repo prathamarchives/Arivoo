@@ -20,8 +20,20 @@ POINTS = ("after-begin", "pre-commit", "post-commit-pre-ack",
 SPINE_POINTS = ("after-begin", "pre-commit", "post-commit-pre-ack")
 
 
+class _UsageParser(argparse.ArgumentParser):
+    """The round-1 F4 fix: EVERY argparse error path (a typo'd point, a missing
+    required arg, a bad choice) prints the named CRASH-USAGE line and exits 1 —
+    argparse's default exit-2 is the crash vocabulary and must never fire for a
+    usage error (the exit-2 masquerade lesson)."""
+
+    def error(self, message: str):
+        print(f"CRASH-USAGE: {message} — a named usage refusal (exit 1), never "
+              "exit 2 (argparse's default masquerades as a crash)")
+        self.exit(1)
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser(description="crash-injection helper (S3 + P3-01 + P3-02)")
+    ap = _UsageParser(description="crash-injection helper (S3 + P3-01 + P3-02)")
     ap.add_argument("--command", default="record_event",
                     choices=["record_event", "import_source", "create_highlight"])
     ap.add_argument("--point", required=True, choices=POINTS)

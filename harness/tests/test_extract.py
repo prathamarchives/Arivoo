@@ -192,13 +192,14 @@ def main() -> int:
               "the generation must publish complete-or-failed: the passages + the generation's current-state update commit atomically, the lineage binding the input version")
 
         # EXT-04 — the passage boundary (the pinned readable-text split)
-        rows = audit(f"SELECT ordinal, start_off, end_off FROM arv.passage p JOIN arv.extraction_generation g "
-                     f"ON p.generation_id=g.id WHERE g.source_id='{sid}' AND g.state='current' ORDER BY p.ordinal;")
+        rows = audit(f"SELECT p.ordinal, p.start_off, p.end_off FROM arv.passage p "
+                     f"JOIN arv.extraction_generation g ON p.generation_id=g.id "
+                     f"WHERE g.source_id='{sid}' AND g.state='current' ORDER BY p.ordinal;")
         offs = [tuple(r.split("|")) for r in rows.splitlines()]
         ok4 = (len(offs) == 3 and offs[0][1] == "0"
                and all(int(offs[i][1]) < int(offs[i][2]) for i in range(3))
-               and all(int(offs[i][2]) <= int(offs[i + 1][1]) for i in range(2))
-               and int(offs[-1][2]) <= len(TEXT))
+               and all(int(offs[i][2]) == int(offs[i + 1][1]) for i in range(2))
+               and int(offs[-1][2]) == len(TEXT))
         check("EXT-04", ok4,
               "the block split on the canonical fixture: 3 ordinals with contiguous, ordered, in-range character offsets (the pinned readable-text/Markdown choice)",
               "the extractor's location evidence must be the format-appropriate offsets into the decoded text, contiguous and ordered — never a guess")
@@ -248,11 +249,11 @@ def main() -> int:
         states = audit(f"SELECT state FROM arv.extraction_generation WHERE source_id='{sid}' ORDER BY ordinal;")
         d7 = audit(f"SELECT md5(string_agg(p.text, '||' ORDER BY p.ordinal)) FROM arv.passage p "
                    f"JOIN arv.extraction_generation g ON p.generation_id=g.id "
-                   f"WHERE g.source_id='{sid}' AND g.state='current';")
+                   f"WHERE g.source_id='{sid}' AND g.ordinal=3;")
         d1 = audit(f"SELECT md5(string_agg(p.text, '||' ORDER BY p.ordinal)) FROM arv.passage p "
                    f"JOIN arv.extraction_generation g ON p.generation_id=g.id "
-                   f"WHERE g.source_id='{sid}' AND g.state='superseded';")
-        ok7 = (p7.returncode == 0 and states.splitlines() == ["current", "superseded", "current"]
+                   f"WHERE g.source_id='{sid}' AND g.ordinal=2;")
+        ok7 = (p7.returncode == 0 and states.splitlines() == ["superseded", "superseded", "current"]
                and d7 == d1)
         check("EXT-07", ok7,
               "a byte-identical re-extraction: the new generation current, the OLD superseded (both retained — the versioned lineage), the passages byte-identical",
@@ -266,7 +267,7 @@ def main() -> int:
         g8 = audit(f"SELECT state FROM arv.extraction_generation WHERE source_id='{sid8}';")
         g_old = audit(f"SELECT string_agg(state, ',' ORDER BY ordinal) FROM arv.extraction_generation "
                       f"WHERE source_id='{sid}';")
-        ok8 = (p8.returncode == 0 and g8 == "current" and "superseded,current" == g_old)
+        ok8 = (p8.returncode == 0 and g8 == "current" and "superseded,superseded,current" == g_old)
         check("EXT-08", ok8,
               "the new edition (a NEW source row of the same work): its generation binds the NEW source only; the old source's generations untouched (a generation NEVER crosses source rows)",
               "the generation's input bind is the source ROW (the version): the ordinal is per-source, the lineage never mixes")
@@ -303,10 +304,16 @@ def main() -> int:
         c6 = crash("--command", "extract_source", "--point", "post-commit-pre-ack",
                    "--owner", "A", "--client-id", "cli-1", "--idem-key", "ext-06",
                    "--source-id", sid, "--file", fA)
-        st6 = audit(f"SELECT state FROM arv.extraction_generation WHERE source_id='{sid}' AND ordinal=3;")
+        st6 = audit(f"SELECT state FROM arv.extraction_generation WHERE source_id='{sid}' AND ordinal=4;")
+        np6 = audit(f"SELECT count(*) FROM arv.passage WHERE generation_id="
+                    f"(SELECT id FROM arv.extraction_generation WHERE source_id='{sid}' AND ordinal=4);")
+        n6_before = audit(f"SELECT count(*) FROM arv.extraction_generation WHERE source_id='{sid}';")
         r6 = extract("ext-06", sid)
-        ok6 = (c6.returncode == 2 and "status=committed" not in c6.stdout and st6 == "current"
-               and r6.returncode == 0 and "status=replayed" in r6.stdout)
+        n6_after = audit(f"SELECT count(*) FROM arv.extraction_generation WHERE source_id='{sid}';")
+        ok6 = (c6.returncode == 2 and "status=committed" not in c6.stdout
+               and st6 == "current" and np6 == "3" and n6_before == "4"
+               and r6.returncode == 0 and "status=replayed" in r6.stdout
+               and n6_after == n6_before)
         check("EXT-06", ok6,
               "the lost extraction ack: the generation committed (current), no ack; the SAME-key replay answers status=replayed (the recorded result)",
               "the extraction rides the spine's idempotency: the same key + the same body -> the recorded result, never a second generation")

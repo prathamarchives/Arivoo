@@ -586,8 +586,19 @@ def create_highlight(*, db, owner, actor, client_id, idem_key, source_id,
                   command="create_highlight", payload=body, build=build, crash_at=crash_at)
 
 
+def _extract_source(**kwargs):
+    """P3-03a (CLAIM-052): the extraction command — the derived-build path lives
+    in harness/extract.py as its own module (§2.9's boundary made structural: NO
+    command_log row; the generation row IS the idempotency record). Imported at
+    CALL time: extract.py imports this module's spine pieces (Session, _q,
+    _sess_row, canonical_body, _dead_exit) at ITS module level, so a module-level
+    import here would be circular in the extract-first load order."""
+    from harness.extract import extract_source
+    return extract_source(**kwargs)
+
+
 REGISTRY = {"record_event": record_event, "import_source": import_source,
-            "create_highlight": create_highlight}
+            "create_highlight": create_highlight, "extract_source": _extract_source}
 
 
 def main() -> int:

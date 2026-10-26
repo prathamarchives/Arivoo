@@ -584,5 +584,21 @@
         "observed_at": "2026-10-26T10:10:00+00:00"
       }
     ]
+  },
+  "harness/tests/test_extract.py": {
+    "schema": 2,
+    "binding_commit": "b9c892037eb0c8218e8f592c885e8d4c9355e431",
+    "binding_sha256": "55ea59a5c5c3610ffff0e2dc104e74c04756bfd5af91b5b8b95a759a6a90b9e8",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-052 (P3-03a) RED: the extraction suite's machinery-absent class observed at the predecessor 0ce7077 (commit A b9c8920 carries the suite; extract.py/0006_extraction_generations.sql absent, the extract_source command absent from the REGISTRY — the waiting-for-harness form, the S1/record-18 §4.1 + P3-01/P3-02 precedent; exit 1, red-01.txt) — the implementation lands AFTER this RED, never before it (LAW-11)",
+    "current_sha256": "d61a20ff23e431a50e45a4e604627969a933d3e5b12186a0d756774b1ec63117",
+    "amendments": [
+      {
+        "prior_sha256": "55ea59a5c5c3610ffff0e2dc104e74c04756bfd5af91b5b8b95a759a6a90b9e8",
+        "new_sha256": "d61a20ff23e431a50e45a4e604627969a933d3e5b12186a0d756774b1ec63117",
+        "note": "the #87 CodeRabbit round 1's suite repairs (assertions CORRECTED to the machine the docstring declares, none removed — the commit-A suite was internally inconsistent: a correct implementation would FAIL its own EXT-04/06/07/08): (a) EXT-04's contiguity tightened <= -> == (end_off equals the next start_off; the last end equals len(TEXT) — the tiling contract) + the join's ambiguous bare 'ordinal' qualified p.ordinal (both derived tables carry an ordinal — the unqualified select ERRORED under ON_ERROR_STOP, found live at the first GREEN run); (b) EXT-07's retained states corrected to [superseded, superseded, current] (three generations exist by then — EXT-05's retry completed ordinal 2) + the byte-identical digest comparison moved PER-ORDINAL (ordinal 3 vs 2; the state-based aggregate mixed two superseded generations); (c) EXT-08's old-source expectation corrected to the same three-row lineage; (d) EXT-06's lost-ack check moved to the NEXT ordinal (4 — ordinal 3 was already current from EXT-07, making the old check vacuous) with the passage count and the same-key replay leaving the generation count unchanged"
+      }
+    ]
   }
 }

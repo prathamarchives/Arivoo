@@ -129,11 +129,11 @@
 - version column is the sync slice's own hardening).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 78ead26bebbfc8a1d2fe4240baddd52548075c89c1b68ebd8b6d200943ce53fe
-- reviewed_diff_sha256: adb5d86cece4b974d082b5052c204b8df14e63746d4e01ebb0b5960d3d6c749f
+- report sha256: da2262775207a9955d2400d48855e0efce0216383f569a69ae738c59d2c1ce5d
+- reviewed_diff_sha256: 5e0f474393bd1fab4a07b82c61366b2f114fb39831b2cc7eee42723d0572e617
 - disposition: PASS
 - findings: 18 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): b4bde4d11160105915cb777110939ffa8b02d23cac805aba6508c03f64a8ea91
+- sheet sha256 (of the content above, excluding this line): 738e2f8bf8daed2edfbda77710d9bb0915c27e40c06b6bf35387f08ced850122

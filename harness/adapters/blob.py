@@ -66,9 +66,8 @@ def get(digest: str) -> bytes:
 
 
 def delete(digest: str) -> bool:
-    """The §4.4 arm — the staging-artifact cleanup (the walk, the ONLY caller
-    contract: delete ONLY blobs unreferenced by any arv.source row; a REFERENCED
-    blob is never deleted even if corrupt — CAP-15's refusal stands)."""
+    """The §4.4 arm — the staging-artifact cleanup: delete ONLY blobs unreferenced
+    by any arv.source row (a REFERENCED blob is never deleted, even corrupt — CAP-15)."""
     if not _SAFE.match(digest):
         return False
     try:
@@ -79,8 +78,7 @@ def delete(digest: str) -> bool:
 
 
 def residents() -> list:
-    """The digest-named store residents (the sweep's enumeration arm; .put-
-    temps are IGNORED — the #84 pin's ignorable class, never time-guessed)."""
+    """The digest-named residents (the sweep's enumeration; .put- temps IGNORED)."""
     try:
         return [p.name for p in _dir().iterdir() if p.is_file() and _SAFE.match(p.name)]
     except FileNotFoundError:

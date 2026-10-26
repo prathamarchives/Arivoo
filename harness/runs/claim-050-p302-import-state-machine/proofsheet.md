@@ -1,25 +1,24 @@
 # PROOF SHEET — slice claim-050-p302-import-state-machine (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 11a8dc9a413d4219fe23bf0064e275ab75874dbb
-- generated (last record's timestamp): 2026-10-26T05:39:11.011590+00:00
-- run records: 15
+- commit (last run record's): 93709b5c0862975086c2cf6ab777383777eee41b
+- generated (last record's timestamp): 2026-10-26T06:33:18.331293+00:00
+- run records: 14
 
 ## Run records (command, exit, output digest)
-- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 f56ad44261ac836f · 2026-10-26T05:06:39.477902+00:00
-- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 9a74cebc12826061 · 2026-10-26T05:06:44.877768+00:00
-- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-26T05:06:45.245465+00:00
-- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-26T05:06:47.868192+00:00
-- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 a66c09105c93f972 · 2026-10-26T05:06:49.481951+00:00
-- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 425268b9eaa2212c · 2026-10-26T05:06:51.756475+00:00
-- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-26T05:08:30.040485+00:00
-- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 e65bda51faafa749 · 2026-10-26T05:08:53.036733+00:00
-- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 d60c7028d708ea70 · 2026-10-26T05:09:07.060045+00:00
-- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 56e18aea6956c7e9 · 2026-10-26T05:09:07.375402+00:00
-- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-26T05:09:07.544863+00:00
-- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 00db18e14fda53df · 2026-10-26T05:09:10.883127+00:00
-- `make verify` -> exit 0 · output sha256 dea68c2344eff55c · 2026-10-26T05:12:44.685143+00:00
-- `python3 harness/gate.py --slice claim-050-p302-import-state-machine --diff main` -> exit 1 · output sha256 c14f0083c62e994b · 2026-10-26T05:15:57.383345+00:00
-- `python3 harness/gate.py --slice claim-050-p302-import-state-machine --diff main` -> exit 0 · output sha256 515fd88445858f9c · 2026-10-26T05:39:11.011590+00:00
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 ac5a810ba610c217 · 2026-10-26T06:25:12.626536+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 9a74cebc12826061 · 2026-10-26T06:25:17.714966+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-26T06:25:18.116650+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-26T06:25:20.423059+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 e51072c2b9069546 · 2026-10-26T06:25:22.040394+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 bdad599bb5abed05 · 2026-10-26T06:25:24.297267+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-26T06:27:00.390993+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 e22a48346e12dcda · 2026-10-26T06:27:18.991679+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 af5b42d451b1140a · 2026-10-26T06:27:30.618310+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 184b5e3fb909ea68 · 2026-10-26T06:27:30.909814+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-26T06:27:31.090883+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 5e1b6f200e714fdd · 2026-10-26T06:27:34.108472+00:00
+- `make verify` -> exit 0 · output sha256 f505073662539548 · 2026-10-26T06:30:37.799147+00:00
+- `python3 harness/gate.py --slice claim-050-p302-import-state-machine --diff main` -> exit 0 · output sha256 7cd231737f5ffdd7 · 2026-10-26T06:33:18.331293+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-050 / P3-02 (LAW-04; never empty-by-omission)
@@ -118,13 +117,23 @@
 - named here, never silently narrowed. Direct-SQL journal rows remain
 - writable by arv_app+GUC by design (the mutable substrate); the machine's
 - own writes are the XOR-checked ones.
+- 13. The sweep's per-unlink recheck (the #3/#5 CodeRabbit round's fix) closes the
+- enumeration window but not the micro-gap between the recheck and the unlink
+- itself — a TRUE cross-process serialization (an advisory lock over the
+- import phases + the sweep) is the sync slice's P3-08 domain (SYS-08 owns
+- the serialization primitives), never silently claimed closed here; the
+- same routing carries the #10 version-guard refinement (a same-key retry
+- rewinding the row between the walk's snapshot and a late _fail write
+- leaves a TRANSIENT overwritten mark that the retry's next phase corrects
+- — the state guard bounds the damage to the disposable substrate, and the
+- version column is the sync slice's own hardening).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 9a3867c31fe84c9f2f0316f25dcdf4ae32feb0745b2a8c3f09357ef39584e3cc
+- report sha256: 78ead26bebbfc8a1d2fe4240baddd52548075c89c1b68ebd8b6d200943ce53fe
 - reviewed_diff_sha256: adb5d86cece4b974d082b5052c204b8df14e63746d4e01ebb0b5960d3d6c749f
 - disposition: PASS
-- findings: 11 (open P0/P1: 0)
+- findings: 18 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 9e1380999797c521db0ea8213491323015e106302ce125d39107e291fec9cf0d
+- sheet sha256 (of the content above, excluding this line): b4bde4d11160105915cb777110939ffa8b02d23cac805aba6508c03f64a8ea91

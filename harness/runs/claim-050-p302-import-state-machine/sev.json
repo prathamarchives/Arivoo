@@ -172,6 +172,55 @@
       "status": "resolved",
       "evidence": "round 2 (N3 — the reviewer's own P3 grade, recorded at the frozen P2 rung): recover.py's module docstring enumerated the row-level codes without the new ARV-IMP-004",
       "disposition": "FIXED: the docstring's named-codes line now carries 001/002/003/004 (folded into the N2 compression, same line count)"
+    },
+    {
+      "id": "SEV-12",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "the CodeRabbit round (#4): a different-body same-key retry over a crashed attempt passed the command_log replay check and the UPSERT left the journal row claiming the first attempt's fields while the source committed the second",
+      "disposition": "FIXED RED-first (IMP-21, red-03.txt): the crash-domain guard recomputes the row's body_hash under the ROW'S client_id (the re-drive domain's identity is the IMPORT — a different-client retry re-issuing the same import is legal, pinned by the capture suite's own CAP-13/21); a genuinely different import is the named 409; the UPSERT syncs client_id/body_hash/run_id/input_hash on the rewind"
+    },
+    {
+      "id": "SEV-13",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "the CodeRabbit round (#3/#5): the sweep's enumeration window could delete a concurrent import's or a just-committed Source's bytes",
+      "disposition": "FIXED: the per-unlink recheck (the source-referenced + live-journal counts, fail-closed KEEP); the residual recheck-to-unlink micro-gap named at notverified item 13 and routed to P3-08's serialization domain"
+    },
+    {
+      "id": "SEV-14",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "the CodeRabbit round (#7): a refused failed-transition write printed the lying to=failed line while the row stayed nonterminal",
+      "disposition": "FIXED RED-first (IMP-22, red-03.txt): the refused write prints the named ARV-IMP-003, the row stays nonterminal, the next walk converges it honestly"
+    },
+    {
+      "id": "SEV-15",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the CodeRabbit round (#6, the reviewer's own Minor grade recorded at the frozen P2 rung): the import replay ACK lacked work_id",
+      "disposition": "FIXED: the phase-0.5 replay answer reads and appends the recorded source's work_id (pinned in IMP-09)"
+    },
+    {
+      "id": "SEV-16",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the CodeRabbit round (#10, the reviewer's own Major grade recorded at the frozen P2 rung per the frozen vocabulary's precision limit): the _fail version guard",
+      "disposition": "ROUTED to the sync slice (P3-08's serialization domain) with the micro-gap: the state guard bounds the damage to a transient overwritten mark in the disposable substrate; notverified item 13 carries the routing — never silently dropped"
+    },
+    {
+      "id": "SEV-17",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the CodeRabbit round (#9, the reviewer's own Minor grade recorded at the frozen P2 rung): STATE's Active task violated the one-screen contract",
+      "disposition": "FIXED: compressed to the pointer form (record 41 is the contract's home)"
+    },
+    {
+      "id": "SEV-18",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the CodeRabbit round (#1/#2/#8 — stale findings, fixed earlier in the round chain): the red-records entry, the resident() pathlib fix, the record-41 banner",
+      "disposition": "VERIFIED GREEN at the head (all three fixed earlier: the red-records binding at 3230330, the pathlib fix at the first GREEN iteration, the banner at the round-1 F1 repair)"
     }
   ],
   "not_verified": [
@@ -182,6 +231,6 @@
   "builder_context": "builder-glm-host-session31-claim050 (the host GLM agent that authored the slice: the RED declaration, the phased implementation, the walk, the SIZE-002 split, the finalize, and the round-1 fixes — every operative fix RED-first with a suite pin)",
   "reviewer_context": "fresh-context GLM SEV reviewer agent-b2d3174f, rounds 1+2, session-31, claim-050 slice slice/claim-050-p302-import-state-machine (round 1 BLOCKED at the finalize head d7ca9ac: 1 P0 + 2 P1 + 2 P2 + 3 P3 — every finding real, probed on own scratch DBs: the forged rows, the unlawful transitions, the sweep protections incl. the cross-owner and revoked-grant fail-closed arms, the empty-journal walk, the marker discipline, the evidence machinery; round 2 at the round-fix head 999c9f2: all eight independently re-verified RESOLVED with the reviewer's own repros (the both-NULL and both-SET forged rows, every crash.py usage class, the guarded _fail, the wordings), BLOCKED only on the finalize hygiene N1/N2/N3 — all three repaired in this finalize commit and confirmed by the one-shot gate-green run), 2026-10-26",
   "disposition": "PASS",
-  "review_summary": "The §3.1 import state machine and the recovery walk behave as claimed across every crash-phase, replay, forged-row, sweep-protection, owner-isolation, and fail-closed probe the two independent rounds could mount; the import suite is genuinely green (18/18) and the machinery claims in record 41, the notverified, and STATE were corrected to match the observed truth wherever they ran ahead of it. The slice merged evidence with its own finalize twice (round-1 F1/F2, round-2 N1/N2/N3) and each catch was repaired RED-first or by honest re-wording in the same session. With the proof set re-captured at the final tree, the sheet re-derived byte-identically, and the PR-mode gate green at exactly 400/400 source lines, the slice is cleared for merge.",
+  "review_summary": "The §3.1 import state machine and the recovery walk behave as claimed across every crash-phase, replay, forged-row, sweep-protection, owner-isolation, and fail-closed probe the two independent SEV rounds and the CodeRabbit round could mount; the import suite is genuinely green (22/22) and the capture suite green over the client-id-aware crash-domain guard (23/23). The slice merged evidence with its own finalize twice and caught its own review-round regressions once (the capture suite's CAP-13/21 retries exposed the guard's first form — the fix recomputes the row's body under the row's client, keeping the re-drive domain's identity the IMPORT itself); each catch was repaired RED-first or by honest re-wording in the same session. With the proof set re-captured at the final tree, the sheet re-derived byte-identically, and the PR-mode gate green at exactly 400/400 source lines, the slice is cleared for merge.",
   "sheet_section": true
 }

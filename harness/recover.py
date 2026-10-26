@@ -2,19 +2,14 @@
 """harness/recover.py — the §3.1 recovery walk (P3-02; SYS-06's acceptance arm).
 
 Convergence-idempotent, OLDEST-FIRST (created_at,id), terminal rows NEVER
-touched (a second walk is a byte-identical no-op, pinned by updated_at), every
-row's outcome NAMED on its own line (a row's failure never stops the walk).
-Journal reads are row_to_json — ONE escaped line per row, JSON-parsed at the
-boundary, never a re-parse of psql text (pipes/newlines/'MARK' cannot corrupt).
-The re-drive reconstructs the canonical body from the row's recorded FIELDS and
-HASH-CHECKS it against body_hash BEFORE any drive (a mismatch is ARV-IMP-001;
-a forged work binding ARV-IMP-004; an unreadable row line ARV-IMP-002; a
-refused batch ARV-IMP-003 — every outcome named, never a silent guess);
-re-verifies the blob FIRST (the phantom-closure: a complete Source without
-bytes is impossible — §4.4); rides the SAME spine under the ORIGINAL key.
-The sweep deletes residue (a REFERENCED blob is never deleted, even corrupt —
-CAP-15 stands; .put- temps ignored, the #84 class). Exit 0 = every outcome
-named; exit 1 = a named machinery failure (never a silent guess).
+touched, every row's outcome NAMED (a row's failure never stops the walk);
+journal reads are row_to_json — ONE escaped line per row, JSON-parsed at the
+boundary, never a re-parse of psql text. The re-drive reconstructs the canonical
+body from the row's recorded FIELDS and HASH-CHECKS it against body_hash BEFORE
+any drive; re-verifies the blob FIRST (the phantom-closure, §4.4); rides the
+SAME spine under the ORIGINAL key. Named codes: ARV-IMP-001/002/003/004. The
+sweep deletes residue with a per-unlink recheck (the residual micro-gap:
+notverified item 13). Exit 0 = every outcome named; exit 1 = a machinery failure.
 """
 import argparse
 import io
@@ -30,27 +25,27 @@ import hashlib  # noqa: E402
 
 
 def _batch(sql: str, *, db: str, user: str = "arv_app") -> "str | None":
-    """One owner-scoped batch (GUC set in the same batch); None = a NAMED
-    machinery failure — a silent empty is a guessed state."""
+    """One owner-scoped batch; None = a NAMED machinery failure."""
     r = pg.psql(sql, db=db, user=user)
     return r.out if r.returncode == 0 else None
 
 
 def _fail(db: str, owner: str, r: dict, code: str, *, clean: bool = False) -> None:
-    """Mark the row failed with the named reason; a corrupt artifact is cleaned
-    only when unreferenced by any source row (the cross-owner check)."""
-    _batch(f"SET app.current_owner={commands._q(owner)}; "
-           f"UPDATE arv.import_journal SET state='failed', fail_reason={commands._q(code)}, "
-           f"updated_at={commands._q(clock.now())} WHERE id={commands._q(r['id'])} "
-           f"AND state IN ('staging','staging_verified');", db=db)  # F5's guard: never flip a terminal row (record 41 §8)
+    """Mark the row failed; clean only an UNREFERENCED corrupt artifact."""
+    if _batch(f"SET app.current_owner={commands._q(owner)}; "
+              f"UPDATE arv.import_journal SET state='failed', fail_reason={commands._q(code)}, "
+              f"updated_at={commands._q(clock.now())} WHERE id={commands._q(r['id'])} "
+              f"AND state IN ('staging','staging_verified');", db=db) is None:
+        print("FAIL ARV-IMP-003: the row's failed-transition write was refused — the row is NOT failed; "
+              "the next walk re-drives it (never a false recovery)")
+        return
     if clean and not _referenced(db, r["digest"]):
         blob.delete(r["digest"])
     print(f"WALK key={r['idempotency_key']} from={r['state']} to=failed reason={code} source=-")
 
 
 def _referenced(db: str, digest: str) -> bool:
-    """The arv_read cross-owner count; an UNREADABLE check is fail-closed True
-    (the blob is KEPT — never deleted on a guessed reference set)."""
+    """The arv_read cross-owner count; UNREADABLE is fail-closed True (KEEP)."""
     out = _batch(f"SELECT count(*) FROM arv.source WHERE digest={commands._q(digest)};",
                  db=db, user="arv_read")
     if out is None:
@@ -59,8 +54,7 @@ def _referenced(db: str, digest: str) -> bool:
 
 
 def _verify(db: str, owner: str, r: dict) -> bool:
-    """§3.1's staging exit + §4.4's phantom-closure: re-verify the blob BEFORE
-    any drive — absent/corrupt is a NAMED failure, never a promoted Source."""
+    """§3.1's staging exit + §4.4's phantom-closure: re-verify BEFORE any drive."""
     try:
         blob.get(r["digest"])
         return True
@@ -71,13 +65,9 @@ def _verify(db: str, owner: str, r: dict) -> bool:
 
 
 def _drive(db: str, owner: str, r: dict) -> None:
-    """The hash-checked body reconstruction, then the SAME spine under the
-    ORIGINAL key (replayed/committed -> complete; 011 -> retry-race, the row
-    stays staging_verified for the next walk; any other refusal -> failed)."""
+    """The work-binding pre-check, then the spine under the ORIGINAL key."""
     if (r["title"] is None) == (r["work_id"] is None):
-        # F3's fix: a coherent-forged row (CAP-007 blocks only the CLI shape) is
-        # a NAMED refusal, never the _q(None) crash that aborted the walk
-        _fail(db, owner, r, "ARV-IMP-004")
+        _fail(db, owner, r, "ARV-IMP-004")  # F3: a forged work binding is a NAMED refusal, never the _q(None) crash
         return
     body = commands._import_body(title=r["title"], work_id=r["work_id"], digest=r["digest"],
                                  media_type=r["media_type"], byte_size=r["byte_size"],
@@ -126,9 +116,7 @@ def _drive(db: str, owner: str, r: dict) -> None:
 
 
 def walk(*, db: str, owner: str) -> int:
-    """The non-terminal rows oldest-first, then the sweep, then the named
-    summary; a malformed line is a NAMED refusal for that row (ARV-IMP-002);
-    a machinery failure is a NAMED exit-1 (ARV-IMP-003)."""
+    """The non-terminal rows oldest-first, then the sweep, then the named summary."""
     raw = _batch(f"SET app.current_owner={commands._q(owner)}; "
                  f"SELECT row_to_json(j) FROM (SELECT id, idempotency_key, client_id, work_id, title, digest, "
                  f"media_type, byte_size, acquired_via, state, body_hash, actor, created_at FROM arv.import_journal "
@@ -171,7 +159,13 @@ def walk(*, db: str, owner: str) -> int:
     kept = set(kept_out.split()) | set(live_out.split())
     swept = [d for d in blob.residents() if d not in kept]
     for d in swept:
-        blob.delete(d)
+        # #3/#5: re-check BEFORE each unlink — the enumeration window can race a concurrent
+        # import/commit; the residual micro-gap routes to the sync slice's serialization (notverified 13)
+        if not _referenced(db, d) and (_batch(f"SELECT count(*) FROM arv.import_journal "
+                                              f"WHERE digest={commands._q(d)} AND state IN "
+                                              f"('staging','staging_verified');", db=db,
+                                             user="arv_read") or "1").strip() == "0":
+            blob.delete(d)
     counts = _batch(f"SET app.current_owner={commands._q(owner)}; "
                     f"SELECT state, count(*) FROM arv.import_journal GROUP BY state ORDER BY state;", db=db)
     if counts is None:

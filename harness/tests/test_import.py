@@ -71,6 +71,15 @@ Cases (the IMP registry — this file is the contract's declaration):
         blocks the request shape): the walk NAMES it (ARV-IMP-004), marks the
         row failed, and CONTINUES — the later rows still driven, WALK-DONE
         still printed (never the _q(None) crash that aborted the walk)
+  IMP-21 the different-body same-key retry over a crashed attempt (the #4
+        finding): the command_log replay check cannot see a crashed attempt,
+        so the JOURNAL row's body_hash is the crash-domain replay guard — the
+        mismatched body under the same key is the named ARV-CMD-409 (zero
+        effect: no UPSERT rewind, no put), never a silent field mix-up
+  IMP-22 a refused failed-transition write is NAMED, never a false recovery
+        (the #7 finding): the planted RAISE on the row's failed-UPDATE makes
+        the walk print ARV-IMP-003 (the row is NOT failed) instead of the
+        lying to=failed line — and the next walk still converges it
 
 The SEV-7 stderr-classification cases (the planted-trigger dup-key -> 011 from
 the DRAINED stderr; the killed-backend connection-class -> the §4.1 uncertain
@@ -340,7 +349,7 @@ def main() -> int:
         ok9 = (ok9a and w9.returncode == 0 and "already-complete" in w9.stdout
                and jrow("imp-09", "state, source_id").split("|")[0] == "complete"
                and jrow("imp-09", "state, source_id").split("|")[1].strip() == sid9
-               and r9.returncode == 0 and "status=replayed" in r9.stdout
+               and r9.returncode == 0 and "status=replayed" in r9.stdout and "work_id=" in r9.stdout
                and audit("SELECT count(*) FROM arv.source WHERE idempotency_key='imp-09';") == "1")
         check("IMP-09", ok9,
               "the lost metadata ack: the journal rode the commit (complete in-transaction, source_id set), no ack emitted; the walk reports already-complete and the SAME-key replay answers status=replayed — the source count stays ONE (zero-or-one effect)",
@@ -554,13 +563,61 @@ def main() -> int:
               "the coherent-forged both-NULL row (direct SQL, hash-consistent): the walk names ARV-IMP-004, marks the row failed, and CONTINUES — the later crashed row still driven to complete, WALK-DONE still printed, never the un-named crash that aborted the walk",
               "the walk's drive pre-checks the work binding (the CLI's CAP-007 XOR mirrored at the row level): a forge is a NAMED refusal, the row fails, the walk proceeds — the fail-closed contract holds for rows no code path of the machine could have written")
 
+        # IMP-21 — the different-body same-key retry over a crashed attempt (#4):
+        # the command_log cannot see the crash; the journal row's body_hash is the guard
+        fN = fresh_file("november.md", "November bytes: the crash-domain 409 case.\n")
+        c21 = crash("--command", "import_source", "--point", "after-put",
+                    "--owner", "A", "--client-id", "cli-1", "--idem-key", "imp-21",
+                    "--title", "Body X", "--file", fN)
+        ok21a = (c21.returncode == 2 and jrow("imp-21").split("|")[0] == "staging")
+        p21 = import_src("imp-21", "Body Y DIFFERENT", fA)  # the same key, a DIFFERENT body
+        ok21 = (ok21a and p21.returncode == 1 and "ARV-CMD-409" in p21.stdout
+                and jrow("imp-21", "state, title").split("|")[0] == "staging"
+                and jrow("imp-21", "state, title").split("|")[1].strip() == "Body X"
+                and audit("SELECT count(*) FROM arv.source WHERE idempotency_key='imp-21';") == "0")
+        check("IMP-21", ok21,
+              "a different body under the same key over a crashed attempt: the journal row's body_hash is the crash-domain replay guard -> the named ARV-CMD-409, the row UNTOUCHED (still the first attempt's staging truth), zero effect — never a silent field mix-up",
+              "the same key must mean the same command in the crash domain too: the replay check reads command_log AND the journal's body_hash — a mismatch is the named conflict, never an UPSERT that leaves the row claiming the first body while the source commits the second")
+
+        # IMP-22 — a refused failed-transition write is NAMED (#7): the planted RAISE
+        # on the failed-UPDATE makes _batch return None; the walk must print ARV-IMP-003
+        fO = fresh_file("oscar.md", "Oscar bytes: the named-refusal case.\n")
+        dO = hashlib.sha256(pathlib.Path(fO).read_bytes()).hexdigest()
+        c22 = crash("--command", "import_source", "--point", "after-put",
+                    "--owner", "A", "--client-id", "cli-1", "--idem-key", "imp-22",
+                    "--title", "Named Refusal", "--file", fO)
+        (pathlib.Path(BLOB_DIR) / dO).unlink()  # the blob absent: the walk will try to fail the row
+        plant22 = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                                 "CREATE OR REPLACE FUNCTION arv._refuse_fail() RETURNS trigger AS $$ "
+                                 "BEGIN RAISE EXCEPTION 'ARV-IMP-TEST: the refused failed-write'; RETURN NEW; END; "
+                                 "$$ LANGUAGE plpgsql; CREATE TRIGGER refuse_fail BEFORE UPDATE ON arv.import_journal "
+                                 "FOR EACH ROW WHEN (NEW.state = 'failed') EXECUTE FUNCTION arv._refuse_fail();"],
+                                capture_output=True, text=True, timeout=60)
+        w22 = walk("A")
+        st_after_w22 = jrow("imp-22", "state, fail_reason")  # captured BEFORE the drop+re-walk (the assert's moment)
+        drop22 = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                                 "DROP TRIGGER IF EXISTS refuse_fail ON arv.import_journal; "
+                                 "DROP FUNCTION IF EXISTS arv._refuse_fail();"],
+                                capture_output=True, text=True, timeout=60)
+        w22b = walk("A")  # the next walk converges the still-nonterminal row honestly
+        ok22 = (c22.returncode == 2 and plant22.returncode == 0 and drop22.returncode == 0
+                and w22.returncode == 0 and "ARV-IMP-003" in w22.stdout
+                and "to=failed reason=ARV-BLOB-002" not in w22.stdout
+                and st_after_w22.split("|")[0] == "staging"
+                and w22b.returncode == 0
+                and jrow("imp-22", "state, fail_reason").split("|")[0] == "failed"
+                and "ARV-BLOB-002" in jrow("imp-22", "state, fail_reason"))
+        check("IMP-22", ok22,
+              "a refused failed-transition write is NAMED (ARV-IMP-003 — the row is NOT failed on that walk), never the lying to=failed line; the row stays nonterminal, the NEXT walk converges it honestly (failed ARV-BLOB-002)",
+              "the walk's report must never claim a transition that did not happen: a refused write is a named machinery refusal, the row's state is the truth, the next walk re-drives it")
+
     finally:
         if not os.environ.get("ARV_KEEP_DB"):
             pg.drop_scratch_db(DB)
     if FAILS:
         print(f"RED — {len(FAILS)} broken case(s): {', '.join(FAILS)}")
         return 1
-    print("GREEN — the §3.1 import state machine + the recovery walk hold end-to-end (IMP-01..17 + IMP-20)")
+    print("GREEN — the §3.1 import state machine + the recovery walk hold end-to-end (IMP-01..22)")
     return 0
 
 

@@ -557,7 +557,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-050 (P3-02) RED: the import suite's machinery-absent class observed at the predecessor ab22029 (commit A 1c556b36 carries the suite; recover.py/0005_import_journal.sql absent, the phased crash points absent from POINTS, the stderr-drained death classifier absent from the Session — the waiting-for-harness form, the S1/record-18 §4.1 + P3-01 capture-suite precedent; exit 1, red-01.txt) — the implementation lands AFTER this RED, never before it (LAW-11)",
-    "current_sha256": "1cdaf2c59e0d5c3987e1e920415ac50a6671a1931324a4d1221819da7f7e7cdc",
+    "current_sha256": "a756ce2fdd1fa46dccaa1310c9b4fbc3fec11a1266d25dacf360a886db454c5c",
     "amendments": [
       {
         "prior_sha256": "f8a5c1d75ac50e2e956ee527214e2a66ee1cba9a9417d6c5d29681fc9f5ec3f8",
@@ -570,6 +570,12 @@
         "new_sha256": "1cdaf2c59e0d5c3987e1e920415ac50a6671a1931324a4d1221819da7f7e7cdc",
         "note": "CLAIM-050 (P3-02) the round-1 SEV chain (reviewer agent-b2d3174f, 1 P0 + 2 P1 + 2 P2 + 3 P3, every finding real, every one fixed): (F3/IMP-20) the coherent-forged both-NULL journal row (direct SQL, hash-consistent — the CLI's CAP-007 blocks only the request shape) crashed the walk UN-NAMED at _q(None) inside the spine's build, aborting the later rows and the sweep; red-02.txt preserves the observed RED at the pre-fix tree (17 PASS + IMP-20 FAIL, the walk's output missing ARV-IMP-004 and WALK-DONE); the fix — _drive's work-binding pre-check mirrors CAP-007's XOR at the row level: the forge fails NAMED (ARV-IMP-004), the row marks failed, the walk CONTINUES (the later crashed row driven, WALK-DONE printed), 18/18 GREEN after; (F6) IMP-16's check text re-worded to the sweep's true predicate (residue referenced by no source row AND no non-terminal journal row — including a terminal-FAILED row's unreferenced digest, observed live by the reviewer); the suite's json import restored for the forge-body construction; the header case list + the summary line updated. Assertions ADD, none weakened",
         "observed_at": "2026-10-26T06:20:00+00:00"
+      },
+      {
+        "prior_sha256": "1cdaf2c59e0d5c3987e1e920415ac50a6671a1931324a4d1221819da7f7e7cdc",
+        "new_sha256": "a756ce2fdd1fa46dccaa1310c9b4fbc3fec11a1266d25dacf360a886db454c5c",
+        "note": "CLAIM-050 (P3-02) the CodeRabbit round (11 inline findings: 4 real fixes, 1 routed, 3 stale-already-fixed, 3 wordings) — the suite gains IMP-21 (the #4 crash-domain 409 guard: a different body under the same key over a crashed attempt is the named conflict — the guard reads the journal row's body_hash recomputed under the ROW'S client_id, so a fresh retry from a different client re-issuing the SAME import is legal while a genuinely different import is refused; the UPSERT syncs client_id/body_hash/run_id/input_hash on the rewind) and IMP-22 (the #7 named refused-write: the planted RAISE on the failed-UPDATE makes the walk print ARV-IMP-003 and leave the row nonterminal — the state captured at its moment before the re-walk, the case-plumbing ordering fix recorded); IMP-09's replay assert gains the work_id pin (#6: the replay ACK must carry the recorded Work ID so a post-crash retry can recover it); red-03.txt preserves the observed RED at the pre-fix tree (17 PASS + IMP-09/21/22 FAIL). The #3/#5 sweep recheck (per-unlink, source + live-journal, fail-closed), the #9 STATE compression, the #10 + micro-gap routing to the sync slice (notverified item 13) ride the same round. 22/22 GREEN after; the capture suite 23/23 over the client-id-aware guard (its CAP-13/21 retries use different client-ids — the guard's re-drive-domain identity is the IMPORT, not the client)",
+        "observed_at": "2026-10-26T08:30:00+00:00"
       }
     ]
   }

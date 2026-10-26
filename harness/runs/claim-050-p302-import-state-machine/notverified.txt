@@ -108,3 +108,14 @@ THE EXPLICIT BOUNDARIES (named, never silently narrowed):
    named here, never silently narrowed. Direct-SQL journal rows remain
    writable by arv_app+GUC by design (the mutable substrate); the machine's
    own writes are the XOR-checked ones.
+
+13. The sweep's per-unlink recheck (the #3/#5 CodeRabbit round's fix) closes the
+    enumeration window but not the micro-gap between the recheck and the unlink
+    itself — a TRUE cross-process serialization (an advisory lock over the
+    import phases + the sweep) is the sync slice's P3-08 domain (SYS-08 owns
+    the serialization primitives), never silently claimed closed here; the
+    same routing carries the #10 version-guard refinement (a same-key retry
+    rewinding the row between the walk's snapshot and a late _fail write
+    leaves a TRANSIENT overwritten mark that the retry's next phase corrects
+    — the state guard bounds the damage to the disposable substrate, and the
+    version column is the sync slice's own hardening).

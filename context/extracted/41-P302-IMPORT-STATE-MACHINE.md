@@ -228,6 +228,42 @@ real, every one fixed in-slice):
   Fixed: the row's Notes corrected (delete/residents; exists lands with its
   own consumer).
 
+THE CODERABBIT ROUND (the #85 review; 11 inline findings: 4 real fixes RED-first,
+1 routed, 3 stale-already-fixed, 3 wording corrections — every thread
+dispositioned before resolution; Greptile's trial credit exhausted, NOTED):
+- #4 (Major): the different-body same-key retry over a crashed attempt passed
+  the command_log replay check (the crash never reached it) and the UPSERT left
+  the row claiming the FIRST attempt's fields while the source committed the
+  second — a silent field mix-up. Fixed RED-first (IMP-21, red-03.txt): the
+  crash-domain guard reads the journal row's body_hash RECOMPUTED under the
+  ROW'S client_id — the re-drive domain's identity is the IMPORT itself (a
+  fresh retry from a different client re-issuing the same import is legal; the
+  capture suite's CAP-13/21 retries pin this) — and a genuinely different
+  import under the same key is the named ARV-CMD-409; the UPSERT's rewind now
+  syncs client_id/body_hash/run_id/input_hash so the row always describes the
+  live attempt.
+- #3/#5 (Major ×2): the sweep's enumeration window could delete a concurrent
+  import's bytes (or worse, a just-committed Source's). Fixed: the per-unlink
+  recheck (the source-referenced count + the live-journal count, both
+  fail-closed KEEP); the residual recheck-to-unlink micro-gap named at
+  notverified item 13 and routed to the sync slice's serialization (P3-08's
+  advisory-lock domain).
+- #7 (Major): a refused failed-transition write printed the lying to=failed
+  line while the row stayed nonterminal. Fixed RED-first (IMP-22, red-03.txt):
+  the refused write prints the named ARV-IMP-003 and the walk continues; the
+  next walk converges the row honestly.
+- #6 (Minor): the import replay ACK lacked work_id (a post-crash retry could
+  not recover the Work ID from its ACK). Fixed: the phase-0.5 replay answer
+  reads and appends the recorded source's work_id (pinned in IMP-09).
+- #10 (Major): the _fail version guard — ROUTED to the sync slice with the
+  micro-gap (the state guard bounds the damage to a transient overwritten mark
+  in the disposable substrate; notverified item 13 carries the routing).
+- #9 (Minor): STATE's Active task compressed to the pointer form (the
+  one-screen contract).
+- #1/#2/#8 (stale): the red-records entry, the resident() pathlib fix, and the
+  record-41 banner — all fixed earlier in the round chain, verified green at
+  the head.
+
 ## 9. Unverified items
 
 The notverified's eleven named boundaries (the standing credential layer; the

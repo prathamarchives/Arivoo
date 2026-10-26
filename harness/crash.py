@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """harness/crash.py — the crash-injection helper (S3; extended P3-01 + P3-02).
 
-SIGKILL armed at one injection point. The spine's three (S3): after-begin /
-pre-commit / post-commit-pre-ack (§1.6's lost-ack). The import's three phase
+SIGKILL at one injection point — the spine's three (S3): after-begin /
+pre-commit / post-commit-pre-ack (§1.6's lost-ack); the import's three phase
 boundaries (P3-02): after-staging / after-put / after-verify. Exit 2 = crashed
-(no ack, by design); the server rolls the open transaction back. A usage error
-is exit 1 with a named line — NEVER the argparse default 2 (which would
-masquerade as a crash; the exit-2 lesson).
+(no ack, by design); a usage error is exit 1 named (the _UsageParser override
+— argparse's exit-2 masquerade never fires).
 """
 import argparse
 import os
@@ -21,9 +20,7 @@ SPINE_POINTS = ("after-begin", "pre-commit", "post-commit-pre-ack")
 
 
 class _UsageParser(argparse.ArgumentParser):
-    """F4's fix: every argparse error path prints the named CRASH-USAGE line and
-    exits 1 (exit 2 is the crash vocabulary — never a usage error's)."""
-
+    """F4: every argparse error exits 1 named (exit 2 is the crash vocabulary)."""
     def error(self, message: str):
         print(f"CRASH-USAGE: {message} — a named usage refusal (exit 1), never "
               "exit 2 (argparse's default masquerades as a crash)")

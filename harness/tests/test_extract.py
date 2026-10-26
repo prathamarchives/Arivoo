@@ -33,8 +33,10 @@ Cases (the EXT registry — this file is the contract's declaration):
   EXT-03 the encoding boundary: a non-UTF-8 source (the P3-01 media
         boundary) -> the named refusal, zero generations
   EXT-04 the passage boundary: the block split on the canonical fixture
-        (blank-line paragraphs; a size-capped long block splits; the offsets
-        cover the text contiguously; the passage digests re-hash)
+        (blank-line paragraphs; the offsets cover the text contiguously; the
+        passage digests re-hash. The size-capped split of an over-long block
+        is NOT this slice's contract — routed to the read-path/indexing
+        slices' own bounded work, never claimed here)
   EXT-05 the extraction crash (pre-commit): building row persists; ZERO
         passages; the previous generation stays current; the retry commits
   EXT-06 the crash AFTER the commit (post-commit-pre-ack): the generation
@@ -45,9 +47,10 @@ Cases (the EXT registry — this file is the contract's declaration):
   EXT-08 the new edition: the same work, a NEW source row (version 2) -> the
         generation binds the NEW source only; the old source's generation
         untouched; a generation NEVER crosses source rows
-  EXT-09 the source-hash mismatch (the stale detection): the generation's
-        input digest vs the source's digest — the query reports the typed
-        stale state, never a silent mismatch
+  EXT-09 the stale-detection substrate: the generation's input digest binds
+        the source row it was built from (the digest MATCH is the substrate —
+        the typed stale REPORTING is the read path's own slice, never
+        claimed here; a mismatch is observable, never silent)
   EXT-10 the extraction failure mid-build (the planted RAISE): the failed
         row with the named reason; the previous current generation STAYS
         current (never a partial presentation)
@@ -60,6 +63,11 @@ Cases (the EXT registry — this file is the contract's declaration):
         updates are lawful state transitions)
   EXT-12 owner isolation: the extraction is RLS-scoped; B never sees A's
         generations; the direct-DB escape fails closed (both layers)
+  EXT-13 the NUL boundary (the SEV round's F1, found live): a valid-UTF-8
+        text containing U+0000 -> the named refusal, zero generations (the
+        psql literal transport cannot carry a NUL byte-exactly — the
+        extraction refuses at the boundary, never a silently truncated
+        passage presented as current)
 
 Run: python3 harness/tests/test_extract.py   (exit 0 = green)
 """
@@ -335,6 +343,20 @@ def main() -> int:
               "the derived-state conventions: NO defaults (LAW-24), RLS forced on both tables, NO append-only trigger (the §2.9 disposable class — state transitions are lawful updates), NO command_log row (the extraction is a derived build, never an owner command), the generation ordinal unique per source",
               "the generation tables are §2.9 DERIVED: disposable, rebuildable, never authoritative — the shape itself is the rule (SYS-07)")
 
+        # EXT-13 — the NUL boundary (the SEV round's F1, found live): the psql
+        # literal transport cannot carry U+0000 (the C-string boundary truncates
+        # the statement mid-literal) — the corrupted-commit class is DEAD by the
+        # named refusal BEFORE any row
+        fNul = fresh_file("nul.md", "before\x00after\n\nsecond block\n")
+        p_imp13 = import_src("ext-src-13", "NUL Book", fNul)
+        sid13 = ack_field(p_imp13, "result_ref")
+        p13 = extract("ext-13", sid13)
+        n13 = audit(f"SELECT count(*) FROM arv.extraction_generation WHERE source_id='{sid13}';")
+        ok13 = (p13.returncode == 1 and "ARV-EXT-005" in p13.stdout and n13 == "0")
+        check("EXT-13", ok13,
+              "a NUL-bearing valid-UTF-8 source -> the named ARV-EXT-005 refusal, ZERO generation rows (the psql literal transport cannot carry U+0000 — the extraction refuses at the boundary, never a silently truncated passage presented as current)",
+              "the complete-or-failed contract: a passage must be the EXACT slice its offsets and digest claim; a text that cannot survive the literal path byte-exactly is a named refusal, never a corrupted commit")
+
         # EXT-12 — owner isolation
         p_impB = import_src("ext-src-B", "B's Book", fresh_file("bbook.md", "B's own text.\n"), owner="B")
         sidB = ack_field(p_impB, "result_ref")
@@ -357,7 +379,7 @@ def main() -> int:
     if FAILS:
         print(f"RED — {len(FAILS)} broken case(s): {', '.join(FAILS)}")
         return 1
-    print("GREEN — the extraction generations hold end-to-end (EXT-01..12): complete-or-failed, versioned, disposable, owner-scoped")
+    print("GREEN — the extraction generations hold end-to-end (EXT-01..13): complete-or-failed, versioned, disposable, owner-scoped")
     return 0
 
 

@@ -23,10 +23,15 @@ never an owner command); the idempotency record rides the generation row itself
 
 The pinned readable-text/Markdown extractor (arivoo-text-blocks.v1): UTF-8
 decode under the source's digest (a decode failure is the named ARV-EXT-002 —
-the P3-01 media boundary); the blank-line block split with a Markdown heading
-ATTACHED FORWARD to the content block that follows it (a heading alone is not a
-passage — the section form); the passages TILE the decoded text (end_off equals
-the next start_off; the last ends at len(text)) — exact, complete location
+the boundary is the DECODE, never the media type); the NUL guard (a valid-UTF-8
+text containing U+0000 is the named ARV-EXT-005 — the psql literal transport
+cannot carry a NUL byte-exactly, and a passage must be the EXACT slice its
+offsets and digest claim: the refusal, never a corrupted commit); the
+blank-line block split with a Markdown heading ATTACHED FORWARD to the content
+block that follows it (a heading with NO following content block is its own
+passage — the tiling keeps coverage exact); the passages TILE the content span
+(end_off equals the next start_off; the last ends at len(text); a leading
+blank-line prefix precedes the first passage) — exact, complete location
 evidence, never a guess; each passage digest re-hashes its text.
 
 The shared spine pieces (Session, _q, _sess_row, canonical_body, _dead_exit)
@@ -59,8 +64,10 @@ _HEADING = re.compile(r"^#{1,6}(?:\s|$)")
 def split_passages(text: str) -> list:
     """The pinned readable-text/Markdown split: blank-line blocks; a Markdown
     heading block ATTACHES FORWARD to the content block that follows it (a
-    heading alone is not a passage — the section form); the passages TILE the
-    text (each end_off == the next start_off; the last ends at len(text)).
+    heading with NO following content block is its own passage — the tiling
+    keeps coverage exact); the passages TILE the content span (each end_off ==
+    the next start_off; the last ends at len(text); a leading blank-line prefix
+    precedes the first passage).
     Returns [(start, end), ...]; empty when the text carries no content block
     (the ARV-EXT-001 class)."""
     n = len(text)
@@ -266,9 +273,18 @@ def extract_source(*, db, owner, actor, client_id, idem_key, source_id,
             text = data.decode("utf-8")
         except UnicodeDecodeError:
             print("FAIL ARV-EXT-002: the source is not valid UTF-8 text — the readable-text "
-                  "boundary (P3-01's media class); the extraction never guesses a text")
-            print("      repair: import the source with a supported readable-text media type; "
-                  "binary formats land with their own slices")
+                  "boundary (the DECODE, never the media type); the extraction never guesses a text")
+            print("      repair: import readable UTF-8 text bytes — the boundary is the decode, "
+                  "not the media type; binary formats land with their own slices")
+            return 1
+        if "\x00" in text:
+            print("FAIL ARV-EXT-005: the source text contains a NUL character (U+0000) — the "
+                  "psql literal transport cannot carry it byte-exactly (the C-string boundary "
+                  "truncates the statement mid-literal); the extraction refuses rather than "
+                  "commit a passage that is not the EXACT slice its offsets and digest claim")
+            print("      repair: remove the NUL from the source and re-import as a new edition — "
+                  "the complete-or-failed contract: a text that cannot survive the literal path "
+                  "byte-exactly is a named refusal, never a corrupted commit")
             return 1
         spans = split_passages(text)
         if not spans:

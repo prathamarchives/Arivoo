@@ -1,0 +1,7 @@
+FAIL EXT-13: a NUL-bearing valid-UTF-8 source -> the named ARV-EXT-005 refusal, ZERO generation rows (the psql literal transport cannot carry U+0000 — the extraction refuses at the boundary, never a silently truncated passage presented as current)
+      repair: the complete-or-failed contract: a passage must be the EXACT slice its offsets and digest claim; a text that cannot survive the literal path byte-exactly is a named refusal, never a corrupted commit
+RED — 1 broken case(s): EXT-13
+(observed at 0be970f — the SEV round-1 F1 class: the pre-fix extractor COMMITTED a
+ corrupted current generation over the NUL input (exit 0, the passage text
+ truncated at the C-string boundary while the offsets/digest claimed the full
+ slice); the new case pins the refusal — the implementation lands after this RED)

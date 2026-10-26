@@ -9,11 +9,12 @@ on the rig's user-space PostgreSQL 17 (loopback, trust auth) — the five-check
 CI run at the pushed head is the walls' verification of the pushed tree
 (INT-104): no in-file result covers the pushed head itself.
 
-THE REPLAY VOCABULARY BOUNDARY (the SEV round's F5): a same-key retry of a
-FAILED generation — or of a building row a LATER key superseded — answers
-exit 0 with status=replayed and state=failed|superseded; the CALLER must read
-the state field. A distinguishing exit code for replayed failures is the
-query surface's own consideration (routed to the read path's slice).
+THE REPLAY VOCABULARY (the SEV round's F5, RESOLVED by the #87 CodeRabbit
+round 2): a same-key retry of a FAILED generation now answers exit 1 with the
+recorded reason (EXT-15 — never a silent success); a superseded generation's
+replay still answers exit 0 with state=superseded (it completed once, then was
+displaced — the recorded outcome is honest); the CALLER reads the state field
+for the displaced class.
 
 THE SIZE-CAPPED SPLIT (F3): NOT implemented and NOT required by the RTM
 freeze — an over-long single block yields ONE passage (the SEV probe: a 2 MB
@@ -42,10 +43,12 @@ precedes the first passage (the passages tile the CONTENT span, not
 necessarily [0, len)); both are the pinned splitter's behavior — verified by
 the SEV round's 24 edge probes, but the suite's fixture carries neither shape.
 
-THE CONCURRENT-LOSER PATH: the SEV round's live races (4 concurrent
-process races + 2 concurrent same-key resumes: single-current held, the loser
-ARV-CMD-011 with zero effect) are the evidence; a DETERMINISTIC in-suite
-concurrency case is not pinned (the suite is serial by design).
+THE CONCURRENT-LOSER PATH: the SEV round's live races (4 concurrent process
+races + 2 concurrent same-key resumes: single-current held, the loser
+ARV-CMD-011 with zero effect) are the evidence; the DEADLOCK class is now
+pinned deterministically (EXT-14 — the planted deadlock-raising trigger), but
+a true multi-process in-suite race case is not pinned (the suite is serial by
+design).
 
 THE SEV REVIEWER'S REMOTE OBSERVATIONS: the reviewer's sandbox was GitHub-API
 rate-limited — the CLAIM-051 close-row merge facts (0ce7077, run 40291330001)

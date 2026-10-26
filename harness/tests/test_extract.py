@@ -68,6 +68,14 @@ Cases (the EXT registry — this file is the contract's declaration):
         psql literal transport cannot carry a NUL byte-exactly — the
         extraction refuses at the boundary, never a silently truncated
         passage presented as current)
+  EXT-14 the deadlock race class (the #87 CodeRabbit round 2; the class the
+        SEV round's live races OBSERVED): the loser of a same-source
+        completion race is a RETRYABLE conflict — ARV-EXT-006, the building
+        row persists (never a failed generation for a race), the same-key
+        retry completes it
+  EXT-15 the same-key replay answers the RECORDED FAILURE (the #87 CodeRabbit
+        round 2): a failed generation replayed under its own key -> exit 1 +
+        the stored reason, never a silent ACK-success
 
 Run: python3 harness/tests/test_extract.py   (exit 0 = green)
 """
@@ -375,13 +383,46 @@ def main() -> int:
               "owner isolation: B's extraction is B's; A extracting B's source -> the named ARV-EXT-004 refusal; arv_app without the GUC sees ZERO rows (both layers fail closed)",
               "the derived tables inherit the substrate's RLS discipline: same policy shape, same fail-closed — a cross-owner extraction is refused at the boundary, never a silent read")
 
+        # EXT-14 — the deadlock race class (the #87 CodeRabbit round 2; the SEV round's
+        # choreographed two-session completions observed the class live): the loser is a
+        # RETRYABLE conflict — the building row persists, never a failed generation
+        plant14 = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                                  "CREATE OR REPLACE FUNCTION arv._ext_dl() RETURNS trigger AS $$ "
+                                  "BEGIN RAISE EXCEPTION 'deadlock detected'; RETURN NEW; END; "
+                                  "$$ LANGUAGE plpgsql; CREATE TRIGGER ext_dl BEFORE INSERT ON arv.passage "
+                                  "FOR EACH ROW WHEN (NEW.ordinal = 1) EXECUTE FUNCTION arv._ext_dl();"],
+                                 capture_output=True, text=True, timeout=60)
+        p14 = extract("ext-14", sid8)
+        drop14 = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                                 "DROP TRIGGER IF EXISTS ext_dl ON arv.passage; DROP FUNCTION IF EXISTS arv._ext_dl();"],
+                                capture_output=True, text=True, timeout=60)
+        st14 = audit(f"SELECT state FROM arv.extraction_generation WHERE source_id='{sid8}' AND ordinal=3;")
+        r14 = extract("ext-14", sid8)
+        st14b = audit(f"SELECT state FROM arv.extraction_generation WHERE source_id='{sid8}' AND ordinal=3;")
+        ok14 = (plant14.returncode == 0 and drop14.returncode == 0 and p14.returncode == 1
+                and "ARV-EXT-006" in p14.stdout and st14 == "building"
+                and r14.returncode == 0 and "status=committed" in r14.stdout and st14b == "current")
+        check("EXT-14", ok14,
+              "the deadlock-race loser: ARV-EXT-006, the building row persists (a race is never a failed generation); the same-key retry completes it",
+              "the race class is retryable by construction: the rolled-back completion leaves the building row; the permanent failed state is reserved for REAL mid-build failures")
+
+        # EXT-15 — the same-key replay answers the recorded failure (the #87 CodeRabbit round 2)
+        n15_before = audit(f"SELECT count(*) FROM arv.extraction_generation WHERE source_id='{sid8}';")
+        p15 = extract("ext-10", sid8)
+        n15_after = audit(f"SELECT count(*) FROM arv.extraction_generation WHERE source_id='{sid8}';")
+        ok15 = (p15.returncode == 1 and "ARV-EXT-003" in p15.stdout
+                and "status=replayed" not in p15.stdout and n15_after == n15_before)
+        check("EXT-15", ok15,
+              "the same-key replay of a FAILED generation: exit 1 + the recorded reason, ZERO new rows — never a silent ACK-success",
+              "the replay must answer the recorded OUTCOME: a caller reading the exit code learns the extraction failed, never a false success")
+
     finally:
         if not os.environ.get("ARV_KEEP_DB"):
             pg.drop_scratch_db(DB)
     if FAILS:
         print(f"RED — {len(FAILS)} broken case(s): {', '.join(FAILS)}")
         return 1
-    print("GREEN — the extraction generations hold end-to-end (EXT-01..13): complete-or-failed, versioned, disposable, owner-scoped")
+    print("GREEN — the extraction generations hold end-to-end (EXT-01..15): complete-or-failed, versioned, disposable, owner-scoped")
     return 0
 
 

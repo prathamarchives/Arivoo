@@ -11,6 +11,8 @@ instantiation — the suite EXT-01..12 pins every transition):
                                                it; a NEW-key extract supersedes it]
   building --failure--> failed                [the named ARV-EXT-003; the previous
                                                current generation STAYS current]
+  building --deadlock race--> building         [the retryable ARV-EXT-006 — zero
+                                               effect, the loser retries]
   current --new extraction, SAME source--> current(new) + superseded(old)
   current --new edition, a NEW source row--> the new source's generation only —
                                                a generation NEVER crosses source rows
@@ -38,8 +40,12 @@ The shared spine pieces (Session, _q, _sess_row, canonical_body, _dead_exit)
 come from harness.commands — ONE session machinery (the P3-01 DRY); what
 differs is the protocol (no command_log), never the session.
 
-Exit 0 = acked (committed or replayed); exit 1 = refused (named); exit 2 =
-crashed (no ack — the crash injector's vocabulary).
+Exit 0 = acked (committed, or the replay of a current/superseded generation);
+exit 1 = refused (named — including the same-key replay of a FAILED generation,
+which answers the recorded failure, never a silent success); exit 2 = crashed
+(no ack — the crash injector's vocabulary). A deadlock race loser is the
+retryable ARV-EXT-006 (the building row persists — a race is never a failed
+generation).
 """
 import argparse
 import hashlib
@@ -170,11 +176,21 @@ def _mark_failed(*, db, owner, gen_id, cause, idem_key) -> int:
 
 
 def _dead_classify(sess: "Session", *, db, owner, gen_id, idem_key) -> int:
-    """A dead completing session: the DRAINED observed cause classifies — an SQL
-    error (outside the duplicate-key/connection classes) is the named mid-build
+    """A dead completing session: the DRAINED observed cause classifies — a
+    DEADLOCK RACE (SQLSTATE 40P01's message) is the retryable conflict
+    ARV-EXT-006 (the rolled-back completion leaves the building row — a race
+    is never a failed generation, the #87 round-2 finding); an SQL error
+    (outside the duplicate-key/connection classes) is the named mid-build
     failure (ARV-EXT-003, the failed row); the spine's death classes (011/012/
     010) answer the rest; a live stall is the honest ARV-CMD-010."""
     cause = sess.dead_reason()
+    if cause is not None and "deadlock detected" in cause:
+        print("FAIL ARV-EXT-006: the completion lost a deadlock race with a concurrent extraction "
+              "of the same source — the transaction rolled back, ZERO effect; the building row "
+              "persists (the same-key retry resumes it, a new key supersedes it)")
+        print("      repair: retry the SAME idempotency key — the building row is waiting; a race "
+              "is never a failed generation")
+        return 1
     if cause is not None and "ERROR" in cause and _DUP not in cause \
             and not any(s in cause for s in _CONN):
         return _mark_failed(db=db, owner=owner, gen_id=gen_id, cause=cause, idem_key=idem_key)
@@ -302,6 +318,15 @@ def extract_source(*, db, owner, actor, client_id, idem_key, source_id,
                       "with a DIFFERENT body (no silent overwrite — exactly-once is a contract)")
                 print("      repair: use a new idempotency key for a new body; the same key "
                       "must mean the same command")
+                return 1
+            if gstate == "failed":
+                reason = _sess_row(sess, f"SELECT fail_reason || '|' FROM arv.extraction_generation "
+                                         f"WHERE id={_q(gid)};").split("|")[0]
+                print(f"FAIL {reason or 'ARV-EXT-003'}: key {idem_key!r} is recorded as a FAILED "
+                      f"generation ({gid}) — the same key answers the recorded failure, never a "
+                      "silent success")
+                print("      repair: retry with a NEW key (a new ordinal); the previous current "
+                      "generation was never touched")
                 return 1
             if gstate != "building":
                 print(f"ACK command=extract_source idem_key={idem_key} status=replayed "

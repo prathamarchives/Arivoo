@@ -68,3 +68,11 @@ API observations recorded in the close row are the builder's own live reads.
 
 THE MERGE (D-042): the single-actor 405 bar + the recorded flip path reproduce
 live at the merge — the protection restored and re-read after.
+
+THE SEV PROBES' EVIDENCE FORM (the #87 round-2 residual finding, read at this
+session's merge gate after the inter-session gap): the reviewer's concurrency
+and NUL probes are recorded as the SEV chain's typed summaries (sev.json's
+reviewer_context/review_summary + record 43 §4) — the round reports as
+received; they are NOT replayable suite run records (the suite is serial by
+design), and the probe-by-probe transcripts are the reviewer's own artifacts,
+summarized in the chain — a run record is cited only for what it records.

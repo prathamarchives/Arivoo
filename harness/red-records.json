@@ -584,5 +584,45 @@
         "observed_at": "2026-10-26T10:10:00+00:00"
       }
     ]
+  },
+  "harness/tests/test_extract.py": {
+    "schema": 2,
+    "binding_commit": "b9c892037eb0c8218e8f592c885e8d4c9355e431",
+    "binding_sha256": "55ea59a5c5c3610ffff0e2dc104e74c04756bfd5af91b5b8b95a759a6a90b9e8",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-052 (P3-03a) RED: the extraction suite's machinery-absent class observed at the predecessor 0ce7077 (commit A b9c8920 carries the suite; extract.py/0006_extraction_generations.sql absent, the extract_source command absent from the REGISTRY — the waiting-for-harness form, the S1/record-18 §4.1 + P3-01/P3-02 precedent; exit 1, red-01.txt) — the implementation lands AFTER this RED, never before it (LAW-11)",
+    "current_sha256": "21e4114e7d009a37db003a94c84d63953b0dda3f199c121c7efd7b24603c90e5",
+    "amendments": [
+      {
+        "prior_sha256": "55ea59a5c5c3610ffff0e2dc104e74c04756bfd5af91b5b8b95a759a6a90b9e8",
+        "new_sha256": "d61a20ff23e431a50e45a4e604627969a933d3e5b12186a0d756774b1ec63117",
+        "note": "the #87 CodeRabbit round 1's suite repairs (assertions CORRECTED to the machine the docstring declares, none removed — the commit-A suite was internally inconsistent: a correct implementation would FAIL its own EXT-04/06/07/08): (a) EXT-04's contiguity tightened <= -> == (end_off equals the next start_off; the last end equals len(TEXT) — the tiling contract) + the join's ambiguous bare 'ordinal' qualified p.ordinal (both derived tables carry an ordinal — the unqualified select ERRORED under ON_ERROR_STOP, found live at the first GREEN run); (b) EXT-07's retained states corrected to [superseded, superseded, current] (three generations exist by then — EXT-05's retry completed ordinal 2) + the byte-identical digest comparison moved PER-ORDINAL (ordinal 3 vs 2; the state-based aggregate mixed two superseded generations); (c) EXT-08's old-source expectation corrected to the same three-row lineage; (d) EXT-06's lost-ack check moved to the NEXT ordinal (4 — ordinal 3 was already current from EXT-07, making the old check vacuous) with the passage count and the same-key replay leaving the generation count unchanged"
+      },
+      {
+        "prior_sha256": "d61a20ff23e431a50e45a4e604627969a933d3e5b12186a0d756774b1ec63117",
+        "new_sha256": "b229160d436ea5248ccb2f408037b554f5813ebf6b8d748e09eff35f4953a08e",
+        "note": "the fresh-context SEV round 1 (reviewer agent-7de931cd, BLOCKED with 1 P1 + 7 P3) — F1 the P1 REAL DEFECT pinned RED-first as the NEW EXT-13 (a NUL-bearing valid-UTF-8 source: the psql literal transport cannot carry U+0000 — the C-string boundary truncated the statement mid-literal and the pre-fix extractor COMMITTED a corrupted current generation (exit 0, the stored passage text truncated while the offsets and digest claimed the full slice); red-02.txt preserves the observed RED at 0be970f; the repair is the named ARV-EXT-005 refusal BEFORE any row — zero generations, the corrupted-commit class dead by construction); F3/F4 the EXT-04/EXT-09 case texts corrected to what is pinned (the size-capped over-long-block split and the typed stale REPORTING were declared-but-unimplemented claims — the size cap routed to the read-path/indexing slices, the stale reporting named the read path's own slice, never silently narrowed); the summary line EXT-01..12 -> EXT-01..13. Assertions ADD (one case), none removed",
+        "observed_at": "2026-10-26T11:30:00+00:00"
+      },
+      {
+        "prior_sha256": "b229160d436ea5248ccb2f408037b554f5813ebf6b8d748e09eff35f4953a08e",
+        "new_sha256": "88317dabaea77e48d5a2511beb44a68eaeab7ab698ab41c96d88d621a24e0373",
+        "note": "the SEV round-2's N1 (cosmetic, the reviewer's own merge-condition list): the stale inline comment at the EXT-09 case ('the source-hash mismatch: the typed stale state' — the pre-repair wording) corrected to the substrate form, matching the corrected header case text and the PASS message. Comments carry no assertions; zero behavioral change; assertions untouched",
+        "observed_at": "2026-10-26T12:10:00+00:00"
+      },
+      {
+        "prior_sha256": "88317dabaea77e48d5a2511beb44a68eaeab7ab698ab41c96d88d621a24e0373",
+        "new_sha256": "2a7bbbfbc78a24f8d8ba78340acf805155d8ea97d5f1df7d029a513f48b97f6d",
+        "note": "the #87 CodeRabbit round 2's two findings, both pinned RED-first (red-03.txt at dc76e29): EXT-14 the deadlock-race class — the SEV round's choreographed completions had OBSERVED the class live (deadlock detected, one session aborted) but the pre-fix classifier sent the loser to the generic SQL-error branch, PERMANENTLY failing a generation over a transient race; the repair classifies 'deadlock detected' (SQLSTATE 40P01's message) as the retryable ARV-EXT-006 (zero effect, the building row persists, the same-key retry completes it) — pinned by a planted deadlock-raising trigger with the retry; EXT-15 the same-key replay of a FAILED generation answered ACK status=replayed exit 0 (a silent success for a recorded failure); the repair answers the recorded failure — exit 1 + the stored reason, zero new rows. Assertions ADD (two cases), none removed; the summary EXT-01..13 -> EXT-01..15",
+        "observed_at": "2026-10-26T13:20:00+00:00"
+      },
+      {
+        "prior_sha256": "2a7bbbfbc78a24f8d8ba78340acf805155d8ea97d5f1df7d029a513f48b97f6d",
+        "new_sha256": "21e4114e7d009a37db003a94c84d63953b0dda3f199c121c7efd7b24603c90e5",
+        "note": "the #87 CodeRabbit round 3's finding (the deadlock classification by MESSAGE TEXT misroutes in BOTH directions: a genuine 40P01 with a LOCALIZED message is marked failed — a permanent state for a transient race; a P0001 impostor carrying the text is granted retryability — the row stays building forever), pinned RED-first (red-04.txt at 4ee740e27497f7b5f435f0235eb7c7315b8edb99): EXT-16 the localized genuine 40P01 — the retryable ARV-EXT-006 by the SQLSTATE CODE channel read from the session's verbose-verbosity stderr, the same-key retry completes it; EXT-17 the P0001 text impostor — the named mid-build failure ARV-EXT-003 with the code visible in the recorded cause; EXT-14's trigger hardened to raise the GENUINE 40P01 SQLSTATE. Assertions ADD (two cases), none removed; the summary EXT-01..15 -> EXT-01..17",
+        "observed_at": "2026-10-27T06:05:09.824451+00:00"
+      }
+    ]
   }
 }

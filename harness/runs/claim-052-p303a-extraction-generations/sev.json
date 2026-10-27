@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-052-p303a-extraction-generations",
+  "base_sha": "0ce707741cc554eca4a4e18cb8acc472c122d39c",
+  "reviewed_diff_sha256": "2dc67f8c0abafabee40d74bc5aed1209a04c736ca68142469f6c6333177a4554",
+  "intent_ids": [
+    "INT-127",
+    "INT-131",
+    "INT-134",
+    "INT-135",
+    "INT-138",
+    "INT-139",
+    "INT-140"
+  ],
+  "requirement_ids": [
+    "SYS-06",
+    "SYS-07",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
+  "changed_components": [
+    "harness/migrations/0006_extraction_generations.sql (the two §2.9 DERIVED tables: extraction_generation with the lineage columns + the ON-ROW idempotency record, passage with the offsets + the re-hash digest; RLS forced, no defaults, no append-only trigger)",
+    "harness/extract.py (the generation machine: validation before any row — ARV-EXT-001/002/004/005 + ARV-CAP-004; the building row in its own transaction; ONE completion transaction; the mid-build failure -> the failed row from the DRAINED stderr on a fresh session; the same-key resume/replay; the pinned arivoo-text-blocks.v1 splitter)",
+    "harness/commands.py (the REGISTRY registration through the call-time-import wrapper), harness/crash.py (the extract arm at the spine's three points)",
+    "harness/tests/test_extract.py (the EXT-01..13 contract suite — the CodeRabbit round's corrections + the SEV round's EXT-13 NUL case)",
+    "CLAIMS.md (CLAIM-051's rule-4 close row + the overlap retirement), the run dir (red-01/02, notverified's ten boundaries, the proof set, this report, the sheet), the five-area navigation re-derivation + record 43"
+  ],
+  "interfaces_reviewed": [
+    "extract_source's validation ladder: the RLS-scoped source read -> the blob verify -> the UTF-8 decode -> the NUL guard -> the split — every refusal named, zero rows on refusal",
+    "the completion transaction's atomicity: supersede-the-current + insert-the-passages + flip-current commit or roll back TOGETHER (the planted-trigger probe at both the INSERT and the UPDATE positions)",
+    "the idempotency surface on the generation row: UNIQUE(owner_scope, idempotency_key) + body_hash; the same-key resume of a crashed building row; the replay of terminal states; the 409 on a different body (source/actor/client-id each)",
+    "the crash points after-begin/pre-commit/post-commit-pre-ack over the phased machine; the recovery: the same key completes its ordinal, a NEW key supersedes the stale building row",
+    "the splitter's tiling contract: 24 edge probes (trailing blanks, heading runs, CRLF, unicode, whitespace-only) — end==next-start and last-ends-at-len held in every case",
+    "the §2.9 catalog shape: defaults/RLS/triggers/grants/keys/CHECKs read independently from the catalog; zero command_log rows for extract_source across every failure path",
+    "migration 0006 under the oracle's admitted grammar; the FK/RLS interaction (FK checks bypass RLS as owner-internal); arv_read BYPASSRLS auditor vs arv_app no-GUC zero-visibility"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the suite EXT-01..13 GREEN (three consecutive runs at the GREEN tree + the reviewer's four); proof run-01",
+      "RED-01 preserved (the machinery-absent gate at the predecessor 0ce7077, byte-identical at the re-run); RED-02 preserved (the EXT-13 NUL class at 0be970f — the pre-fix corrupted-commit reproduced); proof red-01.txt, red-02.txt",
+      "the red-records binding + the three-amendment chain (the CodeRabbit corrections, the SEV EXT-13 addition, the N1 comment) — every digest recomputed and matching; proof run-15 (make verify green incl. ARV-RED-002/006/007)"
+    ],
+    "integration_verification": [
+      "the spine integration: the shared Session/_q/_sess_row/canonical_body/_dead_exit imported (ONE session machinery), the REGISTRY call-time wrapper dispatching, both module load orders clean; proof run-01, run-04",
+      "crash.py's extract arm killing at all three points (exit 2, no ack) over the real CLIs; the crash matrix EXT-05/06; proof run-01",
+      "the migration riding the oracle's admitted grammar; the suite's scratch-DB lifecycle (create -> migrate -> the cases -> drop); proof run-02"
+    ],
+    "system_verification": [
+      "SYS-06/SYS-07's primary trace: complete-or-failed publication at every failure position (the planted trigger at INSERT and UPDATE; the NUL input; the empty input; the decode failure) — a partial generation is NEVER presented; proof run-01",
+      "the versioned lineage: superseded retained, single-current held; the new edition never crossing source rows — the serial suite's own lineage cases at proof run-01 (EXT-07/08); the CONCURRENT single-current evidence is the SEV reviewer's own probe record — the three choreographed two-session completions + four concurrent process races + two concurrent same-key resumes live in this report's review_summary + reviewer_context and record 43 §4 (the SEV chain's evidence as received; never a suite run record — the suite is serial by design)",
+      "the disposable class: zero command_log rows, no append-only trigger, the state transitions lawful — the §2.9 shape is the rule; proof run-01 (EXT-11)"
+    ],
+    "validation": [
+      "the independent two-round SEV chain: round 1 BLOCKED (agent-7de931cd: the REAL NUL-corruption P1 + 7 P3) -> every finding fixed RED-first or routed -> round 2 PASS (the reviewer's own five NUL variants + eight transport siblings + the four suite runs + make verify — the probe evidence in this report's reviewer_context/review_summary and record 43 §4, as received from the reviewer); proof run-15 (make verify green incl. the red-records + KB checks at that tree)",
+      "the CodeRabbit round 1's five inline findings all fixed in-PR, every thread dispositioned BEFORE resolution; proof the PR thread record",
+      "the CodeRabbit round 2's two findings (the deadlock-race class — the SEV round's own live observation, now the retryable ARV-EXT-006 pinned by EXT-14; the failed-generation replay — exit 1 + the recorded reason, pinned by EXT-15) both fixed RED-first (red-03.txt at dc76e29); proof run-17, run-18",
+      "the CodeRabbit round 3's finding (the deadlock classification by message text — both directions misroute) fixed RED-first: the verbose-verbosity SQLSTATE channel + the code-driven classifier, pinned by EXT-14 (genuine 40P01) + EXT-16 (localized) + EXT-17 (the P0001 impostor) (red-04.txt at 4ee740e); proof run-20, run-21",
+      "make verify GREEN 54/0 at the repair trees (the run-14 exit-2 at the banner-defect tree preserved beside the run-15 retry — the honest red, never smoothed); proof run-14, run-15"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a valid-UTF-8 source containing U+0000 rides the psql literal transport and the C-string boundary truncates the passage mid-literal — a corrupted generation presented as current",
+      "control": "the named ARV-EXT-005 refusal BEFORE any row (validation precedes the build); pinned RED-first as EXT-13 (red-02.txt: the pre-fix corrupted commit reproduced at 0be970f)",
+      "proof_ids": [
+        "run-01",
+        "red-02.txt"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "a mid-build SQL failure (the planted trigger at the passage INSERT or the state UPDATE) leaves a partial generation or degrades the previous current",
+      "control": "the completion transaction's atomicity (everything rolls back) + the failed row with the named ARV-EXT-003 written from the DRAINED stderr on a fresh session; the previous current stays current",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "a crash between the building row and the completion (pre-commit) or after the commit before the ack (the lost-ack class)",
+      "control": "the building row in its OWN transaction (the crash substrate; zero passages on the pre-commit crash); the same-key retry RESUMES its ordinal; the post-commit-pre-ack replay answers the recorded result; a new-key extract supersedes the stale building row",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "a cross-owner or dangling extraction target; the empty input; the non-UTF-8 input; the unverifiable blob",
+      "control": "the validation ladder's named refusals (ARV-EXT-004/001/002, ARV-CAP-004) each with ZERO generation rows; the RLS isolation on both layers (arv_app no-GUC sees nothing)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "the idempotency key reused for a different body (source/actor/client-id), or the ordinal raced by concurrent extractions",
+      "control": "the body_hash conflict guard (ARV-CMD-409) on the generation row; the UNIQUE(source_id, ordinal) + UNIQUE(owner_scope, idempotency_key) backstops — the reviewer's live races observed the single-current invariant with the 011 loser at zero effect",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-R1-F1",
+      "severity": "P1",
+      "status": "resolved",
+      "what": "the NUL corruption: a valid-UTF-8 source containing U+0000 produced a silently corrupted CURRENT generation (the passage text truncated at the psql C-string boundary while the offsets/digest claimed the full slice)",
+      "resolution": "fixed RED-first: the EXT-13 case (red-02.txt at 0be970f) + the named ARV-EXT-005 refusal before any row; round 2 re-verified CLOSED over five NUL variants + eight transport-sibling probes (all siblings clean — NUL is the only byte that breaks the transport)"
+    },
+    {
+      "id": "SEV-R1-F2",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the overclaim 'a heading alone is never a passage' (a trailing heading IS its own passage — the tiling forces coverage)",
+      "resolution": "the docstrings corrected to the true behavior; round 2 re-verified CLOSED"
+    },
+    {
+      "id": "CR-R2-F1",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the deadlock-race loser was sent to the generic SQL-error branch — a generation PERMANENTLY failed over a transient infrastructure race (the class the SEV round's choreographed completions observed live)",
+      "resolution": "fixed RED-first: 'deadlock detected' (SQLSTATE 40P01's message) classifies as the retryable ARV-EXT-006 before the generic branch — zero effect, the building row persists, the same-key retry completes it; pinned by EXT-14 (red-03.txt at dc76e29)"
+    },
+    {
+      "id": "CR-R2-F2",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the same-key replay of a FAILED generation answered ACK status=replayed exit 0 — a silent success for a recorded failure (the SEV round's F5)",
+      "resolution": "fixed RED-first: the replay answers the recorded failure — exit 1 + the stored fail_reason, zero new rows; pinned by EXT-15 (red-03.txt at dc76e29)"
+    },
+    {
+      "id": "CR-R3-F1",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the deadlock classification matched the MESSAGE TEXT 'deadlock detected' — both directions misroute: a genuine SQLSTATE 40P01 with a localized message falls to the generic SQL-error branch (the generation PERMANENTLY failed over a transient race), while a P0001 impostor carrying the text is granted retryability (the row stays building forever, no failure recorded)",
+      "resolution": "fixed RED-first (red-04.txt at 4ee740e): the extraction session sets psql's VERBOSITY=verbose by session command at open (\\set VERBOSITY verbose — the spine's Session untouched, every other caller byte-identical) so a dead session's drained stderr carries 'ERROR:  <SQLSTATE>: <message>'; the classifier matches the CODE — 40P01 the retryable ARV-EXT-006 (EXT-16 the localized arm, the same-key retry completes it), any other code the named mid-build failure ARV-EXT-003 (EXT-17 the impostor arm, the code visible in the recorded cause), 23505 delegated to the spine's 011/replay classes; EXT-14's trigger hardened to raise the GENUINE 40P01; the SIZE-002 gate's 425>400 refusal answered by the compression back to 400/400"
+    }
+  ],
+  "not_verified": [
+    "the displaced-class replay: a superseded generation's same-key replay still answers exit 0 with state=superseded (its recorded outcome — completed then displaced — is honest); the FAILED class now answers exit 1 with the recorded reason (EXT-15)",
+    "the size-capped split of an over-long block: NOT implemented, NOT required by the RTM freeze (a 2 MB paragraph yields ONE passage); routed to the read-path/indexing slices if the corpus needs it",
+    "the typed stale REPORTING: the digest-bind substrate is proven (EXT-09); the typed stale-state query surface is the read path's own slice",
+    "the NUL class in the SPINE's own literal paths (record_event's payload, import_source's title): the same pre-existing psql C-string boundary — routed as the spine's bounded follow-up, never silently dropped",
+    "the media-type non-gate: an application/pdf that decodes as UTF-8 extracts cleanly — the boundary is the DECODE by design (P3-01's convention)",
+    "the splitter's two unpinned edges (the trailing-heading passage, the leading-blank prefix): SEV-probed (24 edge cases) but not suite-pinned — the fixture carries neither shape",
+    "a true multi-process in-suite race case is not pinned (the suite is serial by design; the deadlock CLASS itself is pinned by EXT-14's planted trigger)",
+    "the CI-host class: the five-check run at the pushed head is the walls' verification of the pushed tree (INT-104) — no in-file result covers the pushed head itself",
+    "the localized dup-key LABEL: extract's classifier routes the 23505 CODE to the spine's 011/replay classes (never _mark_failed); on a localized rig the spine's English _DUP text may miss and the honest 010 prints instead of 011 — the same exit, the same same-key-retry repair, never a wrong verdict (the spine's default-verbosity text classes are its own bounded follow-up)",
+    "THE SEV PROBES' EVIDENCE FORM (the #87 round-2 residual finding): the reviewer's concurrency + NUL probes are recorded as the SEV chain's typed summaries (this report's reviewer_context/review_summary + record 43 §4) — the round reports as received; they are NOT replayable suite run records (the suite is serial by design), and the probe-by-probe transcripts are the reviewer's own artifacts, summarized in the chain — a run record is cited only for what it records"
+  ],
+  "builder_context": "builder-glm-host-session31-claim052 (the host GLM agent that authored the slice: commit A's RED declaration [the previous session], commit B's GREEN, the CodeRabbit round's five fixes, the SEV round-1 repairs, the finalize, and the #87 round-3 SQLSTATE-channel repair — every fix in-slice)",
+  "reviewer_context": "fresh-context GLM SEV reviewer agent-7de931cd (round 1 BLOCKED at 0be970f: 1 P1 + 7 P3 — the P1 the REAL NUL-corruption defect found end-to-end with its own probes; round 2 PASS at 3d00851: F1 re-verified CLOSED over five NUL variants + eight transport siblings, F2/F3/F4/F6/F8 CLOSED, F5/F7 acknowledged-routed, N1 the one cosmetic fixed in the finalize; both reports verbatim in the session record §7)",
+  "disposition": "PASS",
+  "review_summary": "Round 1 BLOCKED: the NUL-corruption P1 was real and serious — the machine ACKed a corrupted current generation (a passage that was not the slice its offsets and digest claimed) — plus seven P3 claim-accuracy findings; no evidence fabrication found anywhere (the red-record binding, the RED reproduction, the amendment chains all verified byte-level). The builder fixed the P1 RED-first (the EXT-13 pin with the observed RED preserved, the ARV-EXT-005 refusal before any row) and corrected every wording truth. Round 2 PASS: the repair re-verified against the reviewer's own fresh probes (five NUL variants all refused with zero rows; eight transport siblings all clean — NUL is the only byte that breaks the psql literal transport; the suite four times green; make verify exit 0), every closed finding re-read in the tree, F5/F7 honestly routed into the finalize's notverified and navigation updates. The generation machine is behaviorally sound: complete-or-failed held at every failure position (including the reviewer's choreographed deadlocks and live process races — single-current never broken, the loser always zero-effect), the versioned lineage and the §2.9 disposable conventions verified at the catalog level, the owner isolation closed on both layers.",
+  "sheet_section": true
+}

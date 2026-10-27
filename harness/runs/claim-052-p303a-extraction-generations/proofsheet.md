@@ -1,0 +1,113 @@
+# PROOF SHEET — slice claim-052-p303a-extraction-generations (harness-built; never hand-edited — PRF-01, LAW-01)
+
+- commit (last run record's): 2b384bff1c8efb1a6b3490b9586aabaab1cfd217
+- generated (last record's timestamp): 2026-10-27T07:11:19.624260+00:00
+- run records: 28
+
+## Run records (command, exit, output digest)
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 a7423c018d2f4085 · 2026-10-26T10:59:46.443439+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 f29f3bf95d2ce5d6 · 2026-10-26T10:59:51.682989+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-26T10:59:52.085329+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-26T10:59:54.688244+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 b62ae90e95faf1c6 · 2026-10-26T10:59:56.338047+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 52106db29410e836 · 2026-10-26T10:59:58.618475+00:00
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 88f804186ff9b6ff · 2026-10-26T11:00:03.004185+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-26T11:01:36.734148+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 81e7d2e1f60ca5ca · 2026-10-26T11:02:04.062936+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 4e3bbfaa90eaefd4 · 2026-10-26T11:02:15.987419+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 7cfa04be9de3d2a0 · 2026-10-26T11:02:16.520066+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-26T11:02:16.809279+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 cae50aea5cbeffaf · 2026-10-26T11:02:19.571622+00:00
+- `make verify` -> exit 2 · output sha256 867e49f40a4a4e91 · 2026-10-26T11:05:35.110229+00:00
+- `make verify` -> exit 0 · output sha256 c4f0dbb0379dcffd · 2026-10-26T11:27:17.631663+00:00
+- `python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main` -> exit 0 · output sha256 696f24d0b17c81c4 · 2026-10-26T11:31:18.952923+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 9ebaf9658a136f75 · 2026-10-26T11:48:36.758921+00:00
+- `make verify` -> exit 0 · output sha256 4d630d7215c26066 · 2026-10-26T11:51:48.800166+00:00
+- `python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main` -> exit 0 · output sha256 2b4464f846eefe02 · 2026-10-26T11:54:45.004592+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-27T06:13:43.731244+00:00
+- `make verify` -> exit 0 · output sha256 6d870a1afbf674a7 · 2026-10-27T06:17:15.184227+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-27T06:34:54.571549+00:00
+- `make verify` -> exit 0 · output sha256 9eb6653415a3d90a · 2026-10-27T06:38:13.472225+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-27T06:46:11.042821+00:00
+- `make verify` -> exit 0 · output sha256 c9c1c31e41205842 · 2026-10-27T06:49:29.878784+00:00
+- `python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main` -> exit 0 · output sha256 5afcb725423af9a5 · 2026-10-27T06:52:40.633416+00:00
+- `make verify` -> exit 0 · output sha256 0c580b27100795bf · 2026-10-27T07:08:14.214308+00:00
+- `python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main` -> exit 0 · output sha256 f8096f96476d69a0 · 2026-10-27T07:11:19.624260+00:00
+
+## Not verified (LAW-04 — required, never empty-by-omission)
+- NOT VERIFIED — the honest limits of CLAIM-052 / P3-03a (the extraction
+- generations; LAW-04; never empty-by-omission)
+- WHAT THIS SLICE PROVES, ON WHAT STACK: the derived generation machine
+- (building -> current/failed complete-or-failed; the versioned lineage with
+- superseded retained; the crash matrix; the same-key resume/replay; the
+- disposable §2.9 conventions; the owner isolation; the deadlock class on the
+- SQLSTATE code) GREEN in the suite EXT-01..17
+- on the rig's user-space PostgreSQL 17 (loopback, trust auth) — the five-check
+- CI run at the pushed head is the walls' verification of the pushed tree
+- (INT-104): no in-file result covers the pushed head itself.
+- THE REPLAY VOCABULARY (the SEV round's F5, RESOLVED by the #87 CodeRabbit
+- round 2): a same-key retry of a FAILED generation now answers exit 1 with the
+- recorded reason (EXT-15 — never a silent success); a superseded generation's
+- replay still answers exit 0 with state=superseded (it completed once, then was
+- displaced — the recorded outcome is honest); the CALLER reads the state field
+- for the displaced class.
+- THE SIZE-CAPPED SPLIT (F3): NOT implemented and NOT required by the RTM
+- freeze — an over-long single block yields ONE passage (the SEV probe: a 2 MB
+- paragraph -> 1|0|2097153); routed to the read-path/indexing slices' own
+- bounded work if the corpus ever needs it.
+- THE TYPED STALE REPORTING (F4): the SUBSTRATE is proven (the generation's
+- input_digest binds the source row it was built from; EXT-09); the typed
+- stale-state QUERY surface (reporting a mismatch as a named state) is the read
+- path's own slice — never claimed here.
+- THE NUL CLASS IN THE SPINE'S OWN LITERAL PATHS (F1's sibling): the psql
+- C-string boundary exists for EVERY _q()-built literal — record_event's payload
+- and import_source's title carry the same pre-existing class (not this slice's
+- regression; THIS slice's path is guarded by ARV-EXT-005 and pinned RED-first).
+- Routed as the spine's named follow-up (its own bounded slice, never silently
+- dropped).
+- THE MEDIA-TYPE GATE: an application/pdf whose bytes decode as UTF-8 extracts
+- cleanly — the boundary is the DECODE by design (P3-01's convention, the SEV
+- round's H2 probe); a media-type allowlist is NOT this freeze's rule.
+- THE SPLITTER'S DOCUMENTED EDGES (not suite-pinned): a trailing heading with
+- no following content block is its own passage; a leading blank-line prefix
+- precedes the first passage (the passages tile the CONTENT span, not
+- necessarily [0, len)); both are the pinned splitter's behavior — verified by
+- the SEV round's 24 edge probes, but the suite's fixture carries neither shape.
+- THE CONCURRENT-LOSER PATH: the SEV round's live races (4 concurrent process
+- races + 2 concurrent same-key resumes: single-current held, the loser
+- ARV-CMD-011 with zero effect) are the evidence; the DEADLOCK class is now
+- pinned deterministically on the CODE channel (EXT-14 the genuine 40P01,
+- EXT-16 the localized arm, EXT-17 the impostor arm — the #87 round 3), but
+- a true multi-process in-suite race case is not pinned (the suite is serial by
+- design).
+- THE LOCALIZED DUP-KEY LABEL (the #87 round 3's honest boundary): extract's
+- classifier routes the 23505 CODE to the spine's 011/replay classes (never
+- _mark_failed); on a LOCALIZED rig the spine's English _DUP text may miss and
+- the honest ARV-CMD-010 'unrecognized' prints instead of 011 — the same exit,
+- the same same-key-retry repair, never a wrong verdict and never a failed row
+- (the pre-fix tree was WORSE: a localized dup-key landed in _mark_failed as a
+- permanent failure). The spine's own default-verbosity text classes are its
+- bounded follow-up, never this slice's.
+- THE SEV REVIEWER'S REMOTE OBSERVATIONS: the reviewer's sandbox was GitHub-API
+- rate-limited — the CLAIM-051 close-row merge facts (0ce7077, run 40291330001)
+- were git-verified by the reviewer (the merge commit + the branch list) and the
+- API observations recorded in the close row are the builder's own live reads.
+- THE MERGE (D-042): the single-actor 405 bar + the recorded flip path reproduce
+- live at the merge — the protection restored and re-read after.
+- THE SEV PROBES' EVIDENCE FORM (the #87 round-2 residual finding, read at this
+- session's merge gate after the inter-session gap): the reviewer's concurrency
+- and NUL probes are recorded as the SEV chain's typed summaries (sev.json's
+- reviewer_context/review_summary + record 43 §4) — the round reports as
+- received; they are NOT replayable suite run records (the suite is serial by
+- design), and the probe-by-probe transcripts are the reviewer's own artifacts,
+- summarized in the chain — a run record is cited only for what it records.
+
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 4d1dc93e98c3b7bd83a699c3254b53be61a8d0c51ad57ed733a58c13e188d7f1
+- reviewed_diff_sha256: 2dc67f8c0abafabee40d74bc5aed1209a04c736ca68142469f6c6333177a4554
+- disposition: PASS
+- findings: 5 (open P0/P1: 0)
+- not-verified entries: 10
+
+## Assembly
+- sheet sha256 (of the content above, excluding this line): f20044c83b6c8d201bab8768f963c18d7f5521ef9d6b544a17d9d76ce073263f

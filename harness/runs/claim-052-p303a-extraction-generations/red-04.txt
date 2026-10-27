@@ -1,0 +1,15 @@
+FAIL EXT-16: a genuine SQLSTATE 40P01 deadlock with a LOCALIZED message (no 'deadlock detected' text): the retryable ARV-EXT-006 — the CODE classifies, never the message text; the same-key retry completes it
+      repair: a text matcher misroutes a localized real deadlock to the failed row — a permanent state for a transient race; the SQLSTATE code channel is locale-independent
+FAIL EXT-17: a P0001 carrying the text 'deadlock detected': the named mid-build failure ARV-EXT-003, the code visible in the recorded cause — never the retryable class the text alone would grant
+      repair: the impostor's text must not buy retryability: only the SQLSTATE 40P01 code is the deadlock class; every other server error records the failure (complete-or-failed)
+RED — 2 broken case(s): EXT-16, EXT-17
+(observed at 4ee740e27497f7b5f435f0235eb7c7315b8edb99 — the #87 CodeRabbit round 3's finding, both directions
+ reproduced live on the pre-fix tree: the classifier matches the MESSAGE TEXT
+ 'deadlock detected' instead of the SQLSTATE, so (a) a genuine 40P01 deadlock
+ with a LOCALIZED message misses the text matcher and lands in the generic
+ SQL-error branch — the generation PERMANENTLY failed over a transient race
+ (EXT-16); (b) a P0001 impostor carrying the text is granted retryability —
+ the row stays building forever, no failure recorded (EXT-17). The repairs
+ land after this RED: the extraction session's verbose-verbosity SQLSTATE
+ channel + the code-driven classifier; EXT-14's trigger hardened to raise
+ the GENUINE 40P01.)

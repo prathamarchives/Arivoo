@@ -3,9 +3,10 @@
 
 SIGKILL at one injection point — the spine's three (S3): after-begin /
 pre-commit / post-commit-pre-ack (§1.6's lost-ack); the import's three phase
-boundaries (P3-02): after-staging / after-put / after-verify. Exit 2 = crashed
-(no ack, by design); a usage error is exit 1 named (the _UsageParser override
-— argparse's exit-2 masquerade never fires).
+boundaries (P3-02): after-staging / after-put / after-verify; the extraction
+rides the spine's three (P3-03a). Exit 2 = crashed (no ack, by design); a
+usage error is exit 1 named (the _UsageParser override — argparse's exit-2
+masquerade never fires).
 """
 import argparse
 import os
@@ -13,6 +14,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.commands import record_event, import_source, create_highlight  # noqa: E402
+from harness.extract import extract_source  # noqa: E402
 
 POINTS = ("after-begin", "pre-commit", "post-commit-pre-ack",
           "after-staging", "after-put", "after-verify")
@@ -30,7 +32,8 @@ class _UsageParser(argparse.ArgumentParser):
 def main() -> int:
     ap = _UsageParser(description="crash-injection helper (S3 + P3-01 + P3-02)")
     ap.add_argument("--command", default="record_event",
-                    choices=["record_event", "import_source", "create_highlight"])
+                    choices=["record_event", "import_source", "create_highlight",
+                             "extract_source"])
     ap.add_argument("--point", required=True, choices=POINTS)
     ap.add_argument("--owner", required=True)
     ap.add_argument("--actor", default="owner")
@@ -59,6 +62,9 @@ def main() -> int:
         rc = import_source(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                            idem_key=a.idem_key, title=a.title, work_id=a.work_id,
                            file=a.file, media_type=a.media_type, crash_at=a.point)
+    elif a.command == "extract_source":
+        rc = extract_source(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                            idem_key=a.idem_key, source_id=a.source_id, crash_at=a.point)
     else:
         rc = create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                               idem_key=a.idem_key, source_id=a.source_id,

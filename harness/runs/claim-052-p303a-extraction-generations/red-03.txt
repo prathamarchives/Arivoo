@@ -1,0 +1,8 @@
+FAIL EXT-14: the deadlock-race loser: ARV-EXT-006, the building row persists (a race is never a failed generation); the same-key retry completes it
+FAIL EXT-15: the same-key replay of a FAILED generation: exit 1 + the recorded reason, ZERO new rows — never a silent ACK-success
+RED — 2 broken case(s): EXT-14, EXT-15
+(observed at dc76e29 — the #87 CodeRabbit round 2's two findings: the pre-fix
+ tree sends the deadlock loser to the generic SQL-error branch (the generation
+ marked failed — a permanent state for a transient race) and answers the
+ same-key replay of a failed generation with ACK status=replayed exit 0 — a
+ silent success for a recorded failure. The repairs land after this RED)

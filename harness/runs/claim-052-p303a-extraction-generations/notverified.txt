@@ -1,0 +1,78 @@
+NOT VERIFIED — the honest limits of CLAIM-052 / P3-03a (the extraction
+generations; LAW-04; never empty-by-omission)
+
+WHAT THIS SLICE PROVES, ON WHAT STACK: the derived generation machine
+(building -> current/failed complete-or-failed; the versioned lineage with
+superseded retained; the crash matrix; the same-key resume/replay; the
+disposable §2.9 conventions; the owner isolation; the deadlock class on the
+SQLSTATE code) GREEN in the suite EXT-01..17
+on the rig's user-space PostgreSQL 17 (loopback, trust auth) — the five-check
+CI run at the pushed head is the walls' verification of the pushed tree
+(INT-104): no in-file result covers the pushed head itself.
+
+THE REPLAY VOCABULARY (the SEV round's F5, RESOLVED by the #87 CodeRabbit
+round 2): a same-key retry of a FAILED generation now answers exit 1 with the
+recorded reason (EXT-15 — never a silent success); a superseded generation's
+replay still answers exit 0 with state=superseded (it completed once, then was
+displaced — the recorded outcome is honest); the CALLER reads the state field
+for the displaced class.
+
+THE SIZE-CAPPED SPLIT (F3): NOT implemented and NOT required by the RTM
+freeze — an over-long single block yields ONE passage (the SEV probe: a 2 MB
+paragraph -> 1|0|2097153); routed to the read-path/indexing slices' own
+bounded work if the corpus ever needs it.
+
+THE TYPED STALE REPORTING (F4): the SUBSTRATE is proven (the generation's
+input_digest binds the source row it was built from; EXT-09); the typed
+stale-state QUERY surface (reporting a mismatch as a named state) is the read
+path's own slice — never claimed here.
+
+THE NUL CLASS IN THE SPINE'S OWN LITERAL PATHS (F1's sibling): the psql
+C-string boundary exists for EVERY _q()-built literal — record_event's payload
+and import_source's title carry the same pre-existing class (not this slice's
+regression; THIS slice's path is guarded by ARV-EXT-005 and pinned RED-first).
+Routed as the spine's named follow-up (its own bounded slice, never silently
+dropped).
+
+THE MEDIA-TYPE GATE: an application/pdf whose bytes decode as UTF-8 extracts
+cleanly — the boundary is the DECODE by design (P3-01's convention, the SEV
+round's H2 probe); a media-type allowlist is NOT this freeze's rule.
+
+THE SPLITTER'S DOCUMENTED EDGES (not suite-pinned): a trailing heading with
+no following content block is its own passage; a leading blank-line prefix
+precedes the first passage (the passages tile the CONTENT span, not
+necessarily [0, len)); both are the pinned splitter's behavior — verified by
+the SEV round's 24 edge probes, but the suite's fixture carries neither shape.
+
+THE CONCURRENT-LOSER PATH: the SEV round's live races (4 concurrent process
+races + 2 concurrent same-key resumes: single-current held, the loser
+ARV-CMD-011 with zero effect) are the evidence; the DEADLOCK class is now
+pinned deterministically on the CODE channel (EXT-14 the genuine 40P01,
+EXT-16 the localized arm, EXT-17 the impostor arm — the #87 round 3), but
+a true multi-process in-suite race case is not pinned (the suite is serial by
+design).
+
+THE LOCALIZED DUP-KEY LABEL (the #87 round 3's honest boundary): extract's
+classifier routes the 23505 CODE to the spine's 011/replay classes (never
+_mark_failed); on a LOCALIZED rig the spine's English _DUP text may miss and
+the honest ARV-CMD-010 'unrecognized' prints instead of 011 — the same exit,
+the same same-key-retry repair, never a wrong verdict and never a failed row
+(the pre-fix tree was WORSE: a localized dup-key landed in _mark_failed as a
+permanent failure). The spine's own default-verbosity text classes are its
+bounded follow-up, never this slice's.
+
+THE SEV REVIEWER'S REMOTE OBSERVATIONS: the reviewer's sandbox was GitHub-API
+rate-limited — the CLAIM-051 close-row merge facts (0ce7077, run 40291330001)
+were git-verified by the reviewer (the merge commit + the branch list) and the
+API observations recorded in the close row are the builder's own live reads.
+
+THE MERGE (D-042): the single-actor 405 bar + the recorded flip path reproduce
+live at the merge — the protection restored and re-read after.
+
+THE SEV PROBES' EVIDENCE FORM (the #87 round-2 residual finding, read at this
+session's merge gate after the inter-session gap): the reviewer's concurrency
+and NUL probes are recorded as the SEV chain's typed summaries (sev.json's
+reviewer_context/review_summary + record 43 §4) — the round reports as
+received; they are NOT replayable suite run records (the suite is serial by
+design), and the probe-by-probe transcripts are the reviewer's own artifacts,
+summarized in the chain — a run record is cited only for what it records.

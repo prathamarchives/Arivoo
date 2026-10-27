@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-052-p303a-extraction-generations",
   "base_sha": "0ce707741cc554eca4a4e18cb8acc472c122d39c",
-  "reviewed_diff_sha256": "31a67ce8ff4b344d44c21c37d0acaecd362edbfecdb9570cf1bce605b06140ed",
+  "reviewed_diff_sha256": "434a796a07e9587ae6b4f51eec95b4b1d73efc44ed1d126c7c7196d19e53d63e",
   "intent_ids": [
     "INT-127",
     "INT-131",
@@ -138,7 +138,7 @@
       "severity": "P2",
       "status": "resolved",
       "what": "the deadlock classification matched the MESSAGE TEXT 'deadlock detected' — both directions misroute: a genuine SQLSTATE 40P01 with a localized message falls to the generic SQL-error branch (the generation PERMANENTLY failed over a transient race), while a P0001 impostor carrying the text is granted retryability (the row stays building forever, no failure recorded)",
-      "resolution": "fixed RED-first (red-04.txt at 4ee740e): the extraction session runs psql at VERBOSITY=verbose so a dead session's drained stderr carries 'ERROR:  <SQLSTATE>: <message>'; the classifier matches the CODE — 40P01 the retryable ARV-EXT-006 (EXT-16 the localized arm, the same-key retry completes it), any other code the named mid-build failure ARV-EXT-003 (EXT-17 the impostor arm, the code visible in the recorded cause), 23505 delegated to the spine's 011/replay classes; EXT-14's trigger hardened to raise the GENUINE 40P01"
+      "resolution": "fixed RED-first (red-04.txt at 4ee740e): the extraction session sets psql's VERBOSITY=verbose by session command at open (\\set VERBOSITY verbose — the spine's Session untouched, every other caller byte-identical) so a dead session's drained stderr carries 'ERROR:  <SQLSTATE>: <message>'; the classifier matches the CODE — 40P01 the retryable ARV-EXT-006 (EXT-16 the localized arm, the same-key retry completes it), any other code the named mid-build failure ARV-EXT-003 (EXT-17 the impostor arm, the code visible in the recorded cause), 23505 delegated to the spine's 011/replay classes; EXT-14's trigger hardened to raise the GENUINE 40P01; the SIZE-002 gate's 425>400 refusal answered by the compression back to 400/400"
     }
   ],
   "not_verified": [

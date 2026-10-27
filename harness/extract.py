@@ -11,9 +11,7 @@ instantiation — the suite EXT-01..17 pins every transition):
                                                it; a NEW-key extract supersedes it]
   building --failure--> failed                [the named ARV-EXT-003; the previous
                                                current generation STAYS current]
-  building --deadlock race--> building         [the retryable ARV-EXT-006 — the
-                                               SQLSTATE 40P01 CODE classifies
-                                               (never the message text), zero
+  building --deadlock race--> building         [the retryable ARV-EXT-006 — zero
                                                effect, the loser retries]
   current --new extraction, SAME source--> current(new) + superseded(old)
   current --new edition, a NEW source row--> the new source's generation only —
@@ -41,15 +39,11 @@ evidence, never a guess; each passage digest re-hashes its text.
 The shared spine pieces (Session, _q, _sess_row, canonical_body, _dead_exit)
 come from harness.commands — ONE session machinery (the P3-01 DRY); what
 differs is the protocol (no command_log), never the session.
-
 Exit 0 = acked (committed, or the replay of a current/superseded generation);
 exit 1 = refused (named — including the same-key replay of a FAILED generation,
 which answers the recorded failure, never a silent success); exit 2 = crashed
 (no ack — the crash injector's vocabulary). A deadlock race loser is the
-retryable ARV-EXT-006, classified by the SQLSTATE 40P01 CODE read from the
-session's verbose-verbosity stderr — never the message text (a localized real
-deadlock and a P0001 impostor's text both misroute a text matcher, the #87
-round-3 finding; the building row persists — a race is never a failed
+retryable ARV-EXT-006 (the building row persists — a race is never a failed
 generation).
 """
 import argparse
@@ -70,10 +64,7 @@ EXTRACTOR_CONFIG = json.dumps({"block": "blank-line", "encoding": "utf-8",
                                "heading": "attach-forward", "tiling": "contiguous"},
                               sort_keys=True, separators=(",", ":"))
 _HEADING = re.compile(r"^#{1,6}(?:\s|$)")
-_SQLSTATE = re.compile(r"^ERROR:\s+([0-9A-Z]{5}):", re.M)  # the verbose-verbosity channel: a
-# dead session's drained stderr carries 'ERROR:  <SQLSTATE>: <message>' — the CODE
-# classifies (40P01 the retryable race), never the message text; the anchor at
-# line start means a message QUOTING a code mid-line can never impersonate one
+_SQLSTATE = re.compile(r"^ERROR:\s+([0-9A-Z]{5}):", re.M)  # the verbose channel: 'ERROR:  <SQLSTATE>: <msg>'
 
 
 def split_passages(text: str) -> list:
@@ -82,9 +73,7 @@ def split_passages(text: str) -> list:
     heading with NO following content block is its own passage — the tiling
     keeps coverage exact); the passages TILE the content span (each end_off ==
     the next start_off; the last ends at len(text); a leading blank-line prefix
-    precedes the first passage).
-    Returns [(start, end), ...]; empty when the text carries no content block
-    (the ARV-EXT-001 class)."""
+    precedes the first passage). Empty when no content block (ARV-EXT-001)."""
     n = len(text)
 
     def _line_end(k):  # the index just past the line starting at k
@@ -186,22 +175,19 @@ def _mark_failed(*, db, owner, gen_id, cause, idem_key) -> int:
 
 def _dead_classify(sess: "Session", *, db, owner, gen_id, idem_key) -> int:
     """A dead completing session: the DRAINED observed cause classifies — a
-    DEADLOCK (the SQLSTATE 40P01 CODE itself, read from the session's
-    verbose-verbosity stderr — locale-independent, never the message text: a
-    localized real deadlock and a P0001 impostor's text both misroute a text
-    matcher, the #87 round-3 finding) is the retryable conflict ARV-EXT-006
-    (the rolled-back completion leaves the building row — a race is never a
-    failed generation, the #87 round-2 finding); any OTHER server error code
-    (outside the duplicate-key 23505 class the spine answers) is the named
-    mid-build failure (ARV-EXT-003, the failed row); the spine's death classes
-    (011/012/010) answer the rest; a live stall is the honest ARV-CMD-010."""
+    DEADLOCK (the SQLSTATE 40P01 CODE from the session's verbose-verbosity
+    stderr — locale-independent, never the message text: a localized real
+    deadlock and a P0001 impostor's text both misroute a text matcher) is the
+    retryable ARV-EXT-006 (the rolled-back completion leaves the building row
+    — a race is never a failed generation); any OTHER server error code
+    (outside the 23505 duplicate-key class the spine answers) is the named
+    mid-build failure ARV-EXT-003; the spine's classes answer the rest."""
     cause = sess.dead_reason()
     codes = _SQLSTATE.findall(cause or "")
     if "40P01" in codes:
         print("FAIL ARV-EXT-006: the completion lost a deadlock race with a concurrent extraction "
-              "of the same source (SQLSTATE 40P01 — the code, never the message text) — the "
-              "transaction rolled back, ZERO effect; the building row persists (the same-key "
-              "retry resumes it, a new key supersedes it)")
+              "of the same source — the transaction rolled back, ZERO effect; the building row "
+              "persists (the same-key retry resumes it, a new key supersedes it)")
         print("      repair: retry the SAME idempotency key — the building row is waiting; a race "
               "is never a failed generation")
         return 1
@@ -280,10 +266,9 @@ def extract_source(*, db, owner, actor, client_id, idem_key, source_id,
     body_hash = hashlib.sha256(canonical_body(command="extract_source", client_id=client_id,
                                                owner_scope=owner, actor=actor,
                                                payload=body).encode()).hexdigest()
-    # the extraction's session runs psql at VERBOSITY=verbose: a dead session's
-    # drained stderr carries 'ERROR:  <SQLSTATE>: <message>' — the CODE classifies
-    # (40P01 the retryable race), never the message text (#87 round 3)
-    sess = Session(db, "arv_app", owner, err_verbosity="verbose")
+    # psql's verbose format: a dead session's stderr carries 'ERROR:  <SQLSTATE>: <msg>'
+    sess = Session(db, "arv_app", owner)
+    sess.send("\\set VERBOSITY verbose")  # the CODE classifies, never the text
     try:
         digest = _sess_row(sess, f"SELECT digest || '|' FROM arv.source "
                                  f"WHERE id={_q(source_id)};").split("|")[0]

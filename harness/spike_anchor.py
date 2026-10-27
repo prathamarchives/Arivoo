@@ -85,16 +85,46 @@ def _highlight(key, source_id, start, end):
     return r.stdout.strip()
 
 
+class _SpikeFailure(RuntimeError):
+    """A MEASUREMENT-INPUT failure (the #88 round-2 finding): a nonzero
+    resolver exit, malformed output, invalid JSON, or a failed spike-side DB
+    read is NEVER an unresolved answer — it aborts the measurement with the
+    named ARV-SPIKE-002, never a silent None counted into the metrics."""
+
+
+def _dbq(sql: str) -> str:
+    """One spike-side verification read (arv_read, the audit role). A failed
+    read is a measurement-input failure — raised, never an empty string that
+    would silently mislabel every generation comparison below."""
+    r = subprocess.run(["psql", "-X", "-A", "-t", "-U", "arv_read", "-d", DB, "-c", sql],
+                       capture_output=True, text=True, timeout=60)
+    if r.returncode != 0:
+        raise _SpikeFailure(
+            f"ARV-SPIKE-002: the spike's own DB read failed — {r.stderr.strip()[:160]}")
+    return r.stdout.strip()
+
+
 def _resolve(anchor_id):
     p = _cli(str(REPO / "harness" / "query.py"), "resolve-anchor", "--owner", "A",
              "--id", anchor_id)
-    lines = [ln for ln in p.stdout.splitlines() if ln.strip()]
-    if p.returncode != 0 or len(lines) != 1:
-        return None
+    if p.returncode != 0:
+        raise _SpikeFailure(
+            f"ARV-SPIKE-002: the resolver exited {p.returncode} for {anchor_id} — "
+            f"a measurement-input failure, never an unresolved answer: {p.stderr.strip()[:160]}")
+    # newline-only framing (the query.py side's own contract — one JSON line
+    # per answer; a Unicode line separator in a future answer shape must never
+    # corrupt the measurement read either)
+    lines = [ln for ln in p.stdout.split("\n") if ln.strip()]
+    if len(lines) != 1:
+        raise _SpikeFailure(
+            f"ARV-SPIKE-002: the resolver's output for {anchor_id} is not ONE line "
+            f"({len(lines)}) — a malformed measurement input, never an unresolved answer")
     try:
         return json.loads(lines[0])
-    except json.JSONDecodeError:
-        return None
+    except json.JSONDecodeError as e:
+        raise _SpikeFailure(
+            f"ARV-SPIKE-002: the resolver's answer for {anchor_id} is invalid JSON ({e}) — "
+            "a malformed measurement input, never an unresolved answer")
 
 
 def _anchors_for(sid, text, tag):
@@ -132,44 +162,64 @@ def main() -> int:
         m = {"corpus": "synthetic", "documents": len(CORPUS), "anchors": 0,
              "m1_initial_resolved": 0, "m2_after_reextraction_resolved": 0,
              "m3_after_new_edition_resolved_own_version": 0, "silent_retargets": 0}
-        for i, (title, text) in enumerate(CORPUS, 1):
-            d = tempfile.mkdtemp(prefix="arv-spike-src-")
-            f = pathlib.Path(d) / "doc.md"
-            f.write_text(text, encoding="utf-8")
-            p = _import(f"spike-src-{i}", title, str(f))
-            work_id = next((ln.split("work_id=")[1].split()[0] for ln in p.stdout.splitlines()
-                            if "work_id=" in ln), "")
-            sid = next((ln.split("result_ref=")[1].split()[0] for ln in p.stdout.splitlines()
-                        if "result_ref=" in ln), "")
-            if _extract(f"spike-ext-{i}", sid).returncode != 0:
-                print(f"FAIL ARV-SPIKE-001: the spike's substrate failed at document {i}")
-                return 1
-            anchors = _anchors_for(sid, text, f"{i}")
-            m["anchors"] += len(anchors)
-            for aid in anchors:                      # M1: the initial resolution
-                r = _resolve(aid)
-                m["m1_initial_resolved"] += 1 if (r or {}).get("state") == "resolved" else 0
-            if _extract(f"spike-ext-{i}-b", sid).returncode != 0:   # M2: the re-extraction
-                print(f"FAIL ARV-SPIKE-001: the spike's re-extraction failed at document {i}")
-                return 1
-            for aid in anchors:
-                r = _resolve(aid)
-                m["m2_after_reextraction_resolved"] += 1 if (r or {}).get("state") == "resolved" else 0
-            f2 = pathlib.Path(d) / "doc2.md"          # M3: the new EDITION of the same work
-            f2.write_text(text + "\na late paragraph arrives in edition two.\n", encoding="utf-8")
-            p2 = _import(f"spike-src-{i}-v2", None, str(f2), work_id=work_id)
-            sid2 = next((ln.split("result_ref=")[1].split()[0] for ln in p2.stdout.splitlines()
-                         if "result_ref=" in ln), "")
-            if sid2 and _extract(f"spike-ext-{i}-v2", sid2).returncode == 0:
+        try:
+            for i, (title, text) in enumerate(CORPUS, 1):
+                d = tempfile.mkdtemp(prefix="arv-spike-src-")
+                f = pathlib.Path(d) / "doc.md"
+                f.write_text(text, encoding="utf-8")
+                p = _import(f"spike-src-{i}", title, str(f))
+                work_id = next((ln.split("work_id=")[1].split()[0] for ln in p.stdout.splitlines()
+                                if "work_id=" in ln), "")
+                sid = next((ln.split("result_ref=")[1].split()[0] for ln in p.stdout.splitlines()
+                            if "result_ref=" in ln), "")
+                if _extract(f"spike-ext-{i}", sid).returncode != 0:
+                    print(f"FAIL ARV-SPIKE-001: the spike's substrate failed at document {i}")
+                    return 1
+                anchors = _anchors_for(sid, text, f"{i}")
+                m["anchors"] += len(anchors)
+                own_gen = _dbq(f"SELECT id FROM arv.extraction_generation "
+                               f"WHERE source_id='{sid}' AND state='current';")
+                for aid in anchors:                      # M1: the initial resolution
+                    r = _resolve(aid)
+                    m["m1_initial_resolved"] += 1 if (r or {}).get("state") == "resolved" \
+                        and r.get("generation_id") == own_gen else 0
+                if _extract(f"spike-ext-{i}-b", sid).returncode != 0:   # M2: the re-extraction
+                    print(f"FAIL ARV-SPIKE-001: the spike's re-extraction failed at document {i}")
+                    return 1
+                own_gen = _dbq(f"SELECT id FROM arv.extraction_generation "
+                               f"WHERE source_id='{sid}' AND state='current';")
                 for aid in anchors:
                     r = _resolve(aid)
-                    ok = (r or {}).get("state") == "resolved" and r.get("source_id") == sid
-                    m["m3_after_new_edition_resolved_own_version"] += 1 if ok else 0
-                    if r and r.get("state") == "resolved" and r.get("source_id") != sid:
-                        m["silent_retargets"] += 1     # SYS-05's forbidden class — must stay 0
-            else:
-                print(f"FAIL ARV-SPIKE-001: the spike's new-edition leg failed at document {i}")
-                return 1
+                    m["m2_after_reextraction_resolved"] += 1 if (r or {}).get("state") == "resolved" \
+                        and r.get("generation_id") == own_gen else 0
+                f2 = pathlib.Path(d) / "doc2.md"          # M3: the new EDITION of the same work
+                f2.write_text(text + "\na late paragraph arrives in edition two.\n", encoding="utf-8")
+                p2 = _import(f"spike-src-{i}-v2", None, str(f2), work_id=work_id)
+                sid2 = next((ln.split("result_ref=")[1].split()[0] for ln in p2.stdout.splitlines()
+                             if "result_ref=" in ln), "")
+                if sid2 and _extract(f"spike-ext-{i}-v2", sid2).returncode == 0:
+                    # the retarget DETECTOR is the generation comparison (the #88
+                    # round-2 finding): the answer's echoed source_id is the
+                    # anchor row's OWN value by construction — structurally
+                    # always-equal, incapable of detecting a wrong-generation
+                    # resolution. The answer's generation_id is compared against
+                    # the anchor's OWN version's CURRENT generation instead.
+                    own_gen = _dbq(f"SELECT id FROM arv.extraction_generation "
+                                   f"WHERE source_id='{sid}' AND state='current';")
+                    for aid in anchors:
+                        r = _resolve(aid)
+                        ok = (r or {}).get("state") == "resolved" and r.get("generation_id") == own_gen
+                        m["m3_after_new_edition_resolved_own_version"] += 1 if ok else 0
+                        if r and r.get("state") == "resolved" and r.get("generation_id") != own_gen:
+                            m["silent_retargets"] += 1     # SYS-05's forbidden class — must stay 0
+                else:
+                    print(f"FAIL ARV-SPIKE-001: the spike's new-edition leg failed at document {i}")
+                    return 1
+        except _SpikeFailure as e:
+            print(f"FAIL {e}")
+            print("      repair: a measurement-input failure is never an unresolved answer — the "
+                  "resolver's contract is the typed states; a failure outside them aborts the measurement")
+            return 1
         print(json.dumps(m, ensure_ascii=False))
         return 0
     finally:

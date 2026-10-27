@@ -58,13 +58,18 @@ PASS_SQL = ("SELECT row_to_json(t)::text FROM (SELECT id, ordinal, start_off, en
 
 
 def _read(db: str, owner: str, sql: str) -> list:
-    """One owner-scoped read: the GUC + the SELECT in ONE batch (RLS enforced)."""
+    """One owner-scoped read: the GUC + the SELECT in ONE batch (RLS enforced).
+    Row framing is NEWLINE-ONLY (the ANC-10 contract): PostgreSQL emits one
+    JSON row per line, and row_to_json escapes control characters below
+    U+0020 ONLY — U+2028/U+2029/U+0085 travel raw inside the JSON string, so a
+    str.splitlines() reader would split a row on them and corrupt the framing
+    (the observed pre-fix crash: JSONDecodeError 'Unterminated string')."""
     q = "'" + owner.replace("'", "''") + "'"
     r = pg.psql(f"SET app.current_owner={q}; {sql}", db=db, user="arv_app")
     if r.returncode != 0:
         print(f"FAIL ARV-QRY-002: the read failed — {r.stderr.strip()}")
         return None
-    return [ln for ln in r.out.splitlines() if ln.strip()]
+    return [ln for ln in r.out.split("\n") if ln.strip()]
 
 
 def _refuse(id_: str) -> int:

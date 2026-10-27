@@ -444,7 +444,7 @@ def main() -> int:
     if FAILS:
         print(f"RED — {len(FAILS)} broken case(s): {', '.join(FAILS)}")
         return 1
-    print("GREEN — the anchor resolution holds end-to-end (ANC-01..09): typed, version-bound, never a nearest-match")
+    print("GREEN — the anchor resolution holds end-to-end (ANC-01..10): typed, version-bound, never a nearest-match")
     return 0
 
 

@@ -50,10 +50,11 @@ Cases (the ANC registry — this file is the contract's declaration):
          anchor's source_digest -> unresolved with the named cause
          (stale-generation) — the typed read-path stale reporting, exactly
          the surface routed to this slice
-  ANC-04 the drifted tiling: a planted generation whose passages do NOT
-         cover the anchor's offsets + a UNIQUE fallback evidence match ->
-         unresolved (location-unmatched) — the single hit is a detection
-         recorded in the answer, never a retarget
+  ANC-04 the drifted tiling: a planted generation whose passages RELOCATE
+         the anchor's evidence window to exactly ONE surviving position ->
+         unresolved (location-unmatched) with evidence_hits == 1 — the single
+         hit is a detection recorded in the answer, never a retarget (a
+         resolver that resolves-at-the-relocated-position fails here)
   ANC-05 the ambiguity class: a drifted tiling over a source with REPEATED
          identical content — the fallback evidence matches at TWO positions
          -> ambiguous with the hit count; the original anchor evidence
@@ -73,6 +74,11 @@ Cases (the ANC registry — this file is the contract's declaration):
          (the row_to_json-at-the-boundary precedent) carrying the state, the
          named cause where applicable, the passage ids, the offsets, and the
          evidence echo — machine-readable, never re-parsed prose
+  ANC-10 the row-protocol framing: PostgreSQL emits ONE JSON row per line;
+         a Unicode line separator (U+2028) inside the stored text — legal in
+         a JSON string, never escaped by row_to_json — must never corrupt the
+         row framing: the resolver answers the typed state over the intact
+         row, never a parse crash (the #88 round-2 framing finding)
 
 Run: python3 harness/tests/test_anchor.py   (exit 0 = green)
 """
@@ -263,7 +269,7 @@ def main() -> int:
               "a current generation whose input_digest differs from the anchor's source_digest: unresolved with the NAMED cause (stale-generation) — the typed read-path stale reporting the P3-03 card names (the source-hash-mismatch test)",
               "the stale detection is the read path's typed surface: the digest chain's mismatch must surface as a named unresolved cause, never silently resolve over different bytes")
 
-        # ANC-04 — the drifted tiling, no fallback hit: the honest location-unmatched
+        # ANC-04 — the drifted tiling with exactly ONE relocated evidence match: the single-hit DETECTION
         import hashlib as _hl
         fD = fresh_file("drift.md", "alpha opening paragraph text.\n\nbeta middle content.\n\ngamma closing words.\n")
         p_imp4 = import_src("anc-src-4", "Drift Book", fD)
@@ -271,10 +277,17 @@ def main() -> int:
         pd4 = extract("anc-ext-4", sid4)
         # an anchor into gamma's opening (the third block starts at 53)
         p_h4, anc4 = highlight("anc-hl-4", sid4, 53, 59)
-        # plant a drifted generation: ONE short passage covering [0, 10) only — a
-        # hypothetical future extractor's non-covering view (the size-cap class)
+        # plant a drifted generation whose ONE passage RELOCATES the anchor's
+        # full evidence window (context_before 32 + selected 6 + context_after
+        # carried to the text end = TEXTD[21:], 53 chars) to the head of the view:
+        # the tiling does not cover the anchor's offsets with the ORIGINAL bytes,
+        # the window survives in the view at EXACTLY ONE position, and the single
+        # fallback hit is a DETECTION — a resolver that retargets on one
+        # candidate fails here (the #88 round-1 finding)
+        TEXTD = pathlib.Path(fD).read_text(encoding="utf-8")
+        drift4 = TEXTD[21:]
+        d4 = _hl.sha256(drift4.encode("utf-8")).hexdigest()
         gen4 = audit(f"SELECT id FROM arv.extraction_generation WHERE source_id='{sid4}' AND state='current';")
-        d_short = _hl.sha256(b"alpha open").hexdigest()
         pl4 = plant(f"UPDATE arv.extraction_generation SET state='superseded' WHERE id='{gen4}'; "
                     f"INSERT INTO arv.extraction_generation (id, source_id, ordinal, state, extractor, "
                     f"extractor_config, input_digest, idempotency_key, body_hash, owner_scope, actor, "
@@ -285,7 +298,7 @@ def main() -> int:
         gen4b = audit(f"SELECT id FROM arv.extraction_generation WHERE source_id='{sid4}' AND state='current';")
         pl4b = plant(f"INSERT INTO arv.passage (id, generation_id, ordinal, start_off, end_off, text, "
                      f"digest, owner_scope, actor, run_id, input_hash, created_at) "
-                     f"SELECT gen_random_uuid(), '{gen4b}', 1, 0, 10, 'alpha open', '{d_short}', "
+                     f"SELECT gen_random_uuid(), '{gen4b}', 1, 0, {len(drift4)}, '{drift4}', '{d4}', "
                      f"owner_scope, actor, run_id, input_hash, now() "
                      f"FROM arv.extraction_generation WHERE id='{gen4b}';")
         r4 = resolve(anc4)
@@ -293,10 +306,11 @@ def main() -> int:
         ok4 = (pd4.returncode == 0 and pl4.returncode == 0 and pl4b.returncode == 0
                and a4 is not None and a4.get("state") == "unresolved"
                and "location-unmatched" in (a4.get("cause") or "")
-               and int(a4.get("evidence_hits") or 0) == 0)
+               and int(a4.get("evidence_hits") or 0) == 1
+               and a4.get("start_off") == 53 and a4.get("end_off") == 59)
         check("ANC-04", ok4,
-              "a drifted tiling (the planted generation does not cover the anchor's offsets) over UNIQUE content: unresolved with the NAMED cause (location-unmatched) and the fallback evidence found NOWHERE in the current generation — the honest miss, never a retarget",
-              "a nearest-match retarget is the forbidden behavior (SYS-05): the fallback must count its hits and report zero-or-fewer-than-two as the named unresolved, never as a resolved-at-new-location")
+              "a drifted tiling whose view carries the anchor's evidence window at EXACTLY ONE relocated position: unresolved with the NAMED cause (location-unmatched) and evidence_hits == 1 — the single hit is a DETECTION recorded in the answer, the anchor's offsets echoed unchanged, never a resolved-at-new-location",
+              "a nearest-match retarget is the forbidden behavior (SYS-05): the fallback's single candidate must stay an unresolved detection with the hit count — never a retarget, never a first-hit resolve")
 
         # ANC-05 — the ambiguity class: the fallback evidence matches at TWO positions
         # (four identical blocks: the anchor's 49-char evidence window repeats; the
@@ -348,31 +362,46 @@ def main() -> int:
         pd6 = extract("anc-ext-6", sid6)
         r6 = resolve(anc_id)  # the ORIGINAL anchor, after the new edition exists
         a6 = typed(r6)
+        own6 = audit(f"SELECT id FROM arv.extraction_generation WHERE source_id='{sid}' AND state='current';")
+        new6 = audit(f"SELECT id FROM arv.extraction_generation WHERE source_id='{sid6}' AND state='current';")
         ok6 = (pd6.returncode == 0 and a6 is not None and a6.get("state") == "resolved"
-               and a6.get("source_id") == sid)
+               and a6.get("generation_id") == own6 and own6 != new6)
         check("ANC-06", ok6,
-              "a NEW source version (a new edition row of the same work) exists and is extracted: the ORIGINAL anchor still resolves against ITS OWN version — never silently retargeted across versions",
-              "the anchor binds the source VERSION (the row); a new edition is a new row and must never move or re-scope an existing anchor (SYS-05's first clause)")
+              "a NEW source version (a new edition row of the same work) exists and is extracted: the ORIGINAL anchor still resolves against ITS OWN version's CURRENT generation (the answer's generation_id is the own version's, never the new edition's) — never silently retargeted across versions",
+              "the anchor binds the source VERSION (the row); a new edition is a new row and must never move or re-scope an existing anchor (SYS-05's first clause) — the generation_id comparison is the retarget detector, the echoed source_id alone is not")
 
         # ANC-07 — the re-extraction stability: a new generation, the same version
         pe7 = extract("anc-ext-7", sid)
         r7 = resolve(anc_id)
         a7 = typed(r7)
+        # the generation integrity pin: the answer must carry the CURRENT
+        # generation's id and its passage ids — never a superseded generation's
+        # (stale IDs with correct offsets are exactly the accepted-class risk)
+        own7 = audit(f"SELECT id FROM arv.extraction_generation WHERE source_id='{sid}' AND state='current';")
+        pg7 = audit(f"SELECT string_agg(p.id::text, ',' ORDER BY p.ordinal) FROM arv.passage p "
+                   f"JOIN arv.extraction_generation g ON p.generation_id=g.id "
+                   f"WHERE g.source_id='{sid}' AND g.state='current' "
+                   f"AND p.start_off < 121 AND p.end_off > 97;")
         ok7 = (pe7.returncode == 0 and a7 is not None and a7.get("state") == "resolved"
+               and a7.get("generation_id") == own7 and a7.get("passage_ids") == pg7
                and a7.get("start_off") == 97 and a7.get("end_off") == 121)
         check("ANC-07", ok7,
-              "a NEW generation over the SAME source version (a new ordinal, byte-identical passages): the anchor still resolves; the passage ids are the NEW generation's (the rows are disposable), the OFFSETS and the evidence never move",
-              "the re-extraction stability (the cosmetic re-save class): the derived rows may be rebuilt, the anchor's location evidence is the stable contract")
+              "a NEW generation over the SAME source version (a new ordinal, byte-identical passages): the anchor still resolves and the answer carries the CURRENT generation's id and its passage ids (compared against the current generation's rows — a superseded generation's IDs with correct offsets FAIL here), the OFFSETS and the evidence never move",
+              "the re-extraction stability (the cosmetic re-save class): the derived rows may be rebuilt, the anchor's location evidence is the stable contract — but the answer must never serve a superseded generation's passage IDs")
 
-        # ANC-08 — the owner boundary + the absent id: the SAME refusal
+        # ANC-08 — the owner boundary + the absent id: the SAME refusal, byte-compared
         rB = resolve(anc_id, owner="B")
         rX = resolve("00000000-0000-0000-0000-000000000000")
+        _absent_id = "00000000-0000-0000-0000-000000000000"
+        normB = (rB.stdout.replace(anc_id, "<ID>"), rB.stderr)
+        normX = (rX.stdout.replace(_absent_id, "<ID>"), rX.stderr)
         ok8 = (rB.returncode == 1 and "ARV-QRY-001" in rB.stdout
                and rX.returncode == 1 and "ARV-QRY-001" in rX.stdout
-               and typed(rB) is None and typed(rX) is None)
+               and typed(rB) is None and typed(rX) is None
+               and normB == normX)
         check("ANC-08", ok8,
-              "another owner's anchor and an absent id are the SAME ARV-QRY-001 refusal — the typed states never leak another owner's object existence",
-              "the read path's owner boundary (RTM §2.10): absent and out-of-scope are indistinguishable at the resolution surface")
+              "another owner's anchor and an absent id are the SAME ARV-QRY-001 refusal — the full stdout (the supplied ids normalized) and the stderr compare BYTE-EQUAL: the typed states never leak another owner's object existence (no anchor-existence details beyond the echoed id itself)",
+              "the read path's owner boundary (RTM §2.10): absent and out-of-scope are indistinguishable at the resolution surface — a differing refusal shape would be an existence side channel (CWE-203)")
 
         # ANC-09 — the output contract: ONE structured JSON line per typed answer
         ok9 = all(
@@ -383,6 +412,32 @@ def main() -> int:
         check("ANC-09", ok9,
               "every typed answer is ONE structured JSON line (resolved/unresolved/ambiguous) at exit 0 — machine-readable at the boundary, the named cause where applicable, never re-parsed prose",
               "the typed answers are a contract for every future consumer (P3-04/05's bookmark/revision surfaces): one JSON line per answer, the row_to_json-at-the-boundary precedent")
+
+        # ANC-10 — the row-protocol framing: a Unicode line separator in stored
+        # text never corrupts the one-JSON-row-per-line protocol (U+2028 is legal
+        # in a JSON string and row_to_json does NOT escape it; str.splitlines()
+        # splits on it — the #88 round-2 finding: the resolver must read rows by
+        # NEWLINE-ONLY framing, never Unicode line-separator splitting)
+        SEP = "\u2028"
+        T10 = ("first paragraph carries a line separator " + SEP + " inside the line.\n\n"
+               "second paragraph closes the measurement.\n")
+        fJ = fresh_file("u2028.md", T10)
+        p_imp10 = import_src("anc-src-10", "U+2028 Book", fJ)
+        sid10 = ack_field(p_imp10, "result_ref")
+        pe10 = extract("anc-ext-10", sid10)
+        u10 = T10.index(SEP)
+        # the anchor sits just past the separator: BOTH the anchor row's
+        # context_before AND the passage's text carry U+2028 — whichever row the
+        # protocol mis-frames, the pre-fix crash reproduces
+        p_h10, anc10 = highlight("anc-hl-10", sid10, u10 + 1, u10 + 9)
+        r10 = resolve(anc10)
+        a10 = typed(r10)
+        ok10 = (pe10.returncode == 0 and a10 is not None
+                and a10.get("state") == "resolved"
+                and a10.get("start_off") == u10 + 1 and a10.get("end_off") == u10 + 9)
+        check("ANC-10", ok10,
+              "a U+2028 line separator inside the stored passage text AND the anchor's context evidence: the psql row protocol frames ONE-JSON-row-per-line by NEWLINE-ONLY splitting — the separator never breaks the row, and the resolver answers the typed resolved state over the intact row (exit 0, ONE JSON line), never a parse crash",
+              "the row protocol is newline-delimited by PostgreSQL's own contract (row_to_json escapes control characters below U+0020 only — U+2028/U+2029/U+0085 travel RAW): a reader that splits rows on Unicode line separators will corrupt the framing; read rows by newline only")
     finally:
         if not os.environ.get("ARV_KEEP_DB"):
             pg.drop_scratch_db(DB)

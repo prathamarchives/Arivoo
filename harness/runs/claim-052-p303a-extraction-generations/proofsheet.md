@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-052-p303a-extraction-generations (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): af88591ce6b70cbc3cb713b8d4f41f17f0ffd12f
-- generated (last record's timestamp): 2026-10-26T11:54:45.004592+00:00
-- run records: 19
+- commit (last run record's): c5fd6f8692337d5f3d85e05e23a98d8f2abec4dd
+- generated (last record's timestamp): 2026-10-27T06:52:40.633416+00:00
+- run records: 26
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 a7423c018d2f4085 · 2026-10-26T10:59:46.443439+00:00
@@ -24,6 +24,13 @@
 - `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 9ebaf9658a136f75 · 2026-10-26T11:48:36.758921+00:00
 - `make verify` -> exit 0 · output sha256 4d630d7215c26066 · 2026-10-26T11:51:48.800166+00:00
 - `python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main` -> exit 0 · output sha256 2b4464f846eefe02 · 2026-10-26T11:54:45.004592+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-27T06:13:43.731244+00:00
+- `make verify` -> exit 0 · output sha256 6d870a1afbf674a7 · 2026-10-27T06:17:15.184227+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-27T06:34:54.571549+00:00
+- `make verify` -> exit 0 · output sha256 9eb6653415a3d90a · 2026-10-27T06:38:13.472225+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-27T06:46:11.042821+00:00
+- `make verify` -> exit 0 · output sha256 c9c1c31e41205842 · 2026-10-27T06:49:29.878784+00:00
+- `python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main` -> exit 0 · output sha256 5afcb725423af9a5 · 2026-10-27T06:52:40.633416+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-052 / P3-03a (the extraction
@@ -31,7 +38,8 @@
 - WHAT THIS SLICE PROVES, ON WHAT STACK: the derived generation machine
 - (building -> current/failed complete-or-failed; the versioned lineage with
 - superseded retained; the crash matrix; the same-key resume/replay; the
-- disposable §2.9 conventions; the owner isolation) GREEN in the suite EXT-01..13
+- disposable §2.9 conventions; the owner isolation; the deadlock class on the
+- SQLSTATE code) GREEN in the suite EXT-01..17
 - on the rig's user-space PostgreSQL 17 (loopback, trust auth) — the five-check
 - CI run at the pushed head is the walls' verification of the pushed tree
 - (INT-104): no in-file result covers the pushed head itself.
@@ -66,9 +74,18 @@
 - THE CONCURRENT-LOSER PATH: the SEV round's live races (4 concurrent process
 - races + 2 concurrent same-key resumes: single-current held, the loser
 - ARV-CMD-011 with zero effect) are the evidence; the DEADLOCK class is now
-- pinned deterministically (EXT-14 — the planted deadlock-raising trigger), but
+- pinned deterministically on the CODE channel (EXT-14 the genuine 40P01,
+- EXT-16 the localized arm, EXT-17 the impostor arm — the #87 round 3), but
 - a true multi-process in-suite race case is not pinned (the suite is serial by
 - design).
+- THE LOCALIZED DUP-KEY LABEL (the #87 round 3's honest boundary): extract's
+- classifier routes the 23505 CODE to the spine's 011/replay classes (never
+- _mark_failed); on a LOCALIZED rig the spine's English _DUP text may miss and
+- the honest ARV-CMD-010 'unrecognized' prints instead of 011 — the same exit,
+- the same same-key-retry repair, never a wrong verdict and never a failed row
+- (the pre-fix tree was WORSE: a localized dup-key landed in _mark_failed as a
+- permanent failure). The spine's own default-verbosity text classes are its
+- bounded follow-up, never this slice's.
 - THE SEV REVIEWER'S REMOTE OBSERVATIONS: the reviewer's sandbox was GitHub-API
 - rate-limited — the CLAIM-051 close-row merge facts (0ce7077, run 40291330001)
 - were git-verified by the reviewer (the merge commit + the branch list) and the
@@ -77,11 +94,11 @@
 - live at the merge — the protection restored and re-read after.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: ab4e44a3b9f56b9998ba762d8499da34ae998ff3b0e465d73d00ecbad54b71d5
-- reviewed_diff_sha256: 31a67ce8ff4b344d44c21c37d0acaecd362edbfecdb9570cf1bce605b06140ed
+- report sha256: 459059f743c608e5f5c07117ba3ab76cbd739e2455d6c3d4a6c47fa2326b18e7
+- reviewed_diff_sha256: aa08a1d40f2a9196d984719f16228f5a8900e2d35b9525b1232adfc71ce0542e
 - disposition: PASS
-- findings: 4 (open P0/P1: 0)
-- not-verified entries: 8
+- findings: 5 (open P0/P1: 0)
+- not-verified entries: 9
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): f7563d790f9d29b4ddb53b0fd8e231a8d752b204cc8a086c749f06757795f2a7
+- sheet sha256 (of the content above, excluding this line): 8a8add47f920caa226b322d829ba2ea51b10e7ef7efbb0e6ad35d854582175d8

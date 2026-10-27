@@ -1,0 +1,56 @@
+RED-02 — the #88 round-1/round-2 findings' observed red at commit C (1fcfe50), the pre-implementation tree
+================================================================================================
+Observed live 2026-10-27 (the suite run + the direct probes; LAW-11 — the implementation
+repair lands AFTER this observation; this file is the failure record, never the repair's).
+
+(a) THE ANC-10 ROW-PROTOCOL FRAMING CRASH (the CodeRabbit 4386287383 finding, Minor REAL)
+    command: python3 harness/tests/test_anchor.py
+    observed exit: 1
+    the failing case: ANC-10 (the ONLY failing case at this tree — ANC-04/06/07/08's
+      amendments all PASS over the current implementation)
+    FAIL ANC-10: a U+2028 line separator inside the stored passage text AND the
+      anchor's context evidence: the psql row protocol frames ONE-JSON-row-per-line
+      by NEWLINE-ONLY splitting — the separator never breaks the row, and the
+      resolver answers the typed resolved state over the intact row, never a parse
+      crash
+    the crash detail (resolve-anchor over the U+2028 fixture, run directly):
+      resolve-anchor exit: 1
+      STDERR>                 ^^^^^^^^^^^^^^^^^^^^^^
+      STDERR> json.decoder.JSONDecodeError: Unterminated string starting at:
+              line 1 column 232 (char 231)
+    the mechanism: row_to_json escapes only control characters below U+0020, so
+      U+2028 (LINE SEPARATOR), U+2029 (PARAGRAPH SEPARATOR), and U+0085 (NEL)
+      travel RAW inside the JSON string; query.py's _read used str.splitlines(),
+      which splits on those Unicode line separators, so the anchor row (whose
+      context_before carries the U+2028) arrived as TWO fragments and
+      json.loads(rows[0]) raised the unhandled JSONDecodeError above — an
+      untyped crash in place of the typed answer or the named refusal.
+
+(b) THE SPIKE'S SILENT-None CLASS (the CodeRabbit 4386287395 finding, Minor REAL)
+    the probe: harness.spike_anchor._resolve over a resolver FAILURE (an absent
+      anchor id — query.py exits 1 with ARV-QRY-001) against a live scratch DB
+    the pre-fix observation:
+      spike._resolve(absent-id) -> None
+    the mechanism: the pre-fix _resolve converts nonzero resolver exits,
+      malformed output, and invalid JSON to None; the measurement loops then
+      count (r or {}).get("state") == "resolved" — a None is silently counted
+      as a not-resolved anchor in m1/m2/m3 and the spike exits 0 with
+      incomplete metrics. A measurement-input failure is NOT an unresolved
+      answer; the repair must make it an explicit named failure.
+
+(c) THE M3 GENERATION-COMPARISON HOLE (the CodeRabbit 4386287400 finding, Minor REAL)
+    verified by code reading at this tree (spike_anchor.py lines 163-172): the M3
+    leg's silent-retarget detector compares r.get("source_id") != sid — but the
+    resolver's answer echoes the anchor row's OWN source_id by construction
+    (query.py builds out["source_id"] from the anchor row itself), so the
+    condition is structurally always-false and silent_retargets can never fire;
+    m3's own-version counter carries the same echo. The repair: compare the
+    answer's generation_id against the anchor's OWN version's CURRENT
+    generation (read from the DB), the only form that can actually detect a
+    wrong-generation resolution.
+
+The repairs land in commit E, AFTER this red (LAW-11). The four suite amendments
+(ANC-04 one-hit, ANC-06 generation pin, ANC-07 current-generation passage ids,
+ANC-08 refusal normalization) are pinned forms the current implementation already
+satisfies — their RED is the gap they close against future regressions, observed
+GREEN at this tree; ANC-10 is the implementation-demanding red.

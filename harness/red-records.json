@@ -632,13 +632,19 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-053 (P3-03b) RED: the anchor-resolution suite's machinery-absent class observed at the predecessor 364f30e (the resolve-anchor command absent from query.py's surface + spike_anchor.py absent — the waiting-for-harness form, the S1/record-18 §4.1 + P3-01/02/03a precedent; exit 1, red-01.txt in the slice's runs dir) — the implementation lands AFTER this RED, never before it (LAW-11)",
-    "current_sha256": "f9351255343963354d65bf2eacba5e15d1daee037d4c8f21a9d807309c86f0c9",
+    "current_sha256": "4383ef1626fb18cd58b47c2c0fa70c3cd95706741cf9f2ebe1491496957b5c18",
     "amendments": [
       {
         "prior_sha256": "c92b2c5cd93aa0abe1d2660c5f14509df765df7571f12421a41cb1a4be20dd86",
         "new_sha256": "f9351255343963354d65bf2eacba5e15d1daee037d4c8f21a9d807309c86f0c9",
         "note": "the suite-side repair found live at the first GREEN run (the #87 round-2 precedent class): create_highlight's ACK carries result_ref (the HIGHLIGHT id) only — the suite's ack_field(p,'anchor_id') returned empty for every case and all nine resolved-path assertions failed over a CORRECT implementation; the highlight() helper now takes result_ref and reads the anchor id from the row (the CAP-03 precedent's query form); assertions unchanged — the ANC-04/05 redesign landed pre-binding at commit A; zero behavioral expectation changes",
         "observed_at": "2026-10-27T07:44:00.945767+00:00"
+      },
+      {
+        "prior_sha256": "f9351255343963354d65bf2eacba5e15d1daee037d4c8f21a9d807309c86f0c9",
+        "new_sha256": "4383ef1626fb18cd58b47c2c0fa70c3cd95706741cf9f2ebe1491496957b5c18",
+        "note": "the #88 round-1/round-2 review repairs (commit C, the RED form observed at 1fcfe50): NEW ANC-10 — the U+2028 row-protocol framing case, the suite's ONLY failing case at this tree (resolve-anchor exit 1, json.decoder.JSONDecodeError 'Unterminated string starting at line 1 column 232' — the pre-fix _read splits the one-JSON-row-per-line protocol on Unicode line separators; red-02.txt carries the observed crash + the pre-fix spike probe); the four amendments (ANC-04 redesigned to the declared one-hit DETECTION form with evidence_hits == 1 + the offsets echoed; ANC-06 rebuilt on the generation_id comparison — the echoed source_id was structurally always-true; ANC-07 pinned to the CURRENT generation's passage ids post-re-extraction; ANC-08 byte-equal refusal normalization after id-normalization) all GREEN over the current implementation — the pins close the accepted-class regressions with no behavioral expectation change beyond the framing fix (LAW-11: the implementation repair lands after this RED). The registry note-repair honestly recorded: make red's NOTE was shadowed by the Makefile default (the empty-override class), the just-written amendment's note corrected to the observed facts in the same minute, prior to any commit",
+        "observed_at": "2026-10-27T11:56:45.854547+00:00"
       }
     ]
   }

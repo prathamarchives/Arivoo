@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-053-p303b-anchor-resolution-q8-spike --diff origin/main",
+  "exit_code": 0,
+  "commit": "2d7e94ab150df33047b8f4d1d1127e0baee838df",
+  "output_sha256": "29da4321a826ac5e2b2526acf45f4c606f4804f6a88f4cba02f61a9a38289a18",
+  "recorded_at": "2026-10-27T13:02:03.953729+00:00"
+}

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_sev.py",
+  "exit_code": 0,
+  "commit": "43ff60ad0c07beb79a6e26e2f993d37ce764a5b4",
+  "output_sha256": "fe42694443c9883612e146c0ec7502978ef7a3f4bbf8acf94f1011740feb07df",
+  "recorded_at": "2026-10-27T12:22:02.543128+00:00"
+}

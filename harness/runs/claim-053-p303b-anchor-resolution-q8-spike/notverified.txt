@@ -1,0 +1,50 @@
+- NOT VERIFIED — the honest limits of CLAIM-053 / P3-03b (the anchor
+  resolution + the Q8 synthetic-corpus spike; LAW-04; never empty-by-omission)
+- WHAT THIS SLICE PROVES, ON WHAT STACK: the typed anchor resolution
+  (SYS-05's resolved | unresolved | ambiguous at query.py's resolve-anchor
+  arm) holds end-to-end over the REAL boundary (the ANC-01..10 suite, three
+  consecutive GREEN runs at the final tree; the generation-integrity pins
+  ANC-06/07 compare the answer's generation_id and passage_ids against the
+  anchor's OWN version's CURRENT generation rows; the one-hit DETECTION
+  ANC-04; the byte-equal refusal normalization ANC-08; the U+2028
+  row-protocol framing ANC-10) + the Q8 spike re-measured 17/17 anchors
+  with the generation-id comparison live in every leg (M1/M2/M3 all 17/17
+  own-version, ZERO silent retargets). The spike's failures now abort by
+  name (ARV-SPIKE-002), never a silent unresolved count (the pre-fix
+  silent-None and the M3 structurally-always-false echo both observed and
+  repaired in this slice, red-02.txt).
+- Q8's REGISTERED BOUNDARY (§7.3) STANDS UNCHANGED: the corpus is SYNTHETIC
+  (six documents: headings, unicode, repeated blocks, a single-block doc;
+  17 anchors at head/mid/boundary positions). The measured 17/17 is
+  SYNTHETIC-CORPUS FIDELITY ONLY. NO real-PDF/EPUB location-stability claim
+  is made or implied; a real-format claim requires a named, permitted, real
+  corpus and measured results at the owner gate (Q8's registered default).
+  OCR/scanned content is a distinct capability, never implied.
+- THE SPIKE'S ANCHOR PLACEMENT: three anchors per document chosen by
+  structural position (head / mid / block-boundary), not an exhaustive
+  positional sweep; the corpus does not exercise every tiling shape a real
+  extractor may produce (the drifted-tiling classes are exercised
+  synthetically in the ANC suite's planted generations, not in the spike's
+  measured corpus).
+- THE FALLBACK EVIDENCE WINDOW: context_before + context_after at capture
+  time are 32 chars each side (commands.py's create_highlight); the
+  ambiguity and one-hit behaviors are measured against THAT window size. A
+  future change to the window is a different contract surface.
+- NOT VERIFIED — the resolve-anchor surface at CONCURRENT readership
+  (multiple simultaneous resolvers over one source): the typed answer is a
+  read-only surface over committed rows and the suites exercise it serially;
+  the concurrent-reader matrix belongs to the read-path scale slice.
+- NOT VERIFIED — the passage-row framing for control characters ABOVE
+  U+2028's class that PostgreSQL also leaves raw in other encodings (the
+  fix binds the reader to NEWLINE-ONLY framing, which is framing-safe for
+  every character PostgreSQL can emit in a JSON string; the untested
+  surface is other psql OUTPUT FORMATS (-A tuples, CSV), which this slice
+  never reads).
+- THE KNOWN-BAD BASELINE's TWELVE SEV/PRF/CLM/RED/SCOPE GUARDS: verified by
+  the gate's own negative probes at every run (the KB-SEV/KB-PRF/etc. PASS
+  lines in the gate output), not re-proven by independent adversarial
+  attempts in this slice.
+- THE MERGE-CHAIN FACTS (the D-042 reproduction for THIS slice, the
+  post-merge five-check observation, the branch deletion, the protections
+  re-read): recorded only after they happen, in the next slice's commit A
+  (the convention; a committed file cannot guarantee external state, INT-104).

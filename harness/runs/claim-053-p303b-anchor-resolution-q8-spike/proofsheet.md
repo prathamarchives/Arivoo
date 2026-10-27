@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-053-p303b-anchor-resolution-q8-spike (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 026eae3b8ea4d6de488486b8ae01528a20ce2145
-- generated (last record's timestamp): 2026-10-27T13:24:13.071309+00:00
-- run records: 22
+- commit (last run record's): 0bea5d956a35e8dc976cb6a7d7f2a283661b663b
+- generated (last record's timestamp): 2026-10-27T15:52:33.027165+00:00
+- run records: 23
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_anchor.py` -> exit 0 · output sha256 6524242680a49821 · 2026-10-27T12:19:15.431832+00:00
@@ -27,6 +27,7 @@
 - `python3 harness/gate.py --slice claim-053-p303b-anchor-resolution-q8-spike --diff origin/main` -> exit 0 · output sha256 29da4321a826ac5e · 2026-10-27T13:02:03.953729+00:00
 - `python3 harness/gate.py --slice claim-053-p303b-anchor-resolution-q8-spike --diff origin/main` -> exit 1 · output sha256 64c8d3ddd3ad0c8d · 2026-10-27T13:16:43.376652+00:00
 - `python3 harness/gate.py --slice claim-053-p303b-anchor-resolution-q8-spike --diff origin/main` -> exit 0 · output sha256 da91f4a34bd95eff · 2026-10-27T13:24:13.071309+00:00
+- `python3 harness/gate.py --slice claim-053-p303b-anchor-resolution-q8-spike --diff origin/main` -> exit 0 · output sha256 a9b4d060e7a80d55 · 2026-10-27T15:52:33.027165+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - NOT VERIFIED — the honest limits of CLAIM-053 / P3-03b (the anchor
@@ -81,11 +82,11 @@
 - (the convention; a committed file cannot guarantee external state, INT-104).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 398be46fd6d532147b34599f4101faf75835bfd1c2d06a94e3b64ea2932c5111
-- reviewed_diff_sha256: 425daba2f795e8af81640493ee5e9c57d12cfd584852ec5a4a92a1daef252a52
+- report sha256: ece63a9a49ebe6e4e0cd0b8c37b23c01748a361d5f5745488c74a81ef365ff83
+- reviewed_diff_sha256: 1542466c1ceddeea879135834d8712220f7018faa3d2da1aca123c9b8da2c202
 - disposition: PASS
 - findings: 6 (open P0/P1: 0)
 - not-verified entries: 7
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 0bcaf7d0138ff41e250efd60e07f6e34834aa06983c7fcb6f946b809af3f4686
+- sheet sha256 (of the content above, excluding this line): d76a9c3f58e27ce373149ec0562fabd4deda8a50a1be752d9af6ef28c23f1214

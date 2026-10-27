@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-053-p303b-anchor-resolution-q8-spike",
   "base_sha": "364f30e1e1331ef841de6da2db0bbb088108dab2",
-  "reviewed_diff_sha256": "425daba2f795e8af81640493ee5e9c57d12cfd584852ec5a4a92a1daef252a52",
+  "reviewed_diff_sha256": "1542466c1ceddeea879135834d8712220f7018faa3d2da1aca123c9b8da2c202",
   "intent_ids": [
     "INT-127",
     "INT-131",

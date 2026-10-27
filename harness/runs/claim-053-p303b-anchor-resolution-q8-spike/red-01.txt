@@ -1,0 +1,6 @@
+FAIL ARV-TEST-000: the anchor-resolution machinery is absent (machinery-absent class; missing files: ['spike_anchor.py']; the resolve-anchor command absent: True) — P3-03b's implementation lands after this RED, never before it (LAW-11)
+(observed at 364f30e — the P3-03b machinery-absent class at the fresh main: query.py's
+ resolve-anchor arm and harness/spike_anchor.py do not exist; the suite's RED gate
+ probes the command surface (argparse invalid choice) + the spike file's absence —
+ the S1/record-18 §4.1 + P3-01/02/03a precedent form. The implementation lands
+ AFTER this RED, never before it (LAW-11).)

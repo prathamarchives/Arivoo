@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-053-p303b-anchor-resolution-q8-spike",
+  "base_sha": "364f30e1e1331ef841de6da2db0bbb088108dab2",
+  "reviewed_diff_sha256": "1542466c1ceddeea879135834d8712220f7018faa3d2da1aca123c9b8da2c202",
+  "intent_ids": [
+    "INT-127",
+    "INT-131",
+    "INT-134",
+    "INT-135",
+    "INT-138",
+    "INT-139",
+    "INT-140"
+  ],
+  "requirement_ids": [
+    "SYS-05",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
+  "changed_components": [
+    "harness/query.py — the resolve-anchor arm: SYS-05's typed resolution (resolved | unresolved | ambiguous), the named causes, the fallback hit counting, the owner-scoped read, the newline-only row framing",
+    "harness/spike_anchor.py — the Q8 §7.3 synthetic-corpus stability measurement: the M1/M2/M3 matrix with the generation-id comparison in every leg, the named ARV-SPIKE-002 measurement-failure abort, the silent-retarget counter",
+    "harness/tests/test_anchor.py — the ANC-01..10 acceptance suite (RED-first at 364f30e; the four review amendments at 1fcfe50)",
+    "harness/gate.py — the TESTS registration for the suite",
+    "harness/red-records.json — the binding at commit A + the typed amendment chain (the anchor-id ACK repair, the review-round RED form, the GREEN-line range repair) + the serialization repairs",
+    "CLAIMS.md / STATE.md / AGENTS.md / PLAN.md / context/WORKLOG.md / context/extracted/44-P303B-ANCHOR-RESOLUTION-Q8-SPIKE.md — the registry rows + the five-area re-derivation"
+  ],
+  "interfaces_reviewed": [
+    "the resolve-anchor CLI contract: ONE JSON answer line at exit 0 for all three typed states; ARV-QRY-001 at exit 1 for out-of-scope and absent ids (the same refusal, byte-equal after id normalization)",
+    "the psql row protocol at query.py's _read: PostgreSQL's one-JSON-row-per-line framing read by newline-only splitting (row_to_json escapes control chars below U+0020 only — U+2028/U+2029/U+0085 travel raw)",
+    "the anchor/highlight/extraction_generation/passage schema surfaces: the anchor's source_digest == the generation's input_digest byte-bind; the LEFT JOIN to the source's CURRENT generation (never crossing versions by construction); the answer's generation_id + passage_ids against the current generation's rows",
+    "the spike's subprocess boundary: query.py's nonzero exits, malformed output, and invalid JSON abort the measurement by name (ARV-SPIKE-002), never a silent unresolved count"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the suite harness/tests/test_anchor.py ANC-01..10 GREEN — three consecutive runs at the final tree; proof run-01, run-02, run-03",
+      "RED-01 preserved (the machinery-absent gate at the predecessor 364f30e: ARV-TEST-000, exit 1); proof red-01.txt",
+      "RED-02 preserved (the #88 round-2 findings observed at the pre-fix tree 1fcfe50: the U+2028 row-protocol crash live — json.decoder.JSONDecodeError 'Unterminated string starting at line 1 column 232', exit 1; the spike's silent-None probe; the M3 structurally-always-false echo comparison); proof red-02.txt",
+      "the red-records typed amendment chain for the suite file (the binding at commit A; the anchor-id ACK repair; the review-round RED form at 1fcfe50; the GREEN-line range repair) — verified reachable from the baseline by the gate on every run"
+    ],
+    "integration_verification": [
+      "the real boundary exercised end-to-end: import_source -> extract (the generation machine) -> create_highlight (the version-tied anchor) -> resolve-anchor (the typed answer) — all through the real CLI surfaces, never internal helpers; proof run-01..run-03",
+      "the Q8 spike over the real machine: the synthetic 6-document corpus, 17 anchors, M1 17/17, M2 17/17, M3 17/17 own-version (generation-compared), ZERO silent retargets; proof run-04",
+      "the reviewer's own adversarial probes reproduced the whole boundary (its U+2028/U+2029 fixtures, its refusal-equality probes in both owner directions, its from-first-principles fallback recounts at 1/2/3 hits) with the spike's output sha256 byte-identical to run-04's recorded digest"
+    ],
+    "system_verification": [
+      "SYS-05 trace: every Highlight has a stable identity and Anchor tied to a specific Source version; reprocessing cannot silently move it — the typed states pin it (the edition boundary ANC-06, the re-extraction generation integrity ANC-07, the one-hit DETECTION ANC-04, the ambiguity detector ANC-05); proof run-01..run-03 + red-02",
+      "SYS-11 trace: this slice closes its V-model with a fresh-context SEV review (agent-9f3a05c2) whose probes re-derived the recorded evidence byte-identically before the verdict; proof run-04, red-01, red-02",
+      "make verify GREEN 54/0 at the final tree (the canonical layer + the gate's selfcheck + the known-bad probes); proof run-18"
+    ],
+    "validation": [
+      "the owner workflow's read path answers the typed anchor question over the real boundary — the honest measured limits at notverified.txt (Q8 §7.3's synthetic-only boundary stands; no real-PDF/EPUB stability implied)",
+      "the failure modes below each carry their own probe-backed control — the named refusal classes observed refusing and the typed answers observed answering"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a resolver that guesses the nearest match instead of answering the typed states (the SYS-05 forbidden class)",
+      "control": "the fallback evidence only COUNTS candidates: a single hit is the DETECTION (unresolved, location-unmatched, evidence_hits=1, the offsets echoed unchanged); two-or-more is ambiguous with the count; the primary path validates at the anchor's ORIGINAL offsets only; pinned by ANC-04 (the relocated one-hit window) + ANC-05 (the repeated-content ambiguity) + the reviewer's independent 1/2/3-hit recounts",
+      "proof_ids": [
+        "run-01",
+        "run-02",
+        "run-03",
+        "red-02.txt"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "a re-extraction or a new edition silently moves an anchor or serves a superseded generation's passage IDs (the retarget class, stale IDs with correct offsets)",
+      "control": "the answer's generation_id is compared against the anchor's OWN version's CURRENT generation (ANC-06: != the new edition's; ANC-07: == the re-extracted current, passage_ids == the current generation's covering rows; the spike's M3 detector: the generation comparison, never the structurally-echoed source_id)",
+      "proof_ids": [
+        "run-01",
+        "run-04",
+        "red-02.txt"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "a Unicode line separator (U+2028/U+2029/U+0085) inside stored text corrupts the one-JSON-row-per-line protocol and crashes the resolver in place of a typed answer",
+      "control": "query.py's _read splits rows on newline only (row_to_json escapes control chars below U+0020; the separators travel raw inside the JSON string); ANC-10 plants the separator in BOTH the passage text and the anchor's context_before and requires the typed resolved answer; the pre-fix crash observed and preserved (red-02 (a))",
+      "proof_ids": [
+        "run-01",
+        "red-02.txt"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "a spike measurement input fails silently: a nonzero resolver exit, malformed output, or invalid JSON counted as an unresolved anchor (the spike exits 0 with incomplete metrics)",
+      "control": "spike_anchor.py's _SpikeFailure raises the NAMED ARV-SPIKE-002 for every input-failure class and main aborts exit 1 — never a silent None; the pre-fix silent-None probe and the post-fix named raise both observed (red-02 (b)); the reviewer's monkeypatched not-one-line and invalid-JSON probes each raised the named code",
+      "proof_ids": [
+        "run-04",
+        "red-02.txt"
+      ]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "the resolution surface leaks another owner's object existence (out-of-scope vs absent distinguishable — the CWE-203 side channel)",
+      "control": "ANC-08 compares the two refusals BYTE-EQUAL after normalizing the echoed id (the full stdout + stderr); the reviewer's probes verified both owner directions; ARV-QRY-001 is the one named refusal",
+      "proof_ids": [
+        "run-01",
+        "run-02",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-06",
+      "scenario": "a current generation whose input_digest differs from the anchor's source_digest resolves anyway (the stale-byte class)",
+      "control": "the digest-chain check answers unresolved with the NAMED cause (stale-generation) before any covering check — ANC-03's planted digest mismatch; never a silent resolve over different bytes",
+      "proof_ids": [
+        "run-01",
+        "run-02",
+        "run-03"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-F1",
+      "severity": "P1",
+      "status": "resolved",
+      "what": "prose ahead of fact (the CLAIM-051 class): the pushed head's STATE verified-by-run, record 44 §7, and WORKLOG Task 62 claimed the runs-dir artifacts (the SEV report, the 18 records, the sheet) as existing evidence while they were uncommitted — a fresh clone saw only the prose; the PR-mode gate refused ARV-SEV-001, observed live by the reviewer",
+      "resolution": "the three homes re-worded to the explicit sequencing form at 2d7e94a; the artifacts land in the finalize commit binding that content head (this report among them, per the anti-self-referentiality contract) — prose and fact land in the same push, the bind-LAST rule honored"
+    },
+    {
+      "id": "SEV-F2",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "STATE's exact-next-action asserted 'the finalize commit pushed' while the finalize had not landed",
+      "resolution": "re-worded at 2d7e94a to the true next action (land the finalize artifact commit binding this content head)"
+    },
+    {
+      "id": "SEV-F3",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the CLAIMS.md open row's Notes still said 'the ANC-01..09 suite' with ten cases on the books (the same 09-to-10 drift repaired in AGENTS/PLAN/the red record, missed in this home)",
+      "resolution": "the count corrected to ANC-01..10 at 2d7e94a"
+    },
+    {
+      "id": "SEV-F4",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "record 44 §4 said 'three anchors per document' — the single-block document yields two anchors after the position dedup (17 the honest measured count, which every measured home carried)",
+      "resolution": "the wording corrected at 2d7e94a to 'up to three anchors per document (the single-block document yields two after the position dedup, 17 anchors total, the honest measured count)'"
+    },
+    {
+      "id": "CR-R1-MAJOR",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the #88 CodeRabbit round-1 Major findings: the anchor-id ACK read (create_highlight ACKs result_ref, not the anchor id) and the retired CLAIM-052 open row (ARV-CLM-002/006)",
+      "resolution": "both fixed at commit B ddbbf0d (the highlight() helper reads the anchor id from the row via result_ref — the CAP-03 precedent; the open row removed, the rule-4 close row the ONE home) — verified at the tree by this session and again by the reviewer's H-1 sweep"
+    },
+    {
+      "id": "CR-R12-REPAIRED",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the remaining eight #88 CodeRabbit threads (rounds 1-2): the never-planted one-hit DETECTION, ANC-07's superseded-generation hole, ANC-08's refusal normalization, STATE's premature verified-by-run entry, the CLAIMS MD056 table split, query.py's Unicode-separator row corruption, the spike's silent-None failure handling, the M3 structurally-always-false retarget detector",
+      "resolution": "all eight verified REAL and repaired RED-first: commit C 1fcfe50 the RED form + red-02.txt's observed failures; commit E ff18c19 the GREEN (the newline-only framing, the named ARV-SPIKE-002 abort, the generation-id comparisons) + the two doc repairs at commit C; every fix re-verified at the tree by the reviewer's H-1 (a)-(j) sweep"
+    }
+  ],
+  "not_verified": [
+    "Q8's registered boundary stands: the corpus is SYNTHETIC (six documents, 17 anchors); the measured stability is synthetic-corpus fidelity ONLY — no real-PDF/EPUB location-stability claim is made or implied; a real-format claim requires a named, permitted, real corpus and measured results at the owner gate; OCR/scanned content is a distinct capability, never implied",
+    "the spike's anchor placement: three structural positions per document (head/mid/block-boundary, two for the single-block document), not an exhaustive positional sweep; the corpus does not exercise every tiling shape a real extractor may produce",
+    "the fallback evidence window is 32 chars each side (create_highlight's capture-time contexts); the ambiguity and one-hit behaviors are measured against THAT window size — a future window change is a different contract surface",
+    "the resolve-anchor surface at CONCURRENT readership (multiple simultaneous resolvers over one source): the typed answer is a read-only surface over committed rows and the suites exercise it serially; the concurrent-reader matrix belongs to the read-path scale slice",
+    "the row-protocol framing proof binds the reader to newline-only splitting over psql's unaligned tuples output (the only format this slice reads); other psql OUTPUT FORMATS (CSV, aligned) are untested and unread here",
+    "U+0085 (NEL) shares the raw-in-JSON class probed at U+2028/U+2029 but was not separately exercised",
+    "the GitHub-side facts (the ten #88 thread payloads' text, the CI five-check run at the final head, the D-042 merge-chain facts for THIS slice) are external state recorded only after observation (INT-104) — the local gate is the pre-merge authority here"
+  ],
+  "builder_context": "builder-glm-host-session31-claim053 (the host GLM agent that authored the slice across two sessions: commit A's RED declaration + commit B's GREEN + the five found-live repairs [the prior session]; this session: the ten-thread re-fetch + the eight RED-first repairs [commits C-E], the finalize battery + the sheet + this report, the registry amendments + the serialization repair — every fix in-slice)",
+  "reviewer_context": "fresh-context GLM SEV reviewer agent-9f3a05c2 (cold-start, repo-only context, read-only + its own adversarial probes: the U+2028 AND U+2029 framing fixtures, the refusal-equality probes both owner directions, the from-first-principles fallback recounts at 1/2/3 hits, the spike output re-derivation byte-identical to the recorded digest, the RED trail re-derived live at 364f30e and 1fcfe50, the ten #88 fixes' H-1 sweep, make verify GREEN) — round 1 at 7379cfe: verdict BLOCKED on the four administrative findings (F1 the prose-ahead-of-fact P1 + F2/F3/F4 wordings), the machinery verified clean across every contract claim; all four repaired at 2d7e94a + the artifact commit binding it (the resolutions recorded in the findings array); this report is the slice's merged-form SEV record; the CodeRabbit confirmation round at the finalize heads resolved all ten original threads (each fix verified at the final tree) + one new Major finding (STATE's pointer-only violation on the accumulated lines 7/11/25/30) — REAL, accepted, repaired at 8a95480 with the canonical-layer verifier re-run GREEN; this report's digest re-binds that head",
+  "disposition": "PASS",
+  "review_summary": "Round 1 (agent-9f3a05c2, at 7379cfe): BLOCKED — four administrative findings, zero mechanical ones; every contract claim C-1..C-8 reproduced under the reviewer's own probes with byte-identical evidence re-derivations (the suite output sha, the spike output sha, both RED reproductions). F1 (the prose-ahead-of-fact P1) + F2/F3/F4 repaired in the wording commit 2d7e94a and the artifact commit binding it — the resolutions cited per finding; the bind-LAST rule honored (this report's digest binds the content head AFTER every content edit). The machinery verdict stands: the typed resolution is sound, the Q8 spike honestly measured (17/17, synthetic only), the review chains' eight REAL findings fixed RED-first with the observed failures preserved (red-02.txt). Post-SEV: the CodeRabbit confirmation round resolved all ten original threads; its one new Major finding (STATE.md's accumulated pointer-only violation) was accepted and repaired at 8a95480 (the four flagged lines re-derived at the pointer form; the verifier GREEN 54/0 over the trimmed form); the digest re-binds that content head — no silent staleness.",
+  "sheet_section": true
+}

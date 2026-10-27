@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-052-p303a-extraction-generations",
   "base_sha": "0ce707741cc554eca4a4e18cb8acc472c122d39c",
-  "reviewed_diff_sha256": "aa08a1d40f2a9196d984719f16228f5a8900e2d35b9525b1232adfc71ce0542e",
+  "reviewed_diff_sha256": "2dc67f8c0abafabee40d74bc5aed1209a04c736ca68142469f6c6333177a4554",
   "intent_ids": [
     "INT-127",
     "INT-131",

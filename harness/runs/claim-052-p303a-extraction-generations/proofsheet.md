@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-052-p303a-extraction-generations (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): c5fd6f8692337d5f3d85e05e23a98d8f2abec4dd
-- generated (last record's timestamp): 2026-10-27T06:52:40.633416+00:00
-- run records: 26
+- commit (last run record's): 2b384bff1c8efb1a6b3490b9586aabaab1cfd217
+- generated (last record's timestamp): 2026-10-27T07:11:19.624260+00:00
+- run records: 28
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 a7423c018d2f4085 · 2026-10-26T10:59:46.443439+00:00
@@ -31,6 +31,8 @@
 - `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-27T06:46:11.042821+00:00
 - `make verify` -> exit 0 · output sha256 c9c1c31e41205842 · 2026-10-27T06:49:29.878784+00:00
 - `python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main` -> exit 0 · output sha256 5afcb725423af9a5 · 2026-10-27T06:52:40.633416+00:00
+- `make verify` -> exit 0 · output sha256 0c580b27100795bf · 2026-10-27T07:08:14.214308+00:00
+- `python3 harness/gate.py --slice claim-052-p303a-extraction-generations --diff main` -> exit 0 · output sha256 f8096f96476d69a0 · 2026-10-27T07:11:19.624260+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-052 / P3-03a (the extraction
@@ -92,13 +94,20 @@
 - API observations recorded in the close row are the builder's own live reads.
 - THE MERGE (D-042): the single-actor 405 bar + the recorded flip path reproduce
 - live at the merge — the protection restored and re-read after.
+- THE SEV PROBES' EVIDENCE FORM (the #87 round-2 residual finding, read at this
+- session's merge gate after the inter-session gap): the reviewer's concurrency
+- and NUL probes are recorded as the SEV chain's typed summaries (sev.json's
+- reviewer_context/review_summary + record 43 §4) — the round reports as
+- received; they are NOT replayable suite run records (the suite is serial by
+- design), and the probe-by-probe transcripts are the reviewer's own artifacts,
+- summarized in the chain — a run record is cited only for what it records.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 459059f743c608e5f5c07117ba3ab76cbd739e2455d6c3d4a6c47fa2326b18e7
-- reviewed_diff_sha256: aa08a1d40f2a9196d984719f16228f5a8900e2d35b9525b1232adfc71ce0542e
+- report sha256: 4d1dc93e98c3b7bd83a699c3254b53be61a8d0c51ad57ed733a58c13e188d7f1
+- reviewed_diff_sha256: 2dc67f8c0abafabee40d74bc5aed1209a04c736ca68142469f6c6333177a4554
 - disposition: PASS
 - findings: 5 (open P0/P1: 0)
-- not-verified entries: 9
+- not-verified entries: 10
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 8a8add47f920caa226b322d829ba2ea51b10e7ef7efbb0e6ad35d854582175d8
+- sheet sha256 (of the content above, excluding this line): f20044c83b6c8d201bab8768f963c18d7f5521ef9d6b544a17d9d76ce073263f

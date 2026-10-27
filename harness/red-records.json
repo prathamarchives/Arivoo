@@ -632,7 +632,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-053 (P3-03b) RED: the anchor-resolution suite's machinery-absent class observed at the predecessor 364f30e (the resolve-anchor command absent from query.py's surface + spike_anchor.py absent — the waiting-for-harness form, the S1/record-18 §4.1 + P3-01/02/03a precedent; exit 1, red-01.txt in the slice's runs dir) — the implementation lands AFTER this RED, never before it (LAW-11)",
-    "current_sha256": "c92b2c5cd93aa0abe1d2660c5f14509df765df7571f12421a41cb1a4be20dd86",
-    "amendments": []
+    "current_sha256": "f9351255343963354d65bf2eacba5e15d1daee037d4c8f21a9d807309c86f0c9",
+    "amendments": [
+      {
+        "prior_sha256": "c92b2c5cd93aa0abe1d2660c5f14509df765df7571f12421a41cb1a4be20dd86",
+        "new_sha256": "f9351255343963354d65bf2eacba5e15d1daee037d4c8f21a9d807309c86f0c9",
+        "note": "the suite-side repair found live at the first GREEN run (the #87 round-2 precedent class): create_highlight's ACK carries result_ref (the HIGHLIGHT id) only — the suite's ack_field(p,'anchor_id') returned empty for every case and all nine resolved-path assertions failed over a CORRECT implementation; the highlight() helper now takes result_ref and reads the anchor id from the row (the CAP-03 precedent's query form); assertions unchanged — the ANC-04/05 redesign landed pre-binding at commit A; zero behavioral expectation changes",
+        "observed_at": "2026-10-27T07:44:00.945767+00:00"
+      }
+    ]
   }
 }

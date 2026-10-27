@@ -140,9 +140,13 @@ def extract(key, source_id, owner="A"):
 
 
 def highlight(key, source_id, start, end, owner="A"):
-    return cli(str(REPO / "harness" / "commands.py"), "create_highlight", "--owner", owner,
-               "--actor", "owner", "--client-id", "cli-1", "--idem-key", key,
-               "--source-id", source_id, "--start", str(start), "--end", str(end))
+    p = cli(str(REPO / "harness" / "commands.py"), "create_highlight", "--owner", owner,
+            "--actor", "owner", "--client-id", "cli-1", "--idem-key", key,
+            "--source-id", source_id, "--start", str(start), "--end", str(end))
+    hid = ack_field(p, "result_ref")
+    if not hid:
+        return p, ""
+    return p, audit(f"SELECT anchor_id FROM arv.highlight WHERE id='{hid}';")
 
 
 def resolve(anchor_id, owner="A"):
@@ -213,8 +217,7 @@ def main() -> int:
               "the extraction substrate must be green before the anchor contract is tested — repair the extraction first")
 
         # the anchor: the middle paragraph's first 24 chars
-        p_h = highlight("anc-hl-1", sid, 97, 121)
-        anc_id = ack_field(p_h, "anchor_id")
+        p_h, anc_id = highlight("anc-hl-1", sid, 97, 121)
 
         # ANC-01 — the happy path: resolved within its own version
         r1 = resolve(anc_id)
@@ -235,8 +238,7 @@ def main() -> int:
         fB = fresh_file("never.md", "A source that is never extracted.\n\nSecond block.\n")
         p_imp2 = import_src("anc-src-2", "Never Extracted", fB)
         sid2 = ack_field(p_imp2, "result_ref")
-        p_h2 = highlight("anc-hl-2", sid2, 0, 6)
-        anc2 = ack_field(p_h2, "anchor_id")
+        p_h2, anc2 = highlight("anc-hl-2", sid2, 0, 6)
         r2 = resolve(anc2)
         a2 = typed(r2)
         ok2 = (a2 is not None and a2.get("state") == "unresolved"
@@ -250,8 +252,7 @@ def main() -> int:
         p_imp3 = import_src("anc-src-3", "Stale Book", fC)
         sid3 = ack_field(p_imp3, "result_ref")
         pe3 = extract("anc-ext-3", sid3)
-        p_h3 = highlight("anc-hl-3", sid3, 0, 9)
-        anc3 = ack_field(p_h3, "anchor_id")
+        p_h3, anc3 = highlight("anc-hl-3", sid3, 0, 9)
         pl3 = plant(f"UPDATE arv.extraction_generation SET input_digest='deadbeef' "
                     f"WHERE source_id='{sid3}' AND state='current';")
         r3 = resolve(anc3)
@@ -269,8 +270,7 @@ def main() -> int:
         sid4 = ack_field(p_imp4, "result_ref")
         pd4 = extract("anc-ext-4", sid4)
         # an anchor into gamma's opening (the third block starts at 53)
-        p_h4 = highlight("anc-hl-4", sid4, 53, 59)
-        anc4 = ack_field(p_h4, "anchor_id")
+        p_h4, anc4 = highlight("anc-hl-4", sid4, 53, 59)
         # plant a drifted generation: ONE short passage covering [0, 10) only — a
         # hypothetical future extractor's non-covering view (the size-cap class)
         gen4 = audit(f"SELECT id FROM arv.extraction_generation WHERE source_id='{sid4}' AND state='current';")
@@ -308,8 +308,7 @@ def main() -> int:
         sid5 = ack_field(p_imp5, "result_ref")
         pd5 = extract("anc-ext-5", sid5)
         # the anchor into the FIRST block's slice "beta gamma" at [7, 17)
-        p_h5 = highlight("anc-hl-5", sid5, 7, 17)
-        anc5 = ack_field(p_h5, "anchor_id")
+        p_h5, anc5 = highlight("anc-hl-5", sid5, 7, 17)
         # plant a non-covering tiling: [0,7) + [17, len) — the anchor's range is
         # skipped; both OTHER occurrences of the evidence window survive inside it
         gen5 = audit(f"SELECT id FROM arv.extraction_generation WHERE source_id='{sid5}' AND state='current';")

@@ -62,14 +62,20 @@ class Session:
     reads the OBSERVED drained cause — never the poll()-inferred guess, never
     a lagging read that lost the duplicate-key line)."""
 
-    def __init__(self, db: str, user: str, owner: str):
+    def __init__(self, db: str, user: str, owner: str, err_verbosity: "str | None" = None):
         cfg = pg.config()
         if cfg["PGHOST"] not in pg.LOOPBACK:  # the same approved-boundary guard as pg.psql (the #83 round)
             raise RuntimeError("ARV-DB-004: the configured target is outside the approved adapter boundary "
                                "(loopback only) — the command session refuses, never a hidden path")
+        argv = ["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1"]
+        if err_verbosity is not None:  # the #87 round-3 classification channel: psql's verbose
+            # error format prints 'ERROR:  <SQLSTATE>: <message>' — the death classifier reads
+            # the CODE (locale-independent), never the message text; the default stays EXACTLY
+            # the prior argv for every other caller (the bounded diff)
+            argv += ["-v", f"VERBOSITY={err_verbosity}"]
+        argv += ["-U", user, "-d", db]
         self.proc = subprocess.Popen(
-            ["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
-             "-U", user, "-d", db],
+            argv,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, bufsize=1,
         )

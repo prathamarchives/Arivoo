@@ -68,14 +68,25 @@ Cases (the EXT registry — this file is the contract's declaration):
         psql literal transport cannot carry a NUL byte-exactly — the
         extraction refuses at the boundary, never a silently truncated
         passage presented as current)
-  EXT-14 the deadlock race class (the #87 CodeRabbit round 2; the class the
-        SEV round's live races OBSERVED): the loser of a same-source
-        completion race is a RETRYABLE conflict — ARV-EXT-006, the building
+  EXT-14 the deadlock race class (the #87 CodeRabbit rounds 2-3; the class
+        the SEV round's live races OBSERVED; round 3 hardens the trigger to
+        raise the GENUINE 40P01 SQLSTATE — the CODE classifies, never the
+        message text): the loser of a same-source completion race is a
+        RETRYABLE conflict — ARV-EXT-006, the building
         row persists (never a failed generation for a race), the same-key
         retry completes it
   EXT-15 the same-key replay answers the RECORDED FAILURE (the #87 CodeRabbit
         round 2): a failed generation replayed under its own key -> exit 1 +
         the stored reason, never a silent ACK-success
+  EXT-16 the localized real deadlock (the #87 CodeRabbit round 3): a genuine
+        SQLSTATE 40P01 whose message carries NO 'deadlock detected' text —
+        still the retryable ARV-EXT-006 (the code classifies; a text matcher
+        on a localized server would PERMANENTLY fail a generation over a
+        transient race); the same-key retry completes it
+  EXT-17 the text-only impostor (the #87 CodeRabbit round 3): a P0001 whose
+        message SAYS 'deadlock detected' — recorded as the named mid-build
+        failure (ARV-EXT-003, the failed row with the code visible in the
+        cause), never granted retryability by the text alone
 
 Run: python3 harness/tests/test_extract.py   (exit 0 = green)
 """
@@ -383,12 +394,14 @@ def main() -> int:
               "owner isolation: B's extraction is B's; A extracting B's source -> the named ARV-EXT-004 refusal; arv_app without the GUC sees ZERO rows (both layers fail closed)",
               "the derived tables inherit the substrate's RLS discipline: same policy shape, same fail-closed — a cross-owner extraction is refused at the boundary, never a silent read")
 
-        # EXT-14 — the deadlock race class (the #87 CodeRabbit round 2; the SEV round's
-        # choreographed two-session completions observed the class live): the loser is a
-        # RETRYABLE conflict — the building row persists, never a failed generation
+        # EXT-14 — the deadlock race class (the #87 CodeRabbit rounds 2-3; the SEV round's
+        # choreographed two-session completions observed the class live; round 3 hardens the
+        # trigger to raise the GENUINE 40P01 SQLSTATE — the classification channel is the
+        # CODE the server assigns, never the message text): the loser is a RETRYABLE
+        # conflict — the building row persists, never a failed generation
         plant14 = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
                                   "CREATE OR REPLACE FUNCTION arv._ext_dl() RETURNS trigger AS $$ "
-                                  "BEGIN RAISE EXCEPTION 'deadlock detected'; RETURN NEW; END; "
+                                  "BEGIN RAISE deadlock_detected USING MESSAGE = 'deadlock detected'; RETURN NEW; END; "
                                   "$$ LANGUAGE plpgsql; CREATE TRIGGER ext_dl BEFORE INSERT ON arv.passage "
                                   "FOR EACH ROW WHEN (NEW.ordinal = 1) EXECUTE FUNCTION arv._ext_dl();"],
                                  capture_output=True, text=True, timeout=60)
@@ -416,13 +429,67 @@ def main() -> int:
               "the same-key replay of a FAILED generation: exit 1 + the recorded reason, ZERO new rows — never a silent ACK-success",
               "the replay must answer the recorded OUTCOME: a caller reading the exit code learns the extraction failed, never a false success")
 
+        # EXT-16 — the localized real deadlock (the #87 CodeRabbit round 3): the SQLSTATE
+        # 40P01 CODE classifies, the message never does — a genuine deadlock whose message
+        # carries no 'deadlock detected' text (a text matcher misroutes it to the failed row:
+        # a PERMANENT state for a TRANSIENT race, the finding's first direction)
+        f16 = fresh_file("loc16.md", "ローカライズされた本の第一段落。\n\n第二段落はここ。\n")
+        p_imp16 = import_src("ext-src-16", "Localized Book", f16)
+        sid16 = ack_field(p_imp16, "result_ref")
+        plant16 = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                                  "CREATE OR REPLACE FUNCTION arv._ext_dl16() RETURNS trigger AS $$ "
+                                  "BEGIN RAISE deadlock_detected USING MESSAGE = 'デッドロックが検出されました'; RETURN NEW; END; "
+                                  "$$ LANGUAGE plpgsql; CREATE TRIGGER ext_dl16 BEFORE INSERT ON arv.passage "
+                                  "FOR EACH ROW WHEN (NEW.ordinal = 1) EXECUTE FUNCTION arv._ext_dl16();"],
+                                 capture_output=True, text=True, timeout=60)
+        p16 = extract("ext-16", sid16)
+        drop16 = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                                 "DROP TRIGGER IF EXISTS ext_dl16 ON arv.passage; DROP FUNCTION IF EXISTS arv._ext_dl16();"],
+                                capture_output=True, text=True, timeout=60)
+        st16 = audit(f"SELECT state FROM arv.extraction_generation WHERE source_id='{sid16}';")
+        r16 = extract("ext-16", sid16)
+        st16b = audit(f"SELECT state FROM arv.extraction_generation WHERE source_id='{sid16}';")
+        ok16 = (p_imp16.returncode == 0 and plant16.returncode == 0 and drop16.returncode == 0
+                and p16.returncode == 1 and "ARV-EXT-006" in p16.stdout and "ARV-EXT-003" not in p16.stdout
+                and st16 == "building"
+                and r16.returncode == 0 and "status=committed" in r16.stdout and st16b == "current")
+        check("EXT-16", ok16,
+              "a genuine SQLSTATE 40P01 deadlock with a LOCALIZED message (no 'deadlock detected' text): the retryable ARV-EXT-006 — the CODE classifies, never the message text; the same-key retry completes it",
+              "a text matcher misroutes a localized real deadlock to the failed row — a permanent state for a transient race; the SQLSTATE code channel is locale-independent")
+
+        # EXT-17 — the text-only impostor (the #87 CodeRabbit round 3): a P0001 whose message
+        # SAYS 'deadlock detected' — the code channel records the named mid-build failure,
+        # never the retryable class (the finding's second direction: the pre-fix text matcher
+        # granted it retryability, leaving the row building forever with no failure recorded)
+        f17 = fresh_file("imp17.md", "Impostor first block.\n\nImpostor second block.\n")
+        p_imp17 = import_src("ext-src-17", "Impostor Book", f17)
+        sid17 = ack_field(p_imp17, "result_ref")
+        plant17 = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                                  "CREATE OR REPLACE FUNCTION arv._ext_dl17() RETURNS trigger AS $$ "
+                                  "BEGIN RAISE EXCEPTION 'deadlock detected'; RETURN NEW; END; "
+                                  "$$ LANGUAGE plpgsql; CREATE TRIGGER ext_dl17 BEFORE INSERT ON arv.passage "
+                                  "FOR EACH ROW WHEN (NEW.ordinal = 1) EXECUTE FUNCTION arv._ext_dl17();"],
+                                 capture_output=True, text=True, timeout=60)
+        p17 = extract("ext-17", sid17)
+        drop17 = subprocess.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                                 "DROP TRIGGER IF EXISTS ext_dl17 ON arv.passage; DROP FUNCTION IF EXISTS arv._ext_dl17();"],
+                                capture_output=True, text=True, timeout=60)
+        st17 = audit(f"SELECT state FROM arv.extraction_generation WHERE source_id='{sid17}';")
+        fr17 = audit(f"SELECT fail_reason FROM arv.extraction_generation WHERE source_id='{sid17}';")
+        ok17 = (p_imp17.returncode == 0 and plant17.returncode == 0 and drop17.returncode == 0
+                and p17.returncode == 1 and "ARV-EXT-003" in p17.stdout and "ARV-EXT-006" not in p17.stdout
+                and st17 == "failed" and "P0001" in fr17)
+        check("EXT-17", ok17,
+              "a P0001 carrying the text 'deadlock detected': the named mid-build failure ARV-EXT-003, the code visible in the recorded cause — never the retryable class the text alone would grant",
+              "the impostor's text must not buy retryability: only the SQLSTATE 40P01 code is the deadlock class; every other server error records the failure (complete-or-failed)")
+
     finally:
         if not os.environ.get("ARV_KEEP_DB"):
             pg.drop_scratch_db(DB)
     if FAILS:
         print(f"RED — {len(FAILS)} broken case(s): {', '.join(FAILS)}")
         return 1
-    print("GREEN — the extraction generations hold end-to-end (EXT-01..15): complete-or-failed, versioned, disposable, owner-scoped")
+    print("GREEN — the extraction generations hold end-to-end (EXT-01..17): complete-or-failed, versioned, disposable, owner-scoped, the deadlock class on the SQLSTATE code")
     return 0
 
 

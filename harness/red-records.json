@@ -592,7 +592,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-052 (P3-03a) RED: the extraction suite's machinery-absent class observed at the predecessor 0ce7077 (commit A b9c8920 carries the suite; extract.py/0006_extraction_generations.sql absent, the extract_source command absent from the REGISTRY — the waiting-for-harness form, the S1/record-18 §4.1 + P3-01/P3-02 precedent; exit 1, red-01.txt) — the implementation lands AFTER this RED, never before it (LAW-11)",
-    "current_sha256": "2a7bbbfbc78a24f8d8ba78340acf805155d8ea97d5f1df7d029a513f48b97f6d",
+    "current_sha256": "21e4114e7d009a37db003a94c84d63953b0dda3f199c121c7efd7b24603c90e5",
     "amendments": [
       {
         "prior_sha256": "55ea59a5c5c3610ffff0e2dc104e74c04756bfd5af91b5b8b95a759a6a90b9e8",
@@ -616,6 +616,12 @@
         "new_sha256": "2a7bbbfbc78a24f8d8ba78340acf805155d8ea97d5f1df7d029a513f48b97f6d",
         "note": "the #87 CodeRabbit round 2's two findings, both pinned RED-first (red-03.txt at dc76e29): EXT-14 the deadlock-race class — the SEV round's choreographed completions had OBSERVED the class live (deadlock detected, one session aborted) but the pre-fix classifier sent the loser to the generic SQL-error branch, PERMANENTLY failing a generation over a transient race; the repair classifies 'deadlock detected' (SQLSTATE 40P01's message) as the retryable ARV-EXT-006 (zero effect, the building row persists, the same-key retry completes it) — pinned by a planted deadlock-raising trigger with the retry; EXT-15 the same-key replay of a FAILED generation answered ACK status=replayed exit 0 (a silent success for a recorded failure); the repair answers the recorded failure — exit 1 + the stored reason, zero new rows. Assertions ADD (two cases), none removed; the summary EXT-01..13 -> EXT-01..15",
         "observed_at": "2026-10-26T13:20:00+00:00"
+      },
+      {
+        "prior_sha256": "2a7bbbfbc78a24f8d8ba78340acf805155d8ea97d5f1df7d029a513f48b97f6d",
+        "new_sha256": "21e4114e7d009a37db003a94c84d63953b0dda3f199c121c7efd7b24603c90e5",
+        "note": "the #87 CodeRabbit round 3's finding (the deadlock classification by MESSAGE TEXT misroutes in BOTH directions: a genuine 40P01 with a LOCALIZED message is marked failed — a permanent state for a transient race; a P0001 impostor carrying the text is granted retryability — the row stays building forever), pinned RED-first (red-04.txt at 4ee740e27497f7b5f435f0235eb7c7315b8edb99): EXT-16 the localized genuine 40P01 — the retryable ARV-EXT-006 by the SQLSTATE CODE channel read from the session's verbose-verbosity stderr, the same-key retry completes it; EXT-17 the P0001 text impostor — the named mid-build failure ARV-EXT-003 with the code visible in the recorded cause; EXT-14's trigger hardened to raise the GENUINE 40P01 SQLSTATE. Assertions ADD (two cases), none removed; the summary EXT-01..15 -> EXT-01..17",
+        "observed_at": "2026-10-27T06:05:09.824451+00:00"
       }
     ]
   }

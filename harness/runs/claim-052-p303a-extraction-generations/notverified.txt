@@ -4,7 +4,8 @@ generations; LAW-04; never empty-by-omission)
 WHAT THIS SLICE PROVES, ON WHAT STACK: the derived generation machine
 (building -> current/failed complete-or-failed; the versioned lineage with
 superseded retained; the crash matrix; the same-key resume/replay; the
-disposable §2.9 conventions; the owner isolation) GREEN in the suite EXT-01..13
+disposable §2.9 conventions; the owner isolation; the deadlock class on the
+SQLSTATE code) GREEN in the suite EXT-01..17
 on the rig's user-space PostgreSQL 17 (loopback, trust auth) — the five-check
 CI run at the pushed head is the walls' verification of the pushed tree
 (INT-104): no in-file result covers the pushed head itself.
@@ -46,9 +47,19 @@ the SEV round's 24 edge probes, but the suite's fixture carries neither shape.
 THE CONCURRENT-LOSER PATH: the SEV round's live races (4 concurrent process
 races + 2 concurrent same-key resumes: single-current held, the loser
 ARV-CMD-011 with zero effect) are the evidence; the DEADLOCK class is now
-pinned deterministically (EXT-14 — the planted deadlock-raising trigger), but
+pinned deterministically on the CODE channel (EXT-14 the genuine 40P01,
+EXT-16 the localized arm, EXT-17 the impostor arm — the #87 round 3), but
 a true multi-process in-suite race case is not pinned (the suite is serial by
 design).
+
+THE LOCALIZED DUP-KEY LABEL (the #87 round 3's honest boundary): extract's
+classifier routes the 23505 CODE to the spine's 011/replay classes (never
+_mark_failed); on a LOCALIZED rig the spine's English _DUP text may miss and
+the honest ARV-CMD-010 'unrecognized' prints instead of 011 — the same exit,
+the same same-key-retry repair, never a wrong verdict and never a failed row
+(the pre-fix tree was WORSE: a localized dup-key landed in _mark_failed as a
+permanent failure). The spine's own default-verbosity text classes are its
+bounded follow-up, never this slice's.
 
 THE SEV REVIEWER'S REMOTE OBSERVATIONS: the reviewer's sandbox was GitHub-API
 rate-limited — the CLAIM-051 close-row merge facts (0ce7077, run 40291330001)

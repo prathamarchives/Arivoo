@@ -57,6 +57,7 @@
       "the independent two-round SEV chain: round 1 BLOCKED (agent-7de931cd: the REAL NUL-corruption P1 + 7 P3) -> every finding fixed RED-first or routed -> round 2 PASS (the reviewer's own five NUL variants + eight transport siblings + the four suite runs + make verify); proof run-15",
       "the CodeRabbit round 1's five inline findings all fixed in-PR, every thread dispositioned BEFORE resolution; proof the PR thread record",
       "the CodeRabbit round 2's two findings (the deadlock-race class — the SEV round's own live observation, now the retryable ARV-EXT-006 pinned by EXT-14; the failed-generation replay — exit 1 + the recorded reason, pinned by EXT-15) both fixed RED-first (red-03.txt at dc76e29); proof run-17, run-18",
+      "the CodeRabbit round 3's finding (the deadlock classification by message text — both directions misroute) fixed RED-first: the verbose-verbosity SQLSTATE channel + the code-driven classifier, pinned by EXT-14 (genuine 40P01) + EXT-16 (localized) + EXT-17 (the P0001 impostor) (red-04.txt at 4ee740e); proof run-20, run-21",
       "make verify GREEN 54/0 at the repair trees (the run-14 exit-2 at the banner-defect tree preserved beside the run-15 retry — the honest red, never smoothed); proof run-14, run-15"
     ]
   },
@@ -131,6 +132,13 @@
       "status": "resolved",
       "what": "the same-key replay of a FAILED generation answered ACK status=replayed exit 0 — a silent success for a recorded failure (the SEV round's F5)",
       "resolution": "fixed RED-first: the replay answers the recorded failure — exit 1 + the stored fail_reason, zero new rows; pinned by EXT-15 (red-03.txt at dc76e29)"
+    },
+    {
+      "id": "CR-R3-F1",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the deadlock classification matched the MESSAGE TEXT 'deadlock detected' — both directions misroute: a genuine SQLSTATE 40P01 with a localized message falls to the generic SQL-error branch (the generation PERMANENTLY failed over a transient race), while a P0001 impostor carrying the text is granted retryability (the row stays building forever, no failure recorded)",
+      "resolution": "fixed RED-first (red-04.txt at 4ee740e): the extraction session runs psql at VERBOSITY=verbose so a dead session's drained stderr carries 'ERROR:  <SQLSTATE>: <message>'; the classifier matches the CODE — 40P01 the retryable ARV-EXT-006 (EXT-16 the localized arm, the same-key retry completes it), any other code the named mid-build failure ARV-EXT-003 (EXT-17 the impostor arm, the code visible in the recorded cause), 23505 delegated to the spine's 011/replay classes; EXT-14's trigger hardened to raise the GENUINE 40P01"
     }
   ],
   "not_verified": [
@@ -141,9 +149,10 @@
     "the media-type non-gate: an application/pdf that decodes as UTF-8 extracts cleanly — the boundary is the DECODE by design (P3-01's convention)",
     "the splitter's two unpinned edges (the trailing-heading passage, the leading-blank prefix): SEV-probed (24 edge cases) but not suite-pinned — the fixture carries neither shape",
     "a true multi-process in-suite race case is not pinned (the suite is serial by design; the deadlock CLASS itself is pinned by EXT-14's planted trigger)",
-    "the CI-host class: the five-check run at the pushed head is the walls' verification of the pushed tree (INT-104) — no in-file result covers the pushed head itself"
+    "the CI-host class: the five-check run at the pushed head is the walls' verification of the pushed tree (INT-104) — no in-file result covers the pushed head itself",
+    "the localized dup-key LABEL: extract's classifier routes the 23505 CODE to the spine's 011/replay classes (never _mark_failed); on a localized rig the spine's English _DUP text may miss and the honest 010 prints instead of 011 — the same exit, the same same-key-retry repair, never a wrong verdict (the spine's default-verbosity text classes are its own bounded follow-up)"
   ],
-  "builder_context": "builder-glm-host-session31-claim052 (the host GLM agent that authored the slice: commit A's RED declaration [the previous session], commit B's GREEN, the CodeRabbit round's five fixes, the SEV round-1 repairs, and the finalize — every fix in-slice)",
+  "builder_context": "builder-glm-host-session31-claim052 (the host GLM agent that authored the slice: commit A's RED declaration [the previous session], commit B's GREEN, the CodeRabbit round's five fixes, the SEV round-1 repairs, the finalize, and the #87 round-3 SQLSTATE-channel repair — every fix in-slice)",
   "reviewer_context": "fresh-context GLM SEV reviewer agent-7de931cd (round 1 BLOCKED at 0be970f: 1 P1 + 7 P3 — the P1 the REAL NUL-corruption defect found end-to-end with its own probes; round 2 PASS at 3d00851: F1 re-verified CLOSED over five NUL variants + eight transport siblings, F2/F3/F4/F6/F8 CLOSED, F5/F7 acknowledged-routed, N1 the one cosmetic fixed in the finalize; both reports verbatim in the session record §7)",
   "disposition": "PASS",
   "review_summary": "Round 1 BLOCKED: the NUL-corruption P1 was real and serious — the machine ACKed a corrupted current generation (a passage that was not the slice its offsets and digest claimed) — plus seven P3 claim-accuracy findings; no evidence fabrication found anywhere (the red-record binding, the RED reproduction, the amendment chains all verified byte-level). The builder fixed the P1 RED-first (the EXT-13 pin with the observed RED preserved, the ARV-EXT-005 refusal before any row) and corrected every wording truth. Round 2 PASS: the repair re-verified against the reviewer's own fresh probes (five NUL variants all refused with zero rows; eight transport siblings all clean — NUL is the only byte that breaks the psql literal transport; the suite four times green; make verify exit 0), every closed finding re-read in the tree, F5/F7 honestly routed into the finalize's notverified and navigation updates. The generation machine is behaviorally sound: complete-or-failed held at every failure position (including the reviewer's choreographed deadlocks and live process races — single-current never broken, the loser always zero-effect), the versioned lineage and the §2.9 disposable conventions verified at the catalog level, the owner isolation closed on both layers.",

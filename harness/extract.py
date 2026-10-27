@@ -266,9 +266,8 @@ def extract_source(*, db, owner, actor, client_id, idem_key, source_id,
     body_hash = hashlib.sha256(canonical_body(command="extract_source", client_id=client_id,
                                                owner_scope=owner, actor=actor,
                                                payload=body).encode()).hexdigest()
-    # psql's verbose format: a dead session's stderr carries 'ERROR:  <SQLSTATE>: <msg>'
     sess = Session(db, "arv_app", owner)
-    sess.send("\\set VERBOSITY verbose")  # the CODE classifies, never the text
+    sess.send("\\set VERBOSITY verbose")  # verbose stderr: 'ERROR:  <SQLSTATE>: <msg>' — the CODE classifies
     try:
         digest = _sess_row(sess, f"SELECT digest || '|' FROM arv.source "
                                  f"WHERE id={_q(source_id)};").split("|")[0]

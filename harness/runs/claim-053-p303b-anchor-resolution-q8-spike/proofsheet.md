@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-053-p303b-anchor-resolution-q8-spike (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 2d7e94ab150df33047b8f4d1d1127e0baee838df
-- generated (last record's timestamp): 2026-10-27T13:02:03.953729+00:00
-- run records: 20
+- commit (last run record's): 026eae3b8ea4d6de488486b8ae01528a20ce2145
+- generated (last record's timestamp): 2026-10-27T13:24:13.071309+00:00
+- run records: 22
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_anchor.py` -> exit 0 · output sha256 6524242680a49821 · 2026-10-27T12:19:15.431832+00:00
@@ -25,6 +25,8 @@
 - `make verify` -> exit 0 · output sha256 f5482f97063c6fef · 2026-10-27T12:25:05.531043+00:00
 - `python3 harness/gate.py --slice claim-053-p303b-anchor-resolution-q8-spike --diff origin/main` -> exit 1 · output sha256 64c8d3ddd3ad0c8d · 2026-10-27T12:51:34.604701+00:00
 - `python3 harness/gate.py --slice claim-053-p303b-anchor-resolution-q8-spike --diff origin/main` -> exit 0 · output sha256 29da4321a826ac5e · 2026-10-27T13:02:03.953729+00:00
+- `python3 harness/gate.py --slice claim-053-p303b-anchor-resolution-q8-spike --diff origin/main` -> exit 1 · output sha256 64c8d3ddd3ad0c8d · 2026-10-27T13:16:43.376652+00:00
+- `python3 harness/gate.py --slice claim-053-p303b-anchor-resolution-q8-spike --diff origin/main` -> exit 0 · output sha256 da91f4a34bd95eff · 2026-10-27T13:24:13.071309+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - NOT VERIFIED — the honest limits of CLAIM-053 / P3-03b (the anchor
@@ -79,11 +81,11 @@
 - (the convention; a committed file cannot guarantee external state, INT-104).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: c7c14499da5e24ad11f03716dc2d8dd93fad396bead2af3e5633e64d2d3900b5
-- reviewed_diff_sha256: 666ea3897f32adf7fd64c5e039237e77519aefdac12447da8125f6e8dc494852
+- report sha256: 398be46fd6d532147b34599f4101faf75835bfd1c2d06a94e3b64ea2932c5111
+- reviewed_diff_sha256: 425daba2f795e8af81640493ee5e9c57d12cfd584852ec5a4a92a1daef252a52
 - disposition: PASS
 - findings: 6 (open P0/P1: 0)
 - not-verified entries: 7
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 766b6a0fb8355804b3134fa820b333605a2bc2f0fd5d67c0564fc548811dcc9f
+- sheet sha256 (of the content above, excluding this line): 0bcaf7d0138ff41e250efd60e07f6e34834aa06983c7fcb6f946b809af3f4686

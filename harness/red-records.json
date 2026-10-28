@@ -661,13 +661,19 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the P3-04 RED observed at the predecessor tree b200e55 + commit 45bd8f7's suite (machinery-absent ARV-TEST-000: revise_highlight/tombstone_highlight/restore_highlight absent, query.py's get-history arm absent, migration 0007 absent \u2014 the transcript at harness/runs/claim-054-p304-highlight-revisions/red-01.txt)",
-    "current_sha256": "8d59630a1eba7279229b897ea7b48e47e223f23ace675a5f5929a0992874031c",
+    "current_sha256": "b57786297684eceea0118035ccc2ebea834c1bbda00c6d39effb205eaf005515",
     "amendments": [
       {
         "prior_sha256": "e4cfc21f187929512d5953ce6a0edf870c3fad29c8445d28fd2daef71dcdf325",
         "new_sha256": "8d59630a1eba7279229b897ea7b48e47e223f23ace675a5f5929a0992874031c",
         "note": "the HLG suite's post-RED repairs (commit B's implementation cycle, every defect found by the suite itself and recorded at record 45 \u00a78: the two-sided mutation-rejection pin after the identity-constraint fix, the DISTINCT-list and parity-int corrections in the probes, the pg_catalog schema reads, the --work-id re-import probe) \u2014 the typed amendment chaining from the 45bd8f7 binding per the registry's protocol",
         "observed_at": "2026-10-28T06:19:15.356876+00:00"
+      },
+      {
+        "prior_sha256": "8d59630a1eba7279229b897ea7b48e47e223f23ace675a5f5929a0992874031c",
+        "new_sha256": "b57786297684eceea0118035ccc2ebea834c1bbda00c6d39effb205eaf005515",
+        "note": "the #89 review round's four HLG repairs, batched then re-recorded ONCE (4397524897's sequencing): HLG-04b each writer's OWN outcome asserted (committed or the typed ARV-CMD-011 zero-effect refusal \u2014 4397419963), HLG-06 an ACTIVE owner-A fixture beside the tombstoned ones + the listing success/presence assertions (4397419971), HLG-11 relforcerowsecurity pinned beside relrowsecurity (4397419978 \u2014 ENABLED is not FORCED), main()'s finally drops the scratch DB per the anchor-suite ARV_KEEP_DB convention (4397419985); the observed GREEN runs at this tree the authorization evidence",
+        "observed_at": "2026-10-28T10:45:22.931500+00:00"
       }
     ]
   }

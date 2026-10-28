@@ -349,16 +349,23 @@ def main() -> int:
                                "--client-id", "cli-r", "--idem-key", "race-B",
                                "--id", h1, "--start", str(s2), "--end", str(e2)],
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=ENV)
-        ra.communicate(timeout=180)
-        rb.communicate(timeout=180)
+        out_a, _err_a = ra.communicate(timeout=180)
+        out_b, _err_b = rb.communicate(timeout=180)
         contig2 = audit_rows(f"SELECT revision FROM arv.highlight WHERE id='{h1}' ORDER BY revision;")
-        race_ok = (len(contig2) in (3, 4)
+        # each writer's OWN outcome asserted, never discarded (the #89 round-2
+        # finding: an unchecked exit could hide an unrelated failure behind the
+        # ordinal backstop): committed (exit 0) OR the typed ordinal-race
+        # refusal (ARV-CMD-011, zero effect) — anything else is a defect
+        ra_ok = ra.returncode == 0 or "ARV-CMD-011" in out_a
+        rb_ok = rb.returncode == 0 or "ARV-CMD-011" in out_b
+        race_ok = (ra_ok and rb_ok
+                   and len(contig2) in (3, 4)
                    and contig2 == [str(i) for i in range(1, len(contig2) + 1)]
                    and all(a_ != "" for a_ in audit_rows(
                        "SELECT h.anchor_id FROM arv.highlight h JOIN arv.anchor a ON a.id=h.anchor_id "
                        f"WHERE h.id='{h1}' ORDER BY h.revision;")))
         check("HLG-04b", race_ok,
-              "the concurrent revise race: both writers finish, every lawful outcome leaves the ordinals contiguous (the loser's 011 is zero-effect; serialization is lawful too)",
+              "the concurrent revise race: each writer's OWN outcome asserted (committed or the typed ARV-CMD-011 zero-effect refusal — anything else fails), both writers finish, every lawful outcome leaves the ordinals contiguous (serialization is lawful too)",
               "the ordinal convention: the loser's insert aborts — an honest retry re-reads; never a gap, never a duplicate ordinal")
 
         # ---- HLG-05 — the crash matrix (revise + tombstone at each boundary)
@@ -403,6 +410,10 @@ def main() -> int:
         # ---- HLG-06 — the tombstone/restore machine (a FRESH highlight: h6)
         p6 = mk_highlight("hl-A6", sid_a, s1, e1)
         h6 = ack_field(p6, "result_ref")
+        # the #89 round-2 finding: an ACTIVE owner-A fixture beside the tombstoned
+        # ones — the exclusion checks must not pass vacuously over an empty listing
+        p7 = mk_highlight("hl-A7", sid_a, s1, e1)
+        h7 = ack_field(p7, "result_ref")
         p = lifecycle("tombstone_highlight", "tomb-A1", h6)
         get_t = qy("get-capture", "A", h6)
         listing = cli(str(REPO / "harness" / "query.py"), "list-captures", "--owner", "A")
@@ -433,6 +444,7 @@ def main() -> int:
         ev_after = int(audit(f"SELECT count(*) FROM arv.highlight_lifecycle WHERE highlight_id='{h6}';"))
         ok6 = (p.returncode == 0 and "status=committed" in p.stdout
                and get_t.returncode == 1 and "ARV-QRY-003" in get_t.stdout
+               and listing.returncode == 0 and h7 in listing.stdout.split()
                and h6 not in listing.stdout.split()
                and h1 not in listing.stdout.split()                   # h1 tombstoned by c6's lost-ack commit
                and len([r for r in hist_t if r.get("kind") == "lifecycle"]) == 1
@@ -447,7 +459,7 @@ def main() -> int:
                and "ARV-CAP-005" in upl.stderr and "ARV-CAP-005" in delel.stderr
                and ev_after == 5)                                    # 4 lawful + tomb-A5
         check("HLG-06", ok6,
-              "tombstone hides from get-capture (ARV-QRY-003) + list-captures; history retains all; restore returns it; double-tombstone/restore-of-active/revise-of-tombstoned refused by name; the lifecycle rows' own mutations refused; the DB alternation trigger refuses the hostile duplicate",
+              "tombstone hides from get-capture (ARV-QRY-003) + list-captures (the ACTIVE fixture stays listed — the exclusion is never vacuous over an empty listing); history retains all; restore returns it; double-tombstone/restore-of-active/revise-of-tombstoned refused by name; the lifecycle rows' own mutations refused; the DB alternation trigger refuses the hostile duplicate",
               "the §3.3 machine: alternation enforced at the command boundary AND the substrate; the governed history never loses a row")
 
         # ---- HLG-07 — the identity-fix pin (re-import NEVER retargets)
@@ -526,6 +538,10 @@ def main() -> int:
         trg = set(audit("SELECT tgname FROM pg_trigger WHERE "
                         "tgrelid='arv.highlight_lifecycle'::regclass AND NOT tgisinternal;").split())
         rls = audit("SELECT relrowsecurity FROM pg_class WHERE relname='highlight_lifecycle';")
+        # the #89 round-2 finding: ENABLED is not FORCED — relrowsecurity alone
+        # would pass a NO FORCE migration whose table owner bypasses the policy
+        # (PostgreSQL 17's owner-bypass distinction, ddl-rowsecurity)
+        rls_f = audit("SELECT relforcerowsecurity FROM pg_class WHERE relname='highlight_lifecycle';")
         grant_app = set(audit("SELECT privilege_type FROM aclexplode((SELECT relacl FROM "
                               "pg_class WHERE relname='highlight_lifecycle')) WHERE grantee = "
                               "(SELECT oid FROM pg_roles WHERE rolname='arv_app');").split())
@@ -537,11 +553,11 @@ def main() -> int:
         pol = audit("SELECT count(*) FROM pg_policies WHERE schemaname='arv' AND "
                     "tablename='highlight_lifecycle' AND policyname='owner_isolation';")
         ok11 = (no_defs and trg == {"lifecycle_guard", "highlight_lifecycle_immutable"}
-                and rls == "t"
+                and rls == "t" and rls_f == "t"
                 and grant_app >= {"INSERT", "SELECT"} and grant_read == {"SELECT"}
                 and no_fk == "0" and pol == "1")
         check("HLG-11", ok11,
-              "0007's conventions: no DEFAULTs (LAW-24), the append-only + insert-guard triggers (the composite-reference intent in its trigger form — the revision-per-row shape cannot back a literal FK), RLS forced + owner policy, arv_app INSERT/SELECT + arv_read SELECT",
+              "0007's conventions: no DEFAULTs (LAW-24), the append-only + insert-guard triggers (the composite-reference intent in its trigger form — the revision-per-row shape cannot back a literal FK), RLS enabled AND FORCED (relforcerowsecurity — the owner does not bypass; not relrowsecurity alone) + owner policy, arv_app INSERT/SELECT + arv_read SELECT",
               "the 0002/0004 substrate conventions hold on every authoritative table")
 
         # ---- HLG-12 — the row-protocol framing (U+2028 on the new arm)
@@ -575,7 +591,11 @@ def main() -> int:
         print("GREEN — the P3-04 acceptance suite (HLG-01..12) passes")
         return 0
     finally:
-        pass
+        # the #89 round-2 finding: the rig's scratch database DROPPED after every
+        # suite run (the anchor/capture-suite convention; ARV_KEEP_DB overrides
+        # for local inspection) — never left behind on a persistent rig
+        if not os.environ.get("ARV_KEEP_DB"):
+            pg.drop_scratch_db(DB)
 
 
 if __name__ == "__main__":

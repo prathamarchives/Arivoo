@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_highlight.py",
+  "exit_code": 0,
+  "commit": "84b31b737f965fef57d8832d28e1ebc6066fe15d",
+  "output_sha256": "5add459be781a2838d91bb0f1865cd300bb571f6daebf9a3d3a209c5de45b7ec",
+  "recorded_at": "2026-10-28T10:53:00.209989+00:00"
+}

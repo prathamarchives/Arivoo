@@ -14,6 +14,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.commands import record_event, import_source, create_highlight  # noqa: E402
+from harness.commands import revise_highlight, tombstone_highlight, restore_highlight  # noqa: E402
 from harness.extract import extract_source  # noqa: E402
 
 POINTS = ("after-begin", "pre-commit", "post-commit-pre-ack",
@@ -33,7 +34,8 @@ def main() -> int:
     ap = _UsageParser(description="crash-injection helper (S3 + P3-01 + P3-02)")
     ap.add_argument("--command", default="record_event",
                     choices=["record_event", "import_source", "create_highlight",
-                             "extract_source"])
+                             "extract_source", "revise_highlight", "tombstone_highlight",
+                             "restore_highlight"])
     ap.add_argument("--point", required=True, choices=POINTS)
     ap.add_argument("--owner", required=True)
     ap.add_argument("--actor", default="owner")
@@ -48,6 +50,7 @@ def main() -> int:
     ap.add_argument("--source-id", default=None)
     ap.add_argument("--start", default=None, type=int)
     ap.add_argument("--end", default=None, type=int)
+    ap.add_argument("--id", default=None, help="the highlight id (the P3-04 family)")
     a = ap.parse_args()
     if a.command != "import_source" and a.point not in SPINE_POINTS:
         print(f"CRASH-USAGE: the point {a.point!r} is an import-phase boundary — it exists "
@@ -65,6 +68,16 @@ def main() -> int:
     elif a.command == "extract_source":
         rc = extract_source(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                             idem_key=a.idem_key, source_id=a.source_id, crash_at=a.point)
+    elif a.command == "revise_highlight":
+        rc = revise_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                              idem_key=a.idem_key, id_=a.id, start=a.start, end=a.end,
+                              crash_at=a.point)
+    elif a.command == "tombstone_highlight":
+        rc = tombstone_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                 idem_key=a.idem_key, id_=a.id, crash_at=a.point)
+    elif a.command == "restore_highlight":
+        rc = restore_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                               idem_key=a.idem_key, id_=a.id, crash_at=a.point)
     else:
         rc = create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                               idem_key=a.idem_key, source_id=a.source_id,

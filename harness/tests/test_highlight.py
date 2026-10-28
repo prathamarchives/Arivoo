@@ -206,6 +206,16 @@ def app_sql(sql: str, owner: str = "A") -> subprocess.CompletedProcess:
                            capture_output=True, text=True, timeout=60, env=ENV)
 
 
+def super_sql(sql: str) -> subprocess.CompletedProcess:
+    """The append-only trigger's own audience: a role WITH update/delete
+    permission (the rig superuser) — the trigger fires where the least-privilege
+    app role is stopped earlier at the permission boundary (both refusals are
+    the substrate's law; this pins the TRIGGER)."""
+    return subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                            "-U", "postgres", "-d", DB, "-c", sql],
+                           capture_output=True, text=True, timeout=60, env=ENV)
+
+
 def ack_field(p: subprocess.CompletedProcess, field: str) -> str:
     for ln in p.stdout.splitlines():
         if field + "=" in ln:
@@ -273,17 +283,23 @@ def main() -> int:
               "revise appends immutable revision 2 (re-derived content + a NEW anchor row); the prior revision byte-unchanged; the ack carries revision=2 + durability_rung=local_durable",
               "the revision machine must append a new immutable row derived from the same source version's stored bytes, never mutate the prior row")
 
-        # ---- HLG-02 — mutation rejection on the authored rows
+        # ---- HLG-02 — mutation rejection on the authored rows (two-sided: the
+        # least-privilege permission boundary + the append-only TRIGGER behind it)
         before = audit(f"SELECT count(*) FROM arv.highlight WHERE id='{h1}';")
         up = app_sql(f"UPDATE arv.highlight SET selected_text='forged' WHERE id='{h1}';")
         dele = app_sql(f"DELETE FROM arv.highlight WHERE id='{h1}';")
+        up_t = super_sql(f"UPDATE arv.highlight SET selected_text='forged' WHERE id='{h1}';")
+        dele_t = super_sql(f"DELETE FROM arv.highlight WHERE id='{h1}';")
         after = audit(f"SELECT count(*) FROM arv.highlight WHERE id='{h1}';")
         sel1 = audit(f"SELECT selected_text FROM arv.highlight WHERE id='{h1}' AND revision=1;")
-        ok2 = ("ARV-CAP-005" in up.stderr and "ARV-CAP-005" in dele.stderr
+        ok2 = (up.returncode == 1 and "permission denied" in up.stderr      # the app role's least privilege
+               and dele.returncode == 1 and "permission denied" in dele.stderr
+               and "ARV-CAP-005" in up_t.stderr                            # the trigger behind it
+               and "ARV-CAP-005" in dele_t.stderr
                and before == after == "2" and sel1 == TEXT[s1:e1])
         check("HLG-02", ok2,
-              "direct-DB UPDATE/DELETE on the authored rows refused (ARV-CAP-005); the history intact after",
-              "the append-only trigger must refuse every mutation of the authoritative rows (SYS-02)")
+              "direct-DB UPDATE/DELETE on the authored rows refused at BOTH boundaries (the app role's permission denial; the superuser's ARV-CAP-005 append-only trigger); the history intact after",
+              "the append-only trigger must refuse every mutation of the authoritative rows (SYS-02) — permission denial alone is not the trigger's proof")
 
         # ---- HLG-03 — dangling/absent + cross-owner isolation
         pr1 = revise("rev-abs", "00000000-0000-7000-8000-000000000001", s1, e1)
@@ -405,8 +421,15 @@ def main() -> int:
                           f"('00000000-0000-7000-8000-00000000000a', '{h6}', 'tombstone', 'A', "
                           f"'owner', 'hostile-run', 'hostile-hash', 'hostile-key', "
                           f"'2026-10-28T00:00:00+00:00');")
-        upl = app_sql(f"UPDATE arv.highlight_lifecycle SET event='restore' WHERE highlight_id='{h6}';")
-        delel = app_sql(f"DELETE FROM arv.highlight_lifecycle WHERE highlight_id='{h6}';")
+        upl = super_sql(f"UPDATE arv.highlight_lifecycle SET event='restore' WHERE highlight_id='{h6}';")
+        delel = super_sql(f"DELETE FROM arv.highlight_lifecycle WHERE highlight_id='{h6}';")
+        # the guard's existence arm: a lifecycle row for a NONEXISTENT highlight is refused at the substrate
+        ghost = app_sql(f"INSERT INTO arv.highlight_lifecycle (id, highlight_id, event, owner_scope, "
+                        f"actor, run_id, input_hash, idempotency_key, created_at) VALUES "
+                        f"('00000000-0000-7000-8000-00000000000b', "
+                        f"'00000000-0000-7000-8000-00000000000c', 'tombstone', 'A', "
+                        f"'owner', 'hostile-run', 'hostile-hash', 'hostile-ghost', "
+                        f"'2026-10-28T00:00:00+00:00');")
         ev_after = int(audit(f"SELECT count(*) FROM arv.highlight_lifecycle WHERE highlight_id='{h6}';"))
         ok6 = (p.returncode == 0 and "status=committed" in p.stdout
                and get_t.returncode == 1 and "ARV-QRY-003" in get_t.stdout
@@ -420,6 +443,7 @@ def main() -> int:
                and p_res_active.returncode == 1 and "ARV-HLC-004" in p_res_active.stdout
                and ev_count == 4                                     # tomb,res,tomb,res — one per LAWFUL transition
                and "ARV-HLC-003" in hostile.stderr                   # the substrate refuses the duplicate
+               and "ARV-HLC-001" in ghost.stderr                     # the substrate refuses the nonexistent target
                and "ARV-CAP-005" in upl.stderr and "ARV-CAP-005" in delel.stderr
                and ev_after == 5)                                    # 4 lawful + tomb-A5
         check("HLG-06", ok6,
@@ -428,7 +452,7 @@ def main() -> int:
 
         # ---- HLG-07 — the identity-fix pin (re-import NEVER retargets)
         lifecycle("restore_highlight", "res-A0", h1)                  # back to active for the revise
-        p_v2 = import_src("imp-A2", "Revisions", str(src_file), work_id=wid_a)
+        p_v2 = import_src("imp-A2", None, str(src_file), work_id=wid_a)
         sid_v2 = ack_field(p_v2, "result_ref")
         ver = audit(f"SELECT source_version FROM arv.source WHERE id='{sid_v2}';")
         src_before = audit_rows(f"SELECT DISTINCT source_id FROM arv.highlight WHERE id='{h1}';")
@@ -444,11 +468,8 @@ def main() -> int:
               "identity-fixed by construction — a revision NEVER crosses Source versions (SYS-05); the edition is a different source row")
 
         # ---- HLG-08 — re-extraction stability
-        pe = subprocess.run([sys.executable, str(REPO / "harness" / "commands.py"),
-                             "extract_source", "--owner", "A", "--actor", "owner",
-                             "--client-id", "cli-1", "--idem-key", "ext-A2",
-                             "--source-id", sid_a], capture_output=True, text=True,
-                            env=ENV, timeout=180)
+        pe = cli(str(REPO / "harness" / "extract.py"), "--owner", "A", "--actor", "owner",
+                 "--client-id", "cli-1", "--idem-key", "ext-A2", "--source-id", sid_a)
         n_rev = int(audit(f"SELECT count(*) FROM arv.highlight WHERE id='{h1}';"))
         n_anc = int(audit(f"SELECT count(*) FROM arv.highlight h JOIN arv.anchor a ON a.id=h.anchor_id "
                           f"WHERE h.id='{h1}';"))
@@ -496,33 +517,31 @@ def main() -> int:
               "create/revise/tombstone/restore acks ALL name durability_rung=local_durable",
               "SYS-01: the acknowledgment names the rung the store independently knows — never the request's send state")
 
-        # ---- HLG-11 — the schema-convention audits (0007)
+        # ---- HLG-11 — the schema-convention audits (0007; the pg_catalog reads —
+        # information_schema hides other roles' grants/triggers from arv_read)
         cols = audit_rows("SELECT column_name || '|' || COALESCE(column_default, '-') FROM "
                           "information_schema.columns WHERE table_schema='arv' AND "
                           "table_name='highlight_lifecycle' ORDER BY ordinal_position;")
         no_defs = all(c.split("|")[1] == "-" for c in cols)
-        trg_upd = audit("SELECT count(*) FROM information_schema.triggers WHERE "
-                        "event_object_table='highlight_lifecycle' AND event_manipulation='UPDATE';")
-        trg_ins = audit("SELECT count(*) FROM information_schema.triggers WHERE "
-                        "event_object_table='highlight_lifecycle' AND event_manipulation='INSERT';")
+        trg = set(audit("SELECT tgname FROM pg_trigger WHERE "
+                        "tgrelid='arv.highlight_lifecycle'::regclass AND NOT tgisinternal;").split())
         rls = audit("SELECT relrowsecurity FROM pg_class WHERE relname='highlight_lifecycle';")
-        grant_app = set(audit("SELECT string_agg(privilege_type, ',' ORDER BY privilege_type) FROM "
-                              "information_schema.role_table_grants WHERE table_schema='arv' AND "
-                              "table_name='highlight_lifecycle' AND grantee='arv_app';").split(","))
-        grant_read = set(audit("SELECT string_agg(privilege_type, ',' ORDER BY privilege_type) FROM "
-                               "information_schema.role_table_grants WHERE table_schema='arv' AND "
-                               "table_name='highlight_lifecycle' AND grantee='arv_read';").split(","))
-        ident = audit("SELECT count(*) FROM pg_constraint WHERE conrelid='arv.highlight'::regclass "
-                      "AND contype='u' AND (SELECT count(*) FROM unnest(conkey)) = 2;")
-        fk = audit("SELECT count(*) FROM pg_constraint WHERE conrelid='arv.highlight_lifecycle'::regclass "
-                   "AND contype='f' AND confrelid='arv.highlight'::regclass;")
+        grant_app = set(audit("SELECT privilege_type FROM aclexplode((SELECT relacl FROM "
+                              "pg_class WHERE relname='highlight_lifecycle')) WHERE grantee = "
+                              "(SELECT oid FROM pg_roles WHERE rolname='arv_app');").split())
+        grant_read = set(audit("SELECT privilege_type FROM aclexplode((SELECT relacl FROM "
+                               "pg_class WHERE relname='highlight_lifecycle')) WHERE grantee = "
+                               "(SELECT oid FROM pg_roles WHERE rolname='arv_read');").split())
+        no_fk = audit("SELECT count(*) FROM pg_constraint WHERE "
+                      "conrelid='arv.highlight_lifecycle'::regclass AND contype='f';")
         pol = audit("SELECT count(*) FROM pg_policies WHERE schemaname='arv' AND "
                     "tablename='highlight_lifecycle' AND policyname='owner_isolation';")
-        ok11 = (no_defs and trg_upd == "1" and trg_ins == "1" and rls == "t"
+        ok11 = (no_defs and trg == {"lifecycle_guard", "highlight_lifecycle_immutable"}
+                and rls == "t"
                 and grant_app >= {"INSERT", "SELECT"} and grant_read == {"SELECT"}
-                and ident == "1" and fk == "1" and pol == "1")
+                and no_fk == "0" and pol == "1")
         check("HLG-11", ok11,
-              "0007's conventions: no DEFAULTs (LAW-24), the append-only + alternation triggers, RLS forced + owner policy, arv_app INSERT/SELECT + arv_read SELECT, the highlight identity constraint + the composite FK",
+              "0007's conventions: no DEFAULTs (LAW-24), the append-only + insert-guard triggers (the composite-reference intent in its trigger form — the revision-per-row shape cannot back a literal FK), RLS forced + owner policy, arv_app INSERT/SELECT + arv_read SELECT",
               "the 0002/0004 substrate conventions hold on every authoritative table")
 
         # ---- HLG-12 — the row-protocol framing (U+2028 on the new arm)

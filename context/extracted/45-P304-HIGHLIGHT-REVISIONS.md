@@ -1,0 +1,76 @@
+# 45 — CLAIM-054: P3-04 — Highlight and immutable revisions (+ the post-#88 bookkeeping reconciliation)
+
+Session 32 continuation (the standing do-not-stop chain INT-134/135/138/139/140, now INT-141);
+PLAN's P3-04 card (the revision/tombstone machine of RTM §3.3/§2.5); the bounded exclusions
+per the card: bookmark is P3-05's, notes are P3-06's, the governed purge is P3-06/09's.
+
+> STATUS: SESSION ENGINEERING RECORD (2026-10-28; intent refs INT-127/131/134/135/138/139/140/141; decision refs D-036/D-038/D-041/D-042/D-043). Historical process artifact per D-022: NOT owner intent, outranks nothing. Worklog entry: Task 63. PR this session: #89 (this slice; outcome recorded only after it happens). THE SEV record for this slice: `harness/runs/claim-054-p304-highlight-revisions/sev.json` (the rounds' outcome recorded there only after they run).
+
+## 1. What the owner asked (verbatim — owner turn 36, 2026-10-28)
+
+> "Repository bookkeeping needs reconciliation take care of this. the repository is the garden you gotta miantain or anyone works maintains it.."
+
+Received attached to the full continuation directive ("Arivoo: Live Review + Non-Stop Phase 3 → Phase 4 Continuation", prepared 2026-10-28), preserved verbatim at `context/reviews/arivoo-live-review-continuation-directive-2026-10-28.md` (D-022 banner; the INT-140/turn-35 precedent form). The directive's operative orders, verified against the live state at this session's preflight (§2): reconcile the stale STATE/AGENTS/CLAIMS pointers and the CLAIM-053 close row inside CLAIM-054's opening commit; enumerate PR #88's review threads and record their ACTUAL state honestly (the directive's snapshot called 11 threads unresolved; the live 2026-10-28 read shows otherwise — §2); then implement P3-04 (Highlight and immutable revisions) and continue non-stop through P3-05..09, the Phase 3 exit gate, P4-00, P4-A..F, and the Phase 4 exit gate. No credential travelled with this turn; the standing chain (INT-134/135/138/139/140) continues.
+
+## 2. Starting state — the 2026-10-28 preflight (live reads, every one observed)
+
+- **Live GitHub truth (API, token via the workspace-root credential store per D-025):** main = `b200e55521a8f6082be5231d9e4e409b3bcef1b4` (the PR #88 merge, committed 2026-10-27T16:04:27Z); 0 open PRs; exactly one branch (main); PR #88 state=closed merged=true, final head `9560f1ed401fc83bbb337f9d13c6fabc76001a8e`, merge_commit `b200e555`; post-merge workflow run `40537300422` on main completed/success with all five required jobs green (canonical-layer, head-tools, harness, harness-suites, harness-trusted — each job read individually).
+- **Branch protection re-read (live, field-by-field):** required contexts = the exact five; strict=true; 1 approving review; dismiss_stale_reviews=true; enforce_admins=true; allow_force_pushes=false; allow_deletions=false. Byte-equivalent to the standing baseline; nothing to restore or change.
+- **PR #88's review threads — the ACTUAL state (the directive's snapshot was stale):** the GraphQL enumeration over all 11 threads at the 2026-10-28 read (re-observed independently at this session's preflight, every field per thread) shows **every one of the 11 threads `isResolved=true`**, each carrying the author's in-thread disposition replies (comments=3 per thread; one thread with 5), each resolved by `coderabbitai[bot]` AFTER the dispositions (resolvedBy read per thread). Eight threads are `isOutdated=true` (their diff moved after the thread opened — the normal shape of in-PR fix rounds); three are current. The session-27 third-thread-miss class (threads resolved unread) does NOT apply: the dispositions are visible in every thread's history. The directive's "11 unresolved" was the earlier snapshot; the live truth is recorded here and in CLAIM-053's rule-4 close row.
+- **The reconciliation gap, confirmed on the live main tree:** STATE.md line 7 still placed CLAIM-053 "AT THE MERGE GATE" with "merge PR #88" as the exact next action; STATE's active-task/last-completed/observed-live lines still named CLAIM-052/`364f30e`; AGENTS.md's phase line still described CLAIM-053 "AT THE FINALIZE"; CLAIMS.md still carried CLAIM-053 in the open-claims table with no close row; PLAN.md's P3-03 card status still said "EXECUTING (CLAIM-053, this slice — PR #88)". All repaired in this slice's commit A (the canonical rule-4 close-row procedure + the five-area re-derivation), never by an ad-hoc patch to main.
+- **The rig and the baseline:** the rig cluster found RUNNING and healthy at session entry (health OK ARV-RIG-001, PostgreSQL 17.11 on 5433 — no rebuild needed this session; the env-reset corruption class stays watched, records 40/41/43's own). The baseline observation at `b200e55` is two-sided: (a) the REMOTE proof — the post-merge run `40537300422` five green at the exact main SHA (read above); (b) the LOCAL tree at the pre-commit state — `make verify` RED with exactly TWO canonical failures, both named and both this slice's own opening obligations: VER-806/205 (this record's draft form lacked its status banner) + VER-804 (STATE.md still pointed at record 44 while this record 45 existed on disk) — the reconciliation gap observed before the repair, never a surprise; the gate's suite/scope/size/known-bad arms GREEN alongside. Both repaired in commit A by construction (the banner above; the STATE re-derivation below).
+
+## 3. Task and scope
+
+CLAIM-054 / P3-04 (PLAN's P3-04 card; RTM SYS-01/02/05 primary — SYS-03's matrix re-exercised, its closure row stays P3-01's; RTM §2.5 item 5 + §3.3's machine; the bounded exclusion per the card: bookmark is P3-05's, notes are P3-06's, the governed purge is P3-06/09's per §3.3's card mapping):
+
+- **The revision machine:** `revise_highlight` — a new immutable revision row (n+1) carrying the selected content (re-derived from the SAME Source version's stored bytes at new offsets — the quote/anchor slice invariant), a NEW anchor row (append-only; the prior revision's anchor stays, referenced by the prior revision), the identity-fixed source reference, owner/actor, input digest, and the command-log provenance key. The source binding is identity-fixed by construction: a revision NEVER crosses Source versions (SYS-05's wrong-version class refused at the command boundary).
+- **The tombstone machine:** `tombstone_highlight` / `restore_highlight` — typed lifecycle EVENTS (RTM §2.9 item 9's authoritative event rows; §3.3: active --delete--> tombstoned --restore--> active, current revision unchanged), append-only, owner-scoped, provenance-complete; tombstoned hides from ordinary retrieval (list/get) while the governed history (`get-history`) retains every revision and every event.
+- **The read surface:** `get-history` (the governed history — every revision + every lifecycle event, one JSON row per line, newline-only framing); `get-capture`/`list-captures` become tombstone-aware (the typed ARV-QRY-003 refusal for a tombstoned id; the ordinary list excludes tombstoned). The current view is DERIVED from the history (rebuildable — no state column duplicating a derivable fact).
+- **The durability rung (SYS-01):** every highlight-family ack names `durability_rung=local_durable` (the rung the local store independently knows; queued/server_durable arrive with P3-08's sync — never claimed early).
+- **The substrate:** migration 0007 (the `highlight_lifecycle` table + the `highlight` identity index (id, owner) for the composite-FK convention + the immutability trigger + RLS + grants, the 0002/0004 conventions exactly).
+- **The test classes (the card's named set):** mutation rejection + immutable-history preservation; dangling/absent references + cross-owner isolation (the SAME refusal, never a side channel); same-key retry/replay + conflicting-body refusal; crashes at each transactional boundary + lost-ack convergence by replay; source re-import/re-extraction + the never-silent-retarget pin; tombstone/restore behavior; the independent current-view rebuild; the ack-rung pins; the schema-convention audits; the U+2028 row-protocol framing on the new history arm.
+
+RED-first at the predecessor `b200e55` (machinery-absent ARV-TEST-000: the three commands and the get-history arm do not exist; red-01.txt).
+
+## 4. Results
+
+At commit A (this commit): the post-#88 bookkeeping reconciliation LANDED in the canonical form — CLAIM-053's rule-4 close row (the merge facts observed live: PR #88 = `b200e55`, merged 2026-10-27T16:04:27Z under D-042's recorded path; post-merge run `40537300422` five green at the exact main SHA; the branch deleted; the protections re-read byte-equivalent; ALL ELEVEN #88 review threads resolved with the dispositions visible — 8 outdated / 3 current — the directive's stale "11 unresolved" snapshot corrected by the live read); CLAIM-054's open row (the scope, the INT reservation per rule 3, the RED declaration); the five-area STATE re-derivation; AGENTS/PLAN/WORKLOG re-derived; INT-141 minted (turn 36, this record §1 the preservation home); the HLG suite committed in its RED form at the predecessor (red-01.txt). The implementation lands in this slice's next commits (never before the RED, LAW-11).
+
+## 5. Files changed (commit A)
+
+`CLAIMS.md` (D-038) · `STATE.md` (D-043) · `AGENTS.md` (D-043) · `PLAN.md` (D-037) · `INTENT-LEDGER.md` (INT-141 + the session-32 audit note) · `context/WORKLOG.md` (Task 63) · `context/extracted/45-P304-HIGHLIGHT-REVISIONS.md` (D-042) · `context/reviews/arivoo-live-review-continuation-directive-2026-10-28.md` (D-022, preserved verbatim) · `harness/tests/test_highlight.py` (the HLG suite, RED form) · `harness/gate.py` (the TESTS registration) · `harness/runs/claim-054-p304-highlight-revisions/` (scope.txt + red-01.txt). The implementation files (migration 0007, commands.py, query.py, crash.py) land with the GREEN commits inside this claim's scope.
+
+## 6. Commands and external actions (ACTUAL — never reconstructed)
+
+- live GitHub preflight (this session's own re-observation, every field): `python3 /home/z/my-project/scripts/claim054_preflight.py` (token via env only, D-025) → main `b200e55521a8f6082be5231d9e4e409b3bcef1b4`; 1 branch; 0 open PRs; PR #88 closed/merged (head `9560f1e`, merged_at 2026-10-27T16:04:27Z); the 11 threads ALL resolved (8 outdated / 3 current, resolvedBy `coderabbitai[bot]` per thread); run `40537300422` success with all five jobs green; protection = the exact five contexts, strict, admins, dismiss_stale, no force pushes, no deletions.
+- rig health: `python3 harness/health.py` → OK ARV-RIG-001 (PostgreSQL 17.11, port 5433).
+- the baseline: `make verify` @ the pre-commit tree (main `b200e55` + this record's untracked draft) → exit 1 — exactly the two named canonical failures (VER-205 the missing banner; VER-804 STATE's record pointer at 44), both repaired by this commit; the gate's own arms GREEN alongside (suites + red records + scope/size + lint + deps + known-bads + proofsheet).
+- the RED (the machinery-absent observation at the predecessor — no implementation exists at this tree): `python3 harness/tests/test_highlight.py` → exit 1, ARV-TEST-000 (transcript at `harness/runs/claim-054-p304-highlight-revisions/red-01.txt`).
+
+## 7. Evidence
+
+- red-01.txt — the observed ARV-TEST-000 machinery-absent RED at `b200e55` (the HLG suite committed before the implementation; LAW-11).
+- The live-read block at §2 (the five-job run read, the per-thread resolved-state read, the protection export) — the merge facts CLAIM-053's rule-4 close row records.
+- The proof set lands in `harness/runs/claim-054-p304-highlight-revisions/` with the GREEN commits; the SEV report binds the slice's final content head (the CLAIM-051 standing rule: the digest binds LAST).
+
+## 8. Failures
+
+- The prior session's tool-death mid-slice (record 44 §8's continuation note): the workspace carried an uncommitted draft of this record + the directive file for ~a day; nothing was lost (the branch was already cut at the right base; no bookkeeping had landed); this session re-observed every live fact rather than trusting the draft (one draft discrepancy corrected: the thread-count line said 7 outdated/4 current; the live read shows 8/3).
+- The stored credential was found DEAD at session entry (the workspace-root store's value 401 both auth forms) — the turn-35 credential from the handoff verified live (admin-scoped, login `prathamarchives`); the store rebuilt from it per D-025 (the value never in any repo file). The boundary class of record 26 §12, resolved the same way.
+
+## 9. Unverified items
+
+At commit A: everything downstream of the RED (the implementation, the GREEN runs, the proof set, the SEV rounds, the merge) — recorded only after they happen (INT-104). The standing documented residuals unchanged: the ARV-SEV-009 undecidable-base regression; the N12 self-test-row extension; the spine's NUL-literal follow-up; the Q8 synthetic-only boundary; the isolation undecidable classes; host-level workflow protection (Q10); the P3-P5 roadmap's acceptance details (adopted or corrected only at their gates).
+
+## 10. Open decisions
+
+D-014 + Q6–Q12, scopes unchanged (each blocks only its named dependents — RTM §7). Turn 36 opens none and closes none. The governed purge (D-011) stays P3-06/09's — never silently implemented in P3-04.
+
+## 11. Next action
+
+The GREEN implementation inside this claim (migration 0007 + `revise_highlight`/`tombstone_highlight`/`restore_highlight` + the ack rungs + `get-history` + the tombstone-aware reads + the crash arms) → the HLG suite GREEN ×3 → `make verify` GREEN → the proof set → the SEV fresh-context rounds → the review rounds (every thread read + dispositioned before any resolution) → the finalize (the digest binds LAST) → the PR-mode gate at the final head → the D-042 merge → the post-merge observation → P3-05. NO PAUSE (INT-134/135/138/139/140/141).
+
+## 12. Session close
+
+(lands at the slice's merge — recorded only after it happens)

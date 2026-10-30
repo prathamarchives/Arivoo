@@ -1,0 +1,154 @@
+# PROOF SHEET — slice claim-054-p304-highlight-revisions (harness-built; never hand-edited — PRF-01, LAW-01)
+
+- commit (last run record's): 9e56bbf65d4cce471ad8a5f6417bfb8b0e833caa
+- generated (last record's timestamp): 2026-10-30T04:42:37.934678+00:00
+- run records: 37
+
+## Run records (command, exit, output digest)
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 5add459be781a283 · 2026-10-28T10:52:52.506897+00:00
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 5add459be781a283 · 2026-10-28T10:52:56.351719+00:00
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 5add459be781a283 · 2026-10-28T10:53:00.209989+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 5506d248039e881e · 2026-10-28T10:53:14.541830+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-28T10:53:15.078730+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-28T10:53:18.377061+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 14de9bf1cafe32fd · 2026-10-28T10:53:20.269549+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 69a37fec19001537 · 2026-10-28T10:53:22.902542+00:00
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 88f804186ff9b6ff · 2026-10-28T10:53:27.599933+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-28T10:53:29.961258+00:00
+- `python3 harness/tests/test_anchor.py` -> exit 0 · output sha256 6524242680a49821 · 2026-10-28T10:53:32.440000+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 19abc554ca83bfc6 · 2026-10-28T10:55:21.235319+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 3bbf66ea9439e1c2 · 2026-10-28T10:55:51.389953+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 4fbdaa398e760ab1 · 2026-10-28T10:56:04.863626+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 4d53f5a5629bb92f · 2026-10-28T10:56:05.370023+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-28T10:56:05.680585+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 bf57e481d9a00cea · 2026-10-28T10:56:08.827459+00:00
+- `make verify` -> exit 0 · output sha256 c32536b6e2a0987b · 2026-10-28T10:59:48.414814+00:00
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 c0fd0aaa7985b5a1 · 2026-10-30T04:09:32.056584+00:00
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 c0fd0aaa7985b5a1 · 2026-10-30T04:09:35.538729+00:00
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 c0fd0aaa7985b5a1 · 2026-10-30T04:09:39.054847+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 5506d248039e881e · 2026-10-30T04:09:48.582476+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-30T04:09:48.990453+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-30T04:09:51.756324+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 4ddd8877bc39afb0 · 2026-10-30T04:09:53.512061+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 411a86a5bbf5e09e · 2026-10-30T04:10:01.594551+00:00
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 88f804186ff9b6ff · 2026-10-30T04:10:06.329514+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-30T04:10:08.700588+00:00
+- `python3 harness/tests/test_anchor.py` -> exit 0 · output sha256 6524242680a49821 · 2026-10-30T04:10:11.056687+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 0ae670b9b5e5b25b · 2026-10-30T04:12:04.452533+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 9d5004c62605dabb · 2026-10-30T04:12:38.613733+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 be286771457fcc10 · 2026-10-30T04:12:51.111944+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 efd3e683d8b36537 · 2026-10-30T04:12:51.531299+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-30T04:12:51.767241+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 df06cdbc2ae7a348 · 2026-10-30T04:12:54.624090+00:00
+- `make verify` -> exit 0 · output sha256 9936f82c859b51ca · 2026-10-30T04:16:38.960234+00:00
+- `python3 harness/gate.py --slice claim-054-p304-highlight-revisions --diff origin/main` -> exit 0 · output sha256 04ab13edee7b882b · 2026-10-30T04:42:37.934678+00:00
+
+## Not verified (LAW-04 — required, never empty-by-omission)
+- - NOT VERIFIED — the honest limits of CLAIM-054 / P3-04 (the highlight
+- revision/tombstone machine; LAW-04; never empty-by-omission)
+- - WHAT THIS SLICE PROVES, ON WHAT STACK: the highlight lifecycle machine of
+- RTM §3.3/§2.5 holds end-to-end over the REAL PostgreSQL boundary
+- (17.11: the local rig + CI's postgres:17 service): immutable revisions
+- (the prior row byte-unchanged, the content re-derived from the SAME Source
+- version's stored bytes, a NEW anchor row per revision), alternation
+- enforced at BOTH the command boundary and the substrate (the named
+- ARV-HLC-002/003/004 refusals + the advisory-locked insert guard), the
+- crash matrix at every transaction boundary (exit 2 no-ack; the same-key
+- replay converges), the replay/conflict contract (ARV-CMD-409), tombstone
+- hiding from ordinary retrieval (list + the typed ARV-QRY-003) while the
+- governed history retains every revision and event, the identity-fix
+- across re-import and new generations (a revision NEVER crosses Source
+- versions), the DERIVED current view (rebuildable from the history rows
+- alone), every ack naming durability_rung=local_durable (SYS-01), the
+- 0007 schema conventions (no DEFAULTs, append-only + insert-guard
+- triggers, RLS enabled AND FORCED, arv_app INSERT/SELECT + arv_read
+- SELECT), the two-writer race's ACK-EFFECT binding (each exit-0 writer's
+- own persisted (revision, idempotency_key) row read INDEPENDENTLY; a
+- refused writer zero rows), and U+2028 framing on the new get-history
+- arm. The suite HLG-01..12 GREEN three consecutive runs at the final
+- tree; the fourteen sibling suites GREEN (gate.py's TESTS: the fifteen
+- registered suites minus this slice's own); make verify GREEN 54/0.
+- - THE #89 REVIEW ROUNDS' OWN REPAIRS ARE IN THE MEASURED SET: the five
+- strengthened assertions (each race writer's OWN outcome AND its acked
+- revision bound to its own persisted (revision, idempotency_key) row —
+- the round-3 finding; the ACTIVE fixture beside the tombstoned ones so
+- the listing exclusion is never vacuous; relforcerowsecurity pinned so
+- ENABLED-without-FORCED cannot pass; the scratch-DB drop) are part of
+- the GREEN runs above — the review's repairs re-measured, never
+- prose-claimed.
+- - NOT VERIFIED — the CONCURRENT-READER matrix on the new read arms
+- (list-captures/get-history under multiple simultaneous readers): the
+- read path is exercised serially in the suite; HLG-04b covers concurrent
+- WRITERS (the advisory-lock serialization, two writers), not a
+- concurrent-readership claim. The read-path scale slice owns that matrix.
+- - NOT VERIFIED — concurrency beyond TWO writers: the serialization is
+- measured at the two-writer race; >2 simultaneous lifecycle writers are
+- not a measured claim.
+- - THE GOVERNED PURGE (P3-06/09's, D-011) IS NOT THIS SLICE AND NOT
+- IMPLIED: tombstone hides from ordinary retrieval and the history retains
+- everything; NO purge behavior, retention policy, or erasure semantics is
+- claimed or built. A tombstoned highlight's governed erasure is a FUTURE
+- slice's contract with its own review.
+- - BOOKMARKS/NOTES INTEGRATION IS NOT MEASURED (P3-05/P3-06's): the
+- lifecycle machine is measured on highlights alone; how a future bookmark
+- or note surface observes revisions/tombstones is untested by this slice.
+- - THE HOSTILE DIRECT-WRITE CLASSES: the substrate's refusals are verified
+- on the exercised classes (the app role's permission denial, the
+- superuser's append-only trigger, the alternation trigger, the
+- existence-in-scope guard, RLS owner isolation); an exhaustive hostile-SQL
+- enumeration is NOT claimed (the substrate's guards hold on the named
+- classes the suite exercises, per the 0002/0004 convention).
+- - THE FRAMING SURFACE: U+2028 is measured on the get-history arm (HLG-12);
+- U+2029/U+0085 remain unexercised on THIS arm (the same newline-only
+- framing law binds it — row_to_json escapes below U+0020 only — but the
+- untested characters are honestly listed, not silently covered by
+- analogy).
+- - THE ARV_KEEP_DB OVERRIDE PATH: the scratch-DB drop runs after every
+- suite run (the anchor/capture convention); the override branch itself is
+- a local-inspection affordance, not a suite-asserted contract.
+- - NOT VERIFIED — the concurrent-LIFECYCLE-writer class (the SEV round's
+- P2, observed live by the reviewer's own probes): a tombstone/restore RACE
+- loser exits ARV-CMD-010 (the honest unknown) wrapping the substrate's
+- typed ARV-HLC-003/004 raw cause — the outcome is SAFE (zero effect; the
+- advisory-lock serialization held, the trigger fired, the same-key retry
+- converges to the typed command-boundary refusal) but the exit code is
+- not typed to the lifecycle class (only the REVISE race's ARV-CMD-011 is
+- typed); the _dead_exit classification of lifecycle causes is future
+- polish, named here never silently passed. The suite measures the
+- concurrent-lifecycle class NOWHERE — the reviewer's two-writer
+- tombstone/restore probes are the only observation.
+- - THE ARV_APP LAWFUL-ALTERNATION DIRECT INSERT (the SEV round's by-design
+- observation, the 0002/0004 convention): a direct INSERT of a LEGAL
+- lifecycle event with forged provenance SUCCEEDS as arv_app — the
+- substrate enforces existence-in-scope + alternation, not caller
+- provenance; the command boundary is the first line. Out-of-alternation
+- and nonexistent-target direct inserts ARE refused (ARV-HLC-003/004/001
+- at the trigger). The boundary is re-examined when the sync/purge slices
+- (P3-08/P3-09) touch it.
+- - THE RUN-RECORD PROVENANCE (the #89 round-3 finding's honest record):
+- run-01..18 bind 84b31b7 — the tree BEFORE the round-2/3 content landed
+- (the runs exercised then-uncommitted working-tree edits, so the recorded
+- commit field names the stale committed head); the authoritative
+- re-records run-19..36 bind THIS final content head (the same command
+- set, re-run through the canonical recording process at the committed
+- tree). The originals stay as historical artifacts (ARV-PRF-006 forbids
+- the overwrite).
+- - THE MERGE-CHAIN FACTS (the D-042 reproduction for THIS slice, the
+- post-merge five-check observation on main, the branch deletion, the
+- protections re-read): recorded only after they happen, in the next
+- slice's commit A (the convention; a committed file cannot guarantee
+- external state, INT-104).
+- - THE GITHUB-SIDE WALLS (the five required contexts green on the exact
+- final head, the PR review threads' resolved states): observed live via
+- the API at the merge gate, never mechanically asserted by a committed
+- file (INT-104).
+
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 8ea9cda553bd6fdc31598b2cf24e883dbae8efa9f83920d563dc08cafbefc351
+- reviewed_diff_sha256: b0111378baa4c18f6082cd9e015803fec0c6045704024dd981ae2595596dd33e
+- disposition: PASS
+- findings: 5 (open P0/P1: 0)
+- not-verified entries: 9
+
+## Assembly
+- sheet sha256 (of the content above, excluding this line): 715b47639935cd1c0f51247f4fa950e0f7a6b71405f77714c4a8fca5a2e8bb98

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_claims_paths.py",
+  "exit_code": 0,
+  "commit": "9e56bbf65d4cce471ad8a5f6417bfb8b0e833caa",
+  "output_sha256": "efd3e683d8b3653747500b8add7756a66667f9e12637a49020287ff5e6ade69d",
+  "recorded_at": "2026-10-30T04:12:51.531299+00:00"
+}

@@ -60,6 +60,33 @@
 - THE ARV_KEEP_DB OVERRIDE PATH: the scratch-DB drop runs after every
   suite run (the anchor/capture convention); the override branch itself is
   a local-inspection affordance, not a suite-asserted contract.
+- NOT VERIFIED — the concurrent-LIFECYCLE-writer class (the SEV round's
+  P2, observed live by the reviewer's own probes): a tombstone/restore RACE
+  loser exits ARV-CMD-010 (the honest unknown) wrapping the substrate's
+  typed ARV-HLC-003/004 raw cause — the outcome is SAFE (zero effect; the
+  advisory-lock serialization held, the trigger fired, the same-key retry
+  converges to the typed command-boundary refusal) but the exit code is
+  not typed to the lifecycle class (only the REVISE race's ARV-CMD-011 is
+  typed); the _dead_exit classification of lifecycle causes is future
+  polish, named here never silently passed. The suite measures the
+  concurrent-lifecycle class NOWHERE — the reviewer's two-writer
+  tombstone/restore probes are the only observation.
+- THE ARV_APP LAWFUL-ALTERNATION DIRECT INSERT (the SEV round's by-design
+  observation, the 0002/0004 convention): a direct INSERT of a LEGAL
+  lifecycle event with forged provenance SUCCEEDS as arv_app — the
+  substrate enforces existence-in-scope + alternation, not caller
+  provenance; the command boundary is the first line. Out-of-alternation
+  and nonexistent-target direct inserts ARE refused (ARV-HLC-003/004/001
+  at the trigger). The boundary is re-examined when the sync/purge slices
+  (P3-08/P3-09) touch it.
+- THE RUN-RECORD PROVENANCE (the #89 round-3 finding's honest record):
+  run-01..18 bind 84b31b7 — the tree BEFORE the round-2/3 content landed
+  (the runs exercised then-uncommitted working-tree edits, so the recorded
+  commit field names the stale committed head); the authoritative
+  re-records run-19..36 bind THIS final content head (the same command
+  set, re-run through the canonical recording process at the committed
+  tree). The originals stay as historical artifacts (ARV-PRF-006 forbids
+  the overwrite).
 - THE MERGE-CHAIN FACTS (the D-042 reproduction for THIS slice, the
   post-merge five-check observation on main, the branch deletion, the
   protections re-read): recorded only after they happen, in the next

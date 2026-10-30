@@ -580,10 +580,148 @@ def create_highlight(*, db, owner, actor, client_id, idem_key, source_id,
             f"{_q(source_id)}, {_q(anchor_id)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
             f"{_q(idem_key)}, {_q(ts)});",
         ]
-        return hl_id, stmts, ""
+        return hl_id, stmts, f" revision=1 durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
                   command="create_highlight", payload=body, build=build, crash_at=crash_at)
+
+
+# ------------------------------------------------- P3-04: the revision/tombstone machine (RTM §3.3/§2.5)
+
+def _hl_refusal(code: str, hl_id: str, extra: str = "", repair: str = "") -> _CapRefusal:
+    """The highlight-family boundary refusals — absent and another owner's are
+    the SAME refusal, never a side channel (RTM §2.10 on the write path)."""
+    msg = extra or (f"highlight {hl_id} does not exist in the caller's scope — absent and "
+                    "another owner's are the SAME refusal, never a side channel")
+    return _CapRefusal(code, msg, repair or "check the id against the caller's own capture list "
+                       "(query.py list-captures); a highlight is only ever addressable "
+                       "by its owner")
+
+
+def _hl_current(sess: "Session", hl_id: str) -> tuple:
+    """One read: the current (max) revision + its source binding + the DERIVED
+    lifecycle state (the parity of the committed events — order-independent,
+    rebuildable; never a state column duplicating a derivable fact)."""
+    row = _sess_row(sess,
+                    f"SELECT h.revision || '|' || h.source_id || '|' || COALESCE("
+                    f"(SELECT CASE WHEN count(*) FILTER (WHERE l.event = 'tombstone') > "
+                    f"count(*) FILTER (WHERE l.event = 'restore') THEN 'tombstoned' "
+                    f"ELSE 'active' END FROM arv.highlight_lifecycle l "
+                    f"WHERE l.highlight_id = h.id AND l.owner_scope = h.owner_scope), 'active') "
+                    f"FROM arv.highlight h WHERE h.id = {_q(hl_id)} "
+                    f"ORDER BY h.revision DESC LIMIT 1;")
+    if not row:
+        raise _hl_refusal("ARV-HLC-001", hl_id)
+    revision, source_id, state = row.split("|")
+    return int(revision), source_id, state
+
+
+def revise_highlight(*, db, owner, actor, client_id, idem_key, id_,
+                     start, end, crash_at: str = None) -> int:
+    """§3.3's edit transition: append a NEW immutable revision (n+1) — the
+    selected content RE-DERIVED from the SAME Source version's stored bytes at
+    the new offsets (a client never supplies anchor truth; the source binding is
+    identity-fixed by construction, a revision NEVER crosses Source versions),
+    a NEW anchor row (the prior revision's anchor stays, referenced by the prior
+    row).  Tombstoned refuses (ARV-HLC-002: restore first)."""
+    body = json.dumps({"id": id_, "start": start, "end": end},
+                      sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build(sess: "Session", body_hash: str):
+        revision, source_id, state = _hl_current(sess, id_)
+        if state != "active":
+            raise _CapRefusal("ARV-HLC-002",
+                              f"highlight {id_} is tombstoned — a tombstoned highlight is hidden "
+                              "from ordinary use until restored (RTM §3.3: restore precedes edit)",
+                              "restore the highlight first (commands.py restore_highlight); the "
+                              "governed history retains every revision meanwhile")
+        row = _sess_row(sess, f"SELECT digest || '|' || media_type FROM arv.source WHERE id={_q(source_id)};")
+        if not row:
+            raise _CapRefusal("ARV-CAP-004", f"the revision's source {source_id} is not loadable",
+                              "the store is corrupt at this id; the identity-fix refuses, never a guess")
+        digest, media_type = row.split("|")
+        try:
+            text = blob.get(digest).decode("utf-8")
+        except UnicodeDecodeError:
+            raise _CapRefusal("ARV-CAP-008",
+                              f"source {source_id} is not valid UTF-8 text (the media-type boundary)",
+                              "the revision re-derives from stored text; binary formats are their own slices")
+        except KeyError as e:
+            raise _CapRefusal("ARV-CAP-004", f"the source's blob failed to verify — {e}",
+                              "the store is corrupt at this digest; never a revision against unverifiable bytes")
+        if not (0 <= start < end <= len(text)):
+            raise _CapRefusal("ARV-CAP-003",
+                              f"offsets [{start},{end}) are invalid for a {len(text)}-character text — "
+                              "never clamped, never guessed",
+                              "supply 0 <= start < end <= the decoded text length")
+        selected = text[start:end]
+        anchor_id = ids.new_id()
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmts = [
+            f"INSERT INTO arv.anchor (id, source_id, source_digest, start_off, end_off, context_before, "
+            f"context_after, media_type, owner_scope, actor, run_id, input_hash, created_at) VALUES "
+            f"({_q(anchor_id)}, {_q(source_id)}, {_q(digest)}, {start}, {end}, "
+            f"{_q(text[max(0, start - 32):start])}, {_q(text[end:end + 32])}, {_q(media_type)}, "
+            f"{_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, {_q(ts)});",
+            f"INSERT INTO arv.highlight (id, revision, selected_text, source_id, anchor_id, owner_scope, "
+            f"actor, run_id, input_hash, idempotency_key, created_at) VALUES ({_q(id_)}, {revision + 1}, "
+            f"{_q(selected)}, {_q(source_id)}, {_q(anchor_id)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, "
+            f"{_q(ih)}, {_q(idem_key)}, {_q(ts)});",
+        ]
+        return id_, stmts, f" revision={revision + 1} durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="revise_highlight", payload=body, build=build, crash_at=crash_at)
+
+
+def _lifecycle_command(*, command, event, db, owner, actor, client_id, idem_key,
+                       id_, crash_at, refusal_code, refusal_msg, refusal_repair) -> int:
+    """§3.3's tombstone/restore transitions: ONE typed lifecycle EVENT row per
+    LAWFUL transition (append-only, owner-scoped, provenance-complete).  The
+    named command-boundary refusals are the clean first line; the substrate's
+    advisory-lock alternation trigger (0007) is the race + hostile backstop."""
+    body = json.dumps({"id": id_}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build(sess: "Session", body_hash: str):
+        _, _, state = _hl_current(sess, id_)
+        if (event == "tombstone" and state != "active") or (event == "restore" and state != "tombstoned"):
+            raise _CapRefusal(refusal_code, refusal_msg(id_), refusal_repair)
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmts = [f"INSERT INTO arv.highlight_lifecycle (id, highlight_id, event, owner_scope, actor, "
+                 f"run_id, input_hash, idempotency_key, created_at) VALUES ({_q(ids.new_id())}, "
+                 f"{_q(id_)}, {_q(event)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
+                 f"{_q(idem_key)}, {_q(ts)});"]
+        return id_, stmts, " durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command=command, payload=body, build=build, crash_at=crash_at)
+
+
+def tombstone_highlight(*, db, owner, actor, client_id, idem_key, id_, crash_at: str = None) -> int:
+    """§3.3's delete transition: tombstoned — hidden from ordinary retrieval
+    (list/get), the governed history retained; recoverable by restore."""
+    return _lifecycle_command(
+        command="tombstone_highlight", event="tombstone", db=db, owner=owner, actor=actor,
+        client_id=client_id, idem_key=idem_key, id_=id_, crash_at=crash_at,
+        refusal_code="ARV-HLC-003",
+        refusal_msg=lambda i: (f"highlight {i} is already tombstoned — the §3.3 alternation "
+                               "(tombstone only from active; the current view is DERIVED from "
+                               "the events, never a state column)"),
+        refusal_repair="restore the highlight first (commands.py restore_highlight); a second "
+                       "tombstone is a no-op refused with its named code, never a second event row")
+
+
+def restore_highlight(*, db, owner, actor, client_id, idem_key, id_, crash_at: str = None) -> int:
+    """§3.3's restore transition: tombstoned -> active (the current revision
+    unchanged — the revisions were never touched)."""
+    return _lifecycle_command(
+        command="restore_highlight", event="restore", db=db, owner=owner, actor=actor,
+        client_id=client_id, idem_key=idem_key, id_=id_, crash_at=crash_at,
+        refusal_code="ARV-HLC-004",
+        refusal_msg=lambda i: (f"highlight {i} is not tombstoned — the §3.3 alternation "
+                               "(restore only from tombstoned)"),
+        refusal_repair="nothing to restore: the highlight is active in ordinary retrieval; "
+                       "a tombstone precedes every restore")
 
 
 def _extract_source(**kwargs):
@@ -598,7 +736,9 @@ def _extract_source(**kwargs):
 
 
 REGISTRY = {"record_event": record_event, "import_source": import_source,
-            "create_highlight": create_highlight, "extract_source": _extract_source}
+            "create_highlight": create_highlight, "extract_source": _extract_source,
+            "revise_highlight": revise_highlight, "tombstone_highlight": tombstone_highlight,
+            "restore_highlight": restore_highlight}
 
 
 def main() -> int:
@@ -624,6 +764,13 @@ def main() -> int:
     p.add_argument("--source-id", required=True)
     p.add_argument("--start", required=True, type=int)
     p.add_argument("--end", required=True, type=int)
+    for name in ("revise_highlight", "tombstone_highlight", "restore_highlight"):
+        p = sub.add_parser(name)
+        _common(p)
+        p.add_argument("--id", required=True)
+        if name == "revise_highlight":
+            p.add_argument("--start", required=True, type=int)
+            p.add_argument("--end", required=True, type=int)
     a = ap.parse_args()
     db = os.environ.get("PGDATABASE", "postgres")
     if a.command == "record_event":
@@ -634,6 +781,15 @@ def main() -> int:
                              idem_key=a.idem_key, title=a.title, work_id=a.work_id,
                              file=a.file, media_type=a.media_type,
                              acquired_via=a.acquired_via)
+    if a.command == "revise_highlight":
+        return revise_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                idem_key=a.idem_key, id_=a.id, start=a.start, end=a.end)
+    if a.command == "tombstone_highlight":
+        return tombstone_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                   idem_key=a.idem_key, id_=a.id)
+    if a.command == "restore_highlight":
+        return restore_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                  idem_key=a.idem_key, id_=a.id)
     return create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                             idem_key=a.idem_key, source_id=a.source_id,
                             start=a.start, end=a.end)

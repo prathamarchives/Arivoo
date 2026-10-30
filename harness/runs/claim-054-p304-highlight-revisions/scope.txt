@@ -1,0 +1,33 @@
+# CLAIM-054 — P3-04: Highlight and immutable revisions (+ the owner's turn-36
+# bookkeeping reconciliation, INT-141). PLAN's P3-04 card; RTM §2.5 item 5 +
+# §3.3's machine, SYS-01/02/05 primary (SYS-03's matrix re-exercised; its
+# closure row stays P3-01's). The bounded exclusions per the card: bookmark is
+# P3-05's, notes are P3-06's, the governed purge is P3-06/09's (D-011).
+#
+# The machine: revise_highlight (a new immutable revision n+1 — the selected
+# content re-derived from the SAME Source version's stored bytes at new
+# offsets, a NEW anchor row, the identity-fixed source reference; a revision
+# NEVER crosses Source versions) + tombstone_highlight/restore_highlight
+# (typed lifecycle EVENT rows, append-only, alternation enforced at the command
+# boundary AND the substrate; tombstoned hidden from ordinary retrieval, the
+# governed history retained) + get-history (every revision + every event, one
+# JSON row per line, newline-only framing) + the tombstone-aware
+# get-capture/list-captures (ARV-QRY-003) + every highlight-family ack naming
+# durability_rung=local_durable (SYS-01). RED-first at the predecessor
+# b200e55 (machinery-absent ARV-TEST-000, red-01.txt).
+harness/tests/test_highlight.py D-041
+harness/commands.py D-041
+harness/query.py D-041
+harness/crash.py D-041
+harness/gate.py D-041
+harness/migrations/0007_highlight_lifecycle.sql D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+INTENT-LEDGER.md INT-141
+context/WORKLOG.md D-043
+context/extracted/45-P304-HIGHLIGHT-REVISIONS.md D-042
+context/reviews/arivoo-live-review-continuation-directive-2026-10-28.md D-022
+harness/runs/claim-054-p304-highlight-revisions D-042

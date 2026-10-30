@@ -1,0 +1,98 @@
+- NOT VERIFIED — the honest limits of CLAIM-054 / P3-04 (the highlight
+  revision/tombstone machine; LAW-04; never empty-by-omission)
+- WHAT THIS SLICE PROVES, ON WHAT STACK: the highlight lifecycle machine of
+  RTM §3.3/§2.5 holds end-to-end over the REAL PostgreSQL boundary
+  (17.11: the local rig + CI's postgres:17 service): immutable revisions
+  (the prior row byte-unchanged, the content re-derived from the SAME Source
+  version's stored bytes, a NEW anchor row per revision), alternation
+  enforced at BOTH the command boundary and the substrate (the named
+  ARV-HLC-002/003/004 refusals + the advisory-locked insert guard), the
+  crash matrix at every transaction boundary (exit 2 no-ack; the same-key
+  replay converges), the replay/conflict contract (ARV-CMD-409), tombstone
+  hiding from ordinary retrieval (list + the typed ARV-QRY-003) while the
+  governed history retains every revision and event, the identity-fix
+  across re-import and new generations (a revision NEVER crosses Source
+  versions), the DERIVED current view (rebuildable from the history rows
+  alone), every ack naming durability_rung=local_durable (SYS-01), the
+  0007 schema conventions (no DEFAULTs, append-only + insert-guard
+  triggers, RLS enabled AND FORCED, arv_app INSERT/SELECT + arv_read
+  SELECT), the two-writer race's ACK-EFFECT binding (each exit-0 writer's
+  own persisted (revision, idempotency_key) row read INDEPENDENTLY; a
+  refused writer zero rows), and U+2028 framing on the new get-history
+  arm. The suite HLG-01..12 GREEN three consecutive runs at the final
+  tree; the fourteen sibling suites GREEN (gate.py's TESTS: the fifteen
+  registered suites minus this slice's own); make verify GREEN 54/0.
+- THE #89 REVIEW ROUNDS' OWN REPAIRS ARE IN THE MEASURED SET: the five
+  strengthened assertions (each race writer's OWN outcome AND its acked
+  revision bound to its own persisted (revision, idempotency_key) row —
+  the round-3 finding; the ACTIVE fixture beside the tombstoned ones so
+  the listing exclusion is never vacuous; relforcerowsecurity pinned so
+  ENABLED-without-FORCED cannot pass; the scratch-DB drop) are part of
+  the GREEN runs above — the review's repairs re-measured, never
+  prose-claimed.
+- NOT VERIFIED — the CONCURRENT-READER matrix on the new read arms
+  (list-captures/get-history under multiple simultaneous readers): the
+  read path is exercised serially in the suite; HLG-04b covers concurrent
+  WRITERS (the advisory-lock serialization, two writers), not a
+  concurrent-readership claim. The read-path scale slice owns that matrix.
+- NOT VERIFIED — concurrency beyond TWO writers: the serialization is
+  measured at the two-writer race; >2 simultaneous lifecycle writers are
+  not a measured claim.
+- THE GOVERNED PURGE (P3-06/09's, D-011) IS NOT THIS SLICE AND NOT
+  IMPLIED: tombstone hides from ordinary retrieval and the history retains
+  everything; NO purge behavior, retention policy, or erasure semantics is
+  claimed or built. A tombstoned highlight's governed erasure is a FUTURE
+  slice's contract with its own review.
+- BOOKMARKS/NOTES INTEGRATION IS NOT MEASURED (P3-05/P3-06's): the
+  lifecycle machine is measured on highlights alone; how a future bookmark
+  or note surface observes revisions/tombstones is untested by this slice.
+- THE HOSTILE DIRECT-WRITE CLASSES: the substrate's refusals are verified
+  on the exercised classes (the app role's permission denial, the
+  superuser's append-only trigger, the alternation trigger, the
+  existence-in-scope guard, RLS owner isolation); an exhaustive hostile-SQL
+  enumeration is NOT claimed (the substrate's guards hold on the named
+  classes the suite exercises, per the 0002/0004 convention).
+- THE FRAMING SURFACE: U+2028 is measured on the get-history arm (HLG-12);
+  U+2029/U+0085 remain unexercised on THIS arm (the same newline-only
+  framing law binds it — row_to_json escapes below U+0020 only — but the
+  untested characters are honestly listed, not silently covered by
+  analogy).
+- THE ARV_KEEP_DB OVERRIDE PATH: the scratch-DB drop runs after every
+  suite run (the anchor/capture convention); the override branch itself is
+  a local-inspection affordance, not a suite-asserted contract.
+- NOT VERIFIED — the concurrent-LIFECYCLE-writer class (the SEV round's
+  P2, observed live by the reviewer's own probes): a tombstone/restore RACE
+  loser exits ARV-CMD-010 (the honest unknown) wrapping the substrate's
+  typed ARV-HLC-003/004 raw cause — the outcome is SAFE (zero effect; the
+  advisory-lock serialization held, the trigger fired, the same-key retry
+  converges to the typed command-boundary refusal) but the exit code is
+  not typed to the lifecycle class (only the REVISE race's ARV-CMD-011 is
+  typed); the _dead_exit classification of lifecycle causes is future
+  polish, named here never silently passed. The suite measures the
+  concurrent-lifecycle class NOWHERE — the reviewer's two-writer
+  tombstone/restore probes are the only observation.
+- THE ARV_APP LAWFUL-ALTERNATION DIRECT INSERT (the SEV round's by-design
+  observation, the 0002/0004 convention): a direct INSERT of a LEGAL
+  lifecycle event with forged provenance SUCCEEDS as arv_app — the
+  substrate enforces existence-in-scope + alternation, not caller
+  provenance; the command boundary is the first line. Out-of-alternation
+  and nonexistent-target direct inserts ARE refused (ARV-HLC-003/004/001
+  at the trigger). The boundary is re-examined when the sync/purge slices
+  (P3-08/P3-09) touch it.
+- THE RUN-RECORD PROVENANCE (the #89 round-3 finding's honest record):
+  run-01..18 bind 84b31b7 — the tree BEFORE the round-2/3 content landed
+  (the runs exercised then-uncommitted working-tree edits, so the recorded
+  commit field names the stale committed head); the authoritative
+  re-records run-19..36 bind THIS final content head (the same command
+  set, re-run through the canonical recording process at the committed
+  tree). The originals stay as historical artifacts (ARV-PRF-006 forbids
+  the overwrite).
+- THE MERGE-CHAIN FACTS (the D-042 reproduction for THIS slice, the
+  post-merge five-check observation on main, the branch deletion, the
+  protections re-read): recorded only after they happen, in the next
+  slice's commit A (the convention; a committed file cannot guarantee
+  external state, INT-104).
+- THE GITHUB-SIDE WALLS (the five required contexts green on the exact
+  final head, the PR review threads' resolved states): observed live via
+  the API at the merge gate, never mechanically asserted by a committed
+  file (INT-104).

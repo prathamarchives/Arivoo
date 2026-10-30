@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-054-p304-highlight-revisions",
+  "base_sha": "b200e55521a8f6082be5231d9e4e409b3bcef1b4",
+  "reviewed_diff_sha256": "b0111378baa4c18f6082cd9e015803fec0c6045704024dd981ae2595596dd33e",
+  "intent_ids": [
+    "INT-127",
+    "INT-131",
+    "INT-134",
+    "INT-135",
+    "INT-138",
+    "INT-139",
+    "INT-140",
+    "INT-141"
+  ],
+  "requirement_ids": [
+    "SYS-01",
+    "SYS-02",
+    "SYS-03",
+    "SYS-05",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
+  "changed_components": [
+    "harness/migrations/0007_highlight_lifecycle.sql \u2014 the lifecycle substrate: the revision-per-row highlight table (PK (id, revision), no DEFAULTs), the append-only event table with the serialized alternation guard trigger, the insert-guard + immutable triggers, RLS enabled AND FORCED with the owner policy, arv_app INSERT/SELECT + arv_read SELECT",
+    "harness/commands.py \u2014 revise_highlight (immutable revision n+1, content re-derived from the SAME Source version's stored bytes, a NEW anchor row, identity-fixed source reference), tombstone_highlight/restore_highlight (typed append-only lifecycle events, alternation at the command boundary: ARV-HLC-001/002/003/004), the durability_rung=local_durable acks",
+    "harness/query.py \u2014 get-history (every revision + every event, one JSON row per line), the tombstone-aware get-capture (ARV-QRY-003) and list-captures",
+    "harness/crash.py \u2014 the three crash points on the new commands (after-begin / pre-commit / post-commit-pre-ack)",
+    "harness/tests/test_highlight.py \u2014 the HLG-01..12 acceptance suite (RED-first at b200e55; the three review-round amendment links)",
+    "harness/gate.py \u2014 the TESTS registration; harness/red-records.json \u2014 the binding + the typed amendment chain",
+    "CLAIMS.md / STATE.md / AGENTS.md / PLAN.md / INTENT-LEDGER.md / context/WORKLOG.md / context/extracted/45-P304-HIGHLIGHT-REVISIONS.md \u2014 the turn-36 bookkeeping reconciliation (CLAIM-053's rule-4 close row, the five-area re-derivation) + CLAIM-054's rows"
+  ],
+  "interfaces_reviewed": [
+    "the highlight-family CLI contract: revise/tombstone/restore answer with status=committed|replayed and durability_rung=local_durable at exit 0; the typed refusals at exit 1 (ARV-HLC-001 absent/cross-owner the SAME refusal, ARV-HLC-002 revise-of-tombstoned, ARV-HLC-003 double-tombstone, ARV-HLC-004 restore-of-active, ARV-CMD-409 conflicting replay, ARV-CMD-011 the ordinal-race zero-effect)",
+    "the read arms: get-history one-JSON-row-per-line over the psql unaligned protocol (row_to_json escapes below U+0020 only \u2014 U+2028/U+2029/U+0085 travel raw); tombstone-aware get-capture (ARV-QRY-003) and list-captures; ARV-QRY-001 out-of-scope",
+    "the 0007 schema surface: pg_catalog-audited (no DEFAULTs on identity/time, the trigger set, relrowsecurity AND relforcerowsecurity, the grant matrix, the event CHECK constraint)",
+    "the crash harness boundary: crash.py's three points per command; exit 2 no-ack; the same-key replay convergence"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the suite harness/tests/test_highlight.py HLG-01..12 GREEN \u2014 three consecutive runs at the final content tree; proof run-19, run-20, run-21 (the round-2 records run-01..03 kept as the historical artifacts)",
+      "RED-01 preserved (the machinery-absent ARV-TEST-000 at the predecessor b200e55 + commit A's suite form; exit 1); proof red-01.txt",
+      "the red-records typed amendment chain for the suite (the binding at 45bd8f7; the round-2 repairs link; the round-3 ack-effect strengthening link) \u2014 verified reachable from the baseline by the gate on every run",
+      "the round-2/3 review repairs verified IN the measured set: each race writer's OWN outcome + the ack-effect binding, the ACTIVE fixture beside the tombstoned ones, relforcerowsecurity pinned beside relrowsecurity, the scratch-DB drop, the sibling-count reconciliation"
+    ],
+    "integration_verification": [
+      "the real boundary exercised end-to-end: import_source -> create_highlight -> revise_highlight (x3) -> tombstone_highlight -> restore_highlight -> get-history/get-capture/list-captures \u2014 all through the real CLI surfaces over the real PostgreSQL 17 rig; proof run-19..21",
+      "the fourteen sibling suites GREEN at the same tree (the fifteen registered suites minus this slice's own); proof run-22..35; make verify GREEN 54/0; proof run-36",
+      "the fresh-context reviewer's OWN probes: a ~60-assertion adversarial scenario script (revision shapes, byte-immutability across lifecycle ops, alternation at both layers, hostile writes at both role layers, cross-owner RLS + no-GUC fail-closed + forged owner_scope, replay/conflict/zero-effect, the restore crash arm, framing with U+2029/U+0085/tab/raw-newline), the identity-fix re-import probe (source v2 never retargets a revision bound to v1), a 3-writer revise race (beyond the claimed 2-writer matrix), and the concurrent tombstone/restore races \u2014 0 unexpected observations; the suite itself re-run GREEN three times by the reviewer"
+    ],
+    "system_verification": [
+      "SYS-01 trace: every highlight-family ack names durability_rung=local_durable (HLG-10; the reviewer's own CLI transcripts)",
+      "SYS-02 trace: the authoritative rows immutable (HLG-01/02 + the reviewer's byte-identical full-row snapshots across tombstone+restore); the current view DERIVED from the history rows alone, rebuildable (HLG-09)",
+      "SYS-03 trace (re-exercised; the closure row stays P3-01's): the crash matrix at every transaction boundary on the new commands \u2014 six suite arms + the reviewer's own restore arm",
+      "SYS-05 trace: the identity-fix \u2014 a revision NEVER crosses Source versions (HLG-07 the edition boundary, HLG-08 the re-extraction stability; the reviewer's re-import probe: revise still re-derives from v1's bytes at v2)",
+      "SYS-11 trace: this slice closes its V-model with a fresh-context SEV review (agent-66ab6cdc) whose probes re-derived the evidence independently before the verdict"
+    ],
+    "validation": [
+      "the owner workflow's capture path over the real boundary: highlight -> revise -> tombstone -> restore -> history, with truthful durability acks at every step; the honest measured limits at notverified.txt (the concurrent-lifecycle-writer class, the arv_app lawful-alternation boundary, the run-record provenance, the unexercised framing characters beyond the suite's pins)",
+      "the failure modes below each carry their own probe-backed control \u2014 the named refusal classes observed refusing, the typed answers observed answering, and the reviewer's adversarial reproductions"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a mutable-string highlight: an edit overwrites the prior content and the history is destroyed (the C1 worst class)",
+      "control": "append-only immutable revision rows (a NEW row per edit, the prior byte-unchanged); UPDATE/DELETE refused at BOTH layers (the arv_app permission denial + the superuser's ARV-CAP-005 append-only trigger); the PK (id, revision) ordinal backstop",
+      "proof_ids": [
+        "run-19",
+        "run-20",
+        "run-21"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "silent retarget: a new edition or re-extraction moves a highlight's content or binding to a different Source version (the SYS-05 forbidden class)",
+      "control": "the revision's source reference is IDENTITY-FIXED by construction \u2014 the selected content re-derived from the SAME version's stored bytes; the reviewer's re-import probe (v2 imported; revise still derives from v1) + HLG-07/HLG-08",
+      "proof_ids": [
+        "run-19",
+        "run-20",
+        "run-21"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "the concurrent-revise race produces a duplicate ordinal, a gap, or a ghost/missing effect (an ack with no row, or a refusal with a row)",
+      "control": "the advisory-lock serialization + the PK backstop + the ACK-EFFECT binding: each exit-0 writer's acked revision bound INDEPENDENTLY to its own persisted (revision, idempotency_key) row; the ARV-CMD-011 refusal proven zero-effect; the reviewer's 3-writer probe reproduced the held invariants beyond the claimed 2-writer matrix",
+      "proof_ids": [
+        "run-19",
+        "run-20",
+        "run-21"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "a crash at a transaction boundary leaves an uncertain ack (the client cannot know saved-vs-lost) or a partial effect",
+      "control": "the crash matrix: after-begin/pre-commit = zero effect; post-commit-pre-ack = the effect committed with no ack (exit 2); the same-key replay converges to the recorded result \u2014 six suite arms + the reviewer's own restore arm",
+      "proof_ids": [
+        "run-19",
+        "run-20",
+        "run-21"
+      ]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "tombstone as erasure (history destroyed) or as leak (tombstoned content still served to ordinary retrieval)",
+      "control": "tombstoned hidden from ordinary retrieval ONLY (list excludes, get-capture refuses ARV-QRY-003) while get-history retains every revision and event; alternation enforced at the command boundary AND the substrate trigger (the hostile direct duplicate refused)",
+      "proof_ids": [
+        "run-19",
+        "run-20",
+        "run-21"
+      ]
+    },
+    {
+      "id": "FM-06",
+      "scenario": "cross-owner access: another owner reads, revises, or tombstones a highlight; an absent id distinguished from a foreign one",
+      "control": "the SAME ARV-HLC-001 refusal for absent and foreign ids on every arm (never a side channel); RLS enabled AND FORCED (relforcerowsecurity); fail-closed with no GUC (0 rows); a forged owner_scope lifecycle row refused at the trigger",
+      "proof_ids": [
+        "run-19",
+        "run-20",
+        "run-21"
+      ]
+    },
+    {
+      "id": "FM-07",
+      "scenario": "framing corruption on the new history arm: a stored text containing U+2028/U+2029/U+0085 breaks the one-JSON-row-per-line protocol",
+      "control": "newline-only row framing over psql's unescaped-at-U+0020+ output; HLG-12 pins U+2028; the reviewer's probes extended U+2029, U+0085, tab and a raw newline with every line parsing as one JSON row and the value returned exactly",
+      "proof_ids": [
+        "run-19",
+        "run-20",
+        "run-21"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-F1",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the concurrent-LIFECYCLE-writer class is untyped and unnamed: a tombstone/restore race loser exits ARV-CMD-010 (honest unknown) wrapping the substrate's typed ARV-HLC-003/004 raw cause \u2014 safe (zero effect, the serialization held) but the class appeared nowhere in the suite or the limits list (the reviewer's own probes were the only observation)",
+      "disposition": "repaired as the honest fence: the class named in notverified.txt (the outcome's safety stated, the typing gap named as future polish, the suite's non-coverage stated); the _dead_exit lifecycle classification is a named future refinement, never silently passed"
+    },
+    {
+      "id": "SEV-F2",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "a direct INSERT as arv_app of a LAWFUL-alternation lifecycle event with forged provenance SUCCEEDS \u2014 the substrate enforces existence-in-scope + alternation, not caller provenance (out-of-alternation and absent-target inserts ARE refused)",
+      "disposition": "the documented 0002/0004 design boundary (the command boundary is the first line; arv_app must hold INSERT for the command spine): named explicitly in notverified.txt with the revisit condition (the P3-08/P3-09 sync/purge slices re-examine the boundary)"
+    },
+    {
+      "id": "CR-R2-REPAIRED",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the #89 CodeRabbit round-2 findings: the discarded race-writer exits (HLG-04b), the vacuous tombstone-exclusion listing (HLG-06), ENABLED-without-FORCED RLS passing (HLG-11), the scratch databases left behind (ARV_KEEP_DB)",
+      "disposition": "all four repaired at edfe463 (the batched content commit, the typed amendment recorded) and verified by this round at the final tree \u2014 the strengthened assertions ran in the GREEN measured set (run-19..21)"
+    },
+    {
+      "id": "CR-R3-REPAIRED",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the #89 CodeRabbit round-3 findings: the unbound ack-to-row relationship (HLG-04b persisted-key evidence), the thirteen-vs-fourteen sibling-suite count in notverified.txt, and the run records run-01..18 binding the pre-repair SHA 84b31b7",
+      "disposition": "the ack-effect binding landed at 9e56bbf (STRONGER than the finding's suggested form: the acked revision number bound, the pre-race rows excluded from the compared set, the new-row count bound to the success count) and the reviewer reproduced it with a 3-writer probe; the count reconciled to fourteen with the derivation stated in every home; the evidence regenerated through the canonical recording process at the committed final tree (run-19..36 bind 9e56bbf; the originals kept as historical artifacts with the provenance named in notverified.txt)"
+    },
+    {
+      "id": "CR-R1-STALE",
+      "severity": "P2",
+      "status": "resolved",
+      "what": "the #89 CodeRabbit round-1 finding on harness/gate.py (the highlight machinery claimed absent): STALE against the tree \u2014 the commands, the history arm, and migration 0007 all exist at the reviewed head (the review's diff base predated commit B)",
+      "disposition": "dispositioned stale/no-fix by evidence at edfe463 (the machinery verified live in the tree); this round re-verified the machinery present and measured (HLG-01..12 GREEN)"
+    }
+  ],
+  "not_verified": [
+    "the CONCURRENT-READER matrix on the new read arms (list-captures/get-history under multiple simultaneous readers) \u2014 the read path is exercised serially; the read-path scale slice owns that matrix",
+    "concurrency beyond TWO revise writers is not a suite-measured claim (the reviewer's 3-writer probe observed the invariants hold once, an observation, not a suite pin); the concurrent-LIFECYCLE-writer class is measured NOWHERE in the suite \u2014 the reviewer's probes are the only observation (the ARV-CMD-010 typing gap named above)",
+    "the governed purge (P3-06/09's, D-011) is NOT this slice and NOT implied: no purge, retention, or erasure semantics claimed; a tombstoned highlight's governed erasure is a future slice's contract",
+    "bookmarks/notes integration is unmeasured (P3-05/P3-06's): the lifecycle machine is measured on highlights alone",
+    "the hostile direct-write classes: the substrate's refusals verified on the exercised classes only; the arv_app lawful-alternation direct-insert boundary named in notverified.txt (the 0002/0004 convention; re-examined at P3-08/09); an exhaustive hostile-SQL enumeration is NOT claimed",
+    "the framing surface: U+2028 is suite-pinned (HLG-12); U+2029/U+0085/tab/raw-newline were observed intact by the reviewer's probes but are not suite pins",
+    "the ARV_KEEP_DB override path is a local-inspection affordance, not a suite-asserted contract",
+    "the run-record provenance: run-01..18 bind 84b31b7 (the pre-final tree; they exercised then-uncommitted edits); run-19..36 are the authoritative re-records binding the final content head \u2014 the originals kept per ARV-PRF-006",
+    "the GitHub-side walls (the five required contexts green on the exact final head, the PR review threads' resolved states, the D-042 merge-chain facts) are observed live via the API at the merge gate, never mechanically asserted by a committed file (INT-104)"
+  ],
+  "builder_context": "builder-glm-host-session31-claim054 (the host GLM agent across the sessions: the implementation at a66e105, the round-2 repairs at edfe463, the round-3 repairs at 9e56bbf \u2014 the content head this report binds)",
+  "reviewer_context": "fresh-context GLM SEV reviewer agent-66ab6cdc (cold-start, repo-only context, read-only on the tracked tree + its own probes: the suite re-run three times, a ~60-assertion adversarial scenario script outside the repo, the identity-fix re-import probe, a 3-writer revise race, the concurrent tombstone/restore races, make verify, the pg_catalog schema audit); the identity limitation honestly stated \u2014 a reviewer-context identifier does not cryptographically prove independence",
+  "disposition": "PASS",
+  "review_summary": "Round 1 (agent-66ab6cdc, at the content head 9e56bbf): PASS \u2014 every contract claim C-1..C-9 (immutable revisions, alternation at both layers, tombstone hiding with retained history, cross-owner isolation with RLS forced and fail-closed, the replay/conflict/race contract with the ack-effect binding, the crash matrix, the durability-rung acks, the row framing, the 0007 conventions) verified under the reviewer's own adversarial probes including cases the suite does not exercise (U+2029/U+0085/tab/raw-newline framing, a 3-writer race, the restore crash arm, the re-import identity-fix, the lifecycle races). Zero P0/P1; two P2 findings (the untyped concurrent-lifecycle-writer exit, the arv_app lawful-alternation insert boundary) \u2014 both resolved as named fences in notverified.txt with revisit conditions; the #89 review rounds' repairs verified in the measured set; the stale round-1 machinery finding dispositioned by evidence. The evidence chain regenerated on the committed final tree (run-19..36 binding 9e56bbf); the residual administrative work (this report, the assembled sheet, the gate records, the artifact commit) lands in the finalize commit binding this content head.",
+  "sheet_section": true
+}

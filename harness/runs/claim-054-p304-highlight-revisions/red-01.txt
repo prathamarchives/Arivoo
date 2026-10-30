@@ -1,0 +1,7 @@
+# red-01.txt — the P3-04 RED (machinery-absent ARV-TEST-000) observed at the predecessor tree
+# tree: main b200e55521a8f6082be5231d9e4e409b3bcef1b4 + this suite (RED-first, LAW-11 — the implementation is ABSENT by design)
+# command: python3 harness/tests/test_highlight.py
+# date: 2026-10-28T05:51:15Z
+# exit: 1
+
+FAIL ARV-TEST-000: the P3-04 machinery is absent (machinery-absent class; revise_highlight command absent: True; get-history arm absent: True; migration 0007 present: False) — the implementation lands after this RED, never before it (LAW-11)

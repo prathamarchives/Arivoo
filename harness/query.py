@@ -48,7 +48,30 @@ CAP_SQL = ("SELECT row_to_json(t)::text FROM (SELECT h.id AS id, h.revision, h.s
 SRC_SQL = ("SELECT row_to_json(t)::text FROM (SELECT s.id AS id, s.work_id, w.title, s.digest, "
            "s.media_type, s.byte_size, s.import_state, s.source_version, s.created_at "
            "FROM arv.source s JOIN arv.work w ON w.id = s.work_id WHERE s.id = {id}) t;")
-LIST_SQL = "SELECT row_to_json(t)::text FROM (SELECT id FROM arv.highlight ORDER BY created_at, id) t;"
+# P3-04 (RTM §3.3): tombstoned hides from ordinary retrieval — the list EXCLUDES
+# the ids whose committed event parity says tombstoned (tombstone_count >
+# restore_count; order-independent, rebuildable — never a state column).  An
+# HAVING over zero lifecycle rows yields no row -> NOT EXISTS -> active stays listed.
+LIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT DISTINCT h.id FROM arv.highlight h "
+            "WHERE NOT EXISTS (SELECT 1 FROM arv.highlight_lifecycle l "
+            "WHERE l.highlight_id = h.id AND l.owner_scope = h.owner_scope "
+            "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
+            "count(*) FILTER (WHERE l.event = 'restore')) ORDER BY h.id) t;")
+# P3-04: the governed history — EVERY revision + EVERY lifecycle event, one JSON
+# row per line (the ANC-10/#88 newline-only framing contract: row_to_json escapes
+# below U+0020 ONLY, so U+2028 travels raw inside the string and the reader splits
+# on \n ONLY).  The current view is DERIVED from these rows (HLG-09's rebuild).
+HIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT h.id, 'revision' AS kind, h.revision, "
+            "h.selected_text, h.anchor_id, NULL::text AS event, h.actor, h.created_at "
+            "FROM arv.highlight h WHERE h.id = {id} UNION ALL "
+            "SELECT l.highlight_id, 'lifecycle' AS kind, NULL::integer AS revision, "
+            "NULL::text AS selected_text, NULL::uuid AS anchor_id, l.event, l.actor, "
+            "l.created_at FROM arv.highlight_lifecycle l WHERE l.highlight_id = {id}) t "
+            "ORDER BY t.created_at, t.revision NULLS LAST, t.kind;")
+# P3-04: the single-id parity read — tombstoned iff tombstones > restores.
+STATE_SQL = ("SELECT count(*) FILTER (WHERE event = 'tombstone') || '|' || "
+             "count(*) FILTER (WHERE event = 'restore') FROM arv.highlight_lifecycle "
+             "WHERE highlight_id = {id};")
 ANC_SQL = ("SELECT row_to_json(t)::text FROM (SELECT a.id AS anchor_id, a.source_id, a.source_digest, "
            "a.start_off, a.end_off, a.context_before, a.context_after, g.id AS generation_id, "
            "g.input_digest FROM arv.anchor a LEFT JOIN arv.extraction_generation g "
@@ -76,6 +99,16 @@ def _refuse(id_: str) -> int:
     print(f"FAIL ARV-QRY-001: no such object ({id_}) in the caller's scope — absent and "
           "another owner's are the SAME refusal, never a side channel")
     print("      repair: check the id against the caller's own capture list (query.py list-captures)")
+    return 1
+
+
+def _refuse_tombstoned(id_: str) -> int:
+    """P3-04 (RTM §3.3): the typed tombstone refusal on the ordinary read path —
+    hidden from retrieval, never erased; the governed history keeps everything."""
+    print(f"FAIL ARV-QRY-003: highlight {id_} is tombstoned — hidden from ordinary retrieval "
+          "(the governed history at get-history retains every revision and event)")
+    print("      repair: query.py get-history for the governed view; commands.py restore_highlight "
+          "returns it to ordinary retrieval (the revisions were never touched)")
     return 1
 
 
@@ -146,7 +179,7 @@ def _say(out: dict, **kw) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser(description="the authenticated retrieval surface (P3-01)")
     sub = ap.add_subparsers(dest="what", required=True)
-    for name in ("get-capture", "get-source"):
+    for name in ("get-capture", "get-source", "get-history"):
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         p.add_argument("--id", required=True)
@@ -166,7 +199,35 @@ def main() -> int:
         for ln in rows:
             print(json.loads(ln)["id"])
         return 0
-    sql = CAP_SQL if a.what == "get-capture" else SRC_SQL
+    if a.what == "get-history":
+        # the governed history (P3-04): every revision + every lifecycle event —
+        # rows printed as-is, each already ONE escaped JSON line (the framing law)
+        rows = _read(db, a.owner, HIST_SQL.format(id="'" + a.id.replace("'", "''") + "'"))
+        if rows is None:
+            return 1
+        if not rows:
+            return _refuse(a.id)
+        for ln in rows:
+            print(ln)
+        return 0
+    if a.what == "get-capture":
+        # P3-04 (RTM §3.3): the ordinary read refuses tombstoned ids with the
+        # typed code; the governed history keeps them addressable
+        qid = "'" + a.id.replace("'", "''") + "'"
+        rows = _read(db, a.owner, STATE_SQL.format(id=qid))
+        if rows is None:
+            return 1
+        t_n, r_n = (int(x) for x in rows[0].split("|"))
+        if t_n > r_n:
+            return _refuse_tombstoned(a.id)
+        rows = _read(db, a.owner, CAP_SQL.format(id=qid))
+        if rows is None:
+            return 1
+        if not rows:
+            return _refuse(a.id)
+        print(json.dumps(json.loads(rows[0]), ensure_ascii=False))
+        return 0
+    sql = SRC_SQL
     rows = _read(db, a.owner, sql.format(id="'" + a.id.replace("'", "''") + "'"))
     if rows is None:
         return 1

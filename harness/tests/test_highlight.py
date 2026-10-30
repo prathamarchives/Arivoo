@@ -56,7 +56,11 @@ Cases (the HLG registry — this file is the contract's declaration):
          -> ARV-CMD-409 (zero effect); a direct-DB duplicate (id, revision)
          insert -> the PK violation (the concurrent-loser backstop)
   HLG-04b the two-process revise race: every lawful outcome (the loser's
-         011 zero-effect, or serialization) leaves the ordinals contiguous
+         011 zero-effect, or serialization) leaves the ordinals contiguous,
+         AND each exit-0 writer's acked revision is bound INDEPENDENTLY to
+         its own persisted (revision, idempotency_key) row — a success with
+         no row, or a refusal with a row, can never hide behind the
+         contiguous-ordinal backstop (the #89 round-3 finding)
   HLG-05 the crash matrix at each transactional boundary: revise + tombstone
          at after-begin / pre-commit (zero effect) and post-commit-pre-ack
          (the lost ack: the effect IS committed, no ack); the same-key
@@ -338,7 +342,8 @@ def main() -> int:
               "same key+body replays (one effect); same key+different body refuses ARV-CMD-409 (zero effect); a duplicate (id, revision) insert violates the PK",
               "exactly-once is a contract: the replay returns the recorded result, the conflict refuses, the ordinal race backs onto the PK")
 
-        # ---- HLG-04b — the two-process revise race (every lawful outcome)
+        # ---- HLG-04b — the two-process revise race (every lawful outcome, each
+        # ACK bound to its OWN persisted effect)
         ra = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"),
                                "revise_highlight", "--owner", "A", "--actor", "owner",
                                "--client-id", "cli-r", "--idem-key", "race-A",
@@ -352,21 +357,50 @@ def main() -> int:
         out_a, _err_a = ra.communicate(timeout=180)
         out_b, _err_b = rb.communicate(timeout=180)
         contig2 = audit_rows(f"SELECT revision FROM arv.highlight WHERE id='{h1}' ORDER BY revision;")
+
+        def _field_of(text: str, field: str) -> str:
+            for ln in text.splitlines():
+                if field + "=" in ln:
+                    return ln.split(field + "=")[1].split()[0]
+            return ""
         # each writer's OWN outcome asserted, never discarded (the #89 round-2
         # finding: an unchecked exit could hide an unrelated failure behind the
         # ordinal backstop): committed (exit 0) OR the typed ordinal-race
         # refusal (ARV-CMD-011, zero effect) — anything else is a defect
         ra_ok = ra.returncode == 0 or "ARV-CMD-011" in out_a
         rb_ok = rb.returncode == 0 or "ARV-CMD-011" in out_b
+        # THE ACK->EFFECT BINDING (the #89 round-3 finding: exit codes report
+        # what each process SAW, contiguous ordinals report the AGGREGATE —
+        # neither binds a writer's acked revision to its own persisted row, so
+        # a success-with-no-effect (or a refusal-with-an-effect) could hide
+        # behind the backstop). The INDEPENDENT read: the race-created rows
+        # (revision >= 3 — revisions 1/2 predate the race) must be EXACTLY the
+        # exit-0 writers' (acked revision, own key) pairs — one row per success
+        # AT ITS OWN ACKED NUMBER, a refused writer's key nowhere, no phantom
+        # rows — and the new-row count must equal the success count (a
+        # contiguous-but-missing success fails here, never hidden)
+        race_rows = audit_rows(
+            f"SELECT revision || '|' || idempotency_key FROM arv.highlight "
+            f"WHERE id='{h1}' AND revision>=3 ORDER BY revision;")
+        observed = [tuple(r.split("|")) for r in race_rows]
+        expected = []
+        if ra.returncode == 0:
+            expected.append((_field_of(out_a, "revision"), "race-A"))
+        if rb.returncode == 0:
+            expected.append((_field_of(out_b, "revision"), "race-B"))
+        expected.sort(key=lambda t: int(t[0]) if t[0].isdigit() else 1 << 30)
+        bind_ok = (observed == expected
+                   and len(observed) == len(contig2) - 2)
         race_ok = (ra_ok and rb_ok
+                   and bind_ok
                    and len(contig2) in (3, 4)
                    and contig2 == [str(i) for i in range(1, len(contig2) + 1)]
                    and all(a_ != "" for a_ in audit_rows(
                        "SELECT h.anchor_id FROM arv.highlight h JOIN arv.anchor a ON a.id=h.anchor_id "
                        f"WHERE h.id='{h1}' ORDER BY h.revision;")))
         check("HLG-04b", race_ok,
-              "the concurrent revise race: each writer's OWN outcome asserted (committed or the typed ARV-CMD-011 zero-effect refusal — anything else fails), both writers finish, every lawful outcome leaves the ordinals contiguous (serialization is lawful too)",
-              "the ordinal convention: the loser's insert aborts — an honest retry re-reads; never a gap, never a duplicate ordinal")
+              "the concurrent revise race: each writer's OWN outcome asserted (committed or the typed ARV-CMD-011 zero-effect refusal), and each exit-0 writer's acked revision bound INDEPENDENTLY to its own persisted (revision, idempotency_key) row — successes persist exactly one row each at their acked numbers, refused writers leave zero rows, and the ordinals stay contiguous (the count + key binding close the gap contiguity alone cannot see)",
+              "the ordinal convention + the ack-effect binding: an acknowledged effect MUST exist as its own row under its own key — never a missing success behind a contiguous run, never a refusal with an effect")
 
         # ---- HLG-05 — the crash matrix (revise + tombstone at each boundary)
         n0 = int(audit(f"SELECT count(*) FROM arv.highlight WHERE id='{h1}';"))

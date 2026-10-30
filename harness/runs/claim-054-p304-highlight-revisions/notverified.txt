@@ -16,15 +16,20 @@
   alone), every ack naming durability_rung=local_durable (SYS-01), the
   0007 schema conventions (no DEFAULTs, append-only + insert-guard
   triggers, RLS enabled AND FORCED, arv_app INSERT/SELECT + arv_read
-  SELECT), and U+2028 framing on the new get-history arm. The suite
-  HLG-01..12 GREEN three consecutive runs at the final tree; the thirteen
-  sibling suites GREEN; make verify GREEN 54/0.
-- THE #89 REVIEW ROUND'S OWN REPAIRS ARE IN THE MEASURED SET: the four
-  strengthened assertions (each race writer's OWN outcome; the ACTIVE
-  fixture beside the tombstoned ones so the listing exclusion is never
-  vacuous; relforcerowsecurity pinned so ENABLED-without-FORCED cannot
-  pass; the scratch-DB drop) are part of the GREEN runs above — the
-  review's repairs re-measured, never prose-claimed.
+  SELECT), the two-writer race's ACK-EFFECT binding (each exit-0 writer's
+  own persisted (revision, idempotency_key) row read INDEPENDENTLY; a
+  refused writer zero rows), and U+2028 framing on the new get-history
+  arm. The suite HLG-01..12 GREEN three consecutive runs at the final
+  tree; the fourteen sibling suites GREEN (gate.py's TESTS: the fifteen
+  registered suites minus this slice's own); make verify GREEN 54/0.
+- THE #89 REVIEW ROUNDS' OWN REPAIRS ARE IN THE MEASURED SET: the five
+  strengthened assertions (each race writer's OWN outcome AND its acked
+  revision bound to its own persisted (revision, idempotency_key) row —
+  the round-3 finding; the ACTIVE fixture beside the tombstoned ones so
+  the listing exclusion is never vacuous; relforcerowsecurity pinned so
+  ENABLED-without-FORCED cannot pass; the scratch-DB drop) are part of
+  the GREEN runs above — the review's repairs re-measured, never
+  prose-claimed.
 - NOT VERIFIED — the CONCURRENT-READER matrix on the new read arms
   (list-captures/get-history under multiple simultaneous readers): the
   read path is exercised serially in the suite; HLG-04b covers concurrent

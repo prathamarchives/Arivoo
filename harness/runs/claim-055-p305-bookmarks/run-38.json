@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-055-p305-bookmarks --diff origin/main",
+  "exit_code": 0,
+  "commit": "8ac8942917d0cc6d410abbe2d3117241365fbcd8",
+  "output_sha256": "4b045881a123be9cc6e47ce931202d99be86db22b319642f1cc5edcdf725f2b5",
+  "recorded_at": "2026-10-31T14:09:42.910232+00:00"
+}

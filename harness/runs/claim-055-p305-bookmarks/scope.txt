@@ -1,0 +1,37 @@
+# CLAIM-055 — P3-05: Bookmark (+ CLAIM-054's rule-4 close row + the session-34
+# posthumous merge account + INT-142, the turn-37 session-boundary resume).
+# PLAN's P3-05 card; RTM §2.5 item 6 ("the stable return location") + §3.3's
+# machine + the §3.2 capture rungs, SYS-01/02/05 primary. The bounded
+# exclusions per the card: notes are P3-06's, the keyword index is P3-07's,
+# the outbox/sync is P3-08's, the governed purge is P3-06/09's (D-011).
+#
+# The machine: arv.bookmark (identity + the source-versioned Anchor/location
+# reference, revision-per-row — the 0004 shape; NO copy of source content, the
+# column set is the structural law) + create_bookmark/move_bookmark (the
+# location DERIVED from the stored bytes at the offsets, a NEW anchor row per
+# revision, the identity-fixed source reference — a revision NEVER crosses
+# Source versions) + tombstone_bookmark/restore_bookmark (typed lifecycle
+# EVENT rows, append-only, alternation at the command boundary AND the
+# substrate) + query.py's get-bookmark (THE ACCEPTANCE: the saved location or
+# the typed unresolved-anchor state — resolved | unresolved | ambiguous with
+# the named causes — never a silent retarget) + list-bookmarks +
+# get-bookmark-history (the governed history, newline-only framing) + every
+# bookmark-family ack naming durability_rung=local_durable (SYS-01) +
+# migration 0008. RED-first at the predecessor 6938efa (machinery-absent
+# ARV-TEST-000, red-01.txt).
+harness/tests/test_bookmark.py D-041
+harness/commands.py D-041
+harness/query.py D-041
+harness/crash.py D-041
+harness/gate.py D-041
+harness/migrations/0008_bookmark_lifecycle.sql D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+INTENT-LEDGER.md INT-142
+context/WORKLOG.md D-043
+context/extracted/46-P305-BOOKMARKS.md D-042
+context/extracted/45-P304-HIGHLIGHT-REVISIONS.md D-042
+harness/runs/claim-055-p305-bookmarks D-042

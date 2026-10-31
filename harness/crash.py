@@ -15,6 +15,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.commands import record_event, import_source, create_highlight  # noqa: E402
 from harness.commands import revise_highlight, tombstone_highlight, restore_highlight  # noqa: E402
+from harness.commands import (create_bookmark, move_bookmark,  # noqa: E402
+                              tombstone_bookmark, restore_bookmark)
 from harness.extract import extract_source  # noqa: E402
 
 POINTS = ("after-begin", "pre-commit", "post-commit-pre-ack",
@@ -35,7 +37,8 @@ def main() -> int:
     ap.add_argument("--command", default="record_event",
                     choices=["record_event", "import_source", "create_highlight",
                              "extract_source", "revise_highlight", "tombstone_highlight",
-                             "restore_highlight"])
+                             "restore_highlight", "create_bookmark", "move_bookmark",
+                             "tombstone_bookmark", "restore_bookmark"])
     ap.add_argument("--point", required=True, choices=POINTS)
     ap.add_argument("--owner", required=True)
     ap.add_argument("--actor", default="owner")
@@ -50,7 +53,7 @@ def main() -> int:
     ap.add_argument("--source-id", default=None)
     ap.add_argument("--start", default=None, type=int)
     ap.add_argument("--end", default=None, type=int)
-    ap.add_argument("--id", default=None, help="the highlight id (the P3-04 family)")
+    ap.add_argument("--id", default=None, help="the highlight/bookmark id (the P3-04/05 families)")
     a = ap.parse_args()
     if a.command != "import_source" and a.point not in SPINE_POINTS:
         print(f"CRASH-USAGE: the point {a.point!r} is an import-phase boundary — it exists "
@@ -78,6 +81,20 @@ def main() -> int:
     elif a.command == "restore_highlight":
         rc = restore_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                                idem_key=a.idem_key, id_=a.id, crash_at=a.point)
+    elif a.command == "create_bookmark":
+        rc = create_bookmark(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                             idem_key=a.idem_key, source_id=a.source_id,
+                             start=a.start, end=a.end, crash_at=a.point)
+    elif a.command == "move_bookmark":
+        rc = move_bookmark(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                           idem_key=a.idem_key, id_=a.id, start=a.start, end=a.end,
+                           crash_at=a.point)
+    elif a.command == "tombstone_bookmark":
+        rc = tombstone_bookmark(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                idem_key=a.idem_key, id_=a.id, crash_at=a.point)
+    elif a.command == "restore_bookmark":
+        rc = restore_bookmark(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                              idem_key=a.idem_key, id_=a.id, crash_at=a.point)
     else:
         rc = create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                               idem_key=a.idem_key, source_id=a.source_id,

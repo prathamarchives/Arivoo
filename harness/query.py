@@ -78,6 +78,37 @@ ANC_SQL = ("SELECT row_to_json(t)::text FROM (SELECT a.id AS anchor_id, a.source
            "ON g.source_id = a.source_id AND g.state = 'current' WHERE a.id = {id}) t;")
 PASS_SQL = ("SELECT row_to_json(t)::text FROM (SELECT id, ordinal, start_off, end_off, text "
             "FROM arv.passage WHERE generation_id = {gid} ORDER BY ordinal) t;")
+# P3-05 (RTM §2.5 item 6): the bookmark read — the entity row + the version-tied
+# location (the anchor join carries the offsets; NO content column exists)
+BM_SQL = ("SELECT row_to_json(t)::text FROM (SELECT b.id AS bookmark_id, b.revision, b.source_id, "
+          "b.anchor_id, a.start_off, a.end_off, a.media_type, b.created_at FROM arv.bookmark b "
+          "JOIN arv.anchor a ON a.id = b.anchor_id WHERE b.id = {id} "
+          "ORDER BY b.revision DESC LIMIT 1) t;")
+# the §3.3 parity read — tombstoned iff tombstones > restores (the 0007 convention)
+BMSTATE_SQL = ("SELECT count(*) FILTER (WHERE event = 'tombstone') || '|' || "
+               "count(*) FILTER (WHERE event = 'restore') FROM arv.bookmark_lifecycle "
+               "WHERE bookmark_id = {id};")
+# tombstoned hidden from the ordinary listing (the LIST_SQL convention — the
+# HAVING-over-zero-rows form keeps active listed)
+BMLIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT DISTINCT b.id FROM arv.bookmark b "
+              "WHERE NOT EXISTS (SELECT 1 FROM arv.bookmark_lifecycle l "
+              "WHERE l.bookmark_id = b.id AND l.owner_scope = b.owner_scope "
+              "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
+              "count(*) FILTER (WHERE l.event = 'restore')) ORDER BY b.id) t;")
+# the governed history — every revision + every lifecycle event, one JSON row per
+# line (the newline-only framing law; the revision rows carry the anchor's location
+# evidence so the current view rebuilds from history ALONE — BMK-09's projection)
+BMHIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT b.id, 'revision' AS kind, b.revision, "
+              "b.source_id, b.anchor_id, a.start_off, a.end_off, a.context_before, "
+              "a.context_after, NULL::text AS event, b.actor, b.created_at "
+              "FROM arv.bookmark b JOIN arv.anchor a ON a.id = b.anchor_id WHERE b.id = {id} "
+              "UNION ALL "
+              "SELECT l.bookmark_id, 'lifecycle' AS kind, NULL::integer AS revision, "
+              "NULL::uuid AS source_id, NULL::uuid AS anchor_id, NULL::integer AS start_off, "
+              "NULL::integer AS end_off, NULL::text AS context_before, "
+              "NULL::text AS context_after, l.event, l.actor, l.created_at "
+              "FROM arv.bookmark_lifecycle l WHERE l.bookmark_id = {id}) t "
+              "ORDER BY t.created_at, t.revision NULLS LAST, t.kind;")
 
 
 def _read(db: str, owner: str, sql: str) -> list:
@@ -112,30 +143,42 @@ def _refuse_tombstoned(id_: str) -> int:
     return 1
 
 
-def _resolve(db: str, owner: str, anchor_id: str) -> int:
-    """SYS-05's typed resolution — one JSON answer line at exit 0; ARV-QRY-001
-    for out-of-scope/absent. The join never crosses Source versions (the anchor
-    binds its OWN version; a new edition is a different source row and cannot
-    appear here)."""
+def _refuse_tombstoned_bookmark(id_: str) -> int:
+    """P3-05 (RTM §3.3): the typed tombstone refusal on the bookmark read path —
+    the same class as the highlight family's ARV-QRY-003."""
+    print(f"FAIL ARV-QRY-003: bookmark {id_} is tombstoned — hidden from ordinary retrieval "
+          "(the governed history at get-bookmark-history retains every revision and event)")
+    print("      repair: query.py get-bookmark-history for the governed view; commands.py "
+          "restore_bookmark returns it to ordinary retrieval (the revisions were never touched)")
+    return 1
+
+
+def _verdict(db: str, owner: str, anchor_id: str) -> "dict | None":
+    """SYS-05's typed resolution AS A VALUE (P3-05: the bookmark read composes
+    it with the entity row; resolve-anchor prints it).  Returns the answer
+    dict, None when the read itself failed, {} when the anchor is out of
+    scope.  The join never crosses Source versions (the anchor binds its OWN
+    version; a new edition is a different source row and cannot appear
+    here)."""
     q = "'" + anchor_id.replace("'", "''") + "'"
     rows = _read(db, owner, ANC_SQL.format(id=q))
     if rows is None:
-        return 1
+        return None
     if not rows:
-        return _refuse(anchor_id)
+        return {}
     a = json.loads(rows[0])
     out = {"anchor_id": anchor_id, "source_id": a["source_id"],
            "start_off": a["start_off"], "end_off": a["end_off"]}
     cb, ca = a["context_before"], a["context_after"]
     if not a["generation_id"]:
-        _say(out, state="unresolved", cause="no-current-generation", evidence_hits=0)
-        return 0
+        out.update(state="unresolved", cause="no-current-generation", evidence_hits=0)
+        return out
     if a["input_digest"] != a["source_digest"]:
-        _say(out, state="unresolved", cause="stale-generation", evidence_hits=0)
-        return 0
+        out.update(state="unresolved", cause="stale-generation", evidence_hits=0)
+        return out
     rows = _read(db, owner, PASS_SQL.format(gid="'" + a["generation_id"] + "'"))
     if rows is None:
-        return 1
+        return None
     ps = [json.loads(r) for r in rows]
     view = "".join(p["text"] for p in ps)          # the derived view, ordinal order
     base = ps[0]["start_off"] if ps else 0           # the view's source-anchor
@@ -156,18 +199,63 @@ def _resolve(db: str, owner: str, anchor_id: str) -> int:
              and view[max(0, rs - len(cb)):rs] == cb[max(0, len(cb) - rs):]
              and view[re_:min(len(view), re_ + len(ca))] == ca[:max(0, min(len(view), re_ + len(ca)) - re_)])
     if ok_ev:
-        _say(out, state="resolved", generation_id=a["generation_id"],
-             passage_ids=",".join(ids))
-        return 0
+        out.update(state="resolved", generation_id=a["generation_id"],
+                   passage_ids=",".join(ids))
+        return out
     hits = 0                                           # the fallback: cb + gap + ca
     for i in range(len(view)):
         j = i + len(cb) + span
         if view.startswith(cb, i) and j + len(ca) <= len(view) and view.startswith(ca, j):
             hits += 1
     if hits >= 2:
-        _say(out, state="ambiguous", evidence_hits=hits)
+        out.update(state="ambiguous", evidence_hits=hits)
     else:
-        _say(out, state="unresolved", cause="location-unmatched", evidence_hits=hits)
+        out.update(state="unresolved", cause="location-unmatched", evidence_hits=hits)
+    return out
+
+
+def _resolve(db: str, owner: str, anchor_id: str) -> int:
+    """resolve-anchor (P3-03b): the typed verdict printed — ONE JSON answer
+    line at exit 0; ARV-QRY-001 for out-of-scope/absent (the resolve-anchor
+    arm's output contract is pinned byte-for-byte by the ANC suite — this
+    wrapper only prints the SAME dict _verdict builds)."""
+    v = _verdict(db, owner, anchor_id)
+    if v is None:
+        return 1
+    if not v:
+        return _refuse(anchor_id)
+    _say(v)
+    return 0
+
+
+def _get_bookmark(db: str, owner: str, bm_id: str) -> int:
+    """P3-05's ACCEPTANCE arm (RTM §2.5 item 6): return to the saved location
+    or report the typed unresolved-anchor state — the entity row composed
+    with SYS-05's typed verdict over its CURRENT revision's anchor, NEVER a
+    silent retarget (the answer's offsets are the anchor's own, whatever the
+    derived view did; the anchor row is immutable).  A typed state is an
+    ANSWER at exit 0; ARV-QRY-001/003 are the named refusals."""
+    qid = "'" + bm_id.replace("'", "''") + "'"
+    rows = _read(db, owner, BMSTATE_SQL.format(id=qid))
+    if rows is None:
+        return 1
+    t_n, r_n = (int(x) for x in rows[0].split("|"))
+    if t_n > r_n:
+        return _refuse_tombstoned_bookmark(bm_id)
+    rows = _read(db, owner, BM_SQL.format(id=qid))
+    if rows is None:
+        return 1
+    if not rows:
+        return _refuse(bm_id)
+    b = json.loads(rows[0])
+    v = _verdict(db, owner, b["anchor_id"])
+    if v is None:
+        return 1
+    if not v:
+        return _refuse(bm_id)   # the anchor row vanished under the entity: the honest refusal, never a guess
+    out = {"bookmark_id": b["bookmark_id"], "revision": b["revision"]}
+    out.update(v)
+    print(json.dumps(out, ensure_ascii=False))
     return 0
 
 
@@ -183,8 +271,13 @@ def main() -> int:
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         p.add_argument("--id", required=True)
-    p = sub.add_parser("list-captures")
-    p.add_argument("--owner", required=True)
+    for name in ("get-bookmark", "get-bookmark-history"):
+        p = sub.add_parser(name)
+        p.add_argument("--owner", required=True)
+        p.add_argument("--id", required=True)
+    for name in ("list-captures", "list-bookmarks"):
+        p = sub.add_parser(name)
+        p.add_argument("--owner", required=True)
     p = sub.add_parser("resolve-anchor")
     p.add_argument("--owner", required=True)
     p.add_argument("--id", required=True)
@@ -192,6 +285,26 @@ def main() -> int:
     db = os.environ.get("PGDATABASE", "postgres")
     if a.what == "resolve-anchor":
         return _resolve(db, a.owner, a.id)
+    if a.what == "get-bookmark":
+        return _get_bookmark(db, a.owner, a.id)
+    if a.what == "get-bookmark-history":
+        # the governed history (P3-05): every revision + every lifecycle event —
+        # rows printed as-is, each already ONE escaped JSON line (the framing law)
+        rows = _read(db, a.owner, BMHIST_SQL.format(id="'" + a.id.replace("'", "''") + "'"))
+        if rows is None:
+            return 1
+        if not rows:
+            return _refuse(a.id)
+        for ln in rows:
+            print(ln)
+        return 0
+    if a.what == "list-bookmarks":
+        rows = _read(db, a.owner, BMLIST_SQL)
+        if rows is None:
+            return 1
+        for ln in rows:
+            print(json.loads(ln)["id"])
+        return 0
     if a.what == "list-captures":
         rows = _read(db, a.owner, LIST_SQL)
         if rows is None:

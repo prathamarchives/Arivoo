@@ -724,6 +724,185 @@ def restore_highlight(*, db, owner, actor, client_id, idem_key, id_, crash_at: s
                        "a tombstone precedes every restore")
 
 
+# ------------------------------------------------- P3-05: the bookmark machine (RTM §2.5 item 6 + §3.3)
+
+def _derive_anchor(sess: "Session", *, source_id, start, end, owner, actor,
+                   client_id, body_hash):
+    """The version-tied location derivation — ONE construction home for the
+    bookmark family (the create_highlight/revise_highlight convention; the
+    highlight family keeps its landed inline form, pinned by HLG — a refactor
+    of landed code is its own slice, never this one's diff).  The offsets are
+    validated against the DECODED stored bytes and the anchor row (source
+    digest, contexts, media type) is derived — a client never supplies anchor
+    truth; the tie to the Source version is by construction (SYS-05's §6
+    wrong-version class refused at the boundary).  Returns (anchor_id,
+    anchor_stmt); refusals raise _CapRefusal."""
+    row = _sess_row(sess, f"SELECT digest || '|' || media_type FROM arv.source WHERE id={_q(source_id)};")
+    if not row:
+        raise _CapRefusal("ARV-CAP-002",
+                          f"source {source_id} does not exist in the caller's scope — a dangling anchor target is REFUSED at the command boundary (RTM §6)",
+                          "import the source first; a bookmark may only anchor into a source version visible to this owner")
+    digest, media_type = row.split("|")
+    try:
+        text = blob.get(digest).decode("utf-8")
+    except UnicodeDecodeError:
+        raise _CapRefusal("ARV-CAP-008",
+                          f"source {source_id} is not valid UTF-8 text (P3-01 supports readable text/Markdown — the media-type boundary)",
+                          "import the source with a supported media type; binary formats land with their own slices")
+    except KeyError as e:
+        raise _CapRefusal("ARV-CAP-004", f"the source's blob failed to verify — {e}",
+                          "the store is corrupt at this digest; never a bookmark against unverifiable bytes")
+    if not (0 <= start < end <= len(text)):
+        raise _CapRefusal("ARV-CAP-003",
+                          f"offsets [{start},{end}) are invalid for a {len(text)}-character text — never clamped, never guessed",
+                          "supply 0 <= start < end <= the decoded text length")
+    anchor_id, ts, ih = ids.new_id(), clock.now(), body_hash[:16]
+    stmt = (f"INSERT INTO arv.anchor (id, source_id, source_digest, start_off, end_off, context_before, "
+            f"context_after, media_type, owner_scope, actor, run_id, input_hash, created_at) VALUES "
+            f"({_q(anchor_id)}, {_q(source_id)}, {_q(digest)}, {start}, {end}, "
+            f"{_q(text[max(0, start - 32):start])}, {_q(text[end:end + 32])}, {_q(media_type)}, "
+            f"{_q(owner)}, {_q(actor)}, {_q('run-' + client_id)}, {_q(ih)}, {_q(ts)});")
+    return anchor_id, stmt
+
+
+def _bm_refusal(code: str, bm_id: str) -> _CapRefusal:
+    """The bookmark-family boundary refusal — absent and another owner's are
+    the SAME refusal, never a side channel (RTM §2.10 on the write path)."""
+    return _CapRefusal(code, f"bookmark {bm_id} does not exist in the caller's scope — absent and "
+                       "another owner's are the SAME refusal, never a side channel",
+                       "check the id against the caller's own bookmark list (query.py list-bookmarks); "
+                       "a bookmark is only ever addressable by its owner")
+
+
+def _bm_current(sess: "Session", bm_id: str) -> tuple:
+    """One read: the current (max) revision + its source binding + the DERIVED
+    lifecycle state (the parity of the committed events — order-independent,
+    rebuildable; never a state column duplicating a derivable fact)."""
+    row = _sess_row(sess,
+                    f"SELECT b.revision || '|' || b.source_id || '|' || COALESCE("
+                    f"(SELECT CASE WHEN count(*) FILTER (WHERE l.event = 'tombstone') > "
+                    f"count(*) FILTER (WHERE l.event = 'restore') THEN 'tombstoned' "
+                    f"ELSE 'active' END FROM arv.bookmark_lifecycle l "
+                    f"WHERE l.bookmark_id = b.id AND l.owner_scope = b.owner_scope), 'active') "
+                    f"FROM arv.bookmark b WHERE b.id = {_q(bm_id)} "
+                    f"ORDER BY b.revision DESC LIMIT 1;")
+    if not row:
+        raise _bm_refusal("ARV-BMK-001", bm_id)
+    revision, source_id, state = row.split("|")
+    return int(revision), source_id, state
+
+
+def _bm_insert(bm_id, revision, source_id, anchor_id, owner, actor, client_id,
+               idem_key, body_hash) -> str:
+    ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+    return (f"INSERT INTO arv.bookmark (id, revision, source_id, anchor_id, owner_scope, actor, "
+            f"run_id, input_hash, idempotency_key, created_at) VALUES ({_q(bm_id)}, {revision}, "
+            f"{_q(source_id)}, {_q(anchor_id)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
+            f"{_q(idem_key)}, {_q(ts)});")
+
+
+def create_bookmark(*, db, owner, actor, client_id, idem_key, source_id,
+                    start, end, crash_at: str = None) -> int:
+    """P3-05 (RTM §2.5 item 6): the stable return location — identity + the
+    source-versioned Anchor; NO copy of source content (the row carries no
+    text; the location evidence lives in the anchor row alone — the column
+    set is the structural law)."""
+    body = json.dumps({"source_id": source_id, "start": start, "end": end},
+                      sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build(sess: "Session", body_hash: str):
+        anchor_id, anchor_stmt = _derive_anchor(
+            sess, source_id=source_id, start=start, end=end, owner=owner,
+            actor=actor, client_id=client_id, body_hash=body_hash)
+        bm_id = ids.new_id()
+        return bm_id, [anchor_stmt, _bm_insert(bm_id, 1, source_id, anchor_id, owner,
+                                               actor, client_id, idem_key, body_hash)], \
+            " revision=1 durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="create_bookmark", payload=body, build=build, crash_at=crash_at)
+
+
+def move_bookmark(*, db, owner, actor, client_id, idem_key, id_,
+                  start, end, crash_at: str = None) -> int:
+    """§3.3's edit transition for the bookmark: append a NEW immutable
+    revision (n+1) with a NEW anchor at the new offsets — the location
+    RE-DERIVED from the SAME Source version's stored bytes (identity-fixed: a
+    bookmark revision NEVER crosses Source versions; the §6 wrong-version
+    class is refused at the command boundary by construction).  Tombstoned
+    refuses (ARV-BMK-002: restore first)."""
+    body = json.dumps({"id": id_, "start": start, "end": end},
+                      sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build(sess: "Session", body_hash: str):
+        revision, source_id, state = _bm_current(sess, id_)
+        if state != "active":
+            raise _CapRefusal("ARV-BMK-002",
+                              f"bookmark {id_} is tombstoned — a tombstoned bookmark is hidden "
+                              "from ordinary use until restored (RTM §3.3: restore precedes edit)",
+                              "restore the bookmark first (commands.py restore_bookmark); the "
+                              "governed history retains every revision meanwhile")
+        anchor_id, anchor_stmt = _derive_anchor(
+            sess, source_id=source_id, start=start, end=end, owner=owner,
+            actor=actor, client_id=client_id, body_hash=body_hash)
+        return id_, [anchor_stmt, _bm_insert(id_, revision + 1, source_id, anchor_id,
+                                             owner, actor, client_id, idem_key, body_hash)], \
+            f" revision={revision + 1} durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="move_bookmark", payload=body, build=build, crash_at=crash_at)
+
+
+def _bm_lifecycle_command(*, command, event, db, owner, actor, client_id, idem_key,
+                          id_, crash_at, refusal_code, refusal_msg, refusal_repair) -> int:
+    """§3.3's tombstone/restore transitions: ONE typed lifecycle EVENT row per
+    LAWFUL transition (append-only, owner-scoped, provenance-complete).  The
+    named command-boundary refusals are the clean first line; the substrate's
+    advisory-lock alternation trigger (0008) is the race + hostile backstop."""
+    body = json.dumps({"id": id_}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build(sess: "Session", body_hash: str):
+        _, _, state = _bm_current(sess, id_)
+        if (event == "tombstone" and state != "active") or (event == "restore" and state != "tombstoned"):
+            raise _CapRefusal(refusal_code, refusal_msg(id_), refusal_repair)
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmts = [f"INSERT INTO arv.bookmark_lifecycle (id, bookmark_id, event, owner_scope, actor, "
+                 f"run_id, input_hash, idempotency_key, created_at) VALUES ({_q(ids.new_id())}, "
+                 f"{_q(id_)}, {_q(event)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
+                 f"{_q(idem_key)}, {_q(ts)});"]
+        return id_, stmts, " durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command=command, payload=body, build=build, crash_at=crash_at)
+
+
+def tombstone_bookmark(*, db, owner, actor, client_id, idem_key, id_, crash_at: str = None) -> int:
+    """§3.3's delete transition: tombstoned — hidden from ordinary retrieval
+    (get/list), the governed history retained; recoverable by restore."""
+    return _bm_lifecycle_command(
+        command="tombstone_bookmark", event="tombstone", db=db, owner=owner, actor=actor,
+        client_id=client_id, idem_key=idem_key, id_=id_, crash_at=crash_at,
+        refusal_code="ARV-BMK-003",
+        refusal_msg=lambda i: (f"bookmark {i} is already tombstoned — the §3.3 alternation "
+                               "(tombstone only from active; the current view is DERIVED from "
+                               "the events, never a state column)"),
+        refusal_repair="restore the bookmark first (commands.py restore_bookmark); a second "
+                       "tombstone is a no-op refused with its named code, never a second event row")
+
+
+def restore_bookmark(*, db, owner, actor, client_id, idem_key, id_, crash_at: str = None) -> int:
+    """§3.3's restore transition: tombstoned -> active (the current revision
+    unchanged — the revisions were never touched)."""
+    return _bm_lifecycle_command(
+        command="restore_bookmark", event="restore", db=db, owner=owner, actor=actor,
+        client_id=client_id, idem_key=idem_key, id_=id_, crash_at=crash_at,
+        refusal_code="ARV-BMK-004",
+        refusal_msg=lambda i: (f"bookmark {i} is not tombstoned — the §3.3 alternation "
+                               "(restore only from tombstoned)"),
+        refusal_repair="nothing to restore: the bookmark is active in ordinary retrieval; "
+                       "a tombstone precedes every restore")
+
+
 def _extract_source(**kwargs):
     """P3-03a (CLAIM-052): the extraction command — the derived-build path lives
     in harness/extract.py as its own module (§2.9's boundary made structural: NO
@@ -738,7 +917,9 @@ def _extract_source(**kwargs):
 REGISTRY = {"record_event": record_event, "import_source": import_source,
             "create_highlight": create_highlight, "extract_source": _extract_source,
             "revise_highlight": revise_highlight, "tombstone_highlight": tombstone_highlight,
-            "restore_highlight": restore_highlight}
+            "restore_highlight": restore_highlight, "create_bookmark": create_bookmark,
+            "move_bookmark": move_bookmark, "tombstone_bookmark": tombstone_bookmark,
+            "restore_bookmark": restore_bookmark}
 
 
 def main() -> int:
@@ -764,11 +945,23 @@ def main() -> int:
     p.add_argument("--source-id", required=True)
     p.add_argument("--start", required=True, type=int)
     p.add_argument("--end", required=True, type=int)
+    p = sub.add_parser("create_bookmark")
+    _common(p)
+    p.add_argument("--source-id", required=True)
+    p.add_argument("--start", required=True, type=int)
+    p.add_argument("--end", required=True, type=int)
     for name in ("revise_highlight", "tombstone_highlight", "restore_highlight"):
         p = sub.add_parser(name)
         _common(p)
         p.add_argument("--id", required=True)
         if name == "revise_highlight":
+            p.add_argument("--start", required=True, type=int)
+            p.add_argument("--end", required=True, type=int)
+    for name in ("move_bookmark", "tombstone_bookmark", "restore_bookmark"):
+        p = sub.add_parser(name)
+        _common(p)
+        p.add_argument("--id", required=True)
+        if name == "move_bookmark":
             p.add_argument("--start", required=True, type=int)
             p.add_argument("--end", required=True, type=int)
     a = ap.parse_args()
@@ -790,6 +983,19 @@ def main() -> int:
     if a.command == "restore_highlight":
         return restore_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                                   idem_key=a.idem_key, id_=a.id)
+    if a.command == "create_bookmark":
+        return create_bookmark(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                               idem_key=a.idem_key, source_id=a.source_id,
+                               start=a.start, end=a.end)
+    if a.command == "move_bookmark":
+        return move_bookmark(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                             idem_key=a.idem_key, id_=a.id, start=a.start, end=a.end)
+    if a.command == "tombstone_bookmark":
+        return tombstone_bookmark(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                  idem_key=a.idem_key, id_=a.id)
+    if a.command == "restore_bookmark":
+        return restore_bookmark(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                idem_key=a.idem_key, id_=a.id)
     return create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                             idem_key=a.idem_key, source_id=a.source_id,
                             start=a.start, end=a.end)

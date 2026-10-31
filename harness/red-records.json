@@ -682,5 +682,22 @@
         "observed_at": "2026-10-30T04:07:32.181023+00:00"
       }
     ]
+  },
+  "harness/tests/test_bookmark.py": {
+    "schema": 2,
+    "binding_commit": "f837ac5962e67d634a68d321a07ddc7ac4ac1e04",
+    "binding_sha256": "8f007ab264ea92dc084403970599fcf3b2ab414a80886189c6a8cdb6b1e4f545",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-055 (P3-05) commit A: the BMK-01..12 suite's RED observed at the predecessor 6938efa and bound to commit f837ac5 (machinery-absent ARV-TEST-000: create_bookmark absent, get-bookmark absent, migration 0008 absent; the transcript at the slice's runs dir red-01.txt; record 46 \u00a76 \u2014 the record-18 \u00a74.1 / 45bd8f7 precedent class)",
+    "current_sha256": "084e14d3f208c03da2ecde973697754a313605a5abd248670b8c0ff5ada34296",
+    "amendments": [
+      {
+        "prior_sha256": "8f007ab264ea92dc084403970599fcf3b2ab414a80886189c6a8cdb6b1e4f545",
+        "new_sha256": "084e14d3f208c03da2ecde973697754a313605a5abd248670b8c0ff5ada34296",
+        "note": "CLAIM-055 (P3-05) commit B's implementation cycle changed the test file \u2014 the two assertion-form repairs found by the suite at the first GREEN run and documented in commit B's message (BMK-04's count read string-vs-int, now int(); BMK-11's boolean-concat rendering 'true|true' vs the single-column 't' form \u2014 both pins strengthened, none removed; the observed GREEN runs at this tree are the authorization evidence; the 84b31b7 precedent)",
+        "observed_at": "2026-10-31T12:27:16.622930+00:00"
+      }
+    ]
   }
 }

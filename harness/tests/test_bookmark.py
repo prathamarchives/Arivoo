@@ -396,7 +396,7 @@ def main() -> int:
         pm = move("mv-A1", b1, p2s, p2e)
         pm_again = move("mv-A1", b1, p2s, p2e)
         pm_conflict = move("mv-A1", b1, p1s, p1e)                  # same key, different body
-        n_after_replay = audit(f"SELECT count(*) FROM arv.bookmark WHERE id='{b1}';")
+        n_after_replay = int(audit(f"SELECT count(*) FROM arv.bookmark WHERE id='{b1}';"))
         dup = super_sql(f"INSERT INTO arv.bookmark (id, revision, source_id, anchor_id, owner_scope, "
                         f"actor, run_id, input_hash, idempotency_key, created_at) SELECT id, 2, "
                         f"source_id, anchor_id, owner_scope, actor, run_id, input_hash, "
@@ -693,10 +693,13 @@ def main() -> int:
         pol = audit("SELECT count(*) FROM pg_policies WHERE schemaname='arv' AND "
                     "tablename IN ('bookmark', 'bookmark_lifecycle') AND "
                     "policyname='owner_isolation';")
+        # NOTE: a boolean CONCAT (||) renders 'true'/'false' (text context); the
+        # HLG-11 single-column read renders 't' — the two forms differ, both pin
+        # ENABLED+FORCED
         ok11 = (no_defs
                 and trg_b == {"bookmark_immutable"}
                 and trg_l == {"bookmark_lifecycle_guard", "bookmark_lifecycle_immutable"}
-                and rls == "t|t" and rls_l == "t|t"
+                and rls == "true|true" and rls_l == "true|true"
                 and grants[("bookmark", "arv_app")] >= {"INSERT", "SELECT"}
                 and grants[("bookmark", "arv_read")] == {"SELECT"}
                 and grants[("bookmark_lifecycle", "arv_app")] >= {"INSERT", "SELECT"}

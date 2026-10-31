@@ -1,0 +1,102 @@
+- NOT VERIFIED — the honest limits of CLAIM-055 / P3-05 (the bookmark
+  machine; LAW-04; never empty-by-omission)
+- WHAT THIS SLICE PROVES, ON WHAT STACK: the bookmark machine of RTM §2.5
+  item 6 + §3.3 holds end-to-end over the REAL PostgreSQL boundary (17.11:
+  the local rig + CI's postgres:17 service): the stable return location as
+  identity + the source-versioned Anchor reference with NO content column
+  (the structural no-copy law — arv.bookmark's exact ten-column set), the
+  location DERIVED from the stored bytes at the offsets (a client never
+  supplies anchor truth; the tie to the Source version by construction),
+  immutable revisions (move appends revision n+1 with a NEW anchor row,
+  identity-fixed — a revision NEVER crosses Source versions), the TYPED
+  RESOLUTION on read (get-bookmark answers resolved | unresolved |
+  ambiguous with the named causes no-current-generation / stale-generation /
+  location-unmatched at exit 0, the anchor's ORIGINAL offsets echoed, the
+  evidence byte-unchanged — never a silent retarget), alternation enforced
+  at BOTH the command boundary and the substrate (the named ARV-BMK-
+  002/003/004 refusals + the advisory-locked insert guard, the hostile
+  direct duplicate and the ghost target refused), the crash matrix at every
+  transaction boundary (exit 2 no-ack; the same-key replay converges), the
+  replay/conflict contract (ARV-CMD-409), tombstone hiding from ordinary
+  retrieval (list + the typed ARV-QRY-003) while the governed history
+  retains every revision and event, the DERIVED current view (rebuildable
+  from the history rows alone), the identity-fix across re-import (every
+  revision binds v1; the saved location resolves over v1's own generation),
+  every ack naming durability_rung=local_durable (SYS-01), the 0008 schema
+  conventions (no DEFAULTs, append-only + insert-guard triggers, RLS
+  enabled AND FORCED, arv_app INSERT/SELECT + arv_read SELECT, the two
+  composite FKs), the two-writer move race's ACK-EFFECT binding (the SEV
+  reviewer's own five live rounds: each exit-0 writer's acked (revision,
+  idempotency_key) bound INDEPENDENTLY to its own persisted row; every
+  refused writer zero rows anywhere), the resolve-anchor output contract
+  byte-stable through the _verdict refactor, and U+2028 framing on the new
+  get-bookmark-history arm. The suite BMK-01..12 GREEN three consecutive
+  runs at the final tree; the fifteen sibling suites GREEN (gate.py's
+  TESTS: the sixteen registered suites minus this slice's own); make verify
+  GREEN exit 0 (the canonical layer 54/0).
+- THIS SLICE'S OWN REVIEW REPAIRS ARE IN THE MEASURED SET: the two
+  assertion-form repairs (BMK-04's int() count read; BMK-11's
+  boolean-concat 'true|true' form — record 46 §8) and the ARV-CLM-003
+  RETROACTIVE-notation walls-catch (ed14858) are part of the GREEN runs
+  above — the repairs re-measured, never prose-claimed.
+- NOT VERIFIED — the CONCURRENT-READER matrix on the new read arms
+  (get-bookmark/list-bookmarks/get-bookmark-history under multiple
+  simultaneous readers): the read path is exercised serially; the same
+  standing class as the highlight family's (record 45's fence). The
+  read-path scale slice owns that matrix.
+- NOT VERIFIED — concurrency beyond TWO writers: the move race is measured
+  at two writers (the suite's spine class + the reviewer's live rounds);
+  >2 simultaneous bookmark writers are not a measured claim.
+- THE GOVERNED PURGE (P3-06/09's, D-011) IS NOT THIS SLICE AND NOT
+  IMPLIED: tombstone hides from ordinary retrieval and the history retains
+  everything; NO purge behavior, retention policy, or erasure semantics is
+  claimed or built.
+- NOTES/KEYWORD-INDEX/OUTBOX INTEGRATION IS NOT MEASURED (P3-06/07/08's):
+  how a future note surface or the keyword index observes bookmark
+  revisions/tombstones, and the queued/server_durable rungs, are untested
+  by this slice (every ack names local_durable — SYS-01's honest rung).
+- THE HOSTILE DIRECT-WRITE CLASSES: the substrate's refusals are verified
+  on the exercised classes (the app role's permission denial, the
+  superuser's append-only trigger, the alternation trigger, the
+  existence-in-scope guard, RLS owner isolation); an exhaustive hostile-SQL
+  enumeration is NOT claimed.
+- THE NO-GUC HOSTILE INSERT (the SEV round's P2-class observation, the
+  0002/0004/0007 convention): a direct INSERT into arv.bookmark_lifecycle
+  as arv_app WITHOUT app.current_owner set returns INSERT 0 0 — the refusal
+  is by RLS row-invisibility of the guard's target subquery, zero rows
+  land, but the exit is not a named code. Every case where the target is
+  VISIBLE to the writer (duplicate tombstone, ghost id, cross-scope) is
+  refused with the named codes at the trigger, as arv_app AND as the
+  superuser. The boundary is re-examined when the sync/purge slices
+  (P3-08/P3-09) touch it — named here, never silently passed.
+- THE ANC_SQL TWO-CURRENT-GENERATIONS SURFACE (the SEV round's P3,
+  PRE-EXISTING, outside this slice's diff): the resolve-anchor/_verdict
+  LEFT JOIN takes rows[0] if a hostile plant created two current
+  generations for one source; the extraction machine itself maintains one
+  current per source (UNIQUE(source_id, ordinal) + the supersede
+  transition), and the _verdict refactor did not change this surface.
+  Routed to the extraction/read-path owners, not charged to P3-05.
+- THE FRAMING SURFACE: U+2028 is measured on the get-bookmark-history arm
+  (BMK-12, byte-exact against the fixture's own context window); U+2029/
+  U+0085 remain unexercised on THIS arm (the same newline-only framing law
+  binds it — honestly listed, not silently covered by analogy).
+- THE ARV_KEEP_DB OVERRIDE PATH: the scratch-DB drop runs after every
+  suite run; the override branch itself is a local-inspection affordance,
+  not a suite-asserted contract.
+- THE SEV ROUND'S OWN NOT-PROVEN LIST (agent-9fbd03d3, the fresh-context
+  reviewer): crash.py's create_bookmark/restore_bookmark arms specifically
+  (BMK-05 covers move+tombstone at every boundary — suite-covered, not
+  independently re-probed); the full sixteen-suite battery + the canonical
+  verifier + the ARV-CLM-003 walls (the builder's recorded runs stand —
+  run-01..18, this sheet); the arv-baseline-bump grammar exception's
+  process handling (accepted on the 0007 precedent); the catalog RLS
+  re-reads (verified behaviorally through the ownership matrix).
+- THE MERGE-CHAIN FACTS (the D-042 path for THIS slice, the post-merge
+  five-check observation on main, the branch deletion, the protections
+  re-read): recorded only after they happen, in the next slice's commit A
+  (the convention; a committed file cannot guarantee external state,
+  INT-104).
+- THE GITHUB-SIDE WALLS (the five required contexts green on the exact
+  final head, the PR review threads' resolved states): observed live via
+  the API at the merge gate, never mechanically asserted by a committed
+  file (INT-104).

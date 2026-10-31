@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-055-p305-bookmarks",
+  "base_sha": "6938efa5f83987f9d14f5ab565b8f7c61818b3ef",
+  "reviewed_diff_sha256": "173b0e05aba0e110cd5c16462af45f29450c0be3b4c0a145ae7bb431bf93cb6f",
+  "intent_ids": [
+    "INT-142",
+    "INT-141",
+    "INT-140",
+    "INT-139",
+    "INT-135",
+    "INT-134",
+    "INT-131",
+    "INT-127"
+  ],
+  "requirement_ids": [
+    "SYS-01",
+    "SYS-02",
+    "SYS-05"
+  ],
+  "system_claims": [
+    "C1",
+    "C5"
+  ],
+  "changed_components": [
+    "harness/migrations/0008_bookmark_lifecycle.sql",
+    "harness/commands.py (the bookmark family: _derive_anchor, _bm_current, create/move/tombstone/restore_bookmark)",
+    "harness/query.py (the _verdict refactor + get-bookmark/list-bookmarks/get-bookmark-history)",
+    "harness/crash.py (the four bookmark arms)",
+    "harness/tests/test_bookmark.py (the BMK-01..12 acceptance suite)",
+    "harness/gate.py (TESTS registration)"
+  ],
+  "interfaces_reviewed": [
+    "the command boundary: create_bookmark/move_bookmark/tombstone_bookmark/restore_bookmark on the idempotent spine (replay/409/crash points, ARV-BMK-001..004 + ARV-CAP-002/003/004/008 refusals)",
+    "the read boundary: get-bookmark (the entity row composed with SYS-05's typed verdict), list-bookmarks (the parity exclusion), get-bookmark-history (the governed history, newline-only framing)",
+    "the substrate: migration 0008 \u2014 arv.bookmark (revision-per-row, the two composite FKs, no content column) + arv.bookmark_lifecycle (the advisory-lock alternation guard, append-only, RLS forced)",
+    "the resolve-anchor arm's output contract through the _verdict refactor (byte-stable, the ANC suite's pin)",
+    "the anchor reuse: _derive_anchor's version-tied location derivation (the create_highlight convention, one construction home for the new family)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the BMK-01..12 acceptance suite GREEN x3 at the final tree (proof run-01..03 of this sheet)",
+      "the focused sibling regressions GREEN: CAP/IMP/EXT/ANC/HLG/CMD/K (proof run-04..10)",
+      "the machinery suites GREEN: gate_dispatch/mutation_floor/trusted_gate/claims_paths/record_machinery/sev (proof run-11..16)",
+      "the canonical-layer verifier 54 checks 0 failures at the content head (make verify GREEN, proof: the builder's recorded verify run, record 46 section 6)"
+    ],
+    "integration_verification": [
+      "the whole-battery make verify exit 0 at the content head (sixteen suites + known-bads + the gate; record 46 section 6)",
+      "the SEV fresh-context reviewer's own 74-assertion adversarial script GREEN (agent-9fbd03d3: the no-copy column set, the five typed states, the retarget pins, the ownership matrix, the alternation + hostile writes, the idempotency spine, the two-process move race's ack-effect binding, the identity-fix, the resolve-anchor compat)",
+      "the reviewer's five live two-writer race rounds: every exit-0 writer bound to its own persisted (revision, idempotency_key) row; every refused writer zero rows anywhere; ordinals contiguous"
+    ],
+    "system_verification": [
+      "SYS-01: every bookmark-family ack names durability_rung=local_durable (BMK-10)",
+      "SYS-02: the authoritative rows append-only (the permission + ARV-CAP-005 trigger pins, BMK-02/06); the current view DERIVED (rebuildable from history alone, BMK-09)",
+      "SYS-05: the typed resolution on read \u2014 resolved/unresolved/ambiguous with the named causes, the original offsets echoed, never a silent retarget (BMK-08, the acceptance headline)"
+    ],
+    "validation": [
+      "the P3-05 card's acceptance observed: return to the saved location or report the typed unresolved-anchor state (BMK-07/08); the card's test set mapped: invalid Anchor (BMK-02), cross-owner (BMK-03), re-import (BMK-07), re-extraction (BMK-08), tombstone/restore (BMK-06), replay and restart (BMK-04/05)",
+      "the fresh-context reviewer's verdict PASS, zero P0/P1 (this report's findings section carries the three P3 notes)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a silent retarget: the bookmark read returns a plausible-but-wrong location after a drifted re-extraction or a new edition",
+      "control": "the typed resolution contract: the answer's offsets are the anchor's own stored offsets (the anchor row immutable, ARV-CAP-005); a drifted view yields the typed unresolved/ambiguous state at exit 0 \u2014 pinned by BMK-08's five fixtures + the reviewer's independently constructed states",
+      "proof_ids": [
+        "run-01",
+        "run-02",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "content duplication: a bookmark row carrying source text (the card's forbidden copy)",
+      "control": "the structural law: arv.bookmark's column set carries no content column (information_schema pinned by BMK-01 + the reviewer's A1-A3)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "a revision crossing Source versions (the wrong-version anchor class, SYS-05)",
+      "control": "identity-fixed by construction: move re-derives from the SAME source version's stored bytes read from the entity's own binding (BMK-07); the reviewer's identity-fix probe re-verified across re-import",
+      "proof_ids": [
+        "run-01",
+        "run-04"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "a lost or duplicated effect under crash/restart/concurrent writers",
+      "control": "the spine's zero-or-one semantics (BMK-05 crash matrix + the same-key replay convergence) + the PK backstop (BMK-04) + the reviewer's live two-writer races with the ack-effect binding (each success its own row at its acked number; each refusal zero rows)",
+      "proof_ids": [
+        "run-01",
+        "run-02"
+      ]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "a cross-owner bookmark observable through any arm (a side channel)",
+      "control": "RLS owner scoping + the same-refusal rule (ARV-BMK-001/ARV-QRY-001) on every arm \u2014 BMK-03 + the reviewer's D0-D4 matrix incl. the tombstone-state non-leak",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-06",
+      "scenario": "a non-alternating lifecycle (double tombstone, restore-of-active, a hostile duplicate event row)",
+      "control": "the command-boundary named refusals (ARV-BMK-002/003/004) + the substrate's advisory-lock parity guard (BMK-06's hostile + ghost probes; the reviewer's E1-E14)",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "P2",
+      "location": "harness/commands.py _bm_current/move_bookmark",
+      "finding": "the current revision is read BEFORE BEGIN, so concurrent movers both build revision n+1; correctness rests on the PK (id, revision) backstop + full rollback",
+      "evidence": "the reviewer's five live two-writer rounds: the loser exits ARV-CMD-011 (zero effect, rolled back) and leaves zero rows in arv.bookmark/arv.anchor/arv.command_log for its key; ordinals contiguous",
+      "disposition": "SYS-04's documented stance (a unique constraint is not a replay promise); no defect \u2014 the SEV round's race probes now cover the class the suite measures at two writers",
+      "status": "resolved"
+    },
+    {
+      "id": "F2",
+      "severity": "P2",
+      "location": "arv.bookmark_lifecycle guard (RLS interaction)",
+      "finding": "a hostile arv_app INSERT without app.current_owner set returns INSERT 0 0 (RLS row-invisibility of the guard's target subquery), not a named code; zero rows land",
+      "evidence": "the reviewer's hostile probe: count=0 for the hostile key; every VISIBLE-target case refused with the named codes (ARV-BMK-001/003) as arv_app and as superuser",
+      "disposition": "the 0002/0004/0007 convention (the substrate enforces scope + alternation, the command boundary is the first line); named as a notverified fence with the revisit condition (the sync/purge slices)",
+      "status": "resolved"
+    },
+    {
+      "id": "F3",
+      "severity": "P2",
+      "location": "harness/query.py ANC_SQL (PRE-EXISTING, unchanged by this slice)",
+      "finding": "the resolve-anchor/_verdict LEFT JOIN takes rows[0] if a hostile plant created two current generations for one source",
+      "evidence": "code read (the reviewer's F3); not probed live (requires hostile derived-state surgery outside the frozen machine)",
+      "disposition": "the extraction machine maintains one current per source (UNIQUE(source_id, ordinal) + the supersede transition); routed to the extraction/read-path owners, not charged to P3-05",
+      "status": "resolved"
+    }
+  ],
+  "not_verified": [
+    "the concurrent-reader matrix on the new read arms (serially exercised; the standing class)",
+    "concurrency beyond two writers",
+    "the governed purge (P3-06/09's, D-011 \u2014 not implied by tombstone)",
+    "the notes/keyword-index/outbox integrations (P3-06/07/08's) + the queued/server_durable rungs",
+    "the no-GUC hostile-insert named-code boundary (F2, the standing convention fence)",
+    "the ANC_SQL two-current-generations surface (F3, pre-existing)",
+    "U+2029/U+0085 unexercised on the history arm (U+2028 is the carrier)",
+    "crash.py's create_bookmark/restore_bookmark arms specifically (suite-covered at move+tombstone; not independently re-probed by the reviewer)",
+    "the merge-chain facts (recorded only after they happen, INT-104)"
+  ],
+  "builder_context": "session-35 builder context: Super Z (GLM host) \u2014 the session that wrote the implementation, the suite, and this slice's records (record 46)",
+  "reviewer_context": "agent-9fbd03d3 (the fresh-context SEV reviewer, cold-start, independent of the builder: its own 74-assertion adversarial script, its own five live two-writer race rounds, its own identity-fix and resolve-anchor probes over its own scratch DB; probe ledger preserved by the reviewer)",
+  "disposition": "PASS",
+  "review_summary": "The P3-05 bookmark slice holds against every frozen contract attacked: the no-copy structural law (the exact ten-column set, no content column anywhere on the write paths), the five typed-resolution states answered at exit 0 with the anchor's ORIGINAL offsets echoed and byte-unchanged evidence (never a silent retarget), the identity-fix across re-import (every revision binds v1, the saved location resolves over v1's own generation), the same-refusal ownership rule on all six arms including the tombstone-state non-leak, the named alternation codes at both the command boundary and the substrate, exactly-once semantics under genuine two-process races (each success its own row at its acked revision; each refusal zero rows), and the resolve-anchor output contract byte-stable through the _verdict refactor. Zero P0/P1; three P2 notes dispositioned (one design-consistent SYS-04 stance now race-covered, two named fences with revisit conditions). Verdict PASS.",
+  "sheet_section": true
+}

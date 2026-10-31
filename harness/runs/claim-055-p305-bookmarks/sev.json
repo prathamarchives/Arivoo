@@ -40,8 +40,8 @@
   "v_model": {
     "component_verification": [
       "the BMK-01..12 acceptance suite GREEN x3 at the final tree (proof run-01..03 of this sheet)",
-      "the focused sibling regressions GREEN: CAP/IMP/EXT/ANC/HLG/CMD/K (proof run-04..10)",
-      "the machinery suites GREEN: gate_dispatch/mutation_floor/trusted_gate/claims_paths/record_machinery/sev (proof run-11..16)",
+      "the focused sibling regressions GREEN: CAP/IMP/EXT/ANC/HLG/CMD/K (proof run-06..12 \u2014 commands/kernel/capture/import/extract/anchor/highlight)",
+      "the machinery suites GREEN: gate_dispatch/mutation_floor/trusted_gate/claims_paths/record_machinery/sev (proof run-13..18); the substrate suites migrations/substrate GREEN beside them (proof run-04..05)",
       "the canonical-layer verifier 54 checks 0 failures at the content head (make verify GREEN, proof: the builder's recorded verify run, record 46 section 6)"
     ],
     "integration_verification": [
@@ -56,7 +56,7 @@
     ],
     "validation": [
       "the P3-05 card's acceptance observed: return to the saved location or report the typed unresolved-anchor state (BMK-07/08); the card's test set mapped: invalid Anchor (BMK-02), cross-owner (BMK-03), re-import (BMK-07), re-extraction (BMK-08), tombstone/restore (BMK-06), replay and restart (BMK-04/05)",
-      "the fresh-context reviewer's verdict PASS, zero P0/P1 (this report's findings section carries the three P3 notes)",
+      "the fresh-context reviewer's verdict PASS, zero P0/P1 (this report's findings section carries the three P2 notes)",
       "the #90 bot round dispositioned: CodeRabbit's Major (the BMK-04 int() count \u2014 already the implementation-cycle repair at a5eed2b, auto-resolved) and the Minor (STATE's Active-task line trimmed to the pointer-only form, the digest re-bound + the full evidence regenerated at the repaired head \u2014 run-20..37)"
     ]
   },
@@ -85,7 +85,7 @@
       "control": "identity-fixed by construction: move re-derives from the SAME source version's stored bytes read from the entity's own binding (BMK-07); the reviewer's identity-fix probe re-verified across re-import",
       "proof_ids": [
         "run-01",
-        "run-04"
+        "run-09"
       ]
     },
     {

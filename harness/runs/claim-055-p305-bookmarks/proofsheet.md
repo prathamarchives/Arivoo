@@ -116,7 +116,7 @@
 - refused with the named codes at the trigger, as arv_app AND as the
 - superuser. The boundary is re-examined when the sync/purge slices
 - (P3-08/P3-09) touch it — named here, never silently passed.
-- - THE ANC_SQL TWO-CURRENT-GENERATIONS SURFACE (the SEV round's P3,
+- - THE ANC_SQL TWO-CURRENT-GENERATIONS SURFACE (the SEV round's P2,
 - PRE-EXISTING, outside this slice's diff): the resolve-anchor/_verdict
 - LEFT JOIN takes rows[0] if a hostile plant created two current
 - generations for one source; the extraction machine itself maintains one
@@ -159,11 +159,11 @@
 - file (INT-104).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 08d549015673758cd4f76edd4eb499a87708e6e1e41e748b0512426772cf3237
+- report sha256: 0c8a32ff6b15cadf2b92bb76893aaf0265733e3776b2bb77b18e8e86160a6715
 - reviewed_diff_sha256: edb151a1af5cd2bd6d245bd37cd7e82e5ed2151d4f61f942dd3baa54c91875ee
 - disposition: PASS
 - findings: 3 (open P0/P1: 0)
 - not-verified entries: 9
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): b2b58b14d9add70bbefd01791419787be58cc54e7f3f4da8956d648c63a7173f
+- sheet sha256 (of the content above, excluding this line): 14766b5bf2470eb2ab396d852d66326cdb857639fa813b337604cb8cd61c6ca1

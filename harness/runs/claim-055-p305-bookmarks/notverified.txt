@@ -69,7 +69,7 @@
   refused with the named codes at the trigger, as arv_app AND as the
   superuser. The boundary is re-examined when the sync/purge slices
   (P3-08/P3-09) touch it — named here, never silently passed.
-- THE ANC_SQL TWO-CURRENT-GENERATIONS SURFACE (the SEV round's P3,
+- THE ANC_SQL TWO-CURRENT-GENERATIONS SURFACE (the SEV round's P2,
   PRE-EXISTING, outside this slice's diff): the resolve-anchor/_verdict
   LEFT JOIN takes rows[0] if a hostile plant created two current
   generations for one source; the extraction machine itself maintains one

@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-055-p305-bookmarks (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 630d40f700f7cafcc4d7bfb8c3e37d30137fae56
-- generated (last record's timestamp): 2026-10-31T12:48:43.292877+00:00
-- run records: 18
+- commit (last run record's): ba3b878e4562a03bb947ce32484cf68518186321
+- generated (last record's timestamp): 2026-10-31T13:48:16.968931+00:00
+- run records: 19
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T12:45:13.425988+00:00
@@ -23,6 +23,7 @@
 - `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 f2eca2ca563af21c · 2026-10-31T12:48:40.353570+00:00
 - `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-31T12:48:40.605929+00:00
 - `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 fd04527cac35720b · 2026-10-31T12:48:43.292877+00:00
+- `python3 harness/gate.py --slice claim-055-p305-bookmarks --diff origin/main` -> exit 0 · output sha256 614cd42f7bf94422 · 2026-10-31T13:48:16.968931+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - NOT VERIFIED — the honest limits of CLAIM-055 / P3-05 (the bookmark
@@ -136,4 +137,4 @@
 - not-verified entries: 9
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 6ff26fcb8210a95fefd7338fb965fc71c479f6ef9264bc2bd5369974431810da
+- sheet sha256 (of the content above, excluding this line): c8c58dd53d68daed4067b06141f88b9f69aaae8a2951ec28b4437b4b3beeeef3

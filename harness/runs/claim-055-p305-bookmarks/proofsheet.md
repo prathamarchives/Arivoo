@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-055-p305-bookmarks (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): ba3b878e4562a03bb947ce32484cf68518186321
-- generated (last record's timestamp): 2026-10-31T13:48:16.968931+00:00
-- run records: 19
+- commit (last run record's): fce5dc9ee77e8d83753e80514383f9862926e75c
+- generated (last record's timestamp): 2026-10-31T14:06:06.326908+00:00
+- run records: 37
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T12:45:13.425988+00:00
@@ -24,6 +24,24 @@
 - `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-31T12:48:40.605929+00:00
 - `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 fd04527cac35720b · 2026-10-31T12:48:43.292877+00:00
 - `python3 harness/gate.py --slice claim-055-p305-bookmarks --diff origin/main` -> exit 0 · output sha256 614cd42f7bf94422 · 2026-10-31T13:48:16.968931+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T14:03:09.608414+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T14:03:14.784288+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T14:03:20.002197+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 0a0039301aa4dc51 · 2026-10-31T14:03:25.423410+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-31T14:03:25.860201+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-31T14:03:28.619498+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 fa304232e7753333 · 2026-10-31T14:03:30.378432+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 98d573e26a4bb30f · 2026-10-31T14:03:32.973122+00:00
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 88f804186ff9b6ff · 2026-10-31T14:03:37.835176+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-31T14:03:40.218461+00:00
+- `python3 harness/tests/test_anchor.py` -> exit 0 · output sha256 6524242680a49821 · 2026-10-31T14:03:42.630521+00:00
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 c0fd0aaa7985b5a1 · 2026-10-31T14:03:46.440445+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-31T14:05:27.072039+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 bce2db44daf91544 · 2026-10-31T14:05:47.390690+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 a70e18cb931fa1fb · 2026-10-31T14:06:02.374427+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 85154cea110d9532 · 2026-10-31T14:06:02.695404+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-31T14:06:02.890259+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 0cc3972402d56b0b · 2026-10-31T14:06:06.326908+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - NOT VERIFIED — the honest limits of CLAIM-055 / P3-05 (the bookmark
@@ -119,6 +137,16 @@
 - run-01..18, this sheet); the arv-baseline-bump grammar exception's
 - process handling (accepted on the 0007 precedent); the catalog RLS
 - re-reads (verified behaviorally through the ownership matrix).
+- - THE RUN-RECORD PROVENANCE (the #90 review round's honest record, the
+- claim-054 precedent form): run-01..18 bind the FIRST content head
+- 630d40f; run-19 the recorded PR-mode gate at the first artifact tree
+- ba3b878 — both BEFORE the CodeRabbit pointer-only round's STATE trim
+- landed; the authoritative re-records run-20..37 bind THIS final content
+- head (the same command set, re-run through the canonical recording
+- process at the committed tree — the #89 round-3 "records name what they
+- tested" lesson applied), and run-38 is the re-recorded PR-mode gate run.
+- The originals stay as historical artifacts (ARV-PRF-006 forbids the
+- overwrite).
 - - THE MERGE-CHAIN FACTS (the D-042 path for THIS slice, the post-merge
 - five-check observation on main, the branch deletion, the protections
 - re-read): recorded only after they happen, in the next slice's commit A
@@ -130,11 +158,11 @@
 - file (INT-104).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: ffba5063adf1981e87d18c1eafb8825c285cbb66ec878c46874ad453c92993f6
-- reviewed_diff_sha256: 173b0e05aba0e110cd5c16462af45f29450c0be3b4c0a145ae7bb431bf93cb6f
+- report sha256: 08d549015673758cd4f76edd4eb499a87708e6e1e41e748b0512426772cf3237
+- reviewed_diff_sha256: edb151a1af5cd2bd6d245bd37cd7e82e5ed2151d4f61f942dd3baa54c91875ee
 - disposition: PASS
 - findings: 3 (open P0/P1: 0)
 - not-verified entries: 9
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): c8c58dd53d68daed4067b06141f88b9f69aaae8a2951ec28b4437b4b3beeeef3
+- sheet sha256 (of the content above, excluding this line): 70c7d59c1e2637bdd30878a1c1910aa9341df3c5c5552532883288b6fa41177f

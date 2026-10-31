@@ -91,6 +91,16 @@
   run-01..18, this sheet); the arv-baseline-bump grammar exception's
   process handling (accepted on the 0007 precedent); the catalog RLS
   re-reads (verified behaviorally through the ownership matrix).
+- THE RUN-RECORD PROVENANCE (the #90 review round's honest record, the
+  claim-054 precedent form): run-01..18 bind the FIRST content head
+  630d40f; run-19 the recorded PR-mode gate at the first artifact tree
+  ba3b878 — both BEFORE the CodeRabbit pointer-only round's STATE trim
+  landed; the authoritative re-records run-20..37 bind THIS final content
+  head (the same command set, re-run through the canonical recording
+  process at the committed tree — the #89 round-3 "records name what they
+  tested" lesson applied), and run-38 is the re-recorded PR-mode gate run.
+  The originals stay as historical artifacts (ARV-PRF-006 forbids the
+  overwrite).
 - THE MERGE-CHAIN FACTS (the D-042 path for THIS slice, the post-merge
   five-check observation on main, the branch deletion, the protections
   re-read): recorded only after they happen, in the next slice's commit A

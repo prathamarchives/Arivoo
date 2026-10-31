@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-055-p305-bookmarks",
   "base_sha": "6938efa5f83987f9d14f5ab565b8f7c61818b3ef",
-  "reviewed_diff_sha256": "173b0e05aba0e110cd5c16462af45f29450c0be3b4c0a145ae7bb431bf93cb6f",
+  "reviewed_diff_sha256": "edb151a1af5cd2bd6d245bd37cd7e82e5ed2151d4f61f942dd3baa54c91875ee",
   "intent_ids": [
     "INT-142",
     "INT-141",
@@ -56,7 +56,8 @@
     ],
     "validation": [
       "the P3-05 card's acceptance observed: return to the saved location or report the typed unresolved-anchor state (BMK-07/08); the card's test set mapped: invalid Anchor (BMK-02), cross-owner (BMK-03), re-import (BMK-07), re-extraction (BMK-08), tombstone/restore (BMK-06), replay and restart (BMK-04/05)",
-      "the fresh-context reviewer's verdict PASS, zero P0/P1 (this report's findings section carries the three P3 notes)"
+      "the fresh-context reviewer's verdict PASS, zero P0/P1 (this report's findings section carries the three P3 notes)",
+      "the #90 bot round dispositioned: CodeRabbit's Major (the BMK-04 int() count \u2014 already the implementation-cycle repair at a5eed2b, auto-resolved) and the Minor (STATE's Active-task line trimmed to the pointer-only form, the digest re-bound + the full evidence regenerated at the repaired head \u2014 run-20..37)"
     ]
   },
   "failure_modes": [
@@ -156,6 +157,6 @@
   "builder_context": "session-35 builder context: Super Z (GLM host) \u2014 the session that wrote the implementation, the suite, and this slice's records (record 46)",
   "reviewer_context": "agent-9fbd03d3 (the fresh-context SEV reviewer, cold-start, independent of the builder: its own 74-assertion adversarial script, its own five live two-writer race rounds, its own identity-fix and resolve-anchor probes over its own scratch DB; probe ledger preserved by the reviewer)",
   "disposition": "PASS",
-  "review_summary": "The P3-05 bookmark slice holds against every frozen contract attacked: the no-copy structural law (the exact ten-column set, no content column anywhere on the write paths), the five typed-resolution states answered at exit 0 with the anchor's ORIGINAL offsets echoed and byte-unchanged evidence (never a silent retarget), the identity-fix across re-import (every revision binds v1, the saved location resolves over v1's own generation), the same-refusal ownership rule on all six arms including the tombstone-state non-leak, the named alternation codes at both the command boundary and the substrate, exactly-once semantics under genuine two-process races (each success its own row at its acked revision; each refusal zero rows), and the resolve-anchor output contract byte-stable through the _verdict refactor. Zero P0/P1; three P2 notes dispositioned (one design-consistent SYS-04 stance now race-covered, two named fences with revisit conditions). Verdict PASS.",
+  "review_summary": "The P3-05 bookmark slice holds against every frozen contract attacked: the no-copy structural law (the exact ten-column set, no content column anywhere on the write paths), the five typed-resolution states answered at exit 0 with the anchor's ORIGINAL offsets echoed and byte-unchanged evidence (never a silent retarget), the identity-fix across re-import (every revision binds v1, the saved location resolves over v1's own generation), the same-refusal ownership rule on all six arms including the tombstone-state non-leak, the named alternation codes at both the command boundary and the substrate, exactly-once semantics under genuine two-process races (each success its own row at its acked revision; each refusal zero rows), and the resolve-anchor output contract byte-stable through the _verdict refactor. Zero P0/P1; three P2 notes dispositioned (one design-consistent SYS-04 stance now race-covered, two named fences with revisit conditions). The #90 bot round's two threads dispositioned (the Major already-fixed; the Minor repaired with the digest re-bind and the evidence regenerated). Verdict PASS.",
   "sheet_section": true
 }

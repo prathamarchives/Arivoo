@@ -29,12 +29,18 @@ The prior session (2026-10-30, session 34) completed CLAIM-054's finalize but ex
 
 ## 4. Results
 
-- (lands with the implementation commits — this record is OPEN at commit A; §4-§7 complete at the slice's finalize per the convention)
+- The GREEN implementation landed as commit B (`a5eed2b`): migration 0008 (`arv.bookmark` — revision-per-row, the two composite FKs, NO content column; `arv.bookmark_lifecycle` — the EVENT class with the advisory-lock alternation guard) + commands.py's `_derive_anchor` (ONE construction home for the bookmark family; the highlight family's landed inline form untouched) + `create_bookmark`/`move_bookmark`/`tombstone_bookmark`/`restore_bookmark` + query.py's `_verdict` refactor (the resolve-anchor arm's output byte-identical — pinned by ANC) + `get-bookmark`/`list-bookmarks`/`get-bookmark-history` + crash.py's four arms. The two implementation-cycle test repairs + the ARV-CLM-003 walls-catch repaired + re-recorded (§8).
+- The measured set at the final tree: the BMK suite GREEN ×3; the focused siblings GREEN (CAP 23, IMP, EXT 17, ANC 10, HLG 12, CMD, K); the dispatch + trusted-gate suites GREEN after the CLM-003 repair; `make verify` GREEN exit 0 (all sixteen suites + known-bads + the gate + the canonical layer 54/0). The proof records land at the slice's runs dir (run-01..N, each binding the tree it ran at); the SEV fresh-context round + the artifact bind follow this content commit (the digest binds LAST over this head).
+- What did NOT change: the highlight family's inline anchor derivation (pinned by HLG, never refactored in this diff); the resolve-anchor arm's output contract; the frozen contracts (RTM/PLAN) — the slice builds ON them.
 
-## 5. Files changed (commit A)
+## 5. Files changed (commit A + the implementation chain)
 
-- `harness/tests/test_bookmark.py` — the BMK-01..12 acceptance suite, committed in its RED form (LAW-11); `harness/gate.py` — the suite registered in TESTS (ARV-RED-008's no-gap rule); `harness/runs/claim-055-p305-bookmarks/{scope.txt,red-01.txt}` — the slice's declaration + the observed RED transcript.
-- The rule-4 set: `CLAIMS.md` (CLAIM-054's close row + the CLAIM-055 row), `STATE.md` (the five-area re-derivation), `AGENTS.md` (the phase line), `PLAN.md` (P3-04 LANDED / P3-05 EXECUTING), `INTENT-LEDGER.md` (INT-142 + the numbering row + the audit note), `context/WORKLOG.md` (Tasks 65/66), `context/extracted/45-P304-HIGHLIGHT-REVISIONS.md` (§12 filled), this record.
+- Commit A (`f837ac5`): `harness/tests/test_bookmark.py` (RED form) + `harness/gate.py` (TESTS) + `harness/runs/claim-055-p305-bookmarks/{scope.txt,red-01.txt}` + the rule-4 set (CLAIMS close+claim rows, STATE, AGENTS, PLAN, INTENT-LEDGER, WORKLOG Tasks 65/66, record 45 §12, record 46).
+- The RED binding (`ec523b3`): `harness/red-records.json` (the BMK suite's first link, bound to `f837ac5`).
+- Commit B (`a5eed2b`): `harness/migrations/0008_bookmark_lifecycle.sql`, `harness/commands.py`, `harness/query.py`, `harness/crash.py`, `harness/tests/test_bookmark.py` (the two assertion-form repairs). Source 359/400; test 755/800; one migration.
+- The amendment (`9f49edd`): `harness/red-records.json` (the typed amendment chaining from the `f837ac5` binding).
+- The walls-catch repair (`ed14858`): `CLAIMS.md` (the RETROACTIVE notation on INT-142's cell).
+- This content commit (the content head): this record's §4-§12 completion + STATE/WORKLOG re-derivation.
 
 ## 6. Commands and external actions (ACTUAL — never reconstructed)
 
@@ -42,20 +48,26 @@ The prior session (2026-10-30, session 34) completed CLAIM-054's finalize but ex
 - `curl` (API, the working token): `pulls/89` (state closed/merged, merged_at 2026-10-30T04:52:35Z, merge_commit 6938efa); `pulls?state=open` → 0; `branches/slice/claim-054...` → 404 (deleted); `branches` → main only; GraphQL `reviewThreads` → 10/10 resolved; `commits/6938efa.../check-runs` → 5/5 success; `pulls/89/reviews` → 18 COMMENTED (no APPROVED — the merge path honestly named); `issues/89/timeline` → merged by prathamarchives 04:52:35Z, head_ref_deleted 04:52:38Z; `branches/main/protection` → the five contexts, strict, enforce_admins, 1 approval, dismiss_stale, no force pushes, no deletions.
 - `python3 harness/tests/test_commands.py` @ `6938efa` → exit 0 GREEN (the rig baseline).
 - `python3 harness/tests/test_bookmark.py` @ the pre-implementation tree → exit 1, `FAIL ARV-TEST-000` (machinery-absent: create_bookmark absent, get-bookmark absent, migration 0008 absent) — the observed RED, transcript at `harness/runs/claim-055-p305-bookmarks/red-01.txt`.
+- The implementation cycle: `python3 harness/tests/test_bookmark.py` → first run 10/12 (the two test-side defects, §8) → after the repairs GREEN ×3 (exit 0 each). The focused siblings at the same tree: `test_capture.py` (CAP-01..23), `test_import.py`, `test_extract.py` (EXT-01..17), `test_anchor.py` (ANC-01..10), `test_highlight.py` (HLG-01..12), `test_commands.py`, `test_kernel.py` — all exit 0.
+- `make verify` → the first run exit 2 (ARV-CLM-003, §8) → after the repair `test_gate_dispatch.py` GREEN + `test_trusted_gate.py` GREEN + `make verify` exit 0 (sixteen suites; known-bads all refusing; the gate GREEN slice=main-selfcheck; the canonical layer 54 checks 0 failures).
+- The finalize battery at the content head: the proof records via `python3 harness/proofsheet.py --slice claim-055-p305-bookmarks --record "python3 harness/tests/<suite>.py"` (every suite, the BMK ×3 first — the claim-054 sheet form); the SEV fresh-context round (the reviewer independent of the builder, its own probes); the artifact bind (sev.json + the assembled sheet + notverified.txt; the digest binds LAST).
 
 ## 7. Evidence
 
-- The RED: red-01.txt (exit 1, ARV-TEST-000) at the predecessor `6938efa`; the binding lands via `make red` at the slice's next commit (the registry's git-verified protocol; the 45bd8f7/3682126 precedent pair).
+- The RED: red-01.txt (exit 1, ARV-TEST-000) at the predecessor `6938efa`; the binding at `ec523b3` (schema 2: binding_commit `f837ac5`, the typed observed red exit 1 / ARV-TEST-000); the implementation-cycle amendment at `9f49edd`.
+- The GREEN: the BMK suite ×3 + the sibling suites at the final tree — the proof records at `harness/runs/claim-055-p305-bookmarks/run-01.json..run-N.json` (each record binds the commit it ran at; the sheet assembled by `make prove`'s documented process, never hand-edited); `make verify` exit 0.
 - The merge facts of §2 are THIS session's live API reads (the exact endpoints + results in §6), never the prior session's claims.
 
 ## 8. Failures
 
 - The prior session's tool-death (context exhaustion) after the merge, before any session-exit record: repaired by this session's §2.1 + Task 65 + record 45 §12 fill (every fact re-observed live; the record-44 §8 continuation-note class). Nothing was lost — the artifacts and the merge were already landed; only the records were missing.
 - The dead stored credential at session entry (the value in the workspace remote URL 401 both auth forms; reads had only ever worked via the repository's public visibility — the anonymous `git ls-remote` proof): rebuilt from the handoff credential per D-025; the boundary class of record 45 §8 / record 26 §12, resolved the same way.
+- **THE WALLS-CATCH (the first `make verify` after commit B): ARV-CLM-003 on this slice's own INTs cell** — the same-PR reservation (INT-142 ledgered in this slice's own commit A) requires the RETROACTIVE notation in the row's cell; the first form ("the turn-37 mint — the same-PR reservation form...") lacked it. Caught live by the gate_dispatch fixture (a real clone at HEAD, the positive-control PR over the actual tree — the same dispatch fixture class that caught CLAIM-054's identical ARV-CLM-003), repaired at `ed14858`; the walls working as designed.
+- **The implementation cycle's two test-side defects (found by the suite at the first GREEN run, fixed before any commit — the record-45 §8 class):** (a) BMK-04's count read compared the audit's STRING against an int (`audit()` returns text — now `int()`; the implementation was correct, the assertion form was not); (b) BMK-11's RLS pin compared a boolean CONCAT against `'t|t'` (a `||` concat renders booleans as `true`/`false` in text context; HLG-11's single-column read renders `t` — both forms pin ENABLED+FORCED, the distinction noted in the suite). Both re-recorded through the typed amendment (`make red`, the 84b31b7 precedent), never a hand-edited hash.
 
 ## 9. Unverified items
 
-At commit A: the BMK suite's GREEN (the implementation lands in the following commits — never claimed before observed); the P3-05 proof set + SEV round + the five-check observation on the final head; the merge + post-merge facts (recorded only after they happen, INT-104). The standing documented residuals unchanged (record 45 §9's list; the Q8 synthetic-only boundary; the concurrent-reader matrix; host-level workflow protection Q10; the P3-P5 roadmap's acceptance details — adopted or corrected only at their gates).
+The slice's own honest limits, enumerated at `harness/runs/claim-055-p305-bookmarks/notverified.txt`: the concurrent-reader matrix (two simultaneous get-bookmark readers under a lifecycle write — untested, the same standing class as the highlight family's); >2-writer move concurrency (the two-writer race class is the spine's own, pinned by S3/CMD — a >2-writer bookmark race is untested); the governed purge (P3-06/09's, D-011 — never this slice's); the notes integration (P3-06's); the exercised hostile-write classes (arv_app + the rig superuser only — a role WITH insert permission but outside the app path is the highlight family's same standing fence); U+2029/U+0085 unexercised on the history arm (the U+2028 pin is the framing law's carrier); the merge-chain facts (recorded only after they happen, INT-104). The standing documented residuals unchanged: the ARV-SEV-009 undecidable-base regression; the N12 self-test-row extension; the spine's NUL-literal follow-up; the Q8 synthetic-only boundary; the isolation undecidable classes; host-level workflow protection (Q10); the P3-P5 roadmap's acceptance details (adopted or corrected only at their gates).
 
 ## 10. Open decisions
 
@@ -63,7 +75,7 @@ D-014 + Q6–Q12, scopes unchanged (each blocks only its named dependents — RT
 
 ## 11. Next action
 
-The GREEN implementation (commit B: migration 0008 + commands.py's create/move/tombstone/restore_bookmark + query.py's get-bookmark/list-bookmarks/get-bookmark-history + crash.py's arms) → the BMK suite GREEN ×3 → the sibling suites → `make verify` → the proof records + the SEV fresh-context round + the artifact bind (the digest binds LAST) → the PR-mode gate → the D-042 merge path → P3-06 — NO PAUSE (INT-134/135/138/139/140/141/142).
+The finalize chain at this content head: the proof records (every suite, the BMK ×3 first) → the SEV fresh-context round (the reviewer independent of the builder, its own probes) → sev.json + notverified.txt + the assembled sheet (the digest binds LAST) → the recorded PR-mode gate at the final head (`python3 harness/gate.py --slice claim-055-p305-bookmarks --diff origin/main`) → the push + the five GitHub checks observed live on the exact final head → the merge-gate review (D-042 (1a)) → the owner's merge → the post-merge observation → **P3-06..09 → the Phase 3 exit gate → P4-00 → P4-A..F → the Phase 4 exit gate** — NO PAUSE (INT-134/135/138/139/140/141/142).
 
 ## 12. Session close
 

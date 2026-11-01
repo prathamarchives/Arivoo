@@ -1,0 +1,242 @@
+# PROOF SHEET — slice claim-055-p305-bookmarks (harness-built; never hand-edited — PRF-01, LAW-01)
+
+- commit (last run record's): 911010dc26d31faea000ac497ee51110f5fcda0f
+- generated (last record's timestamp): 2026-11-01T13:39:11.213469+00:00
+- run records: 57
+
+## Run records (command, exit, output digest)
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T12:45:13.425988+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T12:45:18.820668+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T12:45:24.113525+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 0a0039301aa4dc51 · 2026-10-31T12:45:45.670983+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-31T12:45:46.104640+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-31T12:45:48.908242+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 fa28ef4cf62382e2 · 2026-10-31T12:45:50.678185+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 e2afbec7093d8f70 · 2026-10-31T12:45:53.309319+00:00
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 88f804186ff9b6ff · 2026-10-31T12:45:58.073569+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-31T12:46:00.490524+00:00
+- `python3 harness/tests/test_anchor.py` -> exit 0 · output sha256 6524242680a49821 · 2026-10-31T12:46:02.904476+00:00
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 c0fd0aaa7985b5a1 · 2026-10-31T12:46:06.715173+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-31T12:48:05.413274+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 ff72d073abec1359 · 2026-10-31T12:48:30.013512+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 8b36070d4e35aa73 · 2026-10-31T12:48:39.919378+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 f2eca2ca563af21c · 2026-10-31T12:48:40.353570+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-31T12:48:40.605929+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 fd04527cac35720b · 2026-10-31T12:48:43.292877+00:00
+- `python3 harness/gate.py --slice claim-055-p305-bookmarks --diff origin/main` -> exit 0 · output sha256 614cd42f7bf94422 · 2026-10-31T13:48:16.968931+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T14:03:09.608414+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T14:03:14.784288+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 d986879f2fcaf385 · 2026-10-31T14:03:20.002197+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 0a0039301aa4dc51 · 2026-10-31T14:03:25.423410+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-10-31T14:03:25.860201+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-10-31T14:03:28.619498+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 fa304232e7753333 · 2026-10-31T14:03:30.378432+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 98d573e26a4bb30f · 2026-10-31T14:03:32.973122+00:00
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 88f804186ff9b6ff · 2026-10-31T14:03:37.835176+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-10-31T14:03:40.218461+00:00
+- `python3 harness/tests/test_anchor.py` -> exit 0 · output sha256 6524242680a49821 · 2026-10-31T14:03:42.630521+00:00
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 c0fd0aaa7985b5a1 · 2026-10-31T14:03:46.440445+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 791ff1faab1f66be · 2026-10-31T14:05:27.072039+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 bce2db44daf91544 · 2026-10-31T14:05:47.390690+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 a70e18cb931fa1fb · 2026-10-31T14:06:02.374427+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 85154cea110d9532 · 2026-10-31T14:06:02.695404+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-10-31T14:06:02.890259+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 0cc3972402d56b0b · 2026-10-31T14:06:06.326908+00:00
+- `python3 harness/gate.py --slice claim-055-p305-bookmarks --diff origin/main` -> exit 0 · output sha256 4b045881a123be9c · 2026-10-31T14:09:42.910232+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 409bc9b4548a622c · 2026-11-01T13:05:38.543097+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 409bc9b4548a622c · 2026-11-01T13:05:44.822219+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 409bc9b4548a622c · 2026-11-01T13:05:51.335551+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 0a0039301aa4dc51 · 2026-11-01T13:06:00.656334+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-11-01T13:06:01.134481+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-11-01T13:06:04.731632+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 07c5a56f9809e309 · 2026-11-01T13:06:06.584578+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 b793bcbd39cf99bd · 2026-11-01T13:06:09.246455+00:00
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 88f804186ff9b6ff · 2026-11-01T13:06:13.940889+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-11-01T13:06:16.295967+00:00
+- `python3 harness/tests/test_anchor.py` -> exit 0 · output sha256 6524242680a49821 · 2026-11-01T13:06:18.819716+00:00
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 c0fd0aaa7985b5a1 · 2026-11-01T13:06:22.925210+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 0ae670b9b5e5b25b · 2026-11-01T13:08:11.244047+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 ab8798d23e5fa308 · 2026-11-01T13:08:43.966665+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 9641a597d90ae83b · 2026-11-01T13:09:00.164739+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 654736a33bdedbae · 2026-11-01T13:09:00.577584+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-11-01T13:09:00.833534+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 5f70793f45806383 · 2026-11-01T13:09:04.011205+00:00
+- `python3 harness/gate.py --slice claim-055-p305-bookmarks --diff origin/main` -> exit 0 · output sha256 12f0060f5f3d2b73 · 2026-11-01T13:39:11.213469+00:00
+
+## Not verified (LAW-04 — required, never empty-by-omission)
+- - NOT VERIFIED — the honest limits of CLAIM-055 / P3-05 (the bookmark
+- machine; LAW-04; never empty-by-omission)
+- - WHAT THIS SLICE PROVES, ON WHAT STACK: the bookmark machine of RTM §2.5
+- item 6 + §3.3 holds end-to-end over the REAL PostgreSQL boundary (17.11:
+- the local rig + CI's postgres:17 service): the stable return location as
+- identity + the source-versioned Anchor reference with NO content column
+- (the structural no-copy law — arv.bookmark's exact ten-column set), the
+- location DERIVED from the stored bytes at the offsets (a client never
+- supplies anchor truth; the tie to the Source version by construction),
+- immutable revisions (move appends revision n+1 with a NEW anchor row,
+- identity-fixed — a revision NEVER crosses Source versions), the TYPED
+- RESOLUTION on read (get-bookmark answers resolved | unresolved |
+- ambiguous with the named causes no-current-generation / stale-generation /
+- location-unmatched at exit 0, the anchor's ORIGINAL offsets echoed, the
+- evidence byte-unchanged — never a silent retarget), alternation enforced
+- at BOTH the command boundary and the substrate (the named ARV-BMK-
+- 002/003/004 refusals + the advisory-locked insert guard, the hostile
+- direct duplicate and the ghost target refused), the crash matrix at every
+- transaction boundary (exit 2 no-ack; the same-key replay converges), the
+- replay/conflict contract (ARV-CMD-409), tombstone hiding from ordinary
+- retrieval (list + the typed ARV-QRY-003) while the governed history
+- retains every revision and event, the DERIVED current view (rebuildable
+- from the history rows alone), the identity-fix across re-import (every
+- revision binds v1; the saved location resolves over v1's own generation),
+- every ack naming durability_rung=local_durable (SYS-01), the 0008 schema
+- conventions (no DEFAULTs, append-only + insert-guard + revision-append
+- triggers, RLS enabled AND FORCED, arv_app INSERT/SELECT + arv_read SELECT,
+- the two composite FKs), THE MOVE-VS-LIFECYCLE SERIALIZATION (the #90
+- round-3 repair: BMK-13's deterministic interleaving — the move holds the
+- per-bookmark advisory xact lock across its complete blocked transition,
+- the tombstone waits ON it until the move commits, a revision never
+- commits after tombstoning; the round-3 SEV reviewer's five live two-
+- writer move races + 3-writer round with every ack bound to its own row),
+- the resolve-anchor output contract
+- byte-stable through the _verdict refactor, and U+2028 framing on the new
+- get-bookmark-history arm. The suite BMK-01..13 GREEN three consecutive
+- runs at the round-3 content head; the fifteen sibling suites GREEN (gate.py's
+- TESTS: the sixteen registered suites minus this slice's own); make verify
+- GREEN exit 0 (the canonical layer 54/0).
+- - THIS SLICE'S OWN REVIEW REPAIRS ARE IN THE MEASURED SET: the two
+- assertion-form repairs (BMK-04's int() count read; BMK-11's
+- boolean-concat 'true|true' form — record 46 §8) and the ARV-CLM-003
+- RETROACTIVE-notation walls-catch (ed14858) are part of the GREEN runs
+- above — the repairs re-measured, never prose-claimed.
+- - NOT VERIFIED — the CONCURRENT-READER matrix on the new read arms
+- (get-bookmark/list-bookmarks/get-bookmark-history under multiple
+- simultaneous readers): the read path is exercised serially; the same
+- standing class as the highlight family's (record 45's fence). The
+- read-path scale slice owns that matrix.
+- - THE MOVE-VS-LIFECYCLE ORDERING (the #90 round-3 repair, measured at TWO
+- writers over the DETERMINISTIC interleaving BMK-13 — the test-held source
+- row blocks the move's anchor INSERT; the tombstone either completes at the
+- defect tree or waits ON the per-bookmark advisory lock at the repaired
+- tree): races beyond the round-3 SEV reviewer's 3-writer live move round and
+- two-writer lifecycle pairs are NOT a measured claim (>3 writers unprobed).
+- - THE BOUNDED WAIT (the round-3 SEV reviewer's F6, honestly bounded): "the
+- tombstone waits ON the lock until the move commits" is bounded by the
+- spine's PRE-EXISTING 30-second marker wall — a lock-holder blocked longer
+- makes the waiting writer exit ARV-CMD-010 with zero rows (fail-safe in the
+- safe direction; the wall is the spine's own suite-pinned design, unchanged
+- by this slice). Never read the wait claim as unbounded.
+- - THE CASE-VARIANT ID-SPELLING LOCK KEY (the round-3 SEV reviewer's F5, the
+- invariant HELD): the command-level lock keys on the CLI id's text spelling
+- while the substrate triggers key on the canonical uuid text — a case-variant
+- spelling of a real id degrades the clean ARV-BMK-002 boundary refusal to
+- the ARV-CMD-010 wrapper (the named code in the drained cause); the SUBSTRATE
+- revision guard (the canonical key + the in-statement parity re-check)
+- refused the post-tombstone append in the reviewer's forced interleaving —
+- zero rows, no violation. The one-line hardening (canonical id normalization
+- at the boundary) is routed to the next bookmark-family slice.
+- - THE PHANTOM-IDENTITY SUBSTRATE GAP (the round-3 SEV reviewer's F7, the same
+- standing fence class as the no-GUC observation): the revision guard refuses
+- rev>1 appends on tombstoned bookmarks but does not pin identity existence —
+- a hostile direct insert with a FRESH id and revision 5 lands (a phantom
+- revision identity, as arv_app WITH the GUC and as the superuser); the
+- command path cannot reach it (_bm_current requires existence; the PK blocks
+- duplicate rev-1); the phantom row carries every frozen contract. The EXISTS
+- pin mirrors the lifecycle guard — routed to the next substrate-touching
+- slice.
+- - THE MALFORMED-ID CONVENTION (the round-3 SEV reviewer's F8, PRE-EXISTING):
+- a non-uuid id on move/tombstone/restore yields ARV-CMD-010 (the marker wall
+- on the failed read) rather than ARV-BMK-001 — byte-identical on the
+- highlight family at origin/main (not a slice regression; uniform across
+- malformed ids, no side channel). A general spine polish item for every
+- family's arms, recorded here never silently passed.
+- - THE COMMAND_LOG TS MOVE (the round-3 SEV reviewer's F9, disclosed + verified
+- benign): the spine refactor moved the command_log created_at from pre-BEGIN
+- to post-BEGIN for ALL commands (application-assigned provenance either way);
+- the reviewer's A/B probes verified record_event's protocol output and
+- persisted semantics byte-identical.
+- - THE GOVERNED PURGE (P3-06/09's, D-011) IS NOT THIS SLICE AND NOT
+- IMPLIED: tombstone hides from ordinary retrieval and the history retains
+- everything; NO purge behavior, retention policy, or erasure semantics is
+- claimed or built.
+- - NOTES/KEYWORD-INDEX/OUTBOX INTEGRATION IS NOT MEASURED (P3-06/07/08's):
+- how a future note surface or the keyword index observes bookmark
+- revisions/tombstones, and the queued/server_durable rungs, are untested
+- by this slice (every ack names local_durable — SYS-01's honest rung).
+- - THE HOSTILE DIRECT-WRITE CLASSES: the substrate's refusals are verified
+- on the exercised classes (the app role's permission denial, the
+- superuser's append-only trigger, the alternation trigger, the
+- existence-in-scope guard, RLS owner isolation); an exhaustive hostile-SQL
+- enumeration is NOT claimed.
+- - THE NO-GUC HOSTILE INSERT (the SEV round's P2-class observation, the
+- 0002/0004/0007 convention): a direct INSERT into arv.bookmark_lifecycle
+- as arv_app WITHOUT app.current_owner set returns INSERT 0 0 — the refusal
+- is by RLS row-invisibility of the guard's target subquery, zero rows
+- land, but the exit is not a named code. Every case where the target is
+- VISIBLE to the writer (duplicate tombstone, ghost id, cross-scope) is
+- refused with the named codes at the trigger, as arv_app AND as the
+- superuser. The boundary is re-examined when the sync/purge slices
+- (P3-08/P3-09) touch it — named here, never silently passed.
+- - THE ANC_SQL TWO-CURRENT-GENERATIONS SURFACE (the SEV round's P2,
+- PRE-EXISTING, outside this slice's diff): the resolve-anchor/_verdict
+- LEFT JOIN takes rows[0] if a hostile plant created two current
+- generations for one source; the extraction machine itself maintains one
+- current per source (UNIQUE(source_id, ordinal) + the supersede
+- transition), and the _verdict refactor did not change this surface.
+- Routed to the extraction/read-path owners, not charged to P3-05.
+- - THE FRAMING SURFACE: U+2028 is measured on the get-bookmark-history arm
+- (BMK-12, byte-exact against the fixture's own context window); U+2029/
+- U+0085 remain unexercised on THIS arm (the same newline-only framing law
+- binds it — honestly listed, not silently covered by analogy).
+- - THE ARV_KEEP_DB OVERRIDE PATH: the scratch-DB drop runs after every
+- suite run; the override branch itself is a local-inspection affordance,
+- not a suite-asserted contract.
+- - THE SEV ROUND'S OWN NOT-PROVEN LIST (agent-9fbd03d3, the round-1 fresh-context
+- reviewer): crash.py's create_bookmark/restore_bookmark arms specifically
+- (BMK-05 covers move+tombstone at every boundary — suite-covered, not
+- independently re-probed); the full sixteen-suite battery + the canonical
+- verifier + the ARV-CLM-003 walls (the builder's recorded runs stand —
+- run-01..18, this sheet); the arv-baseline-bump grammar exception's
+- process handling (accepted on the 0007 precedent); the catalog RLS
+- re-reads (verified behaviorally through the ownership matrix).
+- - THE ROUND-3 SEV REVIEWER'S OWN NOT-PROVEN LIST (agent-7c31e9f2): a
+- single-process make-verify transcript (the sandbox reaped its two
+- backgrounded runs; every constituent command re-run in the FOREGROUND
+- with identical invocations — all sixteen suites, known-bad-only, the
+- no-diff gate, the canonical verifier — all exit 0); races beyond its
+- 3-writer move round; hashtext() collisions across distinct ids (32-bit —
+- spurious serialization only); the proofsheet assembly end-to-end (the
+- gate's own proofsheet/red-record/scope/lint/deps checks + the registry
+- hash chain relied on instead); CI's postgres:17 service environment (all
+- probes on the local 17.11 rig); the artifact bind itself (binds after its
+- report by design).
+- - THE RUN-RECORD PROVENANCE (the #90 review rounds' honest record, the
+- claim-054 precedent form): run-01..18 bind the FIRST content head
+- 630d40f; run-19 the recorded PR-mode gate at the first artifact tree
+- ba3b878 — both BEFORE the CodeRabbit pointer-only round's STATE trim
+- landed; the re-records run-20..37 bind the SECOND content head fce5dc9
+- (the round-2 artifact-repair tree), and run-38 is the round-2 recorded
+- PR-mode gate run at 8ac8942. THE ROUND-3 REGENERATION: run-39..56 bind
+- the ROUND-3 content head 911010d (the same command set, re-run through
+- the canonical recording process at the repaired tree — the #89 round-3
+- "records name what they tested" lesson applied), and run-57 is the
+- round-3 recorded PR-mode gate run. The originals stay as historical
+- artifacts (ARV-PRF-006 forbids the overwrite).
+- - THE MERGE-CHAIN FACTS (the D-042 path for THIS slice, the post-merge
+- five-check observation on main, the branch deletion, the protections
+- re-read): recorded only after they happen, in the next slice's commit A
+- (the convention; a committed file cannot guarantee external state,
+- INT-104).
+- - THE GITHUB-SIDE WALLS (the five required contexts green on the exact
+- final head, the PR review threads' resolved states): observed live via
+- the API at the merge gate, never mechanically asserted by a committed
+- file (INT-104).
+
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 4a66168c7e7281054cf011e8878ab6723e7334e733841e372d9a0969c4e57cae
+- reviewed_diff_sha256: 79d2d01b4a9d6be269f48abeeae95ca9b353069a0f8b6edf71cd7834e931304b
+- disposition: PASS
+- findings: 9 (open P0/P1: 0)
+- not-verified entries: 10
+
+## Assembly
+- sheet sha256 (of the content above, excluding this line): 67ddd9610d965ae8ce8a365fb3fe14860300db2b3b94a0d8cb85a7b700e52b83

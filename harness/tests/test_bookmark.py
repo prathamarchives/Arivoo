@@ -91,6 +91,9 @@ Cases (the BMK registry — this file is the contract's declaration):
          bookmark's location evidence (the anchor's context window) travels
          raw inside a JSON string and survives get-bookmark-history with
          intact newline-only framing (the #88/#89 lesson on every new arm)
+  BMK-13 the move-vs-tombstone SERIALIZATION (the #90 round-3 Major): the
+         held source row blocks the move while the tombstone waits ON the
+         advisory lock — a revision never commits after tombstoning
 
 Run: python3 harness/tests/test_bookmark.py   (exit 0 = green)
 """
@@ -101,6 +104,7 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+import time
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
@@ -134,7 +138,8 @@ if _absent_cmd or _absent_arm or not _mig:
     sys.exit(1)
 
 # ---------------------------------------------------------------- the harness
-from harness.adapters import pg  # noqa: E402
+from harness.adapters import clock, pg  # noqa: E402
+from harness.commands import Session  # noqa: E402
 
 DB = ENV = None
 TEXT = ("The reader's return.\n"
@@ -225,6 +230,16 @@ def super_sql(sql: str) -> subprocess.CompletedProcess:
     return subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
                             "-U", "postgres", "-d", DB, "-c", sql],
                            capture_output=True, text=True, timeout=60, env=ENV)
+
+
+def _poll(sql: str, timeout: float = 20.0) -> bool:
+    """Wait until a superuser observation holds (condition-based, never sleep)."""
+    end = clock.mono() + timeout
+    while clock.mono() < end:
+        if super_sql(sql).stdout.strip() == "1":
+            return True
+        time.sleep(0.25)
+    return False
 
 
 def plant(sql: str) -> subprocess.CompletedProcess:
@@ -478,6 +493,7 @@ def main() -> int:
                         f"'00000000-0000-7000-8000-00000000000c', 'tombstone', 'A', "
                         f"'owner', 'hostile-run', 'hostile-hash', 'hostile-ghost', "
                         f"'2026-10-31T00:00:00+00:00');")
+        host_rev = app_sql(f"INSERT INTO arv.bookmark (id, revision, source_id, anchor_id, owner_scope, actor, run_id, input_hash, idempotency_key, created_at) SELECT id, 2, source_id, anchor_id, owner_scope, actor, run_id, input_hash, 'host-rev', created_at FROM arv.bookmark WHERE id='{b6}' AND revision=1;")
         ev_after = int(audit(f"SELECT count(*) FROM arv.bookmark_lifecycle WHERE bookmark_id='{b6}';"))
         ok6 = (p.returncode == 0 and "status=committed" in p.stdout
                and get_t.returncode == 1 and "ARV-QRY-003" in get_t.stdout
@@ -494,10 +510,11 @@ def main() -> int:
                and "ARV-BMK-003" in hostile.stderr                   # the substrate refuses the duplicate
                and "ARV-BMK-001" in ghost.stderr                     # the substrate refuses the nonexistent target
                and "ARV-CAP-005" in upl.stderr and "ARV-CAP-005" in delel.stderr
+               and "ARV-BMK-002" in host_rev.stderr                 # the substrate refuses the post-tombstone revision append
                and ev_after == 5)                                    # 4 lawful + tomb-A5
         check("BMK-06", ok6,
               "tombstone hides from get-bookmark (ARV-QRY-003) + list-bookmarks (the ACTIVE fixture stays listed — the exclusion is never vacuous over an empty listing); history retains all; restore returns it; double-tombstone/move-of-tombstoned/restore-of-active refused by name; the lifecycle rows' own mutations refused; the DB alternation trigger refuses the hostile duplicate and the ghost target",
-              "the §3.3 machine: alternation enforced at the command boundary AND the substrate; the governed history never loses a row")
+              "the §3.3 machine: alternation enforced at the command boundary AND the substrate (the revision guard refuses the post-tombstone append); the governed history never loses a row")
 
         # ---- BMK-07 — the identity-fix pin (re-import NEVER retargets; the saved location holds)
         lifecycle("restore_bookmark", "res-A0", b1)                  # back to active for the move
@@ -697,7 +714,7 @@ def main() -> int:
         # HLG-11 single-column read renders 't' — the two forms differ, both pin
         # ENABLED+FORCED
         ok11 = (no_defs
-                and trg_b == {"bookmark_immutable"}
+                and trg_b == {"bookmark_immutable", "bookmark_revision_guard"}
                 and trg_l == {"bookmark_lifecycle_guard", "bookmark_lifecycle_immutable"}
                 and rls == "true|true" and rls_l == "true|true"
                 and grants[("bookmark", "arv_app")] >= {"INSERT", "SELECT"}
@@ -706,7 +723,7 @@ def main() -> int:
                 and grants[("bookmark_lifecycle", "arv_read")] == {"SELECT"}
                 and fk_b == "2" and fk_l == "0" and pol == "2")
         check("BMK-11", ok11,
-              "0008's conventions: no DEFAULTs (LAW-24), the append-only triggers on both tables + the insert-guard/alternation trigger on the lifecycle table, RLS enabled AND FORCED on both (relforcerowsecurity — the owner does not bypass), arv_app INSERT/SELECT + arv_read SELECT, the two composite FKs on arv.bookmark (source + anchor inseparable from the owner scope), the lifecycle table's no-FK trigger-form convention",
+              "0008's conventions: no DEFAULTs (LAW-24), the append-only triggers on both tables + the insert-guard/alternation trigger on the lifecycle table + the revision-append guard on arv.bookmark, RLS enabled AND FORCED on both (relforcerowsecurity — the owner does not bypass), arv_app INSERT/SELECT + arv_read SELECT, the two composite FKs on arv.bookmark (source + anchor inseparable from the owner scope), the lifecycle table's no-FK trigger-form convention",
               "the 0002/0004 substrate conventions hold on every authoritative table; the composite FK ties the bookmark to its own source and anchor")
 
         # ---- BMK-12 — the row-protocol framing (U+2028 on the new arm)
@@ -738,11 +755,33 @@ def main() -> int:
               "U+2028 inside the bookmark's location evidence (the anchor's context window, byte-exact against the fixture's own 32-char window) travels raw inside the JSON string and survives get-bookmark-history with intact newline-only framing (both revision rows parse)",
               "row_to_json emits one escaped JSON line per row; the reader splits on the newline ONLY — a U+2028 must never corrupt the framing (the #88/#89 lesson applied to every new arm)")
 
+        # ---- BMK-13 — the move-vs-tombstone SERIALIZATION (the #90 round-3 Major, read-before-BEGIN; see the registry)
+        b13 = ack_field(mk_bookmark("bm-A13", sid_a, p1s, p1e), "result_ref")
+        t_hold = Session(DB, "postgres", "A")
+        t_hold.send(f"BEGIN; SELECT id FROM arv.source WHERE id='{sid_a}' FOR UPDATE; \\echo HELD13")
+        t_hold.read_until("HELD13")
+        mv = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"), "move_bookmark", "--owner", "A", "--actor", "owner", "--client-id", "cli-13", "--idem-key", "mv-race", "--id", b13, "--start", str(p2s), "--end", str(p2e)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=ENV)
+        mv_blocked = _poll("SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' AND wait_event_type='Lock' AND query LIKE '%INSERT INTO arv.anchor%'")
+        lock_held = super_sql("SELECT count(*) FROM pg_locks l JOIN pg_stat_activity a ON a.pid=l.pid WHERE l.locktype='advisory' AND l.granted AND a.usename='arv_app' AND a.query LIKE '%INSERT INTO arv.anchor%'").stdout.strip()
+        tb = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"), "tombstone_bookmark", "--owner", "A", "--actor", "owner", "--client-id", "cli-13", "--idem-key", "tomb-race", "--id", b13], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=ENV)
+        tomb_waited = _poll("SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' AND wait_event='advisory' AND query LIKE '%bookmark_lifecycle%'", 11.0)
+        t_hold.close()            # the release: the blocked move proceeds, commits, frees the lock
+        mv_rc, tb_rc = mv.wait(timeout=90), tb.wait(timeout=90)
+        revs13 = sorted(int(r) for r in audit_rows(f"SELECT revision FROM arv.bookmark WHERE id='{b13}';"))
+        ev13 = int(audit(f"SELECT count(*) FROM arv.bookmark_lifecycle WHERE bookmark_id='{b13}';"))
+        rep13 = move("mv-race", b13, p2s, p2e, client="cli-13")
+        ok13 = (mv_blocked and lock_held == "1" and tomb_waited
+                and tb_rc == 0 and ev13 == 1 and mv_rc == 0 and revs13 == [1, 2]
+                and rep13.returncode == 0 and "status=replayed" in rep13.stdout)
+        check("BMK-13", ok13,
+              "the move-vs-tombstone interleaving is SERIALIZED on the per-bookmark advisory xact lock: the move holds it across its complete blocked transition (pg_locks), the tombstone waits ON it until the move commits (revision 2 then exactly one tombstone event; the same-key replay converges) — a revision never commits after tombstoning",
+              "RTM §3.3: edit only from active — the complete transition must live INSIDE the transaction behind the same advisory lock the lifecycle guard takes")
+
         print()
         if FAILS:
             print(f"RED — {len(FAILS)} failing: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-05 acceptance suite (BMK-01..12) passes")
+        print("GREEN — the P3-05 acceptance suite (BMK-01..13) passes")
         return 0
     finally:
         # the rig's scratch database DROPPED after every suite run (the #89

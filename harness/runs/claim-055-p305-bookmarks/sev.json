@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-055-p305-bookmarks",
   "base_sha": "6938efa5f83987f9d14f5ab565b8f7c61818b3ef",
-  "reviewed_diff_sha256": "edb151a1af5cd2bd6d245bd37cd7e82e5ed2151d4f61f942dd3baa54c91875ee",
+  "reviewed_diff_sha256": "79d2d01b4a9d6be269f48abeeae95ca9b353069a0f8b6edf71cd7834e931304b",
   "intent_ids": [
     "INT-142",
     "INT-141",
@@ -23,11 +23,11 @@
     "C5"
   ],
   "changed_components": [
-    "harness/migrations/0008_bookmark_lifecycle.sql",
-    "harness/commands.py (the bookmark family: _derive_anchor, _bm_current, create/move/tombstone/restore_bookmark)",
+    "harness/migrations/0008_bookmark_lifecycle.sql (arv.bookmark + arv.bookmark_lifecycle + the round-3 revision-append guard)",
+    "harness/commands.py (the bookmark family: _derive_anchor, _bm_current, create/move/tombstone/restore_bookmark + the round-3 _spine build_txn phase \u2014 move_bookmark's locked transition)",
     "harness/query.py (the _verdict refactor + get-bookmark/list-bookmarks/get-bookmark-history)",
     "harness/crash.py (the four bookmark arms)",
-    "harness/tests/test_bookmark.py (the BMK-01..12 acceptance suite)",
+    "harness/tests/test_bookmark.py (the BMK-01..13 acceptance suite \u2014 BMK-13 the round-3 deterministic serialization pin)",
     "harness/gate.py (TESTS registration)"
   ],
   "interfaces_reviewed": [
@@ -39,25 +39,30 @@
   ],
   "v_model": {
     "component_verification": [
-      "the BMK-01..12 acceptance suite GREEN x3 at the final tree (proof run-01..03 of this sheet)",
-      "the focused sibling regressions GREEN: CAP/IMP/EXT/ANC/HLG/CMD/K (proof run-06..12 \u2014 commands/kernel/capture/import/extract/anchor/highlight)",
-      "the machinery suites GREEN: gate_dispatch/mutation_floor/trusted_gate/claims_paths/record_machinery/sev (proof run-13..18); the substrate suites migrations/substrate GREEN beside them (proof run-04..05)",
-      "the canonical-layer verifier 54 checks 0 failures at the content head (make verify GREEN, proof: the builder's recorded verify run, record 46 section 6)"
+      "the BMK-01..13 acceptance suite GREEN x3 at the round-3 content head (proof run-39..41 of this sheet \u2014 BMK-13 the deterministic move-vs-tombstone serialization pin)",
+      "the focused sibling regressions GREEN: CAP/IMP/EXT/ANC/HLG/CMD/K (proof run-44..50 \u2014 commands/kernel/capture/import/extract/anchor/highlight)",
+      "the machinery suites GREEN: gate_dispatch/mutation_floor/trusted_gate/claims_paths/record_machinery/sev (proof run-51..56); the substrate suites migrations/substrate GREEN beside them (proof run-42..43)",
+      "the canonical-layer verifier 54 checks 0 failures at the round-3 content head (make verify GREEN, record 46 section 6 + the round-3 SEV reviewer's own foreground battery)",
+      "the round-3 SEV reviewer's component probes (agent-7c31e9f2): the spine's exactly-one-of-build/build_txn guard fires pre-DB; only move_bookmark rides build_txn (8 call sites enumerated); the crash matrix on ALL FOUR commands incl. create/restore; the hostile direct-write matrix as arv_app AND superuser on the revised 0008"
     ],
     "integration_verification": [
-      "the whole-battery make verify exit 0 at the content head (sixteen suites + known-bads + the gate; record 46 section 6)",
-      "the SEV fresh-context reviewer's own 74-assertion adversarial script GREEN (agent-9fbd03d3: the no-copy column set, the five typed states, the retarget pins, the ownership matrix, the alternation + hostile writes, the idempotency spine, the two-process move race's ack-effect binding, the identity-fix, the resolve-anchor compat)",
-      "the reviewer's five live two-writer race rounds: every exit-0 writer bound to its own persisted (revision, idempotency_key) row; every refused writer zero rows anywhere; ordinals contiguous"
+      "the whole-battery make verify exit 0 at the round-3 content head (sixteen suites + known-bads + the gate; record 46 section 6)",
+      "the round-3 SEV reviewer's own deterministic interleavings (its construction, not BMK-13's): tombstone-queued-first -> the move refuses ARV-BMK-002/ROLLBACK/zero rows; move-queued-first -> the move commits revision 2 BEFORE the tombstone, both exit 0 \u2014 deterministic x2",
+      "the reviewer's FIVE live two-writer move races + a 3-writer round: both/all exit 0, revisions contiguous (n+1, n+2, ...), each ack's (revision, idempotency_key) bound INDEPENDENTLY to its own persisted row, zero unexpected rows across arv.bookmark/arv.anchor/arv.command_log \u2014 the PK-loser behavior retired",
+      "the reviewer's lifecycle races: tombstone-vs-tombstone live x3 + the deterministic substrate path (the loser's insert refused at the trigger, ARV-BMK-003 in the drained cause, zero rows); tombstone-vs-restore x3 (the alternation never violated); move-vs-restore with the restore in flight (the move proceeds lawfully on the restored-active bookmark)",
+      "the reviewer's A/B preservation probes: record_event and resolve-anchor outputs byte-identical between origin/main and HEAD across resolved/absent/cross-owner cases",
+      "BMK-13's deterministic interleaving in-suite (the held source row -> the blocked anchor INSERT -> the advisory lock held across the blocked write via pg_locks -> the tombstone's observed advisory wait -> the lawful order)"
     ],
     "system_verification": [
-      "SYS-01: every bookmark-family ack names durability_rung=local_durable (BMK-10)",
-      "SYS-02: the authoritative rows append-only (the permission + ARV-CAP-005 trigger pins, BMK-02/06); the current view DERIVED (rebuildable from history alone, BMK-09)",
+      "SYS-01: every bookmark-family ack names durability_rung=local_durable (BMK-10 + every probe ack in the round-3 battery)",
+      "SYS-02: the authoritative rows append-only (the permission + ARV-CAP-005 trigger pins, BMK-02/06); the current view DERIVED (rebuildable from history alone, BMK-09); RTM 3.3's edit-only-from-active now SERIALIZED at both layers \u2014 a revision can never commit after tombstoning (BMK-13 + the reviewer's five interleaving classes)",
+      "SYS-04: the crash matrix zero-or-one on all four commands (BMK-05 + the reviewer's own create/restore arms); exactly-once under concurrent same-key and distinct-key races; contiguous ordinals; every refused writer zero rows",
       "SYS-05: the typed resolution on read \u2014 resolved/unresolved/ambiguous with the named causes, the original offsets echoed, never a silent retarget (BMK-08, the acceptance headline)"
     ],
     "validation": [
-      "the P3-05 card's acceptance observed: return to the saved location or report the typed unresolved-anchor state (BMK-07/08); the card's test set mapped: invalid Anchor (BMK-02), cross-owner (BMK-03), re-import (BMK-07), re-extraction (BMK-08), tombstone/restore (BMK-06), replay and restart (BMK-04/05)",
-      "the fresh-context reviewer's verdict PASS, zero P0/P1 (this report's findings section carries the three P2 notes)",
-      "the #90 bot round dispositioned: CodeRabbit's Major (the BMK-04 int() count \u2014 already the implementation-cycle repair at a5eed2b, auto-resolved) and the Minor (STATE's Active-task line trimmed to the pointer-only form, the digest re-bound + the full evidence regenerated at the repaired head \u2014 run-20..37)"
+      "the P3-05 card's acceptance observed: return to the saved location or report the typed unresolved-anchor state (BMK-07/08); the card's test set mapped: invalid Anchor (BMK-02), cross-owner (BMK-03), re-import (BMK-07), re-extraction (BMK-08), tombstone/restore (BMK-06), replay and restart (BMK-04/05), the serialized edit transition (BMK-13)",
+      "the round-3 SEV reviewer's verdict PASS, zero P0/P1 (agent-7c31e9f2 \u2014 this report's findings F5..F9 carry its five P2 notes); the RED chain independently verified: the reviewer re-ran the RED tree 4628ee3 (exit 1, the recorded triad) and reproduced the defect mechanism directly at that tree (the move committed revision 2 after the tombstone), then confirmed the repair at HEAD",
+      "the #90 bot rounds dispositioned: round 1-2 (the Major 4431690026 already the implementation-cycle repair; the Minor 4431690029 STATE's pointer-only trim; the 14:00Z sev-citation pair) + round 3 (the 14:43Z outside-diff Major \u2014 F4 here, fixed-in-PR at 4628ee3/663ae33 with the evidence cascade)"
     ]
   },
   "failure_modes": [
@@ -90,11 +95,12 @@
     },
     {
       "id": "FM-04",
-      "scenario": "a lost or duplicated effect under crash/restart/concurrent writers",
-      "control": "the spine's zero-or-one semantics (BMK-05 crash matrix + the same-key replay convergence) + the PK backstop (BMK-04) + the reviewer's live two-writer races with the ack-effect binding (each success its own row at its acked number; each refusal zero rows)",
+      "scenario": "a lost or duplicated effect under crash/restart/concurrent writers \u2014 or a revision committed after tombstoning (the round-3 class)",
+      "control": "the spine's zero-or-one semantics (BMK-05 crash matrix + the same-key replay convergence) + the advisory-lock serialization at BOTH layers (the spine's build_txn locked section + the 0008 revision-append guard): a lifecycle writer either commits before the lock (the in-transaction read refuses) or waits until the move commits \u2014 BMK-13's deterministic pin + the reviewer's five interleaving classes; concurrent moves serialize lawfully (each ack its own row)",
       "proof_ids": [
-        "run-01",
-        "run-02"
+        "run-39",
+        "run-40",
+        "run-41"
       ]
     },
     {
@@ -119,9 +125,9 @@
       "id": "F1",
       "severity": "P2",
       "location": "harness/commands.py _bm_current/move_bookmark",
-      "finding": "the current revision is read BEFORE BEGIN, so concurrent movers both build revision n+1; correctness rests on the PK (id, revision) backstop + full rollback",
-      "evidence": "the reviewer's five live two-writer rounds: the loser exits ARV-CMD-011 (zero effect, rolled back) and leaves zero rows in arv.bookmark/arv.anchor/arv.command_log for its key; ordinals contiguous",
-      "disposition": "SYS-04's documented stance (a unique constraint is not a replay promise); no defect \u2014 the SEV round's race probes now cover the class the suite measures at two writers",
+      "finding": "the current revision was read BEFORE BEGIN (the round-2 stance: concurrent movers rested on the PK backstop) \u2014 the #90 round-3 CodeRabbit Major named the SAME root's unguarded consequence: a tombstone committing inside the read-to-commit window let the move commit revision n+1 AFTER tombstoning",
+      "evidence": "REPAIRED at 4628ee3/663ae33: the RED observed the violation deterministically (red-02.txt); the round-3 SEV reviewer re-observed the defect at the RED tree and verified the repair across five deterministic/live interleavings (its A1/A2 arms + five live two-writer races + a 3-writer round); move_bookmark now executes its complete transition inside ONE transaction behind the per-bookmark advisory xact lock \u2014 the PK-loser stance retired (the finding's own note: never the defect); concurrent moves serialize lawfully (n+1, n+2, both committed, each ack bound to its own row)",
+      "disposition": "fixed-in-PR at 4628ee3 (the RED) + 663ae33 (the two-layer repair: the spine's build_txn phase + the 0008 revision-append guard); race-verified by the round-3 SEV reviewer (agent-7c31e9f2) and pinned by BMK-13",
       "status": "resolved"
     },
     {
@@ -130,7 +136,7 @@
       "location": "arv.bookmark_lifecycle guard (RLS interaction)",
       "finding": "a hostile arv_app INSERT without app.current_owner set returns INSERT 0 0 (RLS row-invisibility of the guard's target subquery), not a named code; zero rows land",
       "evidence": "the reviewer's hostile probe: count=0 for the hostile key; every VISIBLE-target case refused with the named codes (ARV-BMK-001/003) as arv_app and as superuser",
-      "disposition": "the 0002/0004/0007 convention (the substrate enforces scope + alternation, the command boundary is the first line); named as a notverified fence with the revisit condition (the sync/purge slices)",
+      "disposition": "the 0002/0004/0007 convention (the substrate enforces scope + alternation, the command boundary is the first line); named as a notverified fence with the revisit condition (the sync/purge slices); the round-3 reviewer re-verified the boundary on the revised 0008 (zero rows land, not a named code)",
       "status": "resolved"
     },
     {
@@ -139,24 +145,79 @@
       "location": "harness/query.py ANC_SQL (PRE-EXISTING, unchanged by this slice)",
       "finding": "the resolve-anchor/_verdict LEFT JOIN takes rows[0] if a hostile plant created two current generations for one source",
       "evidence": "code read (the reviewer's F3); not probed live (requires hostile derived-state surgery outside the frozen machine)",
-      "disposition": "the extraction machine maintains one current per source (UNIQUE(source_id, ordinal) + the supersede transition); routed to the extraction/read-path owners, not charged to P3-05",
+      "disposition": "the extraction machine maintains one current per source (UNIQUE(source_id, ordinal) + the supersede transition); routed to the extraction/read-path owners, not charged to P3-05; untouched by the round-3 diff (the reviewer's A/B confirm)",
+      "status": "resolved"
+    },
+    {
+      "id": "F4",
+      "severity": "P2",
+      "location": "harness/commands.py move_bookmark (was 837-850 at d3893ff)",
+      "finding": "the #90 round-3 CodeRabbit Major (outside-diff, 14:43Z): move_bookmark read the bookmark state BEFORE BEGIN and without the lifecycle advisory lock \u2014 a tombstone committing inside that window let the move insert and commit revision n+1 AFTER tombstoning, violating the ARV-BMK-002 contract (RTM \u00a73.3: edit only from active)",
+      "evidence": "the RED 4628ee3 observed the violation deterministically (the test-held source row FOR UPDATE blocks the move's anchor INSERT; the tombstone completes; the move then commits revision 2 after the tombstone \u2014 red-02.txt); the round-3 SEV reviewer independently reproduced the defect at the RED tree and confirmed the repair at HEAD",
+      "disposition": "fixed-in-PR: the RED 4628ee3 (BMK-13 + the BMK-06/11 amendments, the typed amendment) then the GREEN 663ae33 \u2014 the spine's build_txn phase (the complete transition inside ONE transaction behind the per-bookmark advisory xact lock) + the 0008 revision-append guard (the hostile/race substrate backstop); BMK-01..13 GREEN x3; make verify exit 0; the SEV round-3 verdict PASS zero P0/P1",
+      "status": "resolved"
+    },
+    {
+      "id": "F5",
+      "severity": "P2",
+      "location": "harness/commands.py:872 vs harness/migrations/0008_bookmark_lifecycle.sql (the lock keys)",
+      "finding": "the round-3 SEV reviewer's hardening gap (the invariant HOLDS): the command-level lock keys on hashtext(<the CLI id spelling>) while the substrate triggers key on hashtext(NEW.id::text) \u2014 a case-variant spelling of a real id resolves to the same row but a DIFFERENT lock key, degrading the clean ARV-BMK-002 boundary refusal to the ARV-CMD-010 wrapper (the named code in the drained cause); the substrate revision guard still refused the post-tombstone append in the reviewer's forced interleaving \u2014 zero rows, no violation",
+      "evidence": "the reviewer's probe e2 (deterministic): the uppercase-id move blocked at its anchor insert, the tombstone completed mid-move, the append refused at the substrate with ARV-BMK-002 in the raw cause, revs [1], zero move rows",
+      "disposition": "a named one-line hardening follow-up (normalize the id to canonical uuid text before the lock, or refuse non-canonical spellings with a named code) \u2014 routed to the next bookmark-family slice; never blocking (no frozen contract violated in any probe; canonical spellings \u2014 every id the system itself mints and acks \u2014 take the identical key)",
+      "status": "resolved"
+    },
+    {
+      "id": "F6",
+      "severity": "P2",
+      "location": "harness/commands.py:116 (Session.read_until, the pre-existing 30s marker wall) x the new lock waits",
+      "finding": "the 'waits until the move commits' characteristic is BOUNDED by the spine's pre-existing 30-second marker timeout: a lock-holder blocked longer makes the waiting writer exit 1 (ARV-CMD-010), its session dies, the transaction rolls back, the lock releases \u2014 fail-safe in the safe direction (nothing commits, typed exit, zero rows)",
+      "evidence": "the reviewer's probe: the same interleaving with a >30s hold \u2014 both writers died at the wall with zero rows and no event; the <30s form (BMK-13, every normal operation) refuses or serializes lawfully",
+      "disposition": "no code change in-slice (the 30s stall wall is the spine's pre-existing suite-pinned design; every failure typed + zero-row); the bound recorded at notverified.txt + record 46 \u00a79 so the wait claim is never read as unbounded",
+      "status": "resolved"
+    },
+    {
+      "id": "F7",
+      "severity": "P2",
+      "location": "harness/migrations/0008_bookmark_lifecycle.sql:110-133 (enforce_bookmark_revision_guard)",
+      "finding": "the round-3 SEV reviewer's hardening asymmetry (the same standing fence class as the no-GUC observation): the revision guard refuses rev>1 appends on tombstoned bookmarks but does not pin identity existence \u2014 a hostile direct insert with a FRESH id and revision 5 lands (a phantom revision identity, as arv_app WITH the GUC and as the superuser); the command path cannot reach it (_bm_current requires existence; the PK blocks duplicate rev-1); the phantom row still carries every frozen contract (append-only, provenance, owner scope)",
+      "evidence": "the reviewer's probe E6: phantom rev5 on a fresh id rc=0 rows=1; the contrast \u2014 a ghost lifecycle target refused ARV-BMK-001 by the lifecycle guard",
+      "disposition": "a named hardening follow-up (an EXISTS check mirroring the lifecycle guard) \u2014 routed to the next substrate-touching slice; the frozen contracts hold on every exercised class",
+      "status": "resolved"
+    },
+    {
+      "id": "F8",
+      "severity": "P2",
+      "location": "harness/commands.py _bm_current (the uuid cast at the SQL boundary) \u2014 PRE-EXISTING",
+      "finding": "a malformed (non-uuid) id on move/tombstone/restore yields ARV-CMD-010 (the marker wall on the failed read) rather than ARV-BMK-001 \u2014 verified byte-identical on the highlight family at origin/main (not a slice regression; uniform across malformed ids, so no side channel)",
+      "evidence": "the reviewer's probe X1 A/B: tombstone_highlight --id not-a-uuid produced byte-identical output at origin/main and HEAD",
+      "disposition": "no action in this slice; a general spine polish item (a uuid-format boundary check) for every family's arms \u2014 recorded, never silently passed",
+      "status": "resolved"
+    },
+    {
+      "id": "F9",
+      "severity": "P2",
+      "location": "harness/commands.py:345-347 (the command_log construction) \u2014 disclosed nuance",
+      "finding": "the round-3 spine refactor moved the command_log ts from pre-BEGIN to post-BEGIN for ALL commands (the one real delta behind the 'byte-identical' claim \u2014 disclosed in the commit message); the reviewer verified it is the only removed logic and that observable behavior is unchanged (record_event's stdout/replay byte-identical A/B, the row content identical modulo the minted UUID and the timestamp value)",
+      "evidence": "the reviewer's probes H3/H4: the spine diff +31/-7 with the ts/stmts construction the only removal; record_event A/B identical ACK lines, evidence rows, and replays",
+      "disposition": "verified benign, disclosed; the 'byte-identical' prose read as 'identical protocol output and persisted semantics'",
       "status": "resolved"
     }
   ],
   "not_verified": [
     "the concurrent-reader matrix on the new read arms (serially exercised; the standing class)",
-    "concurrency beyond two writers",
+    "races beyond the reviewer's 3-writer move round and two-writer lifecycle pairs (the >3-writer classes remain unprobed)",
+    "the bounded wait: the 'waits until the move commits' characteristic is bounded by the spine's pre-existing 30s marker wall (F6 \u2014 fail-safe, zero rows; never read as unbounded)",
+    "the case-variant id-spelling lock-key hardening (F5) and the phantom-identity EXISTS pin (F7) \u2014 named follow-ups, the invariant held in every probe",
     "the governed purge (P3-06/09's, D-011 \u2014 not implied by tombstone)",
     "the notes/keyword-index/outbox integrations (P3-06/07/08's) + the queued/server_durable rungs",
-    "the no-GUC hostile-insert named-code boundary (F2, the standing convention fence)",
-    "the ANC_SQL two-current-generations surface (F3, pre-existing)",
-    "U+2029/U+0085 unexercised on the history arm (U+2028 is the carrier)",
-    "crash.py's create_bookmark/restore_bookmark arms specifically (suite-covered at move+tombstone; not independently re-probed by the reviewer)",
-    "the merge-chain facts (recorded only after they happen, INT-104)"
+    "the no-GUC hostile-insert named-code boundary (F2, the standing convention fence \u2014 re-verified on the revised 0008)",
+    "the ANC_SQL two-current-generations surface (F3, PRE-EXISTING \u2014 routed to the extraction/read-path owners)",
+    "the malformed-id ARV-CMD-010 convention (F8 \u2014 pre-existing across every family, the spine's polish item)",
+    "the GitHub-side walls + the merge-chain facts (external state, INT-104 \u2014 recorded only after they happen)"
   ],
   "builder_context": "session-35 builder context: Super Z (GLM host) \u2014 the session that wrote the implementation, the suite, and this slice's records (record 46)",
-  "reviewer_context": "agent-9fbd03d3 (the fresh-context SEV reviewer, cold-start, independent of the builder: its own 74-assertion adversarial script, its own five live two-writer race rounds, its own identity-fix and resolve-anchor probes over its own scratch DB; probe ledger preserved by the reviewer)",
+  "reviewer_context": "round 1: agent-9fbd03d3 (the fresh-context SEV reviewer, cold-start, independent of the builder: its own 74-assertion adversarial script, its own five live two-writer race rounds, its own identity-fix and resolve-anchor probes over its own scratch DB). round 3: agent-7c31e9f2 (the fresh-context SEV reviewer over the REPAIRED diff, cold-start, independent of the builder: its own deterministic interleavings, five live two-writer move races + a 3-writer round, the live + deterministic lifecycle races, the hostile matrix on the revised 0008, the RED-tree reproduction of the defect, the A/B spine-compat probes, the foreground 16-suite battery; probe ledger preserved by the reviewer)",
   "disposition": "PASS",
-  "review_summary": "The P3-05 bookmark slice holds against every frozen contract attacked: the no-copy structural law (the exact ten-column set, no content column anywhere on the write paths), the five typed-resolution states answered at exit 0 with the anchor's ORIGINAL offsets echoed and byte-unchanged evidence (never a silent retarget), the identity-fix across re-import (every revision binds v1, the saved location resolves over v1's own generation), the same-refusal ownership rule on all six arms including the tombstone-state non-leak, the named alternation codes at both the command boundary and the substrate, exactly-once semantics under genuine two-process races (each success its own row at its acked revision; each refusal zero rows), and the resolve-anchor output contract byte-stable through the _verdict refactor. Zero P0/P1; three P2 notes dispositioned (one design-consistent SYS-04 stance now race-covered, two named fences with revisit conditions). The #90 bot round's two threads dispositioned (the Major already-fixed; the Minor repaired with the digest re-bind and the evidence regenerated). Verdict PASS.",
+  "review_summary": "ROUND 3 (the repaired tree 911010d): PASS, zero P0/P1, five P2 notes (F5..F9 \u2014 two named hardening follow-ups where the invariant held through the substrate backstop, one bounded-wait disclosure, two verified pre-existing/disclosed conventions). The round-3 central claim verified adversarially: a revision can never commit after tombstoning \u2014 across the reviewer's own deterministic interleavings, five live move races, a 3-writer round, the lifecycle pairs, restore-in-flight, the hostile matrix, and the RED-tree contrast where the violation was observed directly. The move path now serializes on the per-bookmark advisory xact lock at BOTH layers (the spine's build_txn locked section + the 0008 revision-append guard); concurrent moves serialize lawfully with every ack bound to its own row; the crash matrix and exactly-once held on all four commands. ROUND 1 (the original content head): the P3-05 bookmark slice held against every frozen contract attacked \u2014 the no-copy structural law, the five typed-resolution states with the anchor's ORIGINAL offsets echoed (never a silent retarget), the identity-fix across re-import, the same-refusal ownership rule on all six arms, the named alternation codes at both boundaries, the derived current view, the crash matrix, and U+2028 framing.",
   "sheet_section": true
 }

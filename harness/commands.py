@@ -273,15 +273,23 @@ def _sess_row(sess: "Session", sql: str) -> str:
     return next((l for l in lines if "|" in l and "MARK" not in l), "")
 
 
-def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
-           crash_at: str = None) -> int:
+def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build=None,
+           crash_at: str = None, build_txn=None) -> int:
     """The shared product-command protocol — the record_event spine generalized:
     replay check -> build (validation + ids + statements, BEFORE any write) ->
     BEGIN -> effects + command_log -> COMMIT -> ack.  Crash points sit between
     phases; the concurrent loser rides _replay_after_conflict (a unique
     constraint is not a replay promise, P3-K0).  build(sess, body_hash) returns
     (result_ref, statements, ack_extra); a _CapRefusal inside build prints the
-    named code and leaves ZERO rows (the validation precedes the transaction)."""
+    named code and leaves ZERO rows (the validation precedes the transaction).
+    build_txn (the #90 round-3 repair's phase; exactly one of build/build_txn):
+    the SAME contract but executed INSIDE the transaction, right after BEGIN —
+    the caller's advisory xact lock (its first statement) covers the state
+    read, validation, and construction, so a concurrent lifecycle writer can
+    never overtake the transition; a _CapRefusal there ROLLs BACK and prints
+    the same named code with zero rows (the read-before-BEGIN defect class)."""
+    if (build is None) == (build_txn is None):
+        raise ValueError("the spine needs exactly one of build / build_txn — the command's build phase")
     body_hash = hashlib.sha256(canonical_body(command=command, client_id=client_id,
                                               owner_scope=owner, actor=actor,
                                               payload=payload).encode()).hexdigest()
@@ -299,14 +307,14 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
             print(f"ACK command={command} idem_key={idem_key} status=replayed result_ref={recorded_ref}")
             return 0
         try:
-            ref, stmts, extra = build(sess, body_hash)
+            if build is not None:
+                ref, stmts, extra = build(sess, body_hash)
+            else:
+                ref, stmts, extra = None, [], None
         except _CapRefusal as r:
             print(f"FAIL {r.code}: {r}")
             print(f"      repair: {r.repair}")
             return 1
-        ts = clock.now()
-        stmts = stmts + [f"INSERT INTO arv.command_log (owner_scope, idempotency_key, client_id, command_name, body_hash, result_ref, actor, created_at) "
-                         f"VALUES ({_q(owner)}, {_q(idem_key)}, {_q(client_id)}, {_q(command)}, {_q(body_hash)}, {_q(ref)}, {_q(actor)}, {_q(ts)});"]
         sess.send("BEGIN;")
         sess.send(f"\\echo {MARK_BEGUN}")
         try:
@@ -319,6 +327,22 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build,
         if crash_at == "after-begin":
             sess.kill()
             return 2
+        if build_txn is not None:
+            # THE LOCKED SECTION (the #90 round-3 repair): the state read, validation,
+            # and construction run INSIDE the transaction behind the caller's advisory
+            # xact lock — a lifecycle writer commits BEFORE the lock (the read sees it:
+            # the clean refusal) or waits for this transaction's end; a refusal rolls
+            # back with zero rows
+            try:
+                ref, stmts, extra = build_txn(sess, body_hash)
+            except _CapRefusal as r:
+                sess.send("ROLLBACK;")
+                print(f"FAIL {r.code}: {r}")
+                print(f"      repair: {r.repair}")
+                return 1
+        ts = clock.now()
+        stmts = stmts + [f"INSERT INTO arv.command_log (owner_scope, idempotency_key, client_id, command_name, body_hash, result_ref, actor, created_at) "
+                         f"VALUES ({_q(owner)}, {_q(idem_key)}, {_q(client_id)}, {_q(command)}, {_q(body_hash)}, {_q(ref)}, {_q(actor)}, {_q(ts)});"]
         for s in stmts:
             sess.send(s)
         sess.send(f"\\echo {MARK_INSERTS}")
@@ -830,11 +854,20 @@ def move_bookmark(*, db, owner, actor, client_id, idem_key, id_,
     RE-DERIVED from the SAME Source version's stored bytes (identity-fixed: a
     bookmark revision NEVER crosses Source versions; the §6 wrong-version
     class is refused at the command boundary by construction).  Tombstoned
-    refuses (ARV-BMK-002: restore first)."""
+    refuses (ARV-BMK-002: restore first).  THE SERIALIZED TRANSITION (the
+    #90 round-3 repair, CodeRabbit's 14:43Z Major): the complete transition —
+    the per-bookmark advisory xact lock (the SAME lock the 0008 lifecycle
+    guard takes) acquired as the transaction's FIRST statement, then the
+    state read, active validation, revision selection, anchor construction,
+    inserts, and commit, ALL inside the one transaction: a tombstone/restore
+    either commits BEFORE the lock (the read sees it — the clean ARV-BMK-002)
+    or waits until the move commits — a revision can never commit after
+    tombstoning (the read-before-BEGIN defect this closes)."""
     body = json.dumps({"id": id_, "start": start, "end": end},
                       sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
-    def build(sess: "Session", body_hash: str):
+    def build_txn(sess: "Session", body_hash: str):
+        _sess_row(sess, f"SELECT hashtext({_q(id_)}) || '|' || pg_advisory_xact_lock(hashtext({_q(id_)}));")  # the lock FIRST, held to the commit
         revision, source_id, state = _bm_current(sess, id_)
         if state != "active":
             raise _CapRefusal("ARV-BMK-002",
@@ -850,7 +883,7 @@ def move_bookmark(*, db, owner, actor, client_id, idem_key, id_,
             f" revision={revision + 1} durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
-                  command="move_bookmark", payload=body, build=build, crash_at=crash_at)
+                  command="move_bookmark", payload=body, build_txn=build_txn, crash_at=crash_at)
 
 
 def _bm_lifecycle_command(*, command, event, db, owner, actor, client_id, idem_key,

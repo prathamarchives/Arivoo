@@ -29,6 +29,12 @@
 --     serializes concurrent lifecycle writers on one bookmark; the named
 --     command-boundary refusals (ARV-BMK-002/003/004) remain the clean first
 --     line, this guard is the race + hostile-direct-write backstop
+--   THE REVISION-APPEND GUARD (the #90 round-3 repair, the move path's own
+--     backstop — the SAME convention): every arv.bookmark insert takes the
+--     SAME per-bookmark advisory xact lock; an append with revision > 1 on a
+--     tombstoned bookmark is refused with ARV-BMK-002 — the command boundary's
+--     locked build (commands.py's build_txn phase) is never the only
+--     enforcement (a hostile or raced direct write meets the substrate)
 --   NO command_log FK: idempotency_key is the command-log row's provenance ref
 --     (the 0004/0007 convention), not a second ledger
 
@@ -95,6 +101,36 @@ $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS bookmark_lifecycle_guard ON arv.bookmark_lifecycle;
 CREATE TRIGGER bookmark_lifecycle_guard BEFORE INSERT ON arv.bookmark_lifecycle
     FOR EACH ROW EXECUTE FUNCTION arv.enforce_bookmark_lifecycle_guard();
+
+-- the revision-append guard (the #90 round-3 repair): the move path's substrate
+-- backstop — the SAME advisory lock (a same-transaction re-acquisition is the
+-- no-op PostgreSQL defines, so the command's own locked build never self-blocks),
+-- the SAME parity derivation; a revision > 1 append on a tombstoned bookmark is
+-- the §3.3 violation refused with the named code at the substrate
+CREATE OR REPLACE FUNCTION arv.enforce_bookmark_revision_guard() RETURNS trigger AS $$
+DECLARE
+    t_count INTEGER;
+    r_count INTEGER;
+BEGIN
+    PERFORM pg_advisory_xact_lock(hashtext(NEW.id::text));
+    IF NEW.revision = 1 THEN
+        RETURN NEW;  -- the create path: a fresh identity carries no lifecycle state
+    END IF;
+    SELECT count(*) FILTER (WHERE event = 'tombstone'),
+           count(*) FILTER (WHERE event = 'restore')
+      INTO t_count, r_count
+      FROM arv.bookmark_lifecycle
+     WHERE bookmark_id = NEW.id AND owner_scope = NEW.owner_scope;
+    IF t_count > r_count THEN
+        RAISE EXCEPTION 'ARV-BMK-002: bookmark % is tombstoned — a revision append (the move) after tombstoning is refused at the substrate (§3.3: restore precedes edit)', NEW.id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS bookmark_revision_guard ON arv.bookmark;
+CREATE TRIGGER bookmark_revision_guard BEFORE INSERT ON arv.bookmark
+    FOR EACH ROW EXECUTE FUNCTION arv.enforce_bookmark_revision_guard();
 
 -- the append-only guards (ARV-CAP-005, the 0004 function reused by name — one
 -- guard function, every authoritative table)

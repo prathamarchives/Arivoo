@@ -94,4 +94,4 @@ The finalize chain at the round-3 content head `663ae33` (the repair + the measu
 
 ## 12. Session close
 
-This record is OPEN at commit A; it completes at the slice's finalize per the convention. The PAT rotation reminder stays standing until the project completes.
+COMPLETED at the slice's finalize + merge (PR #90 merged BY THE OWNER at `f86e52b` 2026-11-01T13:48:14Z; the post-merge five-check run all green; the close facts in CLAIM-055's rule-4 close row, the round-3 account at §8.3, the merge observation at record 47 §2). The PAT rotation reminder stays standing until the project completes.

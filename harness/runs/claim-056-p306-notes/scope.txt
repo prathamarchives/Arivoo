@@ -1,0 +1,40 @@
+# CLAIM-056 — P3-06: Note and revision history (+ CLAIM-055's rule-4 close
+# row + INT-143, the turn-38 session-boundary resume + the continuous
+# engineering execution directive preserved at context/reviews/).
+# PLAN's P3-06 card; RTM §2.5 item 7 ("the owner's deep raw thinking.
+# Identity + immutable revisions; explicit, version-aware references to
+# Work/Source/Anchor/Highlight/Note; long-form and Unicode preserved
+# losslessly; the diagram/structured-block serialization contract is NOT
+# frozen here — P4-C's reservation") + §2.5 item 9 (Note revisions
+# authoritative) + §3.3's machine + the §3.2 capture rungs, SYS-02/03
+# primary, SYS-01/04 standing. The bounded exclusions per the card: the
+# diagram/structured-block contract NOT frozen (its own round-trip proof
+# required before "supported"); the keyword index is P3-07's, the
+# outbox/sync is P3-08's, the governed purge is P3-06/09's (D-011).
+#
+# The machine: the note family's create/revise/tombstone/restore over the
+# landed §3.3 machine (the serialized transition + the substrate guards, the
+# 0007/0008 precedent) + explicit version-aware references to
+# Work/Source/Anchor/Highlight/Note (dangling refs refused by name at the
+# boundary) + the referenceable history (every revision retrievable,
+# attributable, referenceable; conflict never silently destroys a revision
+# or claims an untested merge) + every note-family ack naming
+# durability_rung=local_durable (SYS-01) + migration 0009. RED-first at the
+# predecessor f86e52b (machinery-absent ARV-TEST-000, red-01.txt).
+harness/tests/test_note.py D-041
+harness/commands.py D-041
+harness/query.py D-041
+harness/crash.py D-041
+harness/gate.py D-041
+harness/migrations/0009_note_lifecycle.sql D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+INTENT-LEDGER.md INT-143
+context/WORKLOG.md D-043
+context/extracted/47-P306-NOTES.md D-042
+context/extracted/46-P305-BOOKMARKS.md D-042
+context/reviews/arivoo-continuous-engineering-execution-directive-2026-11-01.md D-022
+harness/runs/claim-056-p306-notes D-042

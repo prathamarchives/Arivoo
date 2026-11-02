@@ -1,0 +1,2 @@
+FAIL ARV-TEST-000: the P3-06 machinery is absent (machinery-absent class; create_note command absent: True; get-note arm absent: True; migration 0009 present: False) — the implementation lands after this RED, never before it (LAW-11)
+EXIT=1

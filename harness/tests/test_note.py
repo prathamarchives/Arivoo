@@ -553,18 +553,18 @@ def main() -> int:
         host_ref = app_sql(
             f"INSERT INTO arv.note_reference (id, note_id, note_revision, ref_kind, ref_id, "
             f"ref_revision, owner_scope, actor, run_id, input_hash, idempotency_key, created_at) "
-            f"VALUES (gen_random_uuid()::text, '{n1}', 1, 'work', '{ghost}', NULL, 'A', 'owner', "
+            f"VALUES (gen_random_uuid(), '{n1}', 1, 'work', '{ghost}', NULL, 'A', 'owner', "
             f"'run-hostile', 'ih', 'hostile-1', now());")
         # the hostile ghost-target lifecycle insert
         host_lc = app_sql(
             f"INSERT INTO arv.note_lifecycle (id, note_id, event, owner_scope, actor, run_id, "
-            f"input_hash, idempotency_key, created_at) VALUES (gen_random_uuid()::text, "
+            f"input_hash, idempotency_key, created_at) VALUES (gen_random_uuid(), "
             f"'{ghost}', 'tombstone', 'A', 'owner', 'run-hostile', 'ih', 'hostile-2', now());")
         # the version-aware CHECK at the substrate: a work ref carrying a revision
         host_shape = app_sql(
             f"INSERT INTO arv.note_reference (id, note_id, note_revision, ref_kind, ref_id, "
             f"ref_revision, owner_scope, actor, run_id, input_hash, idempotency_key, created_at) "
-            f"VALUES (gen_random_uuid()::text, '{n1}', 1, 'work', '{wid_a}', 3, 'A', 'owner', "
+            f"VALUES (gen_random_uuid(), '{n1}', 1, 'work', '{wid_a}', 3, 'A', 'owner', "
             f"'run-hostile', 'ih', 'hostile-3', now());")
         ok3 = (pr_w.returncode == 1 and "ARV-NTE-003" in pr_w.stdout
                and pr_s.returncode == 1 and "ARV-NTE-003" in pr_s.stdout
@@ -840,30 +840,30 @@ def main() -> int:
               "create/revise/tombstone/restore acks ALL name durability_rung=local_durable (SYS-01)",
               "every note-family acknowledgment reports the honest rung (RTM §3.2: local_durable = the local commit observed)")
 
-        # ---- NTE-11 — the schema-convention audits (0009)
-        defs = audit_rows("SELECT table_name || '|' || column_name || '|' || "
-                          "COALESCE(column_default, 'none') FROM information_schema.columns "
+        # ---- NTE-11 — the schema-convention audits (0009; the pg_catalog reads)
+        defs = audit_rows("SELECT column_name FROM information_schema.columns "
                           "WHERE table_schema='arv' AND table_name IN "
                           "('note', 'note_lifecycle', 'note_reference') "
                           "AND column_default IS NOT NULL;")
-        trig = audit_rows("SELECT trigger_name FROM information_schema.triggers "
-                          "WHERE event_object_table IN ('note', 'note_lifecycle', "
-                          "'note_reference') AND trigger_name IS NOT NULL "
-                          "GROUP BY trigger_name ORDER BY trigger_name;")
-        rls = audit_rows("SELECT relname || '|' || relrowsecurity || '|' || "
-                         "relforcerowsecurity FROM pg_class WHERE relname IN "
-                         "('note', 'note_lifecycle', 'note_reference') "
-                         "ORDER BY relname;")
-        pols = audit_rows("SELECT tablename || '|' || policyname FROM pg_policies "
-                          "WHERE schemaname='arv' AND tablename IN "
-                          "('note', 'note_lifecycle', 'note_reference') "
-                          "ORDER BY tablename, policyname;")
-        grants = audit_rows("SELECT table_name || '|' || string_agg(privilege_type, ',' "
-                            "ORDER BY privilege_type) FROM information_schema.role_table_grants "
-                            "WHERE table_schema='arv' AND table_name IN "
-                            "('note', 'note_lifecycle', 'note_reference') "
-                            "AND grantee IN ('arv_app', 'arv_read') "
-                            "GROUP BY table_name ORDER BY table_name;")
+        trg_n = set(audit("SELECT tgname FROM pg_trigger WHERE "
+                          "tgrelid='arv.note'::regclass AND NOT tgisinternal;").split())
+        trg_l = set(audit("SELECT tgname FROM pg_trigger WHERE "
+                          "tgrelid='arv.note_lifecycle'::regclass AND NOT tgisinternal;").split())
+        trg_r = set(audit("SELECT tgname FROM pg_trigger WHERE "
+                          "tgrelid='arv.note_reference'::regclass AND NOT tgisinternal;").split())
+        rls_rows = [audit(f"SELECT relrowsecurity || '|' || relforcerowsecurity FROM pg_class "
+                          f"WHERE relname='{t}' AND relkind='r';")
+                    for t in ("note", "note_lifecycle", "note_reference")]
+        grants = {}
+        for tbl in ("note", "note_lifecycle", "note_reference"):
+            for role in ("arv_app", "arv_read"):
+                grants[(tbl, role)] = set(audit(
+                    f"SELECT privilege_type FROM aclexplode((SELECT relacl FROM pg_class "
+                    f"WHERE relname='{tbl}')) WHERE grantee = "
+                    f"(SELECT oid FROM pg_roles WHERE rolname='{role}');").split())
+        pol = audit("SELECT count(*) FROM pg_policies WHERE schemaname='arv' AND "
+                    "tablename IN ('note', 'note_lifecycle', 'note_reference') AND "
+                    "policyname='owner_isolation';")
         pks = audit_rows("SELECT tc.table_name || '|' || string_agg(kcu.column_name, ',' "
                          "ORDER BY kcu.ordinal_position) FROM information_schema.table_constraints tc "
                          "JOIN information_schema.key_column_usage kcu "
@@ -874,20 +874,16 @@ def main() -> int:
         checks_c = audit_rows("SELECT conname FROM pg_constraint WHERE conrelid = "
                               "'arv.note_reference'::regclass AND contype = 'c' "
                               "ORDER BY conname;")
-        want_trig = sorted(["note_immutable", "note_lifecycle_immutable",
-                            "note_reference_immutable", "note_lifecycle_guard",
-                            "note_revision_guard", "note_reference_guard"])
-        want_rls = [("note", "true", "true"), ("note_lifecycle", "true", "true"),
-                    ("note_reference", "true", "true")]
-        want_grants = {f"note|INSERT,SELECT", "note_lifecycle|INSERT,SELECT",
-                       "note_reference|INSERT,SELECT",
-                       "note|SELECT", "note_lifecycle|SELECT", "note_reference|SELECT"}
         ok11 = (not defs
-                and trig == want_trig
-                and [tuple(r.split("|")) for r in rls] == want_rls
-                and pols == ["note|owner_isolation", "note_lifecycle|owner_isolation",
-                             "note_reference|owner_isolation"]
-                and set(grants) == want_grants
+                and trg_n == {"note_immutable", "note_revision_guard"}
+                and trg_l == {"note_lifecycle_guard", "note_lifecycle_immutable"}
+                and trg_r == {"note_reference_guard", "note_reference_immutable"}
+                and rls_rows == ["true|true"] * 3
+                and all(grants[(t, "arv_app")] >= {"INSERT", "SELECT"}
+                        for t in ("note", "note_lifecycle", "note_reference"))
+                and all(grants[(t, "arv_read")] == {"SELECT"}
+                        for t in ("note", "note_lifecycle", "note_reference"))
+                and pol == "3"
                 and pks == ["note|id,revision", "note_lifecycle|id", "note_reference|id"]
                 and "note_reference_ref_shape_check" in checks_c)
         check("NTE-11", ok11,

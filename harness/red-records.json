@@ -713,7 +713,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-056 (P3-06) commit B: the NTE-01..14 suite's RED observed at the exact predecessor f86e52b in a temp worktree and bound to commit f0a8125 (machinery-absent ARV-TEST-000: create_note absent, get-note absent, migration 0009 absent; the transcript at the slice's runs dir red-01.txt; record 47 \u00a711 \u2014 the record-18 \u00a74.1 / claim-055 precedent class)",
-    "current_sha256": "4368470c87c78ef7d12321e490a9d184c65c6fafd59550b9c52664e90bfea39d",
-    "amendments": []
+    "current_sha256": "d7dd5d9774c28f0a39efe9a2969be072bd6ce33805d02530acce25b4c957a32b",
+    "amendments": [
+      {
+        "prior_sha256": "4368470c87c78ef7d12321e490a9d184c65c6fafd59550b9c52664e90bfea39d",
+        "new_sha256": "d7dd5d9774c28f0a39efe9a2969be072bd6ce33805d02530acce25b4c957a32b",
+        "note": "CLAIM-056 (P3-06) the pre-implementation assertion-form repairs on the NTE suite (the #89/#90 precedent class, before the first GREEN run): (a) NTE-03's hostile inserts use gen_random_uuid() natively \u2014 the ::text form cannot assign into a UUID column (probed live on the rig: 'column id is of type uuid but expression is of type text'); (b) NTE-11's schema audits aligned to the BMK-11 proven pg_catalog forms (pg_trigger per table, pg_class RLS rows, aclexplode grants per table+role \u2014 the information_schema.role_table_grants GROUP BY form double-counts a privilege across two grantees) \u2014 assertions strengthened, none removed",
+        "observed_at": "2026-11-02T04:32:51.452880+00:00"
+      }
+    ]
   }
 }

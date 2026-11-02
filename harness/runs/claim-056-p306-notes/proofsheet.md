@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-056-p306-notes (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 9608a3abd1152d75918d350e68a66d887a1c9970
-- generated (last record's timestamp): 2026-11-02T06:53:47.253256+00:00
-- run records: 31
+- commit (last run record's): 6d5146957f9d2835b76ee596604d09fd2b72fe37
+- generated (last record's timestamp): 2026-11-02T10:08:58.780090+00:00
+- run records: 36
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_note.py` -> exit 0 · output sha256 95a3e872d9dfe7f2 · 2026-11-02T04:46:48.871501+00:00
@@ -36,6 +36,11 @@
 - `make verify` -> exit 0 · output sha256 553915e3020106e3 · 2026-11-02T06:22:03.525695+00:00
 - `python3 harness/tests/test_note.py` -> exit 0 · output sha256 9e1020e5dfad6015 · 2026-11-02T06:46:39.877219+00:00
 - `make gate SLICE=claim-056-p306-notes GATE_DIFF=origin/main` -> exit 0 · output sha256 16f1bc7a69e7203d · 2026-11-02T06:53:47.253256+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 96c41f4b6a6d105b · 2026-11-02T09:30:38.016177+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 96c41f4b6a6d105b · 2026-11-02T09:30:49.412690+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 96c41f4b6a6d105b · 2026-11-02T09:30:56.050650+00:00
+- `make verify` -> exit 0 · output sha256 708f99434da958d9 · 2026-11-02T09:34:35.376862+00:00
+- `make gate SLICE=claim-056-p306-notes GATE_DIFF=origin/main` -> exit 0 · output sha256 08e9c659ce1fcaa0 · 2026-11-02T10:08:58.780090+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - NOT VERIFIED — the honest limits of CLAIM-056 / P3-06 SLICE ONE (the note
@@ -141,13 +146,68 @@
 - the builder's records + make verify (the SEV rounds re-ran the NTE
 - suite + make verify themselves); the external GitHub-side merge-chain
 - facts (observed live at the PR, never in-file).
+- - ROUND-2 ADDENDUM (the #91 round-2 + the SEV round 4, 2026-11-02 — the
+- repaired-diff re-bind): WHAT THE ROUND PROVES: every PostgreSQL-ACCEPTED
+- UUID spelling of one note (braced, no-hyphen, uppercase, and their
+- combinations) is the SAME logical command — the variant-spelling revise
+- AND tombstone/restore retries all REPLAY the committed result (never
+- ARV-CMD-409), and the boundary lock key is the substrate guards' OWN
+- canonical key (hashtext of the uuid's canonical text — a braced-spelling
+- revise waits AT its own first statement while the canonical key is held,
+- zero granted advisory keys for arv_app, never a second key for one
+- note); the committed payload hashes for the normal hyphenated spelling
+- are byte-identical before and after the repair (the RED lower() form ==
+- the GREEN canonical form — the reviewer verified the byte-equality from
+- both ends); the replay precedes validation (a variant-spelling retry of
+- an already-committed revise AFTER tombstoning REPLAYS, never ARV-NTE-002
+- — the spine's own contract, the reviewer's probe); the crash matrix
+- holds through variant spellings; the cross-owner same-refusal holds for
+- every spelling (never a side channel); the landed families byte-untouched
+- in this diff (the reviewer's hunk check).
+- - ROUND-2 ROUTED (never silently dropped): the LANDED bookmark family's
+- boundary (move_bookmark + _bm_lifecycle_command) locks and bodies on the
+- RAW spelling — the same variant-spelling class (different boundary keys
+- for one bookmark; variant retries as different commands); the substrate
+- trigger's canonical key remains the serializer there; the note family's
+- _nte_canon_id is the named pattern for its own slice (the F4-routing
+- precedent).
+- - SEV ROUND-4 DISPOSITIONS (agent-nte-sev-r4, PASS zero open P0/P1): F1
+- (P3, repaired) — the _nte_canon_id docstring's 'only ever ARV-NTE-001'
+- universal was observably false for PostgreSQL-REFUSED spellings
+- (garbage, urn:uuid: prefixes, stray whitespace: the uuid cast fails
+- inside the session, the generic ARV-CMD-010 wrapper surfaces — exit 1,
+- ZERO effect, never a crash); the docstring now states both arms; the
+- full boundary parse guard + the read arms' raw-cast surfacing + the
+- landed families' same class ROUTED with the round-2 sibling class. F2
+- (P3, documented no-fix) — the ack's result_ref echoes the caller's raw
+- spelling on a first-commit-via-variant (any spelling re-canonicalizes
+- at every boundary; the ref remains a PostgreSQL-accepted spelling of
+- the same note; zero correctness impact). F3 (P3, routed) — the read
+- arms surface the raw uuid-cast error rather than ARV-QRY-001
+- (pre-existing, family-wide — routed with the sibling class).
+- - ROUND-2 NOT VERIFIED: the reviewer's own honest limits — the sixteen
+- sibling suites relied on make verify's exit 0 (not individually
+- re-read); no reference-machine coverage (CLAIM-057's slice); no
+- >2-writer races or 4+ mixed interleavings through variant spellings;
+- U+001C/1D/1E unprobed; the landed families' unparseable-spelling class
+- verified by code reading, not live probes; the external GitHub-side
+- merge-chain facts (observed live at the PR, never in-file). The
+- run-record provenance: run-01..25 the historical pre-split originals
+- (binding the pre-split heads); run-26..31 the split-tree regeneration;
+- run-32..35 the round-2 repair-tree set (the suite ×3 + make verify,
+- bound at the records content head 88caee6 — the machine identical
+- through the docstring-only disposition delta 6d51469, proven by the
+- flanking direct suite re-run exit 0); run-36 the recorded PR-mode gate
+- at the artifact tree (the intermediate gate run at the PRE-BIND tree
+- refused on ARV-PRF-004 + ARV-SEV-003 — the bind-in-progress state,
+- never evidence, never recorded; the recorded run is the BOUND tree's).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 6e3aef194b4daf860b3c5259a70d829cf71df0c4f5c03bd729bd04e2578ee67a
-- reviewed_diff_sha256: a2c5c8ce2212d64349d3ef82e9e038dfdd6dafc2577891ed09d60200aabb3c44
+- report sha256: d9b827910909f2e5f49770e4a2888f55dcd73782ca58a4f849a6295979b2f18f
+- reviewed_diff_sha256: edb576e734024429765de9bf63101b99191857edba8212093dfef1c3cab2e6a6
 - disposition: PASS
-- findings: 5 (open P0/P1: 0)
-- not-verified entries: 15
+- findings: 8 (open P0/P1: 0)
+- not-verified entries: 5
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): c64e762031fec3004e91b98efdab6a042a51c5659beaaa45eb61268e5403b6b6
+- sheet sha256 (of the content above, excluding this line): 689a610152a0d67d1cc4ee53fc69f9390f37f652029b4f1f750cfacde667cd95

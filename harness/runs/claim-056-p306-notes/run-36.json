@@ -1,0 +1,7 @@
+{
+  "command": "make gate SLICE=claim-056-p306-notes GATE_DIFF=origin/main",
+  "exit_code": 0,
+  "commit": "6d5146957f9d2835b76ee596604d09fd2b72fe37",
+  "output_sha256": "08e9c659ce1fcaa0f829d32cfade2c0c9623ca6de58e043974c7a3ce2f252d06",
+  "recorded_at": "2026-11-02T10:08:58.780090+00:00"
+}

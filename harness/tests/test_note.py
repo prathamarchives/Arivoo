@@ -7,10 +7,9 @@ card). The explicit version-aware REFERENCE machine (arv.note_reference, the
 bounded-diff split, the P3-M0 three-slice sequence precedent.
 
 Red-first (LAW-11): committed BEFORE the implementation; at the predecessor
-f86e52b the suite fails with ARV-TEST-000 (machinery-absent: commands.py's
-create_note/revise_note/tombstone_note/restore_note and query.py's get-note
-arm do not exist; migration 0009 absent — the record-18 §4.1 / red-01.txt
-precedent class).
+f86e52b the suite fails with ARV-TEST-000 (machinery-absent: the note-family
+commands + the get-note arm do not exist; migration 0009 absent — the
+record-18 §4.1 / red-01.txt precedent class).
 
 THE MACHINE (RTM §2.5 item 7 — "the owner's deep raw thinking", slice one):
 
@@ -18,9 +17,8 @@ THE MACHINE (RTM §2.5 item 7 — "the owner's deep raw thinking", slice one):
                content — free-standing by construction (NO source binding,
                unlike the highlight/bookmark families; the content is
                owner-authored bytes read LOSSLESSLY: read_bytes + UTF-8
-               decode, no newline translation, no trimming; the NUL boundary
-               named at this boundary — ARV-NTE-009, never the mid-protocol
-               death)
+               decode, no newline translation; the NUL boundary named at
+               this boundary — ARV-NTE-009, never the mid-protocol death)
   revisions    a NEW immutable row per revise (PK (id, revision) — the
                0004/0007/0008 revision-per-row shape); THE SERIALIZED
                TRANSITION (the #90 round-3 lesson applied from the start):
@@ -45,11 +43,11 @@ THE MACHINE (RTM §2.5 item 7 — "the owner's deep raw thinking", slice one):
                trigger (tombstone only from active — ARV-NTE-004; restore
                only from tombstoned — ARV-NTE-005), the strengthened
                revision-append guard (a revision > 1 onto a never-created
-               identity — ARV-NTE-001; a non-contiguous append — ARV-NTE-011,
-               the ordinal backstop promoted to the named substrate
-               refusal; an append on a tombstoned note — ARV-NTE-002), the
-               ARV-CAP-005 append-only triggers, RLS enabled AND FORCED, the
-               ownership uniques
+               identity — ARV-NTE-001; a non-contiguous append —
+               ARV-NTE-011, the ordinal backstop promoted to the named
+               substrate refusal; an append on a tombstoned note —
+               ARV-NTE-002), the ARV-CAP-005 append-only triggers, RLS
+               enabled AND FORCED, the ownership uniques
   acks         every note-family ack names durability_rung=local_durable
                (SYS-01)
 
@@ -60,84 +58,78 @@ The note-family refusal codes (the diagnostics contract):
                lifecycle target
   ARV-NTE-002  the note is tombstoned — restore precedes edit (the command
                boundary + the substrate revision-append guard)
-  ARV-NTE-004  already tombstoned (the second tombstone)
-  ARV-NTE-005  not tombstoned (the restore of an active note)
+  ARV-NTE-004  already tombstoned;  ARV-NTE-005  not tombstoned (the
+               second tombstone / the restore of an active note)
   ARV-NTE-009  NUL (U+0000) in the content — PostgreSQL TEXT cannot carry
-               it; the named note-boundary refusal of the standing spine
-               residual
+               it; the named note-boundary refusal of the spine residual
   ARV-NTE-010  the content-source refusal (neither/both of --content /
                --content-file; unreadable; not valid UTF-8)
   ARV-NTE-011  the non-contiguous revision append at the substrate (must be
                exactly max+1 — the §3.3 revision ladder)
 
 Cases (the NTE registry — this file is the contract's declaration):
-  NTE-01 the create happy path + the structural pins: revision=1 +
-         durability_rung=local_durable in the ack; the exact nine-column
-         set (content-bearing, NO source binding — the free-standing law);
-         the content byte-identical; provenance complete
+  NTE-01 the create happy path: revision=1 + durability_rung=local_durable
+         in the ack; the exact nine-column set (content-bearing, NO source
+         binding — the free-standing law); the content byte-identical;
+         provenance complete
   NTE-02 lossless long-form + Unicode: 40 paragraphs (CJK, combining,
          astral, RTL, C0 controls, U+2028/U+2029, quotes, backslashes,
          trailing whitespace) round trip byte-identically through create ->
-         get-note AND get-note-history; the inline --content arm round
-         trips; the content-source refusals (ARV-NTE-010) and the NUL
-         boundary (ARV-NTE-009, zero rows)
+         get-note AND get-note-history; the inline arm; ARV-NTE-010 + the
+         NUL boundary ARV-NTE-009 (zero rows)
   NTE-03 the append-only substrate + the strengthened revision guard:
-         direct-DB UPDATE/DELETE on arv.note refused at BOTH boundaries
-         (permission + ARV-CAP-005, zero rows); the hostile ghost-target
-         lifecycle insert (ARV-NTE-001); the hostile PHANTOM append
-         (ARV-NTE-001); the hostile GAP append (ARV-NTE-011)
+         UPDATE/DELETE on arv.note at BOTH boundaries (permission +
+         ARV-CAP-005, zero rows); the ghost-target lifecycle insert, the
+         PHANTOM append (ARV-NTE-001), the GAP append (ARV-NTE-011)
   NTE-04 cross-owner isolation: revise/tombstone/restore on an absent id
          and on ANOTHER OWNER's note are the SAME ARV-NTE-001 refusal;
          get/list/history never observe the other owner's notes
   NTE-05 same-key replay + conflicting body + the ordinal backstop: same
          key + same body -> status=replayed (one effect); same key +
          different body -> ARV-CMD-409 (zero effect; create and revise
-         both); the direct-DB duplicate (id, revision) insert meets the
-         contiguity refusal ARV-NTE-011 (the BEFORE trigger precedes the
-         PK — the backstop promoted to the named substrate refusal)
+         both); THE SAME KEY ON A DIFFERENT NOTE -> ARV-CMD-409 (the
+         target id rides the revise body — the #91 review round's Major;
+         zero effect on the second note); the direct-DB duplicate (id,
+         revision) insert meets the contiguity refusal ARV-NTE-011
   NTE-06 the crash/restart matrix: create + revise + tombstone at
          after-begin / pre-commit (zero effect) and post-commit-pre-ack
-         (the lost ack: the effect IS committed); the same-key replay
-         converges every lost ack
+         (the lost ack: the effect IS committed); the replay converges
   NTE-07 the tombstone/restore machine: tombstoned hidden from get-note
          (ARV-QRY-003) and list-notes (an ACTIVE fixture beside); the
          history retains every revision and event; restore returns it (the
          content byte-identical); double-tombstone (ARV-NTE-004),
          restore-of-active (ARV-NTE-005), revise-of-tombstoned
-         (ARV-NTE-002), and the hostile revision-append on a tombstoned
-         note (ARV-NTE-002 at the substrate) refused; the lifecycle
-         mutations meet ARV-CAP-005
+         (ARV-NTE-002), the hostile revision-append on a tombstoned note
+         (ARV-NTE-002 at the substrate), and the lifecycle mutations
+         (ARV-CAP-005) all refused
   NTE-08 the independent current-view rebuild (THE EXPORT-READY HISTORY):
-         the current view (state + current revision + content +
-         attribution) re-derived from the get-note-history rows ALONE
-         equals the get-note answer
-  NTE-09 the ack-rung pins: create/revise/tombstone/restore acks ALL name
+         state + current revision + content + attribution re-derived from
+         the get-note-history rows ALONE equals the get-note answer
+  NTE-09 the ack-rung pins: the four acks ALL name
          durability_rung=local_durable (SYS-01)
   NTE-10 the schema-convention audits (0009): no DEFAULTs (LAW-24), the
          four triggers (two ARV-CAP-005 append-only + the alternation +
          the revision-append guards), RLS enabled AND FORCED + the owner
          policy, the grants, the PK shapes
-  NTE-11 the row-protocol framing on the history arm: U+2028/U+2029 inside
-         the note CONTENT travel raw inside the JSON string and survive
-         get-note-history with intact newline-only framing
+  NTE-11 the row-protocol framing: U+2028/U+2029 inside the note CONTENT
+         travel raw inside the JSON string and survive get-note-history
+         with intact newline-only framing
   NTE-12 the competing-revisions SERIALIZATION (the card's "competing
          revisions — conflict never silently destroys"): two concurrent
          revisers serialize on the per-note advisory xact lock — the
-         parked first reviser HOLDS the lock across its blocked transition
+         parked first reviser HOLDS it across its blocked transition
          (pg_locks), the second WAITS on it; both revisions commit (2 then
-         3, each byte-identical, revision 1 untouched); the replay
-         converges
+         3, each byte-identical, revision 1 untouched)
   NTE-13 the revise-vs-tombstone SERIALIZATION + THE CANONICAL LOCK KEY
-         (the #90 round-3 Major's class applied from the start; the
-         review round's F3 — claim-055 F5's class closed): a revise
-         invoked with the UPPERCASED note id takes the SAME canonical lock
-         key as the substrate guards (hashtext of the uuid's lowercase
-         text) — the concurrent tombstone serializes against it (the
-         revision commits first, exactly one tombstone event; a revision
-         NEVER commits after tombstoning); the late mixed-case revise gets
-         the clean ARV-NTE-002 (never the ARV-CMD-010 stall wrapper of the
-         split-key defect); the history renders the serialized commit
-         order (the lifecycle timestamp taken INSIDE its locked section)
+         (the #90 round-3 Major's class applied from the start; the review
+         round's F3 — claim-055 F5's class closed): a revise invoked with
+         the UPPERCASED note id takes the SAME canonical lock key as the
+         substrate guards — the concurrent tombstone serializes against
+         it (the revision commits first, exactly one tombstone event; a
+         revision NEVER commits after tombstoning); the late mixed-case
+         revise gets the clean ARV-NTE-002 (never the ARV-CMD-010 stall
+         wrapper of the split-key defect); the history renders the
+         serialized commit order (the lifecycle timestamp INSIDE its lock)
 
 Run: python3 harness/tests/test_note.py   (exit 0 = green)
 """
@@ -483,6 +475,12 @@ def main() -> int:
         rev_rows = audit_rows(f"SELECT revision FROM arv.note WHERE id='{n1}' ORDER BY revision;")
         conf2 = revise_note("n-A1r", n1, content="a conflicting revise body")
         rev_rows2 = audit_rows(f"SELECT revision FROM arv.note WHERE id='{n1}' ORDER BY revision;")
+        # the #91 review round's Major: the target id rides the revise body — the same
+        # key on a DIFFERENT note is a different command (ARV-CMD-409, zero effect on it)
+        pnb2 = mk_note("n-B2", content="the cross-note replay subject.")
+        nb2 = ack_field(pnb2, "result_ref")
+        px = revise_note("n-A1r", nb2, content_file=rev2_file)
+        rev_rows3 = audit_rows(f"SELECT revision FROM arv.note WHERE id='{nb2}' ORDER BY revision;")
         # the ordinal backstop: the strengthened guard fires FIRST (the BEFORE trigger
         # precedes the PK; the PK remains the backstop for any guard-bypassed path)
         dupe = super_sql(f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, "
@@ -496,10 +494,12 @@ def main() -> int:
                and rep2.returncode == 0 and "status=replayed" in rep2.stdout
                and rev_rows == ["1", "2"] and conf2.returncode == 1
                and "ARV-CMD-409" in conf2.stdout and rev_rows2 == ["1", "2"]
+               and px.returncode == 1 and "ARV-CMD-409" in px.stdout
+               and rev_rows3 == ["1"]
                and dupe.returncode == 1 and "ARV-NTE-011" in dupe.stderr)
         check("NTE-05", ok5,
-              "same key + same body -> status=replayed (one effect); same key + different body -> ARV-CMD-409 with zero effect (create and revise both); the direct-DB duplicate (id, revision) insert meets the contiguity refusal ARV-NTE-011 (the guard precedes the PK — the ordinal backstop promoted to the named substrate refusal)",
-              "the idempotent spine's exactly-once contract over the note family (RTM §4; a unique constraint is not a replay promise but it IS the ordinal backstop)")
+              "same key + same body -> status=replayed (one effect); same key + different body -> ARV-CMD-409 (create and revise both); the SAME KEY on a DIFFERENT NOTE -> ARV-CMD-409 with zero effect on it (the target id rides the revise body — the #91 review round's Major); the direct-DB duplicate insert meets the contiguity refusal ARV-NTE-011 (the guard precedes the PK)",
+              "the idempotent spine's exactly-once contract over the note family (RTM §4/LAW-23: the same key must mean the same command — a different target is a different command)")
 
         # ---- NTE-06 — the crash/restart matrix (create + revise + tombstone)
         nf = audit("SELECT count(*) FROM arv.note;")

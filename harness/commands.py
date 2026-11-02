@@ -1003,11 +1003,19 @@ def _nte_content(*, content: "str | None", content_file: "str | None") -> str:
     return body
 
 
-def _nte_body(content: str) -> str:
+def _nte_body(content: str, note_id: "str | None" = None) -> str:
     """The canonical note payload — ONE construction home (the command's body
-    hash proves it; exactly-once is over the LOGICAL command)."""
-    return json.dumps({"content": content},
-                      sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    hash proves it; exactly-once is over the LOGICAL command). revise_note
+    carries the target id in its CANONICAL LOWERCASE form (the #91 review
+    round's Major — the landed families' convention: the same key on a
+    DIFFERENT note is a different command and must meet ARV-CMD-409, never a
+    false replay; the lowercase form keeps CLI spelling variants of one note
+    as the same logical command, matching the canonical lock key)."""
+    payload = {"content": content}
+    if note_id is not None:
+        payload["id"] = note_id
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                      ensure_ascii=False)
 
 
 def create_note(*, db, owner, actor, client_id, idem_key, content=None,
@@ -1057,7 +1065,7 @@ def revise_note(*, db, owner, actor, client_id, idem_key, id_, content=None,
         print(f"FAIL {r.code}: {r}")
         print(f"      repair: {r.repair}")
         return 1
-    body = _nte_body(body_content)
+    body = _nte_body(body_content, note_id=id_.lower())  # the target id in the body: a different note is a different command (LAW-23)
 
     def build_txn(sess: "Session", body_hash: str):
         # THE CANONICAL LOCK KEY (the review round's F3, claim-055 F5's class

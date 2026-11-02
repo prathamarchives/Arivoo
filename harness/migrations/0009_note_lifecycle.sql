@@ -144,15 +144,28 @@ CREATE TRIGGER note_lifecycle_guard BEFORE INSERT ON arv.note_lifecycle
 -- no-op PostgreSQL defines, so the command's own locked build never
 -- self-blocks), the SAME parity derivation; a revision > 1 append on a
 -- tombstoned note is the §3.3 violation refused with the named code at the
--- substrate
+-- substrate. THE REVIEW ROUND'S STRENGTHENING (the independent verifier's V-1 +
+-- the SEV's F2 — convergent, and claim-055 F7's routed hardening due at this
+-- substrate-touching slice): the append must also name an EXISTING identity
+-- (a revision > 1 for a never-created note is the phantom-identity gap —
+-- ARV-NTE-001) and must be CONTIGUOUS (exactly max+1 — the §3.3 machine's
+-- revision ladder; a hostile gap append is refused with ARV-NTE-011, the
+-- ordinal backstop promoted from the PK alone to the named substrate refusal)
 CREATE OR REPLACE FUNCTION arv.enforce_note_revision_guard() RETURNS trigger AS $$
 DECLARE
     t_count INTEGER;
     r_count INTEGER;
+    max_rev INTEGER;
 BEGIN
     PERFORM pg_advisory_xact_lock(hashtext(NEW.id::text));
     IF NEW.revision = 1 THEN
         RETURN NEW;  -- the create path: a fresh identity carries no lifecycle state
+    END IF;
+    SELECT max(revision) INTO max_rev
+      FROM arv.note
+     WHERE id = NEW.id AND owner_scope = NEW.owner_scope;
+    IF max_rev IS NULL THEN
+        RAISE EXCEPTION 'ARV-NTE-001: note % does not exist in the caller''s scope — a revision append onto a never-created identity is the phantom-identity gap, refused at the substrate', NEW.id;
     END IF;
     SELECT count(*) FILTER (WHERE event = 'tombstone'),
            count(*) FILTER (WHERE event = 'restore')
@@ -161,6 +174,9 @@ BEGIN
      WHERE note_id = NEW.id AND owner_scope = NEW.owner_scope;
     IF t_count > r_count THEN
         RAISE EXCEPTION 'ARV-NTE-002: note % is tombstoned — a revision append after tombstoning is refused at the substrate (§3.3: restore precedes edit)', NEW.id;
+    END IF;
+    IF NEW.revision <> max_rev + 1 THEN
+        RAISE EXCEPTION 'ARV-NTE-011: the revision append for note % must be exactly max+1 (received % after max %) — the §3.3 revision ladder is contiguous, never a hostile gap (the ordinal backstop at the substrate)', NEW.id, NEW.revision, max_rev;
     END IF;
     RETURN NEW;
 END;

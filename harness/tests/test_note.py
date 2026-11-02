@@ -112,7 +112,12 @@ Cases (the NTE registry — this file is the contract's declaration):
          dangling target refused by the substrate guard (ARV-NTE-003);
          the hostile ghost-target lifecycle insert refused (ARV-NTE-001);
          the hostile revision-append on a tombstoned note refused by the
-         substrate guard (ARV-NTE-002); the version-aware CHECK pinned
+         substrate guard (ARV-NTE-002); THE PHANTOM-IDENTITY AND GAP APPENDS
+         refused by the strengthened revision guard (the review round's
+         convergent finding: a revision > 1 onto a never-created identity —
+         ARV-NTE-001; a non-contiguous revision (max+2 or beyond) on an
+         ACTIVE note — ARV-NTE-011, the ordinal backstop promoted to the
+         named substrate refusal); the version-aware CHECK pinned
          (a work ref carrying a revision — refused at the substrate)
   NTE-04 cross-owner isolation: revise/tombstone/restore on an absent id
          and on ANOTHER OWNER's note are the SAME ARV-NTE-001 refusal;
@@ -170,7 +175,18 @@ Cases (the NTE registry — this file is the contract's declaration):
          transition while the tombstone waits ON it — the revision commits
          first, the tombstone then proceeds from the committed active
          state; a revision NEVER commits after tombstoning; the revise
-         that arrives after the tombstone gets the clean ARV-NTE-002
+         that arrives after the tombstone gets the clean ARV-NTE-002; the
+         history arm renders the serialized commit order (the lifecycle
+         command's timestamp is taken INSIDE its locked section — the
+         review round's F1 repair: a tombstone can never render before a
+         revision that committed first)
+  NTE-15 the case-variant lock-key serialization (the review round's F3,
+         claim-055 F5's class closed for the note family): a revise invoked
+         with the UPPERCASED note id takes the SAME canonical lock key as
+         the substrate guards (hashtext of the uuid's canonical lowercase
+         text form) — a concurrent tombstone still serializes against it
+         (the late revise refused with the clean ARV-NTE-002, never the
+         ARV-CMD-010 stall wrapper of the split-key defect)
 
 Run: python3 harness/tests/test_note.py   (exit 0 = green)
 """
@@ -578,6 +594,19 @@ def main() -> int:
             f"ref_revision, owner_scope, actor, run_id, input_hash, idempotency_key, created_at) "
             f"VALUES (gen_random_uuid(), '{n1}', 1, 'work', '{wid_a}', 3, 'A', 'owner', "
             f"'run-hostile', 'ih', 'hostile-3', now());")
+        # THE STRENGTHENED REVISION GUARD (the review round's convergent finding):
+        # the phantom-identity append (revision 2 onto a never-created id) and the
+        # non-contiguous gap append (revision 5 on an ACTIVE note whose max is 2)
+        # are both refused at the substrate
+        host_phantom = super_sql(
+            f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, run_id, "
+            f"input_hash, idempotency_key, created_at) VALUES ('{ghost}', 2, 'phantom', 'A', "
+            f"'owner', 'run-hostile', 'ih', 'hostile-4', now());")
+        host_gap = super_sql(
+            f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, run_id, "
+            f"input_hash, idempotency_key, created_at) SELECT id, 5, content, owner_scope, "
+            f"actor, run_id, input_hash, idempotency_key, created_at FROM arv.note "
+            f"WHERE id='{n1}' AND revision=1;")
         ok3 = (pr_w.returncode == 1 and "ARV-NTE-003" in pr_w.stdout
                and pr_s.returncode == 1 and "ARV-NTE-003" in pr_s.stdout
                and pr_a.returncode == 1 and "ARV-NTE-003" in pr_a.stdout
@@ -598,7 +627,9 @@ def main() -> int:
                and before == after and before_r == after_r
                and host_ref.returncode == 1 and "ARV-NTE-003" in host_ref.stderr
                and host_lc.returncode == 1 and "ARV-NTE-001" in host_lc.stderr
-               and host_shape.returncode == 1 and "note_reference_ref_shape_check" in host_shape.stderr)
+               and host_shape.returncode == 1 and "note_reference_ref_shape_check" in host_shape.stderr
+               and host_phantom.returncode == 1 and "ARV-NTE-001" in host_phantom.stderr
+               and host_gap.returncode == 1 and "ARV-NTE-011" in host_gap.stderr)
         check("NTE-03", ok3,
               "every dangling target class refused at the boundary (ARV-NTE-003: absent work/source/anchor/highlight/note AND a highlight at a nonexistent revision — the invalid source-version relationship); the shape classes refused (ARV-NTE-006: missing @rev, forbidden @rev, unknown kind, malformed id); duplicates refused (ARV-NTE-008); direct-DB UPDATE/DELETE refused at BOTH boundaries on arv.note and arv.note_reference (permission + ARV-CAP-005, zero rows); the substrate reference guard refuses the hostile dangling insert (ARV-NTE-003), the ghost-target lifecycle insert (ARV-NTE-001), and the version-aware CHECK refuses the work-ref-with-revision shape",
               "references are explicit, version-aware, and validated against the caller's scope at the command boundary AND the substrate (RTM §2.5 item 7; the 0007/0008 composite-reference convention)")
@@ -649,7 +680,10 @@ def main() -> int:
         rev_rows = audit_rows(f"SELECT revision FROM arv.note WHERE id='{n1}' ORDER BY revision;")
         conf2 = revise_note("n-A1r", n1, content="a conflicting revise body")
         rev_rows2 = audit_rows(f"SELECT revision FROM arv.note WHERE id='{n1}' ORDER BY revision;")
-        # the ordinal backstop: a direct-DB duplicate (id, revision) insert -> the PK violation
+        # the ordinal backstop: a direct-DB duplicate (id, revision) insert -> the
+        # strengthened revision guard fires FIRST (the contiguity refusal — the
+        # BEFORE trigger precedes the PK constraint; the PK remains the backstop
+        # for any guard-bypassed path)
         dupe = super_sql(f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, "
                          f"run_id, input_hash, idempotency_key, created_at) SELECT id, 2, "
                          f"content, owner_scope, actor, run_id, input_hash, idempotency_key, "
@@ -661,7 +695,7 @@ def main() -> int:
                and rep2.returncode == 0 and "status=replayed" in rep2.stdout
                and rev_rows == ["1", "2"] and conf2.returncode == 1
                and "ARV-CMD-409" in conf2.stdout and rev_rows2 == ["1", "2"]
-               and dupe.returncode == 1 and "duplicate key" in dupe.stderr)
+               and dupe.returncode == 1 and "ARV-NTE-011" in dupe.stderr)
         check("NTE-05", ok5,
               "same key + same logical body (reference order shuffled — the canonical form) -> status=replayed with exactly one effect row set; same key + different body -> ARV-CMD-409 with zero effect (create and revise both); the direct-DB duplicate (id, revision) insert meets the PK violation — the ordinal backstop",
               "the idempotent spine's exactly-once contract over the note family (RTM §4; a unique constraint is not a replay promise but it IS the ordinal backstop)")
@@ -981,25 +1015,80 @@ def main() -> int:
                                "--client-id", "cli-14", "--idem-key", "race-tomb-t",
                                "--id", n14],
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=ENV)
+        # the tombstone's serialized form takes the advisory lock as its OWN first
+        # statement (the F1 repair) — it waits THERE, not inside the trigger
         tb_waited = _poll("SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' "
-                          "AND wait_event='advisory' AND query LIKE '%note_lifecycle%'", 11.0)
+                          "AND wait_event='advisory' AND query LIKE '%pg_advisory_xact_lock%'", 11.0)
         t_hold2.close()          # the release: the revise commits, THEN the tombstone proceeds
         mv_rc, tb_rc = mv.wait(timeout=120), tb.wait(timeout=120)
         revs14 = sorted(int(r) for r in audit_rows(f"SELECT revision FROM arv.note WHERE id='{n14}';"))
         ev14 = int(audit(f"SELECT count(*) FROM arv.note_lifecycle WHERE note_id='{n14}';"))
         rev_late = revise_note("race-late", n14, content="the late revise — must be refused")
+        # the F1 pin: the history renders the SERIALIZED COMMIT ORDER — the revision-2
+        # row's created_at precedes the tombstone event's (both timestamps were taken
+        # INSIDE their locked sections, so the render order follows the commit order)
+        h14 = history_rows("A", n14)
+        kinds14 = [r.get("kind") for r in h14]
+        rev2_ts = next((r["created_at"] for r in h14
+                        if r.get("kind") == "revision" and r.get("revision") == 2), None)
+        tomb_ts = next((r["created_at"] for r in h14
+                        if r.get("kind") == "lifecycle" and r.get("event") == "tombstone"), None)
         ok14 = (mv_blocked and lock2 == "1" and tb_waited
                 and mv_rc == 0 and tb_rc == 0 and ev14 == 1 and revs14 == [1, 2]
-                and rev_late.returncode == 1 and "ARV-NTE-002" in rev_late.stdout)
+                and rev_late.returncode == 1 and "ARV-NTE-002" in rev_late.stdout
+                and kinds14 == ["revision", "revision", "lifecycle"]
+                and rev2_ts is not None and tomb_ts is not None and rev2_ts <= tomb_ts)
         check("NTE-14", ok14,
-              "the revise-vs-tombstone interleaving is SERIALIZED on the per-note advisory xact lock: the blocked revise holds it across its complete transition, the tombstone waits ON it until the revise commits (revision 2 then exactly one tombstone event); a revise that arrives AFTER the tombstone gets the clean ARV-NTE-002 — a revision never commits after tombstoning",
+              "the revise-vs-tombstone interleaving is SERIALIZED on the per-note advisory xact lock: the blocked revise holds it across its complete transition, the tombstone waits ON it until the revise commits (revision 2 then exactly one tombstone event); a revise that arrives AFTER the tombstone gets the clean ARV-NTE-002 — a revision never commits after tombstoning; the history renders the serialized commit order (the lifecycle timestamp taken INSIDE its locked section — the F1 repair)",
               "RTM §3.3: edit only from active — the complete transition inside ONE transaction behind the same advisory lock the lifecycle guard takes (the #90 round-3 Major's class, applied from the start)")
+
+        # ---- NTE-15 — the case-variant lock-key serialization (F3, claim-055 F5's class closed)
+        p15 = mk_note("n-15", content="the case-variant subject.")
+        n15 = ack_field(p15, "result_ref")
+        t_hold3 = Session(DB, "postgres", "A")
+        t_hold3.send("BEGIN; LOCK TABLE arv.note_reference IN ACCESS EXCLUSIVE MODE; \\echo HELD15")
+        t_hold3.read_until("HELD15")
+        mv_u = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"),
+                                 "revise_note", "--owner", "A", "--actor", "owner",
+                                 "--client-id", "cli-15", "--idem-key", "race-rev-u",
+                                 "--id", n15.upper(), "--content", "the uppercase-id revise",
+                                 "--ref", f"source:{sid_a}"],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=ENV)
+        mvu_blocked = _poll("SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' "
+                            "AND wait_event_type='Lock' AND query LIKE '%INSERT INTO arv.note_reference%'")
+        # the canonical-key advisory lock is held by the UPPERCASED-id reviser
+        lock_u = super_sql("SELECT count(*) FROM pg_locks l JOIN pg_stat_activity a "
+                           "ON a.pid=l.pid WHERE l.locktype='advisory' AND l.granted "
+                           "AND a.usename='arv_app' AND a.query LIKE '%INSERT INTO arv.note_reference%'").stdout.strip()
+        tb_l = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"),
+                                 "tombstone_note", "--owner", "A", "--actor", "owner",
+                                 "--client-id", "cli-15", "--idem-key", "race-tomb-l",
+                                 "--id", n15],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=ENV)
+        tb_l_waited = _poll("SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' "
+                            "AND wait_event='advisory' AND query LIKE '%pg_advisory_xact_lock%'", 11.0)
+        t_hold3.close()
+        mvu_rc, tbl_rc = mv_u.wait(timeout=120), tb_l.wait(timeout=120)
+        revs15 = sorted(int(r) for r in audit_rows(f"SELECT revision FROM arv.note WHERE id='{n15}';"))
+        ev15 = int(audit(f"SELECT count(*) FROM arv.note_lifecycle WHERE note_id='{n15}';"))
+        # the late revise, again via the MIXED-CASE id: the clean refusal, never the
+        # split-key stall wrapper
+        rev_late15 = revise_note("race-late15", n15.upper(),
+                                 content="the late mixed-case revise — must be refused")
+        ok15 = (mvu_blocked and lock_u == "1" and tb_l_waited
+                and mvu_rc == 0 and tbl_rc == 0 and ev15 == 1 and revs15 == [1, 2]
+                and rev_late15.returncode == 1 and "ARV-NTE-002" in rev_late15.stdout
+                and "ARV-CMD-010" not in rev_late15.stdout
+                and "ARV-CMD-010" not in mv_u.stdout and "ARV-CMD-010" not in tb_l.stdout)
+        check("NTE-15", ok15,
+              "the case-variant lock-key serialization: a revise invoked with the UPPERCASED note id takes the SAME canonical lock key as the substrate guards (hashtext of the uuid's canonical lowercase text) — the concurrent tombstone serializes against it (the revision commits first, exactly one tombstone event), and the late mixed-case revise gets the clean ARV-NTE-002 — never the ARV-CMD-010 stall wrapper of the split-key defect",
+              "one note, one lock key: the boundary's advisory lock must be the substrate's canonical key whatever the CLI spelling (claim-055 F5's class, closed for the note family — the review round's F3)")
 
         print()
         if FAILS:
             print(f"RED — {len(FAILS)} failing: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-06 acceptance suite (NTE-01..14) passes")
+        print("GREEN — the P3-06 acceptance suite (NTE-01..15) passes")
         return 0
     finally:
         # the rig's scratch database DROPPED after every suite run (the #89

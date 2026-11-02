@@ -1167,7 +1167,13 @@ def revise_note(*, db, owner, actor, client_id, idem_key, id_, content=None,
     body = _nte_body(body_content, refs_c)
 
     def build_txn(sess: "Session", body_hash: str):
-        _sess_row(sess, f"SELECT hashtext({_q(id_)}) || '|' || pg_advisory_xact_lock(hashtext({_q(id_)}));")  # the lock FIRST, held to the commit
+        # THE CANONICAL LOCK KEY (the review round's F3, claim-055 F5's class
+        # closed for the note family): the substrate guards lock on
+        # hashtext(NEW.id::text) — the uuid type's TEXT rendering is canonical
+        # LOWERCASE — so the boundary lock must take the SAME key whatever the
+        # CLI spelling, never a second lock for one note
+        key = id_.lower()
+        _sess_row(sess, f"SELECT hashtext({_q(key)}) || '|' || pg_advisory_xact_lock(hashtext({_q(key)}));")  # the lock FIRST, held to the commit
         revision, state = _nte_current(sess, id_)
         if state != "active":
             raise _CapRefusal("ARV-NTE-002",
@@ -1192,16 +1198,26 @@ def revise_note(*, db, owner, actor, client_id, idem_key, id_, content=None,
 def _nte_lifecycle_command(*, command, event, db, owner, actor, client_id, idem_key,
                            id_, crash_at, refusal_code, refusal_msg, refusal_repair) -> int:
     """§3.3's tombstone/restore transitions: ONE typed lifecycle EVENT row per
-    LAWFUL transition (append-only, owner-scoped, provenance-complete).  The
-    named command-boundary refusals are the clean first line; the substrate's
-    advisory-lock alternation trigger (0009) is the race + hostile backstop."""
+    LAWFUL transition (append-only, owner-scoped, provenance-complete). THE
+    SERIALIZED + TIME-HONEST FORM (the review round's F1): the complete
+    transition — the per-note advisory xact lock (the canonical lowercase key,
+    the SAME lock the 0009 guards take) acquired as the transaction's FIRST
+    statement, then the state read, the alternation validation, the timestamp
+    (taken INSIDE the locked section, so a lifecycle event can never render
+    before a revision that committed first), the insert, and the commit, ALL
+    inside ONE transaction: a concurrent reviser commits BEFORE the lock (the
+    read sees it) or waits for this transaction's end — the history arm's
+    created_at ordering follows the serialized commit order. The substrate's
+    advisory-lock alternation trigger (0009) remains the hostile backstop."""
     body = json.dumps({"id": id_}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
-    def build(sess: "Session", body_hash: str):
+    def build_txn(sess: "Session", body_hash: str):
+        key = id_.lower()
+        _sess_row(sess, f"SELECT hashtext({_q(key)}) || '|' || pg_advisory_xact_lock(hashtext({_q(key)}));")  # the lock FIRST, held to the commit
         _, state = _nte_current(sess, id_)
         if (event == "tombstone" and state != "active") or (event == "restore" and state != "tombstoned"):
             raise _CapRefusal(refusal_code, refusal_msg(id_), refusal_repair)
-        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]  # ts INSIDE the locked section
         stmts = [f"INSERT INTO arv.note_lifecycle (id, note_id, event, owner_scope, actor, "
                  f"run_id, input_hash, idempotency_key, created_at) VALUES ({_q(ids.new_id())}, "
                  f"{_q(id_)}, {_q(event)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
@@ -1209,7 +1225,7 @@ def _nte_lifecycle_command(*, command, event, db, owner, actor, client_id, idem_
         return id_, stmts, " durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
-                  command=command, payload=body, build=build, crash_at=crash_at)
+                  command=command, payload=body, build_txn=build_txn, crash_at=crash_at)
 
 
 def tombstone_note(*, db, owner, actor, client_id, idem_key, id_, crash_at: str = None) -> int:

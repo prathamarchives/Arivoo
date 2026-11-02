@@ -338,7 +338,11 @@ def audit(query: str) -> str:
 
 
 def audit_rows(query: str) -> list:
-    return [ln for ln in audit(query).splitlines() if ln.strip()]
+    # NEWLINE-ONLY framing (the ANC-10 law): the note content carries raw
+    # U+2028/U+2029 which a str.splitlines() reader would split on — the
+    # audit reads of content-bearing rows use the same framing law as the
+    # history arm
+    return [ln for ln in audit(query).split("\n") if ln.strip()]
 
 
 def app_sql(sql: str, owner: str = "A") -> subprocess.CompletedProcess:
@@ -377,10 +381,14 @@ def ack_field(p: subprocess.CompletedProcess, field: str) -> str:
 
 
 def note_rows(note_id: str, owner: str = "A") -> list:
-    """The authoritative note rows, read independently (arv_read)."""
-    return audit_rows(f"SELECT revision || '|' || content || '|' || actor || '|' || "
-                      f"run_id || '|' || input_hash || '|' || idempotency_key "
-                      f"FROM arv.note WHERE id='{note_id}' ORDER BY revision;")
+    """The authoritative note rows, read independently (arv_read) as ONE
+    escaped JSON line per revision — the content carries raw newlines and
+    U+2028, so a pipe-delimited psql read would fragment the row (the framing
+    law applied to the audit reads too)."""
+    rows = audit_rows(f"SELECT row_to_json(t)::text FROM (SELECT revision, content, actor, "
+                      f"run_id, input_hash, idempotency_key FROM arv.note "
+                      f"WHERE id='{note_id}' ORDER BY revision) t;")
+    return [json.loads(r) for r in rows]
 
 
 def ref_rows(note_id: str, revision: int) -> list:
@@ -399,8 +407,11 @@ def history_rows(owner: str, note_id: str) -> list:
 
 
 def typed(p: subprocess.CompletedProcess) -> "dict | None":
-    """The typed answer: ONE JSON line on stdout, exit 0."""
-    lines = [ln for ln in p.stdout.splitlines() if ln.strip()]
+    """The typed answer: ONE JSON line on stdout, exit 0.  The framing is
+    NEWLINE-ONLY (the ANC-10 law — the note CONTENT carries raw U+2028/U+2029
+    which a str.splitlines() reader would split on; the split('\n') form is
+    the framing law applied to the test's own reader)."""
+    lines = [ln for ln in p.stdout.split("\n") if ln.strip()]
     if p.returncode != 0 or len(lines) != 1:
         return None
     try:
@@ -488,9 +499,10 @@ def main() -> int:
         ok1 = (p1.returncode == 0 and "status=committed" in p1.stdout
                and rev1 == "1" and rung1 == "local_durable"
                and cols == expected_cols                       # exactly the nine — no source binding
-               and len(rows1) == 1 and rows1[0].split("|")[0] == "1"
-               and rows1[0].split("|")[1] == LONG_FORM         # byte-identical content
-               and rows1[0].split("|")[2] == "owner"           # attribution
+               and len(rows1) == 1 and rows1[0]["revision"] == 1
+               and rows1[0]["content"] == LONG_FORM            # byte-identical content
+               and rows1[0]["actor"] == "owner"               # attribution
+               and rows1[0]["idempotency_key"] == "n-A1"      # the command provenance ref
                and got_refs == want_refs                       # the per-revision reference set
                and p1f.returncode == 0 and free_refs == "0")
         check("NTE-01", ok1,
@@ -656,6 +668,7 @@ def main() -> int:
 
         # ---- NTE-06 — the crash/restart matrix (create + revise + tombstone)
         nf = audit("SELECT count(*) FROM arv.note;")
+        nfr = audit("SELECT count(*) FROM arv.note_reference;")
         c_ab = crash("--command", "create_note", "--point", "after-begin",
                      "--owner", "A", "--client-id", "cr-1", "--idem-key", "crash-create",
                      "--content", "crash-create content")
@@ -698,7 +711,7 @@ def main() -> int:
         ev_after3 = audit(f"SELECT count(*) FROM arv.note_lifecycle WHERE note_id='{n1}';")
         # restore for the later cases (the machine returns to active)
         lifecycle("restore_note", "post-crash-restore", n1)
-        ok6 = (c_ab.returncode == 2 and c_pc.returncode == 2 and nf2 == nf and nfr2 == "0"
+        ok6 = (c_ab.returncode == 2 and c_pc.returncode == 2 and nf2 == nf and nfr2 == nfr
                and c_pa.returncode == 2 and nf3 == str(int(nf) + 1)
                and rep_c.returncode == 0 and "status=replayed" in rep_c.stdout
                and got_pa is not None and got_pa.get("content") == "the lost-ack create body"
@@ -731,8 +744,8 @@ def main() -> int:
         h7_rev2 = [r for r in hist7 if r.get("kind") == "revision" and r.get("revision") == 2]
         h7_ev = [r for r in hist7 if r.get("kind") == "lifecycle"]
         dbl = lifecycle("tombstone_note", "n-tomb-t2", n7)
-        r_act = lifecycle("restore_note", "n-tomb-r0", n7)
         rest = lifecycle("restore_note", "n-tomb-r1", n7)
+        r_act = lifecycle("restore_note", "n-tomb-r0", n7)
         g_after = typed(qy("get-note", "A", n7))
         listed_after = [ln for ln in qy("list-notes", "A").stdout.splitlines() if ln.strip()]
         rev_t = revise_note("n-tomb-x", n7, content="revise of an active note after restore")
@@ -741,7 +754,7 @@ def main() -> int:
         lifecycle("tombstone_note", "n-tomb-t3", n7)
         host_rev = super_sql(
             f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, run_id, "
-            f"input_hash, idempotency_key, created_at) SELECT id, 3, content, owner_scope, "
+            f"input_hash, idempotency_key, created_at) SELECT id, 99, content, owner_scope, "
             f"actor, run_id, input_hash, idempotency_key, created_at FROM arv.note "
             f"WHERE id='{n7}' AND revision=2;")
         lc_mut = super_sql(f"UPDATE arv.note_lifecycle SET event='restore' "
@@ -864,13 +877,9 @@ def main() -> int:
         pol = audit("SELECT count(*) FROM pg_policies WHERE schemaname='arv' AND "
                     "tablename IN ('note', 'note_lifecycle', 'note_reference') AND "
                     "policyname='owner_isolation';")
-        pks = audit_rows("SELECT tc.table_name || '|' || string_agg(kcu.column_name, ',' "
-                         "ORDER BY kcu.ordinal_position) FROM information_schema.table_constraints tc "
-                         "JOIN information_schema.key_column_usage kcu "
-                         "ON tc.constraint_name = kcu.constraint_name "
-                         "WHERE tc.constraint_type='PRIMARY KEY' AND tc.table_schema='arv' "
-                         "AND tc.table_name IN ('note', 'note_lifecycle', 'note_reference') "
-                         "GROUP BY tc.table_name ORDER BY tc.table_name;")
+        pks = [audit(f"SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE "
+                     f"contype='p' AND conrelid='arv.{t}'::regclass;")
+               for t in ("note", "note_lifecycle", "note_reference")]
         checks_c = audit_rows("SELECT conname FROM pg_constraint WHERE conrelid = "
                               "'arv.note_reference'::regclass AND contype = 'c' "
                               "ORDER BY conname;")
@@ -884,7 +893,8 @@ def main() -> int:
                 and all(grants[(t, "arv_read")] == {"SELECT"}
                         for t in ("note", "note_lifecycle", "note_reference"))
                 and pol == "3"
-                and pks == ["note|id,revision", "note_lifecycle|id", "note_reference|id"]
+                and pks == ["PRIMARY KEY (id, revision)", "PRIMARY KEY (id)",
+                            "PRIMARY KEY (id)"]
                 and "note_reference_ref_shape_check" in checks_c)
         check("NTE-11", ok11,
               "the 0009 schema conventions: NO DEFAULTs on any column (LAW-24 — ids/clock via adapters); the six triggers (three ARV-CAP-005 append-only + the lifecycle alternation + the revision-append + the reference guards); RLS enabled AND FORCED on all three tables with the owner_isolation policy; arv_app INSERT/SELECT + arv_read SELECT on all three; the PK shapes (note (id,revision); the event/reference tables id + the ownership uniques); the version-aware CHECK (note_reference_ref_shape_check)",
@@ -907,32 +917,38 @@ def main() -> int:
         # ---- NTE-13 — the competing-revisions SERIALIZATION (two revisers)
         p13 = mk_note("n-13", content="the serialization subject.")
         n13 = ack_field(p13, "result_ref")
+        # the held ACCESS EXCLUSIVE on arv.note_reference parks each reviser
+        # AFTER its advisory-lock acquisition (the ref insert is the first
+        # post-lock write) — the tombstone/lifecycle paths never touch this
+        # table before the advisory lock, so the wait observations are exact
         t_hold = Session(DB, "postgres", "A")
-        t_hold.send("BEGIN; LOCK TABLE arv.note IN ACCESS EXCLUSIVE MODE; \\echo HELD13")
+        t_hold.send("BEGIN; LOCK TABLE arv.note_reference IN ACCESS EXCLUSIVE MODE; \\echo HELD13")
         t_hold.read_until("HELD13")
         mv1 = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"),
                                 "revise_note", "--owner", "A", "--actor", "owner",
                                 "--client-id", "cli-13", "--idem-key", "race-rev-1",
-                                "--id", n13, "--content", "competing revision one — the first writer"],
+                                "--id", n13, "--content", "competing revision one — the first writer",
+                                "--ref", f"source:{sid_a}"],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=ENV)
         mv1_blocked = _poll("SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' "
-                            "AND wait_event_type='Lock' AND query LIKE '%INSERT INTO arv.note%'")
+                            "AND wait_event_type='Lock' AND query LIKE '%INSERT INTO arv.note_reference%'")
         lock_held = super_sql("SELECT count(*) FROM pg_locks l JOIN pg_stat_activity a "
                               "ON a.pid=l.pid WHERE l.locktype='advisory' AND l.granted "
-                              "AND a.usename='arv_app' AND a.query LIKE '%INSERT INTO arv.note%'").stdout.strip()
+                              "AND a.usename='arv_app' AND a.query LIKE '%INSERT INTO arv.note_reference%'").stdout.strip()
         mv2 = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"),
                                 "revise_note", "--owner", "A", "--actor", "owner",
                                 "--client-id", "cli-13", "--idem-key", "race-rev-2",
-                                "--id", n13, "--content", "competing revision two — the second writer"],
+                                "--id", n13, "--content", "competing revision two — the second writer",
+                                "--ref", f"source:{sid_a}"],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=ENV)
         mv2_waited = _poll("SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' "
                            "AND wait_event='advisory' AND query LIKE '%pg_advisory_xact_lock%'")
-        t_hold.close()  # the release: the blocked first reviser proceeds, commits, frees the lock
+        t_hold.close()  # the release: the parked first reviser proceeds, commits, frees the lock
         mv1_rc, mv2_rc = mv1.wait(timeout=120), mv2.wait(timeout=120)
         revs13 = sorted(int(r) for r in audit_rows(f"SELECT revision FROM arv.note WHERE id='{n13}';"))
-        c13 = {int(r.split("|")[0]): r.split("|")[1] for r in note_rows(n13)}
+        c13 = {r["revision"]: r["content"] for r in note_rows(n13)}
         rep13 = revise_note("race-rev-1", n13, content="competing revision one — the first writer",
-                            client="cli-13")
+                            refs=[f"source:{sid_a}"], client="cli-13")
         ok13 = (mv1_blocked and lock_held == "1" and mv2_waited
                 and mv1_rc == 0 and mv2_rc == 0 and revs13 == [1, 2, 3]
                 and c13.get(1) == "the serialization subject."
@@ -947,18 +963,19 @@ def main() -> int:
         p14 = mk_note("n-14", content="the tombstone-race subject.")
         n14 = ack_field(p14, "result_ref")
         t_hold2 = Session(DB, "postgres", "A")
-        t_hold2.send("BEGIN; LOCK TABLE arv.note IN ACCESS EXCLUSIVE MODE; \\echo HELD14")
+        t_hold2.send("BEGIN; LOCK TABLE arv.note_reference IN ACCESS EXCLUSIVE MODE; \\echo HELD14")
         t_hold2.read_until("HELD14")
         mv = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"),
                                "revise_note", "--owner", "A", "--actor", "owner",
                                "--client-id", "cli-14", "--idem-key", "race-rev-t",
-                               "--id", n14, "--content", "the revise that must land BEFORE the tombstone"],
+                               "--id", n14, "--content", "the revise that must land BEFORE the tombstone",
+                               "--ref", f"source:{sid_a}"],
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=ENV)
         mv_blocked = _poll("SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' "
-                           "AND wait_event_type='Lock' AND query LIKE '%INSERT INTO arv.note%'")
+                           "AND wait_event_type='Lock' AND query LIKE '%INSERT INTO arv.note_reference%'")
         lock2 = super_sql("SELECT count(*) FROM pg_locks l JOIN pg_stat_activity a "
                           "ON a.pid=l.pid WHERE l.locktype='advisory' AND l.granted "
-                          "AND a.usename='arv_app' AND a.query LIKE '%INSERT INTO arv.note%'").stdout.strip()
+                          "AND a.usename='arv_app' AND a.query LIKE '%INSERT INTO arv.note_reference%'").stdout.strip()
         tb = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"),
                                "tombstone_note", "--owner", "A", "--actor", "owner",
                                "--client-id", "cli-14", "--idem-key", "race-tomb-t",

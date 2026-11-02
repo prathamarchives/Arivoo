@@ -936,6 +936,311 @@ def restore_bookmark(*, db, owner, actor, client_id, idem_key, id_, crash_at: st
                        "a tombstone precedes every restore")
 
 
+# ------------------------------------------------- P3-06: the note machine (RTM §2.5 item 7 + §3.3)
+
+_UUID_RE = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                      r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+_REF_KINDS = ("work", "source", "anchor", "highlight", "note")
+
+
+def _nte_refusal(code: str, note_id: str) -> _CapRefusal:
+    """The note-family boundary refusal — absent and another owner's are
+    the SAME refusal, never a side channel (RTM §2.10 on the write path)."""
+    return _CapRefusal(code, f"note {note_id} does not exist in the caller's scope — absent and "
+                       "another owner's are the SAME refusal, never a side channel",
+                       "check the id against the caller's own note list (query.py list-notes); "
+                       "a note is only ever addressable by its owner")
+
+
+def _nte_current(sess: "Session", note_id: str) -> tuple:
+    """One read: the current (max) revision + the DERIVED lifecycle state
+    (the parity of the committed events — order-independent, rebuildable;
+    never a state column duplicating a derivable fact)."""
+    row = _sess_row(sess,
+                    f"SELECT n.revision || '|' || COALESCE("
+                    f"(SELECT CASE WHEN count(*) FILTER (WHERE l.event = 'tombstone') > "
+                    f"count(*) FILTER (WHERE l.event = 'restore') THEN 'tombstoned' "
+                    f"ELSE 'active' END FROM arv.note_lifecycle l "
+                    f"WHERE l.note_id = n.id AND l.owner_scope = n.owner_scope), 'active') "
+                    f"FROM arv.note n WHERE n.id = {_q(note_id)} "
+                    f"ORDER BY n.revision DESC LIMIT 1;")
+    if not row:
+        raise _nte_refusal("ARV-NTE-001", note_id)
+    revision, state = row.split("|")
+    return int(revision), state
+
+
+def _nte_content(*, content: "str | None", content_file: "str | None") -> str:
+    """The authored-content source: exactly one of --content / --content-file;
+    the file read LOSSLESSLY (read_bytes + UTF-8 decode — no newline
+    translation, no trimming); the NUL boundary named (the standing spine
+    residual refused at THIS boundary with its code, never the mid-protocol
+    death)."""
+    if (content is None) == (content_file is None):
+        raise _CapRefusal("ARV-NTE-010",
+                          "exactly one of --content / --content-file is required — the authored "
+                          "content must arrive through one named channel",
+                          "pass --content-file for the long-form authoring surface, or --content "
+                          "for an inline body; never both, never neither")
+    try:
+        body = content if content is not None else \
+            pathlib.Path(content_file).read_bytes().decode("utf-8")
+    except FileNotFoundError:
+        raise _CapRefusal("ARV-NTE-010",
+                          f"the content file {content_file!r} does not exist — the authored "
+                          "content cannot be read",
+                          "supply an existing readable file path")
+    except (IsADirectoryError, PermissionError, OSError) as e:
+        raise _CapRefusal("ARV-NTE-010", f"the content file cannot be read — {e}",
+                          "supply an existing readable file path")
+    except UnicodeDecodeError:
+        raise _CapRefusal("ARV-NTE-010",
+                          "the content file is not valid UTF-8 — the note preserves the owner's "
+                          "text losslessly and refuses a lossy interpretation",
+                          "supply valid UTF-8; binary formats are their own slices")
+    if "\x00" in body:
+        raise _CapRefusal("ARV-NTE-009",
+                          "the content contains NUL (U+0000) — PostgreSQL TEXT cannot carry it "
+                          "(the standing spine residual, named at the note boundary — never "
+                          "the mid-protocol death)",
+                          "remove the NUL byte; the lossless note surface is every other "
+                          "Unicode codepoint")
+    return body
+
+
+def _nte_refs(refs: "list[str] | None") -> list:
+    """Parse + shape-validate the reference strings 'kind:id' / 'kind:id@rev'.
+    Returns the canonical sorted [(kind, id, rev|None), ...] (the canonical
+    form is what the body hash covers — the same logical reference set in a
+    different CLI order is the SAME command); the TARGET existence check is
+    the caller's session read per kind."""
+    if not refs:
+        return []
+    out, seen = [], set()
+    for r in refs:
+        kind, sep, rest = r.partition(":")
+        if not sep or kind not in _REF_KINDS:
+            raise _CapRefusal("ARV-NTE-006",
+                              f"the reference {r!r} names an unknown kind {kind!r} — the "
+                              f"referenceable kinds are exactly {_REF_KINDS}",
+                              "supply kind:id with kind in work/source/anchor/highlight/note")
+        target, at, rev = rest.partition("@")
+        if not _UUID_RE.match(target):
+            raise _CapRefusal("ARV-NTE-006",
+                              f"the reference {r!r} carries a malformed id {target!r} — a "
+                              "reference target is a UUID",
+                              "supply the target's UUID (query.py list-* / get-*)")
+        if kind in ("highlight", "note"):
+            if not rev or not rev.isdigit() or int(rev) < 1:
+                raise _CapRefusal("ARV-NTE-006",
+                                  f"the {kind} reference {r!r} must name the target revision "
+                                  "(kind:id@rev — version-aware by construction)",
+                                  f"supply {kind}:<uuid>@<revision>; the reference pins the "
+                                  "immutable (id, revision) pair, never a silent retarget")
+            r_ = int(rev)
+        else:
+            if at:
+                raise _CapRefusal("ARV-NTE-006",
+                                  f"the {kind} reference {r!r} must NOT name a revision — the "
+                                  "Source id IS the version; Work/Anchor carry no revision "
+                                  "dimension",
+                                  f"supply {kind}:<uuid> (the bare identity reference)")
+            r_ = None
+        if (kind, target) in seen:
+            raise _CapRefusal("ARV-NTE-008",
+                              f"the reference target {kind}:{target} appears more than once — "
+                              "the reference set is a set (one reference per target per "
+                              "revision)",
+                              "supply each target once; a revision pins one version of one "
+                              "target")
+        seen.add((kind, target))
+        out.append((kind, target, r_))
+    return sorted(out, key=lambda t: (t[0], t[1]))
+
+
+def _nte_check_targets(sess: "Session", refs: list) -> None:
+    """The TARGET existence check per kind (the session is RLS-scoped to the
+    caller: another owner's object is invisible — absent, another owner's, and
+    a nonexistent target revision are the SAME refusal, never a side channel;
+    the referenced rows are immutable so the check cannot be invalidated
+    between validation and commit; the 0009 substrate guard is the hostile
+    direct-write backstop)."""
+    for kind, target, rev in refs:
+        # the pipe-delimited form (the _sess_row convention: a bare scalar row
+        # carries no '|' and would be indistinguishable from a command tag)
+        if kind == "work":
+            row = _sess_row(sess, f"SELECT id || '|' FROM arv.work WHERE id={_q(target)};")
+        elif kind == "source":
+            row = _sess_row(sess, f"SELECT id || '|' FROM arv.source WHERE id={_q(target)};")
+        elif kind == "anchor":
+            row = _sess_row(sess, f"SELECT id || '|' FROM arv.anchor WHERE id={_q(target)};")
+        elif kind == "highlight":
+            row = _sess_row(sess, f"SELECT id || '|' FROM arv.highlight WHERE id={_q(target)} "
+                                  f"AND revision={rev};")
+        else:
+            row = _sess_row(sess, f"SELECT id || '|' FROM arv.note WHERE id={_q(target)} "
+                                  f"AND revision={rev};")
+        if not row:
+            raise _CapRefusal("ARV-NTE-003",
+                              f"the referenced {kind} ({target}" + (f"@{rev}" if rev else "") +
+                              ") does not exist in the caller's scope — absent, another "
+                              "owner's, and a nonexistent target revision are the SAME "
+                              "refusal, never a side channel",
+                              "reference a target from the caller's own library at an "
+                              "existing revision (query.py list-* / get-*)")
+
+
+def _nte_ref_stmts(note_id: str, revision: int, refs: list, owner, actor, client_id,
+                   idem_key, body_hash) -> list:
+    ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+    return [f"INSERT INTO arv.note_reference (id, note_id, note_revision, ref_kind, ref_id, "
+            f"ref_revision, owner_scope, actor, run_id, input_hash, idempotency_key, created_at) "
+            f"VALUES ({_q(ids.new_id())}, {_q(note_id)}, {revision}, {_q(kind)}, {_q(target)}, "
+            f"{rev if rev is not None else 'NULL'}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, "
+            f"{_q(ih)}, {_q(idem_key)}, {_q(ts)});" for kind, target, rev in refs]
+
+
+def _nte_body(content: str, refs: list) -> str:
+    """The canonical note payload — ONE construction home (the command's body
+    hash proves it; the same logical body in a different reference order
+    hashes identically — exactly-once is over the LOGICAL command)."""
+    return json.dumps({"content": content, "refs": [[k, t, r] for k, t, r in refs]},
+                      sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
+def create_note(*, db, owner, actor, client_id, idem_key, content=None,
+                content_file=None, refs=None, crash_at: str = None) -> int:
+    """P3-06 (RTM §2.5 item 7): the deep owner-authored Note — a fresh
+    identity + revision 1 + the authored long-form content + the explicit
+    version-aware reference set. Free-standing by construction (zero
+    references is legal — NO source binding exists on the row); the content
+    is read LOSSLESSLY (read_bytes + UTF-8 decode, no newline translation);
+    every target validated in the caller's scope BEFORE any write (the
+    referenced rows are immutable, so the pre-BEGIN validation cannot be
+    invalidated by a race; the 0009 substrate guard is the hostile-write
+    backstop)."""
+    try:
+        body_content = _nte_content(content=content, content_file=content_file)
+        refs_c = _nte_refs(refs)
+    except _CapRefusal as r:  # the parse precedes the spine (the body hash needs the canonical form)
+        print(f"FAIL {r.code}: {r}")
+        print(f"      repair: {r.repair}")
+        return 1
+    body = _nte_body(body_content, refs_c)
+
+    def build(sess: "Session", body_hash: str):
+        _nte_check_targets(sess, refs_c)
+        note_id = ids.new_id()
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmts = [f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, run_id, "
+                 f"input_hash, idempotency_key, created_at) VALUES ({_q(note_id)}, 1, "
+                 f"{_q(body_content)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
+                 f"{_q(idem_key)}, {_q(ts)});"] + \
+            _nte_ref_stmts(note_id, 1, refs_c, owner, actor, client_id, idem_key, body_hash)
+        return note_id, stmts, " revision=1 durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="create_note", payload=body, build=build, crash_at=crash_at)
+
+
+def revise_note(*, db, owner, actor, client_id, idem_key, id_, content=None,
+                content_file=None, refs=None, crash_at: str = None) -> int:
+    """§3.3's edit transition for the note: append a NEW immutable revision
+    (n+1) carrying its OWN full content and reference set (replacement
+    semantics — the prior revision's rows and references stay untouched and
+    accurate). THE SERIALIZED TRANSITION (the #90 round-3 lesson applied from
+    the start): the complete transition — the per-note advisory xact lock (the
+    SAME lock the 0009 guards take) acquired as the transaction's FIRST
+    statement, then the state read, the active validation, the target
+    validation, the inserts, and the commit, ALL inside ONE transaction:
+    competing revisers serialize (both revisions persist, legal ordering —
+    never a silent overwrite) and a tombstone either commits BEFORE the lock
+    (the read sees it — the clean ARV-NTE-002) or waits for this
+    transaction's end — a revision can never commit after tombstoning."""
+    try:
+        body_content = _nte_content(content=content, content_file=content_file)
+        refs_c = _nte_refs(refs)
+    except _CapRefusal as r:  # the parse precedes the spine (the body hash needs the canonical form)
+        print(f"FAIL {r.code}: {r}")
+        print(f"      repair: {r.repair}")
+        return 1
+    body = _nte_body(body_content, refs_c)
+
+    def build_txn(sess: "Session", body_hash: str):
+        _sess_row(sess, f"SELECT hashtext({_q(id_)}) || '|' || pg_advisory_xact_lock(hashtext({_q(id_)}));")  # the lock FIRST, held to the commit
+        revision, state = _nte_current(sess, id_)
+        if state != "active":
+            raise _CapRefusal("ARV-NTE-002",
+                              f"note {id_} is tombstoned — a tombstoned note is hidden "
+                              "from ordinary use until restored (RTM §3.3: restore precedes edit)",
+                              "restore the note first (commands.py restore_note); the "
+                              "governed history retains every revision meanwhile")
+        _nte_check_targets(sess, refs_c)
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmts = [f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, run_id, "
+                 f"input_hash, idempotency_key, created_at) VALUES ({_q(id_)}, {revision + 1}, "
+                 f"{_q(body_content)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
+                 f"{_q(idem_key)}, {_q(ts)});"] + \
+            _nte_ref_stmts(id_, revision + 1, refs_c, owner, actor, client_id, idem_key,
+                           body_hash)
+        return id_, stmts, f" revision={revision + 1} durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="revise_note", payload=body, build_txn=build_txn, crash_at=crash_at)
+
+
+def _nte_lifecycle_command(*, command, event, db, owner, actor, client_id, idem_key,
+                           id_, crash_at, refusal_code, refusal_msg, refusal_repair) -> int:
+    """§3.3's tombstone/restore transitions: ONE typed lifecycle EVENT row per
+    LAWFUL transition (append-only, owner-scoped, provenance-complete).  The
+    named command-boundary refusals are the clean first line; the substrate's
+    advisory-lock alternation trigger (0009) is the race + hostile backstop."""
+    body = json.dumps({"id": id_}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build(sess: "Session", body_hash: str):
+        _, state = _nte_current(sess, id_)
+        if (event == "tombstone" and state != "active") or (event == "restore" and state != "tombstoned"):
+            raise _CapRefusal(refusal_code, refusal_msg(id_), refusal_repair)
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmts = [f"INSERT INTO arv.note_lifecycle (id, note_id, event, owner_scope, actor, "
+                 f"run_id, input_hash, idempotency_key, created_at) VALUES ({_q(ids.new_id())}, "
+                 f"{_q(id_)}, {_q(event)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
+                 f"{_q(idem_key)}, {_q(ts)});"]
+        return id_, stmts, " durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command=command, payload=body, build=build, crash_at=crash_at)
+
+
+def tombstone_note(*, db, owner, actor, client_id, idem_key, id_, crash_at: str = None) -> int:
+    """§3.3's delete transition: tombstoned — hidden from ordinary retrieval
+    (get/list), the governed history (content, references, events) retained;
+    recoverable by restore."""
+    return _nte_lifecycle_command(
+        command="tombstone_note", event="tombstone", db=db, owner=owner, actor=actor,
+        client_id=client_id, idem_key=idem_key, id_=id_, crash_at=crash_at,
+        refusal_code="ARV-NTE-004",
+        refusal_msg=lambda i: (f"note {i} is already tombstoned — the §3.3 alternation "
+                               "(tombstone only from active; the current view is DERIVED from "
+                               "the events, never a state column)"),
+        refusal_repair="restore the note first (commands.py restore_note); a second "
+                       "tombstone is a no-op refused with its named code, never a second "
+                       "event row")
+
+
+def restore_note(*, db, owner, actor, client_id, idem_key, id_, crash_at: str = None) -> int:
+    """§3.3's restore transition: tombstoned -> active (the current revision
+    unchanged — the revisions were never touched)."""
+    return _nte_lifecycle_command(
+        command="restore_note", event="restore", db=db, owner=owner, actor=actor,
+        client_id=client_id, idem_key=idem_key, id_=id_, crash_at=crash_at,
+        refusal_code="ARV-NTE-005",
+        refusal_msg=lambda i: (f"note {i} is not tombstoned — the §3.3 alternation "
+                               "(restore only from tombstoned)"),
+        refusal_repair="nothing to restore: the note is active in ordinary retrieval; "
+                       "a tombstone precedes every restore")
+
+
 def _extract_source(**kwargs):
     """P3-03a (CLAIM-052): the extraction command — the derived-build path lives
     in harness/extract.py as its own module (§2.9's boundary made structural: NO
@@ -952,7 +1257,9 @@ REGISTRY = {"record_event": record_event, "import_source": import_source,
             "revise_highlight": revise_highlight, "tombstone_highlight": tombstone_highlight,
             "restore_highlight": restore_highlight, "create_bookmark": create_bookmark,
             "move_bookmark": move_bookmark, "tombstone_bookmark": tombstone_bookmark,
-            "restore_bookmark": restore_bookmark}
+            "restore_bookmark": restore_bookmark, "create_note": create_note,
+            "revise_note": revise_note, "tombstone_note": tombstone_note,
+            "restore_note": restore_note}
 
 
 def main() -> int:
@@ -997,6 +1304,22 @@ def main() -> int:
         if name == "move_bookmark":
             p.add_argument("--start", required=True, type=int)
             p.add_argument("--end", required=True, type=int)
+    for name in ("create_note", "revise_note"):
+        p = sub.add_parser(name)
+        _common(p)
+        p.add_argument("--content", default=None,
+                       help="the authored content, inline (exactly one of --content / --content-file)")
+        p.add_argument("--content-file", default=None,
+                       help="the long-form authoring surface: a UTF-8 file read losslessly")
+        p.add_argument("--ref", action="append", default=None, metavar="KIND:ID[@REV]",
+                       help="an explicit version-aware reference (repeatable): work/source/"
+                            "anchor by identity; highlight/note by identity@revision")
+        if name == "revise_note":
+            p.add_argument("--id", required=True)
+    for name in ("tombstone_note", "restore_note"):
+        p = sub.add_parser(name)
+        _common(p)
+        p.add_argument("--id", required=True)
     a = ap.parse_args()
     db = os.environ.get("PGDATABASE", "postgres")
     if a.command == "record_event":
@@ -1029,6 +1352,20 @@ def main() -> int:
     if a.command == "restore_bookmark":
         return restore_bookmark(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                                 idem_key=a.idem_key, id_=a.id)
+    if a.command == "create_note":
+        return create_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                           idem_key=a.idem_key, content=a.content,
+                           content_file=a.content_file, refs=a.ref)
+    if a.command == "revise_note":
+        return revise_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                           idem_key=a.idem_key, id_=a.id, content=a.content,
+                           content_file=a.content_file, refs=a.ref)
+    if a.command == "tombstone_note":
+        return tombstone_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                              idem_key=a.idem_key, id_=a.id)
+    if a.command == "restore_note":
+        return restore_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                            idem_key=a.idem_key, id_=a.id)
     return create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                             idem_key=a.idem_key, source_id=a.source_id,
                             start=a.start, end=a.end)

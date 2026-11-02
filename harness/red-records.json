@@ -713,7 +713,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-056 (P3-06) commit B: the NTE-01..14 suite's RED observed at the exact predecessor f86e52b in a temp worktree and bound to commit f0a8125 (machinery-absent ARV-TEST-000: create_note absent, get-note absent, migration 0009 absent; the transcript at the slice's runs dir red-01.txt; record 47 \u00a711 \u2014 the record-18 \u00a74.1 / claim-055 precedent class)",
-    "current_sha256": "986eb3c8b49aa6a360aa6a5461543ecb2f9dc3c8149eff950331c38071afcb10",
+    "current_sha256": "20274b698e89d73176f76f28dfc539afe28511b3ebf950c4b488365af118cc72",
     "amendments": [
       {
         "prior_sha256": "4368470c87c78ef7d12321e490a9d184c65c6fafd59550b9c52664e90bfea39d",
@@ -750,6 +750,12 @@
         "new_sha256": "986eb3c8b49aa6a360aa6a5461543ecb2f9dc3c8149eff950331c38071afcb10",
         "note": "CLAIM-056 the #91 review round's repairs \u2014 the final docstring trim to the 800-line law (the assertions all held; the registry wording tightened only)",
         "observed_at": "2026-11-02T07:31:51.510813+00:00"
+      },
+      {
+        "prior_sha256": "986eb3c8b49aa6a360aa6a5461543ecb2f9dc3c8149eff950331c38071afcb10",
+        "new_sha256": "20274b698e89d73176f76f28dfc539afe28511b3ebf950c4b488365af118cc72",
+        "note": "CLAIM-056 the #91 ROUND-2 repairs (CodeRabbit 4439931169, the UUID-spelling canonicalization \u2014 every PostgreSQL-accepted spelling of one note is the SAME logical command): NTE-14 ADDED (the braced/no-hyphen revise retry and the uppercase/braced tombstone retry all REPLAY \u2014 never ARV-CMD-409; the boundary lock key is the canonical key \u2014 the braced revise waits AT its own first statement while the canonical key is held, zero granted advisory keys for arv_app) \u2014 the assertion ADDED, none removed; the docstring/comment prose tightened to hold the 800-line law (the commit-H precedent). The observed RED at the predecessor 1de5fba: exit 1, NTE-01..13 PASS + NTE-14 FAIL (red-02.txt)",
+        "observed_at": "2026-11-02T09:05:00+00:00"
       }
     ]
   }

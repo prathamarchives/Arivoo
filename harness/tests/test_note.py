@@ -4,132 +4,98 @@ two-slice sequence (the note CORE machine's contract pins; RTM §2.5 item 7 +
 item 9 + §3.3/§3.2, SYS-01/02/03 primary, SYS-01/04 standing, PLAN's P3-06
 card). The explicit version-aware REFERENCE machine (arv.note_reference, the
 --ref surface, its guards and cases) is CLAIM-057's slice — the LAW-05
-bounded-diff split, the P3-M0 three-slice sequence precedent.
-
-Red-first (LAW-11): committed BEFORE the implementation; at the predecessor
-f86e52b the suite fails with ARV-TEST-000 (machinery-absent: the note-family
-commands + the get-note arm do not exist; migration 0009 absent — the
-record-18 §4.1 / red-01.txt precedent class).
+bounded-diff split, the P3-M0 three-slice sequence precedent. Red-first
+(LAW-11): committed BEFORE the implementation; at the predecessor f86e52b the
+suite fails with ARV-TEST-000 (machinery-absent; red-01.txt).
 
 THE MACHINE (RTM §2.5 item 7 — "the owner's deep raw thinking", slice one):
 
   the row      identity + immutable revisions + the AUTHORED long-form
-               content — free-standing by construction (NO source binding,
-               unlike the highlight/bookmark families; the content is
-               owner-authored bytes read LOSSLESSLY: read_bytes + UTF-8
-               decode, no newline translation; the NUL boundary named at
-               this boundary — ARV-NTE-009, never the mid-protocol death)
-  revisions    a NEW immutable row per revise (PK (id, revision) — the
-               0004/0007/0008 revision-per-row shape); THE SERIALIZED
-               TRANSITION (the #90 round-3 lesson applied from the start):
-               the complete revise — the per-note advisory xact lock (the
-               canonical lowercase key — the SAME key the 0009 guards take
-               whatever the CLI spelling) acquired as the transaction's
-               FIRST statement, then the state read, the active validation,
-               the inserts, and the commit, ALL inside ONE transaction
-               (build_txn): competing revisers serialize (both revisions
-               persist, legal ordering — never a silent overwrite) and a
-               revision can never commit after tombstoning
-  tombstone    the §3.3 machine shared with the landed families: typed
-               lifecycle EVENT rows (append-only, owner-scoped,
-               provenance-complete); tombstoned hides from ordinary
-               retrieval (list excludes, get-note refuses with the typed
-               ARV-QRY-003) while the governed history retains every
-               revision and event; restore returns it (the revisions were
-               never touched); the lifecycle commands run the SAME locked
-               form with the timestamp INSIDE — the history renders the
-               serialized commit order
-  substrate    migration 0009's guards: the advisory-locked alternation
-               trigger (tombstone only from active — ARV-NTE-004; restore
-               only from tombstoned — ARV-NTE-005), the strengthened
-               revision-append guard (a revision > 1 onto a never-created
-               identity — ARV-NTE-001; a non-contiguous append —
-               ARV-NTE-011, the ordinal backstop promoted to the named
-               substrate refusal; an append on a tombstoned note —
+               content — free-standing (NO source binding, unlike the
+               highlight/bookmark families; read_bytes + UTF-8 LOSSLESS; the
+               NUL boundary named here — ARV-NTE-009, never mid-protocol)
+  revisions    a NEW immutable row per revise (PK (id, revision)); THE
+               SERIALIZED TRANSITION: the per-note advisory xact lock (the
+               canonical-key form — the SAME key the 0009 guards take)
+               FIRST, then state read + validation + inserts + commit, ALL
+               inside ONE transaction (build_txn): competing revisers
+               serialize; a revision can never commit after tombstoning
+  tombstone    §3.3's machine: typed lifecycle EVENT rows (append-only,
+               owner-scoped, provenance-complete); tombstoned hides from
+               ordinary retrieval (ARV-QRY-003) while the governed history
+               retains every revision and event; restore returns it; the
+               lifecycle commands run the SAME locked form, the timestamp
+               INSIDE (the history renders the serialized commit order)
+  substrate    0009's guards: the advisory-locked alternation trigger
+               (ARV-NTE-004/005), the strengthened revision-append guard
+               (phantom ARV-NTE-001; non-contiguous ARV-NTE-011; tombstoned
                ARV-NTE-002), the ARV-CAP-005 append-only triggers, RLS
                enabled AND FORCED, the ownership uniques
   acks         every note-family ack names durability_rung=local_durable
-               (SYS-01)
 
-The note-family refusal codes (the diagnostics contract):
-  ARV-NTE-001  the note does not exist in the caller's scope (absent and
-               another owner's are the SAME refusal, never a side channel);
-               at the substrate: the phantom-identity append + the ghost
-               lifecycle target
-  ARV-NTE-002  the note is tombstoned — restore precedes edit (the command
-               boundary + the substrate revision-append guard)
-  ARV-NTE-004  already tombstoned;  ARV-NTE-005  not tombstoned (the
-               second tombstone / the restore of an active note)
-  ARV-NTE-009  NUL (U+0000) in the content — PostgreSQL TEXT cannot carry
-               it; the named note-boundary refusal of the spine residual
-  ARV-NTE-010  the content-source refusal (neither/both of --content /
-               --content-file; unreadable; not valid UTF-8)
-  ARV-NTE-011  the non-contiguous revision append at the substrate (must be
-               exactly max+1 — the §3.3 revision ladder)
+The refusal codes: ARV-NTE-001 absent/another-owner's (the SAME refusal,
+  never a side channel; at the substrate also the phantom append + the ghost
+  lifecycle target); ARV-NTE-002 tombstoned (restore precedes edit, at the
+  boundary AND the substrate guard); ARV-NTE-004 already tombstoned /
+  ARV-NTE-005 not tombstoned (the alternation); ARV-NTE-009 NUL in the
+  content; ARV-NTE-010 the content-source refusal (neither/both/unreadable/
+  not-UTF-8); ARV-NTE-011 the non-contiguous append (exactly max+1).
 
 Cases (the NTE registry — this file is the contract's declaration):
-  NTE-01 the create happy path: revision=1 + durability_rung=local_durable
-         in the ack; the exact nine-column set (content-bearing, NO source
-         binding — the free-standing law); the content byte-identical;
-         provenance complete
-  NTE-02 lossless long-form + Unicode: 40 paragraphs (CJK, combining,
+  NTE-01 create: revision=1 + durability_rung in the ack; the exact
+         nine-column set (content-bearing, NO source binding); the content
+         byte-identical; provenance complete
+  NTE-02 lossless long-form + Unicode (40 paragraphs: CJK, combining,
          astral, RTL, C0 controls, U+2028/U+2029, quotes, backslashes,
-         trailing whitespace) round trip byte-identically through create ->
-         get-note AND get-note-history; the inline arm; ARV-NTE-010 + the
-         NUL boundary ARV-NTE-009 (zero rows)
+         trailing whitespace) round trips through create -> get-note AND
+         get-note-history; the inline arm; ARV-NTE-010 + the NUL boundary
+         ARV-NTE-009 (zero rows)
   NTE-03 the append-only substrate + the strengthened revision guard:
          UPDATE/DELETE on arv.note at BOTH boundaries (permission +
          ARV-CAP-005, zero rows); the ghost-target lifecycle insert, the
          PHANTOM append (ARV-NTE-001), the GAP append (ARV-NTE-011)
-  NTE-04 cross-owner isolation: revise/tombstone/restore on an absent id
-         and on ANOTHER OWNER's note are the SAME ARV-NTE-001 refusal;
-         get/list/history never observe the other owner's notes
+  NTE-04 cross-owner isolation: absent and ANOTHER OWNER's are the SAME
+         ARV-NTE-001 refusal; get/list/history never observe the other
+         owner's notes
   NTE-05 same-key replay + conflicting body + the ordinal backstop: same
-         key + same body -> status=replayed (one effect); same key +
-         different body -> ARV-CMD-409 (zero effect; create and revise
-         both); THE SAME KEY ON A DIFFERENT NOTE -> ARV-CMD-409 (the
-         target id rides the revise body — the #91 review round's Major;
-         zero effect on the second note); the direct-DB duplicate (id,
-         revision) insert meets the contiguity refusal ARV-NTE-011
-  NTE-06 the crash/restart matrix: create + revise + tombstone at
-         after-begin / pre-commit (zero effect) and post-commit-pre-ack
-         (the lost ack: the effect IS committed); the replay converges
-  NTE-07 the tombstone/restore machine: tombstoned hidden from get-note
-         (ARV-QRY-003) and list-notes (an ACTIVE fixture beside); the
-         history retains every revision and event; restore returns it (the
-         content byte-identical); double-tombstone (ARV-NTE-004),
-         restore-of-active (ARV-NTE-005), revise-of-tombstoned
-         (ARV-NTE-002), the hostile revision-append on a tombstoned note
-         (ARV-NTE-002 at the substrate), and the lifecycle mutations
-         (ARV-CAP-005) all refused
-  NTE-08 the independent current-view rebuild (THE EXPORT-READY HISTORY):
-         state + current revision + content + attribution re-derived from
-         the get-note-history rows ALONE equals the get-note answer
-  NTE-09 the ack-rung pins: the four acks ALL name
-         durability_rung=local_durable (SYS-01)
-  NTE-10 the schema-convention audits (0009): no DEFAULTs (LAW-24), the
-         four triggers (two ARV-CAP-005 append-only + the alternation +
-         the revision-append guards), RLS enabled AND FORCED + the owner
-         policy, the grants, the PK shapes
-  NTE-11 the row-protocol framing: U+2028/U+2029 inside the note CONTENT
-         travel raw inside the JSON string and survive get-note-history
-         with intact newline-only framing
-  NTE-12 the competing-revisions SERIALIZATION (the card's "competing
-         revisions — conflict never silently destroys"): two concurrent
-         revisers serialize on the per-note advisory xact lock — the
-         parked first reviser HOLDS it across its blocked transition
-         (pg_locks), the second WAITS on it; both revisions commit (2 then
-         3, each byte-identical, revision 1 untouched)
-  NTE-13 the revise-vs-tombstone SERIALIZATION + THE CANONICAL LOCK KEY
-         (the #90 round-3 Major's class applied from the start; the review
-         round's F3 — claim-055 F5's class closed): a revise invoked with
-         the UPPERCASED note id takes the SAME canonical lock key as the
-         substrate guards — the concurrent tombstone serializes against
-         it (the revision commits first, exactly one tombstone event; a
-         revision NEVER commits after tombstoning); the late mixed-case
-         revise gets the clean ARV-NTE-002 (never the ARV-CMD-010 stall
-         wrapper of the split-key defect); the history renders the
-         serialized commit order (the lifecycle timestamp INSIDE its lock)
+         key + same body -> replayed (one effect); different body ->
+         ARV-CMD-409 (create and revise both); the SAME KEY on a DIFFERENT
+         NOTE -> ARV-CMD-409 (the target id rides the revise body — the
+         #91 round's Major); the direct-DB duplicate meets ARV-NTE-011
+  NTE-06 the crash/restart matrix: after-begin/pre-commit (zero effect) and
+         post-commit-pre-ack (the lost ack: the effect IS committed); the
+         replay converges
+  NTE-07 the tombstone/restore machine: hidden from get-note (ARV-QRY-003)
+         and list (an ACTIVE fixture beside); the history retains every
+         revision and event; double-tombstone (004), restore-of-active
+         (005), revise-of-tombstoned (002), the hostile tombstoned append
+         (002 at the substrate), the lifecycle mutations (ARV-CAP-005)
+  NTE-08 the current view (state + revision + content + attribution)
+         re-derived from the history rows ALONE equals the get-note answer
+         (the export-ready history)
+  NTE-09 the ack-rung pins: the four acks ALL name durability_rung=
+         local_durable (SYS-01)
+  NTE-10 the schema audits (0009): no DEFAULTs (LAW-24), the four triggers,
+         RLS enabled AND FORCED + the owner policy, the grants, the PKs
+  NTE-11 the row-protocol framing: U+2028/U+2029 travel raw inside the JSON
+         string; history survives with newline-only framing
+  NTE-12 the competing-revisions SERIALIZATION: the parked first reviser
+         HOLDS the lock across its blocked transition (pg_locks), the
+         second WAITS on it; both revisions commit (2 then 3, each
+         byte-identical, revision 1 untouched)
+  NTE-13 the revise-vs-tombstone SERIALIZATION + THE CANONICAL LOCK KEY (the
+         review round's F3): the UPPERCASED-id revise takes the SAME
+         canonical key as the substrate guards — the tombstone serializes
+         against it; a revision NEVER commits after tombstoning; the late
+         mixed-case revise gets the clean ARV-NTE-002 (never the
+         ARV-CMD-010 stall wrapper); the history renders the serialized
+         commit order
+  NTE-14 the UUID-SPELLING CANONICALIZATION (the #91 round-2 finding
+         4439931169: PostgreSQL's uuid input also accepts braced/no-hyphen/
+         uppercase spellings of ONE note): a variant-spelling retry REPLAYS
+         (revise AND tombstone — never ARV-CMD-409) and the boundary lock
+         key is the canonical key (the braced revise waits AT the boundary
+         while the canonical key is held — zero granted keys for arv_app)
 
 Run: python3 harness/tests/test_note.py   (exit 0 = green)
 """
@@ -156,7 +122,6 @@ def check(code: str, ok: bool, what: str, repair: str) -> None:
         FAILS.append(code)
 
 
-# ---------------------------------------------------------------- the RED gate
 _probe = subprocess.run([sys.executable, str(REPO / "harness" / "commands.py"),
                           "create_note", "--help"], capture_output=True, text=True)
 _absent_cmd = "invalid choice" in _probe.stderr
@@ -172,14 +137,12 @@ if _absent_cmd or _absent_arm or not _mig:
           "the implementation lands after this RED, never before it (LAW-11)")
     sys.exit(1)
 
-# ---------------------------------------------------------------- the harness
 from harness.adapters import clock, pg  # noqa: E402
 from harness.commands import Session  # noqa: E402
 
 DB = ENV = None
 
-# the long-form Unicode round-trip fixture (NTE-02/NTE-11): CJK, combining,
-# astral, RTL, control characters (C0 minus NUL), the raw separators
+# the long-form Unicode round-trip fixture (NTE-02/NTE-11)
 LONG_FORM = (
     "# Deep note — the reading session\n\n"
     "Opening block: free-standing owner thought, preserved exactly.\n"
@@ -254,8 +217,7 @@ def audit(query: str) -> str:
 
 
 def audit_rows(query: str) -> list:
-    # NEWLINE-ONLY framing (the ANC-10 law): the note content carries raw
-    # U+2028/U+2029 which a str.splitlines() reader would split on
+    # NEWLINE-ONLY framing (the ANC-10 law): splitlines() would split on U+2028
     return [ln for ln in audit(query).split("\n") if ln.strip()]
 
 
@@ -269,8 +231,7 @@ def app_sql(sql: str, owner: str = "A") -> subprocess.CompletedProcess:
 
 def super_sql(sql: str) -> subprocess.CompletedProcess:
     """The append-only trigger's own audience: a role WITH update/delete
-    permission (the rig superuser) — the trigger fires where the least-privilege
-    app role is stopped earlier at the permission boundary."""
+    permission (the rig superuser)."""
     return subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
                             "-U", "postgres", "-d", DB, "-c", sql],
                            capture_output=True, text=True, timeout=60, env=ENV)
@@ -294,9 +255,8 @@ def ack_field(p: subprocess.CompletedProcess, field: str) -> str:
 
 
 def note_rows(note_id: str) -> list:
-    """The authoritative note rows, read independently (arv_read) as ONE
-    escaped JSON line per revision (the content's raw newlines and U+2028
-    would fragment any pipe-delimited read)."""
+    """The authoritative rows, read independently (arv_read) as ONE escaped
+    JSON line per revision (a pipe-delimited read would fragment)."""
     rows = audit_rows(f"SELECT row_to_json(t)::text FROM (SELECT revision, content, actor, "
                       f"run_id, input_hash, idempotency_key FROM arv.note "
                       f"WHERE id='{note_id}' ORDER BY revision) t;")
@@ -311,8 +271,7 @@ def history_rows(owner: str, note_id: str) -> list:
 
 
 def typed(p: subprocess.CompletedProcess) -> "dict | None":
-    """The typed answer: ONE JSON line on stdout, exit 0 (newline-only framing
-    — the content carries raw U+2028/U+2029 a splitlines() reader would split)."""
+    """The typed answer: ONE JSON line on stdout, exit 0."""
     lines = [ln for ln in p.stdout.split("\n") if ln.strip()]
     if p.returncode != 0 or len(lines) != 1:
         return None
@@ -475,14 +434,14 @@ def main() -> int:
         rev_rows = audit_rows(f"SELECT revision FROM arv.note WHERE id='{n1}' ORDER BY revision;")
         conf2 = revise_note("n-A1r", n1, content="a conflicting revise body")
         rev_rows2 = audit_rows(f"SELECT revision FROM arv.note WHERE id='{n1}' ORDER BY revision;")
-        # the #91 review round's Major: the target id rides the revise body — the same
-        # key on a DIFFERENT note is a different command (ARV-CMD-409, zero effect on it)
+        # the #91 review round's Major: the same key on a DIFFERENT note is a
+        # different command (ARV-CMD-409, zero effect on it) — the id rides the body
         pnb2 = mk_note("n-B2", content="the cross-note replay subject.")
         nb2 = ack_field(pnb2, "result_ref")
         px = revise_note("n-A1r", nb2, content_file=rev2_file)
         rev_rows3 = audit_rows(f"SELECT revision FROM arv.note WHERE id='{nb2}' ORDER BY revision;")
-        # the ordinal backstop: the strengthened guard fires FIRST (the BEFORE trigger
-        # precedes the PK; the PK remains the backstop for any guard-bypassed path)
+        # the ordinal backstop: the strengthened guard fires FIRST (the BEFORE
+        # trigger precedes the PK)
         dupe = super_sql(f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, "
                          f"run_id, input_hash, idempotency_key, created_at) SELECT id, 2, "
                          f"content, owner_scope, actor, run_id, input_hash, idempotency_key, "
@@ -578,9 +537,8 @@ def main() -> int:
         g_after = typed(qy("get-note", "A", n7))
         listed_after = [ln for ln in qy("list-notes", "A").stdout.splitlines() if ln.strip()]
         rev_t = revise_note("n-tomb-x", n7, content="revise of an active note after restore")
-        # the substrate revision-append guard: a hostile revision-99 insert on the
-        # TOMBSTONED note is refused (restore precedes edit, at the substrate);
-        # the lifecycle mutations meet the append-only trigger (a row now exists)
+        # the substrate revision-append guard: a hostile revision-99 insert on
+        # the TOMBSTONED note is refused; the lifecycle mutations meet ARV-CAP-005
         lifecycle("tombstone_note", "n-tomb-t3", n7)
         host_rev = super_sql(
             f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, run_id, "
@@ -690,9 +648,7 @@ def main() -> int:
         p12 = mk_note("n-12", content="the serialization subject.")
         n12 = ack_field(p12, "result_ref")
         # the held ACCESS EXCLUSIVE on arv.note parks the first reviser AFTER its
-        # advisory-lock acquisition (the state read is its first post-lock table
-        # touch) — the tombstone's pre-lock path touches only arv.command_log,
-        # so the wait observations stay exact
+        # advisory-lock acquisition — the wait observations stay exact
         t_hold = Session(DB, "postgres", "A")
         t_hold.send("BEGIN; LOCK TABLE arv.note IN ACCESS EXCLUSIVE MODE; \\echo HELD12")
         t_hold.read_until("HELD12")
@@ -735,8 +691,7 @@ def main() -> int:
         t_hold2 = Session(DB, "postgres", "A")
         t_hold2.send("BEGIN; LOCK TABLE arv.note IN ACCESS EXCLUSIVE MODE; \\echo HELD13")
         t_hold2.read_until("HELD13")
-        # the reviser invoked with the UPPERCASED id — the canonical-key pin (F3):
-        # the boundary lock must be the substrate's key whatever the CLI spelling
+        # the reviser invoked with the UPPERCASED id — the canonical-key pin (F3)
         mv = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"),
                                "revise_note", "--owner", "A", "--actor", "owner",
                                "--client-id", "cli-13", "--idem-key", "race-rev-t",
@@ -752,16 +707,16 @@ def main() -> int:
                                "--client-id", "cli-13", "--idem-key", "race-tomb-t",
                                "--id", n13],
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=ENV)
-        # the tombstone's serialized form takes the advisory lock as its OWN first
-        # statement (the F1 repair) — it waits THERE, not inside the trigger
+        # the tombstone's serialized form waits at its OWN first statement (the
+        # F1 repair), not inside the trigger
         tb_waited = _poll("SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' "
                           "AND wait_event='advisory' AND query LIKE '%pg_advisory_xact_lock%'", 11.0)
         t_hold2.close()          # the release: the revise commits, THEN the tombstone proceeds
         mv_rc, tb_rc = mv.wait(timeout=120), tb.wait(timeout=120)
         revs13 = sorted(int(r) for r in audit_rows(f"SELECT revision FROM arv.note WHERE id='{n13}';"))
         ev13 = int(audit(f"SELECT count(*) FROM arv.note_lifecycle WHERE note_id='{n13}';"))
-        # the late revise, again via the MIXED-CASE id: the clean refusal, never the
-        # split-key stall wrapper
+        # the late revise, again via the MIXED-CASE id: the clean refusal, never
+        # the split-key stall wrapper
         rev_late = revise_note("race-late", n13.upper(),
                                content="the late mixed-case revise — must be refused")
         # the F1 pin: the history renders the SERIALIZED COMMIT ORDER (the lifecycle
@@ -783,15 +738,60 @@ def main() -> int:
               "the revise-vs-tombstone interleaving is SERIALIZED on the per-note advisory xact lock — invoked with the UPPERCASED id, the reviser takes the SAME canonical lock key as the substrate guards (hashtext of the uuid's lowercase text): it holds the lock across its complete blocked transition, the tombstone waits ON it until the revise commits (revision 2 then exactly one tombstone event); a revision NEVER commits after tombstoning; the late mixed-case revise gets the clean ARV-NTE-002 — never the ARV-CMD-010 stall wrapper of the split-key defect; the history renders the serialized commit order (the lifecycle timestamp taken INSIDE its locked section)",
               "RTM §3.3: edit only from active — the complete transition inside ONE transaction behind the same advisory lock the lifecycle guard takes; one note, one canonical lock key (claim-055 F5's class closed for the note family — the review round's F3)")
 
+        # ---- NTE-14 — the UUID-SPELLING CANONICALIZATION (the #91 round-2
+        # CodeRabbit 4439931169: PostgreSQL's uuid input also accepts braced,
+        # no-hyphen, and uppercase spellings of ONE note): every spelling is
+        # the SAME logical command — the payload REPLAYS across spellings
+        # (LAW-23) and the lock key is the CANONICAL key (the substrate
+        # guards' own hashtext key — never a second granted key for one note)
+        p14 = mk_note("n-14c", content="the spelling-canonicalization subject.")
+        n14id = ack_field(p14, "result_ref")
+        rf14 = fresh_file("n14.md", "the NTE-14 canonicalization body.\n")
+        pv14 = revise_note("n-14r", n14id, content_file=rf14)
+        pr_b = revise_note("n-14r", "{" + n14id + "}", content_file=rf14)
+        pr_n = revise_note("n-14r", n14id.replace("-", ""), content_file=rf14)
+        t14 = Session(DB, "postgres", "A")
+        t14.send(f"SELECT pg_advisory_lock(hashtext('{n14id}')); \\echo HELD14")
+        t14.read_until("HELD14")
+        mv14 = subprocess.Popen([sys.executable, str(REPO / "harness" / "commands.py"),
+                                 "revise_note", "--owner", "A", "--actor", "owner",
+                                 "--client-id", "cli-14b", "--idem-key", "n-14rb",
+                                 "--id", "{" + n14id + "}", "--content", "v3 via the braced spelling"],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True, env=ENV)
+        wait14 = _poll("SELECT count(*) FROM pg_stat_activity WHERE usename='arv_app' "
+                       "AND wait_event='advisory' AND query LIKE '%pg_advisory_xact_lock%'")
+        g14 = super_sql("SELECT count(*) FROM pg_locks l JOIN pg_stat_activity a "
+                        "ON a.pid=l.pid WHERE l.locktype='advisory' AND l.granted "
+                        "AND a.usename='arv_app';").stdout.strip()
+        t14.close()  # the release: the braced revise proceeds and commits
+        mv14rc = mv14.wait(timeout=120)
+        tb14 = lifecycle("tombstone_note", "n-14t", n14id)
+        tb14u = lifecycle("tombstone_note", "n-14t", n14id.upper())
+        tb14b = lifecycle("tombstone_note", "n-14t", "{" + n14id + "}")
+        revs14 = audit_rows(f"SELECT revision FROM arv.note WHERE id='{n14id}' ORDER BY revision;")
+        ev14 = int(audit(f"SELECT count(*) FROM arv.note_lifecycle WHERE note_id='{n14id}';"))
+        ok14 = (pv14.returncode == 0 and "revision=2" in pv14.stdout
+                and pr_b.returncode == 0 and "status=replayed" in pr_b.stdout
+                and pr_n.returncode == 0 and "status=replayed" in pr_n.stdout
+                and wait14 and g14 == "0" and mv14rc == 0
+                and "revision=3" in mv14.stdout
+                and tb14.returncode == 0 and "durability_rung" in tb14.stdout
+                and tb14u.returncode == 0 and "status=replayed" in tb14u.stdout
+                and tb14b.returncode == 0 and "status=replayed" in tb14b.stdout
+                and revs14 == ["1", "2", "3"] and ev14 == 1)
+        check("NTE-14", ok14,
+              "every PostgreSQL-accepted UUID spelling of one note is the SAME logical command: the braced/no-hyphen revise retry and the uppercase/braced tombstone retry all REPLAY the committed result (never ARV-CMD-409); the boundary lock key is the canonical key — the braced revise waits AT its own first statement while the canonical key is held (zero granted advisory keys for arv_app, never a second key for one note)",
+              "LAW-23 + the one-lock contract: the payload AND the lock key carry the canonical UUID text (the substrate guards' own hashtext key); a spelling is a spelling, never an identity (the #91 round-2 finding 4439931169)")
+
         print()
         if FAILS:
             print(f"RED — {len(FAILS)} failing: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-06 acceptance suite, slice one (NTE-01..13) passes")
+        print("GREEN — the P3-06 acceptance suite, slice one (NTE-01..14) passes")
         return 0
     finally:
-        # the rig's scratch database DROPPED after every suite run (the #89
-        # round-2 convention; ARV_KEEP_DB overrides for local inspection)
+        # the scratch DB DROPPED after every run (ARV_KEEP_DB overrides)
         if not os.environ.get("ARV_KEEP_DB"):
             pg.drop_scratch_db(DB)
 

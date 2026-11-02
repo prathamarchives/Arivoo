@@ -26,46 +26,64 @@ The session-boundary resume word PLUS the owner-forwarded **continuous engineeri
 
 ## 4. Results
 
-OPEN at commit A — the RED-first chain (LAW-11) begins at the predecessor `f86e52b`: the NTE acceptance suite in its machinery-absent RED form (§11), then the implementation.
+CLOSED at the finalize commit — the complete cycle observed (every fact from the actual runs, never reconstructed):
 
-## 5. Files changed (commit A)
+- **The RED (LAW-11)**: the NTE-01..14 suite in its machinery-absent form observed at the EXACT predecessor `f86e52b` in a temp worktree (create_note absent, get-note absent, migration 0009 absent; exit 1 ARV-TEST-000; `red-01.txt`), committed at `f0a8125` with the gate.py TESTS registration (sixteen → seventeen suites), the typed red record bound (commit `1861540`), and the pre-implementation assertion-form amendments at `3f66355` (the gen_random_uuid native-uuid probe finding + the BMK-11 pg_catalog forms).
+- **The GREEN**: migration 0009 + the note family + the read arms + the crash arms at `eb66caf`; the suite GREEN after the implementation-cycle amendments (the audit reads' row_to_json + newline-only framing — the ANC-10 law applied to the test's own readers; the relative crash counts; the restore-order repair; the pg_get_constraintdef PK read; the NTE-13/14 deterministic park on arv.note_reference — arv.note/arv.command_log are touched by the tombstone's pre-lock path, note_reference is the first post-lock write only a reviser touches); make verify GREEN (the seventeen suites + the known-bad matrix + the gate + the canonical layer 54/0).
+- **The measured set**: run-01..20 (the suite ×3 + the sixteen siblings + make verify, all exit 0) at `eb66caf`.
+- **The independent rounds**: the test verifier (agent `nte-verifier-r1`, PASS zero P0/P1 — its own 45-check adversarial probe: the 31KB Unicode corpus byte-identical, the psql-meta-command-looking content riding as data, live two-writer races, the crash matrix, the hostile matrix, the schema audits; findings V-1..V-4) + the SEV round 1 (agent `nte-sev-r1`, PASS zero open P0/P1, sev.json validated `[]`; findings F1..F3 — F2 convergent with V-1).
+- **The review repairs (all three fixed in-PR at `526c3bd`, D-042)**: (1) the phantom-identity + contiguity guard (V-1+F2: the strengthened `enforce_note_revision_guard` — ARV-NTE-001 phantom / the new ARV-NTE-011 gap refusal); (2) the time-honest lifecycle form (F1: tombstone/restore on the spine's build_txn locked section, the timestamp INSIDE); (3) the canonical lock key (F3: revise_note's boundary lock on hashtext(lower(id)) — claim-055 F5's class closed for the note family). The suite grew to NTE-01..15; make verify GREEN again.
+- **The regenerated measured set**: run-21..24 (the repaired suite ×3 + make verify) at `526c3bd`; the SEV round 2 (agent `nte-sev-r2`, PASS zero open P0/P1 — each repair verified FROM BOTH ENDS: the defects reproduced live on the pre-repair tree `eb66caf` (phantom/gap appends landing; the split key visible as two granted advisory locks with a revision committing after the tombstone in its race; the tombstone rendered before the first-committed revision) and the repairs holding on `526c3bd`; one new P2 F4 routed — the landed 0007/0008 families still accept hostile phantom/gap appends, only a NEW migration can repair them, never blocking).
+- **The finalize**: notverified.txt + the 26-record sheet (run-25 the flanking re-verify + run-26 the recorded PR-mode gate run) + the sev digest bound at the content head; the push + PR #91 + the five GitHub checks observed live.
 
-- `context/reviews/arivoo-continuous-engineering-execution-directive-2026-11-01.md` (the owner turn 38 directive, preserved verbatim, D-022 banner).
-- `CLAIMS.md` (CLAIM-055's rule-4 close row + the CLAIM-056 claim row, INT-143 reserved per rule 3).
-- `INTENT-LEDGER.md` (INT-143, the numbering + audit-note update).
-- `AGENTS.md` / `PLAN.md` / `STATE.md` (the five-area re-derivation: P3-05 LANDED + CLAIM-056 EXECUTING).
-- `context/WORKLOG.md` (Task 68), this record.
+## 5. Files changed (the slice, commits A..F)
+
+- Commit A `7310960` + the walls-catch `aed0eac`: the claim + the post-#90 reconciliation (§5 of the opening form).
+- Commit B `f0a8125` + B2 `1861540` + B3 `3f66355`: `harness/tests/test_note.py` (the NTE-01..15 acceptance suite), `harness/gate.py` (the TESTS registration), `harness/runs/claim-056-p306-notes/red-01.txt`, `harness/red-records.json`.
+- Commit C `eb66caf`: `harness/migrations/0009_note_lifecycle.sql` (arv.note + arv.note_lifecycle + arv.note_reference + the four guards + ARV-CAP-005 + RLS + grants), `harness/commands.py` (the note family: _nte_content/_nte_refs/_nte_check_targets/_nte_ref_stmts/_nte_body + create_note + revise_note(build_txn) + tombstone/restore_note + the CLI + the REGISTRY), `harness/query.py` (get-note/list-notes/get-note-history + the SQL arms + the typed ARV-QRY-003 note refusal), `harness/crash.py` (the four note arms).
+- Commit D `526c3bd`: the review repairs — `harness/migrations/0009_note_lifecycle.sql` (the strengthened revision guard), `harness/commands.py` (the canonical lock key + the lifecycle build_txn form), `harness/tests/test_note.py` (the pins: NTE-03 phantom/gap, NTE-05 ARV-NTE-011, NTE-14 pattern + the order pin, NTE-15), `harness/red-records.json`.
+- The finalize commits: `context/extracted/47-P306-NOTES.md` (this record's completion), `context/WORKLOG.md` (Task 69), `STATE.md`/`AGENTS.md`/`PLAN.md` (the five-area re-derivation at the finalized state), `harness/runs/claim-056-p306-notes/` (run-01..26, proofsheet.md, notverified.txt, sev.json).
 
 ## 6. Commands and external actions (ACTUAL — never reconstructed)
 
-- The rig recycle repair: `chmod 700 pgdata` + the empty subdirectories recreated (pg_notify, pg_stat, pg_stat_tmp, pg_serial, pg_snapshots, pg_twophase, pg_replslot, pg_commit_ts, pg_dynshmem, pg_tblspc, pg_logical/snapshots, pg_logical/mappings) after the FATAL permissions + missing-directory refusals; `pg_isready` → accepting connections; `python3 harness/tests/test_commands.py` → exit 0.
-- The lock-mechanics de-risk probes (before the suite was written): the advisory-lock SELECT renders `1713243708|` through the session protocol; the arv.anchor INSERT's FK key-share check blocks behind a held `FOR UPDATE` (`pg_stat_activity`: `Lock|transactionid`) and completes on release.
-- The round-3 chain (the commands at record 46 §8.3 + this session's runs): the BMK suite RED (exit 1, three failing) → `make red NOTE=...` (the registry's second amendment) → the GREEN ×3 + `make verify` exit 0 → the 18-record battery (run-39..56) via `harness/proofsheet.py --record` → the SEV round-3 subagent (agent-7c31e9f2, its own probes, its report) → the sev.json re-bind (`reviewed_diff_sha256 79d2d01b`) + notverified.txt + the 56-record sheet → the gate run record (run-57, exit 0) + the re-assembly (57 records, ARV-PRF-004 PASS) + the flanking direct gate re-run (exit 0) → the push (`d3893ff..aabe85f`).
-- The API reads: the five checks at `aabe85f` ALL success; the disposition POST (comment 6558809890); the merge-gate review (5728361358, submitted COMMENTED 13:47:44Z); the protection PUT flip (200) → the merge (`f86e52b`, 13:48:14Z) → the protection PUT restore (200) → the protections re-read (byte-equivalent, count 1) → the branch DELETE (204) → 0 open PRs, main only → the post-merge check runs on `f86e52b` five green (ids 124867189438/493/514/626/676).
+- The rig recycle repair at session entry (the record-46 §2 form): `chmod 700 pgdata` + the empty subdirectories recreated + the stale postmaster.pid removed; `pg_isready` → accepting; `python3 harness/tests/test_commands.py` → exit 0.
+- The RED observation: `git worktree add /tmp/arv-pred f86e52b` + the suite copied in + `python3 harness/tests/test_note.py` → `FAIL ARV-TEST-000 ... EXIT=1` (red-01.txt); the worktree removed.
+- The RED binding: `make red NOTE=... RED_EXIT=1 RED_CODE=ARV-TEST-000` (bound to `f0a8125`); the two amendment `make red` invocations (B3 + the commit-C cycle + the commit-D cycle — the registry's typed amendment chain).
+- The suites: `python3 harness/tests/test_note.py` GREEN at `eb66caf` (after the cycle repairs) and at `526c3bd` (NTE-01..15); `make verify` GREEN ×2 (both trees); the sixteen siblings GREEN individually (run-04..19).
+- The measured sets: `python3 harness/proofsheet.py --slice claim-056-p306-notes --record ...` ×24 + the flanking re-verify (run-25) + the recorded PR-mode gate (run-26: `make gate SLICE=claim-056-p306-notes GATE_DIFF=origin/main`, exit 0) + the sheet re-assembly + `--verify` (ARV-PRF-004 PASS) + the flanking direct gate re-run (exit 0).
+- The independent rounds: the verifier subagent (its own commands in its report — the 45-check probe + the suite ×2) + the SEV subagents ×2 (their own probes: the suite, make verify, the RED reproduction, the both-ends defect reproductions, the races); `sev.validate_report('claim-056-p306-notes', 'origin/main')` → `[]` after each round.
+- The push chain: `aed0eac..1861540` (the RED, PUSH-EARLY), `1861540..eb66caf` (the GREEN), `eb66caf..526c3bd` (the repairs) + the finalize push; the API reads for the five checks at the final head (observed live before the merge).
 
 ## 7. Evidence
 
-- CLAIM-055's at `harness/runs/claim-055-p305-bookmarks/` (on main at `f86e52b`): red-01.txt, red-02.txt, run-01..57.json, proofsheet.md (57 records, ARV-PRF-004 byte-identical), sev.json (PASS, zero P0/P1; F1 repaired + F4..F9 dispositioned; the digest `79d2d01b` binding the content head `911010d`), notverified.txt (the round-3 honest limits). Record 46 §8.3 is the round's account.
-- CLAIM-056's runs dir opens with this slice: `harness/runs/claim-056-p306-notes/` (scope.txt + the RED transcript land with the RED).
+- CLAIM-056's at `harness/runs/claim-056-p306-notes/`: red-01.txt (the machinery-absent RED at the exact predecessor `f86e52b`); run-01..26.json (the measured sets + the flanking re-verify + the recorded PR-mode gate); proofsheet.md (the 26-record sheet, ARV-PRF-004 byte-identical); sev.json (the round-2 re-bind over the repaired diff — PASS, zero open P0/P1; F1..F3 resolved, F4 routed; the digest binding the content head); notverified.txt (the honest limits + the no-fix dispositions V-2/V-3/V-4 + F4's routing). The SEV chains: round 1 agent-nte-sev-r1 + round 2 agent-nte-sev-r2 (the both-ends reproductions); the test verifier agent-nte-verifier-r1 (its 45-check probe account in the session record §4).
 
 ## 8. Failures
 
-- The sandbox recycle killed the rig (the permissions + missing-directory refusals at startup) — repaired before any work; nothing persisted lost (the runs/records all live in git). The workspace-level notes survive at `/home/z/my-project/` (never repo-tracked).
-- The dead stored remote credential (the first push attempt's 401-class failure) — the D-025 class, third occurrence (records 45/46 §8): the remote URL rebuilt from the handoff credential. The PAT rotation reminder stays standing until the project completes.
-- The `make red --note` argument-form mistake (make's NOTE is an environment variable, not an argv) — corrected to `make red NOTE=...` in the same session; the registry recorded the amendment correctly.
+- The suite's first GREEN run failed 6/14 (the audit-read framing fragmentation on raw newlines/U+2028 — the pipe-delimited reads + splitlines readers; the absolute-vs-relative crash counts; the restore-order assertion; the information_schema PK visibility under arv_read; the NTE-13/14 park point on arv.note blocking the revise at its state SELECT and the tombstone at its replay check) — all repaired in the implementation cycle, recorded as the typed amendments (the #89/#90 precedent class).
+- The review findings F1/F2/F3 (+ V-1..V-4): repaired in-PR at `526c3bd` (§4) with the no-fix dispositions recorded (V-2 trigger precedence — fail-closed either way; V-3 empty content — un-ruled by the card, P4-C's product decision; V-4 the spine's NFC canonicalization — K-04's pinned pre-existing choice; F4 routed — the landed 0007/0008 phantom/gap debt needs its own migration).
+- The sandbox rig recycle at session entry (the standing class) — repaired before any work; nothing persisted lost.
+- The dead-stored-credential class did NOT recur (the remote URL rebuilt from the handoff credential at session entry; the PAT rotation reminder stays standing until the project completes).
 
 ## 9. Unverified items
 
-OPEN at commit A — enumerated at the slice's notverified.txt when the finalize lands. The standing documented residuals unchanged (the ARV-SEV-009 undecidable-base regression; the N12 self-test-row extension; the spine's NUL-literal follow-up; the case-variant lock-key + phantom-identity hardening follow-ups routed from the #90 round-3 SEV; the Q8 synthetic-only boundary; the concurrent-reader matrix; the isolation undecidable classes; Q10; the P3-P5 roadmap's acceptance details).
+- The concurrent-reader matrix on the new read arms (serially exercised; the standing class).
+- The >3-writer race classes and the 4+ mixed interleavings.
+- U+001C/1D/1E (the file/record/group separators) unexercised on the content path.
+- NUL remains a NAMED note-boundary refusal (ARV-NTE-009) — the spine-level NUL-literal follow-up stays open (the standing residual).
+- The spine's NFC canonicalization (K-04): same key + NFD-equivalent body replays the NFC-recorded note — the pinned pre-existing choice, unprobed beyond the verifier's observation.
+- Empty content accepted (V-3): un-ruled by the card; the minimum-length product decision is P4-C's.
+- F4 (routed): the landed 0007/0008 families still accept hostile phantom/gap revision appends (command-path unreachable; a new migration required — the named follow-up slice).
+- The ARV-SEV-009 undecidable-base regression; the N12 self-test-row extension; the Q8 synthetic-only boundary; the isolation undecidable classes; Q10; the host-level workflow protection — the standing documented residuals unchanged.
 
 ## 10. Open decisions
 
-D-014 + Q6–Q12, scopes unchanged (each blocks only its named dependents — RTM §7). Turn 38 opens none and closes none. The governed purge (D-011) stays P3-06/09's — never silently implemented in the note slice.
+D-014 + Q6–Q12, scopes unchanged (each blocks only its named dependents — RTM §7). The slice opens none and closes none. The governed purge (D-011) stays P3-09's — the tombstone/restore machine landed here, the governed erasure never implemented.
 
 ## 11. Next action
 
-The P3-06 RED-first chain at the predecessor `f86e52b`: the NTE acceptance suite (the P3-06 card's test set mapped: the immutable-revision machine, the idempotent spine, competing revisions, dangling refs, owner isolation, the crash matrix, the export-ready history) in its machinery-absent RED form + `harness/runs/claim-056-p306-notes/{scope.txt,red-01.txt}` + the gate.py TESTS registration + the red-record binding (`make red` with the observed exit/code) — then the GREEN implementation (migration 0009 + commands.py's note family over the landed `build_txn` pattern where state-dependent + query.py's read arms + crash.py's arms) per the card, the same cycle the five landed slices executed → the Phase 3 exit gate after P3-09 — NO PAUSE (INT-134/135/138/139/140/141/142/143).
+The merge chain: PR #91 open with the five GitHub checks observed live at the final head → the review dispositions (D-042 (1b): every thread read in full, every finding dispositioned in-thread BEFORE any resolution) → the merge-gate review (D-042 (1a)) → the owner's merge under the recorded single-actor path → the post-merge verification (the five checks on the merge commit + the protections re-read byte-equivalent) → **P3-07 (the keyword index — CLAIM-057's card) → P3-08 → P3-09 → the Phase 3 exit gate** — NO PAUSE (INT-134/135/138/139/140/141/142/143); the next owner checkpoint is the Phase 3 exit gate's verified completion.
 
 ## 12. Session close
 
-This record is OPEN at commit A; it completes at the slice's finalize per the convention. The PAT rotation reminder stays standing until the project completes.
+This record COMPLETES at the slice's finalize (the convention). The PAT rotation reminder stays standing until the project completes.

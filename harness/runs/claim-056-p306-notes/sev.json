@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-056-p306-notes",
+  "base_sha": "f86e52b293be0e6b531440d8e98676b09a289783",
+  "reviewed_diff_sha256": "175a2114eb8ef4bae7c675edf1b5fc9e49f01f5830aab717d2739a754ab10496",
+  "sheet_section": true,
+  "intent_ids": [
+    "INT-143",
+    "INT-142",
+    "INT-141",
+    "INT-140",
+    "INT-139",
+    "INT-138",
+    "INT-135",
+    "INT-134"
+  ],
+  "requirement_ids": [
+    "SYS-01",
+    "SYS-02",
+    "SYS-03",
+    "SYS-04"
+  ],
+  "system_claims": [
+    "C1",
+    "C2",
+    "C5"
+  ],
+  "changed_components": [
+    "harness/migrations/0009_note_lifecycle.sql (arv.note — the exact nine-column free-standing set, identity + immutable revisions + the AUTHORED content, NO source binding; arv.note_lifecycle — the §3.3 event class; arv.note_reference — the version-aware per-revision references with note_reference_ref_shape_check + the set-semantics UNIQUE; the substrate guards — the advisory-locked lifecycle alternation ARV-NTE-004/005, the REPAIRED revision-append guard ARV-NTE-002 now with the phantom-identity refusal ARV-NTE-001 + the contiguity refusal ARV-NTE-011 (commit 526c3bd), the reference guard ARV-NTE-003/007; ARV-CAP-005 append-only on all three; RLS FORCED; the grants; the file amended PRE-MERGE by the repair commit — the forward-only rule governs merged state, and the amended 0009 applies + verifies on every fresh scratch DB in this review's runs)",
+    "harness/commands.py (the note family, additive after the bookmark family: create_note — the lossless content read with the NUL boundary ARV-NTE-009 + the content-source refusal ARV-NTE-010 + pre-BEGIN target validation, safe because referenced rows are immutable; revise_note — the SERIALIZED transition inside build_txn behind the per-note advisory xact lock with the REPAIRED canonical lock key hashtext(lower(id)) (commit 526c3bd), replacement semantics; tombstone_note/restore_note over _nte_lifecycle_command in its REPAIRED form — build_txn with the lock as the transaction's FIRST statement, the state read + validation + the timestamp INSIDE the locked section (commit 526c3bd); the canonical reference-order-independent note payload; the REGISTRY/argparse wiring)",
+    "harness/query.py (the note read arms: get-note — tombstone-aware, the refs array version-aware; list-notes — the HAVING exclusion form; get-note-history — every revision + its OWN refs + every event, one JSON row per line, the created_at/revision render order that the F1 repair makes commit-honest; NOTE_SQL/NOTESTATE_SQL/NOTELIST_SQL/NOTEHIST_SQL + _refuse_tombstoned_note)",
+    "harness/crash.py (the four note arms at the spine's three transaction points)",
+    "harness/tests/test_note.py (the NTE-01..15 acceptance suite at the repaired tree — NTE-03's strengthened-revision-guard pins, NTE-05's named contiguity refusal, NTE-14's history-renders-commit-order pin, NTE-15 the case-variant lock-key serialization; the machinery-absent RED gate at the top)",
+    "harness/gate.py (the TESTS registration, sixteen -> seventeen)",
+    "harness/red-records.json (the typed RED binding to f0a8125 + the four recorded amendment chains — assertions strengthened/added, none removed; the fourth binds the repair-round suite)",
+    "the bookkeeping carried by commit A per the claim row: CLAIMS.md (CLAIM-055's rule-4 close row + the CLAIM-056 row), STATE.md/AGENTS.md/PLAN.md (the five-area re-derivation), INTENT-LEDGER.md (INT-143), context/WORKLOG.md (Task 68), context/extracted/47-P306-NOTES.md (record 47) + record 46's close fill, context/reviews/arivoo-continuous-engineering-execution-directive-2026-11-01.md (the turn-38 directive preserved verbatim, D-022)"
+  ],
+  "interfaces_reviewed": [
+    "the command boundary: create_note/revise_note/tombstone_note/restore_note on the idempotent spine (ARV-NTE-001..011, ARV-CMD-409/010, ARV-CAP-*; revise_note AND the lifecycle commands both ride the locked build_txn section — the F1 repair moves tombstone/restore into it; exactly one of build/build_txn enforced by the spine)",
+    "the repaired lock interface (F3): every note-family writer locks on hashtext of the uuid's canonical LOWERCASE text — the SAME key the 0009 substrate guards take whatever the CLI spelling; verified by this reviewer at the pg_locks tag level (the parked uppercase-id reviser's granted advisory tag equals sign-extended hashtext(lower), never hashtext(UPPER))",
+    "the repaired revision-append substrate guard (F2): an append with revision > 1 must name an EXISTING identity in the caller's scope (ARV-NTE-001) AND be exactly max+1 (ARV-NTE-011) AND not follow a tombstone (ARV-NTE-002) — all three re-derived from committed rows under the same advisory lock",
+    "the content channel: exactly one of --content/--content-file, the lossless read (read_bytes + UTF-8 decode, no newline translation), the NUL boundary named ARV-NTE-009 at THIS boundary, the non-UTF-8/unreadable/neither/both refusals ARV-NTE-010",
+    "the reference machine: kind:id / kind:id@rev parsing (ARV-NTE-006 shape classes), duplicate targets (ARV-NTE-008), the per-kind target existence check in the RLS-scoped session (ARV-NTE-003 — absent, another owner's, and a nonexistent revision the SAME refusal), the substrate backstop (ARV-NTE-007 + ARV-NTE-003) for hostile direct writes",
+    "the read boundary: get-note (the typed tombstone refusal ARV-QRY-003 + the version-aware refs array), list-notes (tombstoned excluded via the HAVING form), get-note-history (the governed history, newline-only framing, the export-ready rows, the commit-honest created_at ordering)",
+    "the substrate: migration 0009 — the substrate authority for the note family (the three tables, the guards, append-only, RLS FORCED, grants; no DEFAULTs — the adapters own ids/clock)",
+    "the crash boundary: crash.py's four note arms at after-begin/pre-commit/post-commit-pre-ack (zero-or-one-effect + the replay convergence)",
+    "the lifecycle machine at BOTH boundaries: the §3.3 alternation (ARV-NTE-004/005) + the revision-append guard (ARV-NTE-002/001/011) at the command boundary AND in the 0009 triggers",
+    "the migration boundary: 0009 amended pre-merge by the repair commit (forward-only governs merged state; no deployed instance exists — the rig's DBs are ephemeral scratch); the fresh-apply + --verify oracle re-validated inside this reviewer's make verify run"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the NTE-01..15 acceptance suite re-run live BY THIS REVIEWER at 526c3bd: exit 0, all fifteen PASS (the builder's repaired-tree records run-21/22/23 agree); the suite covers the create happy path + the nine-column structural pin, the lossless long-form Unicode round trip, the dangling/shape/duplicate reference refusals, the strengthened phantom/gap substrate pins, the append-only pins, the cross-owner matrix, the replay/conflict spine, the crash matrix, the tombstone/restore machine, the version-aware reference accuracy, the current-view rebuild from history alone, the ack-rung pins, the schema audits, the U+2028/U+2029 framing, and the three serialization pins NTE-13/14/15",
+      "the reviewer's own component probes on the repaired tree (fresh scratch DBs): the phantom-identity insert (revision 2 onto a never-created uuid) refused with ARV-NTE-001 as superuser AND as arv_app; the gap appends (revision 42 on a max-1 note, revision 4 on a max-2 note) refused with ARV-NTE-011 as superuser; zero hostile rows landed (the landed set exactly 1,2 — the contiguous hostile append class documented as the guard's intended scope, the command boundary being the honest writer's path)",
+      "the reviewer's regression sample: its own 30-paragraph long-form Unicode fixture (CJK, combining, astral, RTL, C0 controls, CR-LF, bare CR, tabs, U+2028/U+2029/U+0085 raw, quotes/backslashes, trailing whitespace) round trips byte-identically through create -> get-note AND get-note-history with intact newline-only framing (one JSON row); the NUL/UTF-8 refusals re-observed in the suite run",
+      "the PRE-REPAIR discriminating-power check: the reviewer re-ran its F2 probe shape against commit eb66caf (the pre-repair tree, temp worktree) — the phantom revision-2 and the gap revisions 4/42 ALL LAND there (the committed set 1,2,4,42), proving the probe detects the defect the repair closes"
+    ],
+    "integration_verification": [
+      "make verify re-run live BY THIS REVIEWER at 526c3bd: exit 0 (3m30s) — the seventeen suites + the known-bad matrix + the gate + the canonical layer 54/0 (the builder's run-24 the sheet record); every sibling suite green at the REPAIRED tree, so the repair commit's changes to commands.py/0009 regressed nothing in the landed families",
+      "the RED reproduced BY THIS REVIEWER: the f0a8125-bound suite (sha256 4368470c... matching the registry's binding) run over the f86e52b machinery in a temp worktree -> exit 1 / ARV-TEST-000 (the red-01.txt observation) — LAW-11's ordering verified end-to-end, with the four-amendment red-record chain mechanically validated inside make verify",
+      "the reviewer's F3 race on the repaired tree (OS-level Popen + a held ACCESS EXCLUSIVE park on arv.note_reference): the UPPERCASED-id reviser parks AFTER acquiring its advisory lock and the granted pg_locks tag is the CANONICAL key (classid/objid = the sign-extended hashtext of the uuid's lowercase text) while hashtext(UPPER) is provably a different key; the lowercase-id tombstone WAITS on that advisory lock (its own first statement); after release the revision commits first, exactly one tombstone follows; the late MIXED-CASE revise gets the clean ARV-NTE-002 first line and NO racer ever emits ARV-CMD-010",
+      "the reviewer's F1 interleavings on the repaired tree: the deterministic revise-parked/tombstone-waits round renders the history in the serialized commit order (kinds [revision, revision, lifecycle]; the revision-2 created_at strictly <= the tombstone event's), and six natural no-park races all landed in a legal class — both outcome classes observed across this reviewer's rounds (revise-then-tombstone rendered in commit order, and tombstone-first with the clean ARV-NTE-002 to the reviser)",
+      "the PRE-REPAIR reproductions (commit eb66caf, temp worktree): the parked uppercase-id reviser there holds the UPPERCASE-tag advisory lock while the tombstone independently acquires the lowercase-tag one (the split key VISIBLE as two granted advisory locks on one note) and does NOT wait; a natural race rendered the tombstone event BEFORE the revision that committed first (rev2 created_at > tombstone created_at) — round-1's F1 and F3 defect classes reproduced by this reviewer's own probes, then closed at 526c3bd",
+      "the reviewer's crash-matrix integration sample on the repaired tree: create at pre-commit leaves zero effect rows; create/revise/tombstone at post-commit-pre-ack each exit 2 with the effect committed and the same-key replay converging to status=replayed with exactly one effect set"
+    ],
+    "system_verification": [
+      "SYS-01: every note-family ack names durability_rung=local_durable — observed in this reviewer's own probe outputs (create/revise/tombstone acks) and pinned by NTE-10; the queued/server_durable rungs correctly NOT claimed (P3-08's)",
+      "SYS-02: the authoritative note rows append-only (the permission + ARV-CAP-005 pins, NTE-03; the reviewer's hostile UPDATE/DELETE class subsumed by the same triggers); revisions are new rows, the prior byte-unchanged (NTE-01/08); delete = the typed tombstone event, hidden from ordinary retrieval, the governed history retained (NTE-07); the §3.3 ladder contiguous at the substrate (the repaired ARV-NTE-011 — this reviewer's gap probes); the governed purge NOT implemented (D-011 — tombstone only, per the bounded exclusion)",
+      "SYS-03: owner_scope/actor/run_id/input_hash/idempotency_key NOT NULL on all three tables; RLS FORCED + the owner_isolation policy (NTE-11); the same-refusal rule at every boundary (NTE-04) with the substrate guards scope-bound (the phantom refusal fires per owner_scope — a hostile row under another scope is refused, verified by the guard's shape)",
+      "SYS-04: the idempotent spine — the same key + the same logical body (reference order shuffled — the canonical form) replays with exactly one effect set; the same key + a different body refuses ARV-CMD-409 with zero effect (NTE-05 + this reviewer's crash-replay probes); the crash matrix zero-or-one at every transaction boundary (NTE-06)"
+    ],
+    "validation": [
+      "THE ACCEPTANCE (the card): every revision retrievable, attributable, and referenceable — NTE-07/08/09 at the repaired tree: the history retains every revision byte-identical with its OWN reference set + every event, and the current view REBUILDS from the get-note-history rows ALONE (the export-ready history; the end-to-end export/restore equality is P3-09's by scope)",
+      "conflict never silently destroys a revision or claims an untested merge — NTE-13/14/15 + this reviewer's own deterministic and natural races at the repaired tree: competing writers serialize on ONE canonical lock key whatever the id's case, every revision persists contiguously, every refusal typed and zero-row, and the history renders the commit order (the F1 repair verified from both ends)",
+      "the long-form Unicode preservation validated at the byte level by this reviewer's own fixture (CJK/combining/astral/RTL/C0/CR-LF/bare-CR/tabs/U+2028/U+2029/U+0085/quotes/backslashes/trailing whitespace): the content travels RAW inside the JSON string, the newline-only framing holds on both get-note and get-note-history, and the fixture's own string — never a psql round trip — is the comparison basis",
+      "the four bounded exclusions verified held at the repaired tree: the diagram/structured-block contract NOT frozen (plain text only — no structured-block claim anywhere in the diff); the keyword index absent (P3-07's); the outbox/sync rungs absent (P3-08's); the governed purge absent (D-011); no refactor of the landed highlight/bookmark families — the removed-lines audit shows only the REGISTRY/argparse extension lines in commands.py/query.py, and the repair commit D touches only the note family's guard/lock/lifecycle sites"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a silent overwrite: two (or three) competing revisers on one note, or a revise racing a lifecycle writer — a revision destroyed or an untested merge claimed",
+      "control": "the serialized transition: revise_note's complete transition inside ONE transaction behind the per-note advisory xact lock (the canonical key) + the 0009 revision-append guard under the SAME lock; NTE-13/14/15's deterministic pins + this reviewer's own races at the repaired tree — every revision persists contiguously, every loser typed",
+      "proof_ids": ["run-21", "run-22", "run-23"]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "a dangling reference: an absent work/source/anchor/highlight/note target, a nonexistent target revision, another owner's object, or a malformed/duplicate reference string",
+      "control": "the command-boundary validation (ARV-NTE-003/006/008 — absent, another owner's, and a nonexistent revision are the SAME refusal) + the substrate reference guard (ARV-NTE-007 for the owning (note, revision) pair, ARV-NTE-003 for the target, note_reference_ref_shape_check for the version-aware shape) — NTE-03 at the repaired tree",
+      "proof_ids": ["run-21"]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "a cross-owner leak: another owner's note readable/writable/listable/referenceable through any note-family arm",
+      "control": "RLS FORCED + the owner_isolation policy on all three tables + the same-refusal rule at every boundary (ARV-NTE-001/003, ARV-QRY-001) — NTE-04; arv_read is the designed auditor, never a leak",
+      "proof_ids": ["run-21"]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "a revision committed after tombstoning, a double tombstone, or a restore of an active note (the §3.3 alternation broken)",
+      "control": "the advisory-lock serialization at BOTH layers — now including the lifecycle commands' own locked sections (the F1 repair): the command-boundary refusals (ARV-NTE-002/004/005) + the 0009 alternation trigger and revision-append guard re-deriving parity from committed rows under the SAME lock — NTE-07/13/14/15 + this reviewer's deterministic and natural races (both legal outcome classes, never the illegal one; the pre-repair tree demonstrably committed a revision after the tombstone under the case-variant split key, closed at 526c3bd)",
+      "proof_ids": ["run-21", "run-22", "run-23"]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "a lost or duplicated effect under crash/restart at a transaction boundary (a committed-but-unacked command, or a half-applied one)",
+      "control": "the spine's zero-or-one-effect contract: after-begin/pre-commit leave zero rows; post-commit-pre-ack commits with exit 2 and the same-key replay converges the lost ack with the recorded result — NTE-06 on all three spine points for create/revise/tombstone + this reviewer's own crash-matrix sample (create@pre-commit zero effect; create/revise/tombstone@post-commit-pre-ack committed + replayed, exactly one effect)",
+      "proof_ids": ["run-21", "run-24"]
+    },
+    {
+      "id": "FM-06",
+      "scenario": "framing corruption: a row-protocol reader splitting a note's content on U+2028/U+2029 (or NEL) that travelled raw inside the JSON string",
+      "control": "the newline-only framing law on every content-bearing arm: one JSON row per line, the separators raw inside the string — NTE-12 + this reviewer's byte-level probe with its own U+2028/U+2029/U+0085 fixture (every line parses, the fixture's own string the comparison basis)",
+      "proof_ids": ["run-21"]
+    },
+    {
+      "id": "FM-07",
+      "scenario": "NUL (U+0000) in the authored content — PostgreSQL TEXT cannot carry it (the standing spine residual)",
+      "control": "the named refusal at THIS boundary (ARV-NTE-009, zero rows — never the mid-protocol death) + the content-source refusals (ARV-NTE-010: neither/both channels, an unreadable file, non-UTF-8) — NTE-02; a boundary refusal, not a general spine fix",
+      "proof_ids": ["run-21"]
+    },
+    {
+      "id": "FM-08",
+      "scenario": "a hostile direct write at the substrate: UPDATE/DELETE on the authoritative rows, a dangling reference insert, a ghost-target lifecycle row, a revision-append on a tombstoned note — as arv_app or as superuser",
+      "control": "ARV-CAP-005 append-only triggers + the permission grants (no UPDATE/DELETE to arv_app) + the 0009 guards — NTE-03/07/11; the reviewer's own arv_app AND superuser matrix at the repaired tree (every class the named refusal, zero rows); the phantom/gap classes are FM-10's own row",
+      "proof_ids": ["run-21", "run-24"]
+    },
+    {
+      "id": "FM-09",
+      "scenario": "a tombstoned note silently resurfacing in ordinary retrieval, or its governed history silently losing content/references/attribution",
+      "control": "the tombstone-aware read arms: get-note refuses ARV-QRY-003, list-notes excludes via the HAVING form, get-note-history retains every revision byte-identical with its OWN reference set + every event, restore returns the current revision unchanged — NTE-07/09",
+      "proof_ids": ["run-21"]
+    },
+    {
+      "id": "FM-10",
+      "scenario": "the phantom-identity or non-contiguous revision append (round-1 F2 / the verifier's V-1): a hostile direct INSERT of a revision onto a never-created note id, or a gap revision (e.g. 42 on a max-1 note)",
+      "control": "the REPAIRED enforce_note_revision_guard (commit 526c3bd): rev>1 requires an existing identity in scope (ARV-NTE-001) AND exactly max+1 (ARV-NTE-011) under the same advisory lock — pinned by NTE-03/05 and reproduced end-to-end by this reviewer (superuser AND arv_app phantom -> ARV-NTE-001; gap 42-on-1 and 4-on-2 -> ARV-NTE-011; zero hostile rows; the pre-repair tree lands them all — the residual on the LANDED 0007/0008 families is finding F4)",
+      "proof_ids": ["run-21", "run-22", "run-23"]
+    },
+    {
+      "id": "FM-11",
+      "scenario": "the case-variant split lock key (round-1 F3 / claim-055 F5's class): a revise invoked with a non-canonical id spelling taking a DIFFERENT advisory key than the substrate guards — the serialization bypassed, the loser wrapped in ARV-CMD-010",
+      "control": "the REPAIRED canonical lock key (commit 526c3bd): hashtext(lower(id)) at every note-family lock site — pinned by NTE-15 and verified by this reviewer at the pg_locks tag level (the parked uppercase-id reviser holds the canonical tag; the tombstone waits on it; the late mixed-case revise gets the clean ARV-NTE-002; the pre-repair tree shows the two-key split live)",
+      "proof_ids": ["run-21", "run-22", "run-23"]
+    },
+    {
+      "id": "FM-12",
+      "scenario": "the time-dishonest history render (round-1 F1): a lifecycle event's created_at taken before its advisory-lock wait renders BEFORE a revision that committed first — an apparent §3.3 violation in the audit trail that never happened",
+      "control": "the REPAIRED lifecycle form (commit 526c3bd): the timestamp taken INSIDE the locked section after the state read — pinned by NTE-14 and verified by this reviewer's deterministic round (rev2 created_at <= the tombstone's) and six natural races at the repaired tree; the pre-repair tree reproduced the contradiction live",
+      "proof_ids": ["run-21", "run-22", "run-23"]
+    },
+    {
+      "id": "FM-13",
+      "scenario": "migration incompatibility: the amended 0009 (the repair commit strengthened its guard) failing to apply or verify, or drifting from the M0 oracle's checksummed expectations",
+      "control": "the amendment is PRE-MERGE (forward-only governs merged state; the rig's databases are ephemeral scratch DBs — no deployed instance exists); the fresh-apply + --verify oracle re-validated green inside this reviewer's own make verify run at 526c3bd and in every probe's migrate step; the migrations suite green at run-04 and again inside run-24",
+      "proof_ids": ["run-04", "run-24"]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "P2",
+      "status": "resolved",
+      "location": "harness/commands.py _nte_lifecycle_command (the round-1 form took the event's created_at pre-BEGIN) + harness/query.py NOTEHIST_SQL (ORDER BY created_at)",
+      "finding": "round-1 finding, verified real and repaired: the lifecycle event's construction-time timestamp could render the tombstone BEFORE a revision that committed first in a tombstone-built-first race (an apparent §3.3 violation in the history that never happened). The repair (commit 526c3bd) moves tombstone_note/restore_note into the spine's build_txn locked section — the per-note advisory lock as the transaction's FIRST statement, the state read + validation + the timestamp INSIDE",
+      "disposition": "RESOLVED and independently verified by this round: the deterministic revise-parked/tombstone-waits interleaving renders the history in the serialized commit order (the revision-2 created_at strictly precedes the tombstone event's), six natural races all render legally, and the pre-repair tree (eb66caf, this reviewer's own probe) reproduced the contradiction — rev2 created_at AFTER the tombstone's while the revision committed first. The same construction-time-ts shape remains in the LANDED highlight/bookmark lifecycle commands (their history arms share the render), now covered by finding F4's routed class"
+    },
+    {
+      "id": "F2",
+      "severity": "P2",
+      "status": "resolved",
+      "location": "harness/migrations/0009_note_lifecycle.sql arv.enforce_note_revision_guard",
+      "finding": "round-1 finding (convergent with the independent verifier's V-1), verified real and repaired: the guard checked only tombstone-parity, so a hostile direct write could append a revision onto a never-created note id (phantom identity) or a non-contiguous revision (42 on a max-1 note). The repair (commit 526c3bd) requires an existing identity (ARV-NTE-001 at the substrate) AND exactly max+1 (the new ARV-NTE-011 contiguity refusal)",
+      "disposition": "RESOLVED and independently verified by this round: the phantom insert refused with ARV-NTE-001 as superuser AND as arv_app; the gap appends (42-on-max-1, 4-on-max-2) refused with ARV-NTE-011; zero hostile rows landed; the contiguous hostile append class documented as the guard's intended scope (the command boundary is the honest writer's path); the pre-repair tree (eb66caf) lands the phantom AND the gaps (the committed set 1,2,4,42 observed by this reviewer) — the probe's discriminating power proven. The same class on the LANDED 0007/0008 families is finding F4"
+    },
+    {
+      "id": "F3",
+      "severity": "P2",
+      "status": "resolved",
+      "location": "harness/commands.py revise_note build_txn (the advisory-lock key)",
+      "finding": "round-1 finding, verified real and repaired: revise_note keyed pg_advisory_xact_lock on hashtext of the CLI spelling while the 0009 guards key on the uuid's canonical lowercase text — a case-variant spelling took a DIFFERENT lock key, so the substrate guard caught the transition and the loser could surface as the ARV-CMD-010 stall wrapper (4/8 rounds in round 1's race). The repair (commit 526c3bd) takes hashtext(lower(id)) at the boundary",
+      "disposition": "RESOLVED and independently verified by this round at the pg_locks tag level: the parked UPPERCASED-id reviser's granted advisory tag equals the sign-extended hashtext(lower) key (and hashtext(UPPER) is provably a distinct key — the defect's premise), the lowercase-id tombstone WAITS on that one lock, after release the revision commits first and exactly one tombstone follows, and the late MIXED-CASE revise gets the clean ARV-NTE-002 first line with ARV-CMD-010 absent from every output; the pre-repair tree (eb66caf) shows the split key live — two granted advisory locks on one note, the tombstone not waiting — and in this reviewer's race there it committed a revision after the tombstone (the class's worst case, closed at 526c3bd)"
+    },
+    {
+      "id": "F4",
+      "severity": "P2",
+      "status": "open",
+      "location": "harness/migrations/0007_highlight_lifecycle.sql (no entity-side revision-append guard on arv.highlight) + harness/migrations/0008_bookmark_lifecycle.sql arv.enforce_bookmark_revision_guard (parity-only)",
+      "finding": "the landed-families residual of the F2 class, confirmed live by this reviewer at the repaired tree as superuser: a phantom revision-2 onto a never-created bookmark id LANDS in arv.bookmark, a gap revision-5 on a max-1 bookmark LANDS, and in the highlight family (0007, which has no entity-side revision-append guard at all — only the lifecycle-event guard) a phantom revision-2, a revision-2 AFTER tombstoning, and a gap revision-9 ALL LAND on arv.highlight. Hostile/superuser direct writes only: the command paths always read existence first (ARV-HLC/BMK-001-class refusals), arv_app's phantom insert stays inside its own scope, and no cross-owner leak exists (the target checks stay scope-bound). This is claim-055 F7's routed hardening — due at 'the next substrate-touching slice' — narrowed by THIS slice's 0009 repair to the two LANDED families; the bounded exclusion (no refactor of the landed families) and the forward-only migration rule (0007/0008 are merged on main; amending them is forbidden) make a NEW migration the only lawful repair path",
+      "disposition": "routed forward exactly as round 1's F2 disposition already routes it (a one-guard repair covering the remaining revision guards), now narrowed to 0007/0008 by this slice's repair: the next substrate-touching slice carries a new migration adding the phantom-identity + contiguity (+ for 0007, the parity) refusals to the landed families' entity-side guards, with the same RED-first suite amendments; never blocking this slice — no frozen contract is violated on any command-path probe, the defect class is unreachable without direct privileged DB access, and the note family (this slice's diff) is fully guarded"
+    }
+  ],
+  "not_verified": [
+    "the concurrent-reader matrix on the new read arms: get-note's two-step NOTESTATE-then-NOTE_SQL read can race a concurrent tombstone between the two reads (a serially-unobservable window); all read arms were exercised serially by this reviewer — the standing class from the landed families",
+    "race classes beyond this reviewer's live rounds: more than three concurrent revisers, four-plus mixed revise/tombstone/restore interleavings, and same-key concurrent create collisions were not probed (the deterministic NTE-13/14/15 pins and this reviewer's deterministic + seven natural rounds are the coverage)",
+    "U+001C/U+001D/U+001E — the remaining str.splitlines() separators — were not exercised on the history arm; this reviewer's fixture carried U+2028/U+2029/U+0085 and the C0 controls byte-identically",
+    "the NUL refusal (ARV-NTE-009) is a named boundary refusal at the note boundary ONLY — the standing spine residual for every other family remains as it was; no general spine fix is claimed or verified here",
+    "the spine's NFC canonicalization choice (K-04's pinned pre-existing decision): decomposed-form content was not probed by this reviewer; the lossless claim verified is byte-fidelity, never a normalization claim",
+    "the empty-content acceptance is un-ruled by the card: this reviewer observed create_note with an empty --content accepted (rc=0) — no minimum-length law exists in the P3-06 card or the RTM, so no contract is violated; the product decision remains P4-C's (the independent verifier's V-3 no-fix disposition, unchanged by this round)",
+    "the governed purge (D-011) is deliberately NOT implemented (tombstone only) and its purge-ledger/audit-row contracts are unverified — P3-06/09's by scope",
+    "the diagram/structured-block serialization contract is deliberately NOT frozen: plain text only, no round-trip proof claimed, none run (P4-C's reservation)",
+    "the keyword index (P3-07) and the outbox/sync rungs (P3-08) are absent by scope — no verification of their interactions with the note tables was possible or attempted",
+    "the anchor-resolution Q8 boundary stands unprobed (synthetic-corpus-only fidelity, §7.3) — no real-document corpus was run in this review",
+    "the >30s lock-wait boundary (the spine's pre-existing marker wall: the waiting writer exits typed with zero rows) was not re-probed at the note boundary; the wait is bounded by that wall, never unbounded",
+    "the landed-families residual (finding F4) was verified at the substrate level only (the phantom/gap/append-after-tombstone classes as superuser, one DB round per family); its full per-family repair and suite pins are the routed slice's acceptance, not this review's",
+    "the independent test verifier's own 45-check probe and the CodeRabbit rounds are the builder's records — this reviewer did not re-run them; its independent evidence is the suite re-run, make verify, the RED reproduction, and its own probe set",
+    "run-20 and run-24 (make verify) are the builder's records; this reviewer re-ran make verify live at the same tree (exit 0, 3m30s) but did not re-run each sibling suite individually beyond the NTE suite and the make verify batch",
+    "the GitHub-side walls, the PR/merge-chain facts, and the five remote checks are external state (INT-104) — recorded by the builder's records, not verifiable from this tree by this reviewer"
+  ],
+  "builder_context": "session-36 builder context: Super Z (GLM host) — the session that wrote the implementation, the suite, and this slice's records (record 47)",
+  "reviewer_context": "agent nte-sev-r2: the ROUND-2 fresh-context systems-engineering reviewer over the REPAIRED diff (commit 526c3bd), independent of the builder and of round 1; its own probes (all on the real rig, own scratch DBs): the NTE-01..15 acceptance suite re-run live (exit 0); make verify re-run live (exit 0, 3m30s — seventeen suites + known-bads + gate + canonical layer 54/0); the RED reproduced at f86e52b with the f0a8125-bound suite (sha256-verified, exit 1 / ARV-TEST-000); the F2 hostile matrix on the repaired tree (phantom rev-2 as superuser AND arv_app -> ARV-NTE-001; gap 42-on-max-1 and 4-on-max-2 -> ARV-NTE-011; zero hostile rows); the F3 race on the repaired tree (an UPPERCASED-id reviser parked behind a held note_reference ACCESS EXCLUSIVE lock, its granted pg_locks advisory tag verified EQUAL to the canonical sign-extended hashtext(lower) key and NOT the uppercase key; the lowercase tombstone waiting ON that lock; revision-first-then-one-tombstone after release; the late mixed-case revise refused with the clean ARV-NTE-002 and zero ARV-CMD-010 anywhere); the F1 interleavings on the repaired tree (the deterministic parked round + six natural races, the history rendered in commit order every round, both legal outcome classes observed); the same F2/F3/F1 probe set re-run against the PRE-REPAIR tree eb66caf in a temp worktree (the phantom + gaps land, the split key visible as two granted advisory locks, a natural race rendering the tombstone before the committed-first revision, and a revision committed after the tombstone — the repaired tree closes every one); its own 30-paragraph long-form Unicode fixture round trip (byte-identical through get-note and get-note-history, U+2028/U+2029/U+0085 raw, newline-only framing); the crash-matrix sample (create@pre-commit zero effect; create/revise/tombstone@post-commit-pre-ack committed + same-key replay converged, exactly one effect); the landed-families residual probe (bookmark phantom + gap land; highlight phantom + after-tombstone + gap land — finding F4); the empty-content observation (accepted, un-ruled by the card); and the additive-only diff audit for the landed highlight/bookmark families",
+  "disposition": "PASS",
+  "review_summary": "ROUND 2 over the repaired diff (526c3bd): PASS. All three round-1 P2s are repaired, pinned in the suite (NTE-01..15), and independently verified by this reviewer's own probes from BOTH ends — the repaired tree refuses/serializes/renders correctly, and the pre-repair tree (eb66caf, reproduced in a temp worktree with the same probes) exhibits every defect class: the phantom and gap revision appends land (1,2,4,42 committed), the case-variant split lock key is visible as two granted advisory locks on one note with the tombstone NOT waiting (and in one round a revision committed after the tombstone — the class's worst case), and the history rendered a tombstone before the revision that committed first. The trace is verified end-to-end: INT-143 + the standing chain through the P3-06 card and RTM §2.5 items 7/9 + §3.3/§3.2 to SYS-01..04 and the acceptance criteria; the NTE-01..15 suite re-run live green, make verify re-run live green (seventeen suites + known-bads + gate + canonical 54/0), and the RED reproduced at the bound predecessor with the sha256-verified suite. Source-of-truth ownership is clean (0009 the substrate authority, one idempotent spine, revise AND the lifecycle commands on the locked build_txn section, the read/crash arms on the landed conventions) and the diff is additive-only for the landed families. All four bounded exclusions held. One new P2 finding (F4, open, routed): the phantom/contiguity guard exists only in 0009 — the LANDED highlight/bookmark families still accept hostile phantom/gap appends (and 0007 has no entity-side revision-append guard at all), confirmed live as superuser; it is claim-055 F7's routed debt, narrowed by this slice, unreachable from the command paths, and repairable only by a NEW migration (the merged 0007/0008 are forward-only). Zero open P0/P1 — the disposition is PASS."
+}

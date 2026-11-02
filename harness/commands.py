@@ -1013,7 +1013,13 @@ def _nte_canon_id(id_: str) -> str:
     and the lock key (hashtext of the canonical text — the substrate
     guards' own key, never a second key for one note) both carry it. An
     unparseable spelling cannot be a note (the uuid column) — it keeps its
-    lowercased form and can only ever meet the ARV-NTE-001 same-refusal."""
+    lowercased form: a spelling PostgreSQL ACCEPTS meets the ARV-NTE-001
+    same-refusal at the state read; a spelling PostgreSQL REFUSES (garbage,
+    urn:uuid: prefixes, stray whitespace — never a note id by construction)
+    fails the uuid cast inside the session and surfaces the generic
+    ARV-CMD-010 session-death wrapper with ZERO effect — the raw-cast
+    class shared with the read arms and the landed families, routed with
+    the round-2 sibling class to its own slice (the SEV round-4 F1)."""
     try:
         return str(uuid.UUID(id_))
     except (ValueError, AttributeError, TypeError):

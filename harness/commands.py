@@ -938,11 +938,6 @@ def restore_bookmark(*, db, owner, actor, client_id, idem_key, id_, crash_at: st
 
 # ------------------------------------------------- P3-06: the note machine (RTM §2.5 item 7 + §3.3)
 
-_UUID_RE = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
-                      r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
-_REF_KINDS = ("work", "source", "anchor", "highlight", "note")
-
-
 def _nte_refusal(code: str, note_id: str) -> _CapRefusal:
     """The note-family boundary refusal — absent and another owner's are
     the SAME refusal, never a side channel (RTM §2.10 on the write path)."""
@@ -1008,135 +1003,35 @@ def _nte_content(*, content: "str | None", content_file: "str | None") -> str:
     return body
 
 
-def _nte_refs(refs: "list[str] | None") -> list:
-    """Parse + shape-validate the reference strings 'kind:id' / 'kind:id@rev'.
-    Returns the canonical sorted [(kind, id, rev|None), ...] (the canonical
-    form is what the body hash covers — the same logical reference set in a
-    different CLI order is the SAME command); the TARGET existence check is
-    the caller's session read per kind."""
-    if not refs:
-        return []
-    out, seen = [], set()
-    for r in refs:
-        kind, sep, rest = r.partition(":")
-        if not sep or kind not in _REF_KINDS:
-            raise _CapRefusal("ARV-NTE-006",
-                              f"the reference {r!r} names an unknown kind {kind!r} — the "
-                              f"referenceable kinds are exactly {_REF_KINDS}",
-                              "supply kind:id with kind in work/source/anchor/highlight/note")
-        target, at, rev = rest.partition("@")
-        if not _UUID_RE.match(target):
-            raise _CapRefusal("ARV-NTE-006",
-                              f"the reference {r!r} carries a malformed id {target!r} — a "
-                              "reference target is a UUID",
-                              "supply the target's UUID (query.py list-* / get-*)")
-        if kind in ("highlight", "note"):
-            if not rev or not rev.isdigit() or int(rev) < 1:
-                raise _CapRefusal("ARV-NTE-006",
-                                  f"the {kind} reference {r!r} must name the target revision "
-                                  "(kind:id@rev — version-aware by construction)",
-                                  f"supply {kind}:<uuid>@<revision>; the reference pins the "
-                                  "immutable (id, revision) pair, never a silent retarget")
-            r_ = int(rev)
-        else:
-            if at:
-                raise _CapRefusal("ARV-NTE-006",
-                                  f"the {kind} reference {r!r} must NOT name a revision — the "
-                                  "Source id IS the version; Work/Anchor carry no revision "
-                                  "dimension",
-                                  f"supply {kind}:<uuid> (the bare identity reference)")
-            r_ = None
-        if (kind, target) in seen:
-            raise _CapRefusal("ARV-NTE-008",
-                              f"the reference target {kind}:{target} appears more than once — "
-                              "the reference set is a set (one reference per target per "
-                              "revision)",
-                              "supply each target once; a revision pins one version of one "
-                              "target")
-        seen.add((kind, target))
-        out.append((kind, target, r_))
-    return sorted(out, key=lambda t: (t[0], t[1]))
-
-
-def _nte_check_targets(sess: "Session", refs: list) -> None:
-    """The TARGET existence check per kind (the session is RLS-scoped to the
-    caller: another owner's object is invisible — absent, another owner's, and
-    a nonexistent target revision are the SAME refusal, never a side channel;
-    the referenced rows are immutable so the check cannot be invalidated
-    between validation and commit; the 0009 substrate guard is the hostile
-    direct-write backstop)."""
-    for kind, target, rev in refs:
-        # the pipe-delimited form (the _sess_row convention: a bare scalar row
-        # carries no '|' and would be indistinguishable from a command tag)
-        if kind == "work":
-            row = _sess_row(sess, f"SELECT id || '|' FROM arv.work WHERE id={_q(target)};")
-        elif kind == "source":
-            row = _sess_row(sess, f"SELECT id || '|' FROM arv.source WHERE id={_q(target)};")
-        elif kind == "anchor":
-            row = _sess_row(sess, f"SELECT id || '|' FROM arv.anchor WHERE id={_q(target)};")
-        elif kind == "highlight":
-            row = _sess_row(sess, f"SELECT id || '|' FROM arv.highlight WHERE id={_q(target)} "
-                                  f"AND revision={rev};")
-        else:
-            row = _sess_row(sess, f"SELECT id || '|' FROM arv.note WHERE id={_q(target)} "
-                                  f"AND revision={rev};")
-        if not row:
-            raise _CapRefusal("ARV-NTE-003",
-                              f"the referenced {kind} ({target}" + (f"@{rev}" if rev else "") +
-                              ") does not exist in the caller's scope — absent, another "
-                              "owner's, and a nonexistent target revision are the SAME "
-                              "refusal, never a side channel",
-                              "reference a target from the caller's own library at an "
-                              "existing revision (query.py list-* / get-*)")
-
-
-def _nte_ref_stmts(note_id: str, revision: int, refs: list, owner, actor, client_id,
-                   idem_key, body_hash) -> list:
-    ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
-    return [f"INSERT INTO arv.note_reference (id, note_id, note_revision, ref_kind, ref_id, "
-            f"ref_revision, owner_scope, actor, run_id, input_hash, idempotency_key, created_at) "
-            f"VALUES ({_q(ids.new_id())}, {_q(note_id)}, {revision}, {_q(kind)}, {_q(target)}, "
-            f"{rev if rev is not None else 'NULL'}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, "
-            f"{_q(ih)}, {_q(idem_key)}, {_q(ts)});" for kind, target, rev in refs]
-
-
-def _nte_body(content: str, refs: list) -> str:
+def _nte_body(content: str) -> str:
     """The canonical note payload — ONE construction home (the command's body
-    hash proves it; the same logical body in a different reference order
-    hashes identically — exactly-once is over the LOGICAL command)."""
-    return json.dumps({"content": content, "refs": [[k, t, r] for k, t, r in refs]},
+    hash proves it; exactly-once is over the LOGICAL command)."""
+    return json.dumps({"content": content},
                       sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
 def create_note(*, db, owner, actor, client_id, idem_key, content=None,
-                content_file=None, refs=None, crash_at: str = None) -> int:
-    """P3-06 (RTM §2.5 item 7): the deep owner-authored Note — a fresh
-    identity + revision 1 + the authored long-form content + the explicit
-    version-aware reference set. Free-standing by construction (zero
-    references is legal — NO source binding exists on the row); the content
-    is read LOSSLESSLY (read_bytes + UTF-8 decode, no newline translation);
-    every target validated in the caller's scope BEFORE any write (the
-    referenced rows are immutable, so the pre-BEGIN validation cannot be
-    invalidated by a race; the 0009 substrate guard is the hostile-write
-    backstop)."""
+                content_file=None, crash_at: str = None) -> int:
+    """P3-06 slice one (RTM §2.5 item 7): the deep owner-authored Note — a
+    fresh identity + revision 1 + the authored long-form content.
+    Free-standing by construction (NO source binding exists on the row — the
+    explicit version-aware references are CLAIM-057's slice); the content is
+    read LOSSLESSLY (read_bytes + UTF-8 decode, no newline translation)."""
     try:
         body_content = _nte_content(content=content, content_file=content_file)
-        refs_c = _nte_refs(refs)
     except _CapRefusal as r:  # the parse precedes the spine (the body hash needs the canonical form)
         print(f"FAIL {r.code}: {r}")
         print(f"      repair: {r.repair}")
         return 1
-    body = _nte_body(body_content, refs_c)
+    body = _nte_body(body_content)
 
     def build(sess: "Session", body_hash: str):
-        _nte_check_targets(sess, refs_c)
         note_id = ids.new_id()
         ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
         stmts = [f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, run_id, "
                  f"input_hash, idempotency_key, created_at) VALUES ({_q(note_id)}, 1, "
                  f"{_q(body_content)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
-                 f"{_q(idem_key)}, {_q(ts)});"] + \
-            _nte_ref_stmts(note_id, 1, refs_c, owner, actor, client_id, idem_key, body_hash)
+                 f"{_q(idem_key)}, {_q(ts)});"]
         return note_id, stmts, " revision=1 durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
@@ -1144,27 +1039,25 @@ def create_note(*, db, owner, actor, client_id, idem_key, content=None,
 
 
 def revise_note(*, db, owner, actor, client_id, idem_key, id_, content=None,
-                content_file=None, refs=None, crash_at: str = None) -> int:
+                content_file=None, crash_at: str = None) -> int:
     """§3.3's edit transition for the note: append a NEW immutable revision
-    (n+1) carrying its OWN full content and reference set (replacement
-    semantics — the prior revision's rows and references stay untouched and
-    accurate). THE SERIALIZED TRANSITION (the #90 round-3 lesson applied from
+    (n+1) carrying its OWN full content (the prior revision's row stays
+    untouched). THE SERIALIZED TRANSITION (the #90 round-3 lesson applied from
     the start): the complete transition — the per-note advisory xact lock (the
     SAME lock the 0009 guards take) acquired as the transaction's FIRST
-    statement, then the state read, the active validation, the target
-    validation, the inserts, and the commit, ALL inside ONE transaction:
-    competing revisers serialize (both revisions persist, legal ordering —
-    never a silent overwrite) and a tombstone either commits BEFORE the lock
-    (the read sees it — the clean ARV-NTE-002) or waits for this
-    transaction's end — a revision can never commit after tombstoning."""
+    statement, then the state read, the active validation, the inserts, and
+    the commit, ALL inside ONE transaction: competing revisers serialize
+    (both revisions persist, legal ordering — never a silent overwrite) and a
+    tombstone either commits BEFORE the lock (the read sees it — the clean
+    ARV-NTE-002) or waits for this transaction's end — a revision can never
+    commit after tombstoning."""
     try:
         body_content = _nte_content(content=content, content_file=content_file)
-        refs_c = _nte_refs(refs)
     except _CapRefusal as r:  # the parse precedes the spine (the body hash needs the canonical form)
         print(f"FAIL {r.code}: {r}")
         print(f"      repair: {r.repair}")
         return 1
-    body = _nte_body(body_content, refs_c)
+    body = _nte_body(body_content)
 
     def build_txn(sess: "Session", body_hash: str):
         # THE CANONICAL LOCK KEY (the review round's F3, claim-055 F5's class
@@ -1181,14 +1074,11 @@ def revise_note(*, db, owner, actor, client_id, idem_key, id_, content=None,
                               "from ordinary use until restored (RTM §3.3: restore precedes edit)",
                               "restore the note first (commands.py restore_note); the "
                               "governed history retains every revision meanwhile")
-        _nte_check_targets(sess, refs_c)
         ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
         stmts = [f"INSERT INTO arv.note (id, revision, content, owner_scope, actor, run_id, "
                  f"input_hash, idempotency_key, created_at) VALUES ({_q(id_)}, {revision + 1}, "
                  f"{_q(body_content)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
-                 f"{_q(idem_key)}, {_q(ts)});"] + \
-            _nte_ref_stmts(id_, revision + 1, refs_c, owner, actor, client_id, idem_key,
-                           body_hash)
+                 f"{_q(idem_key)}, {_q(ts)});"]
         return id_, stmts, f" revision={revision + 1} durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
@@ -1327,9 +1217,6 @@ def main() -> int:
                        help="the authored content, inline (exactly one of --content / --content-file)")
         p.add_argument("--content-file", default=None,
                        help="the long-form authoring surface: a UTF-8 file read losslessly")
-        p.add_argument("--ref", action="append", default=None, metavar="KIND:ID[@REV]",
-                       help="an explicit version-aware reference (repeatable): work/source/"
-                            "anchor by identity; highlight/note by identity@revision")
         if name == "revise_note":
             p.add_argument("--id", required=True)
     for name in ("tombstone_note", "restore_note"):
@@ -1371,11 +1258,11 @@ def main() -> int:
     if a.command == "create_note":
         return create_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                            idem_key=a.idem_key, content=a.content,
-                           content_file=a.content_file, refs=a.ref)
+                           content_file=a.content_file)
     if a.command == "revise_note":
         return revise_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                            idem_key=a.idem_key, id_=a.id, content=a.content,
-                           content_file=a.content_file, refs=a.ref)
+                           content_file=a.content_file)
     if a.command == "tombstone_note":
         return tombstone_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                               idem_key=a.idem_key, id_=a.id)

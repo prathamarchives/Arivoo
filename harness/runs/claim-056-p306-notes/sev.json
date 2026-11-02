@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-056-p306-notes",
   "base_sha": "f86e52b293be0e6b531440d8e98676b09a289783",
-  "reviewed_diff_sha256": "175a2114eb8ef4bae7c675edf1b5fc9e49f01f5830aab717d2739a754ab10496",
+  "reviewed_diff_sha256": "d46f3c44e83a890ddbcb6b9594268989092dc47a67ee7cf35d79ca28879148c3",
   "sheet_section": true,
   "intent_ids": [
     "INT-143",
@@ -80,79 +80,118 @@
       "id": "FM-01",
       "scenario": "a silent overwrite: two (or three) competing revisers on one note, or a revise racing a lifecycle writer — a revision destroyed or an untested merge claimed",
       "control": "the serialized transition: revise_note's complete transition inside ONE transaction behind the per-note advisory xact lock (the canonical key) + the 0009 revision-append guard under the SAME lock; NTE-13/14/15's deterministic pins + this reviewer's own races at the repaired tree — every revision persists contiguously, every loser typed",
-      "proof_ids": ["run-21", "run-22", "run-23"]
+      "proof_ids": [
+        "run-21",
+        "run-22",
+        "run-23"
+      ]
     },
     {
       "id": "FM-02",
       "scenario": "a dangling reference: an absent work/source/anchor/highlight/note target, a nonexistent target revision, another owner's object, or a malformed/duplicate reference string",
       "control": "the command-boundary validation (ARV-NTE-003/006/008 — absent, another owner's, and a nonexistent revision are the SAME refusal) + the substrate reference guard (ARV-NTE-007 for the owning (note, revision) pair, ARV-NTE-003 for the target, note_reference_ref_shape_check for the version-aware shape) — NTE-03 at the repaired tree",
-      "proof_ids": ["run-21"]
+      "proof_ids": [
+        "run-21"
+      ]
     },
     {
       "id": "FM-03",
       "scenario": "a cross-owner leak: another owner's note readable/writable/listable/referenceable through any note-family arm",
       "control": "RLS FORCED + the owner_isolation policy on all three tables + the same-refusal rule at every boundary (ARV-NTE-001/003, ARV-QRY-001) — NTE-04; arv_read is the designed auditor, never a leak",
-      "proof_ids": ["run-21"]
+      "proof_ids": [
+        "run-21"
+      ]
     },
     {
       "id": "FM-04",
       "scenario": "a revision committed after tombstoning, a double tombstone, or a restore of an active note (the §3.3 alternation broken)",
       "control": "the advisory-lock serialization at BOTH layers — now including the lifecycle commands' own locked sections (the F1 repair): the command-boundary refusals (ARV-NTE-002/004/005) + the 0009 alternation trigger and revision-append guard re-deriving parity from committed rows under the SAME lock — NTE-07/13/14/15 + this reviewer's deterministic and natural races (both legal outcome classes, never the illegal one; the pre-repair tree demonstrably committed a revision after the tombstone under the case-variant split key, closed at 526c3bd)",
-      "proof_ids": ["run-21", "run-22", "run-23"]
+      "proof_ids": [
+        "run-21",
+        "run-22",
+        "run-23"
+      ]
     },
     {
       "id": "FM-05",
       "scenario": "a lost or duplicated effect under crash/restart at a transaction boundary (a committed-but-unacked command, or a half-applied one)",
       "control": "the spine's zero-or-one-effect contract: after-begin/pre-commit leave zero rows; post-commit-pre-ack commits with exit 2 and the same-key replay converges the lost ack with the recorded result — NTE-06 on all three spine points for create/revise/tombstone + this reviewer's own crash-matrix sample (create@pre-commit zero effect; create/revise/tombstone@post-commit-pre-ack committed + replayed, exactly one effect)",
-      "proof_ids": ["run-21", "run-24"]
+      "proof_ids": [
+        "run-21",
+        "run-24"
+      ]
     },
     {
       "id": "FM-06",
       "scenario": "framing corruption: a row-protocol reader splitting a note's content on U+2028/U+2029 (or NEL) that travelled raw inside the JSON string",
       "control": "the newline-only framing law on every content-bearing arm: one JSON row per line, the separators raw inside the string — NTE-12 + this reviewer's byte-level probe with its own U+2028/U+2029/U+0085 fixture (every line parses, the fixture's own string the comparison basis)",
-      "proof_ids": ["run-21"]
+      "proof_ids": [
+        "run-21"
+      ]
     },
     {
       "id": "FM-07",
       "scenario": "NUL (U+0000) in the authored content — PostgreSQL TEXT cannot carry it (the standing spine residual)",
       "control": "the named refusal at THIS boundary (ARV-NTE-009, zero rows — never the mid-protocol death) + the content-source refusals (ARV-NTE-010: neither/both channels, an unreadable file, non-UTF-8) — NTE-02; a boundary refusal, not a general spine fix",
-      "proof_ids": ["run-21"]
+      "proof_ids": [
+        "run-21"
+      ]
     },
     {
       "id": "FM-08",
       "scenario": "a hostile direct write at the substrate: UPDATE/DELETE on the authoritative rows, a dangling reference insert, a ghost-target lifecycle row, a revision-append on a tombstoned note — as arv_app or as superuser",
       "control": "ARV-CAP-005 append-only triggers + the permission grants (no UPDATE/DELETE to arv_app) + the 0009 guards — NTE-03/07/11; the reviewer's own arv_app AND superuser matrix at the repaired tree (every class the named refusal, zero rows); the phantom/gap classes are FM-10's own row",
-      "proof_ids": ["run-21", "run-24"]
+      "proof_ids": [
+        "run-21",
+        "run-24"
+      ]
     },
     {
       "id": "FM-09",
       "scenario": "a tombstoned note silently resurfacing in ordinary retrieval, or its governed history silently losing content/references/attribution",
       "control": "the tombstone-aware read arms: get-note refuses ARV-QRY-003, list-notes excludes via the HAVING form, get-note-history retains every revision byte-identical with its OWN reference set + every event, restore returns the current revision unchanged — NTE-07/09",
-      "proof_ids": ["run-21"]
+      "proof_ids": [
+        "run-21"
+      ]
     },
     {
       "id": "FM-10",
       "scenario": "the phantom-identity or non-contiguous revision append (round-1 F2 / the verifier's V-1): a hostile direct INSERT of a revision onto a never-created note id, or a gap revision (e.g. 42 on a max-1 note)",
       "control": "the REPAIRED enforce_note_revision_guard (commit 526c3bd): rev>1 requires an existing identity in scope (ARV-NTE-001) AND exactly max+1 (ARV-NTE-011) under the same advisory lock — pinned by NTE-03/05 and reproduced end-to-end by this reviewer (superuser AND arv_app phantom -> ARV-NTE-001; gap 42-on-1 and 4-on-2 -> ARV-NTE-011; zero hostile rows; the pre-repair tree lands them all — the residual on the LANDED 0007/0008 families is finding F4)",
-      "proof_ids": ["run-21", "run-22", "run-23"]
+      "proof_ids": [
+        "run-21",
+        "run-22",
+        "run-23"
+      ]
     },
     {
       "id": "FM-11",
       "scenario": "the case-variant split lock key (round-1 F3 / claim-055 F5's class): a revise invoked with a non-canonical id spelling taking a DIFFERENT advisory key than the substrate guards — the serialization bypassed, the loser wrapped in ARV-CMD-010",
       "control": "the REPAIRED canonical lock key (commit 526c3bd): hashtext(lower(id)) at every note-family lock site — pinned by NTE-15 and verified by this reviewer at the pg_locks tag level (the parked uppercase-id reviser holds the canonical tag; the tombstone waits on it; the late mixed-case revise gets the clean ARV-NTE-002; the pre-repair tree shows the two-key split live)",
-      "proof_ids": ["run-21", "run-22", "run-23"]
+      "proof_ids": [
+        "run-21",
+        "run-22",
+        "run-23"
+      ]
     },
     {
       "id": "FM-12",
       "scenario": "the time-dishonest history render (round-1 F1): a lifecycle event's created_at taken before its advisory-lock wait renders BEFORE a revision that committed first — an apparent §3.3 violation in the audit trail that never happened",
       "control": "the REPAIRED lifecycle form (commit 526c3bd): the timestamp taken INSIDE the locked section after the state read — pinned by NTE-14 and verified by this reviewer's deterministic round (rev2 created_at <= the tombstone's) and six natural races at the repaired tree; the pre-repair tree reproduced the contradiction live",
-      "proof_ids": ["run-21", "run-22", "run-23"]
+      "proof_ids": [
+        "run-21",
+        "run-22",
+        "run-23"
+      ]
     },
     {
       "id": "FM-13",
       "scenario": "migration incompatibility: the amended 0009 (the repair commit strengthened its guard) failing to apply or verify, or drifting from the M0 oracle's checksummed expectations",
       "control": "the amendment is PRE-MERGE (forward-only governs merged state; the rig's databases are ephemeral scratch DBs — no deployed instance exists); the fresh-apply + --verify oracle re-validated green inside this reviewer's own make verify run at 526c3bd and in every probe's migrate step; the migrations suite green at run-04 and again inside run-24",
-      "proof_ids": ["run-04", "run-24"]
+      "proof_ids": [
+        "run-04",
+        "run-24"
+      ]
     }
   ],
   "findings": [

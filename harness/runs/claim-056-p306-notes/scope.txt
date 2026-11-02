@@ -12,15 +12,19 @@
 # required before "supported"); the keyword index is P3-07's, the
 # outbox/sync is P3-08's, the governed purge is P3-06/09's (D-011).
 #
-# The machine: the note family's create/revise/tombstone/restore over the
-# landed §3.3 machine (the serialized transition + the substrate guards, the
-# 0007/0008 precedent) + explicit version-aware references to
-# Work/Source/Anchor/Highlight/Note (dangling refs refused by name at the
-# boundary) + the referenceable history (every revision retrievable,
-# attributable, referenceable; conflict never silently destroys a revision
-# or claims an untested merge) + every note-family ack naming
-# durability_rung=local_durable (SYS-01) + migration 0009. RED-first at the
-# predecessor f86e52b (machinery-absent ARV-TEST-000, red-01.txt).
+# The machine (SLICE ONE of the two-slice sequence — the LAW-05 split, the
+# gate's own named repair; the references are CLAIM-057's): the note
+# family's create/revise/tombstone/restore over the landed §3.3 machine
+# (the serialized transition + the substrate guards incl. the strengthened
+# revision-append guard — phantom/contiguity/tombstoned; the 0007/0008
+# precedent) + the AUTHORED long-form content read losslessly (the NUL
+# boundary named ARV-NTE-009) + the referenceable history (every revision
+# retrievable, attributable, referenceable from history alone; conflict
+# never silently destroys a revision or claims an untested merge) + every
+# note-family ack naming durability_rung=local_durable (SYS-01) + migration
+# 0009 (arv.note + arv.note_lifecycle + the guards — note_reference is
+# 0010's). RED-first at the predecessor f86e52b (machinery-absent
+# ARV-TEST-000, red-01.txt).
 harness/tests/test_note.py D-041
 harness/commands.py D-041
 harness/query.py D-041

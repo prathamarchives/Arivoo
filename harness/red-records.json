@@ -713,7 +713,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-056 (P3-06) commit B: the NTE-01..14 suite's RED observed at the exact predecessor f86e52b in a temp worktree and bound to commit f0a8125 (machinery-absent ARV-TEST-000: create_note absent, get-note absent, migration 0009 absent; the transcript at the slice's runs dir red-01.txt; record 47 \u00a711 \u2014 the record-18 \u00a74.1 / claim-055 precedent class)",
-    "current_sha256": "2a61da5c655ee5dd95319309a132cb2269cd7534042311863d1d6ed566f89745",
+    "current_sha256": "30a100cbb0530b469fe85b347e33935b6e8f37ea699f050c6bbb84bdc2ad6030",
     "amendments": [
       {
         "prior_sha256": "4368470c87c78ef7d12321e490a9d184c65c6fafd59550b9c52664e90bfea39d",
@@ -732,6 +732,12 @@
         "new_sha256": "2a61da5c655ee5dd95319309a132cb2269cd7534042311863d1d6ed566f89745",
         "note": "CLAIM-056 (P3-06) commit D \u2014 the review round's repairs pinned in the suite (assertions ADDED, none removed): NTE-03 gains the strengthened-revision-guard pins (the phantom-identity append ARV-NTE-001 + the non-contiguous gap append ARV-NTE-011 \u2014 the independent verifier's V-1 + the SEV's F2, convergent); NTE-05's ordinal-backstop expectation updated to the guard's named contiguity refusal (the BEFORE trigger precedes the PK \u2014 ARV-NTE-011); NTE-14's tombstone-wait pattern updated to the serialized lifecycle form (the lock taken as the command's OWN first statement \u2014 the F1 repair) + the history-renders-commit-order pin; NTE-15 ADDED (the case-variant lock-key serialization \u2014 the F3 repair, claim-055 F5's class closed for the note family)",
         "observed_at": "2026-11-02T05:20:51.660663+00:00"
+      },
+      {
+        "prior_sha256": "2a61da5c655ee5dd95319309a132cb2269cd7534042311863d1d6ed566f89745",
+        "new_sha256": "30a100cbb0530b469fe85b347e33935b6e8f37ea699f050c6bbb84bdc2ad6030",
+        "note": "CLAIM-056 the LAW-05 SPLIT (the gate's own named repair \u2014 'split the slice'; the P3-M0 three-slice-sequence precedent): the version-aware REFERENCE machine (arv.note_reference + its guard + the --ref surface + the reference cases NTE-03-ref/NTE-08/NTE-15's ref parts) moves to CLAIM-057's slice; test_note.py becomes the note CORE suite (NTE-01..13 \u2014 the interleaving parks moved to arv.note ACCESS EXCLUSIVE: the state read is the first post-lock table touch; the canonical-key pin folded into NTE-13; the lifecycle-mutation pin moved to NTE-07 where a lifecycle row exists). The moved assertions mint their own RED in CLAIM-057's suite at CLAIM-056's merged head \u2014 none deleted from the project, all re-homed",
+        "observed_at": "2026-11-02T06:12:08.987722+00:00"
       }
     ]
   }

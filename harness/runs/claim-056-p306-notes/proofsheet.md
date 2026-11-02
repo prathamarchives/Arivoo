@@ -1,0 +1,137 @@
+# PROOF SHEET — slice claim-056-p306-notes (harness-built; never hand-edited — PRF-01, LAW-01)
+
+- commit (last run record's): 1315015b40c1c3be5643de90ae004742921be416
+- generated (last record's timestamp): 2026-11-02T05:57:44.978085+00:00
+- run records: 25
+
+## Run records (command, exit, output digest)
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 95a3e872d9dfe7f2 · 2026-11-02T04:46:48.871501+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 95a3e872d9dfe7f2 · 2026-11-02T04:46:56.069020+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 95a3e872d9dfe7f2 · 2026-11-02T04:47:03.446991+00:00
+- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 374c9cd0b589dcae · 2026-11-02T04:47:15.937129+00:00
+- `python3 harness/tests/test_substrate.py` -> exit 0 · output sha256 bd4d723a03ab6c40 · 2026-11-02T04:47:16.495928+00:00
+- `python3 harness/tests/test_commands.py` -> exit 0 · output sha256 565088ee26bfb2e9 · 2026-11-02T04:47:20.090150+00:00
+- `python3 harness/tests/test_kernel.py` -> exit 0 · output sha256 eb9a3a422f7c3398 · 2026-11-02T04:47:22.095919+00:00
+- `python3 harness/tests/test_capture.py` -> exit 0 · output sha256 302278fce23ea439 · 2026-11-02T04:47:30.084420+00:00
+- `python3 harness/tests/test_import.py` -> exit 0 · output sha256 88f804186ff9b6ff · 2026-11-02T04:47:35.208550+00:00
+- `python3 harness/tests/test_extract.py` -> exit 0 · output sha256 831c5a272c88ae88 · 2026-11-02T04:47:37.762945+00:00
+- `python3 harness/tests/test_anchor.py` -> exit 0 · output sha256 6524242680a49821 · 2026-11-02T04:47:40.160651+00:00
+- `python3 harness/tests/test_highlight.py` -> exit 0 · output sha256 c0fd0aaa7985b5a1 · 2026-11-02T04:47:48.205818+00:00
+- `python3 harness/tests/test_bookmark.py` -> exit 0 · output sha256 409bc9b4548a622c · 2026-11-02T04:47:54.349176+00:00
+- `python3 harness/tests/test_gate_dispatch.py` -> exit 0 · output sha256 0ae670b9b5e5b25b · 2026-11-02T04:49:44.340032+00:00
+- `python3 harness/tests/test_mutation_floor.py` -> exit 0 · output sha256 e423e420eb6c7ce7 · 2026-11-02T04:50:16.338643+00:00
+- `python3 harness/tests/test_trusted_gate.py` -> exit 0 · output sha256 d5552887aaabc89e · 2026-11-02T04:50:35.353962+00:00
+- `python3 harness/tests/test_claims_paths.py` -> exit 0 · output sha256 2a5cd84dda12487c · 2026-11-02T04:50:35.750460+00:00
+- `python3 harness/tests/test_record_machinery.py` -> exit 0 · output sha256 4ff391be99427e0a · 2026-11-02T04:50:36.002042+00:00
+- `python3 harness/tests/test_sev.py` -> exit 0 · output sha256 abc9bb949b75059e · 2026-11-02T04:50:39.178471+00:00
+- `make verify` -> exit 0 · output sha256 4673b55d918b2d14 · 2026-11-02T04:54:35.038762+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 7e00858b477e9a70 · 2026-11-02T05:24:51.874531+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 7e00858b477e9a70 · 2026-11-02T05:24:59.992412+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 7e00858b477e9a70 · 2026-11-02T05:25:08.108197+00:00
+- `make verify` -> exit 0 · output sha256 4309ec2e87e0583d · 2026-11-02T05:28:56.088980+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 7e00858b477e9a70 · 2026-11-02T05:57:44.978085+00:00
+
+## Not verified (LAW-04 — required, never empty-by-omission)
+- - NOT VERIFIED — the honest limits of CLAIM-056 / P3-06 (the note machine;
+- LAW-04; never empty-by-omission)
+- - WHAT THIS SLICE PROVES, ON WHAT STACK: the note machine of RTM §2.5 item 7
+- + §3.3 holds end-to-end over the REAL PostgreSQL boundary (17.11: the
+- local rig + CI's postgres:17 service): the deep owner-authored Note as
+- identity + immutable revisions + the AUTHORED long-form content (the
+- exact nine-column arv.note set — free-standing by construction, NO source
+- binding; the content read LOSSLESSLY: read_bytes + UTF-8 decode, no
+- newline translation — the 40-paragraph Unicode corpus with CJK, combining
+- marks, astral emoji, RTL, C0 control characters, U+2028/U+2029, and
+- psql-meta-command-looking lines round trips byte-identically through
+- create -> get-note AND get-note-history, verified by the suite AND by the
+- independent verifier's own 31KB corpus), the explicit version-aware
+- per-revision references to Work/Source/Anchor/Highlight/Note (arv.note_reference:
+- the highlight/note refs MUST name the target revision — a substrate CHECK;
+- absent, another owner's, and a nonexistent target revision are the SAME
+- ARV-NTE-003 refusal at the command boundary AND the substrate; the shape
+- classes ARV-NTE-006; the set semantics ARV-NTE-008 + the structural
+- UNIQUE), THE SERIALIZED TRANSITION at both layers (revise_note's complete
+- transition inside ONE transaction behind the per-note advisory xact lock —
+- NTE-13's competing revisers BOTH persist (2 then 3, legal ordering,
+- revision 1 byte-unchanged); NTE-14's revise-vs-tombstone interleaving — a
+- revision NEVER commits after tombstoning, and the history renders the
+- serialized commit order (the lifecycle timestamp taken INSIDE its locked
+- section); NTE-15's case-variant pin — one note, one canonical lock key
+- whatever the CLI spelling), the strengthened revision-append guard (the
+- phantom-identity append ARV-NTE-001 + the non-contiguous gap append
+- ARV-NTE-011 — the ordinal backstop promoted to the named substrate
+- refusal), the crash matrix at every transaction boundary (exit 2 no-ack;
+- the same-key replay converges), the replay/conflict contract (the
+- canonical reference-order-independent body hash — exactly-once over the
+- LOGICAL command; ARV-CMD-409), tombstone hiding from ordinary retrieval
+- (list + the typed ARV-QRY-003) while the governed history retains every
+- revision, every reference row, and every event, the DERIVED current view
+- (rebuildable from the history rows ALONE — the export-ready history), the
+- NUL boundary named at this boundary (ARV-NTE-009 — never the mid-protocol
+- death), every ack naming durability_rung=local_durable (SYS-01), and the
+- 0009 schema conventions (no DEFAULTs, the six triggers, RLS enabled AND
+- FORCED, the ownership uniques, arv_app INSERT/SELECT + arv_read SELECT).
+- The suite NTE-01..15 GREEN six times across the pre-repair and repaired
+- trees (run-01..03, run-21..23); the sixteen sibling suites GREEN
+- (gate.py's TESTS: the seventeen registered suites minus this slice's
+- own); make verify GREEN twice (the canonical layer 54/0).
+- - THE INDEPENDENT ROUNDS: the test verifier agent-nte-verifier-r1 (PASS,
+- zero P0/P1 — its own 45-check adversarial probe: the byte-level lossless
+- corpus incl. BOM/U+0085/bare-CR/no-trailing-newline variants, the
+- transport-safety class, the live races, the crash matrix, the hostile
+- matrix as arv_app AND superuser, the schema audits); the SEV round 1
+- agent-nte-sev-r1 (PASS, zero open P0/P1; F1/F2/F3 — F2 convergent with
+- the verifier's V-1); the SEV round 2 agent-nte-sev-r2 over the REPAIRED
+- diff (PASS, zero open P0/P1 — each repair verified FROM BOTH ENDS: the
+- defects reproduced live on the pre-repair tree eb66caf and the repairs
+- holding on 526c3bd; its probes: the suite, make verify, the RED
+- reproduction at the bound commit, the both-ends defect reproductions,
+- the deterministic + natural races). ALL THREE review findings repaired
+- in-PR at 526c3bd (the phantom/contiguity guard, the time-honest
+- lifecycle form, the canonical lock key) with the suite pins NTE-03
+- (phantom/gap), NTE-05 (ARV-NTE-011), NTE-14 (the order pin), NTE-15.
+- - THE NO-FIX DISPOSITIONS (the reasoning stated, D-042): V-2 (P3, cosmetic)
+- — a hostile note_reference insert with a highlight kind + NULL revision
+- meets the reference guard's ARV-NTE-003 before the shape CHECK can fire
+- (BEFORE-trigger precedence): both paths fail closed with named codes,
+- zero rows; the CHECK remains the declarative backstop. V-3 (P3) — an
+- EMPTY note body is accepted: no minimum-length law exists in the card or
+- the RTM; inventing a refusal here would be inventing a law — the product
+- decision is P4-C's (the Journal/user-acceptance round). V-4 (P3) — the
+- spine's NFC canonicalization (K-04's pinned pre-existing choice): a same
+- key + NFD-equivalent body replays the NFC-recorded note; the content
+- STORAGE is raw (an NFD body on a fresh key stores NFD byte-identically)
+- — a spine-level change is out of this slice's bounded diff. F4 (P2,
+- routed) — the LANDED 0007/0008 families still accept hostile
+- phantom/gap revision appends (highlight: no entity-side revision-append
+- guard at all; bookmark: parity-only) — command-path unreachable, never
+- blocking, and repairable only by a NEW migration (merged migrations are
+- forward-only): routed to the next substrate-touching slice (P3-07's
+- card review will name it or a dedicated hardening slice carries it).
+- - NOT VERIFIED (the honest limits): the concurrent-reader matrix on the
+- new read arms (serially exercised; the standing class); the >3-writer
+- race classes and the 4+ mixed interleavings; U+001C/1D/1E (the
+- file/record/group separators) unexercised on the content path; NUL
+- remains a NAMED note-boundary refusal only — the spine-level
+- NUL-literal follow-up stays open (the standing residual); the spine's
+- NFC canonicalization unprobed beyond the verifier's observation; the
+- empty-content ruling (V-3) — P4-C's; F4's per-family repair (the routed
+- follow-up); the governed purge (D-011 — P3-09's, never this slice's);
+- the diagram/structured-block serialization contract (P4-C's reservation
+- — plain text only, no structured-block claim); the keyword index (P3-07)
+- and the outbox/sync rungs (P3-08) — their own slices; the Q8
+- synthetic-only boundary; the ARV-SEV-009 undecidable-base regression;
+- the N12 self-test-row extension; the isolation undecidable classes; Q10;
+- the host-level workflow protection; the >30s marker-wall wait bound not
+- re-probed; the external GitHub-side merge-chain facts (observed live at
+- the PR, never in-file).
+
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 9924729a7816d831e36e1afdf2eaeb6f86d4250fdc088df3c9b4448ca2169faf
+- reviewed_diff_sha256: d46f3c44e83a890ddbcb6b9594268989092dc47a67ee7cf35d79ca28879148c3
+- disposition: PASS
+- findings: 4 (open P0/P1: 0)
+- not-verified entries: 15
+
+## Assembly
+- sheet sha256 (of the content above, excluding this line): e9d74992f090d91eb6753210e3710c647396541be5ae9b8e6f7480a824dfd42c

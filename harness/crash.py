@@ -62,8 +62,6 @@ def main() -> int:
                     help="the note's authored content, inline (P3-06)")
     ap.add_argument("--content-file", default=None,
                     help="the note's long-form authoring surface: a UTF-8 file read losslessly (P3-06)")
-    ap.add_argument("--ref", action="append", default=None, metavar="KIND:ID[@REV]",
-                    help="an explicit version-aware reference (repeatable; P3-06)")
     a = ap.parse_args()
     if a.command != "import_source" and a.point not in SPINE_POINTS:
         print(f"CRASH-USAGE: the point {a.point!r} is an import-phase boundary — it exists "
@@ -108,11 +106,11 @@ def main() -> int:
     elif a.command == "create_note":
         rc = create_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                          idem_key=a.idem_key, content=a.content,
-                         content_file=a.content_file, refs=a.ref, crash_at=a.point)
+                         content_file=a.content_file, crash_at=a.point)
     elif a.command == "revise_note":
         rc = revise_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                          idem_key=a.idem_key, id_=a.id, content=a.content,
-                         content_file=a.content_file, refs=a.ref, crash_at=a.point)
+                         content_file=a.content_file, crash_at=a.point)
     elif a.command == "tombstone_note":
         rc = tombstone_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                             idem_key=a.idem_key, id_=a.id, crash_at=a.point)

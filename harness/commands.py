@@ -30,6 +30,7 @@ import signal
 import subprocess
 import sys
 import threading
+import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import pg, clock, ids, blob  # noqa: E402
@@ -1003,14 +1004,29 @@ def _nte_content(*, content: "str | None", content_file: "str | None") -> str:
     return body
 
 
+def _nte_canon_id(id_: str) -> str:
+    """The note identity's ONE canonical form (the #91 round-2 finding
+    4439931169: PostgreSQL's uuid input accepts braced, no-hyphen, and
+    uppercase spellings of the SAME note): every parseable spelling reduces
+    to the canonical hyphenated lowercase text — the payload (LAW-23: a
+    variant-spelling retry is the SAME logical command and must REPLAY)
+    and the lock key (hashtext of the canonical text — the substrate
+    guards' own key, never a second key for one note) both carry it. An
+    unparseable spelling cannot be a note (the uuid column) — it keeps its
+    lowercased form and can only ever meet the ARV-NTE-001 same-refusal."""
+    try:
+        return str(uuid.UUID(id_))
+    except (ValueError, AttributeError, TypeError):
+        return id_.lower()
+
+
 def _nte_body(content: str, note_id: "str | None" = None) -> str:
     """The canonical note payload — ONE construction home (the command's body
     hash proves it; exactly-once is over the LOGICAL command). revise_note
-    carries the target id in its CANONICAL LOWERCASE form (the #91 review
-    round's Major — the landed families' convention: the same key on a
-    DIFFERENT note is a different command and must meet ARV-CMD-409, never a
-    false replay; the lowercase form keeps CLI spelling variants of one note
-    as the same logical command, matching the canonical lock key)."""
+    carries the target id in its CANONICAL UUID form (_nte_canon_id — the
+    spelling-independent identity: a different note is a different command
+    and must meet ARV-CMD-409, never a false replay; every spelling of one
+    note is the SAME logical command, matching the canonical lock key)."""
     payload = {"content": content}
     if note_id is not None:
         payload["id"] = note_id
@@ -1065,15 +1081,15 @@ def revise_note(*, db, owner, actor, client_id, idem_key, id_, content=None,
         print(f"FAIL {r.code}: {r}")
         print(f"      repair: {r.repair}")
         return 1
-    body = _nte_body(body_content, note_id=id_.lower())  # the target id in the body: a different note is a different command (LAW-23)
+    body = _nte_body(body_content, note_id=_nte_canon_id(id_))  # the target id in the body: a different note is a different command (LAW-23)
 
     def build_txn(sess: "Session", body_hash: str):
-        # THE CANONICAL LOCK KEY (the review round's F3, claim-055 F5's class
-        # closed for the note family): the substrate guards lock on
-        # hashtext(NEW.id::text) — the uuid type's TEXT rendering is canonical
-        # LOWERCASE — so the boundary lock must take the SAME key whatever the
-        # CLI spelling, never a second lock for one note
-        key = id_.lower()
+        # THE CANONICAL LOCK KEY (the review round's F3 + the round-2 finding
+        # 4439931169, claim-055 F5's class closed for the note family): the
+        # substrate guards lock on hashtext(NEW.id::text) — the uuid type's
+        # TEXT rendering is canonical — so the boundary lock must take the
+        # SAME key whatever the CLI spelling, never a second lock for one note
+        key = _nte_canon_id(id_)
         _sess_row(sess, f"SELECT hashtext({_q(key)}) || '|' || pg_advisory_xact_lock(hashtext({_q(key)}));")  # the lock FIRST, held to the commit
         revision, state = _nte_current(sess, id_)
         if state != "active":
@@ -1107,10 +1123,10 @@ def _nte_lifecycle_command(*, command, event, db, owner, actor, client_id, idem_
     read sees it) or waits for this transaction's end — the history arm's
     created_at ordering follows the serialized commit order. The substrate's
     advisory-lock alternation trigger (0009) remains the hostile backstop."""
-    body = json.dumps({"id": id_}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    body = json.dumps({"id": _nte_canon_id(id_)}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
     def build_txn(sess: "Session", body_hash: str):
-        key = id_.lower()
+        key = _nte_canon_id(id_)
         _sess_row(sess, f"SELECT hashtext({_q(key)}) || '|' || pg_advisory_xact_lock(hashtext({_q(key)}));")  # the lock FIRST, held to the commit
         _, state = _nte_current(sess, id_)
         if (event == "tombstone" and state != "active") or (event == "restore" and state != "tombstoned"):

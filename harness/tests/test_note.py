@@ -308,7 +308,6 @@ def main() -> int:
         subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
                        capture_output=True, text=True, timeout=180, env=ENV, check=True)
 
-        # ---------------- the fixture: free-standing notes, two owners
         long_file = fresh_file("deep-note.md", LONG_FORM)
         pnb = mk_note("note-B1", content="B's private deep thinking.", owner="B")
         noteb = ack_field(pnb, "result_ref")
@@ -766,6 +765,7 @@ def main() -> int:
                         "AND a.usename='arv_app';").stdout.strip()
         t14.close()  # the release: the braced revise proceeds and commits
         mv14rc = mv14.wait(timeout=120)
+        mv14out = mv14.stdout.read()  # the ONE read (a stream consumes; never read it twice)
         tb14 = lifecycle("tombstone_note", "n-14t", n14id)
         tb14u = lifecycle("tombstone_note", "n-14t", n14id.upper())
         tb14b = lifecycle("tombstone_note", "n-14t", "{" + n14id + "}")
@@ -775,7 +775,7 @@ def main() -> int:
                 and pr_b.returncode == 0 and "status=replayed" in pr_b.stdout
                 and pr_n.returncode == 0 and "status=replayed" in pr_n.stdout
                 and wait14 and g14 == "0" and mv14rc == 0
-                and "revision=3" in mv14.stdout
+                and "revision=3" in mv14out
                 and tb14.returncode == 0 and "durability_rung" in tb14.stdout
                 and tb14u.returncode == 0 and "status=replayed" in tb14u.stdout
                 and tb14b.returncode == 0 and "status=replayed" in tb14b.stdout

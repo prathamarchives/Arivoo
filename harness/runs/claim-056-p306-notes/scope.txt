@@ -39,6 +39,8 @@ PLAN.md D-037
 INTENT-LEDGER.md INT-143
 context/WORKLOG.md D-043
 context/extracted/47-P306-NOTES.md D-042
+context/extracted/48-P306-ROUND3-READ-PATH.md D-042
 context/extracted/46-P305-BOOKMARKS.md D-042
 context/reviews/arivoo-continuous-engineering-execution-directive-2026-11-01.md D-022
+context/reviews/arivoo-continuation-directive-2026-11-03.md D-022
 harness/runs/claim-056-p306-notes D-042

@@ -109,18 +109,24 @@ BMHIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT b.id, 'revision' AS kind
               "NULL::text AS context_after, l.event, l.actor, l.created_at "
               "FROM arv.bookmark_lifecycle l WHERE l.bookmark_id = {id}) t "
               "ORDER BY t.created_at, t.revision NULLS LAST, t.kind;")
-# P3-06 slice one (RTM §2.5 item 7): the note read — the entity's CURRENT
-# revision + the authored content (the explicit version-aware references are
-# CLAIM-057's slice); the content rides the JSON string raw below U+0020 ONLY,
-# so U+2028/U+2029 travel raw and the framing law holds on this arm too
-NOTE_SQL = ("SELECT row_to_json(t)::text FROM (SELECT n.id AS note_id, n.revision, n.content, "
-            "n.actor, n.created_at FROM arv.note n WHERE n.id = {id} "
-            "ORDER BY n.revision DESC LIMIT 1) t;")
-# the §3.3 parity read — tombstoned iff tombstones > restores (the 0007/0008
-# convention)
-NOTESTATE_SQL = ("SELECT count(*) FILTER (WHERE event = 'tombstone') || '|' || "
-                 "count(*) FILTER (WHERE event = 'restore') FROM arv.note_lifecycle "
-                 "WHERE note_id = {id};")
+# P3-06 slice one (RTM §2.5 item 7 + §3.3): the note read — ONE statement,
+# ONE snapshot: the entity's CURRENT revision + the authored content + the
+# DERIVED tombstone parity share the same read (the #91 round-3 read-path
+# repair — the two-read form let a tombstone commit between the state check
+# and the content fetch, returning a tombstoned note's ordinary content; a
+# read whose snapshot begins after the commit must NEVER return it).  The
+# parity flag rides the line before the payload (the revision|state
+# convention — the || concatenation casts the boolean to text as the full
+# word true/false, never a pipe, so the one-split parse is exact); zero rows
+# stays the absent/out-of-scope refusal (RLS — never a side channel); the
+# explicit version-aware references are CLAIM-057's slice; the content rides
+# the JSON string raw below U+0020 ONLY, so U+2028/U+2029 travel raw and the
+# framing law holds on this arm too
+NOTE_SQL = ("SELECT COALESCE((SELECT count(*) FILTER (WHERE event = 'tombstone') > "
+            "count(*) FILTER (WHERE event = 'restore') FROM arv.note_lifecycle "
+            "WHERE note_id = {id}), false) || '|' || row_to_json(t)::text FROM "
+            "(SELECT n.id AS note_id, n.revision, n.content, n.actor, n.created_at "
+            "FROM arv.note n WHERE n.id = {id} ORDER BY n.revision DESC LIMIT 1) t;")
 # tombstoned hidden from the ordinary listing (the LIST_SQL convention — the
 # HAVING-over-zero-rows form keeps active listed)
 NOTELIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT DISTINCT n.id FROM arv.note n "
@@ -331,21 +337,21 @@ def main() -> int:
         return _resolve(db, a.owner, a.id)
     if a.what == "get-note":
         # P3-06 (RTM §3.3): the ordinary read refuses tombstoned ids with the
-        # typed code; the governed history keeps them addressable
+        # typed code; the governed history keeps them addressable — the state
+        # decision and the content fetch share ONE statement, ONE snapshot
+        # (the #91 round-3 repair: the two-read form raced a committing
+        # tombstone and returned the tombstoned note's content; no lock is
+        # added to ordinary readers — the snapshot closes the race)
         qid = "'" + a.id.replace("'", "''") + "'"
-        rows = _read(db, a.owner, NOTESTATE_SQL.format(id=qid))
-        if rows is None:
-            return 1
-        if rows:
-            t_n, r_n = (int(x) for x in rows[0].split("|"))
-            if t_n > r_n:
-                return _refuse_tombstoned_note(a.id)
         rows = _read(db, a.owner, NOTE_SQL.format(id=qid))
         if rows is None:
             return 1
         if not rows:
             return _refuse(a.id)
-        print(rows[0])
+        flag, payload = rows[0].split("|", 1)
+        if flag == "true":
+            return _refuse_tombstoned_note(a.id)
+        print(payload)
         return 0
     if a.what == "get-note-history":
         # the governed history (P3-06): every revision + every lifecycle

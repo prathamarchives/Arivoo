@@ -764,5 +764,22 @@
         "observed_at": "2026-11-03T12:41:13.040077+00:00"
       }
     ]
+  },
+  "harness/tests/test_note_reference.py": {
+    "schema": 2,
+    "binding_commit": "1937d2af0d1c8a0ba1205ccf4739825ee63d11f7",
+    "binding_sha256": "1bbd84fb8cc715f123ced5e23097b58ffff58f8cd28f8a5e08f32956e55710aa",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-057 (P3-06 slice two) commit B: the NTR-01..12 suite's RED observed at the exact predecessor 36e34920 (CLAIM-056's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000: the --ref surface on create_note absent, migration 0010 absent; the transcript at the slice's runs dir red-01.txt; record 49 \u00a711 (the record-18 \u00a74.1 / claim-055/claim-056 precedent class)",
+    "current_sha256": "af78a2ac5cb03c09cb73b70925361b8b82d2581e9b3b98a5be8555f747e4c88c",
+    "amendments": [
+      {
+        "prior_sha256": "1bbd84fb8cc715f123ced5e23097b58ffff58f8cd28f8a5e08f32956e55710aa",
+        "new_sha256": "af78a2ac5cb03c09cb73b70925361b8b82d2581e9b3b98a5be8555f747e4c88c",
+        "note": "CLAIM-057 (P3-06 slice two) the implementation-cycle repairs on the NTR suite (the #89/#90/#91 precedent class \u2014 assertions corrected against the live rig, none removed, none weakened): (a) NTR-01's provenance read renders pipe-joined STRINGS under psql -A -t (the first-draft pr[0] indexed a CHARACTER, never a column \u2014 the conjunct now pins the exact row set owner|n-A1 x4); (b) NTR-04's no-side-channel pin recast to the honest form: the refusal TEMPLATE is byte-identical to the absent-target refusal modulo the caller-supplied id (the first draft's replace-inequality was ill-typed \u2014 the command legitimately echoes the id the caller itself supplied); (c) NTR-11's schema audits aligned to the live catalog: pg_trigger's tgname (never trigger_name), the auto-generated UNIQUE name note_reference_note_id_note_revision_ref_kind_ref_id_owner__key, the alphabetical CHECK ordering, and the direct relacl read (arv_app=ar \u2014 INSERT+SELECT only)",
+        "observed_at": "2026-11-04T11:06:56.215138+00:00"
+      }
+    ]
   }
 }

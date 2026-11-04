@@ -1,0 +1,186 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-057-p306-refs",
+ "base_sha": "36e34920f1da028495b7857b137442957b3a8d9f",
+ "reviewed_diff_sha256": "5c32d5d457e2d3279166b19247f9e1d9667bb1c748871c360281d48372cac9f6",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-145",
+  "INT-144",
+  "INT-143"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-02",
+  "SYS-03",
+  "SYS-04"
+ ],
+ "system_claims": [
+  "C1",
+  "C5"
+ ],
+ "changed_components": [
+  "harness/migrations/0010_note_references.sql (new, 103 lines): the twelve-column table, the shape CHECK, two UNIQUEs (id/owner + the per-revision set semantics), the guard trigger (advisory lock on the note's canonical key, 007 binding then 003 target-in-scope), the immutable trigger, RLS FORCED + policy + grants, the arv-baseline-bump directive",
+  "harness/commands.py: _nte_body extended backward-compatibly (refs key rides the payload ONLY when non-empty); new _nte_refs (parse + 006 shape classes + 008 set semantics + canonical sort), _nte_check_targets (003 caller-scoped existence), _nte_ref_stmts (per-revision INSERTs in the same transaction); create_note/revise_note carry --ref; the argparse surface confined to the create_note/revise_note parsers",
+  "harness/query.py: NOTE_SQL and NOTEHIST_SQL render per-revision refs (json_agg subselects INSIDE the one-statement forms — the #91 round-3 single-snapshot structure preserved); NOTELIST_SQL untouched",
+  "harness/crash.py: --ref forwarded on the create_note/revise_note crash arms",
+  "harness/gate.py: harness/tests/test_note_reference.py registered in TESTS (ARV-RED-008)",
+  "harness/tests/test_note_reference.py (new, 596 lines): the NTR-01..12 registry — the re-homed pre-split reference assertions (the 9608a3a split record: none deleted from the project)",
+  "Records/docs: CLAIMS.md (the CLAIM-057 row with the widened Scope globs incl. crash.py + gate.py), STATE.md, AGENTS.md, PLAN.md, INTENT-LEDGER.md (INT-145), context/WORKLOG.md, context/extracted/49-P306-REFS.md, context/reviews/arivoo-merge-authorization-2026-11-04.md, harness/red-records.json (the RED binding + the implementation-cycle amendments), harness/runs/claim-057-p306-refs/"
+ ],
+ "interfaces_reviewed": [
+  "The --ref CLI surface on create_note/revise_note (commands.py main()) and both crash.py arms",
+  "The command-log idempotency boundary: body hash, replay, ARV-CMD-409 (incl. the cross-slice no-refs vs refs-carrying distinction and the shuffled-set replay)",
+  "The pre-BEGIN validation read (_nte_check_targets on the RLS-scoped arv_app session)",
+  "The arv.note_reference substrate: the BEFORE-INSERT guard (007 binding, 003 target-in-scope, the canonical advisory-lock key equal to the 0009 guards' key), the four CHECKs, the two UNIQUEs, the append-only trigger",
+  "The role boundaries: arv_app (INSERT/SELECT only, UPDATE/DELETE permission-denied), arv_read (SELECT auditor), postgres (ARV-CAP-005 on UPDATE/DELETE)",
+  "RLS: enabled AND FORCED, the owner_isolation policy, cross-owner invisibility of reference rows",
+  "The read arms: get-note (single statement: state + content + refs one snapshot), get-note-history (per-revision refs + null on lifecycle rows), list-notes (tombstone-hidden)",
+  "The crash spine: pre-commit and post-commit-pre-ack with --ref on create and revise",
+  "The schema/catalog surface: information_schema, pg_trigger, pg_constraint, pg_policies, pg_indexes, role_table_grants",
+  "The gate TESTS registration, the red-records binding digests, and the CLAIMS/scope.txt declaration agreement"
+ ],
+ "v_model": {
+  "component_verification": [
+   "Both suites re-run at the head b6b447b with the rig env by the reviewer's OWN runs: python3 harness/tests/test_note_reference.py exit 0 x3 (outputs byte-identical to the recorded run-01..03 sha 4b329986...); python3 harness/tests/test_note.py exit 0 x2 (byte-identical to run-04's sha 1afeb216...); test_highlight + test_bookmark exit 0 (the landed families unbroken)",
+   "The reviewer's independent 12-probe scratch-DB behavioral set: the version pinning through TWO further target revises and the target's tombstone; the 12 shape classes all 006 with zero effect; the 8 dangling classes all 003; the 5 cross-owner kinds all 003 with refusal templates byte-identical to the same-kind absent form (incl. anchor, beyond the suite's coverage); duplicates 008 (same target twice, same target at two revisions)",
+   "The substrate: arv_app UPDATE/DELETE permission-denied; superuser UPDATE/DELETE ARV-CAP-005; TEN hostile INSERT classes all refused (dangling 003, work-with-revision shape CHECK, ghost binding 007 firing before the target check, highlight-without-rev 003, cross-owner 003, wrong-owner binding 007, unknown kind 003, the actor-vocab CHECK) — zero hostile rows landed",
+   "The catalog audits: twelve columns with NO defaults; the two triggers; relrowsecurity/relforcerowsecurity true/true; PK + the two UNIQUEs + the four CHECKs exactly as declared; grants arv_app=INSERT,SELECT and arv_read=SELECT; the owner_isolation policy; the 0010 guard's lock key hashtext(NEW.note_id::text) equal to the 0009 guards' canonical key"
+  ],
+  "integration_verification": [
+   "The backward-compatible body verified BOTH ways: _nte_body with refs=None/[] byte-identical to the reconstructed pre-0010 form (in-process comparison) AND empirically — a committed no-refs note REPLAYS on a no-refs same-key retry, a refs-carrying retry under the same key 409s with zero ref rows, a different set 409s, a shuffled same set replays",
+   "The crash matrix with --ref through the real spine: pre-commit exit 2 with zero note AND zero reference deltas; post-commit-pre-ack exit 2 committing BOTH (note +1, refs +1) with the same-key replay returning status=replayed and the refs intact; a crashed revise leaves the reference rows unchanged; a revise crashing post-commit-pre-ack commits revision+refs and replays",
+   "The read path through the real psql boundary: get-note on a tombstoned referenced note refuses ARV-QRY-003 with NO content and NO refs leak; get-note-history renders every revision with its OWN refs; restore returns the current view with its current refs; list-notes hides the tombstoned note"
+  ],
+  "system_verification": [
+   "The split honesty: git diff 36e3492..b6b447b -- harness/tests/test_note.py is EMPTY (the note-core suite untouched); the highlight/bookmark families byte-untouched (zero code hunks); only migration 0010 added; the --ref argparse confined to the note parsers",
+   "The gate components re-run by the reviewer: gate --known-bad-only exit 0; gate --no-diff --skip-suites exit 0; tools/verify_canonical_layer.py exit 0 (127 entries — INT-145 counted)",
+   "The RED-record honesty: sha256(git show 1937d2a:harness/tests/test_note_reference.py) = 1bbd84fb... matches the recorded binding_sha256; the HEAD suite = af78a2ac... matches current_sha256 and the working tree; at base 36e3492 commands.py carries no --ref and no 0010 migration exists — the machinery-absent RED is structurally confirmed"
+  ],
+  "validation": [
+   "RTM §2.5 item 7's acceptance — 'explicit, version-aware references' — observed end-to-end: a note referencing a highlight at revision 1 keeps @1 through the target's revisions 2 AND 3 (never a silent retarget); a note-to-note historical ref stays pinned after the referenced note revises; a reference at the current revision accepted; work/source/anchor carry no revision dimension (the shape law at the parse, the CHECK, and the guard)",
+   "The export-ready history property re-observed: the current view (content + refs) re-derives from the get-note-history rows ALONE",
+   "The whole-command durability contract (C1's rung): content and references commit as ONE effect at every probed spine point — the reference rows can never split from their revision"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "shape grammar abuse: missing/forbidden @rev by kind, unknown kinds, malformed/empty ids, rev 0/negative/non-numeric",
+   "control": "the _nte_refs parse boundary (ARV-NTE-006) + the note_reference_ref_shape_check CHECK + the substrate guard",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-02",
+   "scenario": "dangling and phantom targets: absent ids per kind, nonexistent target revisions, valid-beside-dangling partial sets",
+   "control": "the pre-BEGIN caller-scoped existence read (ARV-NTE-003) + the 0010 BEFORE-INSERT guard, the set atomic with the note revision",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-03",
+   "scenario": "cross-owner probing: another owner's work/source/anchor/highlight/note at both the command boundary and the substrate",
+   "control": "the RLS-scoped session read + the owner_isolation policy — absent and another owner's are the SAME refusal, never a side channel (the reviewer's template byte-comparison)",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-04",
+   "scenario": "set-semantics abuse: duplicate targets, the same target at two revisions, case-variant duplicates in one command",
+   "control": "the (kind, target) seen-set (ARV-NTE-008) + the per-revision UNIQUE constraint; the case-variant escape is F2 (routed)",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-05",
+   "scenario": "hostile direct SQL as arv_app and as superuser: UPDATE/DELETE and ten INSERT classes on arv.note_reference",
+   "control": "the permission grants (INSERT/SELECT only) + the ARV-CAP-005 append-only trigger + the guard/CHECK battery — zero hostile rows landed",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-06",
+   "scenario": "idempotency confusion: no-refs vs refs-carrying retries, shuffled sets, different sets, UUID case-spelling variants of ref targets",
+   "control": "the canonical body (the sorted set rides the payload only when non-empty — the backward-compatible hash) + the command-log replay; the case-variant target spelling is F1 (routed)",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-07",
+   "scenario": "crash-split effects: content committed without references or vice versa at every spine point on create and revise",
+   "control": "the reference INSERTs ride the SAME build/build_txn transaction as the revision — one commit point, one whole-command effect; the replay converges lost acks",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-08",
+   "scenario": "silent retargeting: target revision churn (two further revises) and target tombstone under a pinned reference",
+   "control": "the reference MEANS the immutable (id, revision) pair — pinned at write time, rendered version-aware by the read arms",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-09",
+   "scenario": "tombstone visibility leaks: refs or content through the ordinary read, list-notes, history, and restore",
+   "control": "the single-statement NOTE_SQL (state + content + refs one snapshot — ARV-QRY-003) + the governed history retaining everything",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "F1",
+   "severity": "P2",
+   "status": "open",
+   "location": "harness/commands.py (_nte_refs/_nte_body) — the --ref target spellings",
+   "note": "--ref target UUID spellings are not canonicalized before the body hash: create_note --ref work:<UPPERCASE> commits and a same-key retry with the canonical lowercase spelling meets ARV-CMD-409 (the payload's refs array carries the raw CLI spelling — two spellings of one logical target are two bodies). The #91 round-2 repair (_nte_canon_id over the note's OWN id) is the exact precedent class; the ref targets missed the same treatment. Fail-closed: zero effect, no data corruption; the natural CLI path (ids copied from list-*/get-*) is canonical lowercase. ROUTED to a small follow-up slice mirroring _nte_canon_id over ref targets inside _nte_refs (canonicalize before the body hash and the seen-set) — the same routing as the bookmark raw-spelling sibling (record 47 §9). Not merge-blocking."
+  },
+  {
+   "id": "F2",
+   "severity": "P2",
+   "status": "open",
+   "location": "harness/commands.py (_nte_refs) — the case-variant in-command duplicate",
+   "note": "create_note --ref work:<UPPER> --ref work:<lower> (one UUID, two spellings): the case-sensitive seen-set misses the duplicate (no ARV-NTE-008), both INSERTs run, and the second collides on the per-revision UNIQUE (ref_id normalizes) — the session dies mid-transaction surfacing ARV-CMD-011 with a 'concurrent writer' attribution when the command self-collided. Zero effect verified (0 note rows, 0 reference rows, 0 command_log rows). ROUTED with F1 (same root cause, same fix); documented so the 011 code is not over-trusted on hostile inputs. Zero correctness impact."
+  }
+ ],
+ "not_verified": [
+  "The full make verify as ONE command was not executed end-to-end inside the reviewer's sandbox (background processes killed between tool invocations; the sequential run exceeds a single call's cap): its components were reproduced individually — NTR x3 exit 0 (outputs byte-identical to the recorded run-01..03), NTE x2 exit 0 (byte-identical to run-04), test_highlight + test_bookmark exit 0, gate --known-bad-only exit 0, gate --no-diff --skip-suites exit 0, verify_canonical_layer exit 0; the builder's recorded run-05 carries the complete sequential make verify exit 0 at the same tree",
+  "The suites outside this diff's blast radius were not re-run by the reviewer (test_migrations, test_substrate, test_commands, test_anchor, test_gate_dispatch, test_mutation_floor, test_trusted_gate): their files are byte-untouched by the diff; the gate's --skip-suites pass and the canonical layer cover their registration — and the builder's run-05 + the PR's five-check run cover them on the real stack",
+  "The remote CI five-check run on GitHub is not observable from the reviewer's sandbox (observed separately by the builder at the exact head — the walls' own evidence)",
+  "The deterministic tombstone-vs-read interleaving (NTE-15's race machinery) was not re-derived with the reviewer's own harness: NOTE_SQL verified structurally single-statement and the post-tombstone refusal probed post-hoc; the race pin itself rests on the NTE suite's green re-runs",
+  "The reviewer's own multi-writer concurrency round on note_reference inserts was not run: the guard's serialization is evidenced by the lock-key equality with the 0009 guards (verified) plus NTE-12/13's green re-runs, not by an independent interleaving harness",
+  "P3-09 export/restore round-trip of references is out of this slice's scope (only the history-rebuild property re-observed); the governed purge (D-011) and reference behavior under purge are excluded by the slice's own bounded exclusions — refs to tombstoned targets at existing revisions were observed ACCEPTED (the revision rows persist per §3.3), recorded as observed behavior, never adjudicated here"
+ ],
+ "builder_context": "session-39 builder context: Super Z (GLM host) — the session that merged PR #91 under INT-145, wrote commit A (the post-#91 reconciliation + INT-145), the RED 1937d2a, the GREEN 3657f2c + the selfcheck repairs 5db97ad + the record mint 2fe73d7 + the CI scope repair b6b447b, and the implementation-cycle test amendments",
+ "reviewer_context": "agent ntr-sev-r1 (agent-772c9495-a1f5-42bd-90bb-e523b63ebe20): the fresh-context systems-engineering reviewer over the CLAIM-057 diff (base 36e3492, head b6b447b), independent of the builder; executed 2026-11-04T12:07Z→12:20Z as one time-boxed round on the local rig (PostgreSQL 17.11, PGPORT 5433); its own scratch databases (created and dropped through the adapter); the probes enumerated in interfaces_reviewed; the report recast by the builder ONLY to the frozen vocabularies (system_claims as C-ids, the P3 severity recast to P2 per the #90 precedent, the finding dispositions as status+note) — the observations verbatim",
+ "disposition": "PASS",
+ "review_summary": "The round independently re-proves the version-aware reference machine on a fresh scratch rig: references pin the immutable (id, revision) pair through target revision churn and tombstones; the refusal grammar (the 006 shape classes, the 003 dangling and cross-owner same-refusal including the suite-uncovered anchor kind, the 008 set semantics) holds with zero effect at every attempt; the substrate refuses hostile writes at both role boundaries with the right codes and zero rows; the crash matrix keeps content and references one transactional whole; and the no-refs body stays byte-identical to the pre-0010 form so cross-slice retries replay. Both suites re-ran green with outputs byte-identical to the builder's recorded run hashes; the note-core/highlight/bookmark families are byte-untouched in the diff; the RED-record digests bind exactly. Two findings, both fail-closed and sharing one root cause — ref-target UUID spellings are not canonicalized before the body hash (F1: a false ARV-CMD-409 on a case-variant retry, the #91 round-2 precedent class) and the case-variant in-command duplicate surfaces as a misattributed ARV-CMD-011 (F2) — both ROUTED to one small canonicalization follow-up (the _nte_canon_id mirror over ref targets); neither opens a P0/P1. Honest limits: the single-command make verify ran as reproduced components inside the reviewer's sandbox (the builder's recorded run-05 carries the whole), the remote CI run is the walls' own evidence, and the race/concurrency pins rest on the suites' green re-runs plus structural verification."
+}

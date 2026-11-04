@@ -1,0 +1,2 @@
+FAIL ARV-TEST-000: the P3-06 reference machinery is absent (machinery-absent class; --ref surface on create_note absent: True; migration 0010 present: False) — the implementation lands after this RED, never before it (LAW-11)
+EXIT=1

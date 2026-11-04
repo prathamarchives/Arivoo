@@ -781,5 +781,14 @@
         "observed_at": "2026-11-04T11:06:56.215138+00:00"
       }
     ]
+  },
+  "harness/tests/test_keyword_index.py": {
+    "schema": 2,
+    "binding_commit": "090152f5f8c4193d4bfa4996b9172e61e238a179",
+    "binding_sha256": "2d3b3e87880725994827da1b26ad62f0f9c9b5ad1aeb8b58a17c8840d766581b",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-058 (P3-07) commit B: the KWR-01..10 suite's RED observed at the exact predecessor b698608d (CLAIM-057's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000: the search arm absent, the rebuild command absent, migration 0011 absent; the transcript at the slice's runs dir red-01.txt; record 50 \u00a711 (the record-18 \u00a74.1 / claim-055/056/057 precedent class)",
+    "current_sha256": "2d3b3e87880725994827da1b26ad62f0f9c9b5ad1aeb8b58a17c8840d766581b"
   }
 }

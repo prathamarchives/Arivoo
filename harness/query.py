@@ -165,7 +165,7 @@ NOTEHIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT n.id, 'revision' AS ki
 # ordering (kind, entity_id). The result line: kind|id|revision|freq.
 SEARCH_SQL = ("SELECT k.kind || '|' || k.entity_id || '|' || k.revision || '|' || "
               "count(DISTINCT k.token)::text FROM arv.keyword_index k WHERE "
-              "k.token = ANY({terms}) AND ("
+              "k.token = ANY ({terms}) AND ("
               "(k.kind = 'note' AND NOT EXISTS (SELECT 1 FROM arv.note_lifecycle l "
               "WHERE l.note_id = k.entity_id AND l.owner_scope = k.owner_scope "
               "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "

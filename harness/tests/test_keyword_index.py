@@ -314,12 +314,12 @@ def main() -> int:
 
         # ---- KWR-07 — the explicit lag/failure contract
         cnt_before = audit("SELECT count(*) FROM arv.keyword_index;")
-        p_fail = cmd("create_note", "--content", "A refused note stays unindexed: token gravitonx.",
+        p_fail = cmd("create_note", "--content", "A refused note stays unindexed: token quarkx.",
                      "--ref", "note:00000000-0000-7000-8000-0000000000f1@1", key="n-fail")
         pn2 = mk_note("n-ok2", "The immediate note: token bosonx rides.")
         n2 = ack_field(pn2, "result_ref")
         r_imm = search("A", "bosonx")
-        n_fail_rows = audit("SELECT count(*) FROM arv.keyword_index WHERE token='gravitonx';")
+        n_fail_rows = audit("SELECT count(*) FROM arv.keyword_index WHERE token='quarkx';")
         ok7 = (p_fail.returncode == 1 and "ARV-NTE-003" in p_fail.stdout
                and n_fail_rows == "0"  # the FORCED refusal leaves zero index rows
                and pn2.returncode == 0

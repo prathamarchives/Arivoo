@@ -784,7 +784,7 @@
   },
   "harness/tests/test_keyword_index.py": {
     "schema": 2,
-    "binding_commit": "090152f5f8c4193d4bfa4996b9172e61e238a179",
+    "binding_commit": "7c358271cc7eba2c0a0ca7c29428047a76db4a5b",
     "binding_sha256": "2d3b3e87880725994827da1b26ad62f0f9c9b5ad1aeb8b58a17c8840d766581b",
     "red_exit": 1,
     "red_code": "ARV-TEST-000",

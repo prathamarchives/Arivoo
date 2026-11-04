@@ -789,7 +789,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-058 (P3-07) commit B: the KWR-01..10 suite's RED observed at the exact predecessor b698608d (CLAIM-057's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000: the search arm absent, the rebuild command absent, migration 0011 absent; the transcript at the slice's runs dir red-01.txt; record 50 \u00a711 (the record-18 \u00a74.1 / claim-055/056/057 precedent class)",
-    "current_sha256": "e4b14e38b24bf37a94e7c38bb1f67472cf131c5b76ccf598471b6e77725fa41d",
+    "current_sha256": "87c0047195c6e4dfb372c43263742a7f23003b3e4e4cc73cc45869c97788b5ae",
     "amendments": [
       {
         "prior_sha256": "2d3b3e87880725994827da1b26ad62f0f9c9b5ad1aeb8b58a17c8840d766581b",
@@ -802,6 +802,12 @@
         "new_sha256": "e4b14e38b24bf37a94e7c38bb1f67472cf131c5b76ccf598471b6e77725fa41d",
         "note": "CLAIM-058 (P3-07) the SEV round-1 repairs (the kwr-sev-r1 findings F1..F8 \u2014 the reviewer's P1s answered in-slice, the #91 review-round precedent class): (a) F1 \u2014 the tokenizer made GENUINELY Unicode ([^\\W_]+ under re.UNICODE: accented Latin, Greek, Cyrillic, every script) with CJK singles + whole runs, and KWR-06's \u00e9/caf\u00e9/\u03b5\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac assertions made REAL (the vacuous rc-only form removed) with the boundary fixture note (the earlier fixture was revised away by KWR-04 \u2014 the probe raced its own fixture); (b) F2 \u2014 the SYS-07 provenance columns landed (extractor + extractor_config + input_digest, the 0006 extraction-generation convention) and SYS-07 added to the slice's requirement set; (c) F3 \u2014 the search terms deduplicated (a repeated term is one term); (d) F5 \u2014 the current-revision currency join at query time (the phantom-revision guard: the search joins the max indexed revision per entity); (e) F7 \u2014 KWR-07's refusal FORCED (the dangling-ref note: rc=1, zero index rows) replacing the any-outcome acceptance; (f) F8 \u2014 the result line's 4th field relabeled matched-terms (never the false document-frequency claim); (g) the string-vs-int count comparison repaired",
         "observed_at": "2026-11-04T13:44:03.347615+00:00"
+      },
+      {
+        "prior_sha256": "e4b14e38b24bf37a94e7c38bb1f67472cf131c5b76ccf598471b6e77725fa41d",
+        "new_sha256": "87c0047195c6e4dfb372c43263742a7f23003b3e4e4cc73cc45869c97788b5ae",
+        "note": "CLAIM-058 (P3-07) the CI scanner repair (the isolation checker's generic-secret-assignment pattern collided with the audit query's 'token=gravitonx' \u2014 the 12+ char \\S class grabbed the quoted token plus trailing punctuation; NEVER a secret, never a credential): the fixture token renamed quarkx. The assertion is identical (the count of the refused note's token = 0); a cosmetic rename only",
+        "observed_at": "2026-11-04T14:25:52.813543+00:00"
       }
     ]
   }

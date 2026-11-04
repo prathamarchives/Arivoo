@@ -305,8 +305,7 @@ def main() -> int:
                and gfs is not None and gfs.get("refs") is None
                and rr == [f"anchor|{anc_a}|", f"highlight|{h1}|1",
                           f"source|{sid_a}|", f"work|{wid_a}|"]
-               and all(pr[0] == "owner" for pr in prov)
-               and {pr[1] for pr in prov} == {"n-A1"})
+               and len(prov) == 4 and set(prov) == {"owner|n-A1"})
         check("NTR-01", ok1,
               "create with the mixed set appends the revision-1 note row AND the per-revision reference rows (work/source/anchor versionless, highlight@1 version-aware); get-note renders the version-aware refs array; a free-standing note renders refs as JSON null (zero rows aggregated); every reference row carries the command provenance (actor + the idem-key ref); the ack names revision=1 + durability_rung=local_durable",
               "the note's references are explicit per-revision rows — the free-standing law holds (zero references legal) and the mixed shape renders exactly (RTM §2.5 item 7)")
@@ -354,12 +353,16 @@ def main() -> int:
         p_xs = mk_note("n-xs", content="x", refs=[f"source:{sid_b}"])
         p_xh = mk_note("n-xh", content="x", refs=[f"highlight:{hlb}@1"])
         p_xn = mk_note("n-xn", content="x", refs=[f"note:{noteb}@1"])
+        # the refusal TEMPLATE is byte-identical to the absent-target form
+        # modulo the caller-supplied id (which the caller already knows —
+        # never an existence side channel)
+        tmpl_w = p_xw.stdout.replace(wid_b, "<id>")
+        tmpl_abs = p_dw.stdout.replace(ghost, "<id>")
         ok4 = (p_xw.returncode == 1 and "ARV-NTE-003" in p_xw.stdout
                and p_xs.returncode == 1 and "ARV-NTE-003" in p_xs.stdout
                and p_xh.returncode == 1 and "ARV-NTE-003" in p_xh.stdout
                and p_xn.returncode == 1 and "ARV-NTE-003" in p_xn.stdout
-               and p_xw.stdout == p_xw.stdout.replace(wid_b, ghost)
-               and p_xn.stdout == p_xn.stdout.replace(noteb, ghost))
+               and tmpl_w == tmpl_abs)
         check("NTR-04", ok4,
               "references to ANOTHER OWNER's work/source/highlight/note are the SAME ARV-NTE-003 refusal as the absent targets — the refusal text never distinguishes another owner's object from a nonexistent one (no existence side channel through the reference boundary; the session is RLS-scoped to the caller)",
               "absent and another owner's are the SAME refusal at every boundary (RTM §2.10; LAW-22 owner isolation — the reference check rides the caller-scoped read)")
@@ -524,15 +527,14 @@ def main() -> int:
         cols = audit_rows("SELECT column_name FROM information_schema.columns "
                           "WHERE table_schema='arv' AND table_name='note_reference' "
                           "ORDER BY ordinal_position;")
-        trig = audit_rows("SELECT trigger_name FROM pg_trigger WHERE "
+        trig = audit_rows("SELECT tgname FROM pg_trigger WHERE "
                           "tgrelid='arv.note_reference'::regclass AND NOT tgisinternal "
-                          "ORDER BY trigger_name;")
+                          "ORDER BY tgname;")
         rls = audit_rows("SELECT relrowsecurity::text, relforcerowsecurity::text FROM "
                          "pg_class WHERE oid='arv.note_reference'::regclass;")
-        grants = audit_rows("SELECT r, privilege_type FROM (SELECT 'arv_app' AS r, "
-                            "privilege_type FROM aclexplode(relacl) WHERE "
-                            "relacl IS NOT NULL) s JOIN pg_class c ON TRUE WHERE "
-                            "c.oid='arv.note_reference'::regclass ORDER BY privilege_type;")
+        grants = audit("SELECT CASE WHEN 'arv_app=ar/postgres' = ANY (string_to_array("
+                       "trim(relacl::text, '{}'), ',')) THEN 'ar' ELSE relacl::text END "
+                       "FROM pg_class WHERE oid='arv.note_reference'::regclass;")
         uniq = audit_rows("SELECT conname FROM pg_constraint WHERE conrelid="
                           "'arv.note_reference'::regclass AND contype='u' ORDER BY conname;")
         chk = audit_rows("SELECT conname FROM pg_constraint WHERE conrelid="
@@ -543,12 +545,12 @@ def main() -> int:
                 and trig == ["note_reference_guard", "note_reference_immutable"]
                 and rls == ["true|true"]
                 and uniq == ["note_reference_id_owner_scope_key",
-                             "note_reference_note_revision_ref_kind_ref_id_owner_s"]
-                and chk == ["note_reference_note_revision_check",
+                             "note_reference_note_id_note_revision_ref_kind_ref_id_owner__key"]
+                and chk == ["note_reference_actor_check",
+                            "note_reference_note_revision_check",
                             "note_reference_ref_kind_check",
-                            "note_reference_ref_shape_check",
-                            "note_reference_actor_check"]
-                and "INSERT" in " ".join(grants) and "SELECT" in " ".join(grants))
+                            "note_reference_ref_shape_check"]
+                and grants == "ar")
         check("NTR-11", ok11,
               "the 0010 schema audits: the exact twelve-column set (identity + the per-revision binding + the version-aware target + provenance); the two triggers (the guard + the immutable append-only); RLS enabled AND FORCED; the two UNIQUE constraints (the id/owner key + the per-revision set semantics); the CHECK constraints (revision >= 1, the kind enum, the actor enum, the ref SHAPE); arv_app holds INSERT + SELECT only",
               "the substrate is the authority the command boundary rides (the 0007/0008/0009 convention — every constraint named, none decorative)")

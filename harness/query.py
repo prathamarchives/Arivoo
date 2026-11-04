@@ -118,14 +118,21 @@ BMHIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT b.id, 'revision' AS kind
 # parity flag rides the line before the payload (the revision|state
 # convention — the || concatenation casts the boolean to text as the full
 # word true/false, never a pipe, so the one-split parse is exact); zero rows
+# P3-06 (RTM §2.5 item 7): the note read — state + content + the OWN
+# version-aware reference set in ONE statement, ONE snapshot (the #91 round-3
+# repair's form preserved: a post-tombstone read NEVER returns the content,
+# and the refs now ride the same consistent snapshot); absent/out-of-scope
 # stays the absent/out-of-scope refusal (RLS — never a side channel); the
-# explicit version-aware references are CLAIM-057's slice; the content rides
-# the JSON string raw below U+0020 ONLY, so U+2028/U+2029 travel raw and the
-# framing law holds on this arm too
+# content rides the JSON string raw below U+0020 ONLY, so U+2028/U+2029
+# travel raw and the framing law holds on this arm too
 NOTE_SQL = ("SELECT COALESCE((SELECT count(*) FILTER (WHERE event = 'tombstone') > "
             "count(*) FILTER (WHERE event = 'restore') FROM arv.note_lifecycle "
             "WHERE note_id = {id}), false) || '|' || row_to_json(t)::text FROM "
-            "(SELECT n.id AS note_id, n.revision, n.content, n.actor, n.created_at "
+            "(SELECT n.id AS note_id, n.revision, n.content, n.actor, n.created_at, "
+            "(SELECT json_agg(json_build_object('kind', r.ref_kind, 'id', r.ref_id, "
+            "'revision', r.ref_revision) ORDER BY r.ref_kind, r.ref_id, "
+            "r.ref_revision) FROM arv.note_reference r WHERE r.note_id = n.id AND "
+            "r.note_revision = n.revision AND r.owner_scope = n.owner_scope) AS refs "
             "FROM arv.note n WHERE n.id = {id} ORDER BY n.revision DESC LIMIT 1) t;")
 # tombstoned hidden from the ordinary listing (the LIST_SQL convention — the
 # HAVING-over-zero-rows form keeps active listed)
@@ -138,10 +145,14 @@ NOTELIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT DISTINCT n.id FROM arv
 # per line (the newline-only framing law; the revision rows carry the content
 # so the current view rebuilds from history ALONE — the export-ready history)
 NOTEHIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT n.id, 'revision' AS kind, "
-                "n.revision, n.content, NULL::text AS event, n.actor, n.created_at "
-                "FROM arv.note n WHERE n.id = {id} UNION ALL "
+                "n.revision, n.content, (SELECT json_agg(json_build_object('kind', "
+                "r.ref_kind, 'id', r.ref_id, 'revision', r.ref_revision) ORDER BY "
+                "r.ref_kind, r.ref_id, r.ref_revision) FROM arv.note_reference r "
+                "WHERE r.note_id = n.id AND r.note_revision = n.revision AND "
+                "r.owner_scope = n.owner_scope) AS refs, NULL::text AS event, n.actor, "
+                "n.created_at FROM arv.note n WHERE n.id = {id} UNION ALL "
                 "SELECT l.note_id, 'lifecycle' AS kind, NULL::integer AS revision, "
-                "NULL::text AS content, l.event, l.actor, "
+                "NULL::text AS content, NULL::json AS refs, l.event, l.actor, "
                 "l.created_at FROM arv.note_lifecycle l WHERE l.note_id = {id}) t "
                 "ORDER BY t.created_at, t.revision NULLS LAST, t.kind;")
 

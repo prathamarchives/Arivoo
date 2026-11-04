@@ -767,7 +767,7 @@
   },
   "harness/tests/test_note_reference.py": {
     "schema": 2,
-    "binding_commit": "ae551b271660fc39f89b0346bc0d1ebbf61bea9a",
+    "binding_commit": "1937d2af0d1c8a0ba1205ccf4739825ee63d11f7",
     "binding_sha256": "1bbd84fb8cc715f123ced5e23097b58ffff58f8cd28f8a5e08f32956e55710aa",
     "red_exit": 1,
     "red_code": "ARV-TEST-000",

@@ -1,0 +1,7 @@
+{
+  "command": "SLICE=claim-057-p306-refs GATE_DIFF=36e34920f1da028495b7857b137442957b3a8d9f make gate",
+  "exit_code": 0,
+  "commit": "b6b447b6b6e0f7f4afdb4b07aeacbc95a0ef0f95",
+  "output_sha256": "b7fc1e1826bba07854c5338bf0d72104349fe71e437ae5331f0aeb637bed14e3",
+  "recorded_at": "2026-11-04T12:32:58.710614+00:00"
+}

@@ -705,5 +705,64 @@
         "observed_at": "2026-11-01T12:53:19.151327+00:00"
       }
     ]
+  },
+  "harness/tests/test_note.py": {
+    "schema": 2,
+    "binding_commit": "f0a8125eb6697050c25a91126a840fa995f8b458",
+    "binding_sha256": "4368470c87c78ef7d12321e490a9d184c65c6fafd59550b9c52664e90bfea39d",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-056 (P3-06) commit B: the NTE-01..14 suite's RED observed at the exact predecessor f86e52b in a temp worktree and bound to commit f0a8125 (machinery-absent ARV-TEST-000: create_note absent, get-note absent, migration 0009 absent; the transcript at the slice's runs dir red-01.txt; record 47 \u00a711 \u2014 the record-18 \u00a74.1 / claim-055 precedent class)",
+    "current_sha256": "22cef49aa699e8364bf33e0dff03872c77c4844d9b5a88e4b0c49a7da4a082fa",
+    "amendments": [
+      {
+        "prior_sha256": "4368470c87c78ef7d12321e490a9d184c65c6fafd59550b9c52664e90bfea39d",
+        "new_sha256": "d7dd5d9774c28f0a39efe9a2969be072bd6ce33805d02530acce25b4c957a32b",
+        "note": "CLAIM-056 (P3-06) the pre-implementation assertion-form repairs on the NTE suite (the #89/#90 precedent class, before the first GREEN run): (a) NTE-03's hostile inserts use gen_random_uuid() natively \u2014 the ::text form cannot assign into a UUID column (probed live on the rig: 'column id is of type uuid but expression is of type text'); (b) NTE-11's schema audits aligned to the BMK-11 proven pg_catalog forms (pg_trigger per table, pg_class RLS rows, aclexplode grants per table+role \u2014 the information_schema.role_table_grants GROUP BY form double-counts a privilege across two grantees) \u2014 assertions strengthened, none removed",
+        "observed_at": "2026-11-02T04:32:51.452880+00:00"
+      },
+      {
+        "prior_sha256": "d7dd5d9774c28f0a39efe9a2969be072bd6ce33805d02530acce25b4c957a32b",
+        "new_sha256": "1c3dc15c1c0672447cf00c4a7c813239a0db12501938d2b516a9033f199e765c",
+        "note": "CLAIM-056 (P3-06) commit C's implementation-cycle repairs on the NTE suite (the #89/#90 precedent class \u2014 assertions strengthened, none removed): (a) the audit reads of content-bearing rows use the row_to_json one-line form + newline-only framing (a pipe-delimited read fragments on the content's raw newlines; audit_rows/splitlines itself split on U+2028 \u2014 the ANC-10 law applied to the test's own readers); (b) NTE-06's reference-count check made relative (before/after \u2014 the absolute '0' assumed a clean table the earlier cases had already populated); (c) NTE-07's restore-order repaired (the first restore succeeds, the SECOND is the ARV-NTE-005 restore-of-active) + the hostile revision-append uses revision 99 (revision 3 existed); (d) NTE-11's PK read via pg_get_constraintdef (the information_schema.table_constraints join returns empty under arv_read \u2014 probed live); (e) NTE-13/14's deterministic park moved to arv.note_reference ACCESS EXCLUSIVE (arv.note/arv.command_log are touched by the tombstone's PRE-lock path \u2014 note_reference is the first post-lock write only a reviser touches; both revisers now carry a source ref)",
+        "observed_at": "2026-11-02T04:42:23.339118+00:00"
+      },
+      {
+        "prior_sha256": "1c3dc15c1c0672447cf00c4a7c813239a0db12501938d2b516a9033f199e765c",
+        "new_sha256": "2a61da5c655ee5dd95319309a132cb2269cd7534042311863d1d6ed566f89745",
+        "note": "CLAIM-056 (P3-06) commit D \u2014 the review round's repairs pinned in the suite (assertions ADDED, none removed): NTE-03 gains the strengthened-revision-guard pins (the phantom-identity append ARV-NTE-001 + the non-contiguous gap append ARV-NTE-011 \u2014 the independent verifier's V-1 + the SEV's F2, convergent); NTE-05's ordinal-backstop expectation updated to the guard's named contiguity refusal (the BEFORE trigger precedes the PK \u2014 ARV-NTE-011); NTE-14's tombstone-wait pattern updated to the serialized lifecycle form (the lock taken as the command's OWN first statement \u2014 the F1 repair) + the history-renders-commit-order pin; NTE-15 ADDED (the case-variant lock-key serialization \u2014 the F3 repair, claim-055 F5's class closed for the note family)",
+        "observed_at": "2026-11-02T05:20:51.660663+00:00"
+      },
+      {
+        "prior_sha256": "2a61da5c655ee5dd95319309a132cb2269cd7534042311863d1d6ed566f89745",
+        "new_sha256": "30a100cbb0530b469fe85b347e33935b6e8f37ea699f050c6bbb84bdc2ad6030",
+        "note": "CLAIM-056 the LAW-05 SPLIT (the gate's own named repair \u2014 'split the slice'; the P3-M0 three-slice-sequence precedent): the version-aware REFERENCE machine (arv.note_reference + its guard + the --ref surface + the reference cases NTE-03-ref/NTE-08/NTE-15's ref parts) moves to CLAIM-057's slice; test_note.py becomes the note CORE suite (NTE-01..13 \u2014 the interleaving parks moved to arv.note ACCESS EXCLUSIVE: the state read is the first post-lock table touch; the canonical-key pin folded into NTE-13; the lifecycle-mutation pin moved to NTE-07 where a lifecycle row exists). The moved assertions mint their own RED in CLAIM-057's suite at CLAIM-056's merged head \u2014 none deleted from the project, all re-homed",
+        "observed_at": "2026-11-02T06:12:08.987722+00:00"
+      },
+      {
+        "prior_sha256": "30a100cbb0530b469fe85b347e33935b6e8f37ea699f050c6bbb84bdc2ad6030",
+        "new_sha256": "f9185e7904daac280bf088488df5740c23472309895008fc74dc1627c7ccc94e",
+        "note": "CLAIM-056 the #91 review round's repairs (CodeRabbit's four threads, every one read in full and verified valid; the Major's assertion ADDED): NTE-05 gains the cross-note replay pin (the same idem key + the same content on a DIFFERENT note -> ARV-CMD-409 with zero effect on it \u2014 the target id now rides the revise body in its canonical lowercase form, the landed families' convention; the docstring tightened to hold the 800-line limit \u2014 no assertion removed)",
+        "observed_at": "2026-11-02T07:17:09.350000+00:00"
+      },
+      {
+        "prior_sha256": "f9185e7904daac280bf088488df5740c23472309895008fc74dc1627c7ccc94e",
+        "new_sha256": "986eb3c8b49aa6a360aa6a5461543ecb2f9dc3c8149eff950331c38071afcb10",
+        "note": "CLAIM-056 the #91 review round's repairs \u2014 the final docstring trim to the 800-line law (the assertions all held; the registry wording tightened only)",
+        "observed_at": "2026-11-02T07:31:51.510813+00:00"
+      },
+      {
+        "prior_sha256": "986eb3c8b49aa6a360aa6a5461543ecb2f9dc3c8149eff950331c38071afcb10",
+        "new_sha256": "bd6fad3b3493fb4ee894e9f8938db30ed9137ab889a55fdd30084947b73e2c40",
+        "note": "CLAIM-056 the #91 ROUND-2 repairs (CodeRabbit 4439931169, the UUID-spelling canonicalization \u2014 every PostgreSQL-accepted spelling of one note is the SAME logical command): NTE-14 ADDED (the braced/no-hyphen revise retry and the uppercase/braced tombstone retry all REPLAY \u2014 never ARV-CMD-409; the boundary lock key is the canonical key \u2014 the braced revise waits AT its own first statement while the canonical key is held, zero granted advisory keys for arv_app) \u2014 the assertion ADDED, none removed; the docstring/comment prose tightened to hold the 800-line law (the commit-H precedent). The observed RED at the predecessor 1de5fba: exit 1, NTE-01..13 PASS + NTE-14 FAIL (red-02.txt)",
+        "observed_at": "2026-11-02T09:05:00+00:00"
+      },
+      {
+        "prior_sha256": "bd6fad3b3493fb4ee894e9f8938db30ed9137ab889a55fdd30084947b73e2c40",
+        "new_sha256": "22cef49aa699e8364bf33e0dff03872c77c4844d9b5a88e4b0c49a7da4a082fa",
+        "note": "CLAIM-056 the #91 round-3 read-path RED (the continuation directive section 2: get-note checks tombstone state through one _read() and fetches content through a second _read() with no shared snapshot \u2014 a tombstone committing between them returns the ordinary content; a P2 correctness finding, never a notverified entry): NTE-15 ADDED (the deterministic interleaving \u2014 the tombstone parked pre-commit at its command_log INSERT via the canonical advisory anchor, its arv.note read already done holding granted ACCESS SHARE; a pending ACCESS EXCLUSIVE on arv.note queued behind that share; the content read queued behind the pending exclusive \u2014 its snapshot begins only after the commit; observed live in the isolated worktree at c58182c before the pin: PRE-T get-note content exit 0 / POST-T get-note CONTENT exit 0 = the defect / a fresh read refuses ARV-QRY-003). The pin's own first-draft defect found by live diagnostics and fixed BEFORE the true RED: a psql \\echo meta-command swallows the REST OF ITS LINE, so a same-line 'unlock' after the marker never executed (the tombstone never left the advisory park) \u2014 the marker and the subsequent SQL ride SEPARATE LINES of one send (the round-2 TextIOWrapper lesson's class: the pin's own defect, never the machine's). At this tree: exit 1, NTE-01..14 PASS + NTE-15 FAIL (red-03.txt); the docstring/comment prose tightened to hold the 800-line law \u2014 no assertion removed; the implementation lands in the immediately-following commit, never before this RED (LAW-11)",
+        "observed_at": "2026-11-03T12:41:13.040077+00:00"
+      }
+    ]
   }
 }

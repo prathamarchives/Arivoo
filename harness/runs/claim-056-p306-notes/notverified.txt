@@ -1,0 +1,205 @@
+- NOT VERIFIED — the honest limits of CLAIM-056 / P3-06 SLICE ONE (the note
+  core machine; LAW-04; never empty-by-omission)
+- WHAT THIS SLICE PROVES, ON WHAT STACK: the note core machine of RTM §2.5
+  item 7 + §3.3 holds end-to-end over the REAL PostgreSQL boundary (17.11:
+  the local rig + CI's postgres:17 service): the deep owner-authored Note
+  as identity + immutable revisions + the AUTHORED long-form content (the
+  exact nine-column arv.note set — free-standing by construction, NO source
+  binding; the content read LOSSLESSLY: read_bytes + UTF-8 decode, no
+  newline translation — the 40-paragraph Unicode corpus with CJK, combining
+  marks, astral emoji, RTL, C0 control characters, U+2028/U+2029, and
+  psql-meta-command-looking lines round trips byte-identically through
+  create -> get-note AND get-note-history, verified by the suite AND by the
+  independent rounds' own corpora), THE SERIALIZED TRANSITION at both
+  layers (revise_note's complete transition inside ONE transaction behind
+  the per-note advisory xact lock taken on the CANONICAL lowercase key —
+  NTE-12's competing revisers BOTH persist (2 then 3, legal ordering,
+  revision 1 byte-unchanged); NTE-13's revise-vs-tombstone interleaving —
+  a revision NEVER commits after tombstoning, the history renders the
+  serialized commit order (the lifecycle timestamp taken INSIDE its locked
+  section), and the UPPERCASED-id reviser serializes on the SAME one key
+  (never the ARV-CMD-010 stall wrapper of the split-key defect)), the
+  strengthened revision-append guard (the phantom-identity append
+  ARV-NTE-001 + the non-contiguous gap append ARV-NTE-011 — the ordinal
+  backstop promoted to the named substrate refusal; the append on a
+  tombstoned note ARV-NTE-002), the crash matrix at every transaction
+  boundary (exit 2 no-ack; the same-key replay converges), the
+  replay/conflict contract (ARV-CMD-409), tombstone hiding from ordinary
+  retrieval (list + the typed ARV-QRY-003) while the governed history
+  retains every revision and event, the DERIVED current view (rebuildable
+  from the history rows ALONE — the export-ready history), the NUL boundary
+  named at this boundary (ARV-NTE-009) and the content-source refusals
+  (ARV-NTE-010), every ack naming durability_rung=local_durable (SYS-01),
+  and the 0009 schema conventions (no DEFAULTs, the four triggers, RLS
+  enabled AND FORCED, the ownership uniques, arv_app INSERT/SELECT +
+  arv_read SELECT). The suite NTE-01..13 GREEN at the split tree (the
+  split-tree regeneration run-26..29: the suite ×3 + make verify; the
+  historical pre-split run-01..25 preserved as the honest record of the
+  first cycle); the sixteen sibling suites GREEN (gate.py's TESTS: the
+  seventeen registered suites minus this slice's own); make verify GREEN
+  (the canonical layer 54/0). THE LAW-05 SPLIT (the gate's own named
+  repair at the first PR-mode run: source 472>400 + test 1101>800 — never
+  a weakened limit): P3-06 lands as a TWO-SLICE SEQUENCE; the split diff
+  re-measured at 348/400 source + 800/800 test; the landed
+  highlight/bookmark families byte-untouched; none of the moved reference
+  assertions deleted from the project — they re-home to CLAIM-057's suite
+  with its own RED at CLAIM-056's merged head.
+- THE INDEPENDENT ROUNDS (three SEV rounds + the test verifier, all
+  PASS): the test verifier agent-nte-verifier-r1 (zero P0/P1 — its own
+  45-check adversarial probe incl. the 31KB lossless corpus and the
+  transport-safety class); SEV round 1 agent-nte-sev-r1 (zero open P0/P1;
+  F1 ts-ordering, F2 phantom-identity — convergent with the verifier's
+  V-1, F3 case-variant lock key); SEV round 2 agent-nte-sev-r2 over the
+  repaired pre-split diff (zero open P0/P1 — each repair verified FROM
+  BOTH ENDS on the pre-repair and repaired trees); SEV round 3
+  agent-nte-sev-r3 over the SPLIT diff (zero open P0/P1 — the lossless
+  21.7KB corpus through three read paths, the canonical-key proof via
+  pg_locks (exactly ONE granted advisory lock at hashtext(lower(id))),
+  the strengthened-guard hostile matrix, the crash samples, the split
+  honesty audit (no reference machinery in the diff; the landed families
+  byte-untouched; the size law re-measured), and F4 re-confirmed live).
+  ALL THREE round-1 findings repaired in-PR (the phantom/contiguity
+  guard, the time-honest lifecycle form, the canonical lock key) with the
+  suite pins NTE-03/NTE-05/NTE-13.
+- THE NO-FIX DISPOSITIONS (the reasoning stated, D-042): V-2 (P3,
+  cosmetic) — the trigger-precedence shape class (both paths fail closed
+  with named codes; applies to CLAIM-057's reference guard). V-3 (P3) —
+  an EMPTY note body is accepted: no minimum-length law exists in the
+  card or the RTM; inventing a refusal would be inventing a law — the
+  product decision is P4-C's. V-4 (P3) — the spine's NFC canonicalization
+  (K-04's pinned pre-existing choice): the content STORAGE is raw; a
+  spine-level change is out of this slice's bounded diff. F4 (P2, routed,
+  re-confirmed live by round 3) — the LANDED 0007/0008 families still
+  accept hostile phantom/gap revision appends (highlight: no entity-side
+  revision-append guard at all; bookmark: parity-only) — command-path
+  unreachable, never blocking, repairable only by a NEW migration (merged
+  migrations are forward-only): routed to the next substrate-touching
+  slice. F5 (P2, resolved by this finalize) — the split-tree artifacts
+  (this sheet, this not-verified list, run-30/31) land with the finalize
+  commit. THE REFERENCE MACHINE ITSELF is not a finding: it is the lawful
+  CLAIM-057 slice (migration 0010, RED-first at CLAIM-056's merged head).
+- NOT VERIFIED (the honest limits): THE VERSION-AWARE REFERENCE MACHINE
+  (arv.note_reference, the --ref surface, the reference guards and their
+  cases — dangling/shape/duplicate refusals, the cross-owner REF class,
+  the version-pinning of historical references, the refs-in-history
+  projection) — owed to CLAIM-057's own suite and SEV, never claimed
+  here; the concurrent-reader matrix on the new read arms (serially
+  exercised; the standing class); the >3-writer race classes and the 4+
+  mixed interleavings; U+001C/1D/1E (the file/record/group separators)
+  unexercised on the content path; NUL remains a NAMED note-boundary
+  refusal only — the spine-level NUL-literal follow-up stays open; the
+  spine's NFC canonicalization unprobed beyond the verifier's
+  observation; the empty-content ruling (V-3) — P4-C's; F4's per-family
+  repair (the routed follow-up); the governed purge (D-011 — P3-09's);
+  the diagram/structured-block serialization contract (P4-C's reservation
+  — plain text only, no structured-block claim); the keyword index
+  (P3-07) and the outbox/sync rungs (P3-08) — their own slices; the Q8
+  synthetic-only boundary; the ARV-SEV-009 undecidable-base regression;
+  the N12 self-test-row extension; the isolation undecidable classes;
+  Q10; the host-level workflow protection; the >30s marker-wall wait
+  bound not re-probed; the sibling suites' split-tree re-runs relied on
+  the builder's records + make verify (the SEV rounds re-ran the NTE
+  suite + make verify themselves); the external GitHub-side merge-chain
+  facts (observed live at the PR, never in-file).
+- ROUND-2 ADDENDUM (the #91 round-2 + the SEV round 4, 2026-11-02 — the
+  repaired-diff re-bind): WHAT THE ROUND PROVES: every PostgreSQL-ACCEPTED
+  UUID spelling of one note (braced, no-hyphen, uppercase, and their
+  combinations) is the SAME logical command — the variant-spelling revise
+  AND tombstone/restore retries all REPLAY the committed result (never
+  ARV-CMD-409), and the boundary lock key is the substrate guards' OWN
+  canonical key (hashtext of the uuid's canonical text — a braced-spelling
+  revise waits AT its own first statement while the canonical key is held,
+  zero granted advisory keys for arv_app, never a second key for one
+  note); the committed payload hashes for the normal hyphenated spelling
+  are byte-identical before and after the repair (the RED lower() form ==
+  the GREEN canonical form — the reviewer verified the byte-equality from
+  both ends); the replay precedes validation (a variant-spelling retry of
+  an already-committed revise AFTER tombstoning REPLAYS, never ARV-NTE-002
+  — the spine's own contract, the reviewer's probe); the crash matrix
+  holds through variant spellings; the cross-owner same-refusal holds for
+  every spelling (never a side channel); the landed families byte-untouched
+  in this diff (the reviewer's hunk check).
+- ROUND-2 ROUTED (never silently dropped): the LANDED bookmark family's
+  boundary (move_bookmark + _bm_lifecycle_command) locks and bodies on the
+  RAW spelling — the same variant-spelling class (different boundary keys
+  for one bookmark; variant retries as different commands); the substrate
+  trigger's canonical key remains the serializer there; the note family's
+  _nte_canon_id is the named pattern for its own slice (the F4-routing
+  precedent).
+- SEV ROUND-4 DISPOSITIONS (agent-nte-sev-r4, PASS zero open P0/P1): F1
+  (P3, repaired) — the _nte_canon_id docstring's 'only ever ARV-NTE-001'
+  universal was observably false for PostgreSQL-REFUSED spellings
+  (garbage, urn:uuid: prefixes, stray whitespace: the uuid cast fails
+  inside the session, the generic ARV-CMD-010 wrapper surfaces — exit 1,
+  ZERO effect, never a crash); the docstring now states both arms; the
+  full boundary parse guard + the read arms' raw-cast surfacing + the
+  landed families' same class ROUTED with the round-2 sibling class. F2
+  (P3, documented no-fix) — the ack's result_ref echoes the caller's raw
+  spelling on a first-commit-via-variant (any spelling re-canonicalizes
+  at every boundary; the ref remains a PostgreSQL-accepted spelling of
+  the same note; zero correctness impact). F3 (P3, routed) — the read
+  arms surface the raw uuid-cast error rather than ARV-QRY-001
+  (pre-existing, family-wide — routed with the sibling class).
+- ROUND-2 NOT VERIFIED: the reviewer's own honest limits — the sixteen
+  sibling suites relied on make verify's exit 0 (not individually
+  re-read); no reference-machine coverage (CLAIM-057's slice); no
+  >2-writer races or 4+ mixed interleavings through variant spellings;
+  U+001C/1D/1E unprobed; the landed families' unparseable-spelling class
+  verified by code reading, not live probes; the external GitHub-side
+  merge-chain facts (observed live at the PR, never in-file). The
+  run-record provenance: run-01..25 the historical pre-split originals
+  (binding the pre-split heads); run-26..31 the split-tree regeneration;
+  run-32..35 the round-2 repair-tree set (the suite ×3 + make verify,
+  bound at the records content head 88caee6 — the machine identical
+  through the docstring-only disposition delta 6d51469, proven by the
+  flanking direct suite re-run exit 0); run-36 the recorded PR-mode gate
+  at the artifact tree (the intermediate gate run at the PRE-BIND tree
+  refused on ARV-PRF-004 + ARV-SEV-003 — the bind-in-progress state,
+  never evidence, never recorded; the recorded run is the BOUND tree's).
+- ROUND-3 NOT VERIFIED (the read-path repair's honest limits; the R5-F2
+  repair — this addendum IS the round-3 section the SEV round-5 reviewer
+  required before the digest bind): the round proves get-note's state
+  decision and content fetch ride ONE READ COMMITTED statement snapshot
+  (the pre-T read legitimately observing active; the post-T read refusing
+  ARV-QRY-003 with no content — the reviewer's OWN two-session
+  interleaving, written independently of NTE-15, reproduced both
+  boundaries live with pg_stat_activity barrier observation). THE ROUTED
+  SIBLING CLASS (R5-F1, P2 open — the standing F4/F8 chain's read-arm
+  extension, never silently dropped): the LANDED highlight family's
+  get-capture (harness/query.py:417-423, STATE_SQL then CAP_SQL) and the
+  bookmark family's get-bookmark (query.py:285-291, BMSTATE_SQL then
+  BM_SQL) carry the SAME two-read shape the round-3 repair eliminated for
+  get-note — byte-untouched in this delta (the reviewer's zero-match
+  hunk grep), routed in record 48 §9, their own slice per the F4
+  precedent. THE VERSION-AWARE REFERENCE MACHINE stays CLAIM-057's
+  (arv.note_reference, migration 0010, the --ref surface). THE SEV
+  ROUND-5 DISPOSITIONS (agent-nte-sev-r5, PASS, zero open P0/P1): R5-F1
+  routed (above); R5-F2 RESOLVED by this addendum (the round-3
+  notverified section, absent at review time, lands in this artifact
+  commit before the digest bind). THE REVIEWER'S OWN HONEST LIMITS: a
+  full make verify did not complete inside the reviewer's session (both
+  background attempts killed by the sandbox process reaper mid-run —
+  environment, not repo; compensated by run-40's recorded exit 0 at this
+  exact tree + the reviewer's own NTE suite run byte-matching run-37..39
+  (output sha 1afeb216...46e5c40b identical) + the orchestrator's
+  post-recovery make verify exit 0 + the recorded PR-mode gate run-41
+  re-executing the suite set + the KB matrix within the gate); the gate
+  refusal surface not run by the reviewer itself (run-41 records it);
+  the round-3 fresh-context verifier's 27 probe groups not re-run
+  (record 48 §7 carries the PASS account); GitHub-side facts unverified
+  in the reviewer's session (no network); the reviewer's byte-exact
+  content probe used a short pipe/CJK/U+2028/U+2029 payload, not its own
+  multi-KB corpus; the source-size law's exact counting rule not located
+  in-budget (the gate's scope/size check is the mechanical enforcement);
+  standing un-re-probed: U+001C/1D/1E, >3-writer races, NFC
+  canonicalization, the sixteen sibling suites individually. THE
+  RUN-RECORD PROVENANCE: run-37..39 the round-3 suite ×3 + run-40 make
+  verify, all bound at the round-3 content head 6cc9260 (re-observed
+  byte-identical post-recovery: the fourth FACT-001 environment recycle
+  crashed the rig mid-session on 2026-11-04 — WAL crash recovery, the
+  missing bookkeeping directories recreated, migrate 9/9 + verify-schema
+  + health OK + the suite GREEN + make verify GREEN 54/0 all re-observed
+  BEFORE any edit at the same tree); run-41 the recorded PR-mode gate at
+  THIS artifact tree (the digest binds LAST over the content head
+  6cc9260 — the intermediate pre-bind gate refusal on ARV-SEV-003 is the
+  bind-in-progress state, never evidence, never recorded).

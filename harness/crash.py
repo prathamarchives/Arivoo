@@ -17,6 +17,8 @@ from harness.commands import record_event, import_source, create_highlight  # no
 from harness.commands import revise_highlight, tombstone_highlight, restore_highlight  # noqa: E402
 from harness.commands import (create_bookmark, move_bookmark,  # noqa: E402
                               tombstone_bookmark, restore_bookmark)
+from harness.commands import (create_note, revise_note,  # noqa: E402
+                              tombstone_note, restore_note)
 from harness.extract import extract_source  # noqa: E402
 
 POINTS = ("after-begin", "pre-commit", "post-commit-pre-ack",
@@ -38,7 +40,9 @@ def main() -> int:
                     choices=["record_event", "import_source", "create_highlight",
                              "extract_source", "revise_highlight", "tombstone_highlight",
                              "restore_highlight", "create_bookmark", "move_bookmark",
-                             "tombstone_bookmark", "restore_bookmark"])
+                             "tombstone_bookmark", "restore_bookmark",
+                             "create_note", "revise_note", "tombstone_note",
+                             "restore_note"])
     ap.add_argument("--point", required=True, choices=POINTS)
     ap.add_argument("--owner", required=True)
     ap.add_argument("--actor", default="owner")
@@ -53,7 +57,11 @@ def main() -> int:
     ap.add_argument("--source-id", default=None)
     ap.add_argument("--start", default=None, type=int)
     ap.add_argument("--end", default=None, type=int)
-    ap.add_argument("--id", default=None, help="the highlight/bookmark id (the P3-04/05 families)")
+    ap.add_argument("--id", default=None, help="the highlight/bookmark/note id (the P3-04/05/06 families)")
+    ap.add_argument("--content", default=None,
+                    help="the note's authored content, inline (P3-06)")
+    ap.add_argument("--content-file", default=None,
+                    help="the note's long-form authoring surface: a UTF-8 file read losslessly (P3-06)")
     a = ap.parse_args()
     if a.command != "import_source" and a.point not in SPINE_POINTS:
         print(f"CRASH-USAGE: the point {a.point!r} is an import-phase boundary — it exists "
@@ -95,6 +103,20 @@ def main() -> int:
     elif a.command == "restore_bookmark":
         rc = restore_bookmark(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                               idem_key=a.idem_key, id_=a.id, crash_at=a.point)
+    elif a.command == "create_note":
+        rc = create_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                         idem_key=a.idem_key, content=a.content,
+                         content_file=a.content_file, crash_at=a.point)
+    elif a.command == "revise_note":
+        rc = revise_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                         idem_key=a.idem_key, id_=a.id, content=a.content,
+                         content_file=a.content_file, crash_at=a.point)
+    elif a.command == "tombstone_note":
+        rc = tombstone_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                            idem_key=a.idem_key, id_=a.id, crash_at=a.point)
+    elif a.command == "restore_note":
+        rc = restore_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                          idem_key=a.idem_key, id_=a.id, crash_at=a.point)
     else:
         rc = create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                               idem_key=a.idem_key, source_id=a.source_id,

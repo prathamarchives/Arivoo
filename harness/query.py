@@ -109,6 +109,41 @@ BMHIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT b.id, 'revision' AS kind
               "NULL::text AS context_after, l.event, l.actor, l.created_at "
               "FROM arv.bookmark_lifecycle l WHERE l.bookmark_id = {id}) t "
               "ORDER BY t.created_at, t.revision NULLS LAST, t.kind;")
+# P3-06 slice one (RTM §2.5 item 7 + §3.3): the note read — ONE statement,
+# ONE snapshot: the entity's CURRENT revision + the authored content + the
+# DERIVED tombstone parity share the same read (the #91 round-3 read-path
+# repair — the two-read form let a tombstone commit between the state check
+# and the content fetch, returning a tombstoned note's ordinary content; a
+# read whose snapshot begins after the commit must NEVER return it).  The
+# parity flag rides the line before the payload (the revision|state
+# convention — the || concatenation casts the boolean to text as the full
+# word true/false, never a pipe, so the one-split parse is exact); zero rows
+# stays the absent/out-of-scope refusal (RLS — never a side channel); the
+# explicit version-aware references are CLAIM-057's slice; the content rides
+# the JSON string raw below U+0020 ONLY, so U+2028/U+2029 travel raw and the
+# framing law holds on this arm too
+NOTE_SQL = ("SELECT COALESCE((SELECT count(*) FILTER (WHERE event = 'tombstone') > "
+            "count(*) FILTER (WHERE event = 'restore') FROM arv.note_lifecycle "
+            "WHERE note_id = {id}), false) || '|' || row_to_json(t)::text FROM "
+            "(SELECT n.id AS note_id, n.revision, n.content, n.actor, n.created_at "
+            "FROM arv.note n WHERE n.id = {id} ORDER BY n.revision DESC LIMIT 1) t;")
+# tombstoned hidden from the ordinary listing (the LIST_SQL convention — the
+# HAVING-over-zero-rows form keeps active listed)
+NOTELIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT DISTINCT n.id FROM arv.note n "
+                "WHERE NOT EXISTS (SELECT 1 FROM arv.note_lifecycle l "
+                "WHERE l.note_id = n.id AND l.owner_scope = n.owner_scope "
+                "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
+                "count(*) FILTER (WHERE l.event = 'restore')) ORDER BY n.id) t;")
+# the governed history — every revision + every lifecycle event, one JSON row
+# per line (the newline-only framing law; the revision rows carry the content
+# so the current view rebuilds from history ALONE — the export-ready history)
+NOTEHIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT n.id, 'revision' AS kind, "
+                "n.revision, n.content, NULL::text AS event, n.actor, n.created_at "
+                "FROM arv.note n WHERE n.id = {id} UNION ALL "
+                "SELECT l.note_id, 'lifecycle' AS kind, NULL::integer AS revision, "
+                "NULL::text AS content, l.event, l.actor, "
+                "l.created_at FROM arv.note_lifecycle l WHERE l.note_id = {id}) t "
+                "ORDER BY t.created_at, t.revision NULLS LAST, t.kind;")
 
 
 def _read(db: str, owner: str, sql: str) -> list:
@@ -150,6 +185,17 @@ def _refuse_tombstoned_bookmark(id_: str) -> int:
           "(the governed history at get-bookmark-history retains every revision and event)")
     print("      repair: query.py get-bookmark-history for the governed view; commands.py "
           "restore_bookmark returns it to ordinary retrieval (the revisions were never touched)")
+    return 1
+
+
+def _refuse_tombstoned_note(id_: str) -> int:
+    """P3-06 (RTM §3.3): the typed tombstone refusal on the note read path —
+    the same class as the highlight/bookmark families' ARV-QRY-003."""
+    print(f"FAIL ARV-QRY-003: note {id_} is tombstoned — hidden from ordinary retrieval "
+          "(the governed history at get-note-history retains every revision, reference, "
+          "and event)")
+    print("      repair: query.py get-note-history for the governed view; commands.py "
+          "restore_note returns it to ordinary retrieval (the revisions were never touched)")
     return 1
 
 
@@ -275,7 +321,11 @@ def main() -> int:
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         p.add_argument("--id", required=True)
-    for name in ("list-captures", "list-bookmarks"):
+    for name in ("get-note", "get-note-history"):
+        p = sub.add_parser(name)
+        p.add_argument("--owner", required=True)
+        p.add_argument("--id", required=True)
+    for name in ("list-captures", "list-bookmarks", "list-notes"):
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
     p = sub.add_parser("resolve-anchor")
@@ -285,6 +335,43 @@ def main() -> int:
     db = os.environ.get("PGDATABASE", "postgres")
     if a.what == "resolve-anchor":
         return _resolve(db, a.owner, a.id)
+    if a.what == "get-note":
+        # P3-06 (RTM §3.3): the ordinary read refuses tombstoned ids with the
+        # typed code; the governed history keeps them addressable — the state
+        # decision and the content fetch share ONE statement, ONE snapshot
+        # (the #91 round-3 repair: the two-read form raced a committing
+        # tombstone and returned the tombstoned note's content; no lock is
+        # added to ordinary readers — the snapshot closes the race)
+        qid = "'" + a.id.replace("'", "''") + "'"
+        rows = _read(db, a.owner, NOTE_SQL.format(id=qid))
+        if rows is None:
+            return 1
+        if not rows:
+            return _refuse(a.id)
+        flag, payload = rows[0].split("|", 1)
+        if flag == "true":
+            return _refuse_tombstoned_note(a.id)
+        print(payload)
+        return 0
+    if a.what == "get-note-history":
+        # the governed history (P3-06): every revision + every lifecycle
+        # event — rows printed as-is, each already ONE escaped JSON line
+        # (the framing law)
+        rows = _read(db, a.owner, NOTEHIST_SQL.format(id="'" + a.id.replace("'", "''") + "'"))
+        if rows is None:
+            return 1
+        if not rows:
+            return _refuse(a.id)
+        for ln in rows:
+            print(ln)
+        return 0
+    if a.what == "list-notes":
+        rows = _read(db, a.owner, NOTELIST_SQL)
+        if rows is None:
+            return 1
+        for ln in rows:
+            print(json.loads(ln)["id"])
+        return 0
     if a.what == "get-bookmark":
         return _get_bookmark(db, a.owner, a.id)
     if a.what == "get-bookmark-history":

@@ -1,0 +1,334 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-056-p306-notes",
+ "base_sha": "f86e52b293be0e6b531440d8e98676b09a289783",
+ "reviewed_diff_sha256": "f46c74d5cb27f3e632de464d0ec86e75ecca4c63ee0f3d6a3afb8e29de170cca",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-143",
+  "INT-142",
+  "INT-141",
+  "INT-140",
+  "INT-139",
+  "INT-138",
+  "INT-135",
+  "INT-134"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-02",
+  "SYS-03",
+  "SYS-04"
+ ],
+ "system_claims": [
+  "C1",
+  "C2",
+  "C5"
+ ],
+ "changed_components": [
+  "harness/migrations/0009_note_lifecycle.sql (SLICE ONE of the two-slice sequence: arv.note \u2014 the exact nine-column free-standing set, identity + immutable revisions + the AUTHORED content, PK (id,revision), NO source binding by construction; arv.note_lifecycle \u2014 the \u00a73.3 event class, UNIQUE (id, owner_scope); the advisory-locked alternation guard ARV-NTE-004/005; the STRENGTHENED revision-append guard \u2014 phantom ARV-NTE-001 + contiguity ARV-NTE-011 + tombstoned ARV-NTE-002; ARV-CAP-005 append-only on both tables; RLS enabled AND FORCED + owner_isolation; arv_app INSERT/SELECT + arv_read SELECT; NO note_reference \u2014 the reference machinery is CLAIM-057's migration 0010; the lifecycle-target same-owner existence + alternation guard rides the lifecycle event's target, never a version-aware reference machine)",
+  "harness/commands.py (the note family WITHOUT the reference machine: _nte_canon_id \u2014 the round-2 UUID-spelling canonicalization, every PostgreSQL-accepted spelling of one note reduces to the canonical hyphenated lowercase text at the payload AND the lock key; _nte_refusal/_nte_current/_nte_content \u2014 the lossless read_bytes+UTF-8 content source with the ARV-NTE-009 NUL boundary + the ARV-NTE-010 content-source refusals \u2014 /_nte_body + create_note + revise_note (the serialized build_txn transition: the per-note advisory xact lock as the transaction's FIRST statement on the CANONICAL key, the state read + validation + inserts + commit inside ONE transaction) + tombstone_note/restore_note on the same locked form with the timestamp INSIDE (the F1 repair); the diff hunks PURELY ADDITIVE apart from the REGISTRY closing-line extension \u2014 the landed highlight/bookmark families untouched)",
+  "harness/query.py (ROUND-3 REPAIRED: get-note's state decision and content fetch now share ONE owner-scoped statement, ONE READ COMMITTED snapshot \u2014 NOTE_SQL becomes the single statement SELECT COALESCE((the derived tombstone parity over arv.note_lifecycle), false) || '|' || row_to_json(the current-revision payload), the boolean CAST rendering the full word true/false so the one-split parse is exact; a tombstone committing BEFORE the statement's snapshot is VISIBLE to the parity decision (ARV-QRY-003, the content never printed); a tombstone committing AFTER legitimately observes the active state; absent/out-of-scope stays ARV-QRY-001 through the same RLS-scoped _read; NOTESTATE_SQL REMOVED (dead after the merge); get-note-history untouched \u2014 the governed history keeps every revision and event; owner RLS remains the authority; NO lock added to ordinary readers \u2014 the race is closed by the snapshot, never hidden by serialization)",
+  "harness/crash.py (the four note arms \u2014 create/revise/tombstone/restore over the spine's three crash points; --content/--content-file plumbed)",
+  "harness/tests/test_note.py (NTE-01..15 at EXACTLY 800 lines \u2014 LAW-05's ARV-SIZE-004 limit met exactly: NTE-01..13 the split-tree core; NTE-14 the round-2 UUID-spelling regression (the braced/no-hyphen/uppercase replay + the held-canonical-key observation); NTE-15 the round-3 read-path regression \u2014 the deterministic interleaving: the tombstone parked pre-commit behind the advisory anchor + the command_log ACCESS EXCLUSIVE, the content read queued behind a pending table-exclusive on arv.note, both released only after the commit; the post-T read must refuse ARV-QRY-003 with no content, the pre-T read legitimately returns content, the governed history retains everything, the cross-owner read keeps ARV-QRY-001)",
+  "harness/gate.py (the TESTS registration: sixteen \u2192 seventeen suites, one line)",
+  "harness/red-records.json (the typed amendment chain for test_note.py: the RED bound to f0a8125 observed at the exact predecessor f86e52b + the B3 pre-implementation assertion-form repairs + the commit-C implementation-cycle repairs + the commit-D review-repair pins + the LAW-05 SPLIT amendment + the round-2 TextIOWrapper-pin amendment + the ROUND-3 NTE-15 amendment (the RED at 253ea9f over the pre-fix head c58182c) \u2014 every change to the suite is in the registry, none unregistered)",
+  "the bookkeeping: CLAIMS.md (the CLAIM-056 row amended to the two-slice framing; the ROUND-3 scope widening \u2014 the globs + scope.txt extended with context/extracted/48-P306-ROUND3-READ-PATH.md + context/reviews/arivoo-continuation-directive-2026-11-03.md, the trusted gate's own prescribed repair for the ARV-SCOPE-002/ARV-CLM-002 refusal at the records head 0c57701) / STATE.md (the two #91 thread repairs: the shortened active-task pointer form + the re-derived exact-next-action onto the round-3 finalize chain) / AGENTS.md (the phase line) / PLAN.md (the P3-06 card: NTE-01..15 with the round provenance split + the reference-guard clarification) / INTENT-LEDGER.md (INT-143) / context/WORKLOG.md (Tasks 69+70+72) / context/extracted/47-P306-NOTES.md + 48-P306-ROUND3-READ-PATH.md (records 47+48: the directive verbatim, the interleaving account, the four named round-3 failures incl. the psql \\echo line-swallowing pin defect, \u00a77 the fresh-context verifier's 27-probe-group PASS, \u00a79 the routed sibling class) / context/reviews/arivoo-continuation-directive-2026-11-03.md (the owner directive preserved verbatim)",
+  "harness/runs/claim-056-p306-notes/ (the slice's own evidence artifacts \u2014 excluded from the digest by the anti-self-referentiality contract: red-01/02/03.txt, run-01..41.json, proofsheet.md, notverified.txt, scope.txt, sev.json)"
+ ],
+ "interfaces_reviewed": [
+  "the note CLI surface: create_note/revise_note with exactly one of --content/--content-file (ARV-NTE-010 on neither/both/unreadable/not-UTF-8; ARV-NTE-009 on NUL) + tombstone_note/restore_note --id; NO --ref flag exists (verified against --help live, round 4; unchanged by round 3)",
+  "the spine's build_txn phase (harness/commands.py _spine): the complete revise/lifecycle transition INSIDE one transaction behind the per-note advisory xact lock taken as the FIRST statement; a _CapRefusal there rolls back with zero rows",
+  "the advisory-lock contract: hashtext of the uuid's CANONICAL lowercase text \u2014 the SAME key the 0009 substrate guards take whatever the CLI spelling (verified live via pg_locks, round 4; unchanged by round 3)",
+  "the substrate: arv.note + arv.note_lifecycle with the four triggers (note_immutable/note_lifecycle_immutable ARV-CAP-005 + note_lifecycle_guard + note_revision_guard), RLS enabled AND FORCED + the owner_isolation policy on both (re-probed live on the catalog by the round-5 reviewer), the grants, no DEFAULTs (LAW-24)",
+  "the read arms, ROUND-3 FORM: get-note \u2014 the single-statement snapshot read (state parity + content in ONE statement; the reviewer's OWN two-session interleaving observed the pre-T read returning content legitimately and the post-T read refusing ARV-QRY-003 with no content); list-notes (the active-only HAVING form); get-note-history (the export-ready history retaining every revision + event for a tombstoned note); NO reader lock on the ordinary path",
+  "the crash surface: harness/crash.py's four note arms over the spine's after-begin/pre-commit/post-commit-pre-ack points (exit 2 no-ack; the same-key replay converges)",
+  "the idempotency contract: the canonical body hash over the LOGICAL command payload {content}; same key + same body \u2192 status=replayed; same key + different body \u2192 ARV-CMD-409 \u2014 verified through VARIANT spellings (the round-5 reviewer's braced-uppercase revise retry replayed, never 409)",
+  "the scope-declaration surface (ROUND 3): the trusted PR-mode gate's ARV-SCOPE-002/ARV-CLM-002 refusal at the records head answered by the honest declaration widening (CLAIMS globs + scope.txt) \u2014 the gate's own prescribed repair, never an exemption"
+ ],
+ "v_model": {
+  "component_verification": [
+   "NTE-15 deterministic interleaving pin executed at the exact head: suite exit 0, PASS NTE-15 observed (the reviewer's own run)",
+   "the reviewer's independent 12-probe scratch-DB behavioral set over the note family surface (absent/cross-owner/tombstoned/history/replay/byte-exact content incl. pipes + CJK + U+2028/U+2029)",
+   "direct code read of the repaired single-statement NOTE_SQL and the removed NOTESTATE_SQL (both trees read: c58182c and 6cc9260)"
+  ],
+  "integration_verification": [
+   "the reviewer's own two-session race interleaving through the real commands.py/query.py boundary with pg_stat_activity barrier observation: post-T refusal verified live",
+   "RLS owner isolation at the psql boundary: absent vs. cross-owner same-refusal ARV-QRY-001 (behavioral + catalog: relrowsecurity/relforcerowsecurity true, owner_isolation ALL on both tables)",
+   "make migrate no-op against the applied state (9/9, checksums)"
+  ],
+  "system_verification": [
+   "full NTE suite re-run at the exact content head with the output hash byte-matching the recorded runs 37-39 (1afeb216...)",
+   "provenance chain: run-record binding commits exist; the red-record amendment's current_sha256 equals the live test file's hash; sev.json's pre-bind staleness confirmed as the expected state",
+   "the recorded run-40 make verify exit 0 + the orchestrator's post-crash-recovery make verify exit 0 (canonical layer 54/0) + the recorded PR-mode gate run-41 re-executing the suite set + the KB matrix at the artifact tree"
+  ],
+  "validation": [
+   "RTM \u00a73.3's state machine behaviorally confirmed on both read arms: the ordinary read refuses a tombstoned note, the governed history retains everything, restore-path machinery intact",
+   "authored-content losslessness through the new one-statement arm, including the pipe-character parse edge the repair newly introduced",
+   "absent/out-of-scope same-refusal \u2014 no existence side channel (the user-facing security contract)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a silent overwrite: two (or more) competing revisers on one note, or a revise racing a lifecycle transition \u2014 the losing revision destroyed or a revision committing against a tombstoned note",
+   "control": "the serialized build_txn transition behind the per-note advisory xact lock on the CANONICAL key (the transaction's FIRST statement) + the 0009 alternation/revision guards; the NTE suite's interleaving class",
+   "proof_ids": [
+    "run-26",
+    "run-27",
+    "run-28",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  },
+  {
+   "id": "FM-02",
+   "scenario": "a cross-owner leak: another owner's note readable/writable/listable through any note-family boundary",
+   "control": "RLS enabled AND FORCED + owner_isolation on both tables; arv_app/arv_read grants; the cross-owner suite class + the round-5 reviewer's own probe",
+   "proof_ids": [
+    "run-26",
+    "run-27",
+    "run-28",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a \u00a73.3 alternation violation: a double tombstone, a restore of an active note, a revision append on a tombstoned note",
+   "control": "the advisory-locked state read + the 0009 lifecycle guard (ARV-NTE-004/005); the NTE alternation class",
+   "proof_ids": [
+    "run-26",
+    "run-27",
+    "run-28",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  },
+  {
+   "id": "FM-04",
+   "scenario": "a lost or duplicated effect under crash/restart at a transaction boundary (a committed-but-unacked command, an acked-but-uncommitted one)",
+   "control": "harness/crash.py's four note arms over the spine's three crash points + the same-key replay convergence",
+   "proof_ids": [
+    "run-26",
+    "run-27",
+    "run-28",
+    "run-29",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  },
+  {
+   "id": "FM-05",
+   "scenario": "lossy content: newline translation, trimming, a framing split on U+2028/U+2029, an encoding reinterpretation, a pipe-character collision in the round-3 one-split parse",
+   "control": "the lossless read_bytes+UTF-8 content source + the ARV-NTE-009 NUL boundary + the round-5 reviewer's byte-exact probe incl. pipes + CJK + U+2028/U+2029",
+   "proof_ids": [
+    "run-26",
+    "run-27",
+    "run-28",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  },
+  {
+   "id": "FM-06",
+   "scenario": "a hostile direct write at the substrate: UPDATE/DELETE on the authoritative rows, a phantom revision, a gap",
+   "control": "the ARV-CAP-005 immutable triggers + the strengthened revision-append guard (phantom ARV-NTE-001 + contiguity ARV-NTE-011); the known-bad matrix",
+   "proof_ids": [
+    "run-26",
+    "run-27",
+    "run-28",
+    "run-40"
+   ]
+  },
+  {
+   "id": "FM-07",
+   "scenario": "an untruthful acknowledgment: an ack overstating persistence (naming a rung the server does not know)",
+   "control": "the spine's ack discipline (commit-before-ack; the crash arms' exit-2 no-ack form)",
+   "proof_ids": [
+    "run-26",
+    "run-27",
+    "run-28",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  },
+  {
+   "id": "FM-08",
+   "scenario": "a tombstoned note silently resurfacing in ordinary retrieval, or the governed history silently losing a revision or event \u2014 ROUND 3's OWN DEFECT CLASS: a tombstone committing BETWEEN the state read and the content read of one get-note returning the ordinary content",
+   "control": "the single-statement snapshot read (state parity + content in ONE READ COMMITTED statement \u2014 a pre-snapshot tombstone is visible to the parity decision; the post-snapshot one legitimately observes active); pinned by NTE-15's deterministic interleaving + the round-5 reviewer's OWN two-session probe",
+   "proof_ids": [
+    "red-03.txt",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  },
+  {
+   "id": "FM-09",
+   "scenario": "a duplicate logical effect or a silent body swap under the same idempotency key (replay divergence, a variant-spelling retry 409ing)",
+   "control": "the canonical body hash over the logical payload + _nte_canon_id at every boundary (payload AND lock key); the variant-spelling replay class (NTE-14) + the round-5 reviewer's braced-uppercase retry probe",
+   "proof_ids": [
+    "run-26",
+    "run-27",
+    "run-28",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  },
+  {
+   "id": "FM-10",
+   "scenario": "the case-variant or spelling-variant split lock key (the round-1 F3 / claim-055 F5 class): a revise invoked with a non-canonical spelling serializing on a SECOND key",
+   "control": "hashtext(_nte_canon_id(id_)) at both locked builds \u2014 the substrate guards' OWN key whatever the spelling; the held-canonical-key observation (NTE-14)",
+   "proof_ids": [
+    "run-26",
+    "run-27",
+    "run-28",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  },
+  {
+   "id": "FM-11",
+   "scenario": "the time-dishonest history render (the round-1 F1 class): a lifecycle event's created_at taken before a first-committed revision",
+   "control": "the timestamp INSIDE the locked build_txn transition; NTE-13's commit-order assertion",
+   "proof_ids": [
+    "run-26",
+    "run-27",
+    "run-28",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  },
+  {
+   "id": "FM-12",
+   "scenario": "migration incompatibility: the split 0009 failing to apply or verify on a fresh scratch DB, or the steady-state cluster drifting",
+   "control": "make migrate idempotence + verify-schema checksums (re-observed post-crash-recovery on the fourth FACT-001 recycle: 9/9, checksums match)",
+   "proof_ids": [
+    "run-04",
+    "run-12",
+    "run-13",
+    "run-26",
+    "run-29",
+    "run-40"
+   ]
+  },
+  {
+   "id": "FM-13",
+   "scenario": "the split dishonesty: reference machinery smuggled into this slice, a landed-family refactor riding the note diff, a scope breach left undeclared",
+   "control": "the trusted PR-mode gate's scope/claims checks (the ARV-SCOPE-002/ARV-CLM-002 refusal at the records head answered by the honest declaration widening \u2014 the gate's own prescribed repair) + the reviewer's zero-match hunk grep over the landed families + the diff hunks confined to the note family; the recorded artifact-tree gate run follows this bind as the next record (the recorder writes it after the run \u2014 a proof id may never cite it here)",
+   "proof_ids": [
+    "run-36",
+    "run-37",
+    "run-38",
+    "run-39",
+    "run-40"
+   ]
+  },
+  {
+   "id": "FM-14",
+   "scenario": "the round-3 defect class at the READ boundary: two separate snapshots (a state check then a content fetch) with a tombstone committing in between \u2014 the content returned for a tombstoned note",
+   "control": "RED at 253ea9f observed over the pre-fix head c58182c (red-03.txt: NTE-01..14 PASS + NTE-15 FAIL, exit 1 \u2014 the true RED, the granular standalone probe's interleaving) \u2192 GREEN at 47d71b7 (the single-statement merge; the suite \u00d73 exit 0 at the content head 6cc9260, the output hash byte-identical across runs 37-39 and the round-5 reviewer's own run)",
+   "proof_ids": [
+    "red-03.txt",
+    "run-37",
+    "run-38",
+    "run-39"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "F1",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/commands.py (_nte_lifecycle_command) + harness/tests/test_note.py (NTE-13)",
+   "note": "round 1: the lifecycle timestamp taken outside the locked section could render before a first-committed revision \u2014 REPAIRED (the serialized build_txn form, the timestamp INSIDE); pinned by NTE-13's commit-order assertion; carried through round 4; unchanged by round 3"
+  },
+  {
+   "id": "F2",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/migrations/0009_note_lifecycle.sql (the revision-append guard)",
+   "note": "round 1: the phantom-identity append accepted \u2014 REPAIRED (the strengthened guard ARV-NTE-001 + contiguity ARV-NTE-011); pinned by NTE-03; carried through round 4; unchanged by round 3"
+  },
+  {
+   "id": "F3",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/commands.py (revise_note's boundary lock)",
+   "note": "round 1: the case-variant lock key \u2014 REPAIRED (hashtext of the canonical lowercase text) and SUPERSEDED by the round-2 full-spelling canonicalization (_nte_canon_id); pinned by NTE-13/NTE-14; re-probed live by the round-5 reviewer (the braced-uppercase retry REPLAYS)"
+  },
+  {
+   "id": "F4",
+   "severity": "P2",
+   "status": "open",
+   "location": "harness/migrations/0007/0008 (the landed families' guards)",
+   "note": "routed, never silently dropped: the landed 0007/0008 families still accept hostile phantom/gap revision appends (command-path unreachable; a NEW migration required \u2014 merged migrations are forward-only) \u2014 the named follow-up slice; unchanged by rounds 3-5"
+  },
+  {
+   "id": "F5",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/runs/claim-056-p306-notes (the finalize artifacts)",
+   "note": "resolved by the finalize: the split-tree sheet + notverified + the digest bound at the content head; the round-3 finalize repeats the same form at the round-3 content head"
+  },
+  {
+   "id": "F6",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/commands.py (_nte_canon_id docstring) \u2014 the SEV round-4 reviewer's F1",
+   "note": "the round-2 repair's docstring claimed the unparseable spelling 'can only ever meet the ARV-NTE-001 same-refusal' \u2014 observably FALSE for PostgreSQL-REFUSED spellings; REPAIRED at the round-4 disposition commit: the docstring states both arms; the raw-cast class ROUTED with the sibling class; unchanged by round 3"
+  },
+  {
+   "id": "F7",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/commands.py (the ack's result_ref) \u2014 the SEV round-4 reviewer's F2",
+   "note": "documented no-fix: the ack's result_ref echoes the caller's raw spelling on a first-commit-via-variant (any spelling re-canonicalizes at every boundary; zero correctness impact)"
+  },
+  {
+   "id": "F8",
+   "severity": "P2",
+   "status": "open",
+   "location": "harness/query.py (the read arms) \u2014 the SEV round-4 reviewer's F3",
+   "note": "routed: the read arms surface the raw uuid-cast error (ARV-QRY-002 with the invalid-syntax message) for PostgreSQL-refused spellings rather than the ARV-QRY-001 same-refusal \u2014 pre-existing, family-wide (the landed highlight/bookmark arms identical); routed with the sibling class; unchanged by round 3"
+  },
+  {
+   "id": "R5-F1",
+   "severity": "P2",
+   "status": "open",
+   "location": "harness/query.py:285-291 (get-bookmark) + 417-423 (get-capture) \u2014 the SEV round-5 reviewer's finding",
+   "note": "the sibling two-read race shape on the LANDED read arms (BMSTATE_SQL then BM_SQL; STATE_SQL then CAP_SQL \u2014 the exact shape the round-3 repair eliminated for get-note): byte-untouched in the round-3 delta (the reviewer's zero-match hunk grep), ROUTED in record 48 \u00a79 + the round-3 notverified addendum + this report \u2014 their own slice per the F4/F8 routing precedent; never silently fixed, never silently ignored"
+  },
+  {
+   "id": "R5-F2",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/runs/claim-056-p306-notes/notverified.txt \u2014 the SEV round-5 reviewer's finding",
+   "note": "the round-3 notverified section was absent at review time (the file ended at the round-2 addendum) \u2014 RESOLVED by the round-3 addendum landing in THIS artifact commit (the read-path account + the R5-F1 routing + the reviewer's honest limits + the run-37..41 provenance + the fourth FACT-001 environment-recycle account), BEFORE the digest bind per the reviewer's own recommendation"
+  }
+ ],
+ "not_verified": [
+  "the version-aware REFERENCE machine (arv.note_reference, its guard, the --ref surface, its suite cases) is CLAIM-057's slice \u2014 migration 0009 carries only the lifecycle-target same-owner existence + alternation guard",
+  "the routed sibling classes stay open by design: the landed highlight/bookmark read arms' two-read shape (R5-F1) + their guards' phantom/gap acceptance (F4) + the raw uuid-cast surfacing (F8) \u2014 their own slice per the routing precedent, never silently dropped",
+  "the SEV round-5 reviewer could not complete a full make verify inside its own session (both background attempts killed by the sandbox process reaper mid-run \u2014 environment, never repo): compensated by run-40's recorded exit 0 at the exact tree + the reviewer's own NTE suite run byte-matching runs 37-39 + the orchestrator's post-crash-recovery make verify exit 0 (canonical 54/0) + the recorded PR-mode gate run-41 re-executing the suite set + the KB matrix at the artifact tree",
+  "the round-5 reviewer did not itself run the gate's refusal surface, the round-3 fresh-context verifier's 27 probe groups (record 48 \u00a77 carries the PASS account), or any GitHub-side fact (no network in its session) \u2014 the recorded run-41 + the live post-push five-check observation close the first; the others stand on their recorded accounts",
+  "the reviewer's byte-exact content probe used a short pipe/CJK/U+2028/U+2029 payload, not its own multi-KB corpus (the suite's larger corpora cover the class); the source-size law's exact counting rule was not located in the reviewer's budget (the gate's scope/size check is the mechanical enforcement \u2014 the recorded gate run-41 exit 0 is the bound observation)",
+  "the standing residuals unchanged: the concurrent-reader matrix; the >3-writer classes; the spine's NFC canonicalization boundary; U+001C/1D/1E unprobed; the sixteen sibling suites individually re-read only through make verify's aggregate"
+ ],
+ "builder_context": "session-37/38 builder context: Super Z (GLM host) \u2014 the session chain that wrote the implementation, the suite, all three review rounds' repairs, and this slice's records (round 1 the split core; round 2 the UUID-spelling canonicalization + the disposition repairs; round 3 the read-path snapshot repair + the records + the scope widening); the same context authored the finalize artifacts \u2014 the independence limit is stated, never claimed closed",
+ "reviewer_context": "agent nte-sev-r5: the ROUND-5 fresh-context systems-engineering reviewer over the REPAIRED diff (the round-3 content head 6cc9260 \u2014 the read-path snapshot repair + the records + the scope repair in), independent of the builder and of rounds 1-4; executed 2026-11-04T09:34:15Z\u219209:43:45Z as one time-boxed fresh-context review agent (the deadline-constrained protocol: the verify kicked off in the background, the probes in the foreground) over the real rig; its own 12-probe scratch-DB behavioral set + its own two-session race interleaving + its own suite run (output hash byte-identical to runs 37-39); a differing declared context is not cryptographic independence \u2014 the fresh-context execution and the separate merge-gate review remain the protocol",
+ "disposition": "PASS",
+ "review_summary": "ROUND 5 over the REPAIRED diff (the round-3 content head 6cc9260): PASS, zero open P0/P1 (two P2 findings \u2014 R5-F1 the sibling two-read shape on the landed read arms, ROUTED in record 48 \u00a79 + the round-3 notverified addendum; R5-F2 the absent round-3 notverified section, RESOLVED by the addendum landing in this artifact commit before the digest bind). The round-3 defect is real and directly observable in the pre-fix tree (NOTESTATE_SQL read then NOTE_SQL read, no shared snapshot); the repair merges the state decision and the content fetch into one owner-scoped statement with an exact first-pipe split, removes the dead constant, adds no reader lock, and leaves absent/out-of-scope at ARV-QRY-001 and the governed history untouched \u2014 every one of those properties verified by code read AND by the reviewer's own independent probes, including a from-scratch two-session interleaving that reproduced the pre-commit content legitimacy and observed the post-commit ARV-QRY-003 refusal with all three barriers (advisory, command_log, table-exclusive). The NTE suite passes 15/15 at the exact head with an output hash byte-identical to the recorded runs 37-39, and the test file's live hash matches the red-record's current_sha256. The RED transcript shows exactly NTE-15 failing at the RED head, the typed amendment is the last of eight in red-records.json, RLS is enabled and forced with the owner_isolation policy on both note tables, and migrate is a clean no-op. The one thing the reviewer could not complete in-session is a full make verify (the sandbox killed both background runs mid-suite \u2014 environment, never repo); run-40's recorded exit 0, the reviewer's own suite run, the orchestrator's post-recovery make verify, and the recorded gate run-41 stand as the compensating evidence, with the canonical-layer aggregate named on the not-verified list. Nothing observed contradicts any claim in the diff, the records, or the CLAIMS row; the binding independent verification for the merge gate is this round-5 record bound at this artifact commit (the digest binds LAST over the content head 6cc9260)."
+}

@@ -156,6 +156,35 @@ NOTEHIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT n.id, 'revision' AS ki
                 "l.created_at FROM arv.note_lifecycle l WHERE l.note_id = {id}) t "
                 "ORDER BY t.created_at, t.revision NULLS LAST, t.kind;")
 
+# P3-07 (RTM §2.5 the findability rung): the keyword search — the derived
+# index queried under the AUTHORITATIVE current view: the tombstone parity
+# joins at QUERY time (the index never governs visibility; a tombstoned
+# capture is filtered by the lifecycle parity, a restored one returns); the
+# multi-term AND semantics (a document matches only when EVERY term hits it
+# — HAVING count(DISTINCT token) = the term count); the deterministic
+# ordering (kind, entity_id). The result line: kind|id|revision|freq.
+SEARCH_SQL = ("SELECT k.kind || '|' || k.entity_id || '|' || k.revision || '|' || "
+              "count(DISTINCT k.token)::text FROM arv.keyword_index k WHERE "
+              "k.token = ANY ({terms}) AND ("
+              "(k.kind = 'note' AND NOT EXISTS (SELECT 1 FROM arv.note_lifecycle l "
+              "WHERE l.note_id = k.entity_id AND l.owner_scope = k.owner_scope "
+              "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
+              "count(*) FILTER (WHERE l.event = 'restore')))"
+              " OR (k.kind = 'highlight' AND NOT EXISTS (SELECT 1 FROM arv.highlight_lifecycle l "
+              "WHERE l.highlight_id = k.entity_id AND l.owner_scope = k.owner_scope "
+              "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
+              "count(*) FILTER (WHERE l.event = 'restore')))"
+              " OR (k.kind = 'bookmark' AND NOT EXISTS (SELECT 1 FROM arv.bookmark_lifecycle l "
+              "WHERE l.bookmark_id = k.entity_id AND l.owner_scope = k.owner_scope "
+              "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
+              "count(*) FILTER (WHERE l.event = 'restore')))"
+              " OR k.kind = 'source') "
+              "AND (k.kind = 'source' OR k.revision = ("
+              "SELECT MAX(e.revision) FROM arv.keyword_index e WHERE e.owner_scope = k.owner_scope "
+              "AND e.kind = k.kind AND e.entity_id = k.entity_id)) "
+              "GROUP BY k.kind, k.entity_id, k.revision "
+              "HAVING count(DISTINCT k.token) = {nterms} ORDER BY k.kind, k.entity_id;")
+
 
 def _read(db: str, owner: str, sql: str) -> list:
     """One owner-scoped read: the GUC + the SELECT in ONE batch (RLS enforced).
@@ -342,10 +371,26 @@ def main() -> int:
     p = sub.add_parser("resolve-anchor")
     p.add_argument("--owner", required=True)
     p.add_argument("--id", required=True)
+    p = sub.add_parser("search")
+    p.add_argument("--owner", required=True)
+    p.add_argument("terms", nargs="+", help="the keyword terms (AND semantics — every term must hit the document)")
     a = ap.parse_args()
     db = os.environ.get("PGDATABASE", "postgres")
     if a.what == "resolve-anchor":
         return _resolve(db, a.owner, a.id)
+    if a.what == "search":
+        # P3-07: the keyword search — case-folded whole-token terms, the
+        # multi-term AND intersection, the tombstone parity joined at query
+        # time (the index never governs visibility), RLS the owner boundary
+        terms_u = sorted({tm.casefold() for tm in a.terms})  # deduplicated (a repeated term is one term)
+        qterms = ", ".join("'" + tm.replace("'", "''") + "'" for tm in terms_u)
+        rows = _read(db, a.owner, SEARCH_SQL.format(terms="ARRAY[" + qterms + "]",
+                                                    nterms=len(terms_u)))
+        if rows is None:
+            return 1
+        for ln in rows:
+            print(ln)
+        return 0
     if a.what == "get-note":
         # P3-06 (RTM §3.3): the ordinary read refuses tombstoned ids with the
         # typed code; the governed history keeps them addressable — the state

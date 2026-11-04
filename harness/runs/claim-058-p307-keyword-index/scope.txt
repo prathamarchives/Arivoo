@@ -1,0 +1,29 @@
+# CLAIM-058 — P3-07: the keyword findability machine (the rebuildable
+# keyword index over committed sources/passages/captures/notes).
+# PLAN's P3-07 card; RTM §2.5 the findability rung (C1's durability ladder:
+# local-durable -> server-durable -> KEYWORD-SEARCHABLE -> semantically
+# indexed -> linked — this slice lands the keyword-searchable rung over the
+# local rig). The index is a DERIVED, REBUILDABLE layer: authored truth
+# stays in the authoritative rows; the index never an authority, always
+# re-derivable (the acceptance: delete/rebuild restores expected results).
+# The search contract: captures become searchable under a defined contract
+# or explicitly report indexing lag/failure — never a silent miss.
+# RED-first at CLAIM-057's merged head b698608d (machinery-absent
+# ARV-TEST-000, red-01.txt).
+#
+# The bounded exclusions per the card: the semantic/vector rungs P5's; the
+# outbox/sync is P3-08's; the export/restore is P3-09's; the governed purge
+# is D-011's; no refactor of the landed note/reference families.
+harness/tests/test_keyword_index.py D-041
+harness/commands.py D-041
+harness/query.py D-041
+harness/gate.py D-041
+harness/migrations/0011_keyword_index.sql D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/50-P307-KEYWORD-INDEX.md D-042
+harness/runs/claim-058-p307-keyword-index D-042

@@ -1,0 +1,2 @@
+FAIL ARV-TEST-000: the P3-07 keyword-index machinery is absent (machinery-absent class; search arm absent: True; rebuild command absent: True; migration 0011 present: False) — the implementation lands after this RED, never before it (LAW-11)
+EXIT=1

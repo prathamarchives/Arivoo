@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-058-p307-keyword-index",
  "base_sha": "b698608d52cb036027fd410e3737d1f11903cb43",
- "reviewed_diff_sha256": "b57d98a1340f996d4786245bf1b55c8fcb6f6148a443c6337e5abd7149f0378d",
+ "reviewed_diff_sha256": "3513de3bd9fefd76835659f8201b2def5d4d87cf3970c986b4d2360c1beb5f95",
  "sheet_section": true,
  "intent_ids": [
   "INT-145"
@@ -186,5 +186,5 @@
  "builder_context": "session-39 builder: Super Z (GLM host) — the round-1 implementation + the round-1 repairs e234b4a",
  "reviewer_context": "agent kwr-sev-r2 (agent-ad92392f): the round-2 fresh-context reviewer over the REPAIRED diff (base b698608d, head e234b4a), independent of the builder and of round 1 (agent kwr-sev-r1 whose FAIL with two open P1s drove the repairs — the F1R2/F2R2 chain); one time-boxed round on the local rig, its own scratch DBs; the report recast by the builder ONLY to the frozen vocabularies where needed — the observations verbatim",
  "disposition": "PASS",
- "review_summary": "Round 2 independently verifies the repaired diff on a fresh scratch rig: both round-1 P1s are genuinely repaired — the tokenizer is Unicode-real (probed end-to-end from tokenization through live search across accented/Greek/Cyrillic/CJK) and the SYS-07 provenance columns exist and are populated. The round-1 P2s are all verified repaired, with the KWR suite green twice byte-identical to the builder's recorded runs and no regression across the note, capture, and extraction families. One NEW open P2 (F9R2, non-blocking, routed): the currency join is index-internal, so hostile in-scope forward-revision or nonexistent-entity rows surface until rebuild — the same trust class as the by-design DELETE grant, purged by rebuild, no cross-owner leak. PASS at zero open P0/P1; the F9R2 hardening and two P3-class docstring drifts route to a later slice."
+ "review_summary": "Round 2 independently verifies the repaired diff on a fresh scratch rig: both round-1 P1s are genuinely repaired — the tokenizer is Unicode-real (probed end-to-end from tokenization through live search across accented/Greek/Cyrillic/CJK) and the SYS-07 provenance columns exist and are populated. The round-1 P2s are all verified repaired, with the KWR suite green twice byte-identical to the builder's recorded runs and no regression across the note, capture, and extraction families. One NEW open P2 (F9R2, non-blocking, routed): the currency join is index-internal, so hostile in-scope forward-revision or nonexistent-entity rows surface until rebuild — the same trust class as the by-design DELETE grant, purged by rebuild, no cross-owner leak. PASS at zero open P0/P1; the F9R2 hardening and two P3-class docstring drifts route to a later slice. RE-BOUND at the final content head 09d328b: the CI scanner's cosmetic repairs (the ANY-whitespace + the quarkx rename — never secrets, never behavior) landed after the first bind; the digest re-binds LAST per the standing discipline."
 }

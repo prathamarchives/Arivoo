@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-058-p307-keyword-index (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): e234b4a5f5b555ece159ffbb0f7bfc4fdaaca89e
-- generated (last record's timestamp): 2026-11-04T14:10:32.175545+00:00
-- run records: 9
+- commit (last run record's): 09d328bb3e150ab2718ce6a931472be90a4ffe36
+- generated (last record's timestamp): 2026-11-04T14:54:42.232438+00:00
+- run records: 14
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 324b13a1e18ff75a · 2026-11-04T13:20:05.756716+00:00
@@ -14,6 +14,11 @@
 - `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 95730366032f329c · 2026-11-04T13:48:20.700890+00:00
 - `make verify` -> exit 0 · output sha256 7c08ca4cf8011c94 · 2026-11-04T13:52:18.338011+00:00
 - `SLICE=claim-058-p307-keyword-index GATE_DIFF=b698608d52cb036027fd410e3737d1f11903cb43 make gate` -> exit 0 · output sha256 bad9962c15780a04 · 2026-11-04T14:10:32.175545+00:00
+- `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 95730366032f329c · 2026-11-04T14:43:13.092679+00:00
+- `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 95730366032f329c · 2026-11-04T14:43:15.869269+00:00
+- `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 95730366032f329c · 2026-11-04T14:43:18.606020+00:00
+- `make verify` -> exit 0 · output sha256 234cafa60c7e0692 · 2026-11-04T14:47:09.389962+00:00
+- `SLICE=claim-058-p307-keyword-index GATE_DIFF=b698608d52cb036027fd410e3737d1f11903cb43 make gate` -> exit 0 · output sha256 f8c80a8a07453269 · 2026-11-04T14:54:42.232438+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - NOT VERIFIED — the honest limits of CLAIM-058 / P3-07 (the keyword
@@ -66,11 +71,11 @@
 - purge D-011's).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 95ebdd40b852f0c5b72a2091c97713e550b96fe9610134f15a6df672f9a808f7
-- reviewed_diff_sha256: b57d98a1340f996d4786245bf1b55c8fcb6f6148a443c6337e5abd7149f0378d
+- report sha256: 9ee81b937624e38721e888e714aca5a1998fb21557cb90cea3778a59181a86e6
+- reviewed_diff_sha256: 3513de3bd9fefd76835659f8201b2def5d4d87cf3970c986b4d2360c1beb5f95
 - disposition: PASS
 - findings: 9 (open P0/P1: 0)
 - not-verified entries: 5
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): e0190d791b8d740a5976bfb4d27d9512a9c99f97f05266ddcad97a9faacce15d
+- sheet sha256 (of the content above, excluding this line): 230ca41d487d368bce088f87b2dea6b964a269a046bf32287657677fe4a9e598

@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-056-p306-notes (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 6d5146957f9d2835b76ee596604d09fd2b72fe37
-- generated (last record's timestamp): 2026-11-02T10:08:58.780090+00:00
-- run records: 36
+- commit (last run record's): 6cc92606e7bb33c6bf7596e7fe55796a2c4f68e9
+- generated (last record's timestamp): 2026-11-04T09:59:06.478735+00:00
+- run records: 41
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_note.py` -> exit 0 · output sha256 95a3e872d9dfe7f2 · 2026-11-02T04:46:48.871501+00:00
@@ -41,6 +41,11 @@
 - `python3 harness/tests/test_note.py` -> exit 0 · output sha256 96c41f4b6a6d105b · 2026-11-02T09:30:56.050650+00:00
 - `make verify` -> exit 0 · output sha256 708f99434da958d9 · 2026-11-02T09:34:35.376862+00:00
 - `make gate SLICE=claim-056-p306-notes GATE_DIFF=origin/main` -> exit 0 · output sha256 08e9c659ce1fcaa0 · 2026-11-02T10:08:58.780090+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 1afeb21646e5c40b · 2026-11-03T17:10:09.623500+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 1afeb21646e5c40b · 2026-11-03T17:10:16.375922+00:00
+- `python3 harness/tests/test_note.py` -> exit 0 · output sha256 1afeb21646e5c40b · 2026-11-03T17:10:23.170918+00:00
+- `make verify` -> exit 0 · output sha256 a7a9b14ce6e44f59 · 2026-11-03T17:14:04.014697+00:00
+- `make gate SLICE=claim-056-p306-notes GATE_DIFF=origin/main` -> exit 0 · output sha256 209543c1eae2325f · 2026-11-04T09:59:06.478735+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - NOT VERIFIED — the honest limits of CLAIM-056 / P3-06 SLICE ONE (the note
@@ -201,13 +206,60 @@
 - at the artifact tree (the intermediate gate run at the PRE-BIND tree
 - refused on ARV-PRF-004 + ARV-SEV-003 — the bind-in-progress state,
 - never evidence, never recorded; the recorded run is the BOUND tree's).
+- - ROUND-3 NOT VERIFIED (the read-path repair's honest limits; the R5-F2
+- repair — this addendum IS the round-3 section the SEV round-5 reviewer
+- required before the digest bind): the round proves get-note's state
+- decision and content fetch ride ONE READ COMMITTED statement snapshot
+- (the pre-T read legitimately observing active; the post-T read refusing
+- ARV-QRY-003 with no content — the reviewer's OWN two-session
+- interleaving, written independently of NTE-15, reproduced both
+- boundaries live with pg_stat_activity barrier observation). THE ROUTED
+- SIBLING CLASS (R5-F1, P2 open — the standing F4/F8 chain's read-arm
+- extension, never silently dropped): the LANDED highlight family's
+- get-capture (harness/query.py:417-423, STATE_SQL then CAP_SQL) and the
+- bookmark family's get-bookmark (query.py:285-291, BMSTATE_SQL then
+- BM_SQL) carry the SAME two-read shape the round-3 repair eliminated for
+- get-note — byte-untouched in this delta (the reviewer's zero-match
+- hunk grep), routed in record 48 §9, their own slice per the F4
+- precedent. THE VERSION-AWARE REFERENCE MACHINE stays CLAIM-057's
+- (arv.note_reference, migration 0010, the --ref surface). THE SEV
+- ROUND-5 DISPOSITIONS (agent-nte-sev-r5, PASS, zero open P0/P1): R5-F1
+- routed (above); R5-F2 RESOLVED by this addendum (the round-3
+- notverified section, absent at review time, lands in this artifact
+- commit before the digest bind). THE REVIEWER'S OWN HONEST LIMITS: a
+- full make verify did not complete inside the reviewer's session (both
+- background attempts killed by the sandbox process reaper mid-run —
+- environment, not repo; compensated by run-40's recorded exit 0 at this
+- exact tree + the reviewer's own NTE suite run byte-matching run-37..39
+- (output sha 1afeb216...46e5c40b identical) + the orchestrator's
+- post-recovery make verify exit 0 + the recorded PR-mode gate run-41
+- re-executing the suite set + the KB matrix within the gate); the gate
+- refusal surface not run by the reviewer itself (run-41 records it);
+- the round-3 fresh-context verifier's 27 probe groups not re-run
+- (record 48 §7 carries the PASS account); GitHub-side facts unverified
+- in the reviewer's session (no network); the reviewer's byte-exact
+- content probe used a short pipe/CJK/U+2028/U+2029 payload, not its own
+- multi-KB corpus; the source-size law's exact counting rule not located
+- in-budget (the gate's scope/size check is the mechanical enforcement);
+- standing un-re-probed: U+001C/1D/1E, >3-writer races, NFC
+- canonicalization, the sixteen sibling suites individually. THE
+- RUN-RECORD PROVENANCE: run-37..39 the round-3 suite ×3 + run-40 make
+- verify, all bound at the round-3 content head 6cc9260 (re-observed
+- byte-identical post-recovery: the fourth FACT-001 environment recycle
+- crashed the rig mid-session on 2026-11-04 — WAL crash recovery, the
+- missing bookkeeping directories recreated, migrate 9/9 + verify-schema
+- + health OK + the suite GREEN + make verify GREEN 54/0 all re-observed
+- BEFORE any edit at the same tree); run-41 the recorded PR-mode gate at
+- THIS artifact tree (the digest binds LAST over the content head
+- 6cc9260 — the intermediate pre-bind gate refusal on ARV-SEV-003 is the
+- bind-in-progress state, never evidence, never recorded).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: d9b827910909f2e5f49770e4a2888f55dcd73782ca58a4f849a6295979b2f18f
-- reviewed_diff_sha256: edb576e734024429765de9bf63101b99191857edba8212093dfef1c3cab2e6a6
+- report sha256: 6b045ccd41ed561ef5bd61e7fbba906bdc901543c71ff9c39bc3795607b700bd
+- reviewed_diff_sha256: f46c74d5cb27f3e632de464d0ec86e75ecca4c63ee0f3d6a3afb8e29de170cca
 - disposition: PASS
-- findings: 8 (open P0/P1: 0)
-- not-verified entries: 5
+- findings: 10 (open P0/P1: 0)
+- not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 689a610152a0d67d1cc4ee53fc69f9390f37f652029b4f1f750cfacde667cd95
+- sheet sha256 (of the content above, excluding this line): 90d6b9c15b5c15e6fca3d66c1d3b5a64aa9199e449b2912200c022a999eef629

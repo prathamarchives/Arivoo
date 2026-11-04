@@ -234,7 +234,7 @@ def main() -> int:
                and any(f"note|{n1}" in ln for ln in ids_note)
                and r_cjk.returncode == 0 and any(f"note|{n1}" in ln for ln in result_ids(r_cjk)))
         check("KWR-01", ok1,
-              "the known-query pin: search finds every capture kind under the defined contract — the source's extracted passages (xylophone), the highlight's anchor window (xylophone), the note's authored content (zephyr; the CJK single-character term 中文's 中) — with the deterministic result shape (kind|id|revision|freq); the bookmark whose window carries a DIFFERENT term is not in the xylophone results (the window is what is searchable, never the whole source for a windowed capture)",
+              "the known-query pin: search finds every capture kind under the defined contract — the source's extracted passages (xylophone), the highlight's anchor window (xylophone), the note's authored content (zephyr; the CJK single-character term 中文's 中) — with the deterministic result shape (kind|id|revision|matched-terms); the bookmark whose window carries a DIFFERENT term is not in the xylophone results (the window is what is searchable, never the whole source for a windowed capture)",
               "the index is the findability rung's derived layer: the passages, the anchor evidence windows, and the note content — searchable under a defined contract (RTM §2.5; C1's ladder: keyword-searchable)")
 
         # ---- KWR-02 — the owner filter
@@ -293,28 +293,38 @@ def main() -> int:
               "PLAN's P3-07 acceptance: 'rebuilding restores expected results' — the authored rows are the only truth (the derived-state law)")
 
         # ---- KWR-06 — the encoding/tokenization boundaries
+        p6 = mk_note("n-kwr6", "Boundary note: mixed Case WORD with café naïve and é "
+                     "plus Ελληνικά and Привет; corpus stays whole.")
+        n6 = ack_field(p6, "result_ref")
         r_case = search("A", "CASE")
         r_comb = search("A", "é")
+        r_cafe = search("A", "café")
+        r_grk = search("A", "ελληνικά")
         r_cat = search("A", "cor")
-        ok6 = (r_case.returncode == 0
-               and (not result_ids(r_case) or any(f"note|{n1}" in ln for ln in result_ids(r_case)))
-               and r_comb.returncode == 0
-               and r_cat.returncode == 0 and not any("corpus" in ln or f"note|{n1}" in ln
+        ok6 = (p6.returncode == 0
+               and r_case.returncode == 0 and any(f"note|{n6}" in ln for ln in result_ids(r_case))
+               and r_comb.returncode == 0 and any(f"note|{n6}" in ln for ln in result_ids(r_comb))
+               and r_cafe.returncode == 0 and any(f"note|{n6}" in ln for ln in result_ids(r_cafe))
+               and r_grk.returncode == 0 and any(f"note|{n6}" in ln for ln in result_ids(r_grk))
+               and r_cat.returncode == 0 and not any("corpus" in ln or f"note|{n6}" in ln
                                                       for ln in result_ids(r_cat)))
         check("KWR-06", ok6,
-              "the tokenization boundaries: case-folded matching (CASE finds the note carrying 'Case'); the combining-mark token matches; the word-boundary law — 'cor' is NOT a prefix match (never matches 'corpus' — whole tokens only)",
-              "the tokenizer is defined and deterministic: Unicode word tokens, case-folded, whole-token equality (the known-query contract)")
+              "the tokenization boundaries: case-folded matching (CASE finds the note carrying 'Case'); the accented token é MATCHES (a real hit, never the vacuous rc-only form); the accented word café matches whole (the Unicode word law: Latin/Greek/Cyrillic/accented scripts are tokens); the word-boundary law — 'cor' is NOT a prefix match (never matches 'corpus' — whole tokens only)",
+              "the tokenizer is defined and deterministic: case-folded UNICODE word tokens (every script), whole-token equality (the known-query contract)")
 
         # ---- KWR-07 — the explicit lag/failure contract
         cnt_before = audit("SELECT count(*) FROM arv.keyword_index;")
-        p_fail = mk_note("n-fail", "A refused note stays unindexed: token gravitonx.")
+        p_fail = cmd("create_note", "--content", "A refused note stays unindexed: token gravitonx.",
+                     "--ref", "note:00000000-0000-7000-8000-0000000000f1@1", key="n-fail")
         pn2 = mk_note("n-ok2", "The immediate note: token bosonx rides.")
         n2 = ack_field(pn2, "result_ref")
         r_imm = search("A", "bosonx")
-        ok7 = (p_fail.returncode in (0, 1)  # any outcome: the contract is what follows
+        n_fail_rows = audit("SELECT count(*) FROM arv.keyword_index WHERE token='gravitonx';")
+        ok7 = (p_fail.returncode == 1 and "ARV-NTE-003" in p_fail.stdout
+               and n_fail_rows == "0"  # the FORCED refusal leaves zero index rows
                and pn2.returncode == 0
                and r_imm.returncode == 0 and any(f"note|{n2}" in ln for ln in result_ids(r_imm))
-               and audit(f"SELECT count(*) FROM arv.keyword_index;") >= cnt_before)
+               and int(audit("SELECT count(*) FROM arv.keyword_index;")) >= int(cnt_before))
         check("KWR-07", ok7,
               "the explicit lag/failure contract: a COMMITTED note is searchable immediately (the synchronous local index write rides the capture transaction — zero indexing lag on this rig); a refused note leaves zero index rows (never a partial: the index write and the capture are one transactional effect)",
               "the defined contract: searchable-or-explicit-failure, never a silent miss (PLAN's P3-07 acceptance)")
@@ -342,7 +352,7 @@ def main() -> int:
         chk = audit_rows("SELECT conname FROM pg_constraint WHERE conrelid="
                          "'arv.keyword_index'::regclass AND contype='c' ORDER BY conname;")
         ok9 = (cols == ["owner_scope", "kind", "entity_id", "revision", "token",
-                        "created_at"]
+                        "extractor", "extractor_config", "input_digest", "created_at"]
                and rls == ["true|true"]
                and grants == "ok"
                and any("kind" in c for c in chk))

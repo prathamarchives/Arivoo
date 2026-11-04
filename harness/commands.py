@@ -1181,16 +1181,31 @@ def _nte_ref_stmts(note_id: str, revision: int, refs: list, owner, actor, client
 
 # ------------------------------------------------- P3-07: the keyword index (RTM §2.5 findability)
 
-_KWR_TOKEN_RE = re.compile(r"[0-9A-Za-z_]+|[\u4e00-\u9fff]", re.UNICODE)
+_KWR_CJK = re.compile(r"[\u4e00-\u9fff]")
 
 
 def _kwr_tokens(text: str) -> list:
-    """P3-07: the tokenizer — case-folded Unicode word tokens; each CJK
-    character additionally rides as a single-character token (a CJK query
-    term finds the containing text; the word-boundary law: whole tokens
-    only, never a prefix match). DEDUPLICATED per document (the index is a
-    set — the document frequency is the query-time count)."""
-    return sorted({_m.group(0).casefold() for _m in _KWR_TOKEN_RE.finditer(text or "")})
+    """P3-07: the tokenizer — case-folded UNICODE word tokens ([not-word-chars-excluded] under
+    re.UNICODE: Latin, Greek, Cyrillic, accented forms, digits — every script
+    Python's word class carries), each CJK character ADDITIONALLY as a
+    single-character token AND the containing CJK run as its own token (a
+    single-character or a whole-run CJK query both find the text); the
+    word-boundary law: whole tokens only, never a prefix match. DEDUPLICATED
+    per document (the index is a set)."""
+    out: set = set()
+    for run in re.findall(r"[^\W_]+", (text or "").casefold(), re.UNICODE):
+        out.add(run)
+        out.update(_KWR_CJK.findall(run))
+    return sorted(out)
+
+
+def _kwr_provenance(texts: list) -> tuple:
+    """SYS-07: the index row's processing/input provenance — the extractor
+    identity, its config, and the indexed text's digest (the 0006
+    extraction-generation convention applied to the keyword rung)."""
+    joined = "\n".join(texts)
+    return ("kwr-tokenizer", "unicode-word+cjk-single",
+            hashlib.sha256(joined.encode("utf-8", "surrogateescape")).hexdigest())
 
 
 def _kwr_index_stmts(owner: str, kind: str, entity_id: str, revision: int,
@@ -1203,11 +1218,13 @@ def _kwr_index_stmts(owner: str, kind: str, entity_id: str, revision: int,
     toks = set()
     for tx in texts:
         toks.update(_kwr_tokens(tx))
+    extractor, config, digest = _kwr_provenance(texts)
     stmts = [f"DELETE FROM arv.keyword_index WHERE owner_scope={_q(owner)} "
              f"AND kind={_q(kind)} AND entity_id={_q(entity_id)};"]
     stmts += [f"INSERT INTO arv.keyword_index (owner_scope, kind, entity_id, revision, "
-              f"token, created_at) VALUES ({_q(owner)}, {_q(kind)}, {_q(entity_id)}, "
-              f"{revision}, {_q(tk)}, {_q(ts)});" for tk in sorted(toks)]
+              f"token, extractor, extractor_config, input_digest, created_at) VALUES "
+              f"({_q(owner)}, {_q(kind)}, {_q(entity_id)}, {revision}, {_q(tk)}, "
+              f"{_q(extractor)}, {_q(config)}, {_q(digest)}, {_q(ts)});" for tk in sorted(toks)]
     return stmts
 
 

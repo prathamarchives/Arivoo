@@ -179,6 +179,9 @@ SEARCH_SQL = ("SELECT k.kind || '|' || k.entity_id || '|' || k.revision || '|' |
               "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
               "count(*) FILTER (WHERE l.event = 'restore')))"
               " OR k.kind = 'source') "
+              "AND (k.kind = 'source' OR k.revision = ("
+              "SELECT MAX(e.revision) FROM arv.keyword_index e WHERE e.owner_scope = k.owner_scope "
+              "AND e.kind = k.kind AND e.entity_id = k.entity_id)) "
               "GROUP BY k.kind, k.entity_id, k.revision "
               "HAVING count(DISTINCT k.token) = {nterms} ORDER BY k.kind, k.entity_id;")
 
@@ -379,9 +382,10 @@ def main() -> int:
         # P3-07: the keyword search — case-folded whole-token terms, the
         # multi-term AND intersection, the tombstone parity joined at query
         # time (the index never governs visibility), RLS the owner boundary
-        qterms = ", ".join("'" + tm.casefold().replace("'", "''") + "'" for tm in a.terms)
+        terms_u = sorted({tm.casefold() for tm in a.terms})  # deduplicated (a repeated term is one term)
+        qterms = ", ".join("'" + tm.replace("'", "''") + "'" for tm in terms_u)
         rows = _read(db, a.owner, SEARCH_SQL.format(terms="ARRAY[" + qterms + "]",
-                                                    nterms=len(a.terms)))
+                                                    nterms=len(terms_u)))
         if rows is None:
             return 1
         for ln in rows:

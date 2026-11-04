@@ -4,6 +4,9 @@
 -- store — tokens + locators only (NO authored content column), re-derivable
 -- from the authored rows alone (the rebuild command; the acceptance pin),
 -- droppable with zero authored effect. arv_app holds DELETE here by design
+-- (SYS-07: the derived index CARRIES processing/input provenance — the
+-- extractor identity + config + the indexed text's digest, the 0006
+-- extraction-generation convention applied to the keyword rung)
 -- (the rebuild's own surface: delete + re-derive) — the grant is the
 -- derived-layer law made mechanical. Visibility is NEVER governed here: the
 -- search arm joins the authoritative current-view parity (tombstones
@@ -14,6 +17,9 @@ CREATE TABLE IF NOT EXISTS arv.keyword_index (
     entity_id       UUID        NOT NULL,
     revision        INTEGER     NOT NULL CHECK (revision >= 1),
     token           TEXT        NOT NULL,
+    extractor       TEXT        NOT NULL,
+    extractor_config TEXT       NOT NULL,
+    input_digest    TEXT        NOT NULL,
     created_at      TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (owner_scope, kind, entity_id, revision, token)
 );

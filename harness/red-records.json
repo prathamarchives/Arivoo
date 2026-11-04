@@ -764,5 +764,14 @@
         "observed_at": "2026-11-03T12:41:13.040077+00:00"
       }
     ]
+  },
+  "harness/tests/test_note_reference.py": {
+    "schema": 2,
+    "binding_commit": "ae551b271660fc39f89b0346bc0d1ebbf61bea9a",
+    "binding_sha256": "1bbd84fb8cc715f123ced5e23097b58ffff58f8cd28f8a5e08f32956e55710aa",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-057 (P3-06 slice two) commit B: the NTR-01..12 suite's RED observed at the exact predecessor 36e34920 (CLAIM-056's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000: the --ref surface on create_note absent, migration 0010 absent; the transcript at the slice's runs dir red-01.txt; record 49 \u00a711 (the record-18 \u00a74.1 / claim-055/claim-056 precedent class)",
+    "current_sha256": "1bbd84fb8cc715f123ced5e23097b58ffff58f8cd28f8a5e08f32956e55710aa"
   }
 }

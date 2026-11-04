@@ -18,6 +18,7 @@
 harness/tests/test_note_reference.py D-041
 harness/commands.py D-041
 harness/query.py D-041
+harness/crash.py D-041
 harness/migrations/0010_note_references.sql D-041
 harness/red-records.json D-041
 CLAIMS.md D-038

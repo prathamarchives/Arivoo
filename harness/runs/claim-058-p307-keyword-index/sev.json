@@ -1,0 +1,190 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-058-p307-keyword-index",
+ "base_sha": "b698608d52cb036027fd410e3737d1f11903cb43",
+ "reviewed_diff_sha256": "b57d98a1340f996d4786245bf1b55c8fcb6f6148a443c6337e5abd7149f0378d",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-145"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-02",
+  "SYS-03",
+  "SYS-04",
+  "SYS-07"
+ ],
+ "system_claims": [
+  "C1"
+ ],
+ "changed_components": [
+  "harness/migrations/0011_keyword_index.sql (new): the 9-column derived table (locator + token + SYS-07 provenance: extractor/extractor_config/input_digest), PK set semantics, kind CHECK, RLS FORCED + owner_isolation, arv_app INSERT/DELETE/SELECT (the rebuild's surface) + arv_read SELECT",
+  "harness/commands.py: _kwr_tokens (Unicode [word-chars-minus-underscore] tokenizer + CJK singles and whole runs), _kwr_provenance, _kwr_index_stmts (the per-entity replace riding the capture txn), _kwr_rebuild_stmts + rebuild_keyword_index (row_to_json framing, uuid result_ref), _sess_rows, the maintenance hooks at import_source/create_highlight/revise_highlight/create_bookmark/move_bookmark/create_note/revise_note, _derive_anchor returning the anchor text",
+  "harness/query.py: the search arm (SEARCH_SQL — the multi-term AND intersection, the tombstone parity joined at query time per kind, the current-revision currency join, the deterministic kind|id|revision|matched-terms line) + term dedup",
+  "harness/gate.py: the TESTS registration",
+  "harness/tests/test_keyword_index.py (new): the KWR-01..10 registry (RED-first at 7c35827)",
+  "the records/docs: CLAIMS.md, STATE.md, PLAN.md, AGENTS.md, context/WORKLOG.md, record 50, red-records.json (the binding + the implementation-cycle and round-1-repair amendments), the runs dir"
+ ],
+ "interfaces_reviewed": [
+  "the search CLI arm (dedup, AND, parity, currency join, result shape)",
+  "rebuild_keyword_index (the delete/re-derive acceptance)",
+  "the capture maintenance surface (the index write rides each capture transaction)",
+  "migration 0011 (columns, PK, CHECK, RLS, grants) via the live catalog",
+  "_kwr_tokens + _kwr_provenance (the SYS-07 derived-layer generation contract)",
+  "the gate TESTS registration and the RED trail"
+ ],
+ "v_model": {
+  "component_verification": [
+   "Round 2's own unit probe: _kwr_tokens over accented/Greek/Cyrillic/CJK text yields the whole words + the CJK singles + the whole run",
+   "KWR-01..10 exit 0 x2 in the round-2 sandbox, output byte-identical to the builder's recorded run-05/06/07",
+   "The live schema audits: exactly 9 columns, RLS true|true, the kind CHECK; the RED-record binding digests re-verified at 7c35827"
+  ],
+  "integration_verification": [
+   "The index rides the capture transactions: a committed note searchable immediately; the refused note (dangling ref) leaves ZERO rows — reproduced live (rc=1 ARV-NTE-003, count=0)",
+   "rebuild_keyword_index re-derives from the authored rows alone and purges injected phantom rows while restoring the true tokens",
+   "No regression: NTE-01..15 + NTR-01..12 + HLG + BMK + CAP + IMP + EXT all exit 0 (the NTE/NTR digests byte-identical to claim-057's recorded runs)"
+  ],
+  "system_verification": [
+   "SYS-01..SYS-04 (C1's ladder): every capture kind keyword-searchable at local-durable; the owner isolation structural; the tombstone parity at query time; the atomicity inherited from the spine",
+   "SYS-07: the provenance columns populated on live rows (kwr-tokenizer|unicode-word+cjk-single|sha256), zero NULLs; the index droppable with zero authored effect and rebuildable"
+  ],
+  "validation": [
+   "The round-2 live end-user probes: a note 'café Ελληνικά Привет' found by café AND ελληνικά AND привет (and uppercase); duplicate/mixed-case terms identical; ASCII 'cafe' honestly NOT matching 'café' (the whole-token law)",
+   "The hostile-write probes: the stale phantom filtered by the currency join; the forward/nonexistent direction is F9R2 (open P2, routed)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "silent miss: a committed capture unfindable, or a refused one leaving partial rows",
+   "control": "the synchronous index write rides the capture transaction (the forced refusal reproduced live: rc=1 + zero rows)",
+   "proof_ids": [
+    "run-05"
+   ]
+  },
+  {
+   "id": "FM-02",
+   "scenario": "cross-owner token leak",
+   "control": "RLS FORCED + owner_isolation; the round-2 live B-side probes returned zero rows for every A-side term and phantom",
+   "proof_ids": [
+    "run-05"
+   ]
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a stale/phantom revision served",
+   "control": "the current-revision currency join (the stale direction verified live); the forward/nonexistent direction is F9R2 (routed)",
+   "proof_ids": [
+    "run-05"
+   ]
+  },
+  {
+   "id": "FM-04",
+   "scenario": "a tombstoned capture still findable / a restored one missing",
+   "control": "the lifecycle parity joined at QUERY time per kind, never index deletion",
+   "proof_ids": [
+    "run-05"
+   ]
+  },
+  {
+   "id": "FM-05",
+   "scenario": "the index treated as authority or corrupted beyond recovery",
+   "control": "the derived-layer law: delete + rebuild restores exactly (the round-2 rebuild purged injected phantoms)",
+   "proof_ids": [
+    "run-05"
+   ]
+  },
+  {
+   "id": "FM-06",
+   "scenario": "a non-Unicode tokenizer silently dropping accented/Greek/Cyrillic/CJK text (the round-1 F1 class)",
+   "control": "the Unicode tokenizer + CJK singles/runs; the round-2 unit + live probes; KWR-06's real-hit assertions",
+   "proof_ids": [
+    "run-05"
+   ]
+  },
+  {
+   "id": "FM-07",
+   "scenario": "unprovenanced derived rows (the round-1 F2 class, SYS-07)",
+   "control": "the extractor/config/input-digest columns populated on every live row; the 0006 convention",
+   "proof_ids": [
+    "run-05"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "F1R2",
+   "severity": "P1",
+   "status": "resolved",
+   "location": "harness/commands.py _kwr_tokens",
+   "note": "carries round-1 F1 (the ASCII-only tokenizer). VERIFIED REPAIRED by round 2: the unit probe yields café/naïve/ελληνικά/привет + the CJK singles + the run; the live note found by every script's term; KWR-06's assertions demand real hits"
+  },
+  {
+   "id": "F2R2",
+   "severity": "P1",
+   "status": "resolved",
+   "location": "harness/migrations/0011_keyword_index.sql",
+   "note": "carries round-1 F2 (SYS-07 provenance absent). VERIFIED REPAIRED: the 9 columns live; the provenance populated (kwr-tokenizer|unicode-word+cjk-single|sha256), zero NULLs; the requirement set names SYS-07"
+  },
+  {
+   "id": "F3R2",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/query.py search arm",
+   "note": "carries round-1 F3. VERIFIED REPAIRED live: duplicate/mixed-case terms return the identical result"
+  },
+  {
+   "id": "F4R2",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/tests/test_keyword_index.py",
+   "note": "carries round-1 F4 (the string-vs-int count). VERIFIED: int() both sides; the suite green"
+  },
+  {
+   "id": "F5R2",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/query.py SEARCH_SQL",
+   "note": "carries round-1 F5. VERIFIED REPAIRED for the stale direction (the injected r1 phantom returns zero); the forward direction is F9R2"
+  },
+  {
+   "id": "F6R2",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/tests/test_keyword_index.py KWR-06",
+   "note": "carries round-1 F6 (the vacuous assertions + the fixture race). VERIFIED: real-hit assertions + the fresh boundary fixture"
+  },
+  {
+   "id": "F7R2",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/tests/test_keyword_index.py KWR-07",
+   "note": "carries round-1 F7. VERIFIED REPAIRED and reproduced live: rc=1 ARV-NTE-003 with zero index rows"
+  },
+  {
+   "id": "F8R2",
+   "severity": "P2",
+   "status": "resolved",
+   "location": "harness/query.py SEARCH_SQL + KWR-01",
+   "note": "carries round-1 F8. VERIFIED: the 4th field is the matched-terms count, labeled as such; a P3-class docstring residual (result_ids' 'freq' comment) rides the next suite touch"
+  },
+  {
+   "id": "F9R2",
+   "severity": "P2",
+   "status": "open",
+   "location": "harness/query.py SEARCH_SQL (the currency join is index-internal) / the arv_app INSERT surface",
+   "note": "NEW round-2 finding, ROUTED: the phantom guard is one-directional — hostile in-scope arv_app INSERTs at a revision ABOVE the current and for a NONEXISTENT entity surface until rebuild. Unreachable via any CLI path; no cross-owner leak; the same trust class as the by-design DELETE grant (KWR-09/10 pin delete+rebuild); the rebuild purges. ROUTED to a later hardening slice (the authoritative-revision join per kind, symmetric to the parity joins, or a substrate-style write guard); with it ride the two P3-class docstring drifts (result_ids 'freq', the declared-but-unfired ARV-KWR-001)"
+  }
+ ],
+ "not_verified": [
+  "The async half of the independent-failure-domain clause: the LOCAL synchronous index rides the capture transaction by design (C1's ladder); the async/outbox rungs are P3-08+'s — the carried fence",
+  "The full make verify was not re-run end-to-end by the round-2 reviewer (its components re-run individually, all exit 0; the builder's recorded run-08 carries the whole at e234b4a)",
+  "The PR-mode gate and the live GitHub surface (the finalize work's; run-05..08 bound by the re-bind)",
+  "The blob-miss path under real storage corruption reasoned from code, not live-injected (it requires destroying a digest-verified blob beneath the authored layer)",
+  "The bounded exclusions per the card: the semantic/vector rungs (P5), the outbox/sync (P3-08), the export/restore (P3-09), the governed purge (D-011)"
+ ],
+ "builder_context": "session-39 builder: Super Z (GLM host) — the round-1 implementation + the round-1 repairs e234b4a",
+ "reviewer_context": "agent kwr-sev-r2 (agent-ad92392f): the round-2 fresh-context reviewer over the REPAIRED diff (base b698608d, head e234b4a), independent of the builder and of round 1 (agent kwr-sev-r1 whose FAIL with two open P1s drove the repairs — the F1R2/F2R2 chain); one time-boxed round on the local rig, its own scratch DBs; the report recast by the builder ONLY to the frozen vocabularies where needed — the observations verbatim",
+ "disposition": "PASS",
+ "review_summary": "Round 2 independently verifies the repaired diff on a fresh scratch rig: both round-1 P1s are genuinely repaired — the tokenizer is Unicode-real (probed end-to-end from tokenization through live search across accented/Greek/Cyrillic/CJK) and the SYS-07 provenance columns exist and are populated. The round-1 P2s are all verified repaired, with the KWR suite green twice byte-identical to the builder's recorded runs and no regression across the note, capture, and extraction families. One NEW open P2 (F9R2, non-blocking, routed): the currency join is index-internal, so hostile in-scope forward-revision or nonexistent-entity rows surface until rebuild — the same trust class as the by-design DELETE grant, purged by rebuild, no cross-owner leak. PASS at zero open P0/P1; the F9R2 hardening and two P3-class docstring drifts route to a later slice."
+}

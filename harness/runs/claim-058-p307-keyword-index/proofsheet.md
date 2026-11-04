@@ -1,0 +1,76 @@
+# PROOF SHEET — slice claim-058-p307-keyword-index (harness-built; never hand-edited — PRF-01, LAW-01)
+
+- commit (last run record's): e234b4a5f5b555ece159ffbb0f7bfc4fdaaca89e
+- generated (last record's timestamp): 2026-11-04T14:10:32.175545+00:00
+- run records: 9
+
+## Run records (command, exit, output digest)
+- `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 324b13a1e18ff75a · 2026-11-04T13:20:05.756716+00:00
+- `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 324b13a1e18ff75a · 2026-11-04T13:20:08.295008+00:00
+- `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 324b13a1e18ff75a · 2026-11-04T13:20:10.849657+00:00
+- `make verify` -> exit 0 · output sha256 cda6265d1594befe · 2026-11-04T13:24:09.771380+00:00
+- `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 95730366032f329c · 2026-11-04T13:48:15.301407+00:00
+- `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 95730366032f329c · 2026-11-04T13:48:18.002516+00:00
+- `python3 harness/tests/test_keyword_index.py` -> exit 0 · output sha256 95730366032f329c · 2026-11-04T13:48:20.700890+00:00
+- `make verify` -> exit 0 · output sha256 7c08ca4cf8011c94 · 2026-11-04T13:52:18.338011+00:00
+- `SLICE=claim-058-p307-keyword-index GATE_DIFF=b698608d52cb036027fd410e3737d1f11903cb43 make gate` -> exit 0 · output sha256 bad9962c15780a04 · 2026-11-04T14:10:32.175545+00:00
+
+## Not verified (LAW-04 — required, never empty-by-omission)
+- - NOT VERIFIED — the honest limits of CLAIM-058 / P3-07 (the keyword
+- findability machine; LAW-04; never empty-by-omission)
+- - WHAT THIS SLICE PROVES: the rebuildable keyword index of PLAN's P3-07 card
+- holds end-to-end over the real PostgreSQL boundary — every capture kind
+- (the sources' full text, the highlight/bookmark anchor windows + spans, the
+- notes' current-revision content) searchable under the DEFINED contract (a
+- committed capture is searchable immediately — the index write rides the
+- capture transaction, C1's ladder landing keyword-searchable); the Unicode
+- tokenizer (accented Latin, Greek, Cyrillic, every script + CJK singles and
+- whole runs; whole-token equality, never a prefix); the multi-term AND
+- intersection with term dedup; the tombstone parity joined at QUERY time
+- (the index never governs visibility); the current-revision currency join
+- (the stale-phantom guard); the owner isolation (RLS FORCED); the SYS-07
+- provenance on every row (extractor + config + the indexed text's digest —
+- the 0006 extraction-generation convention); the derived-layer law (the
+- index droppable with zero authored effect; rebuild_keyword_index
+- re-derives from the authored rows alone — the acceptance pin, verified by
+- both SEV rounds with the injected-phantom purge).
+- - THE TWO-ROUND SEV CHAIN (the #91 pattern): round 1 (agent kwr-sev-r1)
+- returned FAIL with two open P1s — the ASCII tokenizer behind Unicode
+- claims (F1) and the missing SYS-07 provenance (F2) — BOTH REPAIRED
+- in-slice (the Unicode tokenizer + the real KWR-06 assertions; the
+- provenance columns + SYS-07 in the requirement set) with the round-1 P2s
+- (the term dedup, the currency join, the forced KWR-07 refusal, the
+- matched-terms relabel, the int comparison); round 2 (agent kwr-sev-r2)
+- independently verified every repair on its own scratch rig — PASS, zero
+- open P0/P1, the suite outputs byte-identical to the recorded runs.
+- - THE ROUTED FOLLOW-UP (F9R2, P2 open, never silently dropped): the currency
+- join is index-internal — hostile in-scope arv_app INSERTs at a forward
+- revision or a nonexistent entity SURFACE until rebuild (unreachable via
+- any CLI path; no cross-owner leak; the same trust class as the by-design
+- DELETE grant, which KWR-09/10 pin as delete+rebuild). ROUTED to a later
+- hardening slice: the authoritative-revision join per kind (symmetric to
+- the parity joins) or a substrate-style write guard; with it ride the two
+- P3-class docstring drifts (result_ids' 'freq' comment; the
+- declared-but-unfired ARV-KWR-001 code).
+- - THE ASYNC HALF OF THE INDEPENDENT-FAILURE-DOMAIN CLAUSE (SYS-07/RTM §3.6):
+- the LOCAL synchronous index rides the capture transaction BY DESIGN (C1's
+- durability ladder: the capture IS keyword-searchable at commit); the
+- async/outbox indexing rungs with their independent failure domains are
+- P3-08+'s — the carried fence, never claimed here.
+- - THE STANDING RESIDUALS: the non-text source boundary (a binary source
+- commits unindexed — the media_type IS the explicit not-indexed signal; a
+- richer report surface rides the F9R2 hardening); the ~30 builder-debug
+- scratch DBs on the rig (hygiene, outside the diff); Q6-Q12 + D-014
+- unchanged; the bounded exclusions per the card (the semantic/vector rungs
+- P5's; the outbox/sync P3-08's; the export/restore P3-09's; the governed
+- purge D-011's).
+
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 95ebdd40b852f0c5b72a2091c97713e550b96fe9610134f15a6df672f9a808f7
+- reviewed_diff_sha256: b57d98a1340f996d4786245bf1b55c8fcb6f6148a443c6337e5abd7149f0378d
+- disposition: PASS
+- findings: 9 (open P0/P1: 0)
+- not-verified entries: 5
+
+## Assembly
+- sheet sha256 (of the content above, excluding this line): e0190d791b8d740a5976bfb4d27d9512a9c99f97f05266ddcad97a9faacce15d

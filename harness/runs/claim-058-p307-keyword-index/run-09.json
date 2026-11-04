@@ -1,0 +1,7 @@
+{
+  "command": "SLICE=claim-058-p307-keyword-index GATE_DIFF=b698608d52cb036027fd410e3737d1f11903cb43 make gate",
+  "exit_code": 0,
+  "commit": "e234b4a5f5b555ece159ffbb0f7bfc4fdaaca89e",
+  "output_sha256": "bad9962c15780a048b529f7771da23d94512586aaed9c6a2d2fa786d4711d206",
+  "recorded_at": "2026-11-04T14:10:32.175545+00:00"
+}

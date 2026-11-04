@@ -273,6 +273,16 @@ def _sess_row(sess: "Session", sql: str) -> str:
     lines = sess.read_until(MARK_CHECK)
     return next((l for l in lines if "|" in l and "MARK" not in l), "")
 
+def _sess_rows(sess: "Session", sql: str) -> list:
+    """The multi-row form of _sess_row: every pipe-framed row the query
+    returns (the callers select locator columns first and split on the KNOWN
+    pipe positions — content columns ride LAST)."""
+    sess.send(sql)
+    sess.send(f"\\echo {MARK_CHECK}")
+    lines = sess.read_until(MARK_CHECK)
+    return [l for l in lines if "|" in l and "MARK" not in l]
+
+
 
 def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build=None,
            crash_at: str = None, build_txn=None) -> int:
@@ -549,11 +559,22 @@ def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=
         if crash_at == "after-verify":
             sess.kill()
             return 2
-        build = _import_build(owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,  # phase 3: the ONE metadata txn
-                              title=title, work_id=work_id, digest=digest, media_type=media_type,
-                              byte_size=len(data), acquired_via=acquired_via)
+        def build_with_index(sess2: "Session", body_hash: str):
+            sid, stmts, ack = _import_build(owner=owner, actor=actor, client_id=client_id,
+                                            idem_key=idem_key, title=title, work_id=work_id,
+                                            digest=digest, media_type=media_type,
+                                            byte_size=len(data), acquired_via=acquired_via)(sess2, body_hash)
+            # P3-07: the source's full decoded text rides the SAME metadata
+            # transaction (the explicit-lag contract — a committed source is
+            # searchable immediately; a refused import leaves zero rows)
+            try:
+                src_text = blob.get(digest).decode("utf-8")
+            except (UnicodeDecodeError, KeyError):
+                src_text = ""  # the non-text boundary: the source commits; the findability rung indexes text only
+            return sid, stmts + _kwr_index_stmts(owner, "source", sid, 1, [src_text], clock.now()), ack
+
         return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
-                      command="import_source", payload=body, build=build, crash_at=crash_at)
+                      command="import_source", payload=body, build=build_with_index, crash_at=crash_at)
     finally:
         try:
             sess.close()
@@ -604,7 +625,8 @@ def create_highlight(*, db, owner, actor, client_id, idem_key, source_id,
             f"run_id, input_hash, idempotency_key, created_at) VALUES ({_q(hl_id)}, 1, {_q(selected)}, "
             f"{_q(source_id)}, {_q(anchor_id)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
             f"{_q(idem_key)}, {_q(ts)});",
-        ]
+        ] + _kwr_index_stmts(owner, "highlight", hl_id, 1,
+                             [selected, text[max(0, start - 32):start], text[end:end + 32]], ts)
         return hl_id, stmts, f" revision=1 durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
@@ -692,7 +714,8 @@ def revise_highlight(*, db, owner, actor, client_id, idem_key, id_,
             f"actor, run_id, input_hash, idempotency_key, created_at) VALUES ({_q(id_)}, {revision + 1}, "
             f"{_q(selected)}, {_q(source_id)}, {_q(anchor_id)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, "
             f"{_q(ih)}, {_q(idem_key)}, {_q(ts)});",
-        ]
+        ] + _kwr_index_stmts(owner, "highlight", id_, revision + 1,
+                             [selected, text[max(0, start - 32):start], text[end:end + 32]], ts)
         return id_, stmts, f" revision={revision + 1} durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
@@ -787,7 +810,7 @@ def _derive_anchor(sess: "Session", *, source_id, start, end, owner, actor,
             f"({_q(anchor_id)}, {_q(source_id)}, {_q(digest)}, {start}, {end}, "
             f"{_q(text[max(0, start - 32):start])}, {_q(text[end:end + 32])}, {_q(media_type)}, "
             f"{_q(owner)}, {_q(actor)}, {_q('run-' + client_id)}, {_q(ih)}, {_q(ts)});")
-    return anchor_id, stmt
+    return anchor_id, stmt, text
 
 
 def _bm_refusal(code: str, bm_id: str) -> _CapRefusal:
@@ -836,12 +859,16 @@ def create_bookmark(*, db, owner, actor, client_id, idem_key, source_id,
                       sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
     def build(sess: "Session", body_hash: str):
-        anchor_id, anchor_stmt = _derive_anchor(
+        anchor_id, anchor_stmt, text = _derive_anchor(
             sess, source_id=source_id, start=start, end=end, owner=owner,
             actor=actor, client_id=client_id, body_hash=body_hash)
         bm_id = ids.new_id()
+        ts = clock.now()
         return bm_id, [anchor_stmt, _bm_insert(bm_id, 1, source_id, anchor_id, owner,
-                                               actor, client_id, idem_key, body_hash)], \
+                                               actor, client_id, idem_key, body_hash)] + \
+            _kwr_index_stmts(owner, "bookmark", bm_id, 1,
+                             [text[start:end], text[max(0, start - 32):start],
+                              text[end:end + 32]], ts), \
             " revision=1 durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
@@ -876,11 +903,14 @@ def move_bookmark(*, db, owner, actor, client_id, idem_key, id_,
                               "from ordinary use until restored (RTM §3.3: restore precedes edit)",
                               "restore the bookmark first (commands.py restore_bookmark); the "
                               "governed history retains every revision meanwhile")
-        anchor_id, anchor_stmt = _derive_anchor(
+        anchor_id, anchor_stmt, text = _derive_anchor(
             sess, source_id=source_id, start=start, end=end, owner=owner,
             actor=actor, client_id=client_id, body_hash=body_hash)
         return id_, [anchor_stmt, _bm_insert(id_, revision + 1, source_id, anchor_id,
-                                             owner, actor, client_id, idem_key, body_hash)], \
+                                             owner, actor, client_id, idem_key, body_hash)] + \
+            _kwr_index_stmts(owner, "bookmark", id_, revision + 1,
+                             [text[start:end], text[max(0, start - 32):start],
+                              text[end:end + 32]], clock.now()), \
             f" revision={revision + 1} durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
@@ -1149,6 +1179,132 @@ def _nte_ref_stmts(note_id: str, revision: int, refs: list, owner, actor, client
             f"{_q(ih)}, {_q(idem_key)}, {_q(ts)});" for kind, target, rev in refs]
 
 
+# ------------------------------------------------- P3-07: the keyword index (RTM §2.5 findability)
+
+_KWR_TOKEN_RE = re.compile(r"[0-9A-Za-z_]+|[\u4e00-\u9fff]", re.UNICODE)
+
+
+def _kwr_tokens(text: str) -> list:
+    """P3-07: the tokenizer — case-folded Unicode word tokens; each CJK
+    character additionally rides as a single-character token (a CJK query
+    term finds the containing text; the word-boundary law: whole tokens
+    only, never a prefix match). DEDUPLICATED per document (the index is a
+    set — the document frequency is the query-time count)."""
+    return sorted({_m.group(0).casefold() for _m in _KWR_TOKEN_RE.finditer(text or "")})
+
+
+def _kwr_index_stmts(owner: str, kind: str, entity_id: str, revision: int,
+                     texts: list, ts: str) -> list:
+    """The index maintenance for ONE entity: replace its rows (DELETE the
+    entity's tokens, INSERT the new set). The statements ride the SAME
+    transaction as the capture (the explicit-lag contract: a committed
+    capture is searchable immediately; a refused capture leaves zero rows —
+    one transactional effect, never a partial)."""
+    toks = set()
+    for tx in texts:
+        toks.update(_kwr_tokens(tx))
+    stmts = [f"DELETE FROM arv.keyword_index WHERE owner_scope={_q(owner)} "
+             f"AND kind={_q(kind)} AND entity_id={_q(entity_id)};"]
+    stmts += [f"INSERT INTO arv.keyword_index (owner_scope, kind, entity_id, revision, "
+              f"token, created_at) VALUES ({_q(owner)}, {_q(kind)}, {_q(entity_id)}, "
+              f"{revision}, {_q(tk)}, {_q(ts)});" for tk in sorted(toks)]
+    return stmts
+
+
+def _kwr_rebuild_stmts(sess: "Session", owner: str, ts: str) -> list:
+    """The rebuild: re-derive the OWNER's whole index from the authored rows
+    alone (the acceptance pin — delete/rebuild restores expected results).
+    The searchable set: the sources' extracted passages (the CURRENT
+    generation per source), the highlights' selected text + anchor windows,
+    the bookmarks' anchor windows + spans, the notes' current-revision
+    content. Tombstoned captures are indexed AND filtered at query time
+    (the parity join — the index never governs visibility)."""
+    stmts = [f"DELETE FROM arv.keyword_index WHERE owner_scope={_q(owner)};"]
+    # sources: the FULL decoded text re-read from the verified blob (the same
+    # text the import indexed — the findability rung indexes the source as
+    # imported, the passage-level granularity is the extraction slice's own)
+    for row in _sess_rows(sess,
+            f"SELECT id || '|' || digest FROM arv.source "
+            f"WHERE owner_scope={_q(owner)} ORDER BY id;"):
+        sid, digest = row.split("|", 1)
+        try:
+            text = blob.get(digest).decode("utf-8")
+        except (UnicodeDecodeError, KeyError):
+            text = ""  # the non-text boundary: not indexed, never a rebuild refusal
+        stmts += _kwr_index_stmts(owner, "source", sid, 1, [text], ts)
+# highlights: the current revision's selected text + the anchor windows
+    # (row_to_json: the windows carry raw newlines — the pipe-delimited form
+    # fragments on them, the #89/#90/#91 ANC-10 lesson)
+    for row in _sess_rows(sess,
+            f"SELECT row_to_json(t)::text || '|' FROM (SELECT h.id, h.revision, "
+            f"h.selected_text, a.context_before, a.context_after "
+            f"FROM arv.highlight h JOIN arv.anchor a ON a.id = h.anchor_id "
+            f"WHERE h.owner_scope={_q(owner)} AND h.revision = (SELECT MAX(h2.revision) "
+            f"FROM arv.highlight h2 WHERE h2.id = h.id AND h2.owner_scope={_q(owner)}) "
+            f"ORDER BY h.id) t;"):
+        jr = json.loads(row.rsplit("|", 1)[0])
+        stmts += _kwr_index_stmts(owner, "highlight", jr["id"], int(jr["revision"]),
+                                  [jr["selected_text"], jr["context_before"],
+                                   jr["context_after"]], ts)
+# bookmarks: the current revision's anchor windows + the span re-derived
+    # from the anchor's OWN source digest + offsets through the verified blob
+    # (fully re-derivable WITHOUT the extraction state — the anchor row is
+    # the location evidence; row_to_json for the newline law)
+    for row in _sess_rows(sess,
+            f"SELECT row_to_json(t)::text || '|' FROM (SELECT b.id, b.revision, "
+            f"a.context_before, a.context_after, a.source_digest, "
+            f"a.start_off AS a_start, a.end_off AS a_end "
+            f"FROM arv.bookmark b "
+            f"JOIN arv.anchor a ON a.id = b.anchor_id "
+            f"WHERE b.owner_scope={_q(owner)} AND b.revision = (SELECT MAX(b2.revision) "
+            f"FROM arv.bookmark b2 WHERE b2.id = b.id "
+            f"AND b2.owner_scope={_q(owner)}) ORDER BY b.id) t;"):
+        jr = json.loads(row.rsplit("|", 1)[0])
+        try:
+            src_text = blob.get(jr["source_digest"]).decode("utf-8")
+        except (UnicodeDecodeError, KeyError):
+            src_text = ""
+        span = src_text[jr["a_start"]:jr["a_end"]]
+        stmts += _kwr_index_stmts(owner, "bookmark", jr["id"], int(jr["revision"]),
+                                  [span, jr["context_before"], jr["context_after"]], ts)
+
+
+    # notes: the current revision's authored content (row_to_json: the
+    # long-form content carries raw newlines — the same framing law)
+    for row in _sess_rows(sess,
+            f"SELECT row_to_json(t)::text || '|' FROM (SELECT n.id, n.revision, "
+            f"n.content FROM arv.note n "
+            f"WHERE n.owner_scope={_q(owner)} AND n.revision = (SELECT MAX(n2.revision) "
+            f"FROM arv.note n2 WHERE n2.id = n.id AND n2.owner_scope={_q(owner)}) "
+            f"ORDER BY n.id) t;"):
+        jr = json.loads(row.rsplit("|", 1)[0])
+        stmts += _kwr_index_stmts(owner, "note", jr["id"], int(jr["revision"]),
+                                  [jr["content"]], ts)
+    return stmts
+
+
+def rebuild_keyword_index(*, db, owner, actor, client_id, idem_key,
+                         crash_at: str = None) -> int:
+    """P3-07's rebuild command: re-derive the caller's whole keyword index
+    from the authored rows alone (the acceptance: delete/rebuild restores
+    expected results — the index is a derived, rebuildable layer, never an
+    authority). Idempotent by construction (the full delete + re-derive);
+    the spine's command-log row records the run."""
+    body = json.dumps({"owner": owner}, sort_keys=True, separators=(",", ":"),
+                      ensure_ascii=False)
+
+    def build(sess: "Session", body_hash: str):
+        ts = clock.now()
+        stmts = _kwr_rebuild_stmts(sess, owner, ts)
+        # the run's identity ref (command_log.result_ref is a UUID — the owner
+        # name is NOT a valid ref; the rebuild owns no entity, its ref is the
+        # run itself)
+        return ids.new_id(), stmts, " index=rebuilt durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="rebuild_keyword_index", payload=body, build=build, crash_at=crash_at)
+
+
 def create_note(*, db, owner, actor, client_id, idem_key, content=None,
                 content_file=None, refs=None, crash_at: str = None) -> int:
     """P3-06 (RTM §2.5 item 7): the deep owner-authored Note — a fresh
@@ -1177,7 +1333,8 @@ def create_note(*, db, owner, actor, client_id, idem_key, content=None,
                  f"input_hash, idempotency_key, created_at) VALUES ({_q(note_id)}, 1, "
                  f"{_q(body_content)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
                  f"{_q(idem_key)}, {_q(ts)});"] + \
-            _nte_ref_stmts(note_id, 1, refs_c, owner, actor, client_id, idem_key, body_hash)
+            _nte_ref_stmts(note_id, 1, refs_c, owner, actor, client_id, idem_key, body_hash) + \
+            _kwr_index_stmts(owner, "note", note_id, 1, [body_content], ts)
         return note_id, stmts, " revision=1 durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
@@ -1228,7 +1385,8 @@ def revise_note(*, db, owner, actor, client_id, idem_key, id_, content=None,
                  f"input_hash, idempotency_key, created_at) VALUES ({_q(id_)}, {revision + 1}, "
                  f"{_q(body_content)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
                  f"{_q(idem_key)}, {_q(ts)});"] + \
-            _nte_ref_stmts(id_, revision + 1, refs_c, owner, actor, client_id, idem_key, body_hash)
+            _nte_ref_stmts(id_, revision + 1, refs_c, owner, actor, client_id, idem_key, body_hash) + \
+            _kwr_index_stmts(owner, "note", id_, revision + 1, [body_content], ts)
         return id_, stmts, f" revision={revision + 1} durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
@@ -1315,6 +1473,7 @@ REGISTRY = {"record_event": record_event, "import_source": import_source,
             "move_bookmark": move_bookmark, "tombstone_bookmark": tombstone_bookmark,
             "restore_bookmark": restore_bookmark, "create_note": create_note,
             "revise_note": revise_note, "tombstone_note": tombstone_note,
+            "rebuild_keyword_index": rebuild_keyword_index,
             "restore_note": restore_note}
 
 
@@ -1372,6 +1531,8 @@ def main() -> int:
                             "MUST name the target revision, work/source/anchor MUST NOT)")
         if name == "revise_note":
             p.add_argument("--id", required=True)
+    p = sub.add_parser("rebuild_keyword_index")
+    _common(p)
     for name in ("tombstone_note", "restore_note"):
         p = sub.add_parser(name)
         _common(p)
@@ -1416,6 +1577,9 @@ def main() -> int:
         return revise_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                            idem_key=a.idem_key, id_=a.id, content=a.content,
                            content_file=a.content_file, refs=a.ref)
+    if a.command == "rebuild_keyword_index":
+        return rebuild_keyword_index(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                     idem_key=a.idem_key)
     if a.command == "tombstone_note":
         return tombstone_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                               idem_key=a.idem_key, id_=a.id)

@@ -266,7 +266,7 @@ def main() -> int:
               "the derived-layer law: visibility is the authoritative rows' property (the §3.3 parity), never the index's — the index is rebuilt from the current view")
 
         # ---- KWR-04 — the stale entry after revision
-        revise_note("n-A1-v", n1, "Revised: the zephyr is gone; the avalanche remains.")
+        revise_note("n-A1-v", n1, "Revised: the old word is gone; the avalanche remains.")
         r_old = search("A", "zephyr")
         r_new = search("A", "avalanche")
         ok4 = (r_old.returncode == 0 and not any(f"note|{n1}" in ln for ln in result_ids(r_old))
@@ -279,7 +279,7 @@ def main() -> int:
         before = sorted(result_ids(search("A", "xylophone")) + result_ids(search("A", "avalanche"))
                         + result_ids(search("A", "中")))
         dele = app_sql("DELETE FROM arv.keyword_index;")
-        mid = audit("SELECT count(*) FROM arv.keyword_index;")
+        mid = audit("SELECT count(*) FROM arv.keyword_index WHERE owner_scope='A';")
         empty_r = search("A", "xylophone")
         rb = rebuild()
         after = sorted(result_ids(search("A", "xylophone")) + result_ids(search("A", "avalanche"))
@@ -336,7 +336,7 @@ def main() -> int:
                           "ORDER BY ordinal_position;")
         rls = audit_rows("SELECT relrowsecurity::text, relforcerowsecurity::text FROM "
                          "pg_class WHERE oid='arv.keyword_index'::regclass;")
-        grants = audit("SELECT CASE WHEN 'arv_app=/ar/postgres' = ANY (string_to_array("
+        grants = audit("SELECT CASE WHEN 'arv_app=ard/postgres' = ANY (string_to_array("
                        "trim(relacl::text, '{}'), ',')) THEN 'ok' ELSE relacl::text END "
                        "FROM pg_class WHERE oid='arv.keyword_index'::regclass;")
         chk = audit_rows("SELECT conname FROM pg_constraint WHERE conrelid="

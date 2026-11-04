@@ -789,6 +789,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-058 (P3-07) commit B: the KWR-01..10 suite's RED observed at the exact predecessor b698608d (CLAIM-057's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000: the search arm absent, the rebuild command absent, migration 0011 absent; the transcript at the slice's runs dir red-01.txt; record 50 \u00a711 (the record-18 \u00a74.1 / claim-055/056/057 precedent class)",
-    "current_sha256": "2d3b3e87880725994827da1b26ad62f0f9c9b5ad1aeb8b58a17c8840d766581b"
+    "current_sha256": "331504d4d286f60689b860cb651180a0ab31aaca3f7630416d85e4ea31d7472e",
+    "amendments": [
+      {
+        "prior_sha256": "2d3b3e87880725994827da1b26ad62f0f9c9b5ad1aeb8b58a17c8840d766581b",
+        "new_sha256": "331504d4d286f60689b860cb651180a0ab31aaca3f7630416d85e4ea31d7472e",
+        "note": "CLAIM-058 (P3-07) the implementation-cycle repairs on the KWR suite (the #89/#90/#91/#92 precedent class \u2014 assertions corrected against the live machinery, none removed, none weakened): (a) the grants audit string aligned to PostgreSQL's ACL rendering order (arv_app=ard \u2014 INSERT+DELETE+SELECT, never the alphabetical guess adr); (b) KWR-04's revision fixture content no longer CONTAINS the old term (the first draft's 'the zephyr is gone' kept the token matching \u2014 the stale-entry pin was vacuously failing); (c) KWR-05's post-delete count scoped to the caller (arv_read is the BYPASSRLS auditor \u2014 the unscoped count sees every owner's rows, and the RLS-scoped DELETE removes only the caller's, by design); (d) the schema audits verified live (the six columns, RLS true|true, the two CHECKs)",
+        "observed_at": "2026-11-04T13:04:08.453099+00:00"
+      }
+    ]
   }
 }

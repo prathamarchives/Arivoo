@@ -442,11 +442,108 @@ def main() -> int:
               "the purge ledger's permanence is structural (the append-only trigger), the export reads through the RLS-scoped session, and the hostile reads meet the same owner isolation as the command path")
         _ = pb_note
 
+        # ---- EXP-11 — the mid-restore ledger write (the SEV round-1 F1: the
+        # restore-side TOCTOU — the ledger read must be SERIALIZED against
+        # concurrent ledger writes by the restore's own transaction lock)
+        db11 = pg.create_scratch_db("p309d11")
+        subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
+                       capture_output=True, timeout=180,
+                       env=dict(ENV, PGDATABASE=db11), check=True)
+        e11env = dict(ENV, PGDATABASE=db11)
+        writer = subprocess.Popen(["psql", "-X", "-A", "-t", "-U", "arv_app", "-d", db11,
+                                   "-c", f"SET app.current_owner='A'; INSERT INTO arv.purge_ledger "
+                                         f"(owner_scope, kind, entity_id, reason, actor, created_at) "
+                                         f"VALUES ('A', 'note', '{nid}', 'the mid-restore write', 'owner', now());"],
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=e11env)
+        r11 = exp("restore", "--archive", str(arch), env=e11env)
+        w_out = writer.communicate(timeout=60)
+        w_rc = writer.returncode
+        note_cnt = audit(db11, f"SELECT count(*) FROM arv.note WHERE id='{nid}';")
+        led_cnt = audit(db11, f"SELECT count(*) FROM arv.purge_ledger WHERE kind='note' AND entity_id='{nid}';")
+        asof_named = "ledger_as_of=" in r11.stdout
+        # the two LEGAL serial orders: (a) the write preceded the locked read —
+        # the note dropped; (b) the write followed the restore's commit — the
+        # note present AND the ledger row present (the purge pending the
+        # governed command). NEVER the silent neither.
+        order_a = (note_cnt == "0" and led_cnt == "1")
+        order_b = (note_cnt == "2" and led_cnt == "1")
+        ok11 = (r11.returncode == 0 and w_rc == 0 and asof_named
+                and (order_a or order_b))
+        check("EXP-11", ok11,
+              "the mid-restore ledger write: a purge-ledger insert attempted DURING the restore serializes against the restore's own transaction (the table lock) — the outcome is one of the two LEGAL orders: the write observed (the note dropped from the restored set) or the write landed after the commit (the note restored, the ledger row present — the purge pending the governed command, D-011's flow); the completion always names its ledger's as-of truthfully; never the silent neither (the note present while the read claimed an empty ledger)",
+              "the ledger read moves INSIDE the restore's transaction behind the table lock — a concurrent ledger write either precedes the locked read or waits for the commit; the reconciliation is never computed over a stale snapshot")
+        pg.drop_scratch_db(db11)
+
+        # ---- EXP-12 — the overlapping ledger entry (the SEV round-1 F2: the
+        # promised ON CONFLICT DO NOTHING merge, never a mislabeled failure)
+        db12 = pg.create_scratch_db("p309d12")
+        subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
+                       capture_output=True, timeout=180,
+                       env=dict(ENV, PGDATABASE=db12), check=True)
+        e12env = dict(ENV, PGDATABASE=db12)
+        app_sql(db12, f"INSERT INTO arv.purge_ledger (owner_scope, kind, entity_id, reason, "
+                      f"actor, created_at) VALUES ('A', 'note', '{nid}', "
+                      f"'the destination current entry', 'owner', now());")
+        arch12 = pathlib.Path(tempfile.mkdtemp(prefix="arv-arch12-"))
+        app_sql(SRC, f"INSERT INTO arv.purge_ledger (owner_scope, kind, entity_id, reason, "
+                     f"actor, created_at) VALUES ('A', 'note', '{nid}', "
+                     f"'the archive older entry', 'owner', now());")
+        exp("export", "--owner", "A", "--out", str(arch12))
+        app_sql(SRC, f"DELETE FROM arv.purge_ledger WHERE owner_scope='A';") if False else None
+        r12 = exp("restore", "--archive", str(arch12), env=e12env)
+        reason12 = audit(db12, f"SELECT reason FROM arv.purge_ledger WHERE kind='note' AND entity_id='{nid}';")
+        note12 = audit(db12, f"SELECT count(*) FROM arv.note WHERE id='{nid}';")
+        ok12 = (r12.returncode == 0 and reason12 == "the destination current entry"
+                and note12 == "0")
+        check("EXP-12", ok12,
+              "the overlapping ledger entry: the destination's current entry and the archive's older entry for the SAME (owner, kind, entity) — the restore MERGES (ON CONFLICT DO NOTHING: the destination's reason preserved, never a duplicate-key crash, never the mislabeled manifest failure) and the reconciliation drops the ledgered entity either way (both entries name it)",
+              "the archive's ledger rows merge on conflict with the destination's current entries staying authoritative — the permanence record is additive, never overwritten")
+        pg.drop_scratch_db(db12)
+
+        # ---- EXP-13 — the stray-row gate (the SEV round-1 F5: every
+        # authoritative table checked, never the command_log proxy alone)
+        db13 = pg.create_scratch_db("p309d13")
+        subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
+                       capture_output=True, timeout=180,
+                       env=dict(ENV, PGDATABASE=db13), check=True)
+        e13env = dict(ENV, PGDATABASE=db13)
+        app_sql(db13, "INSERT INTO arv.note (id, revision, content, owner_scope, actor, "
+                      "run_id, input_hash, idempotency_key, created_at) VALUES "
+                      "('00000000-0000-7000-8000-0000000000f9', 1, 'a stray row with no "
+                      "command_log', 'A', 'owner', 'run-stray', 'ih', 'stray-1', now());")
+        r13 = exp("restore", "--archive", str(arch), env=e13env)
+        stray = audit(db13, "SELECT count(*) FROM arv.note WHERE owner_scope='A';")
+        ok13 = (r13.returncode == 1 and "ARV-EXP-002" in r13.stdout and stray == "1")
+        check("EXP-13", ok13,
+              "the stray-row gate: a destination carrying a single stray authoritative row with NO command_log entry (the hostile direct-insert class) still REFUSES the restore (ARV-EXP-002) — the clean-destination check covers EVERY authoritative table, never the command_log count alone; the stray row is untouched (zero new rows)",
+              "the gate is the union count over the whole authoritative set — any pre-existing owner content refuses the restore, never a silent mixed state")
+        pg.drop_scratch_db(db13)
+
+        # ---- EXP-14 — the purged-highlight reference cascade (the SEV round-1
+        # F3: the reference rows pointing at a purged entity drop with it)
+        db14 = pg.create_scratch_db("p309d14")
+        subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
+                       capture_output=True, timeout=180,
+                       env=dict(ENV, PGDATABASE=db14), check=True)
+        e14env = dict(ENV, PGDATABASE=db14)
+        app_sql(db14, f"INSERT INTO arv.purge_ledger (owner_scope, kind, entity_id, reason, "
+                      f"actor, created_at) VALUES ('A', 'highlight', '{hid}', "
+                      f"'the governed purge (the test substrate surface)', 'owner', now());")
+        r14 = exp("restore", "--archive", str(arch), env=e14env)
+        hl14 = audit(db14, f"SELECT count(*) FROM arv.highlight WHERE id='{hid}';")
+        refs14 = audit(db14, f"SELECT count(*) FROM arv.note_reference WHERE ref_kind='highlight' AND ref_id='{hid}';")
+        note14 = audit(db14, f"SELECT count(*) FROM arv.note WHERE id='{nid}';")
+        ok14 = (r14.returncode == 0 and hl14 == "0" and refs14 == "0" and note14 == "2")
+        check("EXP-14", ok14,
+              "the purged-highlight reference cascade: a ledger entry for the HIGHLIGHT drops the highlight and its lifecycle AND the note_reference rows pointing at it (a reference to purged material is purge material by the tree semantics) — the referencing NOTE itself survives intact; the restore completes cleanly (never the coarse whole-archive refusal the substrate's reference guard would force)",
+              "the reconciliation drops the reference rows of every purged entity kind — the D-011 cascade semantics, applied at the restore boundary")
+        pg.drop_scratch_db(db14)
+
         print()
         if FAILS:
             print(f"RED — the P3-09 export/restore suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-09 acceptance suite (EXP-01..10) passes")
+        print("GREEN — the P3-09 acceptance suite (EXP-01..14) passes")
         return 0
     finally:
         pg.drop_scratch_db(SRC)

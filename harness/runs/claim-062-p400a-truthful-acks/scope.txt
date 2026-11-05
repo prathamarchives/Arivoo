@@ -13,11 +13,14 @@
 # pagination/bounded-response work P4-00b's; the format capability matrix
 # P4-00c/P4-A's; no refactor of the landed families.
 harness/tests/test_contract.py D-041
+harness/tests/test_keyword_index.py D-041  # the result_ids amendment (the labeled-search interaction, disclosed)
+harness/tests/test_gate_dispatch.py D-041  # the fixture de-coupling amendment (ARV-CLM-002 fired as designed; disclosed)
 harness/tests/test_export.py D-041  # the EXP-09 amendment: the landed pin meets the labeled search form (disclosed in the red-records amendment chain)
 harness/commands.py D-041
 harness/export.py D-041
 harness/query.py D-041
 harness/migrate.py D-041
+harness/extract.py D-041
 README.md D-036
 harness/gate.py D-041
 harness/red-records.json D-041

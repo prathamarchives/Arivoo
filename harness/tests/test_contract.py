@@ -250,12 +250,37 @@ def main() -> int:
               "the user-facing README at the repo root: the connection env INCLUDING PGDATABASE (the undocumented default the acceptance agent tripped on), the day-one workflow verbs (import, highlight, bookmark, note, search, export, restore), and the durability vocabulary (durability_rung) — the entry surface the uncoached agent had to assemble from --help and the engineering records",
               "write README.md at the repo root: the day-one path (setup, the connection env, the workflow, the durability vocabulary)")
 
+        # ---- CON-08 — the README's commands are RUNNABLE-shaped (the SEV
+        # round-1 F2 pin, RED-first: every commands.py verb the README shows
+        # is one the parser actually registers; every extract invocation
+        # names harness/extract.py — the registry exposes extract_source as
+        # a callable, never a subparser)
+        verbs = {"record_event", "import_source", "create_highlight",
+                 "create_bookmark", "revise_highlight", "tombstone_highlight",
+                 "restore_highlight", "move_bookmark", "tombstone_bookmark",
+                 "restore_bookmark", "create_note", "revise_note",
+                 "rebuild_keyword_index", "tombstone_note", "restore_note"}
+        bad_verb = False
+        for ln in readme.splitlines():
+            s = ln.strip()
+            if s.startswith("#") or not s.startswith("python3 harness/commands.py"):
+                continue
+            parts = s.split()
+            if len(parts) >= 3 and parts[2] not in verbs:
+                bad_verb = True
+        extract_ok = ("harness/commands.py extract_source" not in readme
+                      and "harness/extract.py" in readme)
+        ok8 = (bool(readme) and not bad_verb and extract_ok)
+        check("CON-08", ok8,
+              "the README's commands are runnable-shaped: every harness/commands.py invocation it shows uses a verb the parser actually registers, and every extraction invocation names harness/extract.py (the commands.py registry exposes extract_source as a callable, never a subparser — the day-one path's step 2 must not be a copy-paste that dies with 'invalid choice')",
+              "README.md: the extract step's command line runs harness/extract.py directly (the EXT suite's own invocation form); no commands.py line shows an unregistered verb")
+
         print()
         if FAILS:
             print(f"RED — {len(FAILS)} failure(s): {', '.join(FAILS)}")
             return 1
         print("GREEN — the truthful-acknowledgment contract + the user-facing entry hold "
-              "(CON-01..07; the Phase 3 exit gate's routed register answered)")
+              "(CON-01..08; the Phase 3 exit gate's routed register answered + the SEV round-1 repairs)")
         return 0
     finally:
         if SRC:

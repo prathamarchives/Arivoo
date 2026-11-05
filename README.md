@@ -47,7 +47,8 @@ python3 harness/commands.py import_source --owner me --client-id my-cli \
 #    ACK ... status=committed result_ref=<source-id> work_id=<work-id> durability_rung=local_durable
 
 # 2. (Optional but recommended) extract the passages and index the source
-python3 harness/commands.py extract_source --owner me --client-id my-cli \
+#    (its own module — not a commands.py verb)
+python3 harness/extract.py --owner me --actor owner --client-id my-cli \
     --idem-key ext-001 --source-id <source-id>
 
 # 3. Highlight a passage (character offsets into the stored bytes)

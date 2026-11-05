@@ -888,13 +888,25 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the CON suite's observed RED at commit ec66553 (machinery-absent ARV-TEST-000: the README absent at the root + the migrate --help misfire \u2014 exit 1, red-01.txt at harness/runs/claim-062-p400a-truthful-acks/)",
-    "current_sha256": "309c343deac99bd6b0dcfc710c54f02aa8734ed12b7f488e75f5474527267561",
+    "current_sha256": "2f623ca573c9665df17eec601bea2e2fff28c38b077f1d0ffb8f5609a91a040b",
     "amendments": [
       {
         "prior_sha256": "598ff19be393daf7cfca29672f573a39e5e4ed296111185d79005401c9f70a28",
         "new_sha256": "309c343deac99bd6b0dcfc710c54f02aa8734ed12b7f488e75f5474527267561",
         "note": "CLAIM-062 the implementation-cycle amendments (the #93/#95 precedent class, each disclosed): (1) the extract invocation path corrected to harness/extract.py's own CLI (the commands.py registry exposes extract_source as a callable, never a subparser \u2014 the EXT suite's own form; observed at the first GREEN run as exit 2 invalid-choice, repaired in the same chain); (2) the int/str CLI argument forms. Assertions unchanged \u2014 CON-01..07's pins identical",
         "observed_at": "2026-11-05T20:10:23.570004+00:00"
+      },
+      {
+        "prior_sha256": "309c343deac99bd6b0dcfc710c54f02aa8734ed12b7f488e75f5474527267561",
+        "new_sha256": "a57fb4eedca9137a296d011f0842fcadd9e87e208f3beb849fc2ad9ff79cb5cf",
+        "note": "CLAIM-062 the SEV round-1 repair RED (agent-95174e53 BLOCKED with two open P1s \u2014 the #91/#93/#94/#95 review-round precedent, every repair RED-first): CON-08 the README's commands are runnable-shaped (every harness/commands.py invocation uses a verb the parser registers; every extract invocation names harness/extract.py \u2014 OBSERVED FAILING: the README's day-one step 2 showed commands.py extract_source, the unregistered-verb class; red-02.txt). CON-01..07 all still PASS at this tree \u2014 the repair pin is additive, never a moved assertion",
+        "observed_at": "2026-11-05T21:26:12.804679+00:00"
+      },
+      {
+        "prior_sha256": "a57fb4eedca9137a296d011f0842fcadd9e87e208f3beb849fc2ad9ff79cb5cf",
+        "new_sha256": "2f623ca573c9665df17eec601bea2e2fff28c38b077f1d0ffb8f5609a91a040b",
+        "note": "CLAIM-062 the CON-08 pin repair (disclosed): the verb index corrected to parts[2] (the first RED observation over-failed on a pin bug \u2014 every commands.py line tripped bad_verb); the TRUE RED re-observed against the temporarily-restored README defect (red-02.txt: exit 1, CON-08 FAIL with the fixed pin) before the repair re-applied \u2014 the pin now fails only on the defect class it names",
+        "observed_at": "2026-11-05T21:26:48.001139+00:00"
       }
     ]
   }

@@ -1,0 +1,7 @@
+{
+  "command": "ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-061-p3-exit-gate python3 -I tools/trusted_gate_anchored.py --repo $PWD --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "a287ce199cc0b20dfa9f074ac386cc65acbce547",
+  "output_sha256": "5832f02f2088360e8561c83ed65bf370c218b553ca3d0d84b7709c8efe206e6a",
+  "recorded_at": "2026-11-05T19:40:07.510243+00:00"
+}

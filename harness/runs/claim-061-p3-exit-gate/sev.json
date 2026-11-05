@@ -1,0 +1,127 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-061-p3-exit-gate",
+ "base_sha": "3b5ed28b28d54d47a1032ae0960621dff49c53ef",
+ "reviewed_diff_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-02",
+  "SYS-03",
+  "SYS-04",
+  "SYS-05",
+  "SYS-06",
+  "SYS-07",
+  "SYS-08",
+  "SYS-09",
+  "SYS-10",
+  "SYS-11"
+ ],
+ "system_claims": [
+  "C1",
+  "C2",
+  "C3",
+  "C5"
+ ],
+ "changed_components": [
+  "CLAIMS.md (CLAIM-060's rule-4 close row + CLAIM-061's open row \u2014 the registry reconciliation)",
+  "PLAN.md (P3-09's LANDED status + the P-18 staleness repairs on the P3-01/P3-02/P3-02-followup cards \u2014 no card text changed, only the status lines the #84/#85/#86 closes left stale)",
+  "STATE.md + AGENTS.md (the five-area re-derivation to the post-#95 truth)",
+  "context/WORKLOG.md (Task 77) + context/extracted/53-P3-EXIT-GATE.md (record 53: the gate account \u2014 \u00a71 the #95 close, \u00a72 the criteria-to-evidence map, \u00a73 the acceptance agent, \u00a74 the graders, \u00a75 the verdict + the routed register)",
+  "harness/runs/claim-061-p3-exit-gate/ (the gate's own evidence: scope.txt, the three recorded make-verify runs, the PR-mode gate run, notverified.txt, the acceptance report + both grader reports as verbatim evidence copies)",
+  "NO PRODUCT CODE CHANGED \u2014 a verification campaign over the final main 3b5ed28 (the tree's product surface is byte-identical to the merged head; the suites on main are the measured set)"
+ ],
+ "interfaces_reviewed": [
+  "the exit-gate contract itself: PLAN \u00a73.E's eleven criteria each mapped to its evidence home (record 53 \u00a72)",
+  "the RTM \u00a71 trace rows SYS-01..11 (the requirement statements in PLAN's SYS table; the traces walked independently by grader part 1)",
+  "the RTM \u00a78 slice-acceptance table (which slice closed which rows \u2014 verified against the 13 slice evidence dirs)",
+  "the acceptance task surface (the user-like scenario: setup, import, highlight/bookmark/note-with-reference, search, fresh-start reopen, durability language, export/restore move, abnormal events)",
+  "the grader protocol (part 1 the matrix walk; part 2 the acceptance grade + the final verdict \u2014 SYS-11's phase-gate form)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the three recorded make verify runs at the content head (exit 0; the gate GREEN; the canonical layer 54/0) \u2014 the full 21-suite set + the known-bad matrix + the red records + the lint/deps checks",
+   "the per-slice evidence existence check (13/13 Phase-3 slice dirs: proofsheet.md + sev.json with disposition=PASS)",
+   "the P-18 PLAN staleness repairs verified against the close facts (the #84/#85/#86 merges re-observed in the CLAIMS rows)"
+  ],
+  "integration_verification": [
+   "grader part 1's independent execution: every SYS row's named suites RUN by the grader against its own migrated database (all exit 0), the per-row anchor cases confirmed in its own logs \u2014 no row passed by implication",
+   "grader part 2's seven probe groups on its own databases: the full user path, the replays/409, the export/restore equality, the twelve-surface cross-owner sweep, the sync walk, the crash-interrupted restore, the search-at-commit"
+  ],
+  "system_verification": [
+   "the uncoached clean-clone acceptance run at the exact final main 3b5ed28: a fresh-context agent, a clean clone, two empty databases, a user-like task with no coaching \u2014 setup through the repo's own documented surface, the full capture-and-retrieve walk, the restart byte-identity, the truthful durability reads, the library move, six abnormal events \u2014 NO P0/P1",
+   "the five required CI checks green at the final head 7800919 AND on the merge commit 3b5ed28 (observed live; the ids in record 53 \u00a71)"
+  ],
+  "validation": [
+   "the separate grader's FINAL VERDICT: PASS \u2014 the coverage table (every \u00a73.E line covered or suite-covered with the bounded exclusion named), the re-judged findings (no P0/P1 on re-derivation; the restore P2 re-judged two-layered per RTM \u00a73.7), the grader's own adversarial probes finding no new P0/P1",
+   "the acceptance agent's user verdict recorded verbatim (the honest day-one user's judgment, never edited)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a phase gate passing by implication (a row nobody walked)",
+   "controlled_by": "grader part 1 executed every row's named suites itself and confirmed the per-row cases in its own logs; the walk is recorded per-row in grader-part1-matrix-walk.md"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "a coached acceptance run (the agent told where to look)",
+   "controlled_by": "the task text carried no command names, no file pointers, no schema hints; the rules allowed docs freely and source only to understand an error; the agent's own report records the friction of discovery (the undocumented PGDATABASE, the missing README) \u2014 the proof the coaching was absent"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a false PASS from a stale CI snapshot",
+   "controlled_by": "the five checks were observed at the final head AND on the merge commit live via the API; the local reproduction ran the same S4c path before the push; the merge-gate re-observation follows"
+  },
+  {
+   "id": "FM-04",
+   "scenario": "the gate grading Phase 4 surfaces it should not (scope creep)",
+   "controlled_by": "the routed register names each finding's P4 home; the not-verified list names the Phase 4+ surfaces as NOT graded"
+  },
+  {
+   "id": "FM-05",
+   "scenario": "the staleness class (status lines claiming EXECUTING on landed slices)",
+   "controlled_by": "the P-18 repairs in commit A, each citing its close facts; the canonical layer green after the repair"
+  }
+ ],
+ "findings": [
+  {
+   "id": "G-1",
+   "severity": "P2",
+   "status": "open",
+   "summary": "the restore leaves derived state un-rebuilt and un-mentioned: after restore, search is silently empty and anchors honestly-unresolved until the operator re-runs extract + rebuild \u2014 the RESTORED ack never names the step (re-judged two-layered by the grader: per RTM \u00a73.7 'restored' is the contracted honest intermediate state \u2014 NOT a truthfulness violation \u2014 AND a real user-surface gap: search cannot distinguish empty-index from no-match, defeating P3-07's 'never a silent miss' at this one moment)",
+   "evidence": "acceptance-report.md step 5 + grader-part2 probe C; routed to P4-00's truthful-durability-states contract (the ack naming the rebuild step)"
+  },
+  {
+   "id": "G-2",
+   "severity": "P2",
+   "status": "open",
+   "summary": "no user-facing entry document: the CLI surface had to be assembled from --help and the engineering records (AGENTS.md is agent-oriented)",
+   "evidence": "acceptance-report.md findings + grader-part2 confirmation; routed to P4-00's user-facing entry"
+  },
+  {
+   "id": "G-3",
+   "severity": "P2",
+   "status": "open",
+   "summary": "the P3 polish register from both graders (durability_rung missing on import/extract acks; the anchor_id not in get-capture; the offset-semantics docs; a real --help for migrate.py; the unlabeled search output; the BrokenPipeError) \u2014 every one confirmed by the grader's verbatim checks or corrected (the anchor_id IS in get-history)",
+   "evidence": "acceptance-report.md findings + grader-part2 \u00a73; routed to P4-00/P4-A"
+  }
+ ],
+ "not_verified": [
+  "the independence limit (PLAN \u00a7D-9): the builder, the acceptance agent, and both graders ran on the same host and model family \u2014 context separation is the protocol's design, never a cryptographic proof of distinct substrates",
+  "the owner-facing purge flow was not walked by the acceptance agent (it does not exist \u2014 D-011's deferral); the purge-after-restore criterion is suite-covered (EXP-07/10..15), never user-surface-walked",
+  "the real cross-host network surface and the cloud provider boundary remain Q12's (the rig's two-database loopback model)",
+  "Phase 4+ surfaces (reader client, journal blocks, @-reference resolution states, scoped agent reads, pagination) are not graded by this gate",
+  "the CI evidence is the recorded API snapshot at write time (INT-104's class); the merge-gate re-observation is the live proof",
+  "make verify was run three times by the builder and once by grader part 1 \u2014 not re-run by grader part 2 (its probes were targeted instead; part 1's raw logs spot-verified)"
+ ],
+ "builder_context": "glm-session-41-builder",
+ "reviewer_context": "agent-62dfa294+agent-ae8bc49d-fresh-context-graders",
+ "disposition": "PASS",
+ "review_summary": "The Phase 3 exit gate at the final main 3b5ed28. Part 1 (agent-62dfa294) walked every SYS-01..11 row to its named suites EXECUTED on its own migrated database (all exit 0) with the per-row cases confirmed in its own logs; 13/13 slice evidence dirs carry disposition=PASS SEV reports; one full make verify exit 0; the KB spot-checks held; no P0/P1/P2 findings (four P3s). Part 2 (agent-ae8bc49d) graded the uncoached clean-clone acceptance run: the coverage table complete (the one unwalked line \u2014 tombstones/governed purge \u2014 has no owner-facing surface, the D-011 deferral, suite-covered by EXP-07/10..15), seven independent probe groups reproduced the acceptance claims (the full user path, the replays, the export/restore equality, the twelve-surface cross-owner sweep, the sync walk, the crash-interrupted restore, the search-at-commit), the findings re-judged (no P0/P1; the restore P2 two-layered per RTM \u00a73.7), one report-accuracy correction (get-history exposes the anchor_id). FINAL VERDICT: PASS. The slice itself changes no product code \u2014 the memory/evidence diff (the reconciliation, the staleness repairs, record 53, the gate's run records) is the reviewed surface."
+}

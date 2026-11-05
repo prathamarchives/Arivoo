@@ -1,0 +1,36 @@
+NOT VERIFIED — the honest limits of CLAIM-061 / the Phase 3 exit gate
+(LAW-04; never empty-by-omission)
+
+WHAT THIS GATE PROVES: every PLAN §3.E exit criterion at the final main
+3b5ed28 — the full local verification (three recorded make verify runs, exit
+0; the gate GREEN; the canonical layer 54/0); the RTM all-rows walk executed
+INDEPENDENTLY (grader part 1: every SYS-01..11 row to its named suites RUN
+by the grader itself, all exit 0; 13/13 slice evidence dirs with
+disposition=PASS SEV reports; the KB spot-checks); the uncoached
+clean-clone acceptance path (a fresh-context agent, a clean clone at
+3b5ed28, two empty databases, a user-like task with no coaching — the full
+capture-and-retrieve walk, the restart byte-identity, the export/restore
+equality, the truthful durability reads, six abnormal events — NO P0/P1);
+the separate grader's final verdict PASS (seven independent probe groups,
+the coverage table, the re-judged findings).
+
+NOT VERIFIED — the honest limits:
+- The independence limit (PLAN §D-9): the builder, the acceptance agent,
+  and both graders ran on the same host and model family. Context separation
+  is the protocol's design; it is not cryptographic proof of distinct
+  substrates. Reported honestly, never overclaimed.
+- The owner-facing purge flow was NOT walked by the acceptance agent — it
+  does not exist (D-011's bounded deferral; the ledger + reconciliation are
+  the Phase 3 deliverable). The "governed purge remains effective after
+  restore" criterion is proven at the suite level (EXP-07/10..15), never by
+  a user-surface walk.
+- The real cross-host network surface and the cloud provider boundary
+  remain Q12's (the rig models the two durability domains as two databases
+  on the loopback boundary; no provider claim is made or graded).
+- Phase 4+ surfaces (the reader client, journal blocks, @-reference
+  resolution states, scoped agent reads, pagination) are NOT graded here —
+  they are Phase 4's cards (P4-00..F).
+- The CI evidence is the recorded API snapshot at write time (INT-104's
+  class); the merge-gate re-observation is the live proof.
+- The routed P2/P3 register (six repairs) is recorded in record 53 §5 —
+  none blocks this gate; each lands in its named P4 home.

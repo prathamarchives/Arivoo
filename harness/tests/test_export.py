@@ -417,12 +417,14 @@ def main() -> int:
         # restore the index on DST for the later equality sweeps (the rebuild added a command_log row on DST only)
         _ = rb
 
-        # ---- EXP-10 — the substrate + the scoping
-        u10 = su_sql(SRC, f"UPDATE arv.purge_ledger SET reason='x' WHERE owner_scope='A';")
-        d10 = su_sql(SRC, f"DELETE FROM arv.purge_ledger WHERE owner_scope='A';")
+        # ---- EXP-10 — the substrate + the scoping (the ledger row FIRST —
+        # the append-only trigger is per-row, so the hostile mutations need
+        # a row to hit)
         app_sql(SRC, f"INSERT INTO arv.purge_ledger (owner_scope, kind, entity_id, reason, "
                      f"actor, created_at) VALUES ('A', 'note', "
                      f"'00000000-0000-7000-8000-0000000000e1', 'the substrate pin', 'owner', now());")
+        u10 = su_sql(SRC, "UPDATE arv.purge_ledger SET reason='x' WHERE owner_scope='A';")
+        d10 = su_sql(SRC, "DELETE FROM arv.purge_ledger WHERE owner_scope='A';")
         cols = [ln for ln in audit(SRC, "SELECT column_name FROM information_schema.columns "
                                         "WHERE table_schema='arv' AND table_name='purge_ledger' "
                                         "ORDER BY ordinal_position;").split("\n") if ln.strip()]

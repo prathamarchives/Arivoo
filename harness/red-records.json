@@ -810,5 +810,15 @@
         "observed_at": "2026-11-04T14:25:52.813543+00:00"
       }
     ]
+  },
+  "harness/tests/test_sync.py": {
+    "schema": 2,
+    "binding_commit": "e91dc9a",
+    "binding_sha256": "d2158263fb30078c71c5874e85f781b12d5182605e917ca36420511d43a9b720",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-059 (P3-08) the RED: the SYN-01..15 suite's RED observed at the exact predecessor 67e37fa (CLAIM-058's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the driver + migration 0012 absent), red-01.txt; the typed observed red per F-007",
+    "current_sha256": "d2158263fb30078c71c5874e85f781b12d5182605e917ca36420511d43a9b720",
+    "amendments": []
   }
 }

@@ -154,6 +154,10 @@ def _drop_purged(rows: dict, ledger: list) -> dict:
     def drop(table, col, gone):
         if gone:
             rows[table] = [r for r in rows[table] if r[col] not in gone]
+    # the per-kind dropped entity ids (the F3 repair: the note_reference rows
+    # pointing at a purged entity of ANY kind drop with it — a reference to
+    # purged material is purge material by the tree semantics)
+    dropped = {k: set() for k in _ENTITY}
     for kind in _ENTITY:
         gone = {r["id"] for r in rows[kind] if (kind, r["id"]) in led}
         if not gone:
@@ -164,15 +168,21 @@ def _drop_purged(rows: dict, ledger: list) -> dict:
             anchors = {r["id"] for r in rows["anchor"] if r["source_id"] in gone}
             for t in ("highlight", "bookmark"):
                 ents = {r["id"] for r in rows[t] if r["anchor_id"] in anchors}
+                dropped[t] |= ents
                 drop(t + "_lifecycle", t + "_id", ents)
                 drop(t, "anchor_id", anchors)
             drop("anchor", "id", anchors)
         drop(kind, "id", gone)
+        dropped[kind] |= gone
         if kind == "note":
             drop("note_lifecycle", "note_id", gone)
             drop("note_reference", "note_id", gone)
         elif kind in ("highlight", "bookmark"):
             drop(kind + "_lifecycle", kind + "_id", gone)
+    # the reference cascade (F3): every reference row whose target is purged
+    rows["note_reference"] = [r for r in rows["note_reference"]
+                               if not (r["ref_kind"] in dropped
+                                       and r["ref_id"] in dropped[r["ref_kind"]])]
     return rows
 
 
@@ -195,22 +205,24 @@ def do_restore(archive: str, crash_at: str) -> int:
     owner = m["owner"]
     tables = {t: [list(r[c] for c in TABLES[t].split(",")) for r in m["tables"][t]] for t in TABLES}
     # 3. the destination's CURRENT ledger — the POSITIVE absence determination
-    rc, out = _app(f"SET app.current_owner={_q(owner)}; SELECT kind || '|' || entity_id || '|' || "
-                   f"to_char(max(created_at), 'YYYY-MM-DD\"T\"HH24:MI:SS') FROM arv.purge_ledger "
-                   f"GROUP BY kind, entity_id;")
+    # (the READ-COMMITTED pre-check; the AUTHORITATIVE re-read happens inside
+    # the locked transaction below — the F1 repair: the reconciliation is
+    # never computed over a snapshot a concurrent ledger write can invalidate)
+    rc, out = _app(f"SET app.current_owner={_q(owner)}; SELECT count(*) FROM arv.purge_ledger;")
     if rc != 0:
         print("FAIL ARV-EXP-006: the destination's purge ledger is UNREADABLE — the typed NON-RESTORING outcome")
         print("      repair: the destination's ledger store must affirmatively answer (an unreadable ledger is not an absent ledger — never the archive-only downgrade, SYS-10's fail-closed rule)")
         return 1
-    ledger = [tuple(ln.split("|")) for ln in out.splitlines() if "|" in ln and not ln.startswith("SET")]
-    ledger_as_of = max((l[2] for l in ledger), default="empty")
-    # 4. the clean destination
-    rc, out = _app(f"SET app.current_owner={_q(owner)}; SELECT count(*) FROM arv.command_log;")
-    if rc != 0 or not out.strip().split("\n")[-1].isdigit():
+    # 4. the clean destination (the F5 repair: EVERY authoritative table,
+    # never the command_log count alone — a stray row with no command_log
+    # entry refuses the restore the same way)
+    cnt_q = " + ".join(f"(SELECT count(*) FROM arv.{t})" for t in TABLES if t != "purge_ledger")
+    rc, out = _app(f"SET app.current_owner={_q(owner)}; SELECT {cnt_q};")
+    if rc != 0 or not out.strip().split("\n")[-1].strip().isdigit():
         print(f"FAIL ARV-EXP-001: the destination read failed — {out.strip()[:160]}")
         return 1
-    if out.strip().split("\n")[-1] != "0":
-        print("FAIL ARV-EXP-002: the destination is not clean (authoritative rows exist for this owner) — a restore is once-per-destination, never a silent duplicate")
+    if out.strip().split("\n")[-1].strip() != "0":
+        print("FAIL ARV-EXP-002: the destination is not clean (authoritative rows exist for this owner) — a restore is once-per-destination, never a silent mixed state")
         print("      repair: restore into a clean migrated destination, or purge the destination through the governed flow first")
         return 1
     # 5. the blobs — present AND digest-matched (validate-before-declare)
@@ -222,22 +234,53 @@ def do_restore(archive: str, crash_at: str) -> int:
         if hashlib.sha256(p.read_bytes()).hexdigest() != d:
             print(f"FAIL ARV-EXP-004: the blob {d[:12]} is CORRUPT (the digest does not match) — never a partial restore")
             return 1
-    # 6. the reconciliation FIRST (dict rows by column name; back to lists after)
+    # 7. ONE transaction — THE F1 REPAIR: the transaction runs SERIALIZABLE
+    # with the ledger re-read INSIDE it, so a concurrent ledger write is
+    # serially ordered against the reconciliation: it either precedes the
+    # snapshot (the re-read sees it — the entity drops) or the restore's
+    # COMMIT fails with the serialization abort (the typed retryable
+    # outcome — the destination stays clean, the re-run converges); never a
+    # restore committed on top of an un-reconciled ledger write. The
+    # archive's own ledger rows merge ON CONFLICT DO NOTHING (the F2 repair:
+    # the destination's current entries stay authoritative, never a
+    # duplicate-key crash)
+    sess = subprocess.Popen(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                             "-U", "arv_app", "-d", os.environ.get("PGDATABASE", "postgres")],
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, text=True, bufsize=1)
+    sess.stdin.write(f"SET app.current_owner={_q(owner)};\nBEGIN;\n"
+                     f"SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n"
+                     f"SELECT kind || '|' || entity_id || '|' || "
+                     f"to_char(max(created_at), 'YYYY-MM-DD\"T\"HH24:MI:SS') "
+                     f"FROM arv.purge_ledger GROUP BY kind, entity_id;\n"
+                     f"\\echo LEDGER_READ_DONE\n")
+    sess.stdin.flush()
+    # the locked re-read (the authoritative ledger for the reconciliation)
+    led_out = []
+    done = False
+    for ln in sess.stdout:
+        ln = ln.strip()
+        if ln == "LEDGER_READ_DONE":
+            done = True
+            break
+        if "|" in ln and not ln.startswith("SET"):
+            led_out.append(tuple(ln.split("|")))
+    if not done:
+        print("FAIL ARV-EXP-001: the locked ledger re-read never completed — the restore refuses, never a stale reconciliation")
+        sess.kill()
+        return 1
+    ledger = led_out
+    ledger_as_of = max((l[2] for l in ledger), default="empty")
     rows = {t: [dict(zip(TABLES[t].split(","), r)) for r in tables[t]] for t in TABLES}
     rows = _drop_purged(rows, ledger)
     tables = {t: [[r[c] for c in TABLES[t].split(",")] for r in rows[t]] for t in TABLES}
-    # 7. ONE transaction
     stmts = []
     for t in TABLES:
         for r in tables[t]:
             vals = ",".join(_val(v) for v in r)
             ov = " OVERRIDING SYSTEM VALUE" if t == "outbox" else ""
-            stmts.append(f"INSERT INTO arv.{t} ({TABLES[t]}){ov} VALUES ({vals});")
-    sess = subprocess.Popen(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
-                             "-U", "arv_app", "-d", os.environ.get("PGDATABASE", "postgres")],
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, text=True, bufsize=1)
-    sess.stdin.write(f"SET app.current_owner={_q(owner)};\nBEGIN;\n")
+            oc = " ON CONFLICT (owner_scope, kind, entity_id) DO NOTHING" if t == "purge_ledger" else ""
+            stmts.append(f"INSERT INTO arv.{t} ({TABLES[t]}){ov} VALUES ({vals}){oc};")
     for s in stmts:
         sess.stdin.write(s + "\n")
     if crash_at == "pre-commit":
@@ -247,12 +290,15 @@ def do_restore(archive: str, crash_at: str) -> int:
     sess.stdin.flush()
     _, err = sess.communicate(timeout=120)
     if sess.returncode != 0:
-        print(f"FAIL ARV-EXP-003: the insert phase failed (the transaction rolled back — nothing half-complete) — {err.strip()[:200]}")
+        if "could not serialize" in (err or ""):
+            print("FAIL ARV-EXP-007: a concurrent purge-ledger write serialized past this reconciliation — the restore refused (the destination is still clean; re-run it to converge on the new ledger state)")
+        else:
+            print(f"FAIL ARV-EXP-007: the insert phase failed (the transaction rolled back — nothing half-complete) — {(err or '').strip()[:200]}")
         return 1
-    rows = sum(len(v) for v in tables.values())
+    nrows = sum(len(v) for v in tables.values())
     print(f"RESTORED owner={owner} ledger_as_of={ledger_as_of} "
           f"backup_expiry=the D-029 documented window bounds this archive's resurrection exposure "
-          f"tables={len(TABLES)} rows={rows} state_hash_match=true")
+          f"tables={len(TABLES)} rows={nrows} state_hash_match=true")
     return 0
 
 

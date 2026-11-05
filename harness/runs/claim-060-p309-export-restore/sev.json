@@ -1,0 +1,191 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-060-p309-export-restore",
+ "base_sha": "7df713bfd1f82154cfd45b069177959ffd7c0da7",
+ "reviewed_diff_sha256": "1e46e15420333c0885cd4080eb4d0b9601838ac74148eb1b98a745b9db73393f",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-10"
+ ],
+ "system_claims": [
+  "C1",
+  "C5"
+ ],
+ "changed_components": [
+  "harness/export.py (the export/restore machine: the 13-table canonical export read, the arv-export-1 manifest, the canonical state hash, the blob copies; the restore's declared order incl. the destination-ledger reconciliation and the one-transaction insert phase)",
+  "harness/migrations/0013_purge_ledger.sql (arv.purge_ledger: six-column schema, kind CHECK, PK, the append-only ARV-PRG-001 trigger, RLS enabled+forced, arv_app INSERT/SELECT, arv_read SELECT)",
+  "harness/tests/test_export.py (EXP-01..10)",
+  "harness/gate.py (the TESTS registration of test_export.py)",
+  "harness/red-records.json (the test_export binding f6cf5fb + the amendment chain)",
+  "harness/runs/claim-060-p309-export-restore/{scope.txt,notverified.txt,red-01.txt,run-01..run-04}"
+ ],
+ "interfaces_reviewed": [
+  "the versioned manifest arv-export-1 (format gate ARV-EXP-005; the truncated-manifest and tampered-row refusals ARV-EXP-003)",
+  "the canonical state hash (sha256 over the sorted single-line-JSON table set; recomputed at restore as the tamper proof)",
+  "the owner-scoped RLS export read of the thirteen authoritative tables (B's rows structurally absent — probed)",
+  "the blob copies by digest and the restore's validate-before-declare (present AND digest-matched, ARV-EXP-004)",
+  "the destination's CURRENT purge-ledger read with the POSITIVE absence determination (the dropped-table class -> the typed non-restoring ARV-EXP-006)",
+  "the clean-destination gate ARV-EXP-002 (once-per-destination; the second restore refused, counts unchanged)",
+  "THE RECONCILIATION FIRST (the destination's ledger wins: the ledgered note drops revisions+lifecycle+references; the ledgered source drops the whole capture tree; work/command_log/outbox intact)",
+  "the one-transaction insert phase (the --crash-at pre-commit SIGKILL leaves zero rows; OVERRIDING SYSTEM VALUE on the outbox identity column)",
+  "the typed completion naming ledger_as_of + the D-029 backup-expiry window + state_hash_match",
+  "the arv.purge_ledger substrate contract (append-only ARV-PRG-001 under superuser UPDATE/DELETE, RLS forced, the hostile cross-owner read zero)",
+  "gate.py's TESTS registration and the red-record binding chain (LAW-05)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "migration 0013 read line-by-line: the six-column schema, the kind CHECK, the PK (owner_scope,kind,entity_id), the BEFORE UPDATE OR DELETE ARV-PRG-001 trigger, RLS ENABLED+FORCE, the owner_isolation policy for arv_app, the arv_app INSERT/SELECT + arv_read SELECT grants — matches EXP-10's audits",
+   "export.py read line-by-line against the declared order (parse -> version -> hash -> ledger positive-absence -> clean destination -> blob validate -> reconciliation -> one transaction -> typed completion); the _drop_purged tree rules traced by hand over the fixture",
+   "numstat law: source non-test .py = export.py 275 + gate.py 1 = 276 <= 400; test_export.py 457 <= 800; exactly 1 migration (0013, 49 lines)"
+  ],
+  "integration_verification": [
+   "SEV probe 1 (scratch SRC/DST): the full-library fixture (import_source, create_highlight, create_bookmark, create_note --ref highlight:<id>@1, revise_note, tombstone_note, restore_note) exported (13 tables, 25 rows) and restored into a clean migrated DST; the INDEPENDENT arv_read per-table comparison found every one of the 13 tables byte-equal on both databases",
+   "SEV probe 2 (SYS-10): ledger rows inserted as arv_app on a clean DST2 for the note AND the source; the same archive restored with rc=0 — note/note_lifecycle/note_reference all 0, source/anchor/highlight/bookmark/lifecycles all 0, work=1, command_log=7, outbox=7, ledger_as_of named",
+   "SEV probes 3-5: the dropped-ledger destination -> ARV-EXP-006 with zero rows; the tampered manifest (content edit, hash kept) -> ARV-EXP-003 with zero rows; --crash-at pre-commit -> exit -9 with zero source/command_log rows and the re-run completing to full note equality"
+  ],
+  "system_verification": [
+   "the suite once at HEAD: python3 harness/tests/test_export.py -> exit 0, EXP-01..10 all PASS (the builder's run-01..03 x3 records corroborate at the same commit)",
+   "the red trail: the working-tree test_export.py sha256 ad68aa2c... == the red-record current_sha256; at f6cf5fb the file hashes to the binding_sha256 2b6962b9... — the LAW-05 binding + amendment chain intact (schema 2, red ARV-TEST-000 at the base 7df713b)",
+   "hostile owner-leak probe: a manifest implanted with an owner_scope='B' note row (state hash recomputed) is REFUSED by the RLS WITH CHECK at insert — whole rollback, zero rows on either owner scope"
+  ],
+  "validation": [
+   "the archive-vs-destination equality contract exercised through the independent arv_read role on scratch databases (never the restore's own session)",
+   "adversarial probes beyond the suite: the overlapping-ledger restore, the purged-highlight restore, the fabricated-row-with-recomputed-hash restore, the stray-row-without-command_log restore, the cross-owner implant, and the mid-restore ledger append (the TOCTOU of F1) — outcomes in the findings",
+   "not re-run by this reviewer: make verify (the full 21-suite regression) — run-04's record consulted; the x3 suite runs taken from run-01..03"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a purge recorded on the destination must WIN over older archive content (SYS-10 permanence): the ledgered note's every row and the ledgered source's whole capture tree stay absent after restore",
+   "control": "the reconciliation runs FIRST against the destination's CURRENT ledger, before any insert; the drop is by construction on the reconciled insert set",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-02",
+   "scenario": "the destination's ledger store is unreadable (dropped table / outage class) at restore time",
+   "control": "the POSITIVE absence determination: the ledger read must answer; an error is the typed NON-RESTORING ARV-EXP-006 with zero rows — never the archive-only downgrade",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a tampered or truncated manifest, or an unknown format version, reaches restore",
+   "control": "the parse + version gate + the state-hash recomputation precede any insert; each is a named refusal (ARV-EXP-003 / ARV-EXP-005) with zero rows",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-04",
+   "scenario": "a referenced blob is missing or corrupt in the archive",
+   "control": "validate-before-declare: every referenced digest is present AND digest-matched before the insert phase (ARV-EXP-004, zero rows)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-05",
+   "scenario": "the restore process dies mid-insert (the interruption class)",
+   "control": "the whole insert set rides ONE transaction; the SIGKILL injection leaves zero rows and the re-run completes to equality",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-06",
+   "scenario": "a second restore into the same destination (the silent-duplicate class)",
+   "control": "the clean-destination gate ARV-EXP-002 refuses before any insert; row counts unchanged",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-07",
+   "scenario": "the purge ledger itself is edited or deleted (forging resurrection safety)",
+   "control": "the append-only ARV-PRG-001 trigger refuses UPDATE/DELETE even as superuser; RLS forced with owner isolation",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-08",
+   "scenario": "a ledger row for the same (owner,kind,entity) exists BOTH in the archive and on the destination",
+   "control": "INTENDED: the archive's ledger rows merge ON CONFLICT DO NOTHING with the destination's entries authoritative; OBSERVED: the unimplemented merge fails the whole restore closed (F2)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-09",
+   "scenario": "a purge-ledger row is appended to the destination BETWEEN the restore's ledger read and its commit",
+   "control": "INTENDED: the destination's CURRENT ledger wins; OBSERVED: the reconciliation's single pre-transaction read misses the append and the ledgered entity restores anyway (F1, the demonstrated TOCTOU)",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "F1",
+   "severity": "P1",
+   "status": "open",
+   "scenario": "mid-restore purge-ledger append (the reconciliation TOCTOU): the destination's ledger is read once BEFORE the insert transaction; a row appended after that read and before the commit is never honored",
+   "evidence": "deterministic probe on a clean migrated scratch DST: arv.note held under an ACCESS EXCLUSIVE lock so the restore's insert phase blocked past its ledger read; a ledger row (A,note,<nid>,'mid-restore purge') inserted as arv_app during the block; lock released -> the restore committed rc=0 printing ledger_as_of=empty with the note fully present (2 revisions) AND the ledger row present — a permanent ledger-says-purged/content-present state with no re-reconciliation path (a second restore is refused ARV-EXP-002). notverified.txt names the EXPORT-side read-committed limit but is silent on this restore-side race (a LAW-04 gap). Today the only ledger writers are direct substrate inserts, but D-011's governed purge command will make the race owner-reachable",
+   "status_note": "fix before merge: re-read the ledger inside the insert transaction (or hold a lock on arv.purge_ledger across it), or land the named limit in notverified.txt routed to D-011's integration slice"
+  },
+  {
+   "id": "F2",
+   "severity": "P1",
+   "status": "open",
+   "scenario": "the docstring's claimed ledger merge is not implemented: export.py states 'the archive's own ledger rows merge ON CONFLICT DO NOTHING (the destination's current entries stay authoritative)' but the insert phase emits a plain INSERT for purge_ledger",
+   "evidence": "probe: an archive exported from an SRC carrying a purge_ledger row restored into a clean DST (the row lands, rc=0), then the SAME archive restored into a DST pre-seeded with the same (A,note,<nid>) ledger row -> rc=1, 'FAIL ARV-EXP-003: the insert phase failed ... ERROR: duplicate key value violates unique constraint purge_ledger_pkey', zero rows, the destination's ledger intact. Fail-closed (no corruption, no resurrection) but the declared merge behavior is false and the refusal mislabels a well-formed archive under the malformed/tamper code ARV-EXP-003",
+   "status_note": "fix before merge: add ON CONFLICT DO NOTHING to the purge_ledger inserts (the destination's entries stay authoritative) or correct the docstring"
+  },
+  {
+   "id": "F3",
+   "severity": "P2",
+   "status": "open",
+   "scenario": "ledger kinds beyond the card's declared drop rules: a purged highlight/bookmark/anchor/work drops only the entity's own rows; a surviving note_reference pointing at the purged entity is not reconciled away",
+   "evidence": "probe: a clean DST seeded with a (A,highlight,<hid>) ledger row; the restore of the archive whose note references that highlight -> rc=1, the whole transaction rolled back on the substrate's ARV-NTE-003 referenced-highlight trigger — zero rows anywhere (fail-closed and honest, but one purged highlight blocks the ENTIRE restore including all un-purged state)",
+   "status_note": "routed: the purge-cascade semantics (dropping inbound references or the referencing notes) belong to the governed-purge family D-011; revisit when the purge command lands — the current behavior is safe but coarse"
+  },
+  {
+   "id": "F4",
+   "severity": "P2",
+   "status": "open",
+   "scenario": "the state hash is integrity, not authenticity: an adversary (or a self-consistent corrupted archive) can edit the manifest AND recompute the hash",
+   "evidence": "probe: a fabricated note row (an id that never existed on SRC) appended to the manifest with the state hash recomputed to match -> the restore completed rc=0 and the fabricated note landed on the destination with state_hash_match=true printed",
+   "status_note": "routed: acceptable while the archive lives inside the trusted boundary (the rig's filesystem class, Q12's cross-provider story untested); the 'tamper proof' claim should be scoped in notverified.txt or a manifest signature added before archives cross a trust boundary"
+  },
+  {
+   "id": "F5",
+   "severity": "P2",
+   "status": "open",
+   "scenario": "the clean-destination gate is a command_log-count proxy, not a check over the authoritative set",
+   "evidence": "probe: a stray arv.note row inserted directly as arv_app (no command_log row — the surface the tests themselves use for ledger seeding) left the gate seeing count=0; the restore proceeded rc=0 and the destination ended with the stray note PLUS the restored notes (a silent mixed state the ARV-EXP-002 'zero authoritative rows' wording does not admit)",
+   "status_note": "routed: out-of-discipline writer required (every command path writes command_log); a count across the thirteen tables would close it — revisit if the substrate-direct surface widens"
+  }
+ ],
+ "not_verified": [
+  "the mid-restore ledger-append TOCTOU is demonstrated once deterministically (F1); the broader concurrent-writer matrix (concurrent commands during export reads, concurrent restores into one destination) is NOT exercised — the rig's single-writer discipline stands unproven, as notverified.txt itself notes for the export snapshot",
+  "make verify (the full 21-suite regression) was not re-run by this reviewer; run-04's record at HEAD is consulted as the builder's evidence",
+  "the outbox identity-sequence continuation after restore (a local enqueue post-restore minting a colliding seq) is not probed — the slice's own notverified.txt carries it as a stated residual riding the governed-purge family",
+  "the D-029 backup-expiry window is only NAMED in the completion; its enforcement (the automated expiry sweep) is out of this slice and unverified",
+  "cross-version manifest compatibility: arv-export-1 is the only version that exists; the version gate's refusal of unknown versions is verified (EXP-05), but no real prior-version archive migration is possible yet",
+  "cross-provider blob stores (Q12), large-archive performance, and blob content mutated after export (impossible on the content-addressed store by construction) are untested",
+  "the governed purge COMMAND (D-011) is explicitly this slice's bounded exclusion; all purge-ledger rows in every probe were inserted directly at the substrate — no claim is made that a purge command ran"
+ ],
+ "builder_context": "glm-session-40-builder",
+ "reviewer_context": "agent-exp-sev-r1-fresh-context",
+ "disposition": "BLOCKED",
+ "review_summary": "The slice's core single-threaded claims HOLD under adversarial re-verification on fresh scratch databases: the 13-table export/restore equality through the independent arv_read role is byte-exact; the destination-ledger reconciliation drops the ledgered note's every row and the ledgered source's whole capture tree while work/command_log/outbox restore intact (SYS-10); the dropped-ledger destination fails closed with the typed ARV-EXP-006; the tampered manifest and the missing blob refuse with zero rows; the pre-commit crash leaves nothing and the re-run completes; the append-only ARV-PRG-001 ledger is RLS-forced and owner-isolated; a cross-owner manifest implant is refused by RLS; EXP-01..10 exit 0 at HEAD and the LAW-05 red binding (f6cf5fb, schema 2, the amendment chain) verifies. TWO P1s block the merge: (F1) a demonstrated TOCTOU — a purge-ledger row appended to the destination between the restore's ledger read and its commit is silently overridden, leaving a permanent purged-but-present state with no re-reconciliation path (a SYS-10 permanence hole the honest-limits file does not name); (F2) the docstring's claimed ON CONFLICT DO NOTHING ledger merge is not implemented — the overlapping-ledger restore fails closed under a mislabeled ARV-EXP-003 instead of merging. Three P2s are routed with reasons: the coarse whole-archive refusal on non-tree ledger kinds (F3), the integrity-not-authenticity limit of the state hash (F4), and the command_log-proxy clean-destination gate (F5)."
+}

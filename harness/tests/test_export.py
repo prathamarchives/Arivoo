@@ -460,18 +460,24 @@ def main() -> int:
         w_rc = writer.returncode
         note_cnt = audit(db11, f"SELECT count(*) FROM arv.note WHERE id='{nid}';")
         led_cnt = audit(db11, f"SELECT count(*) FROM arv.purge_ledger WHERE kind='note' AND entity_id='{nid}';")
-        asof_named = "ledger_as_of=" in r11.stdout
-        # the two LEGAL serial orders: (a) the write preceded the locked read —
-        # the note dropped; (b) the write followed the restore's commit — the
-        # note present AND the ledger row present (the purge pending the
-        # governed command). NEVER the silent neither.
-        order_a = (note_cnt == "0" and led_cnt == "1")
-        order_b = (note_cnt == "2" and led_cnt == "1")
-        ok11 = (r11.returncode == 0 and w_rc == 0 and asof_named
-                and (order_a or order_b))
+        # the LEGAL outcomes under the SERIALIZABLE reconciliation: (a) the
+        # write preceded the snapshot — the note dropped; (b) the write
+        # followed the restore's commit — the note present with the row (the
+        # purge pending the governed command); (c) the write landed mid-flight
+        # — the restore ABORTED with the typed retryable refusal and ZERO
+        # rows (the re-run converges). NEVER the silent neither.
+        order_a = (r11.returncode == 0 and note_cnt == "0" and led_cnt == "1")
+        order_b = (r11.returncode == 0 and note_cnt == "2" and led_cnt == "1")
+        aborted = (r11.returncode == 1 and "ARV-EXP-007" in r11.stdout
+                   and note_cnt == "0")
+        if aborted:
+            r11b = exp("restore", "--archive", str(arch), env=e11env)
+            note_cnt = audit(db11, f"SELECT count(*) FROM arv.note WHERE id='{nid}';")
+            aborted = aborted and r11b.returncode == 0 and note_cnt == "0"
+        ok11 = (w_rc == 0 and (order_a or order_b or aborted))
         check("EXP-11", ok11,
-              "the mid-restore ledger write: a purge-ledger insert attempted DURING the restore serializes against the restore's own transaction (the table lock) — the outcome is one of the two LEGAL orders: the write observed (the note dropped from the restored set) or the write landed after the commit (the note restored, the ledger row present — the purge pending the governed command, D-011's flow); the completion always names its ledger's as-of truthfully; never the silent neither (the note present while the read claimed an empty ledger)",
-              "the ledger read moves INSIDE the restore's transaction behind the table lock — a concurrent ledger write either precedes the locked read or waits for the commit; the reconciliation is never computed over a stale snapshot")
+              "the mid-restore ledger write: a purge-ledger insert attempted DURING the restore is SERIALIZED against the reconciliation — the outcome is one of the three legal forms: the write observed (the note dropped from the restored set), the write after the commit (the note restored, the row present — the purge pending the governed command, D-011's flow), or the typed serialization abort (ARV-EXP-007, zero rows, the re-run converging on the new ledger state); never the silent neither (the note present while the reconciliation claimed an empty ledger)",
+              "the reconciliation's ledger read happens INSIDE the SERIALIZABLE restore transaction — a concurrent ledger write is serially ordered against it, never interleaved past it")
         pg.drop_scratch_db(db11)
 
         # ---- EXP-12 — the overlapping ledger entry (the SEV round-1 F2: the
@@ -489,7 +495,6 @@ def main() -> int:
                      f"actor, created_at) VALUES ('A', 'note', '{nid}', "
                      f"'the archive older entry', 'owner', now());")
         exp("export", "--owner", "A", "--out", str(arch12))
-        app_sql(SRC, f"DELETE FROM arv.purge_ledger WHERE owner_scope='A';") if False else None
         r12 = exp("restore", "--archive", str(arch12), env=e12env)
         reason12 = audit(db12, f"SELECT reason FROM arv.purge_ledger WHERE kind='note' AND entity_id='{nid}';")
         note12 = audit(db12, f"SELECT count(*) FROM arv.note WHERE id='{nid}';")

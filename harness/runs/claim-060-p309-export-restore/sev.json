@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-060-p309-export-restore",
+  "base_sha": "7df713bfd1f82154cfd45b069177959ffd7c0da7",
+  "reviewed_diff_sha256": "ead2e7b5759c57acc31ab24399acffd0ca4e43520bd8954193c0cbdb3e26407c",
+  "sheet_section": true,
+  "intent_ids": [
+    "INT-145",
+    "INT-146"
+  ],
+  "requirement_ids": [
+    "SYS-01",
+    "SYS-10"
+  ],
+  "system_claims": [
+    "C1",
+    "C5"
+  ],
+  "changed_components": [
+    "harness/export.py (327 lines at HEAD a5356e1; the export/restore machine: the 13-table canonical export read, the arv-export-1 manifest + canonical state hash, the digest-verified blob copies; the restore's declared order with the ACCESS EXCLUSIVE-locked reconciliation transaction, the ON CONFLICT DO NOTHING purge_ledger merge, the every-table clean gate, the reference cascade, the direct anchor-domain mapping)",
+    "harness/migrations/0013_purge_ledger.sql (57 lines; arv.purge_ledger: six-column schema, kind CHECK permitting work/source/anchor/highlight/bookmark/note, PK (owner_scope,kind,entity_id), the append-only ARV-PRG-001 trigger firing for UPDATE OR DELETE for every role incl. the superuser, RLS enabled+forced, the owner_isolation policy, the arv_app INSERT/SELECT/UPDATE grants \u2014 the UPDATE grant is the ACCESS EXCLUSIVE lock enabler, never a mutation surface)",
+    "harness/tests/test_export.py (599 lines; EXP-01..15 \u2014 the round-3 additions EXP-11 strengthened to the completion-ordering discriminating form and EXP-15 the anchor-kind cascade, RED-first per red-03.txt)",
+    "harness/gate.py (+1 line; the TESTS registration of test_export.py)",
+    "harness/red-records.json (the binding chain to the current suite digest)",
+    "harness/runs/claim-060-p309-export-restore/{scope.txt,notverified.txt,red-01..red-03.txt,run-01..run-12}"
+  ],
+  "interfaces_reviewed": [
+    "the versioned manifest arv-export-1 (format gate ARV-EXP-005; the tampered-row refusal ARV-EXP-003 via the recomputed canonical state hash)",
+    "the owner-scoped RLS export read of the thirteen authoritative tables (SET app.current_owner; row_to_json; the app-role boundary; B's rows never in A's manifest \u2014 EXP-10)",
+    "the blob copies by digest and the restore's validate-before-declare (present AND digest-matched, ARV-EXP-004)",
+    "the destination's CURRENT purge-ledger read with the POSITIVE absence determination (the dropped-table class -> the typed non-restoring ARV-EXP-006)",
+    "the clean-destination gate ARV-EXP-002 over EVERY authoritative table (the union count, never the command_log proxy)",
+    "THE LOCKED RECONCILIATION (the round-3 F1 form): BEGIN; LOCK TABLE arv.purge_ledger IN ACCESS EXCLUSIVE MODE; the ledger re-read INSIDE the transaction (the LEDGER_READ_DONE handshake); every concurrent ledger write of any role/isolation queues behind the lock until the restore's COMMIT \u2014 the interleaved neither (a write committing between the read and the commit) is structurally impossible; the pre-checks remain read-committed advisory only",
+    "the reconciliation's cascade rules in _drop_purged: the ledgered note drops revisions+lifecycle+references; the ledgered source drops the whole capture tree; the ledgered highlight drops itself+lifecycle+inbound references (the referencing note survives); the ledgered ANCHOR id maps directly in the anchor domain (the F6 repair \u2014 the captures anchored to THAT anchor drop, the bookmark survives on its OWN anchor row, the source survives)",
+    "the archive's purge_ledger merge ON CONFLICT (owner_scope,kind,entity_id) DO NOTHING (the F2 repair \u2014 the destination's reason preserved)",
+    "the one-transaction insert phase (the crash injection rolls back to the clean destination; ARV-EXP-007 the typed insert-phase/serialization refusal)",
+    "the typed completion naming ledger_as_of + the D-029 backup-expiry window + state_hash_match",
+    "the arv.purge_ledger substrate contract (append-only ARV-PRG-001 under the new UPDATE grant \u2014 re-verified by me for arv_app AND postgres; RLS forced; owner isolation)",
+    "gate.py's TESTS registration and LAW-05 (source non-test .py 328 <= 400; test 599 <= 800; exactly 1 migration)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "harness/export.py read IN FULL line-by-line: the declared order (parse -> version -> state hash -> the ledger positive-absence pre-check -> the every-table clean gate -> blob validate -> the ONE psql session: BEGIN; LOCK TABLE ACCESS EXCLUSIVE; the locked ledger re-read with the LEDGER_READ_DONE marker -> _drop_purged -> the row-by-row inserts -> COMMIT); the psql-session-as-transaction pattern verified against subprocess plumbing (stdin/stdout handshake, ON_ERROR_STOP, communicate timeout)",
+      "migration 0013 read line-by-line: the six-column schema, the kind CHECK (the anchor kind IS reachable \u2014 F6's domain), the BEFORE UPDATE OR DELETE ARV-PRG-001 trigger, RLS ENABLED+FORCE, the owner_isolation policy, GRANT INSERT,SELECT,UPDATE to arv_app (UPDATE = the lock-mode enabler; PostgreSQL requires an UPDATE-class privilege to take ACCESS EXCLUSIVE) + SELECT to arv_read",
+      "_drop_purged traced by hand for every ledger kind \u2014 the F6 branch verified in code: 'anchors = gone if kind == anchor else {source-id mapping}' \u2014 the ledgered anchor ids used DIRECTLY, never re-evaluated in the source-id domain",
+      "LAW-05 numstat over origin/main...HEAD: source non-test .py = export.py 327 + gate.py 1 = 328 <= 400; test_export.py 599 <= 800; exactly 1 migration (0013)"
+    ],
+    "integration_verification": [
+      "THE F1 DECISIVE PROBE (my own scratch rig, replicating round 2's attack): a 916-row archive (300 bulk notes) restored into a clean migrated DST; an in-server poller observed the restore's ACCESS EXCLUSIVE lock GRANTED at 2026-11-05T16:06:16.876367 (t0+0.064s, mid-insert-phase); the read-committed arv_app ledger INSERT for the target note fired AT that instant; the writer's INSERT returned at 16:06:16.954476 while the lock released (the restore's transaction COMMIT) at 16:06:16.954119 \u2014 the write landed 357 microseconds AFTER the restore's commit, provably OUTSIDE the commit window; the attack writer elapsed 78.6ms vs 6.3ms for the identical post-restore control writer (12.5x \u2014 the block), the note present, restore rc=0, ledger_as_of=empty (the reconciliation read under the lock, pre-write) \u2014 LEGAL outcome (b); round 2's illegal outcome (the write landing inside the commit window) is now structurally impossible: any concurrent ledger write queues behind the lock",
+      "the lock-block requirement directly verified: the attack writer IS a psql session INSERTing into arv.purge_ledger while the restore held its phase \u2014 timed blocked (78.6ms) vs unblocked (6.3ms)",
+      "the F6 probe (my own): a ledger row kind='anchor' for the HIGHLIGHT's anchor id seeded on DST2 (anchor_id queried from arv.highlight on SRC) -> restore rc=0 with anchor=0, highlight=0, highlight_lifecycle=0, note_reference->highlight=0, note=1, bookmark=1, the bookmark's OWN anchor=1, source=1, and the completion naming ledger_as_of=2026-11-05T16:08:05 (the locked re-read saw the seeded row)",
+      "the append-only law under the UPDATE grant (my own): arv_app UPDATE arv.purge_ledger SET reason='x' -> rc=1 ARV-PRG-001; postgres UPDATE -> rc=1 ARV-PRG-001; arv_app DELETE -> rc=1 permission denied (no DELETE grant \u2014 refused either way); postgres DELETE -> rc=1 ARV-PRG-001; the ledger rows intact with reason unchanged \u2014 the grant changed which LOCKS the role may take, never which ROWS it may change",
+      "the core equality (my own): the full-family library (import, highlight, bookmark, note+reference, note revise/tombstone/restore, a B note) exported and restored into a clean migrated DST3 rc=0 \u2014 ALL 13 tables byte-equal through the independent arv_read role under my own canonical TSV forms (work, source, anchor, highlight, highlight_lifecycle, bookmark, bookmark_lifecycle, note, note_lifecycle, note_reference, command_log, outbox, purge_ledger)"
+    ],
+    "system_verification": [
+      "the suite ONCE at HEAD a5356e1 (my own run): python3 harness/tests/test_export.py -> exit 0, EXP-01..15 all PASS, 'GREEN \u2014 the P3-09 acceptance suite (EXP-01..15) passes'; corroborated by the builder's run-09/run-10/run-11 (same command, same commit, same output digest 0c0aef15...) and run-12 (make verify, exit 0)",
+      "the red trail: red-03.txt records EXP-15 observed at the pre-fix tree (the anchor-kind cascade RED-first); red-01/red-02 the round-1 machinery-absent and repair-pin REDs; the suite's EXP-11 now performs the completion-ordering discrimination (order_b) the round-2 form lacked",
+      "the round-2 F2/F3/F5 repairs re-verified through the suite at HEAD: EXP-12 (the both-sides ledger merge, destination reason preserved), EXP-14 (the purged-highlight reference cascade, the note surviving), EXP-13 (the stray-row-without-command_log gate refusing ARV-EXP-002)"
+    ],
+    "validation": [
+      "the archive-vs-destination equality contract exercised through the independent arv_read role on fresh scratch databases with my own canonical per-table TSV forms \u2014 never the restore's session, never the suite's helper set",
+      "adversarial timing probes beyond the suite: the in-server pg_locks/pg_stat_activity watcher + clock_timestamp ordering (the DB-level commit-window discrimination the process-exit proxy cannot resolve \u2014 my first small-fixture run showed the python-teardown noise can invert a process-exit comparison while the DB-level ordering stays legal)",
+      "not re-run by this reviewer: make verify (the full 21-suite regression) \u2014 run-12's record at HEAD a5356e1 (exit 0) is consulted as the builder's evidence"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a purge recorded on the destination must WIN over older archive content (SYS-10 permanence): the ledgered note's every row and the ledgered source's whole capture tree stay absent after restore",
+      "control": "the reconciliation runs FIRST against the destination's CURRENT ledger inside the locked transaction; the ledgered entity's rows dropped by construction before any insert; verified by my probes and EXP-07",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "a tampered or truncated manifest (the state-hash mismatch) or an unknown format version silently best-effort-restores",
+      "control": "the canonical state hash recomputed at restore (ARV-EXP-003) and the format gate (ARV-EXP-005) \u2014 named refusals with zero rows",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "a missing or corrupt blob in the archive leaves a partially restored destination",
+      "control": "validate-before-declare: every digest present AND byte-matched before the insert phase begins (ARV-EXP-004)",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "a non-clean destination (any authoritative row, incl. a stray row with no command_log entry) silently mixes with the archive",
+      "control": "the every-table union-count clean gate refuses ARV-EXP-002 before any insert; the stray row untouched",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "an unreadable destination ledger (the dropped-table/outage class) downgrades to an archive-only restore",
+      "control": "the POSITIVE absence determination: the typed non-restoring ARV-EXP-006 with zero rows, never a silent downgrade",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-06",
+      "scenario": "THE ROUND-2 F1 TOCTOU: a read-committed ledger write commits between the reconciliation's read and the restore's commit \u2014 the restore completes rc=0 on top of an un-reconciled purge (the write inside the commit window)",
+      "control": "VERIFIED REPAIRED (my decisive probe): the reconciliation takes ACCESS EXCLUSIVE on arv.purge_ledger inside the transaction and re-reads under it; the mid-phase attack writer QUEUED behind the lock (78.6ms blocked vs 6.3ms control) and its INSERT returned 357us AFTER the lock's release (the restore's COMMIT at 16:06:16.954119 vs the writer's return 16:06:16.954476) \u2014 the interleaved neither is structurally impossible; the SERIALIZABLE-only form is gone (the lock is isolation-level-independent)",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-07",
+      "scenario": "the archive's purge_ledger row collides with the destination's current entry for the same (owner,kind,entity)",
+      "control": "ON CONFLICT DO NOTHING merge \u2014 the destination's reason preserved, the entity dropped either way, never the mislabeled PK-crash refusal",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-08",
+      "scenario": "an interruption mid-restore leaves a half-complete destination",
+      "control": "the whole restore is ONE transaction \u2014 the crash injection leaves zero rows; the re-run converges (EXP-06)",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-09",
+      "scenario": "THE ROUND-2 F6 DOMAIN BUG: a ledgered ANCHOR id evaluated in the source-id domain \u2014 only the anchor row dropped, the dangling anchor_id foreign key refusing the whole archive",
+      "control": "VERIFIED REPAIRED (my probe + EXP-15, RED-first per red-03.txt): the ledgered anchor ids map directly in the anchor domain \u2014 the anchor, the captures anchored to it (the highlight + its lifecycle + its inbound references) drop; the bookmark survives on its OWN anchor row; the source survives; rc=0",
+      "proof_ids": [
+        "red-03.txt",
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-10",
+      "scenario": "the 0013 UPDATE grant (the lock enabler) opens a mutation surface on the permanence record",
+      "control": "VERIFIED (my probe): ARV-PRG-001 fires for arv_app AND postgres UPDATEs; the arv_app DELETE is permission-denied (no grant); the postgres DELETE refuses ARV-PRG-001; rows intact \u2014 the grant changes which LOCKS the role may take, never which ROWS it may change",
+      "proof_ids": [
+        "run-09"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "P1",
+      "status": "resolved",
+      "summary": "the restore-side TOCTOU (round 2: the SERIALIZABLE form insufficient \u2014 a read-committed writer's mid-flight insert committed cleanly under a lone rw-edge, the write landing inside the restore's commit window)",
+      "evidence": "the round-3 repair verified by MY decisive probe at HEAD a5356e1: the ACCESS EXCLUSIVE lock observed GRANTED mid-phase (16:06:16.876367); the attack writer fired at that instant blocked 78.6ms (vs 6.3ms unblocked control) and its INSERT returned 16:06:16.954476, 357us AFTER the lock release = the restore's COMMIT (16:06:16.954119); restore rc=0, note present, ledger_as_of=empty \u2014 LEGAL outcome (b); the write cannot land inside the commit window under the lock"
+    },
+    {
+      "id": "F6",
+      "severity": "P1",
+      "status": "resolved",
+      "summary": "the anchor-kind ledger entry evaluated in the source-id domain (round 2's new finding \u2014 only the anchor row dropped, the dangling FK refusing the whole archive)",
+      "evidence": "the round-3 repair verified by MY probe: the ledgered anchor id (the highlight's anchor) drops the anchor + the highlight + its lifecycle + its inbound note_references; the note survives; the bookmark survives on its OWN anchor; the source survives; rc=0 with ledger_as_of naming the seeded row; EXP-15 pins it RED-first (red-03.txt)"
+    },
+    {
+      "id": "F2",
+      "severity": "P1",
+      "status": "resolved",
+      "summary": "the ledger merge (round 1): the overlapping ledger entry crashed the restore with the mislabeled manifest-class refusal",
+      "evidence": "re-verified at HEAD through the suite: EXP-12 PASS (ON CONFLICT DO NOTHING, the destination's reason preserved, the entity dropped either way); round 2's own probe corroborated"
+    },
+    {
+      "id": "F3",
+      "severity": "P2",
+      "status": "resolved",
+      "summary": "the reference cascade (round 1): a purged highlight left the dangling note_reference, the substrate refusing the whole archive",
+      "evidence": "re-verified at HEAD through the suite: EXP-14 PASS (the highlight + lifecycle + inbound references drop, the referencing note survives, rc=0); my F6 probe exercised the same cascade through the anchor path"
+    },
+    {
+      "id": "F5",
+      "severity": "P2",
+      "status": "resolved",
+      "summary": "the clean gate (round 1): the command_log-count proxy let a stray authoritative row silently mix",
+      "evidence": "re-verified at HEAD through the suite: EXP-13 PASS (the stray row with no command_log entry refuses ARV-EXP-002, zero new rows); the code's union count read directly (export.py's cnt_q over every non-purge_ledger table)"
+    },
+    {
+      "id": "F4",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "summary": "integrity-is-not-authenticity (round 1, ROUTED): the state hash proves the archive against itself, never against the owner's identity",
+      "evidence": "unchanged by the round-3 repairs and still true by design; the trusted-boundary scoping (a signature before archives cross a trust boundary) rides the governed-purge family's integration \u2014 recorded in notverified.txt"
+    }
+  ],
+  "not_verified": [
+    "make verify (the full 21-suite regression) was not re-run by this reviewer \u2014 the builder's run-12 record at HEAD a5356e1 (exit 0) is consulted as builder evidence, not independently reproduced",
+    "the governed purge command itself (D-011) and the D-029 backup-expiry ENFORCEMENT (the actual deletion of aged backups) are later slices \u2014 this slice proves the ledger's restore-side reconciliation only",
+    "F4 (integrity-is-not-authenticity) remains routed owner-accepted debt: the state hash is not an owner-identity signature; a signature before archives cross a trust boundary rides the governed-purge family's integration",
+    "the F1 attack exercised ONE concurrent read-committed arv_app writer against the locked reconciliation; multi-writer storms, a superuser bypassing RLS mid-window, and the restore killed while a writer queues (the writer then landing on the still-clean destination) were reasoned but not all mechanically fired",
+    "my equality probe's quick B-owner scoping check used a wrong key literal and is not counted; owner scoping is covered by the suite's EXP-10 (B's private content never in A's manifest, the hostile cross-owner ledger read seeing zero), which passed in my own suite run",
+    "the process-exit time proxy (writer process exit vs restore python exit) is noisy \u2014 the python teardown after COMMIT can invert it; the authoritative F1 ordering evidence is the DB-level clock_timestamp discrimination (lock release vs the blocked writer's INSERT return), which is what this review relied on"
+  ],
+  "builder_context": "glm-session-40-builder",
+  "reviewer_context": "agent-exp-sev-r3-fresh-context",
+  "disposition": "PASS",
+  "review_summary": "Fresh-context round 3 at HEAD a5356e1 (base 7df713b). Round 2 proved F1 not repaired (the SERIALIZable form) and found F6 (the anchor-kind domain bug); the builder claims both repaired via the ACCESS EXCLUSIVE-locked reconciliation (migration 0013's UPDATE grant as the lock enabler) and the direct anchor-domain mapping. I verified BOTH with my own scratch-rig probes: (F1) the decisive attack replicated \u2014 a 916-row restore observed holding a GRANTED AccessExclusiveLock mid-phase; the read-committed arv_app ledger INSERT fired at that instant BLOCKED 78.6ms (vs 6.3ms unblocked control) and returned 357us AFTER the lock's release (the restore's COMMIT): the note present, rc=0, ledger_as_of=empty \u2014 the legal write-after-commit outcome; the round-2 illegal form (the write inside the commit window) is structurally impossible under the lock, which serializes writers of any isolation level. (F6) the ledgered anchor id drops the anchor + its captures + their references while the note, the bookmark (its OWN anchor), and the source survive, rc=0. The append-only law holds under the new UPDATE grant (ARV-PRG-001 fires for arv_app and postgres UPDATEs; the arv_app DELETE is permission-denied; rows intact). The core equality holds byte-equal on all 13 tables through the independent arv_read role. The suite passes (EXP-01..15, exit 0, my own run, matching run-09..11's digest; make verify recorded exit 0 in run-12). LAW-05 holds (328 source non-test .py <= 400; 599 test <= 800; 1 migration). Round-1 F2/F3/F5 remain repaired (EXP-12/14/13 re-passed at HEAD). F4 stays routed owner-accepted debt. All findings resolved or routed; no new findings. Disposition: PASS. | RE-BOUND at the finalize head cf085dd per the standing digest-binds-LAST discipline (the finalize commit's record-52 \u00a73 account is part of the reviewed set; the reviewed CODE is unchanged from the round-3 review at a5356e1 \u2014 the byte-identical suite digests prove it)."
+}

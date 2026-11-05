@@ -1,0 +1,29 @@
+# CLAIM-060 — P3-09: export/restore and the integrated durable-capture proof
+# (PLAN's P3-09 card; RTM §3.7 + SYS-10's purge rule + D-029's boundary).
+# The versioned export of the authoritative records + the blob references +
+# the purge/retention state with the canonical state hash; the restore into
+# a clean destination with the purge-ledger reconciliation FIRST (the
+# destination's ledger wins — a purge cannot be resurrected by restore);
+# the authoritative-state equality contract; the derived-index rebuild after
+# restore; the fault matrix (missing blob, malformed archive, interrupted
+# restore, repeated restore, purge then restore, corrupt index rebuild).
+# RED-first at CLAIM-059's merged head 7df713b (machinery-absent
+# ARV-TEST-000, red-01.txt).
+#
+# The bounded exclusions per the card: the governed purge COMMAND D-011's
+# (this slice lands the LEDGER + the reconciliation, never the owner-facing
+# erasure flow); the cross-provider blob story Q12's (the rig's filesystem
+# archive class); no refactor of the landed families.
+harness/tests/test_export.py D-041
+harness/commands.py D-041
+harness/export.py D-041
+harness/gate.py D-041
+harness/migrations/0013_purge_ledger.sql D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/52-P309-EXPORT-RESTORE.md D-042
+harness/runs/claim-060-p309-export-restore D-042

@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the P3-09 export/restore machinery is absent (machinery-absent class; the export arm absent: True; migration 0013 present: False) — the implementation lands after this RED, never before it (LAW-11)

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_export.py",
+  "exit_code": 0,
+  "commit": "a5356e157036ab539d0fb0fc89626bbaa03fe0ac",
+  "output_sha256": "0c0aef1541681712fe46af831843f3399963b854fa009b4238e28073920b9091",
+  "recorded_at": "2026-11-05T15:55:30.184537+00:00"
+}

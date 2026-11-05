@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the P4-00a truthful-surface machinery is absent (machinery-absent class; README at root: False; migrate --help answers usage without executing: False) — the implementation lands after this RED, never before it (LAW-11)

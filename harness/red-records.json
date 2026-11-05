@@ -862,5 +862,15 @@
         "observed_at": "2026-11-05T15:46:32.010042+00:00"
       }
     ]
+  },
+  "harness/tests/test_contract.py": {
+    "schema": 2,
+    "binding_commit": "ec66553db27c6da663e65904bb273c70bd680a0b",
+    "binding_sha256": "598ff19be393daf7cfca29672f573a39e5e4ed296111185d79005401c9f70a28",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the CON suite's observed RED at commit ec66553 (machinery-absent ARV-TEST-000: the README absent at the root + the migrate --help misfire \u2014 exit 1, red-01.txt at harness/runs/claim-062-p400a-truthful-acks/)",
+    "current_sha256": "598ff19be393daf7cfca29672f573a39e5e4ed296111185d79005401c9f70a28",
+    "amendments": []
   }
 }

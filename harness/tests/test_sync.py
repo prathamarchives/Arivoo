@@ -671,11 +671,55 @@ def main() -> int:
               "the no-lost-writes acceptance: every local product command's key has exactly one outbox row (the enqueue never misses — the atomic law held for the whole suite's traffic); the server's command-log key set == the acknowledged set plus the 409-failed set (every delivered row reached the server exactly once — no lost writes, and the only non-acknowledged terminal is the TYPED conflict); every row rests in a truthful state (acknowledged carries its server_ref; retryable/failed/uncertain carry the named reason; zero rows left pending) — the acceptance's 'each committed local write is either server-durable or explicitly queued/retryable' over the ENTIRE matrix",
               "the sweep is global over the suite's traffic — any silent drop, any duplicate, any reason-less failure state fails it; this is the acceptance pin of PLAN's P3-08 card")
 
+        # ---- SYN-16 — the poisoned-payload containment (the SEV round-1 F1)
+        pr16 = cmd("create_note", "--content", "The post-poison note: the heliotrope.",
+                   key="sy-poison2")
+        app_sql(LOC, "INSERT INTO arv.outbox (owner_scope, idempotency_key, client_id, "
+                     "actor, command_name, body_hash, payload, state, attempts, "
+                     "created_at, updated_at) VALUES ('A', 'sy-poison1', 'cli-1', 'owner', "
+                     "'create_note', '" + "0" * 64 + "', 'not-json-at-all', 'pending', 0, "
+                     "now(), now());")
+        r16 = sync()
+        st16 = ob(LOC, "sy-poison1")
+        reason16 = ob(LOC, "sy-poison1", "last_reason") or ""
+        st16b = ob(LOC, "sy-poison2")
+        sn16 = srv_note(ack_field(pr16, "result_ref")) if pr16.returncode == 0 else ""
+        c16 = audit(SRV, f"SELECT content FROM arv.note WHERE id='{sn16}';") if sn16 else ""
+        ok16 = (pr16.returncode == 0 and r16.returncode == 0
+                and st16 == "failed" and "ARV-SYN-013" in reason16
+                and st16b == "acknowledged" and "heliotrope" in c16)
+        check("SYN-16", ok16,
+              "the poisoned-payload containment: a hostile outbox row whose payload is not the canonical JSON (inserted directly at the substrate — the append-only keys accept the INSERT, no shape guard exists by design) is a NAMED terminal failure for THAT row (ARV-SYN-013, the undeliverable class) and the walk CONTINUES — the later row delivers and acknowledges; never an unhandled crash, never a blocked queue",
+              "per-row error containment: one corrupted row may never block every later row in every subsequent pass — the driver names the failure, fails the row, and moves on")
+
+        # ---- SYN-17 — the divergent-bridge containment (the SEV round-1 F2, THE P0)
+        d17 = cmd("create_note", "--content", "The server's divergent creator body.",
+                  key="sy-div1", env=srv_env)
+        l17 = cmd("create_note", "--content", "The local divergent creator body.",
+                  key="sy-div1")
+        pr17 = cmd("revise_note", "--id", ack_field(l17, "result_ref"), "--content",
+                   "The referencer revision: the indigo token.", key="sy-div2")
+        r17 = sync()
+        st17 = ob(LOC, "sy-div1")
+        st17b = ob(LOC, "sy-div2")
+        reason17b = ob(LOC, "sy-div2", "last_reason") or ""
+        div_srv_note = audit(SRV, "SELECT id FROM arv.note WHERE owner_scope='A' "
+                                  "AND content='The server''s divergent creator body.';")
+        div_srv_revs = audit(SRV, f"SELECT count(*) FROM arv.note WHERE id='{div_srv_note}';")
+        ok17 = (d17.returncode == 0 and l17.returncode == 0 and pr17.returncode == 0
+                and r17.returncode == 0
+                and st17 == "failed" and "ARV-CMD-409" in (ob(LOC, "sy-div1", "last_reason") or "")
+                and "ARV-SYN-009" in reason17b
+                and div_srv_revs == "1")
+        check("SYN-17", ok17,
+              "the divergent-bridge containment: the creator's delivery failed the typed 409 conflict (the server carries the key with a DIFFERENT body — a competing logical command); the referencer NEVER translates through the competing server answer — the identity bridge resolves only through creators whose own delivery rests acknowledged, so the referencer holds the named ARV-SYN-009 dependency instead of delivering against the WRONG entity; the server's competing note stays exactly one revision — no effect from the local lineage ever lands on it",
+              "the bridge's soundness gate: a server command_log answer is a valid translation ONLY when the local outbox row for the creating command rests acknowledged — the 409-divergent answer belongs to a different logical command and must never satisfy a referencer")
+
         print()
         if FAILS:
             print(f"RED — the P3-08 sync suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-08 acceptance suite (SYN-01..15) passes")
+        print("GREEN — the P3-08 acceptance suite (SYN-01..17) passes")
         return 0
     finally:
         pg.drop_scratch_db(LOC)

@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-062-p400a-truthful-acks",
  "base_sha": "b1a493497001bc50937e4c99605d87751dca1558",
- "reviewed_diff_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+ "reviewed_diff_sha256": "7efad5c2dd8cd8b1e04050ada80d9a1372d0465e9bc9ef74fa19552b09d08abd",
  "sheet_section": true,
  "intent_ids": [
   "INT-144",

@@ -1,0 +1,20 @@
+# CLAIM-061 — the Phase 3 exit gate (PLAN §3.E; RTM §8's ALL-rows walk)
+# A VERIFICATION CAMPAIGN, never an implementation slice: no product code
+# changes (the suites already on main are the measured set). The gate proves
+# every Phase 3 exit criterion on the final main 3b5ed28: the full local
+# verification at the final revision; the RTM traceability walk (SYS-01..11
+# each to its tests, Proof Sheet evidence, and SEV — no row passes by
+# implication); the uncoached clean-clone task agent completing the real
+# user-like acceptance path; the separate grader with no P0/P1; the
+# not-verified register explicit. Commit A also carries the post-#95
+# reconciliation (CLAIM-060's rule-4 close row + the five-area re-derivation)
+# and the P-18 PLAN staleness repairs (the EXECUTING statuses on the
+# long-landed P3-01/P3-02/P3-02-followup cards).
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+RTM.md D-039
+context/WORKLOG.md D-043
+context/extracted/53-P3-EXIT-GATE.md D-042
+harness/runs/claim-061-p3-exit-gate D-042

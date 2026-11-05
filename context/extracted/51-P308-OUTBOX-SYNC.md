@@ -60,11 +60,51 @@ consumers of the server outbox P4+'s (this slice lands the HANDOFF row —
 the atomic enqueue — never the enrichment jobs); no refactor of the landed
 capture families.
 
-## §3 — The slice chain (in flight; extended as it lands)
+## §3 — The slice chain (COMPLETED at the final content head 7ad7178 + the finalize)
 
-The RED (the SYN suite at `67e37fa`, machinery-absent ARV-TEST-000) → the
-GREEN (migration 0012 + the outbox spine + harness/sync.py + the gate
-registration) → the measured set → the SEV round → the artifact re-bind →
-the push → the PR → the five checks → the merge-gate review → the merge
-under INT-145 → the post-merge verification → P3-09. Each step's exact
-facts land here as it completes.
+THE RED (LAW-11): the SYN-01..15 suite committed in its RED form at `e91dc9a`
+(observed exit 1, machinery-absent ARV-TEST-000 — red-01.txt; the typed red
+record bound to the RED commit). THE GREEN at `ccaee06`: migration 0012 (the
+two outboxes + the substrate guards) + the spine extension (the outbox INSERT
+riding the command's own transaction; the ARV_SITE server-side handoff) +
+harness/sync.py (the driver) + the TESTS registration; the implementation-
+cycle amendments recorded at `2a209c5` (the #93 precedent class).
+
+THE SEV CHAIN (three rounds, the #91 two-round pattern extended): ROUND 1
+(agent syn-sev-r1, fresh context) returned BLOCKED with one P0 + one P1 +
+four P2s — F2 (P0) the divergent identity bridge (after a creator's 409
+conflict the referencer delivered against the server's COMPETING entity and
+was stamped acknowledged — the agent's own hostile probe found it, invisible
+to the suite) and F1 (P1) the poisoned-payload walk crash (an unhandled
+JSONDecodeError blocked every later row permanently). REPAIRED RED-first at
+`2ec3d11`/`ac84677` (the SYN-16/17 pins observed failing — red-02.txt — then
+the soundness gate: the bridge resolves only through creators whose own
+outbox row rests 'acknowledged'; the per-row containment: ARV-SYN-013,
+terminal on first observation, the walk continues). ROUND 2 (agent
+syn-sev-r2) verified all six round-1 findings REPAIRED on its own scratch rig
+but found three new: F8 (P1) the repair round's docstrings pushed the source
+total to 419 > 400 (LAW-05) — REPAIRED by prose compaction to EXACTLY
+400/400 at `55f293c`, the behavior-neutrality proven by the byte-identical
+suite digests across the trim; F9 (P2) the INTENT-LEDGER/directive-file scope
+declarations — repaired in scope.txt and the CLAIMS row (`7ad7178`); F7 (P2)
+the uncommitted artifacts — repaired by this finalize. ROUND 3 (agent
+syn-sev-r3, FINAL): PASS, zero open P0/P1 — the size law re-measured at
+exactly 400/400, the F2/F1 classes re-probed live, the digest chain proven
+across the trim, the sheet re-deriving over the records; the report validates
+clean (validate_report []). F10 (P2, the artifacts untracked at the review
+head) closes with this finalize commit.
+
+THE MEASURED SET: 13 run records — the SYN suite x3 at the pre-repair tree
+(run-01..03, byte-identical 0c65ba6a), make verify at the pre-repair tree
+(run-04), the SYN suite x3 at the repaired tree (run-05..07, byte-identical
+6fff4afa), make verify (run-08), the SYN suite x3 at the final trimmed tree
+(run-09..11, byte-identical 6fff4afa — the trim's behavior-neutrality
+proven), make verify (run-12), and the recorded PR-mode gate at the final
+artifact tree (run-13, exit 0). The sheet re-derives byte-identically over
+all 13 (the digest binds LAST over the FINAL content — the standing
+discipline; the first gate-record attempt caught the bind-in-progress state
+and was never recorded, the deleted draft).
+
+NEXT: the push → the PR → the five checks at the exact final head → the
+merge-gate review (D-042 (1a)) → the merge under INT-145's standing
+authorization → the post-merge verification → P3-09 (export/restore).

@@ -2,92 +2,219 @@
   "schema_version": 1,
   "slice_id": "claim-059-p308-outbox-sync",
   "base_sha": "67e37fac6948734295c5536f266e463525be77f8",
-  "reviewed_diff_sha256": "6ae870afc9b3df9bb8ff76d09621efa81c1c0b42e4aff64b004d270eb5cb2501",
+  "reviewed_diff_sha256": "ee6fc6e870bba1029385b2eca1aaaab625ced9ee6049a1c57a31f9a69d626368",
   "sheet_section": true,
   "intent_ids": ["INT-145", "INT-146"],
   "requirement_ids": ["SYS-01", "SYS-08"],
   "system_claims": ["C1"],
   "changed_components": [
-    "harness/sync.py (NEW, 387 lines): the sync driver — the sequence-ordered walk; the delivered-mark BEFORE the send (its own committed update); the server-side application through the SAME kernel as a subprocess (PGDATABASE=<server> ARV_SITE=server, own process group, deadline kill reaps the psql session); the classifier (rc=0 acknowledged with server_ref; ARV-CMD-409 failed terminal; rc=1 other retryable / failed at max-attempts; rc=2 and timeout uncertain); THE ROUND-1 REPAIRS: the per-row containment (any undeliverable payload is the named ARV-SYN-013 terminal failure for THAT row, the walk continues — F1), the identity-bridge SOUNDNESS GATE (_create_key JOINs arv.outbox.state='acknowledged'; the work bridge the same rule — a 409-divergent creator's server answer never satisfies a referencer — F2), the raw work-id fallback replaced by the named ARV-SYN-009 dependency (F3), the staging temp-file unlink after every import apply (F5); the crash-at hooks (pre-send/post-apply-pre-ack/post-ack); the status arm.",
+    "harness/sync.py (NEW, 368 added lines — trimmed from 387 by the round-2 F8 repair, now EXACTLY within LAW-05's 400 bound): the sync driver — the sequence-ordered walk; the delivered-mark BEFORE the send (its own committed update); the server-side application through the SAME kernel as a subprocess (PGDATABASE=<server> ARV_SITE=server, own process group, deadline kill reaps the psql session); the classifier (rc=0 acknowledged with server_ref; ARV-CMD-409 failed terminal; rc=1 other retryable / failed at max-attempts; rc=2 and timeout uncertain); the round-1 repairs carried: the per-row containment (ARV-SYN-013 terminal for THAT row, the walk continues — F1), the identity-bridge soundness gate (_create_key JOINs arv.outbox.state='acknowledged'; the work bridge the same rule — F2), the ARV-SYN-009 work dependency (F3), the staging temp-file unlink (F5); the crash-at hooks; the status arm. The trim was prose compaction ONLY (docstrings, the row-parse zip form) — behavior-neutrality PROVEN by the digest chain (see v_model).",
     "harness/migrations/0012_outbox.sql (NEW, 138 lines): arv.outbox — the client-outbox state machine (14 columns; ARV-SYN-004 immutable delivery keys, ARV-SYN-005 transition graph, ARV-SYN-006 attempts monotonicity, ARV-SYN-007 no-DELETE, ARV-SYN-008 server_ref law; RLS FORCED + owner isolation) + arv.server_outbox — the D-018 enrichment handoff (append-only ARV-SYN-010; pending/enriched/failed; RLS FORCED).",
     "harness/commands.py (+31 lines): _SYNC_COMMANDS (the durable-capture product commands) + the spine's outbox INSERT riding the command's OWN transaction (arv.outbox on the local site; arv.server_outbox under ARV_SITE=server — one command core, two execution sites, two outboxes).",
     "harness/gate.py (+1 line): the TESTS registration of harness/tests/test_sync.py (ARV-RED-008).",
-    "harness/tests/test_sync.py (NEW, 730 lines): the SYN-01..17 acceptance suite (SYN-16 the poisoned-payload containment pin, SYN-17 the divergent-bridge containment pin — the two round-1 repair pins, additive over the round-1 SYN-01..15).",
-    "harness/red-records.json (+25/-7) + harness/runs/claim-059-p308-outbox-sync/{scope.txt, red-01.txt, red-02.txt, run-01..04.json committed; run-05..08.json UNTRACKED on disk}: the RED observations (machinery-absent red-01; the repair RED SYN-16/17 red-02) and the measured runs (suite x6 + make verify x2, all exit 0).",
-    "Docs/evidence: CLAIMS.md (+2/-1 the CLAIM-059 row), STATE.md, AGENTS.md, PLAN.md, context/WORKLOG.md, context/extracted/51-P308-OUTBOX-SYNC.md (+70), INTENT-LEDGER.md (+17, OUTSIDE the declared scope — F9), context/reviews/arivoo-no-pause-directive-2026-11-05.md (+28, OUTSIDE the declared scope — F9)."
+    "harness/tests/test_sync.py (NEW, 730 added lines, within the 800 bound): the SYN-01..17 acceptance suite (SYN-16 the poisoned-payload containment pin, SYN-17 the divergent-bridge containment pin — the two round-1 repair pins).",
+    "harness/red-records.json (+24/-1): the RED binding for the suite — schema 2, binding_commit e91dc9a, red_exit 1 / ARV-TEST-000, 2 amendments chaining to the CURRENT file digest (verified live at this head).",
+    "The evidence set harness/runs/claim-059-p308-outbox-sync/: scope.txt (34 lines, now carrying the F9 declarations — INTENT-LEDGER.md INT-146 and the turn-42 directive's preservation file D-022), red-01.txt (machinery-absent RED), red-02.txt (the SYN-16/17 repair RED), notverified.txt, run-01..08.json COMMITTED at this head; proofsheet.md + run-09..12.json on disk but UNTRACKED at the verification head (finding F10 — the finalize chain's commit).",
+    "Docs: CLAIMS.md (+2/-1 — the 7ad7178 row edit putting the F9 scope declarations on the CLAIMS row's OWN globs, the claim-057 precedent's protected-path form), STATE.md, AGENTS.md, PLAN.md, context/WORKLOG.md, context/extracted/51-P308-OUTBOX-SYNC.md (+70), INTENT-LEDGER.md (+17, now IN the declared scope), context/reviews/arivoo-no-pause-directive-2026-11-05.md (+28, now IN the declared scope)."
   ],
   "interfaces_reviewed": [
-    "The substrate surface of arv.outbox: INSERT/SELECT/UPDATE for arv_app, the trigger-enforced state machine, RLS owner isolation — re-probed live as the postgres superuser (payload retarget -> ARV-SYN-004; DELETE -> ARV-SYN-007; rows intact after every refusal).",
-    "The substrate surface of arv.server_outbox: append-only as superuser (UPDATE state='enriched' -> ARV-SYN-010 'append-only at this rung'); one pending row per server-APPLIED command observed (pending=4 after four applications: the direct K, K3, KI, kc2).",
-    "The spine's enqueue interface: the outbox INSERT inside the command's own transaction — crash-probed at pre-commit (zero outbox, zero command_log, zero note rows) and post-commit-pre-ack (the row rests pending attempts=0, the local note exists).",
-    "The driver CLI: 'sync --owner --server-db --timeout --max-attempts --crash-at' and 'status --owner' (exit 0 = the walk completed; the states are the truth).",
-    "The server-side application contract: python3 harness/commands.py <command> with PGDATABASE=<server> ARV_SITE=server — the SAME kernel and idempotency semantics; the duplicate probe (direct same-key+same-body on the server after a delivered sync) returned status=replayed with the SAME result_ref, zero new server rows (note count and command_log count unchanged).",
-    "The identity bridge WITH the round-2 soundness gate: _create_key resolves a local entity id only through a creating command whose own outbox row rests 'acknowledged' (and the work bridge only through an acknowledged source) — live-probed through the 409-divergence composition (the referencer held ARV-SYN-009, never the competing server answer) and the failed-creator work bridge (ARV-SYN-009, never the raw local id).",
-    "The delivery classifier and the per-row containment: rc=0/409/other/2/timeout classification; a hostile non-JSON payload is the named terminal ARV-SYN-013 for THAT row with the walk continuing.",
-    "The D-018 handoff: exactly one pending arv.server_outbox row per server-APPLIED command (create_note:K, create_note:K3, import_source:KI, create_note:kc2 observed), atomic with the application; replays add none; the local domain's handoff table stays empty.",
-    "The merge-gate surface (round 2's addition): harness/gate.py --slice claim-059-p308-outbox-sync --diff origin/main — the scope/size/claims/proofsheet/SEV checks over the delivered diff (ARV-SIZE-002, ARV-SCOPE-002 x2, ARV-CLM-002 x2, ARV-PRF-002 observed; the suite arm green once the rig env is loaded)."
+    "The outbox read surface as the independent arv_read role (psql -X -A -t -U arv_read): per-key state/last_reason/attempts — the audit path both my probes used (K failed + ARV-CMD-409; K2 retryable + ARV-SYN-009; pz failed + ARV-SYN-013; K3 acknowledged with server_ref).",
+    "The driver CLI 'sync --owner A --server-db S': exit 0 in BOTH probes with every row dispositioned on its own SYNC line (state + named reason) — the walk completes over failed rows, never aborts.",
+    "The kernel's two-site contract: server-side create_note under PGDATABASE=<server> ARV_SITE=server (ACK status=committed revision=1) vs local create_note/revise_note — one command core, two execution sites, observed on my own two-domain scratch rig.",
+    "The identity bridge's soundness gate (_create_key through acknowledged creators only) — probed via the 409-divergence composition: the referencer held ARV-SYN-009 and the competing server entity stayed untouched.",
+    "The per-row payload containment — probed via a direct arv_app substrate INSERT of a non-JSON payload (accepted by the append-only keys by design, then terminally classified ARV-SYN-013 with the later healthy row acknowledged).",
+    "The evidence/gate surface at the verification head: proofsheet.py --verify (byte-identical re-derivation over 12 run records), scope.check_scope -> [], claims.check_branch_claim -> [], sev.validate_report (this report)."
   ],
   "v_model": {
     "component_verification": [
-      "The SYN-01..17 suite run BY ME on my own two fresh scratch databases (python3 harness/tests/test_sync.py -> exit 0, 17 PASS, 'GREEN — the P3-08 acceptance suite (SYN-01..17) passes', 11.4s) — including the two repair pins SYN-16 (poisoned-payload containment) and SYN-17 (divergent-bridge containment).",
-      "The substrate guard matrix re-fired live as the postgres superuser on my own local db: UPDATE arv.outbox SET payload='x' -> ARV-SYN-004; DELETE -> ARV-SYN-007; UPDATE arv.server_outbox SET state='enriched' -> ARV-SYN-010; every targeted row intact after the refusals.",
-      "The atomic enqueue crash-probed myself: crash.py --command create_note --point pre-commit -> 'CRASHED-AT pre-commit: killed -9' with ZERO outbox/command_log/note rows for the key; --point post-commit-pre-ack -> the outbox row rests pending attempts=0 with the local note committed.",
-      "The per-row containment probed directly at the substrate: a hostile 'not-json' payload INSERT (arv_app) is accepted by the append-only keys, then classified by the driver as the terminal 'ARV-SYN-013: the payload is undeliverable — JSONDecodeError' with the walk CONTINUING (the later row acknowledged), driver exit 0, empty stderr (no traceback)."
+      "My own full-suite run at HEAD 7ad7178: python3 harness/tests/test_sync.py -> exit 0, SYN-01..17 all PASS, 'GREEN — the P3-08 acceptance suite (SYN-01..17) passes' — including the two round-1 repair pins SYN-16 (poisoned-payload containment) and SYN-17 (divergent-bridge containment).",
+      "THE SIZE LAW measured by me at HEAD (git diff --numstat origin/main...HEAD): source .py non-test additions commands.py 31 + gate.py 1 + sync.py 368 = EXACTLY 400 (LAW-05's bound met with zero margin — the F8 trim verified at the byte level); harness/tests/test_sync.py 730 <= 800; exactly ONE migration (0012_outbox.sql, +138).",
+      "THE TRIM'S BEHAVIOR-NEUTRALITY PROVEN BY DIGEST CHAIN: my run's output sha256 6fff4afa7543ec053bef5cbdbc5fdf15270b11ffd5e4842389b88fd531dffb30 == run-09/10/11 (recorded at the trim commit 55f293c) == run-05/06/07 (recorded at the PRE-trim round-1-repair commit ac84677, the 419-line tree) — the suite's observable output is byte-identical across the 419->400 trim and identical at this head.",
+      "The red-records binding verified live at HEAD: schema 2, binding_commit e91dc9a, red_exit 1 (ARV-TEST-000), 2 amendments, current_sha256 == sha256 of the live harness/tests/test_sync.py — the RED chain holds at the reviewed tree."
     ],
     "integration_verification": [
-      "The real two-database boundary: my own two fresh scratch PostgreSQL databases (arv_sev2c_*/arv_sev2d_*, created via harness.adapters.pg.create_scratch_db, both migrated with harness/migrate.py), local commands on one, server-side applications (ARV_SITE=server) and driver deliveries across the boundary.",
-      "THE F2 REPAIR composition, live: a competing server-side create_note key K body 'SERVER-BODY'; a local create_note key K body 'LOCAL-BODY'; a local revise_note K2 on the local note; ONE driver pass -> K failed with 'FAIL ARV-CMD-409 ... DIFFERENT body' in last_reason, K2 retryable with 'ARV-SYN-009: the note ... is not yet server-durable', the server's SERVER-BODY note count exactly 1 with revision=1, and the revise content 'REVISED-BODY-XYZ' appearing NOWHERE on the server (arv.note LIKE '%REVISED%' = 0; the only content-bearing table).",
-      "THE F3 REPAIR, live: import#1's outbox row force-failed at the substrate (the legal pending->failed transition), import#2 --work-id <the local work> -> the driver holds the row retryable with the named 'ARV-SYN-009: the work ... is not yet server-durable — the identity dependency (the work-bridge resolves only through an acknowledged source of that work)' — never the raw local id across the boundary (the server's source count unchanged).",
-      "Duplicate delivery: after the driver acknowledged key kc2, a hostile DIRECT re-application of the same key+body on the server db returned 'ACK ... status=replayed result_ref=<the same ref>' with the server's note count and command_log count unchanged (exactly-once at every layer).",
-      "THE F5 REPAIR, live: an import_source delivered end-to-end through the driver (KI acknowledged with server_ref; the server's source + import_journal rows present) leaves ZERO /tmp/arv-sync-* staging files (ls after the pass -> empty); the earlier non-import pass also left none."
+      "THE F2 (round-1 P0) COMPOSITION re-probed by me on two fresh migrated scratch databases (arv_r3a_*/arv_r3b_*): server-side competing create_note key K content 'SRV' (ARV_SITE=server); local create_note key K content 'LOC'; local revise_note key K2 content 'indigo' on the local note (id from the ACK result_ref); ONE driver pass -> K failed with 'FAIL ARV-CMD-409: idempotency key ... DIFFERENT body' in last_reason, K2 retryable with 'ARV-SYN-009: the note ... is not yet server-durable — the identity dependency', the server's arv.note carries EXACTLY one row (revision 1, 'SRV'), and count(content LIKE '%indigo%') = 0 — no effect of the local lineage ever landed on the competing entity; driver exit 0.",
+      "THE F1 (round-1 P1) POISON WALK re-probed by me on two more fresh scratch databases (arv_r3c_*/arv_r3d_*): the direct arv_app INSERT of the 'not-json' payload under key 'pz' (SET app.current_owner='A'; accepted by the append-only keys), a healthy local note K3 behind it; ONE driver pass -> exit 0, pz failed 'ARV-SYN-013: the payload is undeliverable — JSONDecodeError', K3 acknowledged with server_ref and the server carrying 'the healthy row behind the poison' — the walk continued past the poison, never a crash, never a blocked queue.",
+      "The two-database boundary itself: both probe rigs built in my own session through the repo's own surface (harness.adapters.pg.create_scratch_db + harness/migrate.py on both domains); every cross-domain claim observed through INDEPENDENT arv_read psql sessions, never through the driver's own reports alone."
     ],
     "system_verification": [
-      "SYS-08's declared fault matrix end-to-end on the real stack: offline capture and restart-before-delivery (SYN-02), duplicate/re-drive/uncertain-ACK resolution by same-key replay (SYN-03/05/09), the outage class retryable-never-lost (SYN-06), the typed 409 conflict with both bodies preserved (SYN-07 + my probe), cross-owner isolation (SYN-08), the ordering law (SYN-14), and the no-lost-writes acceptance sweep (SYN-15: the server's key set == acknowledged + 409-failed, every state truthful) — all GREEN in my own run.",
-      "The round-1 P0 FALSIFICATION re-run at the system level and REPAIRED: the divergent-bridge composition now holds the referencer at the named ARV-SYN-009 dependency and the server's competing entity stays untouched by the local lineage (exactly one revision, no local content landed) — the wrong-entity delivery class is dead.",
-      "NEW (round 2): the deliverable's own merge-gate surface — python3 harness/gate.py --slice claim-059-p308-outbox-sync --diff origin/main -> RED, 8 distinct failures: ARV-SIZE-002 (419 source lines > 400, LAW-05), ARV-SCOPE-002 x2 + ARV-CLM-002 x2 (INTENT-LEDGER.md and context/reviews/arivoo-no-pause-directive-2026-11-05.md outside the declared scope), ARV-PRF-002 (no Proof Sheet on disk), plus the expected-stale ARV-SEV-003/005 against this report's authoring. The suite arm itself is GREEN once the rig environment is loaded (my first gate invocation without it produced 15 spurious ARV-GATE-002 exits — an environment artifact of the reviewer's shell, re-run clean)."
+      "The scoped gate checks AT THE VERIFICATION HEAD 7ad7178 (my own runs): scope.check_scope('origin/main') -> [] and claims.check_branch_claim -> [] (the 7ad7178 CLAIMS-row repair verified directly at the head it landed on — F9 closed); proofsheet.py --slice claim-059-p308-outbox-sync --verify -> 'PASS ARV-PRF-004 ... re-derives byte-identically from 12 run records', exit 0.",
+      "The recorded gate evidence: run-12 'make verify' exit 0 at 55f293c (the trim + scope-repair commit). NO run-13 exists — the gate record is run-12; the head's only delta above 55f293c is the one-line CLAIMS.md row edit, whose scope/claims effect I re-checked myself at HEAD (both []).",
+      "SYS-08's declared fault matrix GREEN in my own suite run at HEAD: offline capture and restart-before-delivery (SYN-02), duplicate/re-drive/uncertain-ACK resolution by same-key replay (SYN-03/05/09), the outage class retryable-never-lost (SYN-06), the typed 409 conflict with BOTH bodies preserved (SYN-07), cross-owner isolation (SYN-08), the ordering law (SYN-14), the no-lost-writes acceptance sweep (SYN-15), plus the two containment pins SYN-16/17."
     ],
     "validation": [
-      "The named user scenario (the owner works offline; every capture survives locally with an honest queued state; syncs exactly once on reconnect; the server ends with the same set the local journal shows) — SYN-02's count-and-content equality, GREEN in my own run.",
-      "The honest queued state as user-visible surface: the status arm's per-state counts and queued-row list (SYN-12), with the payload contents never leaking (the locator vocabulary only).",
-      "The full-family equality through the identity bridge (highlight revise, bookmark create+move, version-aware note references, tombstone/restore crossing the domain — SYN-10's per-family count-and-content equality on BOTH domains)."
+      "The named user scenario — the owner works offline, every capture survives locally with an honest queued state, syncs exactly once on reconnect, the server ends with the same set the local journal shows (SYN-02's count-and-content equality) — GREEN in my own run.",
+      "The honest queued state as user-visible surface: the status arm's per-state counts and queued-row list (SYN-12), payload contents never leaking (the locator vocabulary only).",
+      "The full-family equality through the identity bridge (highlight revise, bookmark create+move, version-aware note references, tombstone/restore crossing the domain — SYN-10) and the restored-current-revision local read (SYN-14)."
     ]
   },
   "failure_modes": [
-    {"id": "FM-01", "scenario": "A committed local write loses its sync intent (the enqueue misses or diverges from the mutation's transaction).", "control": "The outbox INSERT rides the spine's OWN statement list between BEGIN and COMMIT (RTM §4.2's one-commit-point law); crash-probed at pre-commit (zero rows) and post-commit-pre-ack (the row exists pending).", "proof_ids": ["run-01", "red-01.txt"]},
-    {"id": "FM-02", "scenario": "A duplicate logical effect at any layer (re-delivery, re-drive after a death window, replay after uncertain-ACK).", "control": "The kernel's same-key+same-body replay semantics — verified live by my direct duplicate probe (status=replayed, zero new server rows) and SYN-03/05/09.", "proof_ids": ["run-01", "run-05"]},
-    {"id": "FM-03", "scenario": "A silent last-write-wins for authored content (a competing body under the same key).", "control": "ARV-CMD-409 surfaced as the delivery's typed conflict -> failed (terminal, visible, the reason recorded); BOTH bodies preserved — verified live (my P1 probe: the local LOCAL-BODY note and the server SERVER-BODY note each intact).", "proof_ids": ["run-01", "run-05"]},
-    {"id": "FM-04", "scenario": "Owner leakage (one owner's driver session reading or delivering another owner's rows).", "control": "RLS FORCED + owner isolation on both outboxes; every driver read/update rides the owner-scoped arv_app session; SYN-08's hostile cross-owner reads and per-owner sync isolation.", "proof_ids": ["run-01", "run-05"]},
-    {"id": "FM-05", "scenario": "Stale or mismatched sync state (a state that lies about the server, a fabricated server_ref, a wrong-entity acknowledgment).", "control": "ARV-SYN-008 (acknowledged requires the server's answer); the round-1 CONTROL GAP (the acknowledged state misrepresenting WHAT was delivered — the wrong-entity class) is now CLOSED by the bridge's soundness gate: a translation is valid only through creators whose own outbox row rests acknowledged (F2 repair, verified live).", "proof_ids": ["run-05", "run-06"]},
-    {"id": "FM-06", "scenario": "Crash/restart windows around the delivery (the death brackets).", "control": "The delivered-mark BEFORE the send and the outcome-mark after the server's answer bracket the window; the non-terminal delivered/uncertain states are re-driven and resolved by the same-key replay (SYN-09; my pre-commit/post-commit-pre-ack crash probes).", "proof_ids": ["run-01", "run-05"]},
-    {"id": "FM-07", "scenario": "A hostile or corrupted outbox row poisons the walk (a payload that is not valid JSON, lacks required fields, or carries newlines).", "control": "REPAIRED (round-1 F1): the per-row containment — the named terminal ARV-SYN-013 for THAT row on first observation, the walk CONTINUES (my probe: poison failed ARV-SYN-013, the later K3 acknowledged, driver exit 0, no traceback; SYN-16 GREEN).", "proof_ids": ["run-05", "run-06", "red-02.txt"]},
-    {"id": "FM-08", "scenario": "The ordering dependency (a referencer delivered before its creator is server-durable) — or through a WRONG entity after a creator's 409 divergence.", "control": "Sequence-ordered walk + the named ARV-SYN-009 refusal for untranslatable targets (retryable, resolved on the next pass); the round-1 RESIDUAL (the raw work-id fallback) is CLOSED (F3 repair, verified live); the divergent-creator class is contained by the soundness gate (F2 repair, verified live: the referencer holds ARV-SYN-009, never the competing answer).", "proof_ids": ["run-05", "run-06", "red-02.txt"]},
-    {"id": "FM-09", "scenario": "Server outage / unreachable class; blob unavailability for the re-materialized import.", "control": "Retryable with the named reason (ARV-CMD-010 for the connection class; ARV-SYN-009 for the missing blob), never failed on attempt 1, local state untouched; the recovered pass acknowledges (SYN-06).", "proof_ids": ["run-01", "run-05"]},
-    {"id": "FM-10", "scenario": "Provenance loss across the domain crossing.", "control": "The outbox row carries owner/actor/client_id/command_name/body_hash/payload and the child invocation passes them through; the server's command_log and server_outbox rows record the same key (observed: create_note:K, create_note:K3, import_source:KI, create_note:kc2).", "proof_ids": ["run-01", "run-05"]},
-    {"id": "FM-11", "scenario": "Hostile substrate mutation of sync intent (retarget, illegal transition, attempts decrease, delete, handoff tamper).", "control": "The 0012 trigger set — ARV-SYN-004/005/006/007/008/010 — every one re-fired by name under my superuser probes this round.", "proof_ids": ["run-01", "run-05"]},
-    {"id": "FM-12", "scenario": "The slice's own deliverable violates the repo's enforced laws (size budget, declared scope, assembled evidence).", "control": "INSUFFICIENT AT PRESENT — the bound merge gate refuses the slice (ARV-SIZE-002: 419 > 400; ARV-SCOPE-002/CLM-002: two undeclared diff paths; ARV-PRF-002: no assembled Proof Sheet) — F7/F8/F9 (open). The check is bound: a red gate blocks the merge.", "proof_ids": ["run-08"]}
+    {
+      "id": "FM-01",
+      "scenario": "A committed local write loses its sync intent (the enqueue misses or diverges from the mutation's transaction).",
+      "control": "The outbox INSERT rides the spine's OWN statement list between BEGIN and COMMIT (RTM §4.2's one-commit-point law); crash-probed at pre-commit (zero rows) and post-commit-pre-ack (the row exists pending) in round 2; SYN-01 green in my round-3 run.",
+      "proof_ids": ["run-01", "run-09", "red-01.txt"]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "A duplicate logical effect at any layer (re-delivery, re-drive after a death window, replay after uncertain-ACK).",
+      "control": "The kernel's same-key+same-body replay semantics (SYN-03/05/09 — the re-drive replays, the blocked attempt rolls back, the death windows never duplicate); green in my round-3 run.",
+      "proof_ids": ["run-01", "run-05", "run-09"]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "A silent last-write-wins for authored content (a competing body under the same key).",
+      "control": "ARV-CMD-409 surfaced as the delivery's typed conflict -> failed (terminal, visible, reason recorded); BOTH bodies preserved — re-probed LIVE by me in round 3 (K failed ARV-CMD-409; the local 'LOC' note and the server 'SRV' note each intact); SYN-07 green.",
+      "proof_ids": ["run-05", "run-09"]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "Owner leakage (one owner's driver session reading or delivering another owner's rows).",
+      "control": "RLS FORCED + owner isolation on both outboxes; every driver read/update rides the owner-scoped arv_app session; SYN-08's hostile cross-owner reads and per-owner sync isolation — green in my round-3 run.",
+      "proof_ids": ["run-01", "run-05", "run-09"]
+    },
+    {
+      "id": "FM-05",
+      "scenario": "Stale or mismatched sync state (a state that lies about the server, a fabricated server_ref, a wrong-entity acknowledgment).",
+      "control": "ARV-SYN-008 (acknowledged requires the server's answer) + the bridge's soundness gate (a translation valid only through creators whose own outbox row rests acknowledged) — the wrong-entity class re-falsified LIVE by my round-3 F2 composition (the referencer held ARV-SYN-009, the competing entity untouched); SYN-17 green.",
+      "proof_ids": ["run-05", "run-06", "run-09"]
+    },
+    {
+      "id": "FM-06",
+      "scenario": "Crash/restart windows around the delivery (the death brackets).",
+      "control": "The delivered-mark BEFORE the send and the outcome-mark after the server's answer bracket the window; the non-terminal delivered/uncertain states re-drive and resolve by the same-key replay (SYN-09) — green in my round-3 run.",
+      "proof_ids": ["run-01", "run-05", "run-09"]
+    },
+    {
+      "id": "FM-07",
+      "scenario": "A hostile or corrupted outbox row poisons the walk (a payload that is not valid JSON).",
+      "control": "Per-row containment: the named terminal ARV-SYN-013 for THAT row, the walk CONTINUES — re-probed LIVE by me in round 3 (pz failed ARV-SYN-013, K3 acknowledged behind it, driver exit 0); SYN-16 green.",
+      "proof_ids": ["run-05", "run-09", "red-02.txt"]
+    },
+    {
+      "id": "FM-08",
+      "scenario": "Out-of-order or premature delivery (a referencer before its entity exists server-side).",
+      "control": "The kernel's own guards (ARV-NTE-001 absent-scope refusal, zero effect) absorb the reorder; the ordered pass then lands create-then-revise (SYN-04) — green in my round-3 run.",
+      "proof_ids": ["run-01", "run-09"]
+    },
+    {
+      "id": "FM-09",
+      "scenario": "An unreachable or stalling server during delivery.",
+      "control": "The outage class rests retryable with the named reason (attempts=1, never failed on first attempt — SYN-06); the stall class rests uncertain with the timeout reason and resolves by same-key replay (SYN-05) — green in my round-3 run.",
+      "proof_ids": ["run-01", "run-09"]
+    },
+    {
+      "id": "FM-10",
+      "scenario": "The substrate is edited hostilely (payload retarget, DELETE, illegal transition, attempts rollback, server_outbox rewrite).",
+      "control": "ARV-SYN-004/005/006/007 on arv.outbox and ARV-SYN-010 on arv.server_outbox (SYN-11's hostile matrix) — green in my round-3 run; round 2 additionally probed the refusals live as the postgres superuser.",
+      "proof_ids": ["run-01", "run-05", "run-09"]
+    },
+    {
+      "id": "FM-11",
+      "scenario": "The enrichment handoff diverges from the application (a server-APPLIED command without its pending row, or a replay adding one).",
+      "control": "The D-018 atomic enqueue: one pending arv.server_outbox row per server-APPLIED command, replays add none, the local domain's handoff table stays empty, append-only at the substrate (SYN-13) — green in my round-3 run.",
+      "proof_ids": ["run-01", "run-09"]
+    },
+    {
+      "id": "FM-12",
+      "scenario": "A lost write at the slice's boundary (an enqueued intent that never reaches a truthful terminal state).",
+      "control": "The no-lost-writes sweep (SYN-15: every local product key has its row, the server's key set == acknowledged + 409-failed, every state truthful) — green in my round-3 run; the walk-ordering law pinned by SYN-14.",
+      "proof_ids": ["run-01", "run-09"]
+    }
   ],
   "findings": [
-    {"id": "F1", "severity": "P1", "scenario": "ROUND 1 (the poisoned-payload walk crash): an arv.outbox row whose payload is not valid JSON crashed the walk with an unhandled JSONDecodeError after the delivered-mark, permanently blocking every later row in every subsequent pass.", "evidence": "ROUND 2 VERIFIED REPAIRED on my fresh scratch rig (arv_sev2c_*/arv_sev2d_*): a hostile INSERT (arv_app) of payload 'not-json' state pending; a normal local create_note K3 after it; ONE driver pass -> exit 0 with EMPTY stderr (no traceback); 'SYNC key=poison state=failed reason=ARV-SYN-013'; 'SYNC key=K3 state=acknowledged server_ref=01a1abca-67b9-...'; the K3 note present on the server (count=1). The containment is terminal on first observation (a payload that cannot parse will never parse). SYN-16 GREEN in my own suite run.", "status": "resolved"},
-    {"id": "F2", "severity": "P0", "scenario": "ROUND 1 (the divergent identity bridge): after a 409 divergence on a creator, every REFERENCER of that entity was delivered against the WRONG server entity (the competing body's entity) and stamped acknowledged — a silent structural divergence no sweep could detect.", "evidence": "ROUND 2 VERIFIED REPAIRED on my fresh scratch rig: server-side direct create_note key K 'SERVER-BODY'; local create_note key K 'LOCAL-BODY'; local revise_note K2 on the local note; ONE driver pass -> K: state=failed, last_reason='FAIL ARV-CMD-409: idempotency key K is already recorded with a DIFFERENT body...'; K2: state=retryable, last_reason='ARV-SYN-009: the note 01a1abc9-cc8d-... is not yet server-durable — the identity dependency' (NOT acknowledged); the server's SERVER-BODY note count exactly 1 with revision=1 (note_lifecycle rows 0); the revise content 'REVISED-BODY-XYZ' appears NOWHERE on the server (the only content-bearing table arv.note: 0 matches); the server command_log carries only K -> the SERVER-BODY note. The soundness gate (_create_key's JOIN on o.state='acknowledged') held. SYN-17 GREEN in my own suite run.", "status": "resolved"},
-    {"id": "F3", "severity": "P2", "scenario": "ROUND 1 (the raw work-id fallback): _cli_args passed the RAW LOCAL work id across the domain boundary when the work translation failed, surfacing the misleading ARV-CAP-006 class instead of the named ARV-SYN-009 ordering dependency.", "evidence": "ROUND 2 VERIFIED REPAIRED, live on my scratch rig: import#1 (key Q1, --title W1) force-failed to terminal at the substrate (the legal pending->failed transition); import#2 (key Q2, --work-id <the local work>) -> the driver holds Q2 retryable with 'ARV-SYN-009: the work 01a1abce-c353-... is not yet server-durable — the identity dependency (the work-bridge resolves only through an acknowledged source of that work)'; the server's source count unchanged (Q2's source never landed); no ARV-CAP-006, no raw local id in the delivery. Code: sync.py's import branch returns the named dependency when _translate_work fails (no 'or p[\"work_id\"]' fallback remains).", "status": "resolved"},
-    {"id": "F4", "severity": "P2", "scenario": "ROUND 1 (the transition-graph superset): the substrate's enforced graph is a permissive superset of RTM §3.4's declared diagram (the re-attempt self-edges, the terminal-failure entries from every non-terminal state, retryable->retryable) — a documentation-alignment item.", "evidence": "ROUND 2 VERIFIED RESOLVED AS DOCUMENTED: notverified.txt now carries the dedicated section 'THE ENFORCED TRANSITION GRAPH IS A DELIBERATE SUPERSET OF RTM §3.4'S DIAGRAM' naming every added edge class (the re-attempt self-edges, the terminal-failure entries, the repeated-retryable edge) and stating acknowledged/failed remain terminal with no outgoing edge; my hostile probes re-fired the guards by name (ARV-SYN-004/007/010) and the legal pending->failed force-fail (my F3 probe) behaved exactly as the documented superset declares. Stated, never silently assumed.", "status": "resolved"},
-    {"id": "F5", "severity": "P2", "scenario": "ROUND 1 (the leaked staging temp file): the re-materialized import wrote a NamedTemporaryFile(delete=False) per delivery attempt with no unlink — one leaked file per attempt, unbounded across a long-lived host.", "evidence": "ROUND 2 VERIFIED REPAIRED, live: after a full import delivery through the driver (KI acknowledged with server_ref; the server's source + import_journal rows present) 'ls /tmp/arv-sync-*' -> EMPTY; the earlier non-import pass also left none; code: the unlink rides immediately after _apply returns and BEFORE the post-apply-pre-ack crash point, under an OSError-pass.", "status": "resolved"},
-    {"id": "F6", "severity": "P2", "scenario": "ROUND 1 (the stale scratch-DB count): notverified.txt's session-hygiene line claimed ~30 builder-debug scratch databases on the rig; the count no longer held at review time.", "evidence": "ROUND 2 VERIFIED RESOLVED: the current notverified.txt carries no ~30-database claim — the line is corrected to 'F6 (P2) the stale scratch-DB count corrected (the rig was re-initdb'd at the session's recycle — zero now)'; at my review time the rig's arv_% databases were exactly my own SEV scratch set (sev2a..sev2d), zero residue.", "status": "resolved"},
-    {"id": "F7", "severity": "P2", "scenario": "NEW (round 2, the evidence chain): the slice's Proof Sheet was never assembled — 'python3 harness/proofsheet.py --slice claim-059-p308-outbox-sync --verify' refuses with ARV-PRF-002 ('no Proof Sheet on disk') — and the post-repair measured runs (run-05..08.json: the suite x3 + make verify at ac84677) sit UNTRACKED on disk, so the committed evidence chain still ends at the pre-repair run-01..04. Every other slice in the repo (claim-002..058 and the harness slices) ships a committed proofsheet.md; round 1 declared this same gap as a review limit and the repair round left it unaddressed.", "evidence": "My run: proofsheet.py --slice claim-059-p308-outbox-sync --verify -> 'FAIL ARV-PRF-002: no Proof Sheet on disk ... run make prove first' (rc=1); ls harness/runs/claim-059-p308-outbox-sync/ -> no proofsheet.md; git status -> run-05.json..run-08.json untracked; git ls-files | grep proofsheet -> 60 committed sheets, none for claim-059. Repair: record + assemble ('make prove SLICE=claim-059-p308-outbox-sync' or proofsheet.py --slice ... after --record), then commit the sheet together with run-05..08.", "status": "open"},
-    {"id": "F8", "severity": "P1", "scenario": "NEW (round 2, the LAW-05 regression): the repair commits grew the slice past the enforced size budget — the diff vs base 67e37fa now carries 419 source lines (sync.py 387 + commands.py 31 + gate.py 1) against the 400-line limit (ARV-SIZE-002: 'split the slice'). Round 1's diff was compliant at 381 (sync.py 349); the F1/F2/F3/F5 repairs added 38 lines to sync.py without re-checking the bound. The gate's size check is bound to the diff, so the slice CANNOT merge as delivered; it went unnoticed because the recorded post-repair verification (run-08's 'make verify') runs the gate with --no-diff --skip-suites, which skips exactly this check.", "evidence": "My run of the authoritative machinery: harness.scope.diff_stats('origin/main') -> src files [('harness/commands.py',31),('harness/gate.py',1),('harness/sync.py',387)] TOTAL 419; scope.check_size -> 'FAIL ARV-SIZE-002: 419 source lines > 400 (LAW-05) — split the slice'; end-to-end: python3 harness/gate.py --slice claim-059-p308-outbox-sync --diff origin/main -> RED with ARV-SIZE-002 among the failures (test lines 730 <= 800, source files 3 <= 8, migrations 1 — all other size checks green). Repair: trim sync.py by >= 19 lines or split the overflow into its own bounded slice (e.g., the work-bridge/import staging arms), keeping LAW-05's one-behavior-per-slice discipline.", "status": "open"},
-    {"id": "F9", "severity": "P2", "scenario": "NEW (round 2, the declared-scope breaches): the diff touches two paths OUTSIDE the slice's declared scope — INTENT-LEDGER.md (+17) and context/reviews/arivoo-no-pause-directive-2026-11-05.md (+28) — while scope.txt's declaration list and the CLAIMS.md row name neither; INTENT-LEDGER is also a LAW-07 protected path requiring an owner-referenced scope line.", "evidence": "My gate run: 'FAIL ARV-SCOPE-002: INTENT-LEDGER.md outside the declared scope' + 'FAIL ARV-SCOPE-002: context/reviews/arivoo-no-pause-directive-2026-11-05.md outside the declared scope' + the claims-registry echoes 'FAIL ARV-CLM-002' for both paths; scope.txt lists CLAIMS/STATE/AGENTS/PLAN/WORKLOG/extracted/runs but neither path. Repair: add the two declaration lines with their owner refs (the INTENT-146 directive line for INTENT-LEDGER.md; the no-pause directive's D-ref for the review file) or move them to their own slice.", "status": "open"}
+    {
+      "id": "F1",
+      "severity": "P1",
+      "status": "resolved",
+      "scenario": "ROUND 1 (the poisoned-payload walk crash): an arv.outbox row whose payload is not canonical JSON crashed the walk with an unhandled JSONDecodeError, blocking every later row permanently.",
+      "control": "The per-row containment repair: the named terminal ARV-SYN-013 for THAT row, the walk continues.",
+      "evidence": "ROUND 3 re-probe (mine, fresh scratch DBs arv_r3c_*/arv_r3d_*): the direct 'not-json' INSERT under key pz, a healthy K3 behind it -> driver exit 0, pz failed 'ARV-SYN-013: the payload is undeliverable — JSONDecodeError: Expecting value: line 1 column 1 (char 0)', K3 acknowledged with server_ref and delivered ('the healthy row behind the poison' on the server). SYN-16 green in my suite run at HEAD."
+    },
+    {
+      "id": "F2",
+      "severity": "P0",
+      "status": "resolved",
+      "scenario": "ROUND 1 (the divergent identity bridge): after a creator's 409 divergence, a referencer translated through the server's COMPETING answer and delivered against the WRONG entity.",
+      "control": "The bridge's soundness gate: a server command_log answer is a valid translation ONLY when the local outbox row for the creating command rests 'acknowledged' (the _create_key JOIN; the work bridge the same rule).",
+      "evidence": "ROUND 3 re-probe (mine, fresh scratch DBs arv_r3a_*/arv_r3b_*): server-side competing create_note K='SRV'; local create_note K='LOC'; local revise_note K2='indigo' on the local note -> ONE driver pass: K failed with 'FAIL ARV-CMD-409 ... DIFFERENT body' in last_reason, K2 retryable with 'ARV-SYN-009: the note ... is not yet server-durable — the identity dependency', the server's arv.note EXACTLY one row (revision 1, 'SRV'), '%indigo%' count 0, driver exit 0. SYN-17 green in my suite run at HEAD."
+    },
+    {
+      "id": "F3",
+      "severity": "P2",
+      "status": "resolved",
+      "scenario": "ROUND 1 (the raw work-id fallback): the work bridge could pass the RAW LOCAL work id across the domain boundary.",
+      "control": "Replaced by the named ARV-SYN-009 dependency (never a raw local id across the boundary).",
+      "evidence": "Round 2 verified this live (the failed-creator work bridge held ARV-SYN-009); round 3 rests on that recorded verification plus my green SYN-01..17 run at HEAD (the suite exercises the bridge paths); not separately re-probed by round 3 — stated in not_verified."
+    },
+    {
+      "id": "F4",
+      "severity": "P2",
+      "status": "resolved",
+      "scenario": "ROUND 1 (the transition-graph superset): the substrate's enforced graph is a deliberate superset of RTM §3.4's diagram (re-attempt self-edges, terminal-failure entries from every non-terminal state, the repeated-retryable edge).",
+      "control": "DOCUMENTED, never silently assumed — notverified.txt carries the explicit superset section; acknowledged/failed remain terminal with no outgoing edge.",
+      "evidence": "Round 3 read the notverified.txt section at HEAD — present, explicit, and consistent with the SYN-11 pin green in my run; not independently re-derived against the RTM diagram by this round (stated in not_verified)."
+    },
+    {
+      "id": "F5",
+      "severity": "P2",
+      "status": "resolved",
+      "scenario": "ROUND 1 (the leaked staging temp file): the re-materialized import left a NamedTemporaryFile per attempt.",
+      "control": "The staging temp file is unlinked after every import apply.",
+      "evidence": "Round 2 verified this live (zero /tmp/arv-sync-* staging files after delivered imports); round 3 rests on that recorded verification plus my green SYN-01..17 run at HEAD; not separately re-probed by round 3 — stated in not_verified."
+    },
+    {
+      "id": "F6",
+      "severity": "P2",
+      "status": "resolved",
+      "scenario": "ROUND 1 (the stale scratch-DB count): notverified.txt's session-hygiene line claimed a scratch-DB count that did not match the recycled rig.",
+      "control": "The count corrected (the rig was re-initdb'd at the session recycle).",
+      "evidence": "The corrected statement rides the committed notverified.txt; nothing in it contradicts my round-3 observations (my own probes created and used four fresh scratch DBs without interference)."
+    },
+    {
+      "id": "F7",
+      "severity": "P2",
+      "status": "resolved",
+      "scenario": "ROUND 2 (the evidence chain): the slice's Proof Sheet was never assembled and the measured run records were uncommitted.",
+      "control": "The sheet assembles and the round-2 records commit in the finalize chain.",
+      "evidence": "ROUND 3: run-05..08.json, scope.txt, red-01.txt, red-02.txt, notverified.txt and the round-2 sev.json ARE in the committed tree at HEAD (git ls-tree); proofsheet.py --verify -> 'PASS ARV-PRF-004 ... re-derives byte-identically from 12 run records' (exit 0). NOTE the round-3 recurrence class for the NEW artifacts — finding F10."
+    },
+    {
+      "id": "F8",
+      "severity": "P1",
+      "status": "resolved",
+      "scenario": "ROUND 2 (the LAW-05 regression): the repair round's docstrings pushed the source total to 419 > 400 — the bound gate refuses.",
+      "control": "Trimmed to EXACTLY 400 by prose compaction only (the module docstring's classifier list, the bridge/containment/apply docstrings, the row-parse loop's zip form) — behavior unchanged.",
+      "evidence": "ROUND 3 measured at HEAD: git diff --numstat origin/main...HEAD gives commands.py 31 + gate.py 1 + sync.py 368 = EXACTLY 400 source lines; test_sync.py 730 <= 800; one migration. BEHAVIOR-NEUTRALITY PROVEN BY DIGEST: my own suite run's output sha256 6fff4afa7543ec053bef5cbdbc5fdf15270b11ffd5e4842389b88fd531dffb30 == run-09/10/11 (recorded at the trim commit 55f293c) == run-05/06/07 (recorded at the PRE-trim commit ac84677) — byte-identical suite output across the trim, no assertion touched."
+    },
+    {
+      "id": "F9",
+      "severity": "P2",
+      "status": "resolved",
+      "scenario": "ROUND 2 (the declared-scope breaches): the diff touches INTENT-LEDGER.md and context/reviews/arivoo-no-pause-directive-2026-11-05.md outside the declared scope (ARV-SCOPE-002/ARV-CLM-002).",
+      "control": "Both paths declared in scope.txt AND on the CLAIMS row's own globs (the 7ad7178 repair — the claim-057 precedent's protected-path form).",
+      "evidence": "ROUND 3 at HEAD: scope.txt carries 'INTENT-LEDGER.md INT-146' and 'context/reviews/arivoo-no-pause-directive-2026-11-05.md D-022'; my own runs of scope.check_scope -> [] and claims.check_branch_claim -> [] (both clean at the verification head, after 7ad7178's one-line CLAIMS.md row edit)."
+    },
+    {
+      "id": "F10",
+      "severity": "P2",
+      "status": "open",
+      "scenario": "NEW (round 3, the F7 class recurrence for the CURRENT evidence set): the round-3 artifacts — proofsheet.md, run-09.json, run-10.json, run-11.json, run-12.json, and this sev.json — are UNTRACKED at the verification head 7ad7178 (git status '??'); the committed tree's evidence stops at run-08 + the round-2 report.",
+      "control": "The standing F7 discipline: the digest binds LAST over the FINAL content head — the finalize chain must commit the round-3 records, the assembled sheet, and this report.",
+      "evidence": "git status at 7ad7178 shows '?? harness/runs/claim-059-p308-outbox-sync/{proofsheet.md,run-09.json,run-10.json,run-11.json,run-12.json}'; git ls-tree HEAD lists the run dir's committed files (run-01..08, sev.json, scope.txt, red-01/02, notverified.txt) without them. The SEV round itself is forbidden from committing (its own charter), so the repair belongs to the builder's finalize commit — the same chain that closed F7 for run-05..08. P2: the artifacts exist, verify, and re-derive byte-identically on disk; only their commit is pending."
+    }
   ],
   "not_verified": [
-    "The Proof Sheet could not be re-derived (ARV-PRF-002 persists — F7): assembling it ('make prove' / proofsheet.py --record + assemble) writes repository files, which this review's constraints forbid (only this report file may be written); the sheet's byte-identity against the run records therefore remains unproven, as does the provenance of the untracked run-05..08.json.",
-    "The per-repair RED observations inside the GREEN cycle: red-02.txt (dated after round 1) records the SYN-16/17 RED at 2ec3d11 and the repair at ac84677, but I did not independently replay the RED commits; the red-records.json binding (binding_commit e91dc9a -> the amended chain) was checked only through the gate's own red-record arm, which passed.",
-    "The real cross-host network surface: the rig models D-032's two durability domains as two loopback PostgreSQL databases with a SHARED content-addressed blob store; no latency, partitions beyond the simulated outage/deadline classes, TLS, credential flows, or Supabase-specific surface (Q12 stands).",
-    "Two CONCURRENT sync drivers racing the same owner's walk were not probed; the kernel's concurrent same-key semantics would govern, but the driver-level interleaving (both marking delivered, both applying) is untested.",
-    "The five CI checks on the final head, the merge-gate review (D-042), and any post-merge state — outside this review's scope; I did not run 'make fast' over every suite myself (the gate's suite arm ran them green under my environment once the rig env was loaded: my first gate invocation without the rig PATH produced 15 spurious ARV-GATE-002 suite exits — a reviewer-shell environment artifact, re-run clean and excluded from the findings).",
-    "The enrichment consumers of arv.server_outbox are P4+ per D-018; only the handoff row's atomicity, the pending state, and the append-only law were verified — no consumer behavior exists to verify at this rung.",
-    "Reviewer independence is declared, not cryptographic: I did not implement this slice and probed only my own scratch databases, but context labels alone cannot prove fresh-context execution (the standing ARV-SEV-007 limit)."
+    "No full 'make verify' gate record exists AT the verification head 7ad7178 itself — the recorded gate evidence (run-12, exit 0) was taken one commit below at 55f293c; the head's only delta is the one-line CLAIMS.md row edit, whose scope/claims effect I re-checked directly at HEAD (both []), but the full gate was not re-recorded at the head, and no run-13 exists.",
+    "My F1/F2 probes were interactive scratch-rig observations taken this round, not sealed run records — they bind to this report's prose only; the sealed evidence at this head is run-09..11 (the suite) and run-12 (the gate).",
+    "The round-3 artifacts (proofsheet.md, run-09..12.json, this sev.json) are untracked at 7ad7178 — the finalize chain must commit them (finding F10, open P2); until then the committed tree's measured evidence stops at run-08.",
+    "I did not re-probe the F3 (work-bridge dependency) or F5 (staging unlink) repair classes, nor the superuser substrate-guard matrix, this round — those rest on round-2's recorded live probes plus the SYN-01..17 suite I ran green at HEAD.",
+    "The rig's inherited limits stand unchanged: D-032's two durability domains are modeled as two databases on one loopback cluster — no real cross-host network behavior (latency, partitions beyond the simulated outage/deadline classes, TLS, credential flows), no Supabase-specific surface, and the blob store is SHARED between the domains (content-addressed, digest-reverified).",
+    "The enforced transition graph's superset over RTM §3.4's diagram is accepted as DOCUMENTED (notverified.txt's explicit section, the F4 disposition), not independently re-derived against the RTM diagram by this round.",
+    "The enrichment consumers of arv.server_outbox remain P4+ and unclaimed; the import work-bridge's multi-source cross-domain translation is covered by the same code path but not separately pinned (a P3-09 restore-equality pin can close it)."
   ],
   "builder_context": "glm-session-40-builder",
-  "reviewer_context": "agent-syn-sev-r2-fresh-context",
-  "disposition": "BLOCKED",
-  "review_summary": "ROUND 2 (fresh context, own probes on two fresh migrated scratch databases): every ROUND-1 finding is VERIFIED REPAIRED — F2 (P0) the divergent identity bridge now carries the soundness gate (my live composition: the creator's competing key lands failed with ARV-CMD-409 in last_reason; the referencer holds retryable ARV-SYN-009, NEVER acknowledged; the server's competing note rests at exactly revision 1 with the revise content appearing nowhere on the server); F1 (P1) the poisoned payload is the named terminal ARV-SYN-013 for THAT row with the walk continuing (the later row acknowledged, driver exit 0, no traceback); F3 the named ARV-SYN-009 work-bridge dependency replaces the raw-id fallback (live-probed); F5 zero leaked /tmp/arv-sync-* after a delivered import; F4 the transition-graph superset is documented in notverified; F6 the stale scratch-DB claim corrected. The suite SYN-01..17 is GREEN by my own run (exit 0, 17 PASS), and the crash matrix, duplicate replay, and hostile substrate guards (ARV-SYN-004/007/010) all re-fired by name. HOWEVER, the deliverable itself REGRESSED past the repo's enforced laws during the repair round: the diff now carries 419 source lines against LAW-05's 400 (ARV-SIZE-002 — round 1 was compliant at 381; the recorded post-repair 'make verify' skipped the check via --no-diff), the slice's Proof Sheet was never assembled (ARV-PRF-002; the post-repair runs run-05..08 sit untracked), and two diff paths (INTENT-LEDGER.md, context/reviews/arivoo-no-pause-directive-2026-11-05.md) sit outside the declared scope (ARV-SCOPE-002/CLM-002). The bound merge gate refuses the slice — BLOCKED on F8 (P1) until the size overflow is trimmed or split, with F7/F9 (P2) repaired in the same pass (assemble + commit the Proof Sheet and the run records; add the two scope declarations). The CODE is sound; the DELIVERABLE is not yet shippable."
+  "reviewer_context": "agent-syn-sev-r3-fresh-context",
+  "disposition": "PASS",
+  "review_summary": "ROUND 3 (fresh context, FINAL, own probes on four fresh migrated scratch databases): the round-1 and round-2 chains are CLOSED at 7ad7178. F2 (P0) and F1 (P1) re-probed live and holding — the 409-divergent creator's answer never satisfies the referencer (K failed ARV-CMD-409, K2 retryable ARV-SYN-009, the server's competing 'SRV' note exactly one revision, the revise content absent, driver exit 0) and the poison row is terminally contained (pz failed ARV-SYN-013, the healthy K3 acknowledged behind it, exit 0). F8's trim measured EXACTLY 400/400 source lines with behavior-neutrality PROVEN by the digest chain: my suite run's output sha256 equals run-09..11 (at the trim commit) AND run-05..07 (at the pre-trim 419-line commit). F7/F9 verified: run-05..08 committed, the sheet re-derives byte-identically over 12 records, scope [] and claims [] at HEAD after the 7ad7178 CLAIMS-row repair. The red trail binds (schema 2, e91dc9a, amendments chained to the live file digest, both REDs showing observed failures); notverified.txt contradicts nothing observed. The suite is GREEN at HEAD (exit 0, SYN-01..17). ONE new finding, F10 (P2, open): the round-3 artifacts (proofsheet.md, run-09..12, this report) are untracked at the head and must ride the finalize-chain commit — the F7 discipline, forbidden to the SEV itself. Disposition PASS."
 }

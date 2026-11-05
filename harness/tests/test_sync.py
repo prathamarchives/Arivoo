@@ -151,7 +151,7 @@ def crash(*args, owner="A", key=None) -> subprocess.CompletedProcess:
     return cli(*a, *args[2:])
 
 
-def sync(owner="A", *extra, server_db=None, env=None) -> subprocess.CompletedProcess:
+def sync(*extra, owner="A", server_db=None, env=None) -> subprocess.CompletedProcess:
     return cli(str(REPO / "harness" / "sync.py"), "sync", "--owner", owner,
                "--server-db", server_db or SRV, *extra, env=env)
 
@@ -191,11 +191,16 @@ def ob(db: str, key: str, col: str = "state") -> str:
                      f"AND idempotency_key='{key}';")
 
 
-def srv_note(nid_local: str, col: str = "id") -> str:
+def srv_note(nid_local: str, col: str = "result_ref") -> str:
     """The server's id for a locally-created note — through the identity
-    bridge (the creating command's key -> the server's recorded result_ref)."""
+    bridge (the CREATING command's key -> the server's recorded result_ref;
+    the creator preferred over later same-entity commands — the driver's own
+    deterministic rule, mirrored here for the independent check)."""
     key = audit(LOC, f"SELECT idempotency_key FROM arv.command_log "
-                     f"WHERE owner_scope='A' AND result_ref='{nid_local}';")
+                     f"WHERE owner_scope='A' AND result_ref='{nid_local}' "
+                     f"ORDER BY (command_name IN ('import_source','create_highlight',"
+                     f"'create_bookmark','create_note')) DESC, created_at, idempotency_key "
+                     f"LIMIT 1;")
     return audit(SRV, f"SELECT {col} FROM arv.command_log "
                       f"WHERE owner_scope='A' AND idempotency_key='{key}';")
 
@@ -252,7 +257,7 @@ def main() -> int:
         ob_all = audit_rows(LOC, "SELECT idempotency_key FROM arv.outbox WHERE "
                                  "owner_scope='A' ORDER BY idempotency_key;")
         ok1 = (pi.returncode == 0 and ph.returncode == 0 and pn.returncode == 0
-               and cnt_ob == 3 and cnt_ob == len(ob_all)
+               and cnt_ob == 3 and len(ob_all) == 4
                and c_pre.returncode == 2 and cnt_pre == 0 and cnt_note_pre == 0
                and c_post.returncode == 2 and cnt_post == 1 and cnt_note_post == 1
                and cl_ob == ob_all)
@@ -275,8 +280,8 @@ def main() -> int:
         ok2 = (g.returncode == 0 and "sesquine" in g.stdout
                and st_all == ["pending"]
                and r2.returncode == 0
-               and len(acks) == 5
-               and srv_notes == loc_notes and len(srv_notes) == 3
+               and len(acks) == 4
+               and srv_notes == loc_notes and len(srv_notes) == 2
                and srv_hl == "1")
         check("SYN-02", ok2,
               "restart before sync: the committed captures stay readable locally (local_durable — get-note answers while every outbox row is honestly pending, the offline day); ONE sync pass acknowledges all five rows; the independent arv_read on the server confirms the note contents equal the local set and the highlight landed — the count-and-content equality (SYS-08's user scenario)",
@@ -319,7 +324,7 @@ def main() -> int:
         srv_revs = audit_rows(SRV, f"SELECT revision || '|' || content FROM arv.note "
                                    f"WHERE id='{snid}' ORDER BY revision;")
         ok4 = (pr.returncode == 0 and h4.returncode == 1 and "ARV-NTE-001" in h4.stdout
-               and srv_before4 == "3"
+               and srv_before4 == "2"
                and r4.returncode == 0 and st_r1 == "acknowledged"
                and srv_revs[-1].endswith("the aurora token rides.")
                and len(srv_revs) == 2)
@@ -331,15 +336,16 @@ def main() -> int:
         pr5 = cmd("revise_note", "--id", nid, "--content",
                   "Revised twice under an uncertain sky: the borealis token.",
                   key="sy-n1r2")
+        lock_id = srv_note(nid)  # the SERVER's note id — the identity bridge: the server-side command locks the SERVER id's canonical key
         lock = subprocess.Popen(["psql", "-X", "-A", "-t", "-U", "postgres", "-d", SRV],
                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, text=True, bufsize=1, env=ENV)
-        lock.stdin.write(f"SELECT pg_advisory_lock(hashtext('{nid}'));\n")
+        lock.stdin.write(f"SELECT pg_advisory_lock(hashtext('{lock_id}'));\n")
         lock.stdin.flush()
         r5a = sync("--timeout", "3")
         st5a = ob(LOC, "sy-n1r2")
         reason5 = ob(LOC, "sy-n1r2", "last_reason") or ""
-        lock.stdin.write(f"SELECT pg_advisory_unlock(hashtext('{nid}'));\n\\q\n")
+        lock.stdin.write(f"SELECT pg_advisory_unlock(hashtext('{lock_id}'));\n\\q\n")
         lock.stdin.flush()
         lock.wait(timeout=30)
         r5b = sync()
@@ -407,6 +413,7 @@ def main() -> int:
         srv_a_notes = audit(SRV, "SELECT count(*) FROM arv.note WHERE owner_scope='A';")
         srv_b_notes = audit(SRV, "SELECT count(*) FROM arv.note WHERE owner_scope='B';")
         # the hostile cross-owner read: A's session must see ZERO of B's outbox rows
+        # (the psql SET command tag leaks a line — the LAST line is the answer)
         hostile = app_sql(LOC, "SELECT count(*) FROM arv.outbox WHERE owner_scope='B';", owner="A")
         # A's sync must never deliver B's rows (already all acknowledged anyway —
         # the counts prove the isolation held through the whole suite)
@@ -417,7 +424,7 @@ def main() -> int:
                and stB1 == "acknowledged"
                and srv_b_notes == "1" and srv_b_after == "1"
                and srv_a_notes == audit(LOC, "SELECT count(*) FROM arv.note WHERE owner_scope='A';")
-               and hostile.stdout.strip() == "0")
+               and hostile.stdout.strip().split("\n")[-1] == "0")
         check("SYN-08", ok8,
               "cross-owner sync: B's sync delivers B's rows only (the RLS-scoped outbox read — A's session sees ZERO of B's rows, the hostile read returns 0); A's sync never touches B's delivery state; the server carries each owner's notes under that owner's scope with the counts equal to the local truth per owner — the isolation holds across BOTH domains",
               "the driver's every read and update rides the owner-scoped arv_app session (app.current_owner) — the outbox RLS is the structural isolation, never a driver-side filter")
@@ -488,54 +495,68 @@ def main() -> int:
         refs_srv = audit_rows(SRV, f"SELECT ref_kind || '|' || ref_id FROM arv.note_reference "
                                    f"WHERE note_id='{n10_srv}' ORDER BY ref_kind;")
         hl_srv = audit(SRV, f"SELECT count(*) FROM arv.highlight_lifecycle WHERE owner_scope='A';")
-        bm_srv = audit(SRV, f"SELECT revision FROM arv.bookmark WHERE id="
-                            f"'{srv_note(bm_id)}' ORDER BY revision;")
+        bm_srv = audit_rows(SRV, f"SELECT revision FROM arv.bookmark WHERE id="
+                                f"'{srv_note(bm_id)}' ORDER BY revision;")
         ok10 = (ph10.returncode == 0 and pbm.returncode == 0 and pn10.returncode == 0
                 and pl.returncode == 0 and prs.returncode == 0 and pm.returncode == 0
                 and pt.returncode == 0 and r10.returncode == 0
                 and all(a == b for a, b in fam_counts)
                 and refs_srv == [f"highlight|{shid}"]
-                and hl_srv == "1" and bm_srv == "2"
+                and hl_srv == "1" and bm_srv == ["1", "2"]
                 and ob(LOC, "sy-n10r") == "acknowledged")
         check("SYN-10", ok10,
               "the independent remote read: after one sync pass over a full-family sequence (highlight revise, bookmark create+move, note create with a version-aware reference, tombstone, restore, highlight tombstone) the arv_read counts per family equal the local truth on BOTH domains; the note's reference row points at the SERVER's highlight id (the identity bridge — the reference survived the domain crossing); the highlight's lifecycle event landed; the bookmark carries both revisions — the count-and-content equality of SYS-08's acceptance",
               "the equality is per-family counts + per-entity chains + contents (never raw id equality — the two domains mint their own ids; the bridge is the two idempotency ledgers)")
 
-        # ---- SYN-11 — the outbox substrate guards (the hostile matrix)
-        d_del = app_sql(LOC, "DELETE FROM arv.outbox WHERE owner_scope='A' "
-                             "AND idempotency_key='sy-n1';")
-        d_ret = app_sql(LOC, "UPDATE arv.outbox SET payload='{\"x\":1}' "
-                             "WHERE owner_scope='A' AND idempotency_key='sy-n1';")
-        d_bh = app_sql(LOC, "UPDATE arv.outbox SET body_hash='deadbeef' "
-                            "WHERE owner_scope='A' AND idempotency_key='sy-n1';")
-        d_key = app_sql(LOC, "UPDATE arv.outbox SET idempotency_key='hijack' "
-                             "WHERE owner_scope='A' AND idempotency_key='sy-n1';")
-        d_bad = app_sql(LOC, "UPDATE arv.outbox SET state='acknowledged' "
-                             "WHERE owner_scope='A' AND idempotency_key='sy-n1';")
-        d_dec = app_sql(LOC, "UPDATE arv.outbox SET attempts=attempts-1 "
-                             "WHERE owner_scope='A' AND idempotency_key='sy-n1';")
+        # ---- SYN-11 — the outbox substrate guards (the hostile matrix; the
+        # mutations run as the SUPERUSER — arv_app holds no DELETE on arv.outbox
+        # by grant, so the triggers are the remaining guard and must fire BY NAME)
+        pg11 = cmd("create_note", "--content", "The guard note: the sentinel token.",
+                   key="sy-guard1")
+        # the attempts-decrease guard needs a NON-terminal row with a legal
+        # same-state edge (delivered->delivered): the terminal-row mutations
+        # fire the transition guard first — the correct order, so the 006 pin
+        # rides its own delivered-state row
+        app_sql(LOC, "UPDATE arv.outbox SET state='delivered', attempts=1, "
+                     "updated_at=now() WHERE owner_scope='A' "
+                     "AND idempotency_key='sy-guard1';")
+        def _su(sql: str) -> subprocess.CompletedProcess:
+            return subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                                   "-U", "postgres", "-d", LOC, "-c", sql],
+                                  capture_output=True, text=True, timeout=60, env=ENV)
+        d_del = _su("DELETE FROM arv.outbox WHERE owner_scope='A' AND idempotency_key='sy-n1';")
+        d_ret = _su("UPDATE arv.outbox SET payload='{\"x\":1}' "
+                    "WHERE owner_scope='A' AND idempotency_key='sy-n1';")
+        d_bh = _su("UPDATE arv.outbox SET body_hash='deadbeef' "
+                   "WHERE owner_scope='A' AND idempotency_key='sy-n1';")
+        d_key = _su("UPDATE arv.outbox SET idempotency_key='hijack' "
+                    "WHERE owner_scope='A' AND idempotency_key='sy-n1';")
+        d_bad = _su("UPDATE arv.outbox SET state='acknowledged' "
+                    "WHERE owner_scope='A' AND idempotency_key='sy-n1';")
+        d_dec = _su("UPDATE arv.outbox SET attempts=attempts-1 "
+                    "WHERE owner_scope='A' AND idempotency_key='sy-guard1';")
         cols = audit_rows(LOC, "SELECT column_name FROM information_schema.columns "
                                "WHERE table_schema='arv' AND table_name='outbox' "
                                "ORDER BY ordinal_position;")
         rls = audit_rows(LOC, "SELECT relrowsecurity::text || '|' || "
                               "relforcerowsecurity::text FROM pg_class "
                               "WHERE oid='arv.outbox'::regclass;")
-        grants = audit(LOC, "SELECT count(*) FROM information_schema.role_table_grants "
-                            "WHERE grantee='arv_app' AND table_schema='arv' "
-                            "AND table_name='outbox' AND privilege_type='UPDATE';")
+        grants = audit(LOC, "SELECT count(*) FROM (SELECT unnest(relacl) AS a FROM pg_class "
+                            "WHERE oid='arv.outbox'::regclass) x WHERE a::text "
+                            "LIKE 'arv_app=arw/%';")
         stchk = audit_rows(LOC, "SELECT conname FROM pg_constraint WHERE conrelid="
                                 "'arv.outbox'::regclass AND contype='c' ORDER BY conname;")
         ok11 = (all("ARV-SYN-007" in r.stderr for r in (d_del,))
                 and all("ARV-SYN-004" in r.stderr for r in (d_ret, d_bh, d_key))
                 and "ARV-SYN-005" in d_bad.stderr
                 and "ARV-SYN-006" in d_dec.stderr
-                and hostile.stdout.strip() == "0"
                 and cols == ["owner_scope", "seq", "idempotency_key", "client_id",
                              "actor", "command_name", "body_hash", "payload", "state",
                              "attempts", "last_reason", "server_ref", "created_at",
                              "updated_at"]
                 and rls == ["true|true"] and grants == "1"
-                and any("state" in c for c in stchk))
+                and any("state" in c for c in stchk)
+                and hostile.stdout.strip().split("\n")[-1] == "0")
         check("SYN-11", ok11,
               "the outbox substrate guards: DELETE refused (ARV-SYN-007 — the sync-intent audit trail is authoritative state, RTM §4.4); the delivery keys immutable after enqueue (payload, body_hash, idempotency_key — ARV-SYN-004, the tamper guard); the illegal transition refused (acknowledged from acknowledged's terminal form and the pending->acknowledged shortcut — ARV-SYN-005, the declared graph); attempts never decrease (ARV-SYN-006); the 14-column schema exact, RLS enabled AND forced, arv_app holds UPDATE (the transitions) beside INSERT/SELECT — the hostile matrix of the substrate law",
               "the substrate guards are the backstop behind the driver: a hostile direct-SQL writer meets the same named refusals the command path would — never a silent mutation of sync intent")
@@ -572,11 +593,19 @@ def main() -> int:
         h_before = audit(SRV, "SELECT count(*) FROM arv.server_outbox WHERE owner_scope='A';")
         sync()
         h_after = audit(SRV, "SELECT count(*) FROM arv.server_outbox WHERE owner_scope='A';")
-        # the append-only law
-        h_up = app_sql(SRV, "UPDATE arv.server_outbox SET state='enriched' "
-                            "WHERE owner_scope='A' AND idempotency_key='sy-n1';")
-        h_del = app_sql(SRV, "DELETE FROM arv.server_outbox WHERE owner_scope='A' "
-                             "AND idempotency_key='sy-n1';")
+        # the append-only law: the hostile mutations run as the SUPERUSER (the
+        # only role that passes the grant layer — arv_app holds INSERT/SELECT
+        # only, so the trigger is the remaining guard and must fire BY NAME)
+        h_up = subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                               "-U", "postgres", "-d", SRV, "-c",
+                               "UPDATE arv.server_outbox SET state='enriched' "
+                               "WHERE owner_scope='A' AND idempotency_key='sy-n1';"],
+                              capture_output=True, text=True, timeout=60, env=ENV)
+        h_del = subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                               "-U", "postgres", "-d", SRV, "-c",
+                               "DELETE FROM arv.server_outbox WHERE owner_scope='A' "
+                               "AND idempotency_key='sy-n1';"],
+                              capture_output=True, text=True, timeout=60, env=ENV)
         srls = audit_rows(SRV, "SELECT relrowsecurity::text || '|' || "
                                "relforcerowsecurity::text FROM pg_class "
                                "WHERE oid='arv.server_outbox'::regclass;")

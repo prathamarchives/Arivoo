@@ -40,6 +40,20 @@ MARK_BEGUN = "MARK:BEGUN"
 MARK_INSERTS = "MARK:INSERTS_DONE"
 MARK_COMMITTED = "MARK:COMMITTED"
 
+# P3-08 (CLAIM-059): the OUTBOX-CARRYING command set — the durable-capture
+# product families whose committed local writes carry sync intent (RTM §4.2:
+# the effect rows + the command-log row + the outbox row in ONE transaction).
+# record_event (the kernel's own evidence surface) and rebuild_keyword_index
+# (the derived layer — the server re-derives its own, P3-09's contract) stay
+# OUT: their server-side story is not a delivery. The spine enqueues the
+# CLIENT outbox row on the local site and the SERVER outbox handoff row on
+# the server site (ARV_SITE=server — the D-018 separation: one command core,
+# two execution sites, two outboxes, never one mixed surface).
+_SYNC_COMMANDS = ("import_source", "create_highlight", "revise_highlight",
+                  "tombstone_highlight", "restore_highlight", "create_bookmark",
+                  "move_bookmark", "tombstone_bookmark", "restore_bookmark",
+                  "create_note", "revise_note", "tombstone_note", "restore_note")
+
 
 def _q(s: str) -> str:
     return "'" + s.replace("'", "''") + "'"
@@ -354,6 +368,23 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build=Non
         ts = clock.now()
         stmts = stmts + [f"INSERT INTO arv.command_log (owner_scope, idempotency_key, client_id, command_name, body_hash, result_ref, actor, created_at) "
                          f"VALUES ({_q(owner)}, {_q(idem_key)}, {_q(client_id)}, {_q(command)}, {_q(body_hash)}, {_q(ref)}, {_q(actor)}, {_q(ts)});"]
+        # P3-08 (CLAIM-059): the outbox row rides the SAME transaction — the
+        # client outbox (sync intent) on the local site, the server outbox
+        # (the D-018 enrichment handoff) on the server site. ARV_SITE is read
+        # here per-call (the main()-PGDATABASE precedent; the LAW-24 lint's
+        # ambient set never included env reads).
+        if command in _SYNC_COMMANDS:
+            if os.environ.get("ARV_SITE", "local") == "server":
+                stmts.append(f"INSERT INTO arv.server_outbox (owner_scope, idempotency_key, "
+                             f"command_name, body_hash, state, created_at) "
+                             f"VALUES ({_q(owner)}, {_q(idem_key)}, {_q(command)}, "
+                             f"{_q(body_hash)}, 'pending', {_q(ts)});")
+            else:
+                stmts.append(f"INSERT INTO arv.outbox (owner_scope, idempotency_key, client_id, "
+                             f"actor, command_name, body_hash, payload, state, attempts, "
+                             f"created_at, updated_at) VALUES ({_q(owner)}, {_q(idem_key)}, "
+                             f"{_q(client_id)}, {_q(actor)}, {_q(command)}, {_q(body_hash)}, "
+                             f"{_q(payload)}, 'pending', 0, {_q(ts)}, {_q(ts)});")
         for s in stmts:
             sess.send(s)
         sess.send(f"\\echo {MARK_INSERTS}")

@@ -41,7 +41,7 @@ from harness.adapters import pg  # noqa: E402
 # pipes and newlines, so the output is structured AT THE SQL BOUNDARY (row_to_json
 # emits ONE escaped JSON line per row) — never re-parsed by splitting psql text.
 CAP_SQL = ("SELECT row_to_json(t)::text FROM (SELECT h.id AS id, h.revision, h.selected_text, "
-           "h.source_id, a.source_digest, a.start_off AS start, a.end_off AS end, a.context_before, "
+           "h.source_id, h.anchor_id, a.source_digest, a.start_off AS start, a.end_off AS end, a.context_before, "
            "a.context_after, a.media_type, h.created_at FROM arv.highlight h "
            "JOIN arv.anchor a ON a.id = h.anchor_id WHERE h.id = {id} "
            "ORDER BY h.revision DESC LIMIT 1) t;")
@@ -388,6 +388,10 @@ def main() -> int:
                                                     nterms=len(terms_u)))
         if rows is None:
             return 1
+        # P4-00a (CLAIM-062): the labeled form — the header names the columns
+        # before the rows (the acceptance run's 'unlabeled search output'
+        # finding; the row shape itself unchanged)
+        print("# kind|entity_id|revision|matched_terms")
         for ln in rows:
             print(ln)
         return 0

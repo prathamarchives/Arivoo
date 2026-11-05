@@ -182,10 +182,13 @@ def ack_field(p: subprocess.CompletedProcess, field: str) -> str:
 
 
 def result_ids(p: subprocess.CompletedProcess) -> list:
-    """The search results: one JSON line per hit, kind|id|revision|freq."""
+    """The search results: one row per hit, kind|id|revision|freq. P4-00a
+    amendment (CLAIM-062, disclosed): the search arm now prints a '#'-prefixed
+    column header (the labeled form — CON-05); a label line is never a result
+    row, so it is skipped here exactly like a blank line."""
     out = []
     for ln in p.stdout.split("\n"):
-        if ln.strip():
+        if ln.strip() and not ln.lstrip().startswith("#"):
             out.append(ln.strip())
     return out
 

@@ -1,0 +1,148 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-062-p400a-truthful-acks",
+ "base_sha": "b1a493497001bc50937e4c99605d87751dca1558",
+ "reviewed_diff_sha256": "7efad5c2dd8cd8b1e04050ada80d9a1372d0465e9bc9ef74fa19552b09d08abd",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-09"
+ ],
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "changed_components": [
+  "harness/commands.py (+2 lines: the import acks \u2014 the committed extra and the replayed line \u2014 carry durability_rung=local_durable; SYS-01's every-write rule extended to the import family)",
+  "harness/extract.py (+2 lines: the extract acks \u2014 committed and replayed \u2014 carry the rung)",
+  "harness/export.py (+2 lines: the RESTORED completion names the derived-rebuild step \u2014 state=restored derived_state=pending_rebuild rebuild=extract_source+rebuild_keyword_index)",
+  "harness/query.py (+4 lines: CAP_SQL projects h.anchor_id; the search arm prints the '# kind|entity_id|revision|matched_terms' header always)",
+  "harness/migrate.py (+14 lines: argparse \u2014 a REAL --help that never touches a database; --verify unchanged)",
+  "README.md (+121 lines, DATA class: the user-facing day-one path \u2014 the connection env incl. PGDATABASE, import->highlight->bookmark->note->search, the idempotency contract, the durability vocabulary, the backup/restore story with the rebuild step named)",
+  "harness/tests/test_contract.py (the CON-01..08 suite, 291 test lines: the six routed repairs pinned + CON-08 the README's commands runnable-shaped)",
+  "harness/tests/test_export.py (the EXP-09 amendment: the empty-form expectation corrected to the header-alone form \u2014 the landed pin meets the labeled search)",
+  "harness/tests/test_keyword_index.py (the result_ids amendment: '#'-prefixed label lines skipped \u2014 never result rows)",
+  "harness/tests/test_gate_dispatch.py (the fixture de-coupling amendment: the synthetic CLAIM-998 scope drops README.md \u2014 ARV-CLM-002 fired as designed when this claim legitimately opened it)"
+ ],
+ "interfaces_reviewed": [
+  "the ack line vocabulary (ACK command=... status=... result_ref=... durability_rung=local_durable \u2014 the same vocabulary the capture/bookmark/note committed forms already carry)",
+  "the restore completion line (RESTORED owner=... ledger_as_of=... backup_expiry=... tables=... rows=... state_hash_match=true state=restored derived_state=pending_rebuild rebuild=...)",
+  "get-capture's JSON projection (anchor_id added between source_id and source_digest)",
+  "the search output form (the header line + the unchanged kind|entity_id|revision|matched_terms rows)",
+  "migrate.py's CLI surface (--help / --verify / the default apply path)",
+  "the README's day-one path (setup, the connection env, the workflow verbs, the durability vocabulary)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the CON-01..08 suite at the real boundary (exit 0, 8/8 \u2014 re-run by SEV rounds 1-3 on their own scratch databases)",
+   "the full 22-suite regression set + make verify + the canonical layer 54/0 at every repair tree (the builder's runs + the SEV rounds' independent re-runs)",
+   "LAW-05 sizes: source 6 files / 27 lines; tests 4 files / 291 lines; README +121 (DATA); 0 migrations \u2014 within 8/400/6/800"
+  ],
+  "integration_verification": [
+   "the README's day-one path walked verbatim end-to-end (SEV round 2: every step exit 0; SEV round 3: the import's durability claim probed at the DB substance level \u2014 the source row, the command_log row, the outbox intent, and the on-disk blob digest all consistent)",
+   "the restore ladder's honesty (SEV round 3: before rebuild the index rows=0 and search answers header-alone \u2014 pending_rebuild TRUE; the two named verbs genuinely complete restored->fully_operational)",
+   "the consumer sweep (SEV round 1: the repo grepped \u2014 no consumer parses the old unlabeled search form; the three suites amended forward)"
+  ],
+  "system_verification": [
+   "the PR-mode gate over the real 26-path diff: scope.check_scope GREEN; claims.check_branch_claim GREEN (after the N1 repair \u2014 the bare-entry form); the 22 suites + the KB matrix green; the only refusals the expected pre-finalize artifact codes (the sheet + this report land at the finalize)",
+   "the scope declarations at BOTH homes (scope.txt + the CLAIMS row) covering every changed path \u2014 the round-1 F1 repair held through round 3's rogue-path sensitivity probe (the check not vacuous)"
+  ],
+  "validation": [
+   "the SEV three-round chain: round 1 (agent-95174e53) BLOCKED \u2014 F1 the scope declarations, F2 the README's step-2 command (both repaired RED-first: CON-08 added, the TRUE RED re-observed against the temporarily-restored defect), F3 the replayed-form rung (routed to P4-00b); round 2 (agent-7b730c41) BLOCKED \u2014 N1 the CLAIMS scope-cell form (repaired: the bare-entry reformat, the parser's own check re-observed GREEN, the defect forms reproduced by round 3's probes); round 3 (agent-con-sev-r3) PASS zero open P0/P1, no new findings",
+   "the routed register's origin honored: every repair answers a Phase 3 exit gate finding (record 53 \u00a75) \u2014 the acceptance agent's and the graders' observations made mechanically true"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "an ack that implies its durability state instead of naming it (the underclaim class)",
+   "control": "CON-01/02 pin the rung on both ack forms of import/extract; the SEV round-1 probe extended it to the crash-re-drive form",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-02",
+   "scenario": "a restore completion that leaves the derived-rebuild step silent (the acceptance run's silent-search-miss class)",
+   "control": "CON-03 pins the naming; SEV rounds 1/3 probed the zero-source and all-purged edges (the naming truthful, never overclaiming)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a user-facing entry document whose commands cannot run (the day-one copy-paste dying at step 2)",
+   "control": "CON-08 pins the runnable-shaped class (every commands.py verb registered; every extract invocation on its own module) \u2014 the TRUE RED observed at red-02.txt and independently reproduced line-for-line by SEV round 2",
+   "proof_ids": [
+    "run-06",
+    "run-07",
+    "run-08"
+   ]
+  },
+  {
+   "id": "FM-04",
+   "scenario": "a help request that executes (the migrate --help misfire)",
+   "control": "CON-06 pins usage-exit-0-zero-arv-tables; SEV rounds 1/3 probed the dead-port and nonexistent-DB forms \u2014 no connection attempt at all",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-05",
+   "scenario": "a labeled output that breaks a pipe consumer (the silent regression class)",
+   "control": "the consumer sweep (SEV round 1's grep: only the three suites consume search stdout, each amended forward with disclosed red-records chains); the full 22-suite regression green at every tree",
+   "proof_ids": [
+    "run-09"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "F1",
+   "severity": "P1",
+   "status": "resolved",
+   "summary": "the scope declarations missed three changed paths (the PR-mode gate's own ARV-SCOPE-002/ARV-CLM-002 derivation)",
+   "evidence": "both declaration homes widened (scope.txt + the CLAIMS cell); round 2 verified scope.check_scope GREEN over the 26-path diff; round 3's rogue-path probe proved the check not vacuous"
+  },
+  {
+   "id": "F2",
+   "severity": "P1",
+   "status": "resolved",
+   "summary": "the README's day-one step 2 documented commands.py extract_source \u2014 an unregistered verb (the copy-paste dying at step 2)",
+   "evidence": "repaired to harness/extract.py (its own module); CON-08 added RED-first (red-02.txt the TRUE RED, independently reproduced by round 2 line-for-line); the verb set exactly the parser's 15 registrations"
+  },
+  {
+   "id": "N1",
+   "severity": "P1",
+   "status": "resolved",
+   "summary": "the CLAIMS scope cell's annotated entries broke the claims parser's entry matching (ARV-CLM-002 x3)",
+   "evidence": "reformatted to bare backticked paths (the every-prior-row convention), annotations moved to Notes; claims.check_branch_claim GREEN over the real diff; the comma-annotation and commaless-annotation defect forms both reproduced by round 3's probes (the mechanism real, the repair minimal \u2014 one line)"
+  },
+  {
+   "id": "F3",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the capture/bookmark/note families' REPLAYED acks and record_event's ack carry no durability_rung \u2014 pre-existing at origin/main (byte-identical, never a regression)",
+   "evidence": "ROUTED to P4-00b's DTO-freeze card (PLAN's P4-00b line carries the routing: RTM \u00a74.3/SYS-01's frozen letter filled on every path there); this slice's narrative re-worded to the accurate scope"
+  }
+ ],
+ "not_verified": [
+  "the capture families' replayed acks + record_event's ack carry no rung \u2014 pre-existing at base, ROUTED to P4-00b (the F3 finding)",
+  "the live CI five-check run and the GitHub merge path \u2014 the push/finalize follows this record (the local PR-mode gate + the suite set + the canonical layer are the local evidence)",
+  "the uncoached-acceptance-agent form was not re-run for the README (SEV rounds walked it verbatim themselves; the permanent day-one suite is P4-00b's boundary test)",
+  "real SIGKILL crash injection beyond the suites' simulated --crash-at points",
+  "the mutation-floor and canonical-layer internals (taken as green exits, re-observed at this tree by SEV round 3)",
+  "round-2's line-for-line RED reproduction not independently re-executed by round 3 (round 2's verification stands; the gate's LAW-11 machinery green)"
+ ],
+ "builder_context": "glm-session-41-builder",
+ "reviewer_context": "agent-con-sev-r3-fresh-context",
+ "disposition": "PASS",
+ "review_summary": "The SEV three-round chain over the P4-00a slice (the truthful-acknowledgment contract + the user-facing entry \u2014 the Phase 3 exit gate's routed register answered). Round 1 (agent-95174e53) BLOCKED: the scope declarations missed three paths (F1) and the README's step 2 documented an unregistered verb (F2) \u2014 both repaired RED-first (CON-08 added; the TRUE RED re-observed against the temporarily-restored defect after a disclosed pin-index repair); the replayed-form rung routed to P4-00b (F3). Round 2 (agent-7b730c41) BLOCKED: the CLAIMS scope cell's annotated entries broke the claims parser (N1) \u2014 repaired to the bare-entry form with the parser's own check re-observed GREEN. Round 3 (agent-con-sev-r3, FINAL): PASS, zero open P0/P1, no new findings \u2014 its own probes: the rogue-path sensitivity (the repair not vacuous), both annotation defect forms reproduced, the ack's truth direction probed at the DB substance level (the source row, the command_log row, the outbox intent, and the blob digest consistent \u2014 the rung's claim true, not decorative), and the restore ladder's two named verbs genuinely completing restored->fully_operational. The full 22-suite regression + make verify + the canonical layer 54/0 green at the final tree; the PR-mode gate refuses only on the expected pre-finalize artifact codes."
+}

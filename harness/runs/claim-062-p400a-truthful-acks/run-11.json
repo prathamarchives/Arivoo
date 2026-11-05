@@ -1,0 +1,7 @@
+{
+  "command": "ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-062-p400a-truthful-acks python3 -I tools/trusted_gate_anchored.py --repo $PWD --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "d672ec6d90f568f086f17802e72a69c928cd4231",
+  "output_sha256": "1173e868d63be56e07d1a2969e019b34f159bc1ea1640f838a418d80bdfa7e7a",
+  "recorded_at": "2026-11-05T22:42:51.824012+00:00"
+}

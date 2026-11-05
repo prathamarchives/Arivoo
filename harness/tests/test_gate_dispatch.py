@@ -275,15 +275,20 @@ def main() -> int:
         sname = "claim-998-positive-shape"
         sd = d / "harness" / "runs" / sname
         sd.mkdir(parents=True)
+        # P4-00a amendment (CLAIM-062, disclosed): the fixture's synthetic
+        # scope drops README.md — a LIVE claim may legitimately own any real
+        # file at any time (CLAIM-062 owns README.md for the user-facing-entry
+        # repair, and ARV-CLM-002 fired exactly as designed on the overlap).
+        # The fixture's own probe file is the fixture-owned surface; the
+        # empty-diff case needs no coverage, only non-overlap.
         (sd / "scope.txt").write_text(
-            "README.md INT-125/D-039\n"
             "context/extracted/21-fixture-probe.md INT-125/D-039\n")
         reg = d / "CLAIMS.md"
         text = reg.read_text()
         anchor = "|-------|---------|-------|--------|----------------|---------------|---------|-------|\n"
         row = ("| CLAIM-998 | 20 | test | `slice/" + sname + "` | "
-               "`README.md`, `context/extracted/21-fixture-probe.md` | "
-               "— | 2026-10-19 | positive probe — non-overlapping, and the 21- entry is the KB-CLM-002 probe's guaranteed overlap partner (A11's coupling, made deterministic) |\n")
+               "`context/extracted/21-fixture-probe.md` | "
+               "— | 2026-10-19 | positive probe — non-overlapping (fixture-owned surface only, never a real file a live claim may own), and the 21- entry is the KB-CLM-002 probe's guaranteed overlap partner (A11's coupling, made deterministic) |\n")
         reg.write_text(text.replace(anchor, anchor + row, 1))
         nv_text = "- fixture probe record (self-contained; no real evidence touched)\n"
         head_sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=d,
@@ -306,7 +311,7 @@ def main() -> int:
                 "schema_version": 1, "slice_id": sname, "base_sha": head_sha,
                 "reviewed_diff_sha256": sevmod.reviewed_diff_sha256("origin/main", sname, repo=d),
                 "intent_ids": ["INT-125"], "requirement_ids": ["SYS-11"],
-                "system_claims": ["C1"], "changed_components": ["README.md"],
+                "system_claims": ["C1"], "changed_components": ["context/extracted/21-fixture-probe.md"],
                 "interfaces_reviewed": ["the dispatch fixture's own sev.json"],
                 "v_model": {
                     "component_verification": ["the fixture's own validator run, proof run-01"],

@@ -1,0 +1,33 @@
+# CLAIM-062 — P4-00a: the truthful-acknowledgment contract + the
+# user-facing entry (PLAN's elaborated P4-00a card; the Phase 3 exit gate's
+# routed register, record 53 §5). The six repairs as one behavior family:
+# (1) import/extract acks carry SYS-01's durability_rung; (2) the restore's
+# typed completion names the derived-rebuild step (RTM §3.7's
+# restored->fully_operational ladder made visible); (3) get-capture exposes
+# the anchor_id; (4) the search output labels its rows; (5) a REAL --help
+# for migrate.py; (6) the user-facing README at the repo root.
+# RED-first at CLAIM-061's merged head b1a4934.
+# Commit A carries the post-#96 reconciliation (CLAIM-061's rule-4 close row
+# + the five-area re-derivation) + the Phase 4 elaboration + record 54.
+# THE BOUNDED EXCLUSIONS: the contract-test boundary harness P4-00b's; the
+# pagination/bounded-response work P4-00b's; the format capability matrix
+# P4-00c/P4-A's; no refactor of the landed families.
+harness/tests/test_contract.py D-041
+harness/tests/test_keyword_index.py D-041  # the result_ids amendment (the labeled-search interaction, disclosed)
+harness/tests/test_gate_dispatch.py D-041  # the fixture de-coupling amendment (ARV-CLM-002 fired as designed; disclosed)
+harness/tests/test_export.py D-041  # the EXP-09 amendment: the landed pin meets the labeled search form (disclosed in the red-records amendment chain)
+harness/commands.py D-041
+harness/export.py D-041
+harness/query.py D-041
+harness/migrate.py D-041
+harness/extract.py D-041
+README.md D-036
+harness/gate.py D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/54-P400-FOUNDATION.md D-042
+harness/runs/claim-062-p400a-truthful-acks D-042

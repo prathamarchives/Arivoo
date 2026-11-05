@@ -92,19 +92,29 @@ def _create_key(local_db: str, owner: str, local_id: str) -> str:
     (import_source / create_*) is preferred over later same-entity commands
     (revise/lifecycle share the result_ref) — the creator is always the
     EARLIEST seq, so it is delivered before any referencer within a pass
-    (never a false ordering dependency). A WORK id is never a result_ref —
-    the work bridge finds any source of that work and its creating command."""
+    (never a false ordering dependency). THE SOUNDNESS GATE (the SEV round-1
+    F2 repair): the key is a valid bridge ONLY when its own outbox row rests
+    'acknowledged' — a 409-divergent creator's server answer belongs to a
+    DIFFERENT logical command and must never satisfy a referencer (the
+    wrong-entity delivery class). A WORK id is never a result_ref — the work
+    bridge finds any source of that work and its creating command."""
     key = _scalar(local_db, owner,
-                  f"SELECT idempotency_key FROM arv.command_log "
-                  f"WHERE owner_scope={_q(owner)} AND result_ref={_q(local_id)} "
-                  f"ORDER BY (command_name IN ('import_source','create_highlight',"
-                  f"'create_bookmark','create_note')) DESC, created_at, idempotency_key "
+                  f"SELECT c.idempotency_key FROM arv.command_log c JOIN arv.outbox o "
+                  f"ON o.owner_scope = c.owner_scope AND o.idempotency_key = c.idempotency_key "
+                  f"WHERE c.owner_scope={_q(owner)} AND c.result_ref={_q(local_id)} "
+                  f"AND o.state = 'acknowledged' "
+                  f"ORDER BY (c.command_name IN ('import_source','create_highlight',"
+                  f"'create_bookmark','create_note')) DESC, c.created_at, c.idempotency_key "
                   f"LIMIT 1;")
     if not key:
         key = _scalar(local_db, owner,
-                      f"SELECT c.idempotency_key FROM arv.source s JOIN arv.command_log c "
-                      f"ON c.result_ref = s.id AND c.owner_scope = s.owner_scope "
+                      f"SELECT c.idempotency_key FROM arv.source s "
+                      f"JOIN arv.command_log c ON c.result_ref = s.id "
+                      f"AND c.owner_scope = s.owner_scope "
+                      f"JOIN arv.outbox o ON o.owner_scope = c.owner_scope "
+                      f"AND o.idempotency_key = c.idempotency_key "
                       f"WHERE s.owner_scope={_q(owner)} AND s.work_id={_q(local_id)} "
+                      f"AND o.state = 'acknowledged' "
                       f"ORDER BY s.created_at LIMIT 1;")
     return key
 
@@ -169,8 +179,16 @@ def _cli_args(row: dict, local_db: str, server_db: str, owner: str) -> "tuple[li
         tmp.close()
         argv = ["--file", tmp.name, "--media-type", p["media_type"],
                 "--acquired-via", p["acquired_via"]]
-        argv += ["--title", p["title"]] if p["title"] is not None else \
-                ["--work-id", _translate_work(local_db, server_db, owner, p["work_id"]) or p["work_id"]]
+        if p["title"] is not None:
+            argv += ["--title", p["title"]]
+        else:
+            w = _translate_work(local_db, server_db, owner, p["work_id"])
+            if not w:
+                return None, (f"ARV-SYN-009: the work {p['work_id']} is not yet "
+                                "server-durable — the identity dependency (the "
+                                "work-bridge resolves only through an acknowledged "
+                                "source of that work)")
+            argv += ["--work-id", w]
         return argv, ""
     if c in ("create_highlight", "create_bookmark"):
         sid = _translate(local_db, server_db, owner, p["source_id"])
@@ -280,17 +298,37 @@ def do_sync(owner: str, server_db: str, timeout: float, max_attempts: int,
         row["attempts"] += 1
         if crash_at == "pre-send":
             _die()
-        argv, err = _cli_args(row, local_db, server_db, owner)
+        # THE PER-ROW CONTAINMENT (the SEV round-1 F1 repair): a hostile or
+        # corrupted payload (or any unexpected per-row failure) is a NAMED
+        # terminal outcome for THAT row — the walk CONTINUES; one poisoned
+        # row may never block every later row in every subsequent pass
+        try:
+            argv, err = _cli_args(row, local_db, server_db, owner)
+        except Exception as e:  # the undeliverable class — named, contained
+            argv, err = None, (f"ARV-SYN-013: the payload is undeliverable — "
+                               f"{type(e).__name__}: {e}")
+        tmp_file = next((a for a in (argv or []) if a.startswith("/tmp/arv-sync-")), None)
         if argv is None:
-            state, reason = ("failed" if row["attempts"] >= max_attempts else "retryable"), err
+            # the undeliverable class (ARV-SYN-013) is TERMINAL on first
+            # observation — a payload that cannot parse will never parse; the
+            # dependency class (ARV-SYN-009) stays retryable until the policy
+            if "ARV-SYN-013" in err:
+                state, reason = "failed", err
+            else:
+                state, reason = ("failed" if row["attempts"] >= max_attempts else "retryable"), err
             rc_o, out_o = _app(local_db, owner,
                                f"UPDATE arv.outbox SET state={_q(state)}, last_reason={_q(reason)}, "
                                f"updated_at={_q(clock.now())} WHERE owner_scope={_q(owner)} "
                                f"AND idempotency_key={_q(row['idempotency_key'])};")
-            print(f"SYNC key={row['idempotency_key']} state={state} reason=identity-dependency")
+            print(f"SYNC key={row['idempotency_key']} state={state} reason={err.split(':')[0]}")
             done += 1
             continue
         rc, out = _apply(server_db, row, argv, timeout)
+        if tmp_file:
+            try:
+                os.unlink(tmp_file)  # the SEV round-1 F5 repair: no leaked staging file per attempt
+            except OSError:
+                pass
         if crash_at == "post-apply-pre-ack":
             _die()
         state, reason, ref = _outcome(row, rc, out, max_attempts)

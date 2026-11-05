@@ -5,44 +5,37 @@
 The outbox walk: read the owner's non-terminal rows in SEQUENCE order; per
 row: mark delivered (attempts+1, its own committed update) BEFORE the send —
 a death between the mark and the answer leaves 'delivered', the state the
-next pass's replay resolves; apply the command on the SERVER database
-through the SAME kernel (python3 harness/commands.py <command> ... with
+next pass's replay resolves; apply the command on the SERVER database through
+the SAME kernel (python3 harness/commands.py <command> ... with
 PGDATABASE=<server> ARV_SITE=server — the server-site application enqueues
 the server_outbox handoff row in its own transaction, D-018); classify:
-
-  rc=0             -> acknowledged (committed or replayed — the replay IS the
-                      exactly-once resolution; the server's result_ref rides
-                      the row, the ARV-SYN-008 law)
-  rc=1 ARV-CMD-409 -> failed (the typed body conflict — terminal, visible,
-                      both bodies preserved; never a silent LWW)
-  rc=1 other       -> retryable (the named refusal — the outage class
-                      ARV-CMD-010/ARV-DB-003 or the server-side validation
-                      mismatch; the state may change, the next pass re-attempts)
-  rc=2             -> uncertain (the command process died mid-flight — the
-                      server may or may not have committed; only the next
-                      pass's same-key replay resolves it)
-  deadline passed  -> uncertain (no response in --timeout — never an assumed
-                      failure or success)
-
+  rc=0 -> acknowledged (the replay IS the exactly-once resolution; the
+          server's result_ref rides the row, the ARV-SYN-008 law)
+  rc=1 + ARV-CMD-409 -> failed (the typed body conflict — terminal, visible,
+          both bodies preserved; never a silent LWW)
+  rc=1 other -> retryable (the named refusal — the outage class
+          ARV-CMD-010/ARV-DB-003 or the server-side validation mismatch)
+  rc=2 / deadline -> uncertain (the honest unknown; only the next pass's
+          same-key replay resolves it)
 attempts >= --max-attempts on a retryable outcome -> failed (the terminal
-policy; the local mutation remains local-durable — never lost, never dropped
-from view). Exit 0 = the walk completed (the states ARE the truth —
-explicitly queued/retryable is a legitimate end state, never an error).
+policy; the local mutation remains local-durable). Exit 0 = the walk
+completed (explicitly queued/retryable is a legitimate end state).
 
-THE IDENTITY BRIDGE: the two durability domains mint their own entity ids;
-the driver translates a referenced local id to the server's id for the SAME
-logical entity through the two idempotency ledgers — the local command_log's
-row that produced the local id (its key), then the server's command_log row
-for that key (its recorded result_ref). The equality contract across domains
-is over COUNTS + CONTENTS + per-entity chains, never raw id equality.
+THE IDENTITY BRIDGE: the two domains mint their own entity ids; the driver
+translates a referenced local id to the server's id for the SAME logical
+entity through the two idempotency ledgers (the local creating command's
+key -> the server's recorded result_ref) — the equality contract across
+domains is over COUNTS + CONTENTS + per-entity chains, never raw id equality.
+THE SOUNDNESS GATE (the SEV round-1 F2 repair): a server answer is a valid
+translation ONLY when the local outbox row for the creating command rests
+'acknowledged' — a 409-divergent creator's answer belongs to a DIFFERENT
+logical command and never satisfies a referencer.
 
 Environment (the main()-PGDATABASE precedent): the LOCAL database is
 PGDATABASE; the server database arrives as --server-db. ARV_SITE=server is
-set ONLY on the server-side child invocation, never this process.
-
-Crash injection: --crash-at {pre-send, post-apply-pre-ack, post-ack} kills
-the driver hard (SIGKILL on itself — the crash.py class) at the FIRST row
-reaching that point; exit -9 is the observed death, never a clean exit.
+set ONLY on the server-side child invocation, never this process. Crash
+injection: --crash-at {pre-send, post-apply-pre-ack, post-ack} kills the
+driver hard (SIGKILL on itself) at the FIRST row reaching that point.
 """
 import argparse
 import json
@@ -65,7 +58,6 @@ def _q(s: str) -> str:
 
 
 def _die() -> None:
-    """The hard death (the crash.py class — SIGKILL on self, exit -9)."""
     os.kill(os.getpid(), signal.SIGKILL)
 
 
@@ -87,17 +79,13 @@ def _rows(db: str, owner: str, sql: str) -> list:
 
 
 def _create_key(local_db: str, owner: str, local_id: str) -> str:
-    """The identity bridge, local half: the creating command's key for a
-    local entity id (the local command_log's result_ref). A creating command
-    (import_source / create_*) is preferred over later same-entity commands
-    (revise/lifecycle share the result_ref) — the creator is always the
-    EARLIEST seq, so it is delivered before any referencer within a pass
-    (never a false ordering dependency). THE SOUNDNESS GATE (the SEV round-1
-    F2 repair): the key is a valid bridge ONLY when its own outbox row rests
-    'acknowledged' — a 409-divergent creator's server answer belongs to a
-    DIFFERENT logical command and must never satisfy a referencer (the
-    wrong-entity delivery class). A WORK id is never a result_ref — the work
-    bridge finds any source of that work and its creating command."""
+    """The bridge's local half: the creating command's key for a local entity
+    id (the command_log's result_ref; a create/import command preferred over
+    later same-entity commands — the creator is always the EARLIEST seq). THE
+    SOUNDNESS GATE: the key counts ONLY when its outbox row rests
+    'acknowledged' (a 409-divergent creator's server answer belongs to a
+    different logical command). A WORK id is never a result_ref — the work
+    bridge goes through any acknowledged source of that work."""
     key = _scalar(local_db, owner,
                   f"SELECT c.idempotency_key FROM arv.command_log c JOIN arv.outbox o "
                   f"ON o.owner_scope = c.owner_scope AND o.idempotency_key = c.idempotency_key "
@@ -145,11 +133,9 @@ def _translate_work(local_db: str, server_db: str, owner: str, work_local: str) 
 
 
 def _refs_args(refs: list, local_db: str, server_db: str, owner: str) -> "tuple[list, str]":
-    """The canonical reference set -> the --ref CLI surface (KIND:ID[@REV]),
-    each target TRANSLATED through the identity bridge (the reference must
-    point at the SERVER's entity — the local id is meaningless there; an
-    untranslatable target is the named ordering dependency, never a
-    wrong-id delivery)."""
+    """The reference set -> the --ref surface, each target TRANSLATED through
+    the bridge (a local id is meaningless on the server; an untranslatable
+    target is the named ARV-SYN-009 ordering dependency)."""
     out: list = []
     for r in refs or []:
         t = _translate(local_db, server_db, owner, r[1])
@@ -163,10 +149,9 @@ def _refs_args(refs: list, local_db: str, server_db: str, owner: str) -> "tuple[
 
 
 def _cli_args(row: dict, local_db: str, server_db: str, owner: str) -> "tuple[list, str]":
-    """The server-side invocation for one outbox row: (argv, error). The
-    payload's identity references translate through the bridge; an
-    untranslatable reference is the named ordering dependency (ARV-SYN-009),
-    never a wrong-id delivery."""
+    """The server-side invocation for one outbox row: (argv, error) — the
+    identity references translated, an untranslatable one the named
+    ARV-SYN-009 dependency, never a wrong-id delivery."""
     p = json.loads(row["payload"])
     c = row["command_name"]
     if c == "import_source":
@@ -223,9 +208,9 @@ def _cli_args(row: dict, local_db: str, server_db: str, owner: str) -> "tuple[li
 
 
 def _apply(server_db: str, row: dict, argv: list, timeout: float) -> "tuple[object, str]":
-    """The server-side application: the SAME kernel, the server site. The
-    child runs in its own process group so a deadline kill reaps the psql
-    session too (the blocked-transaction rollback class)."""
+    """The server-side application: the SAME kernel, the server site — the
+    child in its own process group so a deadline kill reaps the psql session
+    too (the blocked-transaction rollback class)."""
     full = [sys.executable, str(REPO / "harness" / "commands.py"), row["command_name"],
             "--owner", row["owner"], "--actor", row["actor"],
             "--client-id", row["client_id"], "--idem-key", row["idempotency_key"]] + argv
@@ -274,16 +259,13 @@ def do_sync(owner: str, server_db: str, timeout: float, max_attempts: int,
     if not rows:
         print(f"SYNC-DONE owner={owner} rows=0")
         return 0
-    # the local owner column rides the read's RLS scope; the state/keys parse
-    # on the KNOWN pipe positions (the payload column rides LAST — single-line
-    # canonical JSON by construction)
-    parsed = []
-    for ln in rows:
-        f = ln.split("|", 8)
-        parsed.append({"owner": owner, "seq": f[0], "idempotency_key": f[1],
-                       "client_id": f[2], "actor": f[3], "command_name": f[4],
-                       "body_hash": f[5], "state": f[6], "attempts": int(f[7]),
-                       "payload": f[8]})
+    # the pipe positions are KNOWN (payload rides LAST — single-line canonical
+    # JSON by construction; the established _sess_rows law)
+    names = ("seq", "idempotency_key", "client_id", "actor", "command_name",
+             "body_hash", "state", "attempts", "payload")
+    parsed = [{"owner": owner, **dict(zip(names, ln.split("|", 8)))} for ln in rows]
+    for row in parsed:
+        row["attempts"] = int(row["attempts"])
     done = 0
     for row in parsed:
         ts = clock.now()
@@ -298,10 +280,9 @@ def do_sync(owner: str, server_db: str, timeout: float, max_attempts: int,
         row["attempts"] += 1
         if crash_at == "pre-send":
             _die()
-        # THE PER-ROW CONTAINMENT (the SEV round-1 F1 repair): a hostile or
-        # corrupted payload (or any unexpected per-row failure) is a NAMED
-        # terminal outcome for THAT row — the walk CONTINUES; one poisoned
-        # row may never block every later row in every subsequent pass
+        # THE PER-ROW CONTAINMENT (the SEV round-1 F1 repair): an undeliverable
+        # payload is the named ARV-SYN-013 terminal failure for THAT row — the
+        # walk CONTINUES; one poisoned row may never block every later row
         try:
             argv, err = _cli_args(row, local_db, server_db, owner)
         except Exception as e:  # the undeliverable class — named, contained

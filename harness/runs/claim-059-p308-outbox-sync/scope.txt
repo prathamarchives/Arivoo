@@ -30,3 +30,5 @@ PLAN.md D-037
 context/WORKLOG.md D-043
 context/extracted/51-P308-OUTBOX-SYNC.md D-042
 harness/runs/claim-059-p308-outbox-sync D-042
+INTENT-LEDGER.md INT-146
+context/reviews/arivoo-no-pause-directive-2026-11-05.md D-022

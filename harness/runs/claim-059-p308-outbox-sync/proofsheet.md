@@ -101,11 +101,11 @@
 - they ran.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: a28f6328dc1acb8a59ead3039fc1bc272a1a4bed5b4125323138dfafa92cf614
-- reviewed_diff_sha256: ee6fc6e870bba1029385b2eca1aaaab625ced9ee6049a1c57a31f9a69d626368
+- report sha256: 6534a1cdafe32fea43ef5dec617894946c1a4f1e2afbfc589575498c4c7c18f5
+- reviewed_diff_sha256: b442b2b90b879532bd0002c64e7338da6f1aa898ff741456efeb68851143f636
 - disposition: PASS
 - findings: 10 (open P0/P1: 0)
 - not-verified entries: 7
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 54a718822fd87b418e049a536899354ea14ea70f6d3be944ed14d26d24809533
+- sheet sha256 (of the content above, excluding this line): 5ebf13f97d55933fff00e69d74fce8e7e6aa07aa0c2c0814fd8ec077f7a34047

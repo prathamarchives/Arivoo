@@ -165,7 +165,11 @@ def _drop_purged(rows: dict, ledger: list) -> dict:
         if kind in ("source", "anchor", "work"):
             if kind == "work":
                 gone |= {r["id"] for r in rows["source"] if r["work_id"] in gone}
-            anchors = {r["id"] for r in rows["anchor"] if r["source_id"] in gone}
+            # the F6 repair: a ledgered ANCHOR id is already in the anchor
+            # domain — the source branch maps source ids to anchors; the
+            # anchor branch uses the ledgered ids directly
+            anchors = gone if kind == "anchor" else \
+                {r["id"] for r in rows["anchor"] if r["source_id"] in gone}
             for t in ("highlight", "bookmark"):
                 ents = {r["id"] for r in rows[t] if r["anchor_id"] in anchors}
                 dropped[t] |= ents
@@ -234,22 +238,24 @@ def do_restore(archive: str, crash_at: str) -> int:
         if hashlib.sha256(p.read_bytes()).hexdigest() != d:
             print(f"FAIL ARV-EXP-004: the blob {d[:12]} is CORRUPT (the digest does not match) — never a partial restore")
             return 1
-    # 7. ONE transaction — THE F1 REPAIR: the transaction runs SERIALIZABLE
-    # with the ledger re-read INSIDE it, so a concurrent ledger write is
-    # serially ordered against the reconciliation: it either precedes the
-    # snapshot (the re-read sees it — the entity drops) or the restore's
-    # COMMIT fails with the serialization abort (the typed retryable
-    # outcome — the destination stays clean, the re-run converges); never a
-    # restore committed on top of an un-reconciled ledger write. The
-    # archive's own ledger rows merge ON CONFLICT DO NOTHING (the F2 repair:
-    # the destination's current entries stay authoritative, never a
-    # duplicate-key crash)
+    # 7. ONE transaction — THE F1 REPAIR (round 2): the reconciliation takes
+    # ACCESS EXCLUSIVE on the purge ledger at the transaction's start and
+    # re-reads it INSIDE — every concurrent ledger write (any isolation
+    # level, any role) BLOCKS on the lock until this transaction commits, so
+    # the write either precedes the locked read (the reconciliation sees it —
+    # the entity drops) or follows the commit (the write lands as a
+    # subsequent purge, pending the governed command); the interleaved
+    # neither (a write committing between the read and the restore's commit)
+    # is structurally impossible — the SERIALIZABLE-only form was proven
+    # insufficient (a lone rw-edge forms no SSI cycle for a read-committed
+    # writer). The archive's own ledger rows merge ON CONFLICT DO NOTHING
+    # (the F2 repair: the destination's current entries stay authoritative)
     sess = subprocess.Popen(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
                              "-U", "arv_app", "-d", os.environ.get("PGDATABASE", "postgres")],
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, text=True, bufsize=1)
     sess.stdin.write(f"SET app.current_owner={_q(owner)};\nBEGIN;\n"
-                     f"SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n"
+                     f"LOCK TABLE arv.purge_ledger IN ACCESS EXCLUSIVE MODE;\n"
                      f"SELECT kind || '|' || entity_id || '|' || "
                      f"to_char(max(created_at), 'YYYY-MM-DD\"T\"HH24:MI:SS') "
                      f"FROM arv.purge_ledger GROUP BY kind, entity_id;\n"

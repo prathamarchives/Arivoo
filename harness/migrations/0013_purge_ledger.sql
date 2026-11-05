@@ -45,5 +45,13 @@ CREATE POLICY owner_isolation ON arv.purge_ledger
     USING (owner_scope = current_setting('app.current_owner', true))
     WITH CHECK (owner_scope = current_setting('app.current_owner', true));
 
-GRANT INSERT, SELECT ON arv.purge_ledger TO arv_app;
+-- The UPDATE grant is the LOCK ENABLER, never a mutation surface: the
+-- restore's reconciliation transaction takes ACCESS EXCLUSIVE on this table
+-- (serializing every concurrent ledger write against the reconciliation —
+-- the SEV round-2 F1 repair), and PostgreSQL requires an UPDATE-class
+-- privilege for that lock mode. THE APPEND-ONLY LAW IS THE TRIGGER
+-- (ARV-PRG-001 fires for every role incl. the superuser): an UPDATE
+-- statement by arv_app still refuses; the grant changes which LOCKS the
+-- role may take, never which ROWS it may change.
+GRANT INSERT, SELECT, UPDATE ON arv.purge_ledger TO arv_app;
 GRANT SELECT ON arv.purge_ledger TO arv_read;

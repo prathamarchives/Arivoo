@@ -450,14 +450,28 @@ def main() -> int:
                        capture_output=True, timeout=180,
                        env=dict(ENV, PGDATABASE=db11), check=True)
         e11env = dict(ENV, PGDATABASE=db11)
+        import time as _t
+        r11p = subprocess.Popen([sys.executable, str(REPO / "harness" / "export.py"),
+                                 "restore", "--archive", str(arch)],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                                env=e11env)
+        _t.sleep(1.2)  # MID-INSERT-PHASE: the reconciliation's lock is already held
+        w_start = _t.monotonic()
         writer = subprocess.Popen(["psql", "-X", "-A", "-t", "-U", "arv_app", "-d", db11,
                                    "-c", f"SET app.current_owner='A'; INSERT INTO arv.purge_ledger "
                                          f"(owner_scope, kind, entity_id, reason, actor, created_at) "
                                          f"VALUES ('A', 'note', '{nid}', 'the mid-restore write', 'owner', now());"],
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=e11env)
-        r11 = exp("restore", "--archive", str(arch), env=e11env)
+        r11_out, _ = r11p.communicate(timeout=120)
+        r_end = _t.monotonic()
         w_out = writer.communicate(timeout=60)
+        w_end = _t.monotonic()
+        class _R:  # the completed-process shape the assertions read
+            returncode = r11p.returncode
+            stdout = r11_out or ""
+        r11 = _R()
         w_rc = writer.returncode
+        writer_landed_after = w_end > r_end  # the blocking proof: the write could not commit inside the restore
         note_cnt = audit(db11, f"SELECT count(*) FROM arv.note WHERE id='{nid}';")
         led_cnt = audit(db11, f"SELECT count(*) FROM arv.purge_ledger WHERE kind='note' AND entity_id='{nid}';")
         # the LEGAL outcomes under the SERIALIZABLE reconciliation: (a) the
@@ -467,7 +481,8 @@ def main() -> int:
         # — the restore ABORTED with the typed retryable refusal and ZERO
         # rows (the re-run converges). NEVER the silent neither.
         order_a = (r11.returncode == 0 and note_cnt == "0" and led_cnt == "1")
-        order_b = (r11.returncode == 0 and note_cnt == "2" and led_cnt == "1")
+        order_b = (r11.returncode == 0 and note_cnt == "2" and led_cnt == "1"
+                   and writer_landed_after)  # the write PROVABLY followed the restore's commit
         aborted = (r11.returncode == 1 and "ARV-EXP-007" in r11.stdout
                    and note_cnt == "0")
         if aborted:
@@ -544,11 +559,36 @@ def main() -> int:
               "the reconciliation drops the reference rows of every purged entity kind — the D-011 cascade semantics, applied at the restore boundary")
         pg.drop_scratch_db(db14)
 
+        # ---- EXP-15 — the purged-anchor cascade (the SEV round-2 F6: a
+        # ledgered ANCHOR id is in the anchor domain — the captures anchored
+        # to it drop, never the coarse whole-archive FK refusal)
+        db15 = pg.create_scratch_db("p309d15")
+        subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
+                       capture_output=True, timeout=180,
+                       env=dict(ENV, PGDATABASE=db15), check=True)
+        e15env = dict(ENV, PGDATABASE=db15)
+        anchor_id = audit(SRC, f"SELECT anchor_id FROM arv.highlight WHERE id='{hid}';")
+        app_sql(db15, f"INSERT INTO arv.purge_ledger (owner_scope, kind, entity_id, reason, "
+                      f"actor, created_at) VALUES ('A', 'anchor', '{anchor_id}', "
+                      f"'the governed purge (the test substrate surface)', 'owner', now());")
+        r15 = exp("restore", "--archive", str(arch), env=e15env)
+        anc15 = audit(db15, f"SELECT count(*) FROM arv.anchor WHERE id='{anchor_id}';")
+        hl15 = audit(db15, f"SELECT count(*) FROM arv.highlight WHERE id='{hid}';")
+        bm15 = audit(db15, f"SELECT count(*) FROM arv.bookmark WHERE id='{bm_id}';")
+        src15 = audit(db15, f"SELECT count(*) FROM arv.source WHERE id='{sid}';")
+        refs15 = audit(db15, f"SELECT count(*) FROM arv.note_reference WHERE ref_kind='highlight' AND ref_id='{hid}';")
+        ok15 = (r15.returncode == 0 and anc15 == "0" and hl15 == "0" and bm15 == "1"
+                and src15 == "1" and refs15 == "0")
+        check("EXP-15", ok15,
+              "the purged-anchor cascade: a ledger entry for an ANCHOR (a kind the ledger's CHECK admits) drops the anchor AND every capture anchored to THAT anchor (the highlight with its lifecycle, the references pointing at it) — the BOOKMARK survives (it derived its OWN anchor row — each capture's location evidence is its own; the purge was one location, not the source's every capture), the SOURCE survives; the restore completes cleanly, never the coarse whole-archive refusal the dangling anchor_id foreign key would force",
+              "the ledgered anchor ids are already in the anchor domain — the cascade maps them directly, never through the source-id domain")
+        pg.drop_scratch_db(db15)
+
         print()
         if FAILS:
             print(f"RED — the P3-09 export/restore suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-09 acceptance suite (EXP-01..14) passes")
+        print("GREEN — the P3-09 acceptance suite (EXP-01..15) passes")
         return 0
     finally:
         pg.drop_scratch_db(SRC)

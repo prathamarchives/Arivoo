@@ -818,7 +818,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-059 (P3-08) the RED: the SYN-01..15 suite's RED observed at the exact predecessor 67e37fa (CLAIM-058's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the driver + migration 0012 absent), red-01.txt; the typed observed red per F-007",
-    "current_sha256": "d2158263fb30078c71c5874e85f781b12d5182605e917ca36420511d43a9b720",
-    "amendments": []
+    "current_sha256": "39fa65e173b76bee53cda0e1981ebd3513da48a32c5a28640ba28d4281530eac",
+    "amendments": [
+      {
+        "prior_sha256": "d2158263fb30078c71c5874e85f781b12d5182605e917ca36420511d43a9b720",
+        "new_sha256": "39fa65e173b76bee53cda0e1981ebd3513da48a32c5a28640ba28d4281530eac",
+        "note": "CLAIM-059 (P3-08) the implementation-cycle amendments (the #93 precedent class \u2014 the RED form e91dc9a repaired to the passing form during the GREEN, every repair RED-observed first): (1) the sync() helper's owner positional collided with the extra-args call form (the timeout/crash-at/server-db flags) \u2014 all keyword; (2) SYN-01's post-crash row count vs the pre-crash count compared against the wrong boundary (len(ob_all)==4 after the crash pair); (3) SYN-02's acked/notes counts corrected to the actual fixture totals (4 rows, 2 notes); (4) SYN-04's server note count 2; (5) SYN-05's held advisory lock re-keyed to the SERVER's note id (the identity bridge \u2014 the server-side command locks the SERVER id's canonical key, the local id never reaches it); (6) srv_note's bridge column result_ref (command_log has no id column) + the deterministic creator preference mirrored from the driver; (7) SYN-10's bookmark revision form (the two-line audit_rows); (8) SYN-11's grants audit through relacl::text (information_schema's grant view is grantee-scoped \u2014 arv_read cannot see arv_app's entries); the hostile outbox mutations as the superuser (arv_app holds no DELETE by grant \u2014 the permission layer intercepts before the trigger; the superuser reaches the trigger and it fires BY NAME); the 006 pin rides its own delivered-state row (the terminal-state rows fire the transition guard first \u2014 the correct order); (9) SYN-13's server_outbox hostile mutations as the superuser, same class; (10) the SET command-tag line stripped from the hostile cross-owner read",
+        "observed_at": "2026-11-05T11:25:25.803865+00:00"
+      }
+    ]
   }
 }

@@ -1,0 +1,7 @@
+{
+  "command": "SLICE=claim-060-p309-export-restore GATE_DIFF=origin/main make gate",
+  "exit_code": 0,
+  "commit": "a5356e157036ab539d0fb0fc89626bbaa03fe0ac",
+  "output_sha256": "8103f6bb62bad76c358d1e8a5b74ddd34ba7d28aba9ea4cf936a8c7f0c1c9d83",
+  "recorded_at": "2026-11-05T16:21:10.296818+00:00"
+}

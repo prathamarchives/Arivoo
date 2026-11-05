@@ -65,10 +65,40 @@ The bounded exclusions: the governed purge command D-011's; the
 cross-provider blob story Q12's (the rig's filesystem archive class); no
 refactor of the landed families.
 
-## §3 — The slice chain (in flight; extended as it lands)
+## §3 — The slice chain (COMPLETED at the final content head a5356e1 + the finalize)
 
-The RED (the EXP suite at `7df713b`, machinery-absent ARV-TEST-000) → the
-GREEN (migration 0013 + harness/export.py + the registration) → the measured
-set → the SEV round → the artifact re-bind → the push → the PR → the five
-checks → the merge-gate review → the merge under INT-145 → the post-merge
-verification → the Phase 3 exit gate.
+THE RED (LAW-11): the EXP-01..10 suite committed in its RED form at `f6cf5fb`
+(machinery-absent ARV-TEST-000, red-01.txt; the typed record bound to the
+RED commit). THE GREEN at `190f4b0`: migration 0013 (the purge ledger) +
+harness/export.py + the registration; the implementation-cycle amendments
+recorded (EXP-04's migrated destination; EXP-10's per-row trigger lesson).
+
+THE THREE-ROUND SEV CHAIN: ROUND 1 (agent exp-sev-r1) BLOCKED — F1 (P1, the
+restore-side TOCTOU: a ledger row inserted mid-flight silently overridden)
++ F2 (P1, the promised ON CONFLICT ledger merge never implemented) + F3/F5
+(P2s, the reference cascade + the command_log-proxy gate) — repaired
+RED-first at `e006897`/`a18a0e2` (EXP-11..14, red-02.txt); F4 (P2,
+integrity≠authenticity) ROUTED (the trusted-boundary signature rides the
+governed-purge family). ROUND 2 (agent exp-sev-r2) verified F2/F3/F5 but
+PROVED F1's SERIALIZABLE form insufficient (a lone rw-edge forms no SSI
+cycle for a read-committed writer — 2 of 6 interleavings illegal, the abort
+unreachable) and found F6 (the anchor-kind domain bug — the dangling FK
+refusing the whole archive); repaired at `a5356e1`: the ACCESS EXCLUSIVE
+reconciliation lock (migration 0013's UPDATE grant as the lock enabler —
+the ARV-PRG-001 trigger remains the append-only law, firing for every role
+incl. the superuser), the anchor-domain direct mapping, EXP-11 strengthened
+to the discriminating mid-phase form, EXP-15 pinning the anchor cascade
+RED-first (red-03.txt). ROUND 3 (agent exp-sev-r3) PASS zero open P0/P1 —
+the decisive DB-level clock_timestamp ordering proof (the blocked writer's
+INSERT returning 357µs after the lock release = the restore's COMMIT),
+all 13 tables byte-equal, EXP-01..15 green, the law at 328/400 + 599/800.
+
+THE MEASURED SET: 13 run records — EXP-01..10 x3 + verify (the pre-repair
+tree), EXP-01..14 x3 + verify (the round-1-repaired tree), EXP-01..15 x3 +
+verify (the final tree), and the recorded PR-mode gate at the final
+artifact tree (exit 0). The sheet re-derives byte-identically over all
+records (the digest binds LAST).
+
+NEXT: the push → the PR → the five checks → the merge-gate review (D-042
+(1a)) → the merge under INT-145 → the post-merge verification → the Phase 3
+exit gate → P4-00.

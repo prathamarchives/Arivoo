@@ -45,3 +45,26 @@
 - Q6-Q12 + D-014 unchanged; the bounded exclusions per the card (the
   governed purge command D-011's; the cross-provider blob story Q12's; no
   refactor of the landed families).
+- THE THREE-ROUND SEV CHAIN (the #94/#95 precedent): round 1 (agent
+  exp-sev-r1) BLOCKED — F1 (P1) the restore-side TOCTOU (a ledger row
+  inserted mid-flight silently overridden) + F2 (P1) the promised ON
+  CONFLICT ledger merge never implemented (the mislabeled crash) + F3/F5
+  (P2s: the purged-highlight reference cascade; the command_log-proxy clean
+  gate) — all repaired RED-first (EXP-11..14, red-02.txt); F4 (P2,
+  integrity-is-not-authenticity) ROUTED to the governed-purge family's
+  trusted-boundary signature (owner-accepted-debt). Round 2 (agent
+  exp-sev-r2) verified F2/F3/F5 repaired but PROVED F1's SERIALIZABLE form
+  insufficient (a lone rw-edge forms no SSI cycle for a read-committed
+  writer — 2 of 6 interleavings illegal) and found F6 (the anchor-kind
+  ledger entry evaluated in the source-id domain — the dangling FK refusing
+  the whole archive); both repaired at a5356e1 (the ACCESS EXCLUSIVE
+  reconciliation lock with migration 0013's UPDATE grant as the lock
+  enabler — the ARV-PRG-001 trigger remains the append-only law, firing for
+  every role incl. the superuser, re-verified; the anchor-domain direct
+  mapping; EXP-11 strengthened to the discriminating mid-phase form with
+  the completion-ordering proof; EXP-15 pins the anchor cascade RED-first,
+  red-03.txt). Round 3 (agent exp-sev-r3) PASS — the decisive DB-level
+  clock_timestamp ordering proof (the blocked writer's INSERT returning
+  357µs AFTER the lock release = the restore's COMMIT; 12.5× the control
+  latency), F6 verified, all 13 tables byte-equal, EXP-01..15 green, the
+  law at 328/400 + 599/800 + 1 migration.

@@ -1,0 +1,34 @@
+# CLAIM-059 — P3-08: the local outbox, the sync driver, and the recovery
+# semantics (PLAN's P3-08 card; RTM §3.4/§3.5 + SYS-08 + D-018/D-032).
+# The local mutation + the client-outbox intent commit ATOMICALLY (RTM
+# §4.2 — one local transaction); the outbox state machine {pending,
+# delivered, acknowledged, retryable, failed, uncertain} with the declared
+# transition graph at the substrate; the sync driver applies remote writes
+# through the SAME command kernel (one command core, two execution sites);
+# the server-site application enqueues the SERVER outbox handoff for future
+# enrichment (D-018); ordering by sequence; replay by the same idempotency
+# key; the uncertain-ACK resolution; no silent LWW for authored content;
+# the crash matrix around the ack-update; cross-owner isolation; the
+# independent remote read. RED-first at CLAIM-058's merged head 67e37fa
+# (machinery-absent ARV-TEST-000, red-01.txt).
+#
+# The bounded exclusions per the card: the export/restore P3-09's; the
+# governed purge D-011's; the real cross-host network surface (the rig's
+# two-database domains model D-032's separate durability domains; Q12
+# untouched); the enrichment consumers of the server outbox P4+'s; no
+# refactor of the landed capture families.
+harness/tests/test_sync.py D-041
+harness/commands.py D-041
+harness/sync.py D-041
+harness/gate.py D-041
+harness/migrations/0012_outbox.sql D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/51-P308-OUTBOX-SYNC.md D-042
+harness/runs/claim-059-p308-outbox-sync D-042
+INTENT-LEDGER.md INT-146
+context/reviews/arivoo-no-pause-directive-2026-11-05.md D-022

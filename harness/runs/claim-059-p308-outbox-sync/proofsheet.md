@@ -1,0 +1,111 @@
+# PROOF SHEET — slice claim-059-p308-outbox-sync (harness-built; never hand-edited — PRF-01, LAW-01)
+
+- commit (last run record's): 7ad7178d9dae59e18410fdfa9425d3f33d1c4d3e
+- generated (last record's timestamp): 2026-11-05T14:06:51.978227+00:00
+- run records: 13
+
+## Run records (command, exit, output digest)
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 0c65ba6abef4725d · 2026-11-05T11:28:03.275839+00:00
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 0c65ba6abef4725d · 2026-11-05T11:28:14.032636+00:00
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 0c65ba6abef4725d · 2026-11-05T11:28:24.857403+00:00
+- `make verify` -> exit 0 · output sha256 2a77f49a0e8d25b1 · 2026-11-05T11:37:52.000995+00:00
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 6fff4afa7543ec05 · 2026-11-05T12:17:09.203637+00:00
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 6fff4afa7543ec05 · 2026-11-05T12:17:20.535034+00:00
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 6fff4afa7543ec05 · 2026-11-05T12:17:32.035009+00:00
+- `make verify` -> exit 0 · output sha256 e006746e8eb07c21 · 2026-11-05T12:21:51.533569+00:00
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 6fff4afa7543ec05 · 2026-11-05T13:25:50.818937+00:00
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 6fff4afa7543ec05 · 2026-11-05T13:26:02.230123+00:00
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 6fff4afa7543ec05 · 2026-11-05T13:26:13.573024+00:00
+- `make verify` -> exit 0 · output sha256 cc6b36f03254c4f7 · 2026-11-05T13:34:21.055452+00:00
+- `SLICE=claim-059-p308-outbox-sync GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 912e6c4e50764428 · 2026-11-05T14:06:51.978227+00:00
+
+## Not verified (LAW-04 — required, never empty-by-omission)
+- - NOT VERIFIED — the honest limits of CLAIM-059 / P3-08 (the local outbox,
+- the sync driver, and the recovery semantics; LAW-04; never
+- empty-by-omission)
+- - WHAT THIS SLICE PROVES: SYS-08's declared fault matrix end-to-end over the
+- real PostgreSQL boundary — the atomic enqueue (the effect rows + the
+- command-log row + the outbox row in ONE local transaction, RTM §4.2); the
+- declared state machine {pending, delivered, acknowledged, retryable,
+- failed, uncertain} enforced at the substrate (the transition graph, the
+- immutable delivery keys, the attempts monotonicity, the no-delete law, the
+- server_ref law); the sync driver applying remote writes through the SAME
+- command kernel (one command core, two execution sites — RTM §3.5: unknown
+- key applies, same key + same body replays, same key + different body
+- surfaces ARV-CMD-409 as the delivery's typed conflict with BOTH bodies
+- preserved, never a silent LWW); the D-018/D-032 server-outbox handoff (one
+- pending row per server-APPLIED command, atomic with the application,
+- strictly append-only at this rung); the identity bridge (the two domains
+- mint their own entity ids; every referenced id translates through the two
+- idempotency ledgers — the count-and-content equality, never raw id
+- equality); the crash matrix (pre-send / post-apply-pre-ack / post-ack each
+- resolving to exactly-once); the uncertain-ACK resolution by the same-key
+- replay (the held server-side advisory lock blocking past the deadline); the
+- outage class (retryable with the named reason, never lost); the cross-owner
+- isolation (RLS on both domains); the no-lost-writes acceptance sweep (every
+- local product key has its row, the server's key set == acknowledged +
+- 409-failed, every state truthful).
+- - THE DOMAIN MODEL'S HONEST BOUNDARY: the rig models D-032's two durability
+- domains as TWO DATABASES on one loopback PostgreSQL cluster. What is NOT
+- claimed: any real cross-host network behavior (latency, partitions beyond
+- the simulated outage and deadline classes, TLS, credential flows); any
+- Supabase-specific surface (Q12's provider boundary stands); any
+- cross-store blob durability (the blob store is SHARED between the domains
+- on this rig — content-addressed, so the re-materialized import re-verifies
+- the digest; the production cross-store blob story is Q12's, untouched).
+- - THE ENFORCED TRANSITION GRAPH IS A DELIBERATE SUPERSET OF RTM §3.4'S
+- DIAGRAM (the SEV round-1 F4, dispositioned): every RTM-declared edge is
+- enforced (pending→delivered/retryable; delivered→acknowledged/uncertain/
+- retryable; uncertain→acknowledged/retryable; retryable→delivered/retryable/
+- failed), plus three operationally-required classes the diagram does not
+- name: the RE-ATTEMPT self-edges (delivered→delivered, uncertain→delivered —
+- the driver's delivered-mark on re-sends), the TERMINAL-FAILURE entries from
+- every non-terminal state (pending/delivered/uncertain→failed — the typed
+- ARV-CMD-409 conflict lands from delivered, and the undeliverable
+- ARV-SYN-013 class is terminal on first observation), and retryable→
+- retryable (the repeated retryable outcome). acknowledged and failed remain
+- terminal with NO outgoing edge. The superset is documented here, never
+- silently assumed.
+- - RECORD_EVENT AND REBUILD_KEYWORD_INDEX CARRY NO SYNC INTENT BY DESIGN: the
+- kernel's own evidence surface and the derived-layer rebuild (the server
+- re-derives its own index per P3-09's restore contract) are outside the
+- outbox-carrying set — their server-side story is not a delivery. Stated,
+- never hidden.
+- - THE IMPORT'S WORK-BRIDGE COVERAGE: the work-id translation (import #2 into
+- an existing work) rides any ACKNOWLEDGED source of that work — the SYN
+- matrix exercises --title imports; a multi-source work's cross-domain
+- translation is covered by the same bridge code path but NOT separately
+- pinned (a P3-09 restore-equality pin can cover it end-to-end).
+- - Q6-Q12 + D-014 unchanged; the bounded exclusions per the card (the
+- export/restore P3-09's; the governed purge D-011's; the enrichment
+- consumers P4+'s; no refactor of the landed capture families).
+- - THE SEV ROUND-1 CHAIN (the #91/#93 precedent): round 1 (agent
+- syn-sev-r1, fresh context, BLOCKED with one P0 + one P1 + four P2s) —
+- F2 (P0) the divergent identity bridge (after a creator's 409 conflict the
+- referencer translated through the server's COMPETING answer and delivered
+- against the wrong entity) REPAIRED by the soundness gate (the bridge
+- resolves only through creators whose own outbox row rests acknowledged);
+- F1 (P1) the poisoned-payload walk crash (an unhandled JSONDecodeError
+- blocked every later row permanently) REPAIRED by the per-row containment
+- (ARV-SYN-013, terminal on first observation, the walk continues); F3 (P2)
+- the raw work-id fallback REPAIRED to the named ARV-SYN-009 dependency;
+- F5 (P2) the leaked staging temp file per import attempt REPAIRED (unlink
+- after the apply); F4 (P2) the graph superset DOCUMENTED above; F6 (P2)
+- the stale scratch-DB count corrected (the rig was re-initdb'd at the
+- session's recycle — zero now). Round 2 verifies the repairs over the
+- repaired diff.
+- - THE ENRICHMENT CONSUMERS ARE P4+'s: the server_outbox handoff row is the
+- D-018 CONTRACT (atomic enqueue + append-only law + the pending state); the
+- enrichment jobs that consume it (async indexing, extraction fan-outs, any
+- derived-state rebuild triggers) are future rungs — this slice never claims
+- they ran.
+
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 6534a1cdafe32fea43ef5dec617894946c1a4f1e2afbfc589575498c4c7c18f5
+- reviewed_diff_sha256: b442b2b90b879532bd0002c64e7338da6f1aa898ff741456efeb68851143f636
+- disposition: PASS
+- findings: 10 (open P0/P1: 0)
+- not-verified entries: 7
+
+## Assembly
+- sheet sha256 (of the content above, excluding this line): 5ebf13f97d55933fff00e69d74fce8e7e6aa07aa0c2c0814fd8ec077f7a34047

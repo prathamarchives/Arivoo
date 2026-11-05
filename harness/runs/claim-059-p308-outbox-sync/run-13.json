@@ -1,0 +1,7 @@
+{
+  "command": "SLICE=claim-059-p308-outbox-sync GATE_DIFF=origin/main make gate",
+  "exit_code": 0,
+  "commit": "7ad7178d9dae59e18410fdfa9425d3f33d1c4d3e",
+  "output_sha256": "912e6c4e5076442831e2287770350262f6f8dbeccfdf3e004f64f6c7b3357007",
+  "recorded_at": "2026-11-05T14:06:51.978227+00:00"
+}

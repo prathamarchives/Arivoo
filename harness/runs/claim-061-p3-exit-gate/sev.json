@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-061-p3-exit-gate",
  "base_sha": "3b5ed28b28d54d47a1032ae0960621dff49c53ef",
- "reviewed_diff_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+ "reviewed_diff_sha256": "c35cf318c6fd44a7f7b42d27fce8809dde5a9baff597e25447b0882e2bb69ef5",
  "sheet_section": true,
  "intent_ids": [
   "INT-144",
@@ -66,27 +66,46 @@
   {
    "id": "FM-01",
    "scenario": "a phase gate passing by implication (a row nobody walked)",
-   "controlled_by": "grader part 1 executed every row's named suites itself and confirmed the per-row cases in its own logs; the walk is recorded per-row in grader-part1-matrix-walk.md"
+   "control": "grader part 1 executed every row's named suites itself and confirmed the per-row cases in its own logs; the walk is recorded per-row in grader-part1-matrix-walk.md",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
   },
   {
    "id": "FM-02",
    "scenario": "a coached acceptance run (the agent told where to look)",
-   "controlled_by": "the task text carried no command names, no file pointers, no schema hints; the rules allowed docs freely and source only to understand an error; the agent's own report records the friction of discovery (the undocumented PGDATABASE, the missing README) \u2014 the proof the coaching was absent"
+   "control": "the task text carried no command names, no file pointers, no schema hints; the rules allowed docs freely and source only to understand an error; the agent's own report records the friction of discovery (the undocumented PGDATABASE, the missing README) \u2014 the proof the coaching was absent",
+   "proof_ids": [
+    "run-01"
+   ]
   },
   {
    "id": "FM-03",
    "scenario": "a false PASS from a stale CI snapshot",
-   "controlled_by": "the five checks were observed at the final head AND on the merge commit live via the API; the local reproduction ran the same S4c path before the push; the merge-gate re-observation follows"
+   "control": "the five checks were observed at the final head AND on the merge commit live via the API; the local reproduction ran the same S4c path before the push; the merge-gate re-observation follows",
+   "proof_ids": [
+    "run-01",
+    "run-02",
+    "run-03"
+   ]
   },
   {
    "id": "FM-04",
    "scenario": "the gate grading Phase 4 surfaces it should not (scope creep)",
-   "controlled_by": "the routed register names each finding's P4 home; the not-verified list names the Phase 4+ surfaces as NOT graded"
+   "control": "the routed register names each finding's P4 home; the not-verified list names the Phase 4+ surfaces as NOT graded",
+   "proof_ids": [
+    "run-01"
+   ]
   },
   {
    "id": "FM-05",
    "scenario": "the staleness class (status lines claiming EXECUTING on landed slices)",
-   "controlled_by": "the P-18 repairs in commit A, each citing its close facts; the canonical layer green after the repair"
+   "control": "the P-18 repairs in commit A, each citing its close facts; the canonical layer green after the repair",
+   "proof_ids": [
+    "run-01"
+   ]
   }
  ],
  "findings": [

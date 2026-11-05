@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the P3-08 sync machinery is absent (machinery-absent class; the driver absent: True; migration 0012 present: False) — the implementation lands after this RED, never before it (LAW-11)

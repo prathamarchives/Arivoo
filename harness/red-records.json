@@ -102,7 +102,7 @@
     "red_code": "ARV-TEST-000/011/019"
   },
   "harness/tests/test_gate_dispatch.py": {
-    "current_sha256": "4251b778e7a50d5b55c6f0c96827444eacaf44cad8fe01fededa95550429d37d",
+    "current_sha256": "efdc36da8560d0a45c1b34ae8a3cdf3b5c30ab7c480f9a5a546ff75b8f98277a",
     "amendments": [
       {
         "note": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
@@ -148,6 +148,12 @@
         "new_sha256": "4251b778e7a50d5b55c6f0c96827444eacaf44cad8fe01fededa95550429d37d",
         "note": "CLAIM-044 (the fixture modernization + the scope widening): test_gate_dispatch.py's born-positive sev.json gains sheet_section: true \u2014 the fixture's base is the whole copy (its proofsheet carries the renderer), so the base-side expectation applies to the fixture exactly as in reality; the first fix-head run caught the fixture NOT born-valid (ARV-SEV-009 at the fixture's own assert) \u2014 the modernization rides WITH the machinery (the 5447477 precedent: both inert at the predecessor, never before their time). The file joins the slice's scope in BOTH homes (scope.txt + the row's cell) \u2014 the declaration-drift class (SEV-1/record 34) guarded against by widening at edit time.",
         "observed_at": "2026-10-24T14:38:01.244912+00:00"
+      },
+      {
+        "prior_sha256": "4251b778e7a50d5b55c6f0c96827444eacaf44cad8fe01fededa95550429d37d",
+        "new_sha256": "efdc36da8560d0a45c1b34ae8a3cdf3b5c30ab7c480f9a5a546ff75b8f98277a",
+        "note": "CLAIM-062 the dispatch-fixture amendment (the live-registry dependency class the fixture's own comment names \u2014 caught by ARV-CLM-002 firing EXACTLY as designed when CLAIM-062 legitimately opened README.md): the synthetic CLAIM-998 scope drops README.md for the fixture-owned probe file alone; the fixture's assertions unchanged",
+        "observed_at": "2026-11-05T20:43:26.295212+00:00"
       }
     ],
     "red_evidence": "Amendment 2 (H-01a-R, narrowed not weakened): the bad-base assertion's first draft counted raw 'ARV-DIFF-001' substring mentions \u2014 but the ARV-CLM-000 skip note and the REQUIRED consolidated summary ('RED \u2014 the gate refuses: ...') legitimately contain the code string; the assertion is narrowed to the disposition form (lines starting 'FAIL ARV-DIFF-001' == exactly one) \u2014 no assertion removed, the traceback/exit/skip-note/selfcheck assertions unchanged; the underlying defect (a second disposition print or a crash-repeated code) stays refused",
@@ -789,7 +795,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-058 (P3-07) commit B: the KWR-01..10 suite's RED observed at the exact predecessor b698608d (CLAIM-057's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000: the search arm absent, the rebuild command absent, migration 0011 absent; the transcript at the slice's runs dir red-01.txt; record 50 \u00a711 (the record-18 \u00a74.1 / claim-055/056/057 precedent class)",
-    "current_sha256": "87c0047195c6e4dfb372c43263742a7f23003b3e4e4cc73cc45869c97788b5ae",
+    "current_sha256": "1d98cca4184e310d0aa795282a613d241be69099211e71fbbedf9e1860de6971",
     "amendments": [
       {
         "prior_sha256": "2d3b3e87880725994827da1b26ad62f0f9c9b5ad1aeb8b58a17c8840d766581b",
@@ -808,6 +814,12 @@
         "new_sha256": "87c0047195c6e4dfb372c43263742a7f23003b3e4e4cc73cc45869c97788b5ae",
         "note": "CLAIM-058 (P3-07) the CI scanner repair (the isolation checker's generic-secret-assignment pattern collided with the audit query's 'token=gravitonx' \u2014 the 12+ char \\S class grabbed the quoted token plus trailing punctuation; NEVER a secret, never a credential): the fixture token renamed quarkx. The assertion is identical (the count of the refused note's token = 0); a cosmetic rename only",
         "observed_at": "2026-11-04T14:25:52.813543+00:00"
+      },
+      {
+        "prior_sha256": "87c0047195c6e4dfb372c43263742a7f23003b3e4e4cc73cc45869c97788b5ae",
+        "new_sha256": "1d98cca4184e310d0aa795282a613d241be69099211e71fbbedf9e1860de6971",
+        "note": "CLAIM-062 the KWR result_ids amendment (the same labeled-search interaction as EXP-09, disclosed): the helper skips '#'-prefixed header lines exactly like blank lines \u2014 a label is never a result row; KWR-02/KWR-05's zero-result expectations unchanged in substance (the owner filter still returns zero rows; the deleted index still returns zero rows)",
+        "observed_at": "2026-11-05T20:32:24.110133+00:00"
       }
     ]
   },
@@ -841,7 +853,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-060 (P3-09) the RED: the EXP-01..10 suite's RED observed at the exact predecessor 7df713b (CLAIM-059's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the export arm + migration 0013 absent), red-01.txt; the typed observed red per F-007",
-    "current_sha256": "89f0a8badde4b340a2e530534fb2355aa31767159b6b8912217aa66679457c99",
+    "current_sha256": "6711140ef7318d93977e59347abf9b894209d8ce889d79c4177a7dc845a86bfd",
     "amendments": [
       {
         "prior_sha256": "2b6962b91aae8005a915483117c7de02fa8a38230c913c190b70992430df0464",
@@ -860,6 +872,12 @@
         "new_sha256": "89f0a8badde4b340a2e530534fb2355aa31767159b6b8912217aa66679457c99",
         "note": "CLAIM-060 (P3-09) the SEV round-2 repair additions (RED-first: EXP-15 observed FAILING before the anchor-domain fix \u2014 the F6 class; EXP-11 strengthened to the discriminating form firing the writer MID-INSERT-PHASE with the completion-ordering proof):",
         "observed_at": "2026-11-05T15:46:32.010042+00:00"
+      },
+      {
+        "prior_sha256": "89f0a8badde4b340a2e530534fb2355aa31767159b6b8912217aa66679457c99",
+        "new_sha256": "6711140ef7318d93977e59347abf9b894209d8ce889d79c4177a7dc845a86bfd",
+        "note": "CLAIM-062 the EXP-09 amendment (the landed pin meets the labeled search form \u2014 a REAL contract interaction caught by the regression run): the search arm now ALWAYS prints the column header (CON-05, the gate's routed repair), so the empty-index search answers with the header ALONE (zero result rows) instead of pure silence; EXP-09's empty-form expectation corrected forward \u2014 the pin's substance unchanged (the index empty pre-rebuild; the searches answer exactly as the source post-rebuild)",
+        "observed_at": "2026-11-05T20:11:34.623879+00:00"
       }
     ]
   },
@@ -870,7 +888,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the CON suite's observed RED at commit ec66553 (machinery-absent ARV-TEST-000: the README absent at the root + the migrate --help misfire \u2014 exit 1, red-01.txt at harness/runs/claim-062-p400a-truthful-acks/)",
-    "current_sha256": "598ff19be393daf7cfca29672f573a39e5e4ed296111185d79005401c9f70a28",
-    "amendments": []
+    "current_sha256": "309c343deac99bd6b0dcfc710c54f02aa8734ed12b7f488e75f5474527267561",
+    "amendments": [
+      {
+        "prior_sha256": "598ff19be393daf7cfca29672f573a39e5e4ed296111185d79005401c9f70a28",
+        "new_sha256": "309c343deac99bd6b0dcfc710c54f02aa8734ed12b7f488e75f5474527267561",
+        "note": "CLAIM-062 the implementation-cycle amendments (the #93/#95 precedent class, each disclosed): (1) the extract invocation path corrected to harness/extract.py's own CLI (the commands.py registry exposes extract_source as a callable, never a subparser \u2014 the EXT suite's own form; observed at the first GREEN run as exit 2 invalid-choice, repaired in the same chain); (2) the int/str CLI argument forms. Assertions unchanged \u2014 CON-01..07's pins identical",
+        "observed_at": "2026-11-05T20:10:23.570004+00:00"
+      }
+    ]
   }
 }

@@ -399,6 +399,12 @@ def main() -> int:
         pg.drop_scratch_db(db8b)
 
         # ---- EXP-09 — the rebuild (the derived layer re-derives)
+        # P4-00a amendment (CLAIM-062, disclosed): the search arm now ALWAYS
+        # prints the column header (the labeled form — CON-05; the Phase 3
+        # exit gate's routed repair), so the EMPTY-index search answers with
+        # the header ALONE — zero result rows, never pure silence. The pin's
+        # substance is unchanged: the index is empty pre-rebuild and the
+        # searches answer exactly as the source post-rebuild.
         app_sql(DST, "DELETE FROM arv.keyword_index;")
         empty_search = cli(str(REPO / "harness" / "query.py"), "search", "--owner", "A",
                            "welkin", env=dst_env)
@@ -407,7 +413,9 @@ def main() -> int:
                     "welkin", env=dst_env)
         s_src = cli(str(REPO / "harness" / "query.py"), "search", "--owner", "A",
                     "welkin", env=ENV)
-        ok9 = (empty_search.returncode == 0 and not empty_search.stdout.strip()
+        _empty_lines = [ln for ln in empty_search.stdout.strip().split("\n") if ln.strip()]
+        ok9 = (empty_search.returncode == 0
+               and _empty_lines == ["# kind|entity_id|revision|matched_terms"]
                and rb.returncode == 0 and "status=committed" in rb.stdout
                and s_dst.returncode == 0 and bool(s_dst.stdout.strip())
                and sorted(s_dst.stdout.strip().split("\n")) == sorted(s_src.stdout.strip().split("\n")))

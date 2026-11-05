@@ -304,7 +304,9 @@ def do_restore(archive: str, crash_at: str) -> int:
     nrows = sum(len(v) for v in tables.values())
     print(f"RESTORED owner={owner} ledger_as_of={ledger_as_of} "
           f"backup_expiry=the D-029 documented window bounds this archive's resurrection exposure "
-          f"tables={len(TABLES)} rows={nrows} state_hash_match=true")
+          f"tables={len(TABLES)} rows={nrows} state_hash_match=true "
+          f"state=restored derived_state=pending_rebuild "
+          f"rebuild=extract_source+rebuild_keyword_index")
     return 0
 
 

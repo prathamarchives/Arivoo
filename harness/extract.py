@@ -251,7 +251,7 @@ def _complete(sess: "Session", *, db, owner, actor, client_id, idem_key, gen_id,
         sess.kill()
         return 2
     print(f"ACK command=extract_source idem_key={idem_key} status=committed "
-          f"result_ref={gen_id} source_id={source_id}")
+          f"result_ref={gen_id} source_id={source_id} durability_rung=local_durable")
     return 0
 
 
@@ -330,7 +330,7 @@ def extract_source(*, db, owner, actor, client_id, idem_key, source_id,
                 return 1
             if gstate != "building":
                 print(f"ACK command=extract_source idem_key={idem_key} status=replayed "
-                      f"result_ref={gid} source_id={source_id} state={gstate}")
+                      f"result_ref={gid} source_id={source_id} state={gstate} durability_rung=local_durable")
                 return 0
             gen_id = gid  # the crashed attempt: the SAME key resumes THIS ordinal
         else:

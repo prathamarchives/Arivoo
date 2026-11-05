@@ -463,7 +463,7 @@ def _import_build(*, owner, actor, client_id, idem_key, title, work_id, digest,
                      f"{_q(idem_key)}, {_q(ts)});")
         stmts.append(f"UPDATE arv.import_journal SET state='complete', source_id={_q(sid)}, updated_at={_q(ts)} "
                      f"WHERE owner_scope={_q(owner)} AND idempotency_key={_q(idem_key)};")
-        return sid, stmts, f" work_id={new_work}"
+        return sid, stmts, f" work_id={new_work} durability_rung=local_durable"
     return build
 
 
@@ -532,7 +532,7 @@ def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=
                 return 1
             wid_ack = _sess_row(sess, f"SELECT work_id || '|' FROM arv.source WHERE id={_q(recorded_ref)};")
             print(f"ACK command=import_source idem_key={idem_key} status=replayed result_ref={recorded_ref}"
-                  f" work_id={wid_ack.split('|')[0] if wid_ack else ''}")
+                  f" work_id={wid_ack.split('|')[0] if wid_ack else ''} durability_rung=local_durable")
             return 0
         jrowj = _sess_row(sess, f"SELECT row_to_json(j) || '|' FROM (SELECT body_hash, client_id FROM "
                                 f"arv.import_journal WHERE idempotency_key={_q(idem_key)}) j;")

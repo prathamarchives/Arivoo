@@ -109,6 +109,13 @@ def query(*args, env=None) -> subprocess.CompletedProcess:
     return cli(str(REPO / "harness" / "query.py"), *args, env=env or ENV)
 
 
+def extract(*args, env=None) -> subprocess.CompletedProcess:
+    # the extraction CLI is its own module (extract.py's own argparse — the
+    # commands.py registry exposes it as a callable, never a subparser; the
+    # EXT suite's own invocation form)
+    return cli(str(REPO / "harness" / "extract.py"), *args, env=env or ENV)
+
+
 def export(*args, env=None) -> subprocess.CompletedProcess:
     return cli(str(REPO / "harness" / "export.py"), *args, env=env or ENV)
 
@@ -134,14 +141,15 @@ def main() -> int:
         for ln in r_imp.stdout.splitlines():
             if ln.startswith("ACK") and "result_ref=" in ln:
                 sid = ln.split("result_ref=")[1].split()[0]
-        r_ext = cmd("extract_source", "--source-id", sid, key="ext-1")
-        r_hl = cmd("create_highlight", "--source-id", sid, "--start", 0,
-                   "--end", 30, key="hl-1")
+        r_ext = extract("--owner", "A", "--actor", "owner", "--client-id", "cli-1",
+                        "--idem-key", "ext-1", "--source-id", sid)
+        r_hl = cmd("create_highlight", "--source-id", sid, "--start", "0",
+                   "--end", "30", key="hl-1")
         hid = ""
         for ln in r_hl.stdout.splitlines():
             if ln.startswith("ACK") and "result_ref=" in ln:
                 hid = ln.split("result_ref=")[1].split()[0]
-        cmd("create_bookmark", "--source-id", sid, "--start", 0, "--end", 10,
+        cmd("create_bookmark", "--source-id", sid, "--start", "0", "--end", "10",
             key="bm-1")
         cmd("create_note", "--content", "the quiet harbor note",
             "--ref", f"highlight:{hid}@1", key="nt-1")
@@ -157,7 +165,8 @@ def main() -> int:
               "commands.py's import arms: append durability_rung=local_durable to the committed extra and the replayed ack line — the same vocabulary the capture/bookmark/note families already carry")
 
         # ---- CON-02 — the extract ack truthfulness
-        r_ext2 = cmd("extract_source", "--source-id", sid, key="ext-1")
+        r_ext2 = extract("--owner", "A", "--actor", "owner", "--client-id", "cli-1",
+                         "--idem-key", "ext-1", "--source-id", sid)
         ok2 = (r_ext.returncode == 0 and r_ext2.returncode == 0
                and "durability_rung=local_durable" in r_ext.stdout
                and "durability_rung=local_durable" in r_ext2.stdout)

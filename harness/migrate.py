@@ -474,10 +474,23 @@ def verify(db: str, mdir: str) -> int:
 
 
 def main() -> int:
+    # P4-00a (CLAIM-062): a REAL --help — argparse prints usage and exits 0
+    # WITHOUT touching any database (the acceptance run's misfire: a help
+    # request EXECUTED the migration). parse_args runs before any connection.
+    import argparse
+    ap = argparse.ArgumentParser(
+        description="the migration runner (S1; D-036's fail-closed oracle) — "
+                    "applies harness/migrations/*.sql in version order under the "
+                    "arv.schema_migrations ledger; re-runnable (nothing to apply "
+                    "is a no-op, ARV-MIG-001)")
+    ap.add_argument("--verify", action="store_true",
+                    help="observation-only: report the applied/ledger state "
+                         "(ARV-MIG-013: verify creates NOTHING)")
+    a = ap.parse_args()
     cfg = pg.config()
     db = os.environ.get("PGDATABASE", "postgres")
     mdir = cfg["ARV_MIGRATIONS_DIR"]
-    if "--verify" in sys.argv:
+    if a.verify:
         return verify(db, mdir)
     # No pre-count bootstrap (the zero-effects contract): discovery, the
     # sequence check and the alphabet all fire before the first DB touch in run().

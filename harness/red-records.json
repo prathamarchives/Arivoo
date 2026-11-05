@@ -833,5 +833,15 @@
         "observed_at": "2026-11-05T12:08:26.392044+00:00"
       }
     ]
+  },
+  "harness/tests/test_export.py": {
+    "schema": 2,
+    "binding_commit": "f6cf5fb",
+    "binding_sha256": "2b6962b91aae8005a915483117c7de02fa8a38230c913c190b70992430df0464",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-060 (P3-09) the RED: the EXP-01..10 suite's RED observed at the exact predecessor 7df713b (CLAIM-059's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the export arm + migration 0013 absent), red-01.txt; the typed observed red per F-007",
+    "current_sha256": "2b6962b91aae8005a915483117c7de02fa8a38230c913c190b70992430df0464",
+    "amendments": []
   }
 }

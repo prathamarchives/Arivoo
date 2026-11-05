@@ -92,11 +92,11 @@
 - law at 328/400 + 599/800 + 1 migration.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: bc30dc0bd31dc3608824398a8ab7ea7eb8048f1bc1017ba42330a9109ac63e5c
-- reviewed_diff_sha256: 9e012ea54f3b0c4d5951abad0fc4a12144eacb8b4fffe253dbdf84fddb933a44
+- report sha256: a7017af1c92d6501a94e184a25790a35802cb8362434830516cdc02c240ce120
+- reviewed_diff_sha256: ead2e7b5759c57acc31ab24399acffd0ca4e43520bd8954193c0cbdb3e26407c
 - disposition: PASS
 - findings: 6 (open P0/P1: 0)
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): f730bda330304f9cb1465b39fd01ec4b33a0415d3013b4605505eb3a6f116d69
+- sheet sha256 (of the content above, excluding this line): 8d3d8048dea51c6e81a090910b58c52b963d5543b0d864f04142e45f265658a2

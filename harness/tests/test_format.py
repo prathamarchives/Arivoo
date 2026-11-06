@@ -138,8 +138,8 @@ def jlines(r: subprocess.CompletedProcess) -> list:
 def _digest_of(r: subprocess.CompletedProcess) -> str:
     """the refusal's named digest (the staged-bytes recovery key)"""
     for ln in r.stdout.splitlines():
-        if "digest=" in ln:
-            return ln.split("digest=")[1].split()[0].rstrip("')")
+        if "[digest=" in ln:
+            return ln.split("[digest=")[1].split("]")[0].strip().rstrip("')")
     return ""
 
 
@@ -258,7 +258,7 @@ def main() -> int:
 
         # ---- FMT-05 — ARV-FMT-003 (the undecodable/encrypted payload)
         enc = tmp / "enc.json"
-        enc.write_bytes(bytes(range(0, 64)))  # not valid UTF-8, not valid JSON
+        enc.write_bytes(bytes(range(0x80, 0xC0)) + b"\xff\xfe\xff")  # continuation bytes without a lead + BOM-garbage: NOT valid UTF-8
         r_f3 = cmd("import_source", "--title", "Undecodable",
                    "--file", str(enc), "--media-type", "application/json", key="f3-1")
         dg3 = _digest_of(r_f3)
@@ -281,12 +281,12 @@ def main() -> int:
               "the decode step in the format adapter with the typed refusal naming the digest")
 
         # ---- FMT-06 — the frozen contract on the new surface
-        r_abs = query("get-source", "--owner", "A", "--id", str(_uuid.uuid4()))
+        absent = str(_uuid.uuid4())
+        r_abs = query("get-source", "--owner", "A", "--id", absent)
         r_xo = query("get-source", "--owner", "B", "--id", jsid)
         ok6 = (r_abs.returncode == 1 and "FAIL ARV-QRY-001:" in r_abs.stdout
                and r_xo.returncode == 1
-               and r_abs.stdout.replace(str(_uuid.uuid4()), "<id>")
-               == r_xo.stdout.replace(jsid, "<id>")
+               and r_abs.stdout.replace(absent, "<id>") == r_xo.stdout.replace(jsid, "<id>")
                and "api_version=1" in r_j.stdout and "api_version=1" in r_t.stdout
                and all(row.get("api_version") == 1 for row in rows))
         check("FMT-06", ok6,

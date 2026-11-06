@@ -17,6 +17,7 @@ harness/capability.py D-041
 harness/extract.py D-041
 harness/gate.py D-041
 harness/red-records.json D-041
+harness/tests/test_bookmark.py D-041
 CLAIMS.md D-038
 STATE.md D-043
 AGENTS.md D-043

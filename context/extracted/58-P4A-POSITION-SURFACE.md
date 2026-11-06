@@ -17,3 +17,16 @@ The design boundary: the READER CLIENT is P4-B's separate repo — this slice la
 ## §3 — The slice chain (in flight)
 
 THE RED (LAW-11): test_position.py ALONE at the RED commit (tests-only, the LAW-11 form — red-01.txt honestly records 'migration 0014 present: False'; the migration lands with the GREEN, never the RED) — the POS registry (the save->reopen->return round-trip at the real boundary; the generation binding honest across a re-extraction — the serving-generation answer; the position read arm's no-oracle; the frozen ack grammar on the new verbs) — machinery-absent at the merged head `562b70f` (red-01.txt; the typed record bound to the RED commit). THE GREEN: the position commands + the read arm + the migration. The measured set + the SEV round + the artifact re-bind + the push + the PR + the five checks + the merge-gate review + the merge under INT-145 + the post-merge verification follow — NO PAUSE (INT-146).
+
+## §4 The close (LANDED — PR #101 = merge `269921ac`, 2026-11-06T16:53:46Z under INT-145)
+
+The slice landed with its full chain green: the five checks at the exact final head `28e3c4b` AND on the
+merge commit (all observed live); the merge-gate review D-042 (1a) `5803793140`; the flip/merge/restore
+with the protections re-read byte-equivalent; the branch deleted; 0 open PRs. The THREE-ROUND SEV CHAIN
+(round 1 BLOCKED — the dead-letter P1 + the scope P1 + the comment P3, repaired RED-first; round 2 BLOCKED
+— the repair's own undeclared test_sync.py P1 + the wording P3s, repaired; round 3 FINAL PASS — zero open
+P0/P1/P2/P3). The 16-record proof sheet; the five disclosed test amendments + the additive SYN-18 pin; the
+result_ref widening lossless for every landed family. The full merge account: record 59 §1 + CLAIM-066's
+rule-4 close row + WORKLOG Task 83. The EPUB coordinate-mapping question (the notverified's disclosed
+limit: byte-offset positions over EPUB-derived views may need their own mapping layer) rides the FOLLOWING
+slice's acceptance — never assumed compatible, never silently fixed.

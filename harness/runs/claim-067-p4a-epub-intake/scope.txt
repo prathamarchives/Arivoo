@@ -1,0 +1,24 @@
+# CLAIM-067 — P4-A slice three: the EPUB intake (the zip/XHTML adapter by the
+# stdlib path; PLAN's elaborated P4-A slice three card; record 59 §2). The
+# application/epub+zip intake through the EXISTING durability ladder — the
+# CLAIM-065 adapter registry's THIRD approved row; the stdlib-only container
+# walk (ARV-DEP-008); the typed epub-family refusals with staged bytes; the
+# matrix's third MEASURED row over a SYNTHETIC corpus (Q8's gate); the
+# position-surface composition arm. RED-first at CLAIM-066's merged head
+# 269921ac. Commit A carries the post-#101 reconciliation + record 59.
+# THE BOUNDED EXCLUSIONS: no DRM circumvention surface (an encrypted EPUB
+# refuses typed, the bytes staged); no PDF (the following slice); no
+# reader-client work (P4-B's repo).
+harness/tests/test_epub.py D-041
+harness/formats.py D-041
+harness/commands.py D-041
+harness/capability.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/59-P4A-EPUB-INTAKE.md D-042
+harness/runs/claim-067-p4a-epub-intake D-042

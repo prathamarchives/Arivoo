@@ -44,7 +44,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import blob  # noqa: E402
 from harness.commands import API_VERSION  # noqa: E402  # the version's ONE home
-from harness.formats import ADAPTERS  # noqa: E402  # P4-A slice one: the matrix DERIVES from the adapter registry (formats.py) — ONE home: the adapter declares, the matrix reports
+from harness.formats import ADAPTERS, _FmtRefusal, read_text  # noqa: E402  # P4-A slice one: the matrix DERIVES from the adapter registry (formats.py) — ONE home: the adapter declares, the matrix reports; P4-A slice three (CLAIM-067): read_text — the coverage's text domain is the DERIVED view (the epub's raw bytes are a zip, never a text decode's subject)
 from harness.query import _read, _refuse  # noqa: E402  # the shared owner-scoped read + the shared refusal form (one machinery, never a second)
 
 # P4-00c/P4-A: the DECLARED matrix — derived from formats.py's ADAPTERS (the
@@ -122,8 +122,11 @@ def _measure(db: str, owner: str, source_id: str) -> int:
         return 1
     count, covered = (int(x) for x in prow[0].split("|"))
     try:
-        text_len = len(blob.get(digest).decode("utf-8"))
-    except Exception:
+        # P4-A slice three (CLAIM-067): the ONE read_text home — the epub's
+        # coverage derives over its DERIVED view, exactly like the text
+        # formats' own bytes
+        text_len = len(read_text(media_type, digest))
+    except (UnicodeDecodeError, KeyError, _FmtRefusal):
         text_len = 0  # the unreadable-blob class: the counts stand, the coverage honestly 0
     row.update({"passages": count,
                 "coverage": round(covered / text_len, 6) if text_len else 0.0})

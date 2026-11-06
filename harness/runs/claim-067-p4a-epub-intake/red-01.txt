@@ -1,0 +1,20 @@
+CLAIM-067 — the observed RED (LAW-11: tests-only, committed BEFORE the implementation)
+
+Command: python3 harness/tests/test_epub.py
+Tree:    269921acf8e7ab2b3cbda7408902b53460309234 (CLAIM-066's merged head — the PR #101 merge)
+Exit:    1
+Output:
+  FAIL ARV-TEST-000: the P4-A slice three epub machinery is absent
+  (machinery-absent class; the matrix's application/epub+zip row present: False)
+  — the implementation lands after this RED, never before it (LAW-11)
+
+The machinery-absent probe: the capability matrix at the RED tree declares
+exactly two formats (text/plain + application/json — the CLAIM-065 landing);
+the application/epub+zip row, the epub adapter (formats.py's zip/XHTML walk),
+and the typed epub-family refusals (ARV-FMT-004/005/006) are each absent.
+The suite registered in gate.py's TESTS at this commit (the ARV-RED-008
+class: the registration honestly widens with the suite).
+
+Observed live at the exact tree above (the cheapest honest probe per
+surface). The implementation lands in the immediately-following commit,
+never before this RED.

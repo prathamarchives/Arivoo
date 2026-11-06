@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-067-p4a-epub-intake",
+  "base_sha": "269921acf8e7ab2b3cbda7408902b53460309234",
+  "reviewed_diff_sha256": "a3aee383eef6cb6f08a8532c5211f8f833b07003a82caeeda4583388e32d52f4",
+  "sheet_section": true,
+  "intent_ids": [
+    "INT-144",
+    "INT-145",
+    "INT-146"
+  ],
+  "requirement_ids": [
+    "SYS-06",
+    "SYS-09"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
+  "changed_components": [
+    "harness/formats.py (the registry's THIRD approved row application/epub+zip; the stdlib-only EPUB walk \u2014 zipfile + xml.etree + html.parser; the typed ARV-FMT-004/005/006 refusals with staged bytes; read_text \u2014 the ONE home for the readable text of a stored source)",
+    "harness/commands.py (the keyword-index ride at import + the rebuild's source AND bookmark arms routed through read_text; the highlight/bookmark/position offset validations over the DERIVED view; the position's ONE read widened with media_type)",
+    "harness/extract.py (the decode routed through read_text \u2014 the pre-slice form decoded independently and would refuse a zip blob as ARV-EXT-002)",
+    "harness/capability.py (the coverage derives over the DERIVED view; the matrix still derives from ADAPTERS \u2014 no epub string in the file)",
+    "harness/tests/test_epub.py (the EPB-01..06 suite: the synthetic round-trip, the third measured row, the typed refusals, the composition arm, the stdlib/one-home laws, the rebuild's findability parity)"
+  ],
+  "interfaces_reviewed": [
+    "the import boundary's decode call order (CAP-009 -> FMT-001 -> staging -> the epub walk)",
+    "the read_text one-home contract across every text-access site",
+    "the staged-bytes contract (the digest named, the blob answers)",
+    "the position/highlight offset domain over the derived view",
+    "the spine-order reading (the derived text follows the OPF spine, never the zip order)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the EPB suite (run-01..03, 09..11) x6 green at the GREEN and final trees",
+      "the keyword_index suite at the repair tree (run-08)"
+    ],
+    "integration_verification": [
+      "make verify x3 (run-05, 06, 12) \u2014 all suites + the gate + the canonical layer 54/0",
+      "the position no-regression (run-04) + the blast-radius suites at the GREEN tree (format/import/extract/capture/highlight/bookmark/keyword/capability/commands/substrate)"
+    ],
+    "system_verification": [
+      "SYS-06 trace: the epub intake rides the ONE ladder with the typed zero-effect refusals whose staged bytes survive",
+      "SYS-09 trace: the derived view feeds search (the index rides it), the extraction generations, and the position surface unchanged"
+    ],
+    "validation": [
+      "the two-round SEV chain: round 1 BLOCKED (the rebuild's bookmark-arm P1 \u2014 the epub-anchored bookmark silently vanishing from search after rebuild \u2014 + the record-58 scope P2 + two routed P3s) repaired RED-first at b670997 with the additive EPB-06 pin; round 2 FINAL PASS zero open P0/P1/P2/P3 (the RED replayed by the reviewer, the repair live-proved)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "an epub-typed payload that is not a zip, or a zip without the container/OPF chain, or a reading order empty of readable text",
+      "control": "the typed ARV-FMT-004/005/006 refusals \u2014 zero effect, the digest named, the blob answers at it (the staged-bytes contract)",
+      "proof_ids": [
+        "run-01",
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "an epub-anchored entity silently vanishing from search after the keyword-index rebuild",
+      "control": "the rebuild's every arm routes through the ONE read_text home (the SEV round-1 P1 repair, pinned by EPB-06: the bookmark searchable before AND after)",
+      "proof_ids": [
+        "run-07",
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "a text-access site decoding the epub's raw zip bytes (the second decode path)",
+      "control": "the one-home law: zero blob.get(...).decode(...) survivors in harness/*.py (the round-2 reviewer's sweep); the read arm's refusals typed at every site",
+      "proof_ids": [
+        "run-12"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "the epub's derived view diverging between the import-time index and the later reads",
+      "control": "the walk is deterministic over digest-verified bytes (the same read_text re-derivation at every site; the spine-order probe)",
+      "proof_ids": [
+        "run-09",
+        "run-11"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the synthetic corpus only (Q8's gate \u2014 no real-EPUB stability claim); the walk's decompression bound (the routed P3 \u2014 an 80 MB chapter materialized in 0.40 s, the hardening follow-up); the partial-spine truncation (formats.py:261 \u2014 a partially-broken reading order imports its readable subset, the stricter form a follow-up decision); no DRM circumvention (the encrypted class refuses typed); no PDF (the following slice); no reader client (P4-B); the strip's deterministic form is not a layout claim (the EPUB-view position mapping question stands as disclosed at CLAIM-066); the mimetype-entry strictness not enforced (the lenient by-name read) \u2014 the full list at notverified.txt"
+  ],
+  "builder_context": "Super Z (GLM host) \u2014 the standing do-not-stop chain INT-134..146",
+  "reviewer_context": "two fresh-context SEV agents: agent-5d3d9a17 (round 1), agent-9b3f1d24 (round 2 FINAL)",
+  "disposition": "PASS",
+  "review_summary": "the two-round chain: round 1 BLOCKED (the rebuild's bookmark arm decoded the anchor's source bytes RAW \u2014 an epub-anchored bookmark searchable at creation SILENTLY VANISHED from search after rebuild_keyword_index, demonstrated live on the reviewer's own two-DB rig; + the record-58 scope path undeclared) repaired RED-first at b670997 (the arm's SELECT joins arv.source for the media type + the ONE read_text home; the additive EPB-06 pin with its RED observed: the vanish reproduced); round 2 FINAL PASS zero open P0/P1/P2/P3 (the RED replayed by the reviewer at the pre-repair tree; the repair live-proved: the epub bookmark survives the rebuild, pre==post exactly; the red-records chain exact; the one-home sweep clean \u2014 zero raw-decode survivors; all 24 diff paths declared)"
+}

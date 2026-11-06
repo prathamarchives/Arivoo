@@ -1,0 +1,7 @@
+{
+  "command": "env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-067-p4a-epub-intake python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "18715d373ef264f3a7301f39b8eecdd370a65f61",
+  "output_sha256": "2dbdf64e0cf78869c24298716c159eb2dbcbca0fe69a2bdd0bd7fb63a70113e3",
+  "recorded_at": "2026-11-06T18:58:42.307260+00:00"
+}

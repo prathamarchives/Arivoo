@@ -842,7 +842,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-059 (P3-08) the RED: the SYN-01..15 suite's RED observed at the exact predecessor 67e37fa (CLAIM-058's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the driver + migration 0012 absent), red-01.txt; the typed observed red per F-007",
-    "current_sha256": "4a4d8079855ae26d126831dba736dafe01d08c96ed540a64a25de3bf8636d988",
+    "current_sha256": "c25318b53b1d803a11c0410691a4d4d711815e2a22c4f338791a72ed45e0fdc4",
     "amendments": [
       {
         "prior_sha256": "d2158263fb30078c71c5874e85f781b12d5182605e917ca36420511d43a9b720",
@@ -855,6 +855,12 @@
         "new_sha256": "4a4d8079855ae26d126831dba736dafe01d08c96ed540a64a25de3bf8636d988",
         "note": "CLAIM-059 (P3-08) the SEV round-1 repair additions (RED-first: SYN-16/17 observed FAILING at 2ec3d11, red-02.txt \u2014 the fresh-context verifier agent-syn-sev-r1 returned BLOCKED with F2 (P0, the divergent identity bridge: after a creator's 409 conflict the referencer delivered against the server's COMPETING entity and was stamped acknowledged) + F1 (P1, the poisoned-payload walk crash: an unhandled JSONDecodeError blocked every later row permanently); the pins SYN-16 (the poisoned payload \u2192 the named ARV-SYN-013 terminal failure, the walk continues) + SYN-17 (the divergent bridge \u2192 the referencer holds the named ARV-SYN-009 dependency, the competing entity never gains the local lineage's effect) added RED-first, both observed failing, then repaired: the bridge soundness gate (only acknowledged creators translate) + the per-row containment)",
         "observed_at": "2026-11-05T12:08:26.392044+00:00"
+      },
+      {
+        "prior_sha256": "4a4d8079855ae26d126831dba736dafe01d08c96ed540a64a25de3bf8636d988",
+        "new_sha256": "c25318b53b1d803a11c0410691a4d4d711815e2a22c4f338791a72ed45e0fdc4",
+        "note": "the SEV round-1 F1 repair's pin (CLAIM-066): SYN-18 ADDED \u2014 the position delivery (the save_position outbox row delivers through the translated source id, binds the server's own serving generation per the site-local binding law, acks <server-source>@<ordinal>, acknowledges with server_ref, and the server's read arm answers the delivered row). The RED observed at the pre-repair tree: FAIL SYN-18, the dead letter (sync.py _cli_args carried no save_position branch \u2014 the enqueue rode _SYNC_COMMANDS but the delivery refused ARV-SYN-000, the row resting retryable with the named reason; the server never received a single save). Purely additive: SYN-01..17 untouched, no assertion removed",
+        "observed_at": "2026-11-06T15:47:59.264672+00:00"
       }
     ]
   },

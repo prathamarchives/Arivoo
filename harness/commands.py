@@ -1388,9 +1388,10 @@ def rebuild_keyword_index(*, db, owner, actor, client_id, idem_key,
     def build(sess: "Session", body_hash: str):
         ts = clock.now()
         stmts = _kwr_rebuild_stmts(sess, owner, ts)
-        # the run's identity ref (command_log.result_ref is a UUID — the owner
-        # name is NOT a valid ref; the rebuild owns no entity, its ref is the
-        # run itself)
+        # the run's identity ref (command_log.result_ref carries each family's
+        # address form — a uuid text for entity commands, <source>@<ordinal>
+        # for positions, TEXT since 0014; the owner name is NOT a valid ref;
+        # the rebuild owns no entity, its ref is the run itself)
         return ids.new_id(), stmts, " index=rebuilt durability_rung=local_durable"
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,

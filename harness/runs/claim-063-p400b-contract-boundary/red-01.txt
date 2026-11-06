@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the P4-00b client-contract machinery is absent (machinery-absent class; the write ack's api_version token: 'ACK command=record_event idem_key=probe-1 status=committed result_ref=01a1aec4-2185-7baf-b9c0-712ceeb4a0e9') — the implementation lands after this RED, never before it (LAW-11)

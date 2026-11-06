@@ -135,8 +135,8 @@ def main() -> int:
         cond = client.condition_forbidden_source(ENV, walk)
         ok2 = (cond["read_absent"] == cond["read_foreign"]           # the no-oracle, read path
                and cond["write_absent"] == cond["write_foreign"]     # the no-oracle, write path
-               and cond["read_absent"].startswith("ARV-QRY-001")
-               and cond["write_absent"].startswith("ARV-POS-001")
+               and "FAIL ARV-QRY-001:" in cond["read_absent"]
+               and "FAIL ARV-POS-001:" in cond["write_absent"]
                and cond["foreign_extract"].startswith("ARV-EXT-004"))
         check("CAC-02", ok2,
               "auth/owner-scope expiration + forbidden source: another owner's data is the "
@@ -149,13 +149,13 @@ def main() -> int:
         # ---- CAC-03 — malformed DTO
         cond = client.condition_malformed_dto(ENV, walk)
         ok3 = (cond["offset_law"].startswith("ARV-CAP-003")
-               and cond["content_law"].startswith("ARV-NTE-004")
+               and cond["content_law"].startswith("ARV-NTE-010")
                and cond["format_law"].startswith("ARV-FMT-001")
                and cond["position_law"].startswith("ARV-POS-003")
                and cond["zero_effect"])
         check("CAC-03", ok3,
               "malformed DTO: the typed refusals at every command boundary — the offset law "
-              "(ARV-CAP-003, never clamped), the content law (ARV-NTE-004), the format law "
+              "(ARV-CAP-003, never clamped), the content law (ARV-NTE-010 — the channel law: neither/both content channels), the format law "
               "(ARV-FMT-001), the position law (ARV-POS-003) — each zero-effect (the row "
               "counts unchanged across all four)",
               "the landed typed-refusal contracts observed through the clean driver")
@@ -206,10 +206,11 @@ def main() -> int:
                and cond["generation_changed"] is True
                and cond["saved_generation_stable"] is True
                and cond["generation_matches"] is False
-               and cond["offsets_unchanged"] is True)
+               and cond["offsets_unchanged"] is True
+               and cond["saved_before_matches"])
         check("CAC-07", ok7,
               "stale source version: the generation binding honest across a re-extraction — "
-              "the saved offsets byte-unchanged, the saved_generation_id stable, "
+              "the saved offsets byte-unchanged (before == after the re-extraction), the saved_generation_id stable, "
               "generation_matches=false (the client is TOLD the view moved, never silently "
               "retargeted)",
               "the landed serving-generation contract observed through the clean driver")

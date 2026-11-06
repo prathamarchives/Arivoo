@@ -1061,7 +1061,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the CAC suite's observed RED at commit cdca73ab (machinery-absent ARV-TEST-000: harness/client.py \u2014 the clean external client driver \u2014 absent at the RED tree 101e173; exit 1, red-01.txt at harness/runs/claim-069-p4b-client-acceptance/)",
-    "current_sha256": "2401c6219a03246bfe93d6d83f5695432d87aae7a8f5cac000bbe11ad99ee812",
-    "amendments": []
+    "current_sha256": "6a67a2ee659301d9b0592c5c24f3f2ab99a28d0bfb3ba01f092dd23f214691dc",
+    "amendments": [
+      {
+        "prior_sha256": "2401c6219a03246bfe93d6d83f5695432d87aae7a8f5cac000bbe11ad99ee812",
+        "new_sha256": "6a67a2ee659301d9b0592c5c24f3f2ab99a28d0bfb3ba01f092dd23f214691dc",
+        "note": "the three implementation-cycle amendments (disclosed in the GREEN commit): (1) the content law's code corrected to ARV-NTE-010 (the channel law \u2014 neither/both content channels; the RED draft named ARV-NTE-004, the tombstone-alternation law \u2014 a wrong-code pin, never green); (2) CAC-02's refusal checks accept the FAIL-prefixed line form ('FAIL ARV-QRY-001:' in the line \u2014 the driver returns the FULL first FAIL line for the byte-equality compare; the startswith form could never match); (3) CAC-07's offsets comparison moved to BEFORE-vs-AFTER the re-extraction (the honest form: the earlier conditions legitimately advance the position, and the re-extraction must change NOTHING about whatever row is saved \u2014 the RED's walk-offsets comparison conflated the two) + the driver docstring's law line reworded off the literal database-tool token (the suite's own mechanical scan reads the source; the law stated without tripping its own gate). Purely additive/strengthening: no assertion removed",
+        "observed_at": "2026-11-06T20:38:54.084238+00:00"
+      }
+    ]
   }
 }

@@ -1,0 +1,18 @@
+CLAIM-069 — the observed RED (LAW-11: tests-only, committed BEFORE the implementation)
+
+Command: python3 harness/tests/test_client_acceptance.py
+Tree:    101e173b27cdff0b9fdcd9e70105d80b0eb96974 (CLAIM-068's merged head — the PR #103 merge)
+Exit:    1
+Output:
+  FAIL ARV-TEST-000: the P4-B slice one client-acceptance machinery is absent
+  (machinery-absent class; harness/client.py importable with the walk driver:
+  False) — the implementation lands after this RED, never before it (LAW-11)
+
+The machinery-absent probe: at the RED tree harness/client.py (the clean
+external client driver — P4-F's named proof vehicle: the walk + the nine
+adversarial conditions as reusable driver functions) is absent. The suite
+registered in gate.py's TESTS at this commit (the ARV-RED-008 class).
+
+Observed live at the exact tree above (the cheapest honest probe per
+surface). The implementation lands in the immediately-following commit,
+never before this RED.

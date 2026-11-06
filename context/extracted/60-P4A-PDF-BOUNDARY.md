@@ -57,3 +57,16 @@ reproduction) → the push → the PR → the five checks at the exact final hea
 review (D-042 (1a)) → **the merge under INT-145** → the post-merge verification (the five checks
 on the merge commit observed live) → P4-B..F → the Phase 4 exit gate — NO PAUSE EVEN FOR UPDATES
 (INT-146).
+
+## §4 The close (LANDED — PR #103 = merge `101e173`, 2026-11-06T20:21:34Z under INT-145)
+
+The slice landed with its full chain green: the five checks at the exact final head `1c8ea11` AND
+on the merge commit (all observed live); the merge-gate review D-042 (1a) `5806451549`; the
+flip/merge/restore with the protections re-read byte-equivalent; the branch deleted; 0 open PRs.
+The ONE-ROUND SEV CHAIN (agent-9c4e2f17 PASS — zero open P0/P1/P2/P3-blocking; three P3 notes
+routed/recorded in notverified). The 7-record proof sheet (the trusted-gate reproduction green on
+the first attempt). The slice's own catch: the machinery-absent probe made DB-free (the
+ambient-DB + fixed-key replay class, the amendment chained + disclosed). THE PHASE MARK: P4-A
+COMPLETE — all four slices landed (JSON by the ladder, the position surface, the EPUB intake,
+the PDF boundary). The full merge account: record 61 §1 + CLAIM-068's rule-4 close row + WORKLOG
+Task 85.

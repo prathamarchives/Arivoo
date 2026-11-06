@@ -1,0 +1,29 @@
+# CLAIM-069 — P4-B slice one: the client-shaped adversarial acceptance path
+# (the clean EXTERNAL client harness over the landed API; PLAN's P4-B row
+# elaborated one phase deep at P4-A's landing; record 61 §2). The reader
+# client itself is P4-B's SEPARATE authorized repo (never this one) — this
+# slice lands the BACKEND's proof of the client contract: a scripted driver
+# over the real CLIs (no privileged paths, never a table write) exercising
+# P4-B's named adversarial conditions at the real boundary (auth/owner-scope
+# expiration, forbidden source, malformed DTO, offline +
+# timeout-with-uncertain-ack, duplicate click, reload/restart, stale source
+# version, deleted target, retry-after-lost-response). RED-first at
+# CLAIM-068's merged head 101e173.
+# THE BOUNDED EXCLUSIONS: no reader-client UI (the separate repo); no
+# product tables touched by the harness; no new product surface. THE MACHINERY THIS
+# SLICE LANDS: harness/client.py — the CLEAN EXTERNAL CLIENT DRIVER (P4-F's named
+# proof vehicle: a thin scripted client over the real CLIs, the walk + the nine
+# adversarial conditions as reusable driver functions; test-side infrastructure,
+# never a product surface).
+harness/tests/test_client_acceptance.py D-041
+harness/client.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/60-P4A-PDF-BOUNDARY.md D-042
+context/extracted/61-P4B-CLIENT-ACCEPTANCE.md D-042
+harness/runs/claim-069-p4b-client-acceptance D-042

@@ -961,5 +961,15 @@
         "observed_at": "2026-11-06T06:05:08.413345+00:00"
       }
     ]
+  },
+  "harness/tests/test_format.py": {
+    "schema": 2,
+    "binding_commit": "f0e038aafa9ee6d9e4e22f7e2007bbd6cb9021bb",
+    "binding_sha256": "84b266bda7ca544913da6a0c8cfcdb6bf944e8f5061117c7e673e3be3cf673b4",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the FMT suite's observed RED at commit f0e038a (machinery-absent ARV-TEST-000: the matrix's application/json row absent \u2014 exit 1, red-01.txt at harness/runs/claim-065-p4a-format-intake-json/)",
+    "current_sha256": "84b266bda7ca544913da6a0c8cfcdb6bf944e8f5061117c7e673e3be3cf673b4",
+    "amendments": []
   }
 }

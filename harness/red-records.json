@@ -1036,5 +1036,15 @@
         "observed_at": "2026-11-06T18:35:36.746057+00:00"
       }
     ]
+  },
+  "harness/tests/test_pdf.py": {
+    "schema": 2,
+    "binding_commit": "e4a52b8435b56f4b49026f82e0377651f4e0eaac",
+    "binding_sha256": "c2f9837a15edd72dd2e74a665c8cfa69d58d3ec7fce38db32bc9e07f64305451",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the PDF suite's observed RED at commit e4a52b84 (machinery-absent ARV-TEST-000: the application/pdf import refusing ARV-FMT-001 at the RED tree 237d4d8 \u2014 the passthrough carries application/octet-stream only; exit 1, red-01.txt at harness/runs/claim-068-p4a-pdf-boundary/)",
+    "current_sha256": "c2f9837a15edd72dd2e74a665c8cfa69d58d3ec7fce38db32bc9e07f64305451",
+    "amendments": []
   }
 }

@@ -20,6 +20,7 @@ harness/migrations/0014_reading_position.sql D-041
 harness/gate.py D-041
 harness/sync.py D-041
 harness/crash.py D-041
+harness/tests/test_sync.py D-041
 harness/red-records.json D-041
 CLAIMS.md D-038
 STATE.md D-043

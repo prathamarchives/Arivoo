@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the P4-00c capability machinery is absent (machinery-absent class; capability.py matrix exit 2; the README's frozen forms present: False) — the implementation lands after this RED, never before it (LAW-11)

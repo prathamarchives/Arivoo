@@ -56,6 +56,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import blob, clock, ids  # noqa: E402
 from harness.commands import API_VERSION  # noqa: E402  # P4-00b: the version token's ONE home (commands.py) — never a second constant
+from harness.formats import _FmtRefusal, read_text  # noqa: E402  # P4-A slice three (CLAIM-067): the ONE read_text home — the epub's derived view is the extraction's text domain (the pre-slice form decoded independently and would refuse a zip blob as ARV-EXT-002)
 from harness.commands import (MARK_BEGUN, MARK_COMMITTED, MARK_INSERTS,  # noqa: E402
                               Session, _CONN, _dead_exit, _q, _sess_row,
                               canonical_body)
@@ -271,8 +272,9 @@ def extract_source(*, db, owner, actor, client_id, idem_key, source_id,
     sess = Session(db, "arv_app", owner)
     sess.send("\\set VERBOSITY verbose")  # verbose stderr: 'ERROR:  <SQLSTATE>: <msg>' — the CODE classifies
     try:
-        digest = _sess_row(sess, f"SELECT digest || '|' FROM arv.source "
-                                 f"WHERE id={_q(source_id)};").split("|")[0]
+        _src = _sess_row(sess, f"SELECT digest || '|' || media_type FROM arv.source "
+                                 f"WHERE id={_q(source_id)};")
+        digest, media_type = _src.split("|", 1) if _src else ("", "")
         if not digest:
             print(f"FAIL ARV-EXT-004: source {source_id} does not exist in the caller's scope — "
                   "a cross-owner or dangling extraction target is REFUSED at the boundary (RTM §6)")
@@ -280,7 +282,7 @@ def extract_source(*, db, owner, actor, client_id, idem_key, source_id,
                   "version visible to this owner")
             return 1
         try:
-            data = blob.get(digest)
+            blob.get(digest)  # the verify: readable AND digest-matched (get re-hashes) — read_text re-reads through the same store
         except KeyError as e:
             print(f"FAIL ARV-CAP-004: the source's blob failed to verify — "
                   f"{e.args[0] if e.args else e}")
@@ -288,12 +290,25 @@ def extract_source(*, db, owner, actor, client_id, idem_key, source_id,
                   "against unverifiable bytes")
             return 1
         try:
-            text = data.decode("utf-8")
+            # P4-A slice three (CLAIM-067): the ONE read_text home — the text
+            # formats decode, the epub re-derives its container walk, the
+            # octet-stream passthrough decodes (the readable-text boundary is
+            # the DECODE, never the media type — the landed EXT-02/EXT-03)
+            text = read_text(media_type, digest)
         except UnicodeDecodeError:
             print("FAIL ARV-EXT-002: the source is not valid UTF-8 text — the readable-text "
                   "boundary (the DECODE, never the media type); the extraction never guesses a text")
             print("      repair: import readable UTF-8 text bytes — the boundary is the decode, "
                   "not the media type; binary formats land with their own slices")
+            return 1
+        except _FmtRefusal as r:
+            # the epub derivation's own refusal (unreachable for a source that
+            # passed the import walk — the derivation is deterministic over
+            # digest-verified bytes; the arm is the honest backstop, the code
+            # visible, never a crash)
+            print(f"FAIL ARV-EXT-002: the source's derived text cannot be produced — {r}")
+            print("      repair: the store's bytes changed under the digest (the corruption "
+                  "class); never an extraction against an underivable view")
             return 1
         if "\x00" in text:
             print("FAIL ARV-EXT-005: the source text contains a NUL character (U+0000) — the "

@@ -1021,7 +1021,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the EPB suite's observed RED at commit 319bed5 (machinery-absent ARV-TEST-000: the matrix's application/epub+zip row, the epub adapter, and the typed ARV-FMT-004/005/006 refusals each absent at the RED tree 269921ac \u2014 exit 1, red-01.txt at harness/runs/claim-067-p4a-epub-intake/)",
-    "current_sha256": "61aaf0b7b522eb9ffdf9616b6d398e32b165fc2187efef67fcf49f4703012f5a",
-    "amendments": []
+    "current_sha256": "9c60fa111d42a4036aeb991f9800260fa378c370258478d1cc0ac353132ea093",
+    "amendments": [
+      {
+        "prior_sha256": "61aaf0b7b522eb9ffdf9616b6d398e32b165fc2187efef67fcf49f4703012f5a",
+        "new_sha256": "9c60fa111d42a4036aeb991f9800260fa378c370258478d1cc0ac353132ea093",
+        "note": "the two implementation-cycle amendments (disclosed in the GREEN commit): (1) the matrix-equality probe drops the matrix row's OWN 'format' key before comparing to the registry entry (the row carries format+api_version as RENDERING keys \u2014 the registry entry's capability fields are the comparison domain; the RED's form included 'format' in the compared dict, an inequality by construction, never green); (2) the draft text-length probe removed (a dead first probe superseded by the digest-row probe one line below \u2014 the working tree carried both; no assertion changed)",
+        "observed_at": "2026-11-06T17:20:54.846590+00:00"
+      }
+    ]
   }
 }

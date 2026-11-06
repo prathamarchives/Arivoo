@@ -284,7 +284,7 @@ def main() -> int:
         from harness.formats import ADAPTERS  # noqa: E402
         reg_epub = dict(ADAPTERS.get("application/epub+zip", {}))
         mat_epub = {k: v for k, v in fmts.get("application/epub+zip", {}).items()
-                    if k != "api_version"}
+                    if k not in ("api_version", "format")}
         ok2 = (r_mat.returncode == 0
                and "application/epub+zip" in fmts
                and fmts["application/epub+zip"].get("native_text") is False

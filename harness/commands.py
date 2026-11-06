@@ -34,7 +34,7 @@ import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import pg, clock, ids, blob  # noqa: E402
-from harness.formats import _FmtRefusal, check_registered, decode  # noqa: E402  # P4-A slice one: the format adapter registry — ONE home (formats.py), the import boundary the only caller
+from harness.formats import _FmtRefusal, check_registered, decode, read_text  # noqa: E402  # P4-A slice one: the format adapter registry — ONE home (formats.py), the import boundary the only caller; P4-A slice three (CLAIM-067): read_text — the ONE home for 'the readable text of a stored source' (the derived view feeds extraction, the keyword index, and the offset validations)
 
 MARK_CHECK = "MARK:CHECK"
 MARK_BEGUN = "MARK:BEGUN"
@@ -641,10 +641,13 @@ def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=
                                             byte_size=len(data), acquired_via=acquired_via)(sess2, body_hash)
             # P3-07: the source's full decoded text rides the SAME metadata
             # transaction (the explicit-lag contract — a committed source is
-            # searchable immediately; a refused import leaves zero rows)
+            # searchable immediately; a refused import leaves zero rows).
+            # P4-A slice three (CLAIM-067): the text-access routes through the
+            # ONE home — the epub's derived view indexes exactly like the text
+            # formats' own bytes
             try:
-                src_text = blob.get(digest).decode("utf-8")
-            except (UnicodeDecodeError, KeyError):
+                src_text = read_text(media_type, digest)
+            except (UnicodeDecodeError, KeyError, _FmtRefusal):
                 src_text = ""  # the non-text boundary: the source commits; the findability rung indexes text only
             return sid, stmts + _kwr_index_stmts(owner, "source", sid, 1, [src_text], clock.now()), ack
 
@@ -675,7 +678,9 @@ def create_highlight(*, db, owner, actor, client_id, idem_key, source_id,
                               "import the source first; a capture may only anchor into a source version visible to this owner")
         digest, media_type = row.split("|")
         try:
-            text = blob.get(digest).decode("utf-8")
+            # P4-A slice three (CLAIM-067): the ONE read_text home — the
+            # epub's derived view is the offset domain
+            text = read_text(media_type, digest)
         except UnicodeDecodeError:
             raise _CapRefusal("ARV-CAP-008",
                               f"source {source_id} is not valid UTF-8 text (P3-01 supports readable text/Markdown — the media-type boundary)",
@@ -683,6 +688,14 @@ def create_highlight(*, db, owner, actor, client_id, idem_key, source_id,
         except KeyError as e:
             raise _CapRefusal("ARV-CAP-004", f"the source's blob failed to verify — {e}",
                               "the store is corrupt at this digest; never a capture against unverifiable bytes")
+        except _FmtRefusal as r:
+            # the epub derivation's own refusal (unreachable for a source that
+            # passed the import walk — the derivation is deterministic over
+            # digest-verified bytes; the arm is the honest backstop, never a
+            # crash)
+            raise _CapRefusal("ARV-CAP-008",
+                              f"source {source_id}'s derived text cannot be produced — {r}",
+                              "the store's bytes changed under the digest (the corruption class); never a capture against an underivable view")
         if not (0 <= start < end <= len(text)):
             raise _CapRefusal("ARV-CAP-003",
                               f"offsets [{start},{end}) are invalid for a {len(text)}-character text — never clamped, never guessed",
@@ -763,7 +776,8 @@ def revise_highlight(*, db, owner, actor, client_id, idem_key, id_,
                               "the store is corrupt at this id; the identity-fix refuses, never a guess")
         digest, media_type = row.split("|")
         try:
-            text = blob.get(digest).decode("utf-8")
+            # P4-A slice three (CLAIM-067): the ONE read_text home
+            text = read_text(media_type, digest)
         except UnicodeDecodeError:
             raise _CapRefusal("ARV-CAP-008",
                               f"source {source_id} is not valid UTF-8 text (the media-type boundary)",
@@ -771,6 +785,10 @@ def revise_highlight(*, db, owner, actor, client_id, idem_key, id_,
         except KeyError as e:
             raise _CapRefusal("ARV-CAP-004", f"the source's blob failed to verify — {e}",
                               "the store is corrupt at this digest; never a revision against unverifiable bytes")
+        except _FmtRefusal as r:
+            raise _CapRefusal("ARV-CAP-008",
+                              f"source {source_id}'s derived text cannot be produced — {r}",
+                              "the store's bytes changed under the digest (the corruption class); never a revision against an underivable view")
         if not (0 <= start < end <= len(text)):
             raise _CapRefusal("ARV-CAP-003",
                               f"offsets [{start},{end}) are invalid for a {len(text)}-character text — "
@@ -867,7 +885,8 @@ def _derive_anchor(sess: "Session", *, source_id, start, end, owner, actor,
                           "import the source first; a bookmark may only anchor into a source version visible to this owner")
     digest, media_type = row.split("|")
     try:
-        text = blob.get(digest).decode("utf-8")
+        # P4-A slice three (CLAIM-067): the ONE read_text home
+        text = read_text(media_type, digest)
     except UnicodeDecodeError:
         raise _CapRefusal("ARV-CAP-008",
                           f"source {source_id} is not valid UTF-8 text (P3-01 supports readable text/Markdown — the media-type boundary)",
@@ -875,6 +894,10 @@ def _derive_anchor(sess: "Session", *, source_id, start, end, owner, actor,
     except KeyError as e:
         raise _CapRefusal("ARV-CAP-004", f"the source's blob failed to verify — {e}",
                           "the store is corrupt at this digest; never a bookmark against unverifiable bytes")
+    except _FmtRefusal as r:
+        raise _CapRefusal("ARV-CAP-008",
+                          f"source {source_id}'s derived text cannot be produced — {r}",
+                          "the store's bytes changed under the digest (the corruption class); never a bookmark against an underivable view")
     if not (0 <= start < end <= len(text)):
         raise _CapRefusal("ARV-CAP-003",
                           f"offsets [{start},{end}) are invalid for a {len(text)}-character text — never clamped, never guessed",
@@ -1315,13 +1338,15 @@ def _kwr_rebuild_stmts(sess: "Session", owner: str, ts: str) -> list:
     # sources: the FULL decoded text re-read from the verified blob (the same
     # text the import indexed — the findability rung indexes the source as
     # imported, the passage-level granularity is the extraction slice's own)
+    # P4-A slice three (CLAIM-067): the rebuild reads the media type too — the
+    # ONE read_text home (the epub's derived view re-derives identically)
     for row in _sess_rows(sess,
-            f"SELECT id || '|' || digest FROM arv.source "
+            f"SELECT id || '|' || media_type || '|' || digest FROM arv.source "
             f"WHERE owner_scope={_q(owner)} ORDER BY id;"):
-        sid, digest = row.split("|", 1)
+        sid, mt, digest = row.split("|", 2)
         try:
-            text = blob.get(digest).decode("utf-8")
-        except (UnicodeDecodeError, KeyError):
+            text = read_text(mt, digest)
+        except (UnicodeDecodeError, KeyError, _FmtRefusal):
             text = ""  # the non-text boundary: not indexed, never a rebuild refusal
         stmts += _kwr_index_stmts(owner, "source", sid, 1, [text], ts)
 # highlights: the current revision's selected text + the anchor windows
@@ -1582,9 +1607,12 @@ def save_position(*, db, owner, actor, client_id, idem_key, source_id,
     def build_txn(sess: "Session", body_hash: str):
         key = owner + "|" + source_id
         _sess_row(sess, f"SELECT hashtext({_q(key)}) || '|' || pg_advisory_xact_lock(hashtext({_q(key)}));")  # the lock FIRST, held to the commit
-        # ONE read: the source's digest + the CURRENT generation (the serving
-        # generation the new save binds; '' when none serves — ARV-POS-002)
-        row = _sess_row(sess, f"SELECT s.digest || '|' || COALESCE((SELECT g.id::text "
+        # ONE read: the source's digest + media type + the CURRENT generation
+        # (the serving generation the new save binds; '' when none serves —
+        # ARV-POS-002). P4-A slice three (CLAIM-067): the media type rides the
+        # same ONE read — the position's offsets validate against the DERIVED
+        # view (the ONE read_text home), never a second decode path
+        row = _sess_row(sess, f"SELECT s.digest || '|' || s.media_type || '|' || COALESCE((SELECT g.id::text "
                               f"FROM arv.extraction_generation g WHERE g.source_id = s.id "
                               f"AND g.owner_scope = s.owner_scope AND g.state = 'current' "
                               f"ORDER BY g.ordinal DESC LIMIT 1), '') FROM arv.source s "
@@ -1597,7 +1625,7 @@ def save_position(*, db, owner, actor, client_id, idem_key, source_id,
                               "check the id against the caller's own sources (query.py get-source "
                               "reads the import ack's result_ref back); a position is only ever "
                               "saved by the source's owner")
-        digest, gen_id = row.split("|", 1)
+        digest, media_type, gen_id = row.split("|", 2)
         if not gen_id:
             raise _CapRefusal("ARV-POS-002",
                               f"source {source_id} has no current extraction generation — the position "
@@ -1607,13 +1635,18 @@ def save_position(*, db, owner, actor, client_id, idem_key, source_id,
                               "extract the source first (harness/extract.py extract_source); the "
                               "position save follows the serving generation")
         try:
-            text = blob.get(digest).decode("utf-8")
+            # P4-A slice three (CLAIM-067): the ONE read_text home — the epub's
+            # derived view is the position's offset domain
+            text = read_text(media_type, digest)
         except (KeyError, UnicodeDecodeError) as e:
             # the corrupt-blob class (one code, one home — the bookmark family's
             # own wording): the bytes cannot verify for the position's boundary
             raise _CapRefusal("ARV-CAP-004", f"the source's blob failed to verify — {e}",
                               "the store is corrupt at this digest; never a position against "
                               "unverifiable bytes")
+        except _FmtRefusal as r:
+            raise _CapRefusal("ARV-CAP-004", f"the source's derived text cannot be produced — {r}",
+                              "the store's bytes changed under the digest (the corruption class); never a position against an underivable view")
         if not (0 <= start < end <= len(text)):
             raise _CapRefusal("ARV-POS-003",
                               f"offsets [{start},{end}) are invalid for a {len(text)}-character text — "

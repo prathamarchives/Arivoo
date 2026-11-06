@@ -89,6 +89,15 @@ TEXT = ("Para one lives here.\n\n"
 # the measured facts for THIS corpus (the tiler's own values — pinned by
 # measurement, the suite fails if the machinery's answer differs)
 N_PASSAGES, COVERAGE = 3, 1.0
+# the DERIVATION corpus (the SEV round-1 F4 repair: a SECOND, different
+# corpus — a conditional hard-code of the first corpus's values cannot pass
+# both pins)
+TEXT2 = ("Block one.\n\n"
+         "Block two.\n\n"
+         "Block three.\n\n"
+         "Block four.\n\n"
+         "Block five.")
+N_PASSAGES2, COVERAGE2 = 5, 1.0
 
 
 def check(code: str, ok: bool, what: str, repair: str) -> None:
@@ -222,6 +231,40 @@ def main() -> int:
         m2 = jline(r_m2)
         r_m3 = cap("measure", "--owner", "A", "--source", s_crash)
         m3 = jline(r_m3)
+        # the DERIVATION corpus (the F4 repair): a second, DIFFERENT source —
+        # the measured values must track the tiler's actual output, proving
+        # the derivation (a hard-coded row cannot pass both corpora)
+        f4 = tmp / "four.md"
+        f4.write_text(TEXT2, encoding="utf-8")
+        r4 = cmd("import_source", "--title", "The Derivation Corpus",
+                 "--file", str(f4), key="imp-4")
+        s_derive = ref_of(r4)
+        r_ext4 = extract("--owner", "A", "--actor", "owner", "--client-id", "cli-1",
+                         "--idem-key", "ext-4", "--source-id", s_derive)
+        r_m4 = cap("measure", "--owner", "A", "--source", s_derive)
+        m4 = jline(r_m4)
+        # the FAILED state (the F3 repair): the planted mid-build RAISE over a
+        # FRESH source (the EXT-10 form) — the failed generation carries its
+        # NAMED reason; the row answers state=failed with the reason visible
+        f5 = tmp / "five.md"
+        f5.write_text("The failure corpus.\n\nA second block for the planted RAISE.", encoding="utf-8")
+        r5 = cmd("import_source", "--title", "The Failure Corpus",
+                 "--file", str(f5), key="imp-5")
+        s_fail = ref_of(r5)
+        import subprocess as _sp
+        plant = _sp.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                         "CREATE OR REPLACE FUNCTION arv._cap_fail() RETURNS trigger AS $$ "
+                         "BEGIN RAISE EXCEPTION 'ARV-CAP-TEST: the planted capability failure'; RETURN NEW; END; $$ "
+                         "LANGUAGE plpgsql; CREATE TRIGGER cap_fail BEFORE INSERT ON arv.passage "
+                         "FOR EACH ROW WHEN (NEW.ordinal = 2) EXECUTE FUNCTION arv._cap_fail();"],
+                        capture_output=True, text=True, timeout=60, env=ENV)
+        r_fail = extract("--owner", "A", "--actor", "owner", "--client-id", "cli-1",
+                         "--idem-key", "ext-5", "--source-id", s_fail)
+        drop = _sp.run(["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", DB, "-c",
+                        "DROP TRIGGER IF EXISTS cap_fail ON arv.passage; DROP FUNCTION IF EXISTS arv._cap_fail();"],
+                       capture_output=True, text=True, timeout=60, env=ENV)
+        r_m5 = cap("measure", "--owner", "A", "--source", s_fail)
+        m5 = jline(r_m5)
         ok2 = (r_ext.returncode == 0
                and r_m1.returncode == 0
                and m1.get("state") == "ready" and m1.get("api_version") == 1
@@ -233,15 +276,26 @@ def main() -> int:
                and m2.get("api_version") == 1
                and r_crash.returncode == 2  # the crash injector's own vocabulary
                and r_m3.returncode == 0
-               and m3.get("state") == "building" and m3.get("api_version") == 1)
+               and m3.get("state") == "building" and m3.get("api_version") == 1
+               and r_ext4.returncode == 0 and r_m4.returncode == 0
+               and m4.get("state") == "ready" and m4.get("api_version") == 1
+               and m4.get("passages") == N_PASSAGES2 and m4.get("coverage") == COVERAGE2
+               and plant.returncode == 0 and drop.returncode == 0
+               and r_fail.returncode == 1 and "ARV-EXT-003" in r_fail.stdout
+               and r_m5.returncode == 0
+               and m5.get("state") == "failed" and m5.get("api_version") == 1
+               and "ARV-EXT-003" in str(m5.get("fail_reason", "")))
         check("CAP-02", ok2,
               "the MEASURED row (measured, never asserted): the ready source answers state=ready with "
-              "the generation's OWN facts (passages=3, coverage=1.0, the generation id + ordinal — "
-              "derived at the real boundary, the suite fails if the machinery's answer differs); the "
-              "unextracted source answers state=not_extracted passages=0 (a typed ANSWER, never "
-              "silence); the crashed extract answers state=building (the honest in-flight state)",
+              "the generation's OWN facts (passages=3, coverage=1.0, the generation id + ordinal); the "
+              "DERIVATION corpus (a second, different source — the F4 repair) answers passages=5 "
+              "coverage=1.0 — a hard-coded row cannot pass both; the unextracted source answers "
+              "state=not_extracted passages=0 (a typed ANSWER, never silence); the crashed extract "
+              "answers state=building; the planted mid-build RAISE answers state=failed WITH its "
+              "named reason in the row (the F3 repair — the docstring's promise kept)",
               "harness/capability.py's measure verb: the owner-scoped reads over the generation + "
-              "passage rows + the blob (the coverage derivation), never a hard-coded row")
+              "passage rows + the blob (the coverage derivation) + the failed row's named reason, "
+              "never a hard-coded row")
 
         # ---- CAP-03 — the read-position reservation
         r_sur = cap("surfaces")

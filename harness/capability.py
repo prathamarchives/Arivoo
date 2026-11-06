@@ -112,9 +112,16 @@ def _measure(db: str, owner: str, source_id: str) -> int:
     # the digest binding: the generation's input digest vs the source's own —
     # the stale detector's substrate, derived honestly at read time. The
     # generation row's machine state maps onto the READINESS vocabulary:
-    # current -> ready (the user-facing word), building/failed as themselves.
+    # current -> ready (the user-facing word), building/failed as themselves;
+    # a failed generation carries its NAMED reason (the docstring's promise).
     row["state"] = ("ready" if gdigest == digest and gstate == "current"
                     else ("stale" if gdigest != digest else gstate))
+    if gstate == "failed":
+        frow = _read(db, owner, f"SELECT COALESCE(fail_reason, '') FROM arv.extraction_generation "
+                                f"WHERE id = '{gid}';")
+        if frow is None:
+            return 1
+        row["fail_reason"] = frow[0] if frow and frow[0] else "unnamed"
     prow = _read(db, owner, f"SELECT count(*) || '|' || COALESCE(sum(p.end_off - p.start_off), 0) "
                             f"FROM arv.passage p WHERE p.generation_id = '{gid}';")
     if prow is None:

@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the P4-A slice two position machinery is absent (machinery-absent class; save_position command absent: True; get-position arm absent: True; migration 0014 present: False) — the implementation lands after this RED, never before it (LAW-11)

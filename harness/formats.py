@@ -89,7 +89,14 @@ ADAPTERS = {
 # "import anything, extract what's readable" media class). The passthrough
 # is INTAKE-legal, never a matrix row (it declares no reading capability)
 # and never extractable.
-PASSTHROUGH = {"application/octet-stream"}
+# P4-A slice four (CLAIM-068; record 60 §2): application/pdf joins the
+# passthrough as the NAMED type of the same class — a PDF imports durably
+# (durable capture never refused for content), the readable-text boundary
+# stays at extraction's ARV-EXT-002 over the binary bytes, and NO matrix row
+# appears (a format declares reading capability only through its acceptance
+# corpus; the PDF's scan/OCR + fixed-layout classes are future increments
+# under Q8's owner gate — never a generic claim from the passthrough).
+PASSTHROUGH = {"application/octet-stream", "application/pdf"}
 
 # every INTAKE-legal media type: the approved reading formats + the bytes
 # passthrough — anything else is the typed ARV-FMT-001 refusal.

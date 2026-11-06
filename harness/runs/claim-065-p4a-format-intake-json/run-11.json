@@ -1,0 +1,7 @@
+{
+  "command": "SLICE=claim-065-p4a-format-intake-json GATE_DIFF=origin/main make gate",
+  "exit_code": 0,
+  "commit": "2f33f70303248d7b72178403aaa7aaf54673c9a6",
+  "output_sha256": "779f9f4d76300db63bd7aee1d48abac8ff1781941bf282fd1a9423b9506a2d37",
+  "recorded_at": "2026-11-06T08:52:04.847032+00:00"
+}

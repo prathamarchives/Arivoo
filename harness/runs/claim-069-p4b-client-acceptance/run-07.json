@@ -1,0 +1,7 @@
+{
+  "command": "env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-069-p4b-client-acceptance python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "30d3358acfa107a3215c98c9f676b2d531add220",
+  "output_sha256": "19800828d8bb1db69b5705ca73566945a40f3651f6bc6ae1c25ded8e585fad87",
+  "recorded_at": "2026-11-06T21:20:54.991652+00:00"
+}

@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-069-p4b-client-acceptance (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 05b1de73d6560903a05449d1d4ca025a04f85a82
-- generated (last record's timestamp): 2026-11-06T21:03:35.295005+00:00
-- run records: 5
+- commit (last run record's): 30d3358acfa107a3215c98c9f676b2d531add220
+- generated (last record's timestamp): 2026-11-06T21:20:54.991652+00:00
+- run records: 7
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_client_acceptance.py` -> exit 0 · output sha256 11579301a80617f3 · 2026-11-06T20:51:12.806186+00:00
@@ -10,6 +10,8 @@
 - `python3 harness/tests/test_client_acceptance.py` -> exit 0 · output sha256 11579301a80617f3 · 2026-11-06T20:51:31.536087+00:00
 - `make verify` -> exit 0 · output sha256 29de0bdc4520d268 · 2026-11-06T20:57:30.210387+00:00
 - `make verify` -> exit 0 · output sha256 8153cfe4cbf5a1ad · 2026-11-06T21:03:35.295005+00:00
+- `env SLICE=claim-069-p4b-client-acceptance GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 c83d4d997e80c086 · 2026-11-06T21:20:24.776540+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-069-p4b-client-acceptance python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 19800828d8bb1db6 · 2026-11-06T21:20:54.991652+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-069 / P4-B slice one (the
@@ -66,4 +68,4 @@
 - not-verified entries: 1
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): de4020b716d9844ad6e93fcacdbbf77f7bfb82dd01cadcb4d01b331af3aa6664
+- sheet sha256 (of the content above, excluding this line): 4c0e665a9ed78eaee2cb5ae3e6787ff304910a924c7a2f8a22182d4752f4d020

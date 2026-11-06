@@ -100,3 +100,17 @@ re-bind (the PR-mode gate record + the trusted-gate reproduction) → the push �
 the exact final head → the merge-gate review (D-042 (1a)) → **the merge under INT-145** → the post-merge
 verification (the five checks on the merge commit observed live) → the PDF boundary slice (P4-A slice
 four) → P4-B..F → the Phase 4 exit gate — NO PAUSE EVEN FOR UPDATES (INT-146).
+
+## §4 The close (LANDED — PR #102 = merge `237d4d8`, 2026-11-06T19:09:32Z under INT-145)
+
+The slice landed with its full chain green: the five checks at the exact final head `410fa74` AND on
+the merge commit (all observed live); the merge-gate review D-042 (1a) `5805584084`; the
+flip/merge/restore with the protections re-read byte-equivalent; the branch deleted; 0 open PRs. The
+TWO-ROUND SEV CHAIN (round 1 BLOCKED — the rebuild's bookmark-arm P1 + the record-58 scope P2 + two
+routed P3s, repaired RED-first; round 2 FINAL PASS — zero open P0/P1/P2/P3). The 14-record proof
+sheet (the trusted-gate reproduction green on the FIRST attempt — the claim-066 run-15 lesson
+applied). The slice's own honest catches: the rule-4 close-row form (the gate's ARV-CLM-002 caught
+the in-place-LANDED mistake at 8d14aad) + the record banner (VER-205 at d84b202). The full merge
+account: record 60 §1 + CLAIM-067's rule-4 close row + WORKLOG Task 84. The two routed P3s (the
+decompression bound + the partial-spine truncation) are carried in the slice's notverified.txt —
+follow-ups under Q8's gate, never silently dropped.

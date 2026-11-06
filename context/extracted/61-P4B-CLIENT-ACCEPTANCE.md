@@ -52,6 +52,8 @@ exercising P4-B's named adversarial conditions at the real boundary:
 - **deleted target** — the tombstone refusals (ARV-QRY-003 / the lifecycle classes)
 - **retry-after-lost-response** — the same-key replay after the crash arm (the convergence)
 
+**The machinery this slice lands: harness/client.py — the CLEAN EXTERNAL CLIENT DRIVER** (P4-F's named proof vehicle: 'backend contracts are proven through a clean external client, never fabricated'): a thin scripted client over the real CLIs — the walk + the nine adversarial conditions as reusable driver functions, each returning structured observations; test-side infrastructure, never a product surface. The RED's machinery-absent probe: the driver absent at `101e173`.
+
 **The design boundary (the acceptance the RED pins):** the suite runs green on a clean database;
 each condition answers with its typed refusal or its truthful answer — never a privileged
 helper, never a table write, never a second durability path. The full user walk rides first

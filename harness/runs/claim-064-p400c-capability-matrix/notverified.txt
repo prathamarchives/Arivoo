@@ -1,0 +1,62 @@
+NOT VERIFIED — the honest limits of CLAIM-064 / P4-00c (the format
+capability matrix + extraction readiness; LAW-04; never empty-by-omission).
+
+WHAT THIS SLICE PROVES: the system's format capabilities are DECLARED,
+MEASURED, and RESERVED — user-visible, never marketing, never a silent miss.
+The DECLARED matrix (capability.py matrix: text/plain the FIRST APPROVED
+format — native text, reflow, NO OCR, the extractor named — declaring
+exactly what the landed machinery does, never more). The MEASURED row
+(capability.py measure: the readiness vocabulary ready/not_extracted/
+building/failed/stale as typed answers at exit 0, derived at the real
+boundary from the owner-scoped generation + passage reads + the blob — the
+derivation pinned by TWO corpora (3/1.0 and 5/1.0) plus the round-3 probes
+(Markdown heading attach-forward 3/1.0, single-word 1/1.0, leading-blank
+25/27=0.925926 hand-computed, the whitespace-only source refusing
+ARV-EXT-001 at extract and answering not_extracted/0/0.0 at measure). The
+RESERVED surface (source-open/position -> P4-A/B, the contract sketch, the
+README note). The README rewritten to the frozen P4-00b contract (the
+versioned search header, the bounded/paginated lists with their truth
+markers, the api_version field, the capability section). The per-family
+ARV-QRY-001 hints (list-notes/list-bookmarks/list-captures + the source and
+anchor-honest forms) with the template-level no-oracle re-verified on all
+families. The three-round fresh-context SEV chain: round 1 (agent-ee8ed9dd)
+BLOCKED — the re-committed anchored driver (P1, the #98 class re-caught:
+removed from the index AND moved out of the tree) + the failed-state gap
+(P2, repaired: the planted-RAISE fixture + the fail_reason field) + the
+derivation pin (P3, repaired: the second corpus); round 2 (agent-9fd4f420)
+PASS — every repair verified live; round 3 (agent-ce9d9e53) FINAL PASS —
+13 adversarial probes, zero open P0/P1/P2.
+
+THE HONEST LIMITS (what this slice does NOT claim):
+1. THE SERVING-GENERATION FIELD IS P4-A/B's (round-1 F2, ROUTED): measure
+   reports the LATEST generation — a crashed or failed RE-extract over an
+   existing current generation answers building/failed while the source
+   stays fully readable (extract.py's own "previous current STAYS current"
+   contract; the round-2 agent re-observed the previous generation serving).
+   The serving-generation distinction lands with the read-position surface.
+2. THE STALE STATE IS STRUCTURALLY UNREACHABLE TODAY (disclosed): the
+   source row is immutable and the ARV-CAP-005 append-only trigger refuses
+   even a superuser digest UPDATE (the round-3 agent's probe 11 observed
+   the refusal); the state is derived honestly at read time and named in
+   the vocabulary, but no suite pins it because no legal path reaches it.
+3. THE UNREADABLE-BLOB FORM (round-1 F7, disclosed): a source whose blob
+   cannot be read answers state=ready with coverage=0.0 (the passage
+   counts stand; the coverage honestly 0) — the form looks
+   self-contradictory; the recovery walk is the repair path (P3-02's
+   machinery).
+4. THE WHITESPACE-ONLY SOURCE (round-3 F12, disclosed): extract refuses
+   ARV-EXT-001 (zero content blocks) and measure answers not_extracted —
+   honest (no generation exists) but the row does not name the refusal
+   that precedes it; naming it would couple the readiness read to the
+   extract path's history — a later slice's call.
+5. THE RUN-RECORD PROVENANCE (the standing F11/F5 class): run-01..06's
+   commit fields name the then-HEADs while the measured working trees
+   carried the respective GREEN/repair content uncommitted; the substance
+   re-verified at the committed final tree by SEV rounds 2-3 and by
+   run-07..10 (the final-tree records).
+6. THE STANDING LIMITS: the export/migrate version-field exclusion (P4-00b's
+   notverified) still stands; the CI run is authoritative at PR time; the
+   fresh-context labels are not cryptographic independence (ARV-SEV-007);
+   no format converters beyond text/plain (P4-A's per-format work), no OCR
+   (its own gate), no reader-client work (the separate repo); Q6-Q12 and
+   D-014 stand open at their recorded scopes.

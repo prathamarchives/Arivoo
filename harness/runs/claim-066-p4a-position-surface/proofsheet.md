@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-066-p4a-position-surface (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 8ba47713adc6695a2813570dc70dd6e19022dae5
-- generated (last record's timestamp): 2026-11-06T16:30:51.097563+00:00
-- run records: 13
+- commit (last run record's): fdf5b764a35b204933b382cfb4ba68933a12c9cb
+- generated (last record's timestamp): 2026-11-06T16:41:47.632757+00:00
+- run records: 16
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_position.py` -> exit 0 · output sha256 14a843991330adb4 · 2026-11-06T14:36:58.557394+00:00
@@ -18,6 +18,9 @@
 - `python3 harness/tests/test_position.py` -> exit 0 · output sha256 14a843991330adb4 · 2026-11-06T16:25:26.394799+00:00
 - `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 4e0c35436bcb8e56 · 2026-11-06T16:25:38.656353+00:00
 - `make verify` -> exit 0 · output sha256 235e748a60f7f684 · 2026-11-06T16:30:51.097563+00:00
+- `env SLICE=claim-066-p4a-position-surface GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 2da68d37aa4bb5b9 · 2026-11-06T16:38:07.716871+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-066-p4a-position-surface python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 1 · output sha256 7dcd85825831383e · 2026-11-06T16:38:38.043480+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-066-p4a-position-surface python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 fb88aa96e3253987 · 2026-11-06T16:41:47.632757+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-066 / P4-A slice two (the
@@ -96,4 +99,4 @@
 - not-verified entries: 1
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): e81f3518db994b0ea608bd20532e28d039dc1e0a01f4a2ba46c1cb66c8d83adc
+- sheet sha256 (of the content above, excluding this line): d10ff41f7f194d2548385208a976b890f368c6c186007c10854efebcea0ec7d2

@@ -520,7 +520,7 @@ def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*", media_type):
         print(f"FAIL ARV-CAP-009: media_type {media_type!r} is not a MIME token pair (type/subtype, "
               "token charset only) — free-form text is a title/payload, never a media type")
-        print("      repair: pass a MIME pair like text/plain or text/markdown")
+        print("      repair: pass a MIME pair like text/plain or application/json (the intake-supported formats — see `python3 harness/capability.py matrix`; opaque bytes ride the application/octet-stream passthrough)")
         return 1
     if (title is None) == (work_id is None):
         print("FAIL ARV-CAP-007: exactly one of --title (a new work) or --work-id (an existing work) "

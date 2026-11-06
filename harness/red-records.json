@@ -975,13 +975,19 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the FMT suite's observed RED at commit f0e038a (machinery-absent ARV-TEST-000: the matrix's application/json row absent \u2014 exit 1, red-01.txt at harness/runs/claim-065-p4a-format-intake-json/)",
-    "current_sha256": "3475e7ecb11e4c307bf440124d79bbba58cd3a9999d40aa418e732e28a6804f4",
+    "current_sha256": "8f7ca45b8c578375da38f3d4e5c396e4fcdd7d3f8496e69db1b326c13213b49a",
     "amendments": [
       {
         "prior_sha256": "84b266bda7ca544913da6a0c8cfcdb6bf944e8f5061117c7e673e3be3cf673b4",
         "new_sha256": "3475e7ecb11e4c307bf440124d79bbba58cd3a9999d40aa418e732e28a6804f4",
         "note": "the FMT suite's implementation-cycle amendments (the #93..#99 precedent class, each disclosed): (1) the digest parser corrected to the [digest=...] bracket form (the rstrip class \u2014 the trailing bracket broke the blob probe); (2) the no-oracle comparison's absent-id REUSED not re-generated (the fresh-uuid replace was a no-op \u2014 the pin's own defect caught by the first GREEN run); (3) the FMT-005 fixture bytes corrected to genuinely-invalid UTF-8 (bytes 0..63 are ASCII control chars \u2014 VALID UTF-8; the continuation-byte range 0x80..0xBF without a lead is the honest undecodable class)",
         "observed_at": "2026-11-06T07:40:01.976218+00:00"
+      },
+      {
+        "prior_sha256": "3475e7ecb11e4c307bf440124d79bbba58cd3a9999d40aa418e732e28a6804f4",
+        "new_sha256": "8f7ca45b8c578375da38f3d4e5c396e4fcdd7d3f8496e69db1b326c13213b49a",
+        "note": "the SEV round-1 P3 repairs (agent-6aee153a PASS with two repair-in-slice notes): (1) the CAP-009 repair hint's stale text/markdown example corrected to the intake-supported forms (text/plain or application/json + the octet-stream passthrough note + the matrix pointer \u2014 text/markdown is an ARV-FMT-001 refusal since the registry); (2) FMT-05's zero-effect arm now ASSERTED (the audit helper + the source-count equality across all three refusals \u2014 the dead srcs_before variable class repaired). OBSERVED at this tree: the FMT suite GREEN (6 PASS) + the hint-affected suites re-verified (capture/import)",
+        "observed_at": "2026-11-06T08:20:46.460525+00:00"
       }
     ]
   }

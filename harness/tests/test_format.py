@@ -213,7 +213,14 @@ def main() -> int:
               "(ONE home: the adapter declares, the matrix reports)")
 
         # ---- FMT-03 — ARV-FMT-001 (the unsupported media type)
-        srcs_before = query("get-source", "--owner", "A", "--id", str(_uuid.uuid4()))
+        # the zero-effect proof (the SEV round-1 F2 repair: the pin now
+        # ASSERTS the letter — the source count unchanged across the refusals)
+        def audit(sql: str) -> str:
+            return subprocess.run(["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                                   "-U", "arv_read", "-d", DB, "-c", sql],
+                                  capture_output=True, text=True, timeout=60,
+                                  env=ENV).stdout.strip()
+        srcs_before = audit("SELECT count(*) FROM arv.source;")
         r_f1 = cmd("import_source", "--title", "Unsupported",
                    "--file", str(jf), "--media-type", "application/x-msdownload", key="f1-1")
         # the MIME grammar check still fires FIRST for malformed types
@@ -272,7 +279,11 @@ def main() -> int:
                 capture_output=True, text=True, timeout=60, env=ENV)
             blob3 = probe.returncode == 0 and probe.stdout.strip().isdigit()
         ok5 = (r_f3.returncode == 1 and "FAIL ARV-FMT-003:" in r_f3.stdout
-               and ref_of(r_f3) == "" and dg3 and blob3)
+               and ref_of(r_f3) == "" and dg3 and blob3
+               # the zero-effect proof spans ALL THREE refusals (the SEV
+               # round-1 F2 repair: the pin now ASSERTS the letter — the
+               # source count unchanged from before FMT-03's refusals)
+               and audit("SELECT count(*) FROM arv.source;") == srcs_before)
         check("FMT-05", ok5,
               "ARV-FMT-003 (the undecodable/encrypted payload): bytes that cannot decode as "
               "UTF-8 under a text format refuse named — exit 1 + the digest named + the bytes "

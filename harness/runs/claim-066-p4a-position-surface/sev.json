@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-066-p4a-position-surface",
+  "base_sha": "562b70f3a6e3e176bf8fa8a39fd986ff04a29887",
+  "reviewed_diff_sha256": "f7fc0edc22f93fcbe01c0e0fc427692a1a69d74c4f6761c66fe64e3124d8f2e8",
+  "sheet_section": true,
+  "intent_ids": [
+    "INT-144",
+    "INT-145",
+    "INT-146"
+  ],
+  "requirement_ids": [
+    "SYS-06",
+    "SYS-09"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
+  "changed_components": [
+    "harness/commands.py (+~95 lines: save_position \u2014 the append-only save through the spine's build_txn phase with the per-(owner,source) advisory xact lock; ARV-POS-001/002/003 typed refusals; the result_ref as <source>@<ordinal>; the _SYNC_COMMANDS + crash-matrix membership)",
+    "harness/query.py (+~60 lines: the get-position read arm \u2014 ONE statement ONE snapshot, the no-oracle shared refusal, the typed no_position_saved ANSWER, the generation binding honest across a re-extraction)",
+    "harness/migrations/0014_reading_position.sql (the NEW migration: reading_position append-only with the serialized-save/ordinal/generation-bind/append-only guards, RLS forced, NO content column; AND command_log.result_ref WIDENED UUID->TEXT with the serving index)",
+    "harness/sync.py (the SEV round-1 F1 repair: _cli_args' save_position branch \u2014 the translated source, the site-local generation binding; the one typed join's s.id::text cast)",
+    "harness/crash.py (+7 lines: save_position in the crash matrix's choices + the elif)",
+    "harness/capability.py (the source-open/position surfaces row names the LANDED verbs save_position/get_position)",
+    "harness/tests/test_position.py (the POS-01..06 suite with the five disclosed implementation-cycle amendments, the typed chain in red-records.json)",
+    "harness/tests/test_sync.py (the SEV round-1 F1 repair's SYN-18 pin \u2014 the position delivery end-to-end, purely additive)"
+  ],
+  "interfaces_reviewed": [
+    "the spine's build_txn contract (the locked section, the refusal rollback)",
+    "the frozen ack grammar (status/result_ref/save/durability_rung/api_version) on every ack and replay line",
+    "the read arm's flag|payload one-statement form (the structured-at-the-SQL-boundary law)",
+    "the outbox delivery map (_cli_args) + the identity bridge's typed join",
+    "migration 0014's guard triggers against hostile direct-SQL writes"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the POS suite (run-01..03, 09..11) x6 green at the GREEN and final trees",
+      "the SYN suite with SYN-18 (run-07, run-12) green"
+    ],
+    "integration_verification": [
+      "make verify x3 (run-04, 05, 08, 13) \u2014 all suites + the gate + the canonical layer 54/0",
+      "the blast-radius suites at the GREEN tree (commands/substrate/migrations/sync/export/capability/import/extract/capture/bookmark/note/highlight/note_reference/keyword_index/format/kernel/anchor/boundary/claims_paths/record_machinery/mutation_floor/sev/trusted_gate/contract/gate_dispatch)"
+    ],
+    "system_verification": [
+      "SYS-06 trace: the save rides the spine's own durability ladder + the outbox + the crash matrix's lost-ack convergence",
+      "SYS-09 trace: the reopen read arm with the no-oracle + the typed answers"
+    ],
+    "validation": [
+      "the three-round SEV chain: round 1 BLOCKED (F1 dead letter P1, F2 scope P1, F3 comment P3) repaired at 057b426; round 2 BLOCKED (F4 the repair's own undeclared test_sync.py P1, F5 RED-wording P3, F6 run-record convention P3) repaired at 8ba4771; round 3 FINAL PASS zero open P0/P1/P2/P3"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a hostile or raced writer skips an ordinal or binds a cross-source generation",
+      "control": "migration 0014's guard triggers (ARV-POS-004/006) under the SAME advisory lock the command takes",
+      "proof_ids": [
+        "run-01",
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "a re-extraction supersedes the generation the reader was reading",
+      "control": "the serving-generation binding: saved_generation_id byte-stable, generation_matches=false \u2014 never a silent retarget (the #99 notverified's routing)",
+      "proof_ids": [
+        "run-01",
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "the position save's sync intent dead-letters (the enqueue without a delivery map)",
+      "control": "the _cli_args save_position branch + the SYN-18 pin (the site-local binding law); an unextracted server rests retryable with the named ARV-POS-002 reason",
+      "proof_ids": [
+        "run-07",
+        "run-12"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "the result_ref widening breaks a landed family's replay",
+      "control": "every landed family's uuid widens losslessly; the replay/409 + export + sync suites green at the widened substrate",
+      "proof_ids": [
+        "run-04",
+        "run-13"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the reader client (P4-B's repo); the paginated/EPUB coordinate mapping; the cross-site position merge semantics; the unextracted-server delivery arm suite-pinned (code-path + agent-observed only); the dwell/session events (D-010, P4-C); the spine-points-only crash matrix \u2014 the full list at notverified.txt"
+  ],
+  "builder_context": "Super Z (GLM host) \u2014 the standing do-not-stop chain INT-134..146",
+  "reviewer_context": "three fresh-context SEV agents: agent-7c41e9d2 (round 1), agent-9f27c4ab (round 2), agent-3fa1c0d2 (round 3 FINAL)",
+  "disposition": "PASS",
+  "review_summary": "the three-round chain: round 1 BLOCKED (the dead-letter P1 + the scope P1 + the comment P3 \u2014 all repaired RED-first/disclosed at 057b426 with the SYN-18 pin's RED observed); round 2 BLOCKED (the repair's own undeclared test_sync.py P1 + the RED-wording P3 + the run-record convention P3 \u2014 repaired at 8ba4771); round 3 FINAL PASS zero open P0/P1/P2/P3 (the gate's own scope/claim/registry checks green live; both red-records chains exact at every link; the five test amendments + the SYN-18 addition all additive, zero weakened assertions; the adversarial spot-checks 5/5)"
+}

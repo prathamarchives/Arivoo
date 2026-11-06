@@ -1,0 +1,7 @@
+{
+  "command": "ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-065-p4a-format-intake-json python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "2f33f70303248d7b72178403aaa7aaf54673c9a6",
+  "output_sha256": "d623ab9fa7a7c79346e6f048d85dd735b7da69a1cc9e8fb198789b3557df1107",
+  "recorded_at": "2026-11-06T08:53:21.177284+00:00"
+}

@@ -359,7 +359,16 @@ def main() -> int:
         pr_off = mk_bookmark("bm-off", sid_a, 5, 3)
         pr_big = mk_bookmark("bm-big", sid_a, 0, 10 ** 6)
         bin_file = fresh_file("bin.dat", b"\xff\xfe\x00binary-not-utf8")
-        p_bin = import_src("imp-bin", "Binary", bin_file)
+        # P4-A slice one amendment (CLAIM-065, disclosed): the opaque binary
+        # now declares its HONEST media type — the bytes passthrough
+        # (application/octet-stream, the landed import-anything class). The
+        # pin's SUBSTANCE is unchanged: the non-UTF-8 source still imports
+        # (durable capture) and the CAPTURE boundary still refuses it with
+        # ARV-CAP-008 — the readable-text guard now reachable via the
+        # passthrough (the pre-P4-A form smuggled binary bytes in as
+        # text/plain, a class the format boundary now refuses typed at
+        # intake with ARV-FMT-003).
+        p_bin = import_src("imp-bin", "Binary", bin_file, media="application/octet-stream")
         sid_bin = ack_field(p_bin, "result_ref")
         pr_bin = mk_bookmark("bm-bin", sid_bin, 0, 4)
         before = audit(f"SELECT count(*) FROM arv.bookmark;")

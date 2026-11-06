@@ -702,7 +702,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-055 (P3-05) commit A: the BMK-01..12 suite's RED observed at the predecessor 6938efa and bound to commit f837ac5 (machinery-absent ARV-TEST-000: create_bookmark absent, get-bookmark absent, migration 0008 absent; the transcript at the slice's runs dir red-01.txt; record 46 \u00a76 \u2014 the record-18 \u00a74.1 / 45bd8f7 precedent class)",
-    "current_sha256": "d85309bbbaa39ad1e25ff626eab2b8c5de153f61ec3da221b718466dce4fca0c",
+    "current_sha256": "e0b13110b7408a3df08b1ee05286eb61d33bb8c6c581a021c4027b86850dc656",
     "amendments": [
       {
         "prior_sha256": "8f007ab264ea92dc084403970599fcf3b2ab414a80886189c6a8cdb6b1e4f545",
@@ -715,6 +715,12 @@
         "new_sha256": "d85309bbbaa39ad1e25ff626eab2b8c5de153f61ec3da221b718466dce4fca0c",
         "note": "CLAIM-055 (P3-05) the #90 round-3 RED (the CodeRabbit 14:43Z Major - move_bookmark serialized with the lifecycle transitions): BMK-13's deterministic interleaving observed RED at the predecessor d3893ff (the tombstone completes while the move's anchor INSERT waits on the test-held source row - no advisory lock held, no advisory wait observed - and the move then commits revision 2 AFTER the tombstone's commit) + BMK-06's hostile post-tombstone revision append lands unrefused + BMK-11's trigger inventory lacks the revision-append guard; the implementation lands after this RED (LAW-11); the transcript at red-02.txt",
         "observed_at": "2026-11-01T12:53:19.151327+00:00"
+      },
+      {
+        "prior_sha256": "d85309bbbaa39ad1e25ff626eab2b8c5de153f61ec3da221b718466dce4fca0c",
+        "new_sha256": "e0b13110b7408a3df08b1ee05286eb61d33bb8c6c581a021c4027b86850dc656",
+        "note": "the disclosed implementation-cycle amendment (the P4-A slice one format boundary): BMK-02's opaque-binary fixture now declares its HONEST media type (application/octet-stream \u2014 the landed import-anything passthrough; the pre-P4-A form smuggled binary bytes in as text/plain, a class the format boundary now refuses typed at intake with ARV-FMT-003); the pin's SUBSTANCE unchanged \u2014 the non-UTF-8 source still imports durably and the CAPTURE boundary still refuses ARV-CAP-008",
+        "observed_at": "2026-11-06T07:43:30.907506+00:00"
       }
     ]
   },
@@ -959,6 +965,29 @@
         "new_sha256": "f54f792f8c7d1740e97436ddbdac92550868cb4c2130460f14bcda821173a1bc",
         "note": "the SEV round-1 repair amendment (agent-ee8ed9dd BLOCKED: F3 the failed state's zero coverage + the fail_reason promise; F4 the single-corpus derivation pin): CAP-02 gains the DERIVATION corpus (a second, different source \u2014 passages=5 coverage=1.0: a hard-coded row cannot pass both corpora) + the FAILED-state fixture (the EXT-10 planted-RAISE form over a fresh source \u2014 state=failed WITH the named ARV-EXT-003 reason in the row); the capability module's measure adds the fail_reason field (the docstring's promise kept). OBSERVED at this tree: the amended suite GREEN (exit 0, 6 PASS \u2014 both corpora's measured values + the failed row's reason all holding); no product-side RED existed for F3/F4 (the failures were coverage gaps, not product defects \u2014 the fail_reason field is the additive GREEN riding the same repair)",
         "observed_at": "2026-11-06T06:05:08.413345+00:00"
+      }
+    ]
+  },
+  "harness/tests/test_format.py": {
+    "schema": 2,
+    "binding_commit": "f0e038aafa9ee6d9e4e22f7e2007bbd6cb9021bb",
+    "binding_sha256": "84b266bda7ca544913da6a0c8cfcdb6bf944e8f5061117c7e673e3be3cf673b4",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the FMT suite's observed RED at commit f0e038a (machinery-absent ARV-TEST-000: the matrix's application/json row absent \u2014 exit 1, red-01.txt at harness/runs/claim-065-p4a-format-intake-json/)",
+    "current_sha256": "8f7ca45b8c578375da38f3d4e5c396e4fcdd7d3f8496e69db1b326c13213b49a",
+    "amendments": [
+      {
+        "prior_sha256": "84b266bda7ca544913da6a0c8cfcdb6bf944e8f5061117c7e673e3be3cf673b4",
+        "new_sha256": "3475e7ecb11e4c307bf440124d79bbba58cd3a9999d40aa418e732e28a6804f4",
+        "note": "the FMT suite's implementation-cycle amendments (the #93..#99 precedent class, each disclosed): (1) the digest parser corrected to the [digest=...] bracket form (the rstrip class \u2014 the trailing bracket broke the blob probe); (2) the no-oracle comparison's absent-id REUSED not re-generated (the fresh-uuid replace was a no-op \u2014 the pin's own defect caught by the first GREEN run); (3) the FMT-005 fixture bytes corrected to genuinely-invalid UTF-8 (bytes 0..63 are ASCII control chars \u2014 VALID UTF-8; the continuation-byte range 0x80..0xBF without a lead is the honest undecodable class)",
+        "observed_at": "2026-11-06T07:40:01.976218+00:00"
+      },
+      {
+        "prior_sha256": "3475e7ecb11e4c307bf440124d79bbba58cd3a9999d40aa418e732e28a6804f4",
+        "new_sha256": "8f7ca45b8c578375da38f3d4e5c396e4fcdd7d3f8496e69db1b326c13213b49a",
+        "note": "the SEV round-1 P3 repairs (agent-6aee153a PASS with two repair-in-slice notes): (1) the CAP-009 repair hint's stale text/markdown example corrected to the intake-supported forms (text/plain or application/json + the octet-stream passthrough note + the matrix pointer \u2014 text/markdown is an ARV-FMT-001 refusal since the registry); (2) FMT-05's zero-effect arm now ASSERTED (the audit helper + the source-count equality across all three refusals \u2014 the dead srcs_before variable class repaired). OBSERVED at this tree: the FMT suite GREEN (6 PASS) + the hint-affected suites re-verified (capture/import)",
+        "observed_at": "2026-11-06T08:20:46.460525+00:00"
       }
     ]
   }

@@ -44,23 +44,16 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import blob  # noqa: E402
 from harness.commands import API_VERSION  # noqa: E402  # the version's ONE home
+from harness.formats import ADAPTERS  # noqa: E402  # P4-A slice one: the matrix DERIVES from the adapter registry (formats.py) — ONE home: the adapter declares, the matrix reports
 from harness.query import _read, _refuse  # noqa: E402  # the shared owner-scoped read + the shared refusal form (one machinery, never a second)
 
-# P4-00c: the DECLARED matrix — exactly what the landed machinery does, never
-# more. text/plain is the FIRST APPROVED format (the readable-text block
-# tiler, arivoo-text-blocks.v1: blank-line blocks, headings attach-forward,
-# contiguous tiling). A new format's row lands with its own converter slice
-# (P4-A's per-format work) — never by editing this comment.
-FORMATS = {
-    "text/plain": {
-        "native_text": True,     # the bytes ARE the text (no OCR needed)
-        "scan_ocr": False,       # no scan/OCR path exists
-        "layout": "reflow",      # reflowed text (not a fixed-layout page grid)
-        "extraction": "supported",
-        "approved": True,
-        "extractor": "arivoo-text-blocks.v1",
-    },
-}
+# P4-00c/P4-A: the DECLARED matrix — derived from formats.py's ADAPTERS (the
+# intake registry IS the capability declaration: a format appears here
+# exactly when its adapter lands, with exactly the capabilities the adapter
+# carries — never a second hand-maintained table). text/plain is the first
+# approved format; application/json the second (P4-A slice one); a new
+# format's row lands with its own increment slice (P4-A's EPUB/PDF cards).
+FORMATS = ADAPTERS
 
 # P4-00c: the RESERVED-SURFACE registry — the named surfaces later phases own,
 # declared here so the contract sketch is visible from day one, never smuggled

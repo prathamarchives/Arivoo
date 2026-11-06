@@ -34,6 +34,7 @@ import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import pg, clock, ids, blob  # noqa: E402
+from harness.formats import _FmtRefusal, check_registered, decode  # noqa: E402  # P4-A slice one: the format adapter registry — ONE home (formats.py), the import boundary the only caller
 
 MARK_CHECK = "MARK:CHECK"
 MARK_BEGUN = "MARK:BEGUN"
@@ -519,12 +520,22 @@ def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*", media_type):
         print(f"FAIL ARV-CAP-009: media_type {media_type!r} is not a MIME token pair (type/subtype, "
               "token charset only) — free-form text is a title/payload, never a media type")
-        print("      repair: pass a MIME pair like text/plain or text/markdown")
+        print("      repair: pass a MIME pair like text/plain or application/json (the intake-supported formats — see `python3 harness/capability.py matrix`; opaque bytes ride the application/octet-stream passthrough)")
         return 1
     if (title is None) == (work_id is None):
         print("FAIL ARV-CAP-007: exactly one of --title (a new work) or --work-id (an existing work) "
               "is required — an import names its work")
         print("      repair: pass --title OR --work-id, never both, never neither")
+        return 1
+    # P4-A slice one (CLAIM-065): the FORMAT REGISTRY check — AFTER the MIME
+    # grammar (CAP-009 precedes: the grammar is the entry boundary), BEFORE
+    # any effect. The approval registry IS the capability matrix: a MIME-valid
+    # but unregistered type is the typed ARV-FMT-001 refusal, zero effect.
+    try:
+        check_registered(media_type)
+    except _FmtRefusal as r:
+        print(f"FAIL {r.code}: {r}")
+        print(f"      repair: {r.repair}")
         return 1
     data = path.read_bytes()
     digest = blob.digest_of(data)
@@ -599,6 +610,21 @@ def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=
                          idem_key=idem_key)
             print(f"FAIL ARV-CAP-004: the blob verify failed — {e.args[0] if e.args else e}")
             print("      repair: the store is corrupt at this digest; the row is failed(retryable) and the recovery walk cleans the unreferenced artifact — a Source NEVER commits without verified bytes")
+            return 1
+        # P4-A slice one (CLAIM-065): the FORMAT DECODE + the format's own
+        # grammar — AFTER the blob staging (the staged-bytes contract: the
+        # refusal NAMES the digest, the bytes stay recoverable, the journal
+        # row failed-retryable — the ARV-CAP-004 pattern extended to the
+        # format class). Staged bytes are never lost.
+        try:
+            decode(media_type, data, digest)
+        except _FmtRefusal as r:
+            _journal_txn(sess, f"UPDATE arv.import_journal SET state='failed', "
+                          f"fail_reason={_q(r.code)}, updated_at={_q(clock.now())} "
+                          f"WHERE owner_scope={_q(owner)} AND idempotency_key={_q(idem_key)};",
+                         idem_key=idem_key)
+            print(f"FAIL {r.code}: {r}")
+            print(f"      repair: {r.repair} [digest={r.digest}]")
             return 1
         if not _journal_txn(sess, f"UPDATE arv.import_journal SET state='staging_verified', "
                             f"updated_at={_q(clock.now())} WHERE owner_scope={_q(owner)} "

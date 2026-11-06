@@ -1,0 +1,27 @@
+# CLAIM-065 — P4-A slice one: the first additional format intake (JSON) by
+# the durability ladder (PLAN's elaborated P4-A card, minted at P4-00c's
+# landing from the actual evidence — record 57 §2).
+# The application/json intake through the EXISTING import ladder (never a
+# second durability path); the capability matrix's SECOND row MEASURED (the
+# two-corpus form); the typed format refusals (ARV-FMT-001..003) with
+# staged bytes never lost. RED-first at CLAIM-064's merged head 4e758fc.
+# Commit A carries the post-#99 reconciliation (CLAIM-064's rule-4 close
+# row + the five-area re-derivation + the P4-A elaboration) + record 57.
+# THE BOUNDED EXCLUSIONS: no PDF (the scan/OCR + fixed-layout classes);
+# no EPUB (the second increment); no reader-client work (P4-B's repo); the
+# source-open/position surface is P4-A slice two.
+harness/tests/test_format.py D-041
+harness/formats.py D-041
+harness/commands.py D-041
+harness/capability.py D-041
+harness/extract.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+harness/tests/test_bookmark.py D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/57-P4A-FORMAT-INTAKE.md D-042
+harness/runs/claim-065-p4a-format-intake-json D-042

@@ -1,0 +1,1 @@
+FAIL ARV-TEST-000: the P4-A slice one format machinery is absent (machinery-absent class; the matrix's application/json row present: False) — the implementation lands after this RED, never before it (LAW-11)

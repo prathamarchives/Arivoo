@@ -1,0 +1,61 @@
+NOT VERIFIED — the honest limits of CLAIM-065 / P4-A slice one (the first
+additional format intake: JSON by the durability ladder; LAW-04; never
+empty-by-omission).
+
+WHAT THIS SLICE PROVES: a format is intake-supported only through the one
+durability ladder, and every failure is a named, typed, zero-effect refusal
+whose staged bytes survive. The adapter registry (harness/formats.py — ONE
+home: the capability matrix derives from it): the approved reading formats
+text/plain + application/json (native text, reflow, the extractor named);
+the BYTES PASSTHROUGH (application/octet-stream — the landed P3-02/EXT-03
+contract: opaque binaries import durably, the readable-text boundary stays
+at extraction's ARV-EXT-002, never a matrix row). The typed refusals:
+ARV-FMT-001 (the unsupported type — refused at the boundary after the
+MIME-grammar check, zero effect, now ASSERTED by the source-count
+equality); ARV-FMT-002 (the malformed payload — after the blob staging,
+the journal failed-retryable, the refusal NAMING the digest, the blob
+answering — the staged-bytes contract verified by the suite's own blob
+probes); ARV-FMT-003 (the undecodable/encrypted payload — the digest
+named, the bytes recoverable). The JSON intake measured through the
+existing ladder (the ack's full frozen contract; the SECOND matrix row
+measured over its own corpus). The two-round fresh-context SEV chain:
+round 1 (agent-6aee153a) PASS zero open P0/P1/P2 with two repair-in-slice
+P3s (both applied: the CAP-009 hint's stale example; the zero-effect arm
+asserted); round 2 (agent-64ccdcc2) FINAL PASS — both repairs verified
+live, the adversarial probes coherent (the replay/409/empty-file arms, the
+follow-the-hint loop terminating).
+
+THE HONEST LIMITS (what this slice does NOT claim):
+1. THE STRICT-JSON EDGES (round-1 F3, accepted-with-note): a BOM'd JSON
+   document and an empty JSON file both refuse ARV-FMT-002 (the digest
+   named, the exact bytes recoverable) — strict by design; a BOM-tolerant
+   reader is a later format-increment's call, never silently assumed.
+2. THE FAILED-INTAKE SEMANTICS (round-1 F4, verified identical to the
+   landed CAP-004 pattern): a same-key+same-bytes retry rewinds the
+   journal row and re-refuses; a same-key+fixed-payload retry is the
+   ARV-CMD-409; a NEW key lands the fixed payload; the recovery window
+   ends at the orphan sweep.
+3. THE CASE-SENSITIVE REGISTRY (round-1 F5, the accepted-as-designed
+   narrowness class): Application/JSON refuses ARV-FMT-001 — the
+   claim-049 class, never a silent case-fold.
+4. THE TEXT/PLAIN+NON-UTF-8 NARROWING (round-1 F6, disclosed): the
+   pre-P4-A class that committed non-UTF-8 bytes AS text/plain now refuses
+   ARV-FMT-003 at intake — the honest route for opaque bytes is the
+   octet-stream passthrough (verified end-to-end: import durably, extract
+   refuses ARV-EXT-002, capture refuses ARV-CAP-008 — the BMK-02
+   amendment's disclosed form).
+5. THE RUN-RECORD PROVENANCE (the standing class): run-01..05's commit
+   fields name the then-HEADs while the measured working trees carried the
+   respective GREEN/repair content uncommitted; the substance re-verified
+   at the committed final tree by SEV round 2 and by run-06..09 (the
+   final-tree records).
+6. THE PROVENANCE NIT (round 2's note, disclosed): the repair commit's
+   message cites round 1 as agent-6aee153a (the task-launch label) while
+   the round-1 report self-labels agent-481321aa — the same execution,
+   two labels; cosmetic.
+7. THE STANDING LIMITS: no EPUB (the second increment), no PDF (the
+   scan/OCR + fixed-layout classes — their own increments under the Q8
+   corpus gate), no reader-client work (P4-B's repo); the position surface
+   is P4-A slice two; the CI run is authoritative at PR time; the
+   fresh-context labels are not cryptographic independence (ARV-SEV-007);
+   Q6-Q12 and D-014 stand open at their recorded scopes.

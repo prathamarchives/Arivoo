@@ -394,10 +394,11 @@ def _get_bookmark(db: str, owner: str, bm_id: str) -> int:
         return 1
     if not v:
         return _refuse(bm_id)   # the anchor row vanished under the entity: the honest refusal, never a guess
-    out = {"api_version": API_VERSION,  # P4-00b: the version key on every read body
-           "bookmark_id": b["bookmark_id"], "revision": b["revision"]}
+    out = {"bookmark_id": b["bookmark_id"], "revision": b["revision"]}
     out.update(v)
-    print(json.dumps(out, ensure_ascii=False))
+    # P4-00b: the version key at the SAME print boundary as every other read
+    # body (the _versioned form — the uniform placement, SEV round-1 F7 note)
+    print(json.dumps(_versioned(out), ensure_ascii=False))
     return 0
 
 
@@ -438,8 +439,9 @@ def main() -> int:
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         # P4-00b: the list contract — the bounded page + the keyset cursor
-        p.add_argument("--limit", type=int, default=DEFAULT_LIST_LIMIT,
-                       help=f"the page size (bounds 1..{MAX_LIST_LIMIT}, default {DEFAULT_LIST_LIMIT})")
+        p.add_argument("--limit", default=str(DEFAULT_LIST_LIMIT),
+                       help=f"the page size (bounds 1..{MAX_LIST_LIMIT}, default {DEFAULT_LIST_LIMIT}) — "
+                            "a non-integer refuses with the typed ARV-QRY-004, never argparse's usage exit")
         p.add_argument("--after", default=None, metavar="ID",
                        help="the keyset cursor — the next page starts strictly after this listed id")
     p = sub.add_parser("resolve-anchor")

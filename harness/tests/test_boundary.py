@@ -204,6 +204,12 @@ def main() -> int:
         r_bm = cmd("create_bookmark", "--source-id", sid, "--start", "0",
                    "--end", "10", key="bm-1")
         bm1 = ref_of(r_bm)
+        # the census fixtures (SEV round-1 F2 repair: EVERY registered verb
+        # walks the census — the five unwalked verbs + the bookmark/note
+        # replayed forms + one lifecycle replay)
+        r_bm2 = cmd("create_bookmark", "--source-id", sid, "--start", "20",
+                    "--end", "30", key="bm-2")
+        bm2 = ref_of(r_bm2)
         r_nt = cmd("create_note", "--content", "the frozen contract note",
                    "--ref", f"highlight:{hl1}@1", key="nt-1")
         n1 = ref_of(r_nt)
@@ -214,23 +220,40 @@ def main() -> int:
             key="rev-1")
         cmd("tombstone_note", "--id", n2, key="tn-2")
         cmd("restore_note", "--id", n2, key="rn-2")
+        cmd("revise_highlight", "--id", hl1, "--start", "0", "--end", "30", key="rh-1")
+        cmd("move_bookmark", "--id", bm1, "--start", "5", "--end", "15", key="mb-1")
+        cmd("tombstone_bookmark", "--id", bm2, key="tb-2")
+        cmd("restore_bookmark", "--id", bm2, key="rb-2")
+        cmd("tombstone_bookmark", "--id", bm2, key="tb-2b")  # ends hidden: the list pin keeps its shape
         cmd("tombstone_highlight", "--id", hl2, key="th-2")
+        cmd("restore_highlight", "--id", hl2, key="rhh-2")
         r_rb = cmd("rebuild_keyword_index", key="rb-1")
 
         # the REPLAYS (same key + same canonical body) — the replayed ack
-        # census (BND-02's fixtures)
+        # census (BND-02's fixtures: every replayable family)
         r_imp_rp = cmd("import_source", "--title", "The Boundary Corpus",
                        "--file", str(src_file), key="imp-1")
         r_ext_rp = extract("--owner", "A", "--actor", "owner", "--client-id", "cli-1",
                            "--idem-key", "ext-1", "--source-id", sid)
         r_hl_rp = cmd("create_highlight", "--source-id", sid, "--start", "0",
                       "--end", "30", key="hl-1")
+        r_bm_rp = cmd("create_bookmark", "--source-id", sid, "--start", "0",
+                      "--end", "10", key="bm-1")
+        r_nt_rp = cmd("create_note", "--content", "the census note", key="nt-2")
         r_ev_rp = cmd("record_event", "--payload", "the boundary census", key="ev-1")
+        r_tn_rp = cmd("tombstone_note", "--id", n2, key="tn-2")  # the lifecycle replay (the spine's shared path)
         r_rb_rp = cmd("rebuild_keyword_index", key="rb-1")
+        # THE CENSUS SNAPSHOT — the exact structure pin (SEV round-1 F2: the
+        # floor form >= 14 let a silently-broken verb leave the suite green;
+        # the snapshot pins the census's exact shape)
+        CENSUS = list(ACKS)
+        census_verbs = {ack_tokens(ln)[0][1] for ln in CENSUS}
+        replayed_verbs = {ack_tokens(ln)[0][1] for ln in CENSUS
+                          if "status=replayed" in ln}
 
         # ---- BND-02 — the replayed acks carry the rung (the F3 residual)
-        replayed = [ln for ln in ACKS if "status=replayed" in ln]
-        ok2 = (len(replayed) >= 5
+        replayed = [ln for ln in CENSUS if "status=replayed" in ln]
+        ok2 = (len(replayed) == 8
                and all("durability_rung=local_durable" in ln for ln in replayed)
                and all("api_version=" in ln for ln in replayed)
                # record_event's COMMITTED ack carries the rung too (the F3
@@ -241,21 +264,33 @@ def main() -> int:
                and "durability_rung=local_durable" in r_rb.stdout
                and "durability_rung=local_durable" in r_ext.stdout)
         check("BND-02", ok2,
-              "the replayed acks carry the rung: every status=replayed ack (import/extract/highlight/"
-              "record_event/rebuild) AND record_event's committed ack name durability_rung=local_durable "
-              "+ api_version — SYS-01's every-write rule holds on EVERY acknowledgment path (the F3 "
-              "residual, record 54 §3, closed)",
+              "the replayed acks carry the rung: all EIGHT replayed forms in the census (import/extract/"
+              "highlight/bookmark/note/record_event/rebuild + the lifecycle replay) AND record_event's "
+              "committed ack name durability_rung=local_durable + api_version — SYS-01's every-write "
+              "rule holds on EVERY acknowledgment path (the F3 residual, record 54 §3, closed)",
               "commands.py's replay print sites (the spine's replay + conflict paths + record_event's "
               "build extra) and extract.py's replayed ack: append the rung + the version token")
 
-        # ---- BND-01 — the version field on every write ack
-        ok1 = (len(ACKS) >= 14 and all("api_version=1" in ln for ln in ACKS)
+        # ---- BND-01 — the version field on every write ack (the FULL verb
+        # census — SEV round-1 F2: every registered verb, exactly)
+        ALL_VERBS = {"record_event", "import_source", "create_highlight", "extract_source",
+                     "revise_highlight", "tombstone_highlight", "restore_highlight",
+                     "create_bookmark", "move_bookmark", "tombstone_bookmark", "restore_bookmark",
+                     "create_note", "revise_note", "tombstone_note", "restore_note",
+                     "rebuild_keyword_index"}
+        ok1 = (len(CENSUS) == 28
+               and census_verbs == ALL_VERBS
+               and replayed_verbs == {"import_source", "extract_source", "create_highlight",
+                                      "create_bookmark", "create_note", "record_event",
+                                      "tombstone_note", "rebuild_keyword_index"}
+               and all("api_version=1" in ln for ln in ACKS)
                and r_imp.returncode == 0 and r_ext.returncode == 0)
         check("BND-01", ok1,
-              f"the version field on every write ack: all {len(ACKS)} ack lines in the census "
-              "(commands.py's verb census — record_event/import/highlight/bookmark/note/"
-              "revise/tombstone/restore/rebuild — AND extract.py's acks, committed AND replayed) "
-              "carry api_version=1",
+              f"the version field on every write ack, the FULL census: the 28-line snapshot pins EVERY "
+              "one of commands.py's 16 registered verbs (incl. revise_highlight/move_bookmark/"
+              "tombstone_bookmark/restore_bookmark/restore_highlight — the SEV round-1 F2 repair) and "
+              f"every replayable family's replayed form; all {len(ACKS)} ack lines the suite observes "
+              "(the census + the later fixtures) carry api_version=1",
               "every ACK print site carries the api_version token — commands.py's spine/committed/"
               "replay/import sites + extract.py's two ack sites (ONE home: commands.API_VERSION)")
 
@@ -275,9 +310,10 @@ def main() -> int:
                     or d.get("durability_rung") not in RUNGS
                     or d.get("api_version") != "1"):
                 bad.append(ln)
-        ok3 = len(ACKS) >= 14 and not bad
+        ok3 = len(CENSUS) == 28 and not bad
         check("BND-03", ok3,
-              f"the ack grammar frozen: every one of the {len(ACKS)} ack lines parses as k=v tokens "
+              f"the ack grammar frozen: every one of the {len(ACKS)} ack lines the suite observes "
+              "(the 28-line census + every later fixture ack) parses as k=v tokens "
               "carrying command/idem_key/status/result_ref/durability_rung/api_version, no token "
               "repeats, status in {committed, replayed}, rung in SYS-01's frozen four "
               "{in_flight, local_durable, queued, server_durable} (RTM §4.3 item 3 — the DTO "
@@ -285,6 +321,10 @@ def main() -> int:
               "an ack line broke the frozen grammar: " + (bad[0] if bad else "(none)"))
 
         # ---- BND-04 — the typed-error surface as the contract
+        # the QRY-003/list-hiding fixture: hl2 ends the census ACTIVE (the
+        # restore_highlight walk) — re-tombstone it AFTER the census snapshot
+        # (the 29th ack; not part of the 28-line structure pin)
+        cmd("tombstone_highlight", "--id", hl2, key="th-2b")
         notes_before = int(audit("SELECT count(*) FROM arv.note;") or 0)
         srcs_before = int(audit("SELECT count(*) FROM arv.source;") or 0)
         # ARV-CMD-409: the key/body conflict
@@ -302,16 +342,33 @@ def main() -> int:
         # ARV-NTE-006: the malformed reference kind
         rnte6 = cmd("create_note", "--content", "x", "--ref", "bogus:zzz", key="nte6-1")
         notes_after = int(audit("SELECT count(*) FROM arv.note;") or 0)
-        # ARV-QRY-001: absent == cross-owner (byte-identical — no oracle)
+        # ARV-QRY-001: the no-existence-oracle — TWO directions (SEV round-1
+        # F1 repair: the original pin compared absent-vs-absent, vacuous):
+        # (a) CROSS-OWNER: B reads A's REAL objects — the refusal must be
+        #     byte-identical to B's absent-id refusal at the TEMPLATE level
+        #     (the queried id normalized out: a leak would differ anywhere
+        #     else — the code, the wording, the shape)
+        # (b) READER-INDEPENDENCE: the SAME absent id read as A and as B —
+        #     byte-identical (the refusal never depends on the reader)
         absent_id = str(_uuid.uuid4())
         r_abs_A = query("get-capture", "--owner", "A", "--id", absent_id)
         r_abs_B = query("get-capture", "--owner", "B", "--id", absent_id)
+        r_xo_cap = query("get-capture", "--owner", "B", "--id", hl1)
+        r_xo_abs = query("get-capture", "--owner", "B", "--id", absent_id)
+        r_xo_nt = query("get-note", "--owner", "B", "--id", n1)
+        r_xo_nt_abs = query("get-note", "--owner", "B", "--id", absent_id)
+
+        def _tmpl(out: str, qid: str) -> str:
+            return out.replace(qid, "<id>")
         # ARV-QRY-003: the tombstoned read
         r_qry3 = query("get-capture", "--owner", "A", "--id", hl2)
-        # ARV-QRY-004: the list-bounds refusals (the new typed code)
+        # ARV-QRY-004: the list-bounds refusals (the new typed code — incl.
+        # the NON-INTEGER limit: the SEV round-1 F3 repair makes every bounds
+        # violation the typed exit-1 shape, never argparse's exit-2 usage)
         r_l0 = query("list-notes", "--owner", "C", "--limit", "0")
         r_l1001 = query("list-notes", "--owner", "C", "--limit", "1001")
         r_lbad = query("list-notes", "--owner", "C", "--after", "not-a-uuid")
+        r_lnan = query("list-notes", "--owner", "C", "--limit", "abc")
         ok4 = (r409.returncode == 1 and "FAIL ARV-CMD-409:" in r409.stdout
                and notes_409 == notes_before
                and rcap6.returncode == 1 and "FAIL ARV-CAP-006:" in rcap6.stdout
@@ -320,18 +377,26 @@ def main() -> int:
                and rnte6.returncode == 1 and "FAIL ARV-NTE-006:" in rnte6.stdout
                and notes_after == notes_before
                and r_abs_A.returncode == 1 and "FAIL ARV-QRY-001:" in r_abs_A.stdout
-               and r_abs_B.returncode == 1 and r_abs_A.stdout == r_abs_B.stdout
+               and r_abs_A.stdout == r_abs_B.stdout
+               and r_xo_cap.returncode == 1 and "FAIL ARV-QRY-001:" in r_xo_cap.stdout
+               and _tmpl(r_xo_cap.stdout, hl1) == _tmpl(r_xo_abs.stdout, absent_id)
+               and r_xo_cap.stderr == r_xo_abs.stderr
+               and r_xo_nt.returncode == 1 and "FAIL ARV-QRY-001:" in r_xo_nt.stdout
+               and _tmpl(r_xo_nt.stdout, n1) == _tmpl(r_xo_nt_abs.stdout, absent_id)
                and r_qry3.returncode == 1 and "FAIL ARV-QRY-003:" in r_qry3.stdout
                and r_l0.returncode == 1 and "FAIL ARV-QRY-004:" in r_l0.stdout
                and r_l1001.returncode == 1 and "FAIL ARV-QRY-004:" in r_l1001.stdout
-               and r_lbad.returncode == 1 and "FAIL ARV-QRY-004:" in r_lbad.stdout)
+               and r_lbad.returncode == 1 and "FAIL ARV-QRY-004:" in r_lbad.stdout
+               and r_lnan.returncode == 1 and "FAIL ARV-QRY-004:" in r_lnan.stdout)
         check("BND-04", ok4,
               "the typed-error surface as the contract: ARV-CMD-409 (key/body conflict, zero effect — "
               "note count unchanged), ARV-CAP-006/007 (import refusals, zero effect — source count "
-              "unchanged), ARV-NTE-006 (malformed ref, zero effect), ARV-QRY-001 (absent == "
-              "cross-owner, byte-identical refusals — no existence oracle), ARV-QRY-003 (tombstoned "
-              "read), ARV-QRY-004 (limit 0 / limit 1001 / non-uuid cursor) — each exit 1 + the "
-              "'FAIL ARV-XXX-NNN:' prefix (the frozen refusal shape)",
+              "unchanged), ARV-NTE-006 (malformed ref, zero effect), ARV-QRY-001 BOTH directions "
+              "(cross-owner: B reading A's REAL capture/note refuses byte-identically to B's "
+              "absent-id refusal at the template level — no existence oracle; reader-independence: "
+              "the same absent id refuses identically for A and B), ARV-QRY-003 (tombstoned "
+              "read), ARV-QRY-004 (limit 0 / limit 1001 / non-uuid cursor / non-integer limit) — "
+              "each exit 1 + the 'FAIL ARV-XXX-NNN:' prefix (the frozen refusal shape)",
               "the refusal sites keep the typed shape; the list-bounds refusal (ARV-QRY-004) is new "
               "machinery — it lands with this slice")
 

@@ -80,6 +80,8 @@ matrix's third MEASURED row over a SYNTHETIC corpus (Q8's gate — synthetic-onl
 stability claim; the owner's real-document corpus is the owner gate). The encrypted/DRM class refuses
 typed with the bytes staged (no circumvention surface).
 
+**The text-access routing (the GREEN's true shape):** the blob stores the ORIGINAL bytes (content-addressed, never transformed), so the EPUB's derived text must be re-derived at EVERY text-access site — extract.py's decode (the pre-slice form decodes independently and would refuse a zip blob as ARV-EXT-002), the keyword-index full-text ride at import, the highlight/position offset validations. ONE home: formats.py's read_text(media_type, digest) — the text formats passthrough-decode, the epub walks the container, the octet-stream class refuses (the readable-text boundary stays at extraction's named refusal).
+
 **The design boundary (the acceptance the RED pins):** the synthetic-EPUB round-trip at the real boundary
 (build a zip in the test, import it, extract it, measure it — the matrix row MEASURED not asserted); the
 three refusal classes each with the zero-effect + staged-bytes proof (the CAP-004 pattern); the

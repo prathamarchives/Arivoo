@@ -4,13 +4,17 @@
 # CLAIM-065 adapter registry's THIRD approved row; the stdlib-only container
 # walk (ARV-DEP-008); the typed epub-family refusals with staged bytes; the
 # matrix's third MEASURED row over a SYNTHETIC corpus (Q8's gate); the
-# position-surface composition arm. RED-first at CLAIM-066's merged head
+# position-surface composition arm. THE TEXT-ACCESS ROUTING: the EPUB's derived
+# text must be readable at EVERY text-access site (extract.py's decode, the
+# keyword-index ride, the highlight/position offset validations) — ONE home
+# (formats.py's read_text), never a second decode path. RED-first at CLAIM-066's merged head
 # 269921ac. Commit A carries the post-#101 reconciliation + record 59.
 # THE BOUNDED EXCLUSIONS: no DRM circumvention surface (an encrypted EPUB
 # refuses typed, the bytes staged); no PDF (the following slice); no
 # reader-client work (P4-B's repo).
 harness/tests/test_epub.py D-041
 harness/formats.py D-041
+harness/extract.py D-041
 harness/commands.py D-041
 harness/capability.py D-041
 harness/gate.py D-041

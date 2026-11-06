@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-069-p4b-client-acceptance",
+  "base_sha": "101e173b27cdff0b9fdcd9e70105d80b0eb96974",
+  "reviewed_diff_sha256": "b9b397f0beb576b2d3f19d56ed134bcfc31b6794238707426940798ebf179325",
+  "sheet_section": true,
+  "intent_ids": [
+    "INT-144",
+    "INT-145",
+    "INT-146"
+  ],
+  "requirement_ids": [
+    "SYS-06",
+    "SYS-09",
+    "SYS-01"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
+  "changed_components": [
+    "harness/client.py (the NEW module: the clean external client driver \u2014 P4-F's named proof vehicle; the full user walk + P4-B's named adversarial conditions as reusable driver functions over the real CLIs, subprocess-only, no privileged path)",
+    "harness/tests/test_client_acceptance.py (the CAC-01..09 suite: the walk frozen on every ack, the no-oracle both paths, the four DTO laws, the lost-ack convergence, the idempotency, the reload durability, the stale-version honesty, the tombstone lifecycle, the no-privileged-path law)"
+  ],
+  "interfaces_reviewed": [
+    "the public CLI boundary as the client's only surface",
+    "the frozen ack grammar on every write path",
+    "the typed-refusal vocabulary as client-consumable data",
+    "the crash-injection vocabulary at the lost-ack arm"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the CAC suite (run-01..03) x3 green"
+    ],
+    "integration_verification": [
+      "make verify x2 (run-04, 05) \u2014 all 29 suites + the gate + the canonical layer 54/0"
+    ],
+    "system_verification": [
+      "SYS-01 trace: every walk ack names its durability rung (CAC-01's frozen check)",
+      "SYS-06 trace: the durable import + the position + the capture through the one ladder",
+      "SYS-09 trace: the reopen round-trip + the typed answers"
+    ],
+    "validation": [
+      "the one-round SEV chain: round 1 (agent-5e8c31a7) PASS \u2014 zero open P0/P1/P2; the walk + the uncertain-ack + the no-oracle observations reproduced from raw CLI outputs on the reviewer's own scratch DB; the sha chain closed; four P3 notes routed/recorded in notverified"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "the client proof secretly using a privileged path",
+      "control": "the no-privileged-path law: subprocess invocations of the real CLIs only \u2014 the driver's source mechanically scanned (CAC-09) + the SEV reviewer's full-file read",
+      "proof_ids": [
+        "run-01",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "an adversarial client condition answering with an untyped failure",
+      "control": "the nine conditions each pinned to their typed refusal or truthful answer (the CAC-02..08 registry)",
+      "proof_ids": [
+        "run-01",
+        "run-02"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "the driver fabricating observations the CLIs do not answer",
+      "control": "the SEV reviewer reproduced the walk + the uncertain-ack + the no-oracle observations from the raw CLI outputs",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "no reader-client UI (P4-B's separate repo \u2014 the owner's gate); the format-law arm's zero-effect observability limited to the typed refusal (no CLI enumerates sources \u2014 the SEV P3-1 wording note); the crash arm's vocabulary disclosed (crash.py named at the call site, omitted in the docstring's list); the CAC-09 scan's narrowness (the substance verified by full-file read; the AST-level scan a follow-up); the mkdtemp scratch-dir litter (cosmetic) \u2014 the full list at notverified.txt"
+  ],
+  "builder_context": "Super Z (GLM host) \u2014 the standing do-not-stop chain INT-134..146",
+  "reviewer_context": "one fresh-context SEV agent: agent-5e8c31a7 (round 1, PASS)",
+  "disposition": "PASS",
+  "review_summary": "the one-round chain: round 1 (agent-5e8c31a7) PASS \u2014 zero open P0/P1/P2. The clean-client law verified by full-file read (every subprocess target a repo CLI; no privileged path); the walk + the uncertain-ack + the no-oracle observations reproduced from raw CLI outputs on the reviewer's own scratch DB; the sha chain closed (HEAD == current == the amendment's new; the binding at cdca73a == the amendment's prior); the three amendments additive/strengthening (the NTE-010 wrong-code fix confirmed against commands.py; CAC-07 strictly adds a conjunct); all 13 diff paths declared; four P3 notes routed/recorded (the zero-effect observability wording; the docstring's crash.py omission; the scan's narrowness; the scratch-dir litter)"
+}

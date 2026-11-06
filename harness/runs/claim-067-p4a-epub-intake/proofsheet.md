@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-067-p4a-epub-intake (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): b67099710deceb35c4ef417762c21eb67d810450
-- generated (last record's timestamp): 2026-11-06T18:51:14.965646+00:00
-- run records: 12
+- commit (last run record's): 18715d373ef264f3a7301f39b8eecdd370a65f61
+- generated (last record's timestamp): 2026-11-06T18:58:42.307260+00:00
+- run records: 14
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_epub.py` -> exit 0 · output sha256 5846ed54f199f08a · 2026-11-06T18:05:40.432654+00:00
@@ -17,6 +17,8 @@
 - `python3 harness/tests/test_epub.py` -> exit 0 · output sha256 ed043118645d115c · 2026-11-06T18:45:16.321640+00:00
 - `python3 harness/tests/test_epub.py` -> exit 0 · output sha256 ed043118645d115c · 2026-11-06T18:45:25.622032+00:00
 - `make verify` -> exit 0 · output sha256 8c803a29f4e69244 · 2026-11-06T18:51:14.965646+00:00
+- `env SLICE=claim-067-p4a-epub-intake GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 6c3c2e2a8932965b · 2026-11-06T18:58:16.274982+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-067-p4a-epub-intake python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 2dbdf64e0cf78869 · 2026-11-06T18:58:42.307260+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-067 / P4-A slice three (the EPUB
@@ -85,4 +87,4 @@
 - not-verified entries: 1
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 52f66dc879e850fa6dcc64520ede07bd723ca854feb3a628b3b7b95b2dcb2080
+- sheet sha256 (of the content above, excluding this line): ef72e1c6436069794eb3a2dea34a839ae5f27447037f47f1929c18601afa4f40

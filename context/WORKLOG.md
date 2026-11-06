@@ -903,3 +903,10 @@ Stage Summary:
 - Evidence: record 56 (complete); harness/runs/claim-064-p400c-capability-matrix/ (on main); the review id `5797014752`.
 - Unresolved: Q6-Q12 + D-014 unchanged; the EPUB/PDF increments + the position surface = the following P4-A slices.
 - Next: the P4-A slice one RED (test_format.py at `4e758fc`) → the GREEN → the measured set → the SEV round → the finalize chain → the merge under INT-145 → P4-A's following slices → P4-B..F — NO PAUSE UNTIL PHASE 4 IS DONE (INT-144..146).
+
+## Task 82 (CLAIM-066, session 41) — the #100 merge close (P4-A slice one LANDED) + the CLAIM-066 open (P4-A slice two: the position surface)
+- What: PR #100 (CLAIM-065 — the JSON format intake) merged under INT-145's standing authorization: the five checks green at the final head `c275e4b` and on the merge commit `562b70f` (all observed live); the merge-gate review D-042 (1a) `5797891176`; the flip/merge/restore with the protections re-read byte-equivalent; the branch deleted; 0 open PRs; only main; no ARV-SEV-003 round (the digest bound LAST — 2e207fe7; the local trusted-gate reproduction green before the push). The SEV two-round chain: round 1 PASS zero open P0/P1/P2 (two repair-in-slice P3s applied: the CAP-009 hint, the asserted zero-effect arm); round 2 FINAL PASS. CLAIM-066 opened on `slice/claim-066-p4a-position-surface` (P4-A slice two: the source-open/position surface — the reserved surface made real; the serving-generation field; ONE migration 0014; RED-first at `562b70f`).
+- Verified: the five checks on `c275e4b` and on `562b70f` (all success, observed live via the API); the protections byte-equivalent after the restore; 0 open PRs; only main.
+- Evidence: record 57 (complete); harness/runs/claim-065-p4a-format-intake-json/ (on main); the review id `5797891176`.
+- Unresolved: Q6-Q12 + D-014 unchanged; the EPUB/PDF increments = the following P4-A slices; P4-B..F beyond.
+- Next: the P4-A slice two RED (test_position.py + migration 0014 at `562b70f`) → the GREEN → the measured set → the SEV round → the finalize chain → the merge under INT-145 → the following P4-A slices → P4-B..F — NO PAUSE UNTIL PHASE 4 IS DONE (INT-144..146).

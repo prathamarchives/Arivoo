@@ -1,0 +1,7 @@
+{
+  "command": "env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-066-p4a-position-surface python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "fdf5b764a35b204933b382cfb4ba68933a12c9cb",
+  "output_sha256": "fb88aa96e32539871c2cf5316a5155778b59d84c5c93b08ee942dbb91aa77f73",
+  "recorded_at": "2026-11-06T16:41:47.632757+00:00"
+}

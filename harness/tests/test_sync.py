@@ -85,6 +85,13 @@ Cases (the SYN registry; each pin's full statement lives at its check()):
          (acknowledged carries server_ref; retryable/failed carry the named
          reason); the server's command-log key set == the acknowledged set
          plus the 409-failed set; zero rows silently dropped
+  SYN-18 the position delivery (the SEV round-1 F1 repair): the
+         save_position outbox row DELIVERS — the server-side save
+         re-executes through the TRANSLATED source id and binds the
+         SERVER's own serving generation (the site-local binding law:
+         each site's rows bind that site's generation ids, never a
+         cross-site uuid transplant); the row acknowledges with its
+         server_ref and the server's read arm answers the delivered row
 
 Run: python3 harness/tests/test_sync.py   (exit 0 = green)
 """
@@ -715,11 +722,64 @@ def main() -> int:
               "the divergent-bridge containment: the creator's delivery failed the typed 409 conflict (the server carries the key with a DIFFERENT body — a competing logical command); the referencer NEVER translates through the competing server answer — the identity bridge resolves only through creators whose own delivery rests acknowledged, so the referencer holds the named ARV-SYN-009 dependency instead of delivering against the WRONG entity; the server's competing note stays exactly one revision — no effect from the local lineage ever lands on it",
               "the bridge's soundness gate: a server command_log answer is a valid translation ONLY when the local outbox row for the creating command rests acknowledged — the 409-divergent answer belongs to a different logical command and must never satisfy a referencer")
 
+        # ---- SYN-18 — the position delivery (the SEV round-1 F1 repair: the
+        # dead letter closed — save_position joins the outbox-carrying set's
+        # DELIVERY half, not just its enqueue half)
+        # the site-local binding law: the delivered save binds the SERVER's own
+        # serving generation — the rig extracts on BOTH sites (the local save
+        # needs the local generation, the delivered save the server's), and the
+        # pin asserts the server row's generation IS the server's, never the
+        # local uuid transplanted
+        ex_loc = cli(str(REPO / "harness" / "extract.py"), "--owner", "A", "--actor",
+                     "owner", "--client-id", "cli-1", "--idem-key", "sy-extloc1",
+                     "--source-id", sid, env=ENV)
+        srv_sid = audit(SRV, "SELECT result_ref FROM arv.command_log "
+                             "WHERE owner_scope='A' AND idempotency_key='sy-imp1';")
+        ex_srv = cli(str(REPO / "harness" / "extract.py"), "--owner", "A", "--actor",
+                     "owner", "--client-id", "cli-1", "--idem-key", "sy-extsrv1",
+                     "--source-id", srv_sid, env=srv_env)
+        s3 = TEXT.index("persistent anchor")
+        p_pos = cmd("save_position", "--source-id", sid, "--start", str(s3),
+                    "--end", str(s3 + 8), key="sy-pos1")
+        r18 = sync()
+        st18 = ob(LOC, "sy-pos1")
+        ref18 = ob(LOC, "sy-pos1", "server_ref")
+        srv_pos = audit(SRV, f"SELECT start_off || '|' || end_off || '|' || generation_id "
+                             f"FROM arv.reading_position WHERE owner_scope='A' "
+                             f"AND source_id='{srv_sid}';")
+        srv_gen = audit(SRV, f"SELECT id FROM arv.extraction_generation "
+                             f"WHERE source_id='{srv_sid}' AND state='current' "
+                             f"ORDER BY ordinal DESC LIMIT 1;")
+        loc_gen = audit(LOC, f"SELECT id FROM arv.extraction_generation "
+                             f"WHERE source_id='{sid}' AND state='current' "
+                             f"ORDER BY ordinal DESC LIMIT 1;")
+        g18 = cli(str(REPO / "harness" / "query.py"), "get-position", "--owner", "A",
+                  "--source", srv_sid, env=srv_env)
+        ok18 = (ex_loc.returncode == 0 and ex_srv.returncode == 0
+                and p_pos.returncode == 0 and f"result_ref={sid}@1" in p_pos.stdout
+                and r18.returncode == 0
+                and st18 == "acknowledged" and ref18 == f"{srv_sid}@1"
+                and srv_pos == f"{s3}|{s3 + 8}|{srv_gen}"
+                and srv_gen and srv_gen != loc_gen
+                and g18.returncode == 0 and '"state": "saved"' in g18.stdout
+                and '"save_ordinal": 1' in g18.stdout)
+        check("SYN-18", ok18,
+              "the position delivery (the SEV round-1 F1 repair): the save_position outbox row DELIVERS — "
+              "the server-side save re-executes through the TRANSLATED source id, binds the SERVER's own "
+              "serving generation (the site-local binding law: each site's rows bind that site's generation "
+              "ids — the pin asserts the server row's generation IS the server's, and the two sites' "
+              "generation uuids differ), acks <server-source>@1, and the row acknowledges with its "
+              "server_ref; the server's read arm answers the delivered row (state=saved, ordinal 1) — "
+              "never a dead letter in the outbox-carrying set",
+              "harness/sync.py _cli_args' save_position branch (the translated source id + the offsets) — "
+              "the command was already in _SYNC_COMMANDS (the enqueue); the delivery completes the "
+              "no-lost-writes law for the position family")
+
         print()
         if FAILS:
             print(f"RED — the P3-08 sync suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-08 acceptance suite (SYN-01..17) passes")
+        print("GREEN — the P3-08 acceptance suite (SYN-01..18) passes")
         return 0
     finally:
         pg.drop_scratch_db(LOC)

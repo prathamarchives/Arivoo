@@ -61,11 +61,12 @@ FORMATS = ADAPTERS
 RESERVED_SURFACES = {
     "source-open/position": {
         "owner_phase": "P4-A/B",
-        "reservation": ("the read-position surface — open a source at a saved "
-                        "position, save the reading position, return to it; the "
-                        "bookmark/anchor machinery is the substrate, the "
-                        "surface itself lands with P4-A/B (no reader-client "
-                        "work in this repository)"),
+        "reservation": ("LANDED in P4-A slice two (CLAIM-066): the backend verbs are real — "
+                        "save_position (commands.py — the append-only save through the spine, "
+                        "the serving-generation binding) + get_position (query.py get-position — "
+                        "the last-saved position, its generation binding honest across a "
+                        "re-extraction, the no-oracle); the reader CLIENT that opens a source "
+                        "at the saved position is P4-B's separate repo (no client work here)"),
     },
 }
 

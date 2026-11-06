@@ -97,7 +97,7 @@ def _create_key(local_db: str, owner: str, local_id: str) -> str:
     if not key:
         key = _scalar(local_db, owner,
                       f"SELECT c.idempotency_key FROM arv.source s "
-                      f"JOIN arv.command_log c ON c.result_ref = s.id "
+                      f"JOIN arv.command_log c ON c.result_ref = s.id::text "
                       f"AND c.owner_scope = s.owner_scope "
                       f"JOIN arv.outbox o ON o.owner_scope = c.owner_scope "
                       f"AND o.idempotency_key = c.idempotency_key "
@@ -176,6 +176,18 @@ def _cli_args(row: dict, local_db: str, server_db: str, owner: str) -> "tuple[li
             argv += ["--work-id", w]
         return argv, ""
     if c in ("create_highlight", "create_bookmark"):
+        sid = _translate(local_db, server_db, owner, p["source_id"])
+        if not sid:
+            return None, f"ARV-SYN-009: the source {p['source_id']} is not yet server-durable — the identity dependency (the creating command has no server answer; ordering resolves it on the next pass)"
+        return ["--source-id", sid, "--start", str(p["start"]), "--end", str(p["end"])], ""
+    if c == "save_position":
+        # P4-A slice two (CLAIM-066; the SEV round-1 F1 repair — the dead
+        # letter closed): the position save DELIVERS through the translated
+        # source id; the server-side save binds the SERVER's own serving
+        # generation (the site-local binding law — each site's rows bind that
+        # site's generation ids, never a cross-site uuid transplant). A server
+        # that has not extracted rests the row retryable with the command's
+        # own named ARV-POS-002 reason — a truthful state, never a dead letter
         sid = _translate(local_db, server_db, owner, p["source_id"])
         if not sid:
             return None, f"ARV-SYN-009: the source {p['source_id']} is not yet server-durable — the identity dependency (the creating command has no server answer; ordering resolves it on the next pass)"

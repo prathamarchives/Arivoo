@@ -1,0 +1,102 @@
+# PROOF SHEET — slice claim-066-p4a-position-surface (harness-built; never hand-edited — PRF-01, LAW-01)
+
+- commit (last run record's): fdf5b764a35b204933b382cfb4ba68933a12c9cb
+- generated (last record's timestamp): 2026-11-06T16:41:47.632757+00:00
+- run records: 16
+
+## Run records (command, exit, output digest)
+- `python3 harness/tests/test_position.py` -> exit 0 · output sha256 14a843991330adb4 · 2026-11-06T14:36:58.557394+00:00
+- `python3 harness/tests/test_position.py` -> exit 0 · output sha256 14a843991330adb4 · 2026-11-06T14:37:18.732858+00:00
+- `python3 harness/tests/test_position.py` -> exit 0 · output sha256 14a843991330adb4 · 2026-11-06T14:37:21.712006+00:00
+- `make verify` -> exit 0 · output sha256 09d53dd6ad79ec7f · 2026-11-06T14:42:54.803474+00:00
+- `make verify` -> exit 0 · output sha256 ca9ac27ed0580d88 · 2026-11-06T14:48:35.342827+00:00
+- `python3 harness/tests/test_position.py` -> exit 0 · output sha256 14a843991330adb4 · 2026-11-06T15:48:29.553069+00:00
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 4e0c35436bcb8e56 · 2026-11-06T15:48:48.798009+00:00
+- `make verify` -> exit 0 · output sha256 7f65bb2fdfd76902 · 2026-11-06T15:54:02.848257+00:00
+- `python3 harness/tests/test_position.py` -> exit 0 · output sha256 14a843991330adb4 · 2026-11-06T16:25:16.066242+00:00
+- `python3 harness/tests/test_position.py` -> exit 0 · output sha256 14a843991330adb4 · 2026-11-06T16:25:19.168245+00:00
+- `python3 harness/tests/test_position.py` -> exit 0 · output sha256 14a843991330adb4 · 2026-11-06T16:25:26.394799+00:00
+- `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 4e0c35436bcb8e56 · 2026-11-06T16:25:38.656353+00:00
+- `make verify` -> exit 0 · output sha256 235e748a60f7f684 · 2026-11-06T16:30:51.097563+00:00
+- `env SLICE=claim-066-p4a-position-surface GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 2da68d37aa4bb5b9 · 2026-11-06T16:38:07.716871+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-066-p4a-position-surface python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 1 · output sha256 7dcd85825831383e · 2026-11-06T16:38:38.043480+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-066-p4a-position-surface python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 fb88aa96e3253987 · 2026-11-06T16:41:47.632757+00:00
+
+## Not verified (LAW-04 — required, never empty-by-omission)
+- NOT VERIFIED — the honest limits of CLAIM-066 / P4-A slice two (the
+- source-open/position surface; LAW-04; never empty-by-omission).
+- WHAT THIS SLICE PROVES: the reading-position contract on the EXISTING
+- substrate — the save (commands.py save_position through the spine's own
+- build_txn phase: the per-(owner, source) advisory xact lock held to the
+- commit, the typed ARV-POS-001/002/003 refusals with zero effect, the
+- result_ref as the user-coordinate address <source>@<ordinal>), the reopen
+- (query.py get-position: ONE statement ONE snapshot, the no-oracle
+- byte-equal to get-source's refusal, the typed no_position_saved ANSWER at
+- exit 0), the serving-generation binding honest across a re-extraction
+- (saved_generation_id byte-stable, current_generation_id the new one, the
+- derived generation_matches flag — never a silent retarget; the #99
+- notverified's routing closed), the append-only substrate (migration 0014:
+- the serialized-save guard, the ordinal law, the generation-bind law, the
+- append-only law, RLS forced, NO content column), the delivery (the SEV
+- round-1 F1 repair: sync.py's save_position branch — the site-local binding
+- law, the server row binding the SERVER's own generation), and the result_ref
+- widening (command_log.result_ref UUID -> TEXT, lossless for every landed
+- family, the serving index, sync.py's one typed join cast).
+- THE HONEST LIMITS:
+- - THE READER CLIENT IS NOT HERE (the bounded exclusion, P4-B's separate
+- repo): the backend verbs save_position/get_position are real and pinned;
+- the client that opens a source AT the saved position (the viewport
+- scroll, the rendering) is P4-B's surface. The reopen returns the
+- coordinates; the client's use of them is unverified here.
+- - THE OFFSET SEMANTICS ARE THE DECODED-TEXT COORDINATES (the derived
+- view's own): a position names [start, end) over the source's decoded
+- text. The COORDINATE SYSTEM of a future paginated/EPUB reader (page
+- numbers, CFI-style anchors) is NOT established — the EPUB slice owns
+- that boundary; byte-offset positions over EPUB-derived views may need
+- their own mapping layer, never assumed compatible.
+- - THE GENERATION BINDING IS SITE-LOCAL (the SEV round-1 F1 repair's
+- disclosed shape): each site's position rows bind THAT site's generation
+- ids. The delivered save binds the server's own serving generation —
+- never a cross-site uuid transplant. What is NOT verified: any
+- cross-site position MERGE semantics (two sites saving positions for the
+- same source and the same owner — the last-writer-wins question at the
+- ordinal level is the sync ordering's, and no cross-site ordinal
+- reconciliation exists or is claimed; the server's outbox never mirrors
+- back).
+- - AN UNEXTRACTED SERVER RESTS THE POSITION DELIVERY RETRYABLE (the
+- truthful state): the delivered save against a server that has not
+- extracted refuses ARV-POS-002 and rests retryable with that named
+- reason — the recovery (extract server-side, re-sync) is pinned in the
+- SEV round-2 agent's own rig, NOT in the SYN suite's traffic (the rig
+- extracts before the delivery; the unextracted-server arm is
+- code-path-verified + agent-observed, not suite-pinned).
+- - THE DWELL/SESSION EVENTS ARE NOT HERE (D-010's boundary, P4-C's): a
+- reading position is a SAVED STATE, not an event stream; automatic
+- position tracking (scroll events, session dwell) is P4-C's surface.
+- - THE CRASH MATRIX'S SPINE POINTS ONLY: the position save's crash arms
+- ride the spine's three (after-begin / pre-commit / post-commit-pre-ack)
+- — the lost-ack convergence is pinned; no position-specific crash point
+- exists or is claimed (the save is one statement; there is no
+- multi-statement window to crash inside).
+- - THE RESULT_REF WIDENING'S COMPATIBILITY SURFACE: every landed family's
+- replay is pinned green (commands/sync/export suites) and import's
+- plain-uuid replay verified lossless; what is NOT re-verified: any
+- EXTERNAL consumer of command_log.result_ref as a uuid (none exists in
+- this repository — the export column is text, the sync bridge casts; an
+- external reader that parsed the column AS a uuid type would see text
+- now, the honest widening disclosed at the migration's directive).
+- - THE STANDING EXCLUSIONS (unchanged): no EPUB/PDF increments (the
+- following P4-A slices); Q6-Q12's open gates stand; the run-record
+- convention (HEAD-at-capture) disclosed at run-06/07/08 — the SEV
+- round-2 verified the digests reproduce byte-exactly at the repair
+- commit.
+
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 223249c94285c06a97b45812e0b39663e912d04f90e7be48e55685642fd37582
+- reviewed_diff_sha256: f7fc0edc22f93fcbe01c0e0fc427692a1a69d74c4f6761c66fe64e3124d8f2e8
+- disposition: PASS
+- findings: 0 (open P0/P1: 0)
+- not-verified entries: 1
+
+## Assembly
+- sheet sha256 (of the content above, excluding this line): d10ff41f7f194d2548385208a976b890f368c6c186007c10854efebcea0ec7d2

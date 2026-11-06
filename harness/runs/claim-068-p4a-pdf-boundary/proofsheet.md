@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-068-p4a-pdf-boundary (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 036091271c2f59422ac820b1dc16952059d593d4
-- generated (last record's timestamp): 2026-11-06T19:58:42.849759+00:00
-- run records: 5
+- commit (last run record's): e13a261139980a87d546f71b1167fa193ccf7dd3
+- generated (last record's timestamp): 2026-11-06T20:13:10.236370+00:00
+- run records: 7
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_pdf.py` -> exit 0 · output sha256 cb6a5ad870c83f68 · 2026-11-06T19:46:10.655414+00:00
@@ -10,6 +10,8 @@
 - `python3 harness/tests/test_pdf.py` -> exit 0 · output sha256 cb6a5ad870c83f68 · 2026-11-06T19:46:18.851314+00:00
 - `make verify` -> exit 0 · output sha256 e1d5db736a931de8 · 2026-11-06T19:52:33.588515+00:00
 - `make verify` -> exit 0 · output sha256 ba6293c83c55b6ad · 2026-11-06T19:58:42.849759+00:00
+- `env SLICE=claim-068-p4a-pdf-boundary GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 485d950d3dd1ad64 · 2026-11-06T20:12:41.974571+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-068-p4a-pdf-boundary python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 221d574b8a0e3cc0 · 2026-11-06T20:13:10.236370+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-068 / P4-A slice four (the PDF
@@ -65,4 +67,4 @@
 - not-verified entries: 1
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 56291bc729fbf159a949bdb8ba7c65ec7bc4446d90d40ebd3849cb8b954b26d3
+- sheet sha256 (of the content above, excluding this line): da9f5c4e1f9372f315bb69667fc176b04847fdad396b80baaa5f2030af212512

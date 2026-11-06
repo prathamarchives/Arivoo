@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-068-p4a-pdf-boundary",
+  "base_sha": "237d4d80cfdab238d63f4feb555ed91c9eeec674",
+  "reviewed_diff_sha256": "ff97db0a9c9a10b84042995d1e517bb1fb6f64957fefba363319950b3628c2ce",
+  "sheet_section": true,
+  "intent_ids": [
+    "INT-144",
+    "INT-145",
+    "INT-146"
+  ],
+  "requirement_ids": [
+    "SYS-06",
+    "SYS-09"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
+  "changed_components": [
+    "harness/formats.py (the ONE-line GREEN: PASSTHROUGH gains application/pdf beside application/octet-stream \u2014 the named type of the same bytes class; no decode arm, no matrix row, no PDF-specific path)",
+    "harness/tests/test_pdf.py (the PDF-01..05 suite: the durable passthrough import, the named extraction refusal with the bytes recoverable, the non-text index boundary, the no-pdf-row honesty + the octet-stream equivalence, the typed capture/position refusals)"
+  ],
+  "interfaces_reviewed": [
+    "the passthrough's one-class contract (the octet-stream equivalence)",
+    "the extraction's decode boundary (EXT-02's letter over the binary bytes)",
+    "the matrix's derivation honesty (no row without an acceptance corpus)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the PDF suite (run-01..03) x3 green"
+    ],
+    "integration_verification": [
+      "make verify x2 (run-04, 05) \u2014 all suites + the gate + the canonical layer 54/0",
+      "the blast radius: format + epub suites green"
+    ],
+    "system_verification": [
+      "SYS-06 trace: the durable import with the original bytes stored",
+      "SYS-09 trace: the named extraction refusal + the non-text search boundary"
+    ],
+    "validation": [
+      "the one-round SEV chain: round 1 (agent-9c4e2f17) PASS \u2014 zero open P0/P1/P2/P3-blocking; the probes live (the octet-stream equivalence byte-equal, the export/restore byte-intact, the BOM'd-text class honest per the landed letter); the three P3 notes routed/recorded in notverified"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a PDF silently claimed as readable text",
+      "control": "the honest boundary: NO pdf matrix row + the named ARV-EXT-002 extraction refusal + the non-text index boundary \u2014 never a text-extraction claim",
+      "proof_ids": [
+        "run-01",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "the passthrough splitting into two classes with different letters",
+      "control": "the octet-stream equivalence pinned: the same bytes under both media types, byte-equal refusal heads, one class",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "the durable capture lost to the extraction's honesty",
+      "control": "the staged bytes recoverable: the blob ANSWERS at the source's digest after the refusal; the export/restore byte-intact (the reviewer's own probe)",
+      "proof_ids": [
+        "run-01",
+        "run-03"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "no PDF text extraction (the scan/OCR + fixed-layout classes \u2014 future increments under Q8's owner gate); the all-ASCII PDF extracts with syntax-as-text (the decode is the boundary \u2014 the landed letter, the residual routed to the scan/OCR increment); the restore's blob-store provisioning is the operator boundary (CLAIM-060's landed design); the synthetic fixture only \u2014 the full list at notverified.txt"
+  ],
+  "builder_context": "Super Z (GLM host) \u2014 the standing do-not-stop chain INT-134..146",
+  "reviewer_context": "one fresh-context SEV agent: agent-9c4e2f17 (round 1, PASS)",
+  "disposition": "PASS",
+  "review_summary": "the one-round chain: round 1 (agent-9c4e2f17) PASS \u2014 zero open P0/P1/P2/P3-blocking. The one-line GREEN verified at the real boundary (the passthrough's named type, no decode arm, no matrix row); the suite 5/5; the blast radius green; the red-records chain exact (the probe amendment additive, one hunk); all 13 diff paths declared; the probes live (the octet-stream equivalence byte-equal, the export/restore byte-intact with state_hash_match=true, the BOM'd-text class honest per the landed EXT-02 letter). Three P3 notes routed/recorded (the all-ASCII syntax-as-text class -> the future scan/OCR increment; the restore's operator-boundary blob provisioning -> CLAIM-060's landed design; the GREEN message's no-amendments wording vs the probe-repair commit -> the substance held, the immutable history noted)"
+}

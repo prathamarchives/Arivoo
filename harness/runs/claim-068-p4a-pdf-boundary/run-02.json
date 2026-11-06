@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_pdf.py",
+  "exit_code": 0,
+  "commit": "036091271c2f59422ac820b1dc16952059d593d4",
+  "output_sha256": "cb6a5ad870c83f6898c84222ab8cf4be4193a9b423c9a1cf0bc981890b8c2ffb",
+  "recorded_at": "2026-11-06T19:46:12.075147+00:00"
+}

@@ -1,0 +1,113 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-065-p4a-format-intake-json",
+ "base_sha": "4e758fc2d04220a69cdc94d4fb385fb3c816b8f6",
+ "reviewed_diff_sha256": "2e207fe7d9e5c3d4a3f13e22389e845e83827546ffe890f75eee840f3bb4cb3c",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-06",
+  "SYS-09"
+ ],
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "changed_components": [
+  "harness/formats.py (the NEW module, 118 source lines: the adapter registry — ONE home for the intake-format truth; the approved reading formats + the bytes passthrough + the typed ARV-FMT-001/002/003 refusals with the staged-bytes contract)",
+  "harness/commands.py (+24 lines: the FMT-001 registry check at the validation phase after CAP-009; the FMT-002/003 decode after the blob verify — the journal failed-retryable, the digest named; the CAP-009 hint's corrected example)",
+  "harness/capability.py (+1 line: FORMATS = formats.ADAPTERS — the matrix DERIVES from the registry, never a second declaration)",
+  "harness/tests/test_format.py (the FMT-01..06 suite, 338 test lines: the JSON intake through the existing ladder, the second measured matrix row, the three typed refusals with the asserted zero-effect + the blob-probe staged-bytes proof)",
+  "harness/tests/test_bookmark.py (the disclosed BMK-02 amendment: the opaque-binary fixture's honest octet-stream media type — the substance unchanged)",
+  "harness/gate.py (+1 line: the TESTS registration)",
+  "harness/red-records.json (the RED record + the three typed amendments)",
+  "CLAIMS.md/STATE.md/AGENTS.md/PLAN.md/context/WORKLOG.md/context/extracted/57-P4A-FORMAT-INTAKE.md (the claim row, the five-area re-derivation, the P4-A elaboration, record 57)"
+ ],
+ "interfaces_reviewed": [
+  "the import boundary's format phase (the registry check after the MIME grammar; the decode after the blob verify — the staged-bytes contract)",
+  "the typed refusal vocabulary (ARV-FMT-001/002/003 — the FAIL shape, the digest naming, the zero-effect proof)",
+  "the capability matrix's derivation (FORMATS = ADAPTERS — one home)",
+  "the bytes passthrough (the landed EXT-03 contract preserved: import durably, extract refuses ARV-EXT-002, never a matrix row)",
+  "the frozen ack grammar on the new path (api_version on the JSON intake's acks; the replay/409 semantics identical to the landed ladder)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the FMT suite x6 (run-01..03 at the GREEN tree, run-06..08 at the final tree — the intake, the measured row, the three refusals with the asserted zero-effect + the blob probes)",
+   "the red-records chain exact at every link (round 2 verified: the binding, the prior, the current)"
+  ],
+  "integration_verification": [
+   "make verify x3 (run-04/05 at the GREEN tree, run-09 at the final tree — all 26 suites + the gate + the canonical layer 54/0)",
+   "the landed boundaries preserved: EXT-03 (the passthrough's ARV-EXT-002), BMK-02 (the capture's ARV-CAP-008 via the honest route), CAP-19 (the MIME grammar precedes the registry)"
+  ],
+  "system_verification": [
+   "the staged-bytes contract at the real boundary (the refusal names the digest; the blob answers; the journal failed-retryable — the ARV-CAP-004 pattern extended)",
+   "the no-oracle unchanged on the read arms (the FMT-06 pin + the round-1 probes)"
+  ],
+  "validation": [
+   "the two-round fresh-context SEV chain (round 1 PASS zero open P0/P1/P2 with two repair-in-slice P3s applied; round 2 FINAL PASS — both repairs verified live, the adversarial arms coherent)",
+   "the honest limits recorded (notverified.txt): the strict-JSON edges, the failed-intake semantics, the case-sensitive registry, the text/plain narrowing, the provenance classes"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-1",
+   "scenario": "an unsupported format silently imports as something it is not (the generic-claim class)",
+   "control": "the registry check at the boundary (ARV-FMT-001, zero effect, ASSERTED by the source-count equality); the approval registry IS the capability matrix",
+   "proof_ids": [
+    "run-06",
+    "sev-round-1.md",
+    "sev-round-2.md"
+   ]
+  },
+  {
+   "id": "FM-2",
+   "scenario": "the user loses what they submitted on a format refusal (the silent-loss class)",
+   "control": "the staged-bytes contract: the FMT-002/003 refusals NAME the digest and the blob answers at it (the suite's own blob probes); the journal row failed-retryable",
+   "proof_ids": [
+    "run-06"
+   ]
+  },
+  {
+   "id": "FM-3",
+   "scenario": "a second durability path grows beside the ladder (the bypass class)",
+   "control": "the JSON intake rides the EXISTING import ladder verbatim (the ack's frozen grammar; the replay/409 semantics identical — the round-2 probes)",
+   "proof_ids": [
+    "run-06",
+    "sev-round-2.md"
+   ]
+  },
+  {
+   "id": "FM-4",
+   "scenario": "the landed bytes-passthrough contract breaks (the regression class)",
+   "control": "EXT-03 green (the octet-stream import + the ARV-EXT-002 extraction refusal); BMK-02 green via the honest route (the ARV-CAP-008 capture refusal); the passthrough never a matrix row",
+   "proof_ids": [
+    "run-09"
+   ]
+  },
+  {
+   "id": "FM-5",
+   "scenario": "the matrix and the registry drift apart (the two-homes class)",
+   "control": "FORMATS = formats.ADAPTERS — the derivation is an assignment, never a second table",
+   "proof_ids": [
+    "run-06"
+   ]
+  }
+ ],
+ "findings": [],
+ "not_verified": [
+  "the strict-JSON edges (BOM'd + empty JSON refuse FMT-002 — strict by design, the bytes recoverable)",
+  "the failed-intake rewind semantics (identical to the landed CAP-004 pattern — the round-1 verification)",
+  "the case-sensitive registry (the accepted-as-designed narrowness class)",
+  "the text/plain+non-UTF-8 narrowing (the disclosed boundary — the honest octet-stream route verified end-to-end)",
+  "the run-record provenance class + the round-1 agent-label nit (the same execution, two labels)",
+  "no EPUB, no PDF, no reader-client work; the position surface is P4-A slice two; the CI run authoritative at PR time; fresh-context labels are not cryptographic independence"
+ ],
+ "builder_context": "super-z (GLM host, session 41, the standing do-not-stop chain INT-134..146) — the builder of the RED, the GREEN, and the repairs",
+ "reviewer_context": "two fresh-context SEV executions: agent-6aee153a (round 1, PASS with two P3s repaired), agent-64ccdcc2 (round 2 — FINAL PASS)",
+ "disposition": "PASS",
+ "review_summary": "P4-A slice one verified at the real boundary: the JSON intake through the ONE existing ladder (the frozen ack grammar on the new path), the adapter registry as the single home (the matrix derives from it), the three typed format refusals with the staged-bytes contract (the digest named, the blob answering, the zero effect asserted), and the landed boundaries preserved (the EXT-03 passthrough, the BMK-02 capture guard, the CAP-19 grammar precedence) — the two-round fresh-context chain closing at FINAL PASS with zero open P0/P1/P2 and every bounded gap disclosed in notverified.txt."
+}

@@ -944,5 +944,15 @@
         "observed_at": "2026-11-06T03:59:50.296837+00:00"
       }
     ]
+  },
+  "harness/tests/test_capability.py": {
+    "schema": 2,
+    "binding_commit": "2f4d3efc51336846f1e3dbd2c21f0bbf4b325290",
+    "binding_sha256": "5b959d2c23f1b2851d3c0558dc6bf4426234f14f59860e399c0c99f7284ed7af",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the CAP suite's observed RED at commit 2f4d3ef (machinery-absent ARV-TEST-000: capability.py absent + the README's frozen forms absent \u2014 exit 1, red-01.txt at harness/runs/claim-064-p400c-capability-matrix/)",
+    "current_sha256": "5b959d2c23f1b2851d3c0558dc6bf4426234f14f59860e399c0c99f7284ed7af",
+    "amendments": []
   }
 }

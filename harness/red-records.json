@@ -1053,5 +1053,15 @@
         "observed_at": "2026-11-06T19:33:02.121090+00:00"
       }
     ]
+  },
+  "harness/tests/test_client_acceptance.py": {
+    "schema": 2,
+    "binding_commit": "cdca73ab93ed5da9837e11b243135ac02d55a3a9",
+    "binding_sha256": "2401c6219a03246bfe93d6d83f5695432d87aae7a8f5cac000bbe11ad99ee812",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the CAC suite's observed RED at commit cdca73ab (machinery-absent ARV-TEST-000: harness/client.py \u2014 the clean external client driver \u2014 absent at the RED tree 101e173; exit 1, red-01.txt at harness/runs/claim-069-p4b-client-acceptance/)",
+    "current_sha256": "2401c6219a03246bfe93d6d83f5695432d87aae7a8f5cac000bbe11ad99ee812",
+    "amendments": []
   }
 }

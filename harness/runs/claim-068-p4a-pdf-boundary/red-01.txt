@@ -1,0 +1,22 @@
+CLAIM-068 — the observed RED (LAW-11: tests-only, committed BEFORE the implementation)
+
+Command: python3 harness/tests/test_pdf.py
+Tree:    237d4d80cfdab238d63f4feb555ed91c9eeec674 (CLAIM-067's merged head — the PR #102 merge)
+Exit:    1
+Output:
+  FAIL ARV-TEST-000: the P4-A slice four pdf boundary machinery is absent
+  (machinery-absent class; the application/pdf import committed: False; the
+  observed refusal: FAIL ARV-FMT-001: the media type 'application/pdf' is not
+  an intake-supported format)
+  — the implementation lands after this RED, never before it (LAW-11)
+
+The machinery-absent probe: at the RED tree formats.py's PASSTHROUGH carries
+application/octet-stream ONLY — the application/pdf import refuses ARV-FMT-001
+(the unsupported class). The pdf boundary (the passthrough class + the named
+extraction refusal + the honest matrix) is absent.
+The suite registered in gate.py's TESTS at this commit (the ARV-RED-008
+class: the registration honestly widens with the suite).
+
+Observed live at the exact tree above (the cheapest honest probe per
+surface). The implementation lands in the immediately-following commit,
+never before this RED.

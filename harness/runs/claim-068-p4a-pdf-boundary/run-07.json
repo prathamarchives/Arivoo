@@ -1,0 +1,7 @@
+{
+  "command": "env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-068-p4a-pdf-boundary python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "e13a261139980a87d546f71b1167fa193ccf7dd3",
+  "output_sha256": "221d574b8a0e3cc0dd88e4727fa58276a79ccfdf9766e194368fab59a70d8f30",
+  "recorded_at": "2026-11-06T20:13:10.236370+00:00"
+}

@@ -1036,5 +1036,22 @@
         "observed_at": "2026-11-06T18:35:36.746057+00:00"
       }
     ]
+  },
+  "harness/tests/test_pdf.py": {
+    "schema": 2,
+    "binding_commit": "e4a52b8435b56f4b49026f82e0377651f4e0eaac",
+    "binding_sha256": "c2f9837a15edd72dd2e74a665c8cfa69d58d3ec7fce38db32bc9e07f64305451",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the PDF suite's observed RED at commit e4a52b84 (machinery-absent ARV-TEST-000: the application/pdf import refusing ARV-FMT-001 at the RED tree 237d4d8 \u2014 the passthrough carries application/octet-stream only; exit 1, red-01.txt at harness/runs/claim-068-p4a-pdf-boundary/)",
+    "current_sha256": "11508528a8de98330a98a2bf76ff056c1bf1c0c484801498839b76233d9e831f",
+    "amendments": [
+      {
+        "prior_sha256": "c2f9837a15edd72dd2e74a665c8cfa69d58d3ec7fce38db32bc9e07f64305451",
+        "new_sha256": "11508528a8de98330a98a2bf76ff056c1bf1c0c484801498839b76233d9e831f",
+        "note": "the one implementation-cycle amendment (disclosed in the GREEN follow-up): the machinery-absent probe replaced \u2014 the import-based first draft depended on the AMBIENT database and a FIXED idem key (a second run REPLAYED the prior probe's ack, so make verify's run misread the machinery as absent while the import actually committed; the replay path also bypasses the registry check, so a replay would never prove the pdf legality); the replacement is the DB-free registry probe (from harness.formats import INTAKE_OK; 'application/pdf' in INTAKE_OK) \u2014 environment-independent, idempotent, and the registry IS the machinery. The RED re-observed at the pre-GREEN tree by construction: the probe exits 1 at 237d4d8 (the passthrough carried octet-stream only). No assertion changed; the suite's five cases untouched",
+        "observed_at": "2026-11-06T19:33:02.121090+00:00"
+      }
+    ]
   }
 }

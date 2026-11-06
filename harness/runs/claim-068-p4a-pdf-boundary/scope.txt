@@ -1,0 +1,26 @@
+# CLAIM-068 — P4-A slice four: the PDF boundary (the honest passthrough class,
+# never a text-extraction claim; PLAN's elaborated P4-A slice four card; record
+# 60 §2). application/pdf is INTAKE-LEGAL as the bytes-passthrough class: a
+# PDF imports durably through the one ladder; the readable-text boundary stays
+# at EXTRACTION's named refusal (ARV-EXT-002 over the binary bytes, the digest
+# named, the staged bytes recoverable); NO pdf matrix row (a format appears
+# only through its acceptance corpus — the scan/OCR + fixed-layout classes are
+# future increments under Q8's owner gate); the octet-stream equivalence
+# observed. RED-first at CLAIM-067's merged head 237d4d8.
+# THE BOUNDED EXCLUSIONS: no PDF text extraction (the scan/OCR class — Q8's
+# owner gate); no fixed-layout rendering; no third-party PDF parser
+# (ARV-DEP-008).
+harness/tests/test_pdf.py D-041
+harness/formats.py D-041
+harness/commands.py D-041
+harness/capability.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/59-P4A-EPUB-INTAKE.md D-042
+context/extracted/60-P4A-PDF-BOUNDARY.md D-042
+harness/runs/claim-068-p4a-pdf-boundary D-042

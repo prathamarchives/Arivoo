@@ -534,7 +534,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-049 (P3-01) RED: the capture suite's machinery-absent class observed at the predecessor 5c04375 (commit A c77c14f carries the suite; import_source/create_highlight absent from the REGISTRY, query.py/blob.py/0004_p3_01_capture_skeleton.sql absent \u2014 the waiting-for-harness form, the S1/record-18 \u00a74.1 + P3-K0 precedent; exit 1, red-01.txt) \u2014 the implementation lands AFTER this RED, never before it (LAW-11)",
-    "current_sha256": "af7683c4603a1971b8660d4b50f1a85f57f2a166983075de5f7ffa6401e96ec1",
+    "current_sha256": "475a31d36f03f3a07d5c16a107e3a6813cfbb0f7b21ec499afa390bb19b05967",
     "amendments": [
       {
         "prior_sha256": "6283a7edfde056210b35766988fcbf6a9fe63e554f6a9f868b1499e2d1cb4114",
@@ -553,6 +553,12 @@
         "new_sha256": "af7683c4603a1971b8660d4b50f1a85f57f2a166983075de5f7ffa6401e96ec1",
         "note": "CLAIM-049 (the #84 CodeRabbit round \u2014 all four findings REAL, all four FIXED RED-first with new suite pins): [Major] the atomic put (blob.py: same-directory temp + ONE os.replace \u2014 the pre-fix write_bytes at the final path let concurrent readers see half-written files and a killed writer poison the digest path forever; red-04.txt reproduces the false-refusal harm) \u2014 pinned by CAP-23 (every resident re-hashes; no .put- residue from clean imports; the orphan class ignored); [Minor] the anchor/source inseparability (0004: UNIQUE(id, source_id, owner_scope) on anchor + the highlight's composite (anchor_id, source_id, owner_scope) FK \u2014 a mismatched pair is refused at the DB layer) \u2014 pinned by CAP-22; [Minor] CAP-21's fixed sleep replaced by the REAL lock-state wait (pg_stat_activity's arv_app Lock wait observed via the rig's superuser \u2014 arv_read lacks pg_read_all_stats; a deadline miss fails the case honestly); [Minor] the STATE/AGENTS/PLAN current-state counts corrected (CAP-01..23, eleven boundaries \u2014 the historical record text untouched, per the finding's own instruction). The checkpoint contracts unchanged",
         "observed_at": "2026-10-25T17:23:27.650464+00:00"
+      },
+      {
+        "prior_sha256": "af7683c4603a1971b8660d4b50f1a85f57f2a166983075de5f7ffa6401e96ec1",
+        "new_sha256": "475a31d36f03f3a07d5c16a107e3a6813cfbb0f7b21ec499afa390bb19b05967",
+        "note": "CLAIM-063 the disclosed implementation-cycle amendment (the P4-00a precedent class \u2014 amendments ADD acceptance forms, never remove assertions): CAP-09's empty-listing expectation widened to admit the P4-00b truthful empty answer ('# api_version=1' + '# more=false' alone \u2014 BND-05's frozen form; never pure silence); the pin's SUBSTANCE unchanged \u2014 owner B still sees NOTHING of A's (all non-comment lines of the old expectation retained)",
+        "observed_at": "2026-11-06T03:06:41.568921+00:00"
       }
     ]
   },
@@ -853,7 +859,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-060 (P3-09) the RED: the EXP-01..10 suite's RED observed at the exact predecessor 7df713b (CLAIM-059's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the export arm + migration 0013 absent), red-01.txt; the typed observed red per F-007",
-    "current_sha256": "6711140ef7318d93977e59347abf9b894209d8ce889d79c4177a7dc845a86bfd",
+    "current_sha256": "c0b89f981e3767c8f635258369cf77691806b8f41698b66da73067e8367e7f9a",
     "amendments": [
       {
         "prior_sha256": "2b6962b91aae8005a915483117c7de02fa8a38230c913c190b70992430df0464",
@@ -878,6 +884,12 @@
         "new_sha256": "6711140ef7318d93977e59347abf9b894209d8ce889d79c4177a7dc845a86bfd",
         "note": "CLAIM-062 the EXP-09 amendment (the landed pin meets the labeled search form \u2014 a REAL contract interaction caught by the regression run): the search arm now ALWAYS prints the column header (CON-05, the gate's routed repair), so the empty-index search answers with the header ALONE (zero result rows) instead of pure silence; EXP-09's empty-form expectation corrected forward \u2014 the pin's substance unchanged (the index empty pre-rebuild; the searches answer exactly as the source post-rebuild)",
         "observed_at": "2026-11-05T20:11:34.623879+00:00"
+      },
+      {
+        "prior_sha256": "6711140ef7318d93977e59347abf9b894209d8ce889d79c4177a7dc845a86bfd",
+        "new_sha256": "c0b89f981e3767c8f635258369cf77691806b8f41698b66da73067e8367e7f9a",
+        "note": "CLAIM-063 the disclosed implementation-cycle amendment (the SEV round-1 F4 correction: this note originally named CAP-09 by copy-paste \u2014 the REAL change is EXP-09's empty-search expectation carrying the P4-00b versioned header '# api_version=1 kind|entity_id|revision|matched_terms' (BND-06's frozen form); the pin's SUBSTANCE unchanged \u2014 the EMPTY-index search still answers with the header ALONE, zero result rows, and the dst==src search equality is retained verbatim; the digest chain (prior 6711140e -> new c0b89f98) was verified exact by the SEV round BEFORE this prose correction)",
+        "observed_at": "2026-11-06T03:06:41.569362+00:00"
       }
     ]
   },
@@ -907,6 +919,29 @@
         "new_sha256": "2f623ca573c9665df17eec601bea2e2fff28c38b077f1d0ffb8f5609a91a040b",
         "note": "CLAIM-062 the CON-08 pin repair (disclosed): the verb index corrected to parts[2] (the first RED observation over-failed on a pin bug \u2014 every commands.py line tripped bad_verb); the TRUE RED re-observed against the temporarily-restored README defect (red-02.txt: exit 1, CON-08 FAIL with the fixed pin) before the repair re-applied \u2014 the pin now fails only on the defect class it names",
         "observed_at": "2026-11-05T21:26:48.001139+00:00"
+      }
+    ]
+  },
+  "harness/tests/test_boundary.py": {
+    "schema": 2,
+    "binding_commit": "357a32fc77e0de9361d629a554b98ccfbbe0c9d3",
+    "binding_sha256": "c66461757ec0dbb49542496513771e86f49b29ebe433c4edf51fca27b12b13d4",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the BND suite's observed RED at commit 61762b8 (machinery-absent ARV-TEST-000: the write ack carries no api_version token \u2014 exit 1, red-01.txt at harness/runs/claim-063-p400b-contract-boundary/)",
+    "current_sha256": "70d9c70f7c069d7b4dcb28eecd4bd3890fc0e7a8039a203c1a43993e6a2f4d1e",
+    "amendments": [
+      {
+        "prior_sha256": "c66461757ec0dbb49542496513771e86f49b29ebe433c4edf51fca27b12b13d4",
+        "new_sha256": "2508f43922e7fa5962420143209d9d4499c9e8c7b339981abf58060aa33bb2c7",
+        "note": "the SEV round-1 repair amendment (agent-837e1143 BLOCKED: F1 the vacuous cross-owner pin + F2 the census width + F3 the non-integer limit): BND-04 gains the TRUE cross-owner pins (B reads A's REAL capture/note \u2014 template-level byte-equality vs the absent-id refusal, the F1 vacuity repaired: the law verified live by the SEV round's own probe, the pin now pins it) + the reader-independence pin; BND-01/02/03 gain the exact 28-line census structure (every one of the 16 registered verbs + all 8 replayed forms \u2014 the >=14 floor class dead); BND-04 gains the non-integer --limit probe. OBSERVED at this tree: TRUE RED exit 1 on BND-04 (the --limit abc probe: argparse exit 2 observed vs the frozen exit-1 ARV-QRY-004 shape expected \u2014 red-02.txt); the cross-owner pins PASS immediately (the pin-strengthening class, disclosed: the defect was the pin's vacuity, not the product)",
+        "observed_at": "2026-11-06T03:58:45.094073+00:00"
+      },
+      {
+        "prior_sha256": "2508f43922e7fa5962420143209d9d4499c9e8c7b339981abf58060aa33bb2c7",
+        "new_sha256": "70d9c70f7c069d7b4dcb28eecd4bd3890fc0e7a8039a203c1a43993e6a2f4d1e",
+        "note": "the BND-01 message's f-string segment fix (the {len(ACKS)} count rendered literally \u2014 the SEV round's reading caught it; the pin itself unaffected)",
+        "observed_at": "2026-11-06T03:59:50.296837+00:00"
       }
     ]
   }

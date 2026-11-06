@@ -40,6 +40,13 @@ MARK_BEGUN = "MARK:BEGUN"
 MARK_INSERTS = "MARK:INSERTS_DONE"
 MARK_COMMITTED = "MARK:COMMITTED"
 
+# P4-00b (CLAIM-063): the client/API version field — ONE home for the frozen
+# contract's version token. Every write ack carries `api_version={API_VERSION}`
+# and every read surface reports the same value (query.py/extract.py import
+# THIS constant — one fact, one home). The version changes only through the
+# boundary contract's own change process (PLAN's P4-00b card; RTM §5).
+API_VERSION = 1
+
 # P3-08 (CLAIM-059): the OUTBOX-CARRYING command set — the durable-capture
 # product families whose committed local writes carry sync intent (RTM §4.2:
 # the effect rows + the command-log row + the outbox row in ONE transaction).
@@ -262,7 +269,7 @@ def record_event(*, db: str, owner: str, actor: str, client_id: str,
         ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
         stmt = (f"INSERT INTO arv.evidence_event (id, event_type, payload, owner_scope, actor, run_id, input_hash, created_at) "
                 f"VALUES ({_q(ev_id)}, 'event', {_q(payload)}, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, {_q(ts)});")
-        return ev_id, [stmt], ""
+        return ev_id, [stmt], " durability_rung=local_durable"  # P4-00b (F3): the kernel's own evidence surface names its rung — the ack grammar's required token on this path too
 
     return _spine(db=db, owner=owner, actor=actor, client_id=client_id,
                   idem_key=idem_key, command="record_event", payload=payload,
@@ -329,7 +336,12 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build=Non
                       "(no silent overwrite — exactly-once is a contract, not a preference)")
                 print("      repair: use a new idempotency key for a new body; the same key must mean the same command")
                 return 1
-            print(f"ACK command={command} idem_key={idem_key} status=replayed result_ref={recorded_ref}")
+            # P4-00b (F3 closed): the replayed ack names its rung too — the
+            # recorded command_log row committed locally, so the replay's
+            # answer is local_durable exactly like the first ack (SYS-01 on
+            # EVERY acknowledgment path) — plus the version token.
+            print(f"ACK command={command} idem_key={idem_key} status=replayed "
+                  f"result_ref={recorded_ref} durability_rung=local_durable api_version={API_VERSION}")
             return 0
         try:
             if build is not None:
@@ -394,7 +406,8 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build=Non
             recorded = _replay_after_conflict(db=db, owner=owner, idem_key=idem_key, body_hash=body_hash)
             if recorded == "replayed":
                 ref_r = _recorded_ref(db=db, owner=owner, idem_key=idem_key)
-                print(f"ACK command={command} idem_key={idem_key} status=replayed result_ref={ref_r}")
+                print(f"ACK command={command} idem_key={idem_key} status=replayed "
+                      f"result_ref={ref_r} durability_rung=local_durable api_version={API_VERSION}")
                 return 0
             if recorded == "conflict":
                 return 1
@@ -417,7 +430,10 @@ def _spine(*, db, owner, actor, client_id, idem_key, command, payload, build=Non
         if crash_at == "post-commit-pre-ack":
             sess.kill()
             return 2
-        print(f"ACK command={command} idem_key={idem_key} status=committed result_ref={ref}{extra}")
+        # P4-00b: the frozen ack grammar's tail — the version token rides
+        # every committed ack (the compatibility matrix's foundation).
+        print(f"ACK command={command} idem_key={idem_key} status=committed "
+              f"result_ref={ref}{extra} api_version={API_VERSION}")
         return 0
     except TimeoutError as e:
         print(f"FAIL ARV-CMD-010: {e}")
@@ -532,7 +548,8 @@ def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=
                 return 1
             wid_ack = _sess_row(sess, f"SELECT work_id || '|' FROM arv.source WHERE id={_q(recorded_ref)};")
             print(f"ACK command=import_source idem_key={idem_key} status=replayed result_ref={recorded_ref}"
-                  f" work_id={wid_ack.split('|')[0] if wid_ack else ''} durability_rung=local_durable")
+                  f" work_id={wid_ack.split('|')[0] if wid_ack else ''} durability_rung=local_durable"
+                  f" api_version={API_VERSION}")
             return 0
         jrowj = _sess_row(sess, f"SELECT row_to_json(j) || '|' FROM (SELECT body_hash, client_id FROM "
                                 f"arv.import_journal WHERE idempotency_key={_q(idem_key)}) j;")

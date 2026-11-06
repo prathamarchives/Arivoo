@@ -1,0 +1,28 @@
+# CLAIM-063 — P4-00b: the client-contract freeze + the boundary test
+# (PLAN's elaborated P4-00b card; the SEV round-1 F3 routing rides here).
+# The documented client contract exercised END-TO-END as a permanent suite
+# at the REAL boundary: the frozen DTO vocabulary (every ack's
+# status/durability_rung/effect_id/typed-error shape INCLUDING the replayed
+# forms of the capture families' acks and record_event's ack — the F3
+# residual, RTM §4.3/SYS-01's frozen letter filled on every path); the
+# error-code surface as the contract; the list arms' bounded responses +
+# pagination; the client/API version field. RED-first at CLAIM-062's merged
+# head 54533c6. Commit A carries the post-#97 reconciliation (CLAIM-062's
+# rule-4 close row + the five-area re-derivation) + record 55.
+# THE BOUNDED EXCLUSIONS: the format capability matrix P4-00c/P4-A's; the
+# read-position surface P4-A/B's; no reader-client work (the separate repo).
+harness/tests/test_boundary.py D-041
+harness/commands.py D-041
+harness/extract.py D-041
+harness/query.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+harness/tests/test_capture.py D-041
+harness/tests/test_export.py D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/55-P400B-CONTRACT-BOUNDARY.md D-042
+harness/runs/claim-063-p400b-contract-boundary D-042

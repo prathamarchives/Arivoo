@@ -55,6 +55,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import blob, clock, ids  # noqa: E402
+from harness.commands import API_VERSION  # noqa: E402  # P4-00b: the version token's ONE home (commands.py) — never a second constant
 from harness.commands import (MARK_BEGUN, MARK_COMMITTED, MARK_INSERTS,  # noqa: E402
                               Session, _CONN, _dead_exit, _q, _sess_row,
                               canonical_body)
@@ -251,7 +252,8 @@ def _complete(sess: "Session", *, db, owner, actor, client_id, idem_key, gen_id,
         sess.kill()
         return 2
     print(f"ACK command=extract_source idem_key={idem_key} status=committed "
-          f"result_ref={gen_id} source_id={source_id} durability_rung=local_durable")
+          f"result_ref={gen_id} source_id={source_id} durability_rung=local_durable "
+          f"api_version={API_VERSION}")
     return 0
 
 
@@ -330,7 +332,8 @@ def extract_source(*, db, owner, actor, client_id, idem_key, source_id,
                 return 1
             if gstate != "building":
                 print(f"ACK command=extract_source idem_key={idem_key} status=replayed "
-                      f"result_ref={gid} source_id={source_id} state={gstate} durability_rung=local_durable")
+                      f"result_ref={gid} source_id={source_id} state={gstate} durability_rung=local_durable "
+                      f"api_version={API_VERSION}")
                 return 0
             gen_id = gid  # the crashed attempt: the SAME key resumes THIS ordinal
         else:

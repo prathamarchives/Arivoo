@@ -1,0 +1,7 @@
+{
+  "command": "ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-063-p400b-contract-boundary python3 -I tools/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "e2bfa2adf9b5e423a9db55b37baee106f42d6f22",
+  "output_sha256": "250db8dccca5d1e064c2dd8545a2291e33d4a76213ef60c3ce273e548cc9577c",
+  "recorded_at": "2026-11-06T05:00:16.948077+00:00"
+}

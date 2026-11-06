@@ -1,0 +1,141 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-063-p400b-contract-boundary",
+ "base_sha": "54533c6e18cb5ae00fdd3e584c41261a71419cde",
+ "reviewed_diff_sha256": "3ed1e239941b5f8fa3e4d5536b8d1f3649d064c803e055ab5eccbbb46ae90ca3",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-09"
+ ],
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "changed_components": [
+  "harness/commands.py (+API_VERSION, the ONE home; +22 lines: the version token on the spine's committed print + BOTH replay paths + import's replayed ack; record_event's build extra carries the rung — the F3 closure)",
+  "harness/extract.py (+4 lines: the two ack sites carry the version token, importing commands.API_VERSION — never a second constant)",
+  "harness/query.py (+DEFAULT_LIST_LIMIT/MAX_LIST_LIMIT, _versioned, _refuse_list_bounds, _list_arm — the list contract's ONE implementation; the version key at every read print boundary; the search header's versioned form)",
+  "harness/gate.py (+1 line: test_boundary.py joins the TESTS tuple — the ARV-RED-008 registration)",
+  "harness/tests/test_boundary.py (the BND-01..06 suite, 560 test lines: the frozen client contract pinned at the REAL CLI boundary — the 28-line exact verb census, the cross-owner no-oracle at the real objects, the 101-fixture default-bound proof, the pagination walk, the typed-error surface)",
+  "harness/tests/test_capture.py (the disclosed CAP-09 amendment: the truthful empty-listing form)",
+  "harness/tests/test_export.py (the disclosed EXP-09 amendment: the versioned search header)",
+  "harness/red-records.json (the RED record for test_boundary.py + the four typed amendments chaining from the trusted baseline)",
+  "CLAIMS.md/STATE.md/AGENTS.md/PLAN.md/context/WORKLOG.md/context/extracted/55-P400B-CONTRACT-BOUNDARY.md (the claim row, the five-area re-derivation, record 55)"
+ ],
+ "interfaces_reviewed": [
+  "the ack line grammar (ACK command=... idem_key=... status=committed|replayed result_ref=... [extras] durability_rung=local_durable api_version=1 — RTM §4.3 item 3's frozen vocabulary on every path incl. the replayed forms)",
+  "the read surface's version key (\"api_version\": 1 inside every get-* body, every history row, resolve-anchor's answer; api_version=1 on the search/list headers — the '#' label convention)",
+  "the list contract (--limit default 100 bounds 1..1000 typed-refused at every violation incl. the non-integer form; --after the uuid-validated keyset cursor; '# api_version=1' opening, '# more=true|false' closing, observed never inferred)",
+  "the typed-error surface (ARV-CMD-409/CAP-006/CAP-007/NTE-006/QRY-001 both directions/QRY-003/QRY-004 — exit 1 + the FAIL prefix + zero effect)",
+  "the CLI parse boundary (query.py's argparse: the list arms' --limit taken as a raw string so every bounds violation is the typed refusal, never argparse's exit-2 usage)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the BND suite's 28-line census: every one of commands.py's 16 registered verbs + extract.py's ack observed committed AND (for every replayable family) replayed, each ack grammar-checked token-by-token (run-01..03, run-06..08)",
+   "the _versioned injection unit-pinned: every read body/history row carries the key, the framing law probed with pipes/newlines/U+2028 marker-laden content (SEV round 3 probes 7-8, 11)"
+  ],
+  "integration_verification": [
+   "the full regression: all 24 suites green incl. the amended consumers (capture/export/contract/bookmark/note/keyword_index) — the version keys and list markers break no existing parse (make verify x3: run-04, run-05, run-09)",
+   "the scope/claims/lint/size checks green over the real 21-path diff (the PR-mode gate's own derivation)"
+  ],
+  "system_verification": [
+   "the acceptance path made mechanical: the Phase 3 exit gate's uncoached walk (import->highlight->bookmark->note->search + the replays + the 409 + the cross-owner probe + the bounded lists) IS the BND suite's fixture — the contract the graders walked is now the suite the gate runs on every push",
+   "the 101-fixture default-bound proof: the no-flag list call returns EXACTLY 100 + more=true; the keyset walk completes with no dups and no skips (BND-05)"
+  ],
+  "validation": [
+   "the three-round fresh-context SEV chain: round 1 BLOCKED (the vacuous pin + the census width — repaired RED-first/disclosed), round 2 every repair verified REPAIRED, round 3 the final independent verdict PASS with 19 adversarial probes (sev-round-1/2/3.md)",
+   "the honest limits recorded (notverified.txt): the export/migrate version-field exclusion, the routed P3s (README lag + hint wording -> P4-00c), the run-record provenance disclosure, the pin-strengthening disclosure, the byte-form change"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-1",
+   "scenario": "a client cannot tell an empty listing from a truncated one (the silent-unbounded-list class) or an empty search from a no-match",
+   "control": "every list response opens '# api_version=1' and closes with the OBSERVED '# more=' marker (limit+1 fetched); the empty owner answers the two lines alone; the search answers header-alone",
+   "proof_ids": [
+    "run-01",
+    "run-06",
+    "sev-round-3.md"
+   ]
+  },
+  {
+   "id": "FM-2",
+   "scenario": "an acknowledged write leaves its persistence state implied (the replayed-form gap — the F3 class: a replay answers without naming the rung the server knows)",
+   "control": "every replayed ack (import/extract/highlight/bookmark/note/record_event/rebuild/lifecycle) AND record_event's committed ack carry durability_rung=local_durable + api_version; the crash-path retry probed (killed post-commit-pre-ack, the retry replays with the rung)",
+   "proof_ids": [
+    "run-01",
+    "run-06",
+    "sev-round-3.md"
+   ]
+  },
+  {
+   "id": "FM-3",
+   "scenario": "a refusal leaks another owner's object existence (the side-channel class)",
+   "control": "B reading A's REAL capture/note refuses byte-identically to B's absent-id refusal at the template level (stderr equal; reader-independence pinned); the cross-owner list is the two-line empty answer",
+   "proof_ids": [
+    "run-06",
+    "sev-round-2.md",
+    "sev-round-3.md"
+   ]
+  },
+  {
+   "id": "FM-4",
+   "scenario": "a bounds violation clamps silently or dies as a usage error (the unbounded-dump and exit-2 classes)",
+   "control": "every --limit/--after violation (0, 1001, non-integer, non-uuid cursor, injection strings) refuses typed ARV-QRY-004 exit 1 with zero effect — the TRUE RED observed pre-repair (red-02.txt)",
+   "proof_ids": [
+    "red-02.txt",
+    "run-06",
+    "sev-round-3.md"
+   ]
+  },
+  {
+   "id": "FM-5",
+   "scenario": "the frozen vocabulary drifts silently (a verb loses an ack form, a pin goes vacuous)",
+   "control": "the 28-line exact census structure (all 16 verbs set-equal to the REGISTRY, 8 replayed forms, the count exact) + the token-by-token grammar walk over every ack the suite observes — the >=-floor vacuity class dead",
+   "proof_ids": [
+    "run-06",
+    "sev-round-2.md",
+    "sev-round-3.md"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "F1",
+   "severity": "P1",
+   "status": "resolved",
+   "summary": "the cross-owner no-oracle pin was vacuous (absent-vs-absent — both probes a globally-absent id)",
+   "evidence": "the amended pin probes B reading A's REAL capture AND note with template-normalized byte-equality vs the absent-id refusal + stderr equality + reader-independence; round 2 reproduced live and caught all four synthetic leak classes; round 3 re-probed with the pin's exact logic"
+  },
+  {
+   "id": "F2",
+   "severity": "P2",
+   "status": "resolved",
+   "summary": "the ack census narrower than the full-verb claim (5 verbs unwalked; the >=14 floor let a broken verb pass)",
+   "evidence": "the exact 28-line census: all 16 verbs set-equal to the REGISTRY (re-counted by AST in round 3), 8 replayed forms, the count-and-set pin"
+  },
+  {
+   "id": "F3",
+   "severity": "P2",
+   "status": "resolved",
+   "summary": "a non-integer --limit died as argparse usage (exit 2), not the frozen typed exit-1 shape",
+   "evidence": "the argparse type=int removed; every bounds violation (incl. 'abc', '1e3', '5.0', '-1', injection cursors) refuses ARV-QRY-004 exit 1 — the TRUE RED observed pre-repair (red-02.txt), live-verified on all three arms by rounds 2-3"
+  }
+ ],
+ "not_verified": [
+  "export.py's RESTORED line and migrate.py's operator output carry no version field (not the client API — a later slice's named decision, not an omission)",
+  "the README's surface examples lag the frozen contract (F5, routed to P4-00c) and the ARV-QRY-001 hint says 'capture list' on the note/bookmark arms (F10, pre-existing at base, routed to P4-00c)",
+  "run-01..05's commit field names the pre-GREEN head while measuring the uncommitted GREEN tree (F11 — the substance re-verified at the committed tree by rounds 2-3, the gate, and run-06..09)",
+  "the uncoached README walk is not re-run this slice — the acceptance path it exercised is the BND suite's own fixtures (the slice's point); the CI run is authoritative at PR time; fresh-context labels are not cryptographic independence (ARV-SEV-007's standing limit)"
+ ],
+ "builder_context": "super-z (GLM host, session 41, the standing do-not-stop chain INT-134..146) — the builder of the RED, the GREEN, and the repairs",
+ "reviewer_context": "three fresh-context SEV executions: agent-837e1143 (round 1), agent-7493b68e (round 2), agent-fd75db21 (round 3, the final verdict)",
+ "disposition": "PASS",
+ "review_summary": "P4-00b's client-contract freeze verified at the real boundary: the version field on every client-facing surface (16 verbs + extract, committed and replayed; every read body, history row, and header), the F3 replayed-rung closure, the frozen ack grammar, the typed-error surface with the no-oracle pinned at the real objects, and the bounded/paginated list contract with its observed truth markers — pinned as the permanent BND suite (the exit gate's uncoached acceptance path made mechanical), with the three-round fresh-context chain closing at PASS zero open P0/P1/P2 and every bounded gap routed or disclosed in notverified.txt."
+}

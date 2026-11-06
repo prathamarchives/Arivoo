@@ -909,5 +909,15 @@
         "observed_at": "2026-11-05T21:26:48.001139+00:00"
       }
     ]
+  },
+  "harness/tests/test_boundary.py": {
+    "schema": 2,
+    "binding_commit": "357a32fc77e0de9361d629a554b98ccfbbe0c9d3",
+    "binding_sha256": "c66461757ec0dbb49542496513771e86f49b29ebe433c4edf51fca27b12b13d4",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the BND suite's observed RED at commit 61762b8 (machinery-absent ARV-TEST-000: the write ack carries no api_version token \u2014 exit 1, red-01.txt at harness/runs/claim-063-p400b-contract-boundary/)",
+    "current_sha256": "c66461757ec0dbb49542496513771e86f49b29ebe433c4edf51fca27b12b13d4",
+    "amendments": []
   }
 }

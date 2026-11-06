@@ -1013,5 +1013,15 @@
         "observed_at": "2026-11-06T14:16:41.030894+00:00"
       }
     ]
+  },
+  "harness/tests/test_epub.py": {
+    "schema": 2,
+    "binding_commit": "319bed55d522df0959455f9ddff008c00d460164",
+    "binding_sha256": "61aaf0b7b522eb9ffdf9616b6d398e32b165fc2187efef67fcf49f4703012f5a",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the EPB suite's observed RED at commit 319bed5 (machinery-absent ARV-TEST-000: the matrix's application/epub+zip row, the epub adapter, and the typed ARV-FMT-004/005/006 refusals each absent at the RED tree 269921ac \u2014 exit 1, red-01.txt at harness/runs/claim-067-p4a-epub-intake/)",
+    "current_sha256": "61aaf0b7b522eb9ffdf9616b6d398e32b165fc2187efef67fcf49f4703012f5a",
+    "amendments": []
   }
 }

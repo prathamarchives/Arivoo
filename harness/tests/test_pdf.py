@@ -67,24 +67,21 @@ from harness.adapters import pg  # noqa: E402
 
 FAILS: list[str] = []
 
-# the machinery-absent probe (the RED gate): at the RED tree the passthrough
-# carries application/octet-stream ONLY — the application/pdf import refuses
-# ARV-FMT-001 (the unsupported class). The cheapest honest probe per surface.
-_pdf_fixture = pathlib.Path(tempfile.mkdtemp(prefix="arv-pdfprobe-")) / "probe.pdf"
-_pdf_fixture.write_bytes(b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n1 0 obj\n<< /Type /Catalog >>\nendobj\n"
-                         b"trailer\n<< /Root 1 0 R >>\n%%EOF\n")
-_probe_env = dict(os.environ)
-_probe = subprocess.run([sys.executable, str(REPO / "harness" / "commands.py"),
-                         "import_source", "--title", "The PDF Probe",
-                         "--file", str(_pdf_fixture), "--media-type", "application/pdf",
-                         "--owner", "A", "--actor", "owner", "--client-id", "cli-1",
-                         "--idem-key", "pdfprobe-1"],
-                        capture_output=True, text=True, timeout=120, env=_probe_env)
-if not (_probe.returncode == 0 and "status=committed" in _probe.stdout):
-    print(f"FAIL ARV-TEST-000: the P4-A slice four pdf boundary machinery is absent "
-          f"(machinery-absent class; the application/pdf import committed: "
-          f"{_probe.returncode == 0}; the observed refusal: "
-          f"{next((ln for ln in _probe.stdout.splitlines() if ln.startswith('FAIL')), 'none')[:90]}) "
+# the machinery-absent probe (the RED gate): the cheapest HONEST probe per
+# surface — the registry itself (DB-free, environment-independent, never a
+# replayed-ack ambiguity: the import-based first draft depended on the
+# ambient database and a fixed idem key, so a second run replayed and the
+# probe misread the machinery — the amendment disclosed in the GREEN commit).
+# At the RED tree the passthrough carries application/octet-stream ONLY.
+_probe = subprocess.run([sys.executable, "-c",
+                         f"import sys; sys.path.insert(0, {str(REPO)!r});\n"
+                         "from harness.formats import INTAKE_OK\n"
+                         "sys.exit(0 if 'application/pdf' in INTAKE_OK else 1)"],
+                        capture_output=True, text=True, timeout=60)
+if _probe.returncode != 0:
+    print("FAIL ARV-TEST-000: the P4-A slice four pdf boundary machinery is absent "
+          "(machinery-absent class; application/pdf in the intake-legal set: False — "
+          "the passthrough carries application/octet-stream only at the RED tree) "
           "— the implementation lands after this RED, never before it (LAW-11)")
     sys.exit(1)
 

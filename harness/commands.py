@@ -1370,16 +1370,22 @@ def _kwr_rebuild_stmts(sess: "Session", owner: str, ts: str) -> list:
     for row in _sess_rows(sess,
             f"SELECT row_to_json(t)::text || '|' FROM (SELECT b.id, b.revision, "
             f"a.context_before, a.context_after, a.source_digest, "
-            f"a.start_off AS a_start, a.end_off AS a_end "
+            f"a.start_off AS a_start, a.end_off AS a_end, s.media_type "
             f"FROM arv.bookmark b "
             f"JOIN arv.anchor a ON a.id = b.anchor_id "
+            f"JOIN arv.source s ON s.id = a.source_id AND s.owner_scope = a.owner_scope "
             f"WHERE b.owner_scope={_q(owner)} AND b.revision = (SELECT MAX(b2.revision) "
             f"FROM arv.bookmark b2 WHERE b2.id = b.id "
             f"AND b2.owner_scope={_q(owner)}) ORDER BY b.id) t;"):
         jr = json.loads(row.rsplit("|", 1)[0])
         try:
-            src_text = blob.get(jr["source_digest"]).decode("utf-8")
-        except (UnicodeDecodeError, KeyError):
+            # the SEV round-1 P1 repair (CLAIM-067): the anchor's source digest
+            # read WITH its media type through the ONE read_text home — an
+            # epub-anchored bookmark's span re-derives exactly like every other
+            # text-access site (the raw decode SILENTLY VANISHED it from
+            # search after the rebuild)
+            src_text = read_text(jr["media_type"], jr["source_digest"])
+        except (UnicodeDecodeError, KeyError, _FmtRefusal):
             src_text = ""
         span = src_text[jr["a_start"]:jr["a_end"]]
         stmts += _kwr_index_stmts(owner, "bookmark", jr["id"], int(jr["revision"]),

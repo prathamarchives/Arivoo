@@ -53,6 +53,13 @@ Cases (the EPB registry; each pin's full statement lives at its check()):
          html.parser + json, never a third-party parser); the matrix's epub
          row derives FROM the registry (capability.py imports ADAPTERS —
          never a second declaration)
+  EPB-06 the rebuild's findability parity over the derived view (the SEV
+         round-1 P1 repair's pin): a bookmark anchored into the EPUB source
+         (its span a phrase of the DERIVED text) is searchable at creation
+         AND REMAINS searchable after rebuild_keyword_index — the rebuild's
+         every arm re-derives the epub's view through the ONE read_text
+         home, never a raw decode that silently vanishes the epub-anchored
+         entities from search; the source's own row survives (the control)
 
 THE BOUNDED EXCLUSIONS (the CLAIMS row's letter): no DRM circumvention
 surface (an encrypted EPUB refuses typed, the bytes staged); no PDF (the
@@ -443,11 +450,52 @@ def main() -> int:
               "the stdlib zipfile + html.parser walk in formats.py + the matrix's derivation "
               "unchanged from the CLAIM-065 form")
 
+        # ---- EPB-06 — the rebuild's findability parity over the derived view
+        # (the SEV round-1 P1 repair's pin: the bookmark arm of the keyword
+        # rebuild decoded the anchor's source bytes RAW — an epub-anchored
+        # bookmark was searchable at creation and SILENTLY VANISHED from
+        # search after rebuild_keyword_index; the rebuild must re-derive the
+        # epub's view exactly like every other text-access site)
+        phrase = CH2_P1
+        i = None
+        if digest_row:
+            probe2 = subprocess.run(
+                [sys.executable, "-c",
+                 f"import sys; sys.path.insert(0, {str(REPO)!r});\n"
+                 "from harness import formats\n"
+                 f"t = formats.read_text('application/epub+zip', {digest_row!r})\n"
+                 f"i = t.find({phrase!r})\n"
+                 "print(i if i >= 0 else -1)"],
+                capture_output=True, text=True, timeout=60, env=ENV)
+            i = int(probe2.stdout.strip()) if probe2.returncode == 0 else -1
+        r_bm = cmd("create_bookmark", "--source-id", esid, "--start", str(i),
+                   "--end", str(i + len(phrase)), key="ebm-1") if i is not None and i >= 0 else None
+        bm_id = ref_of(r_bm) if r_bm else ""
+        s_pre = query("search", "--owner", "A", "meridian")
+        r_rbl = cmd("rebuild_keyword_index", key="erbl-1")
+        s_post = query("search", "--owner", "A", "meridian")
+        ok6 = (i is not None and i >= 0 and r_bm is not None and r_bm.returncode == 0
+               and bm_id and "api_version=1" in r_bm.stdout
+               and r_rbl.returncode == 0
+               and s_pre.returncode == 0 and bm_id in s_pre.stdout and esid in s_pre.stdout
+               and s_post.returncode == 0 and bm_id in s_post.stdout and esid in s_post.stdout)
+        check("EPB-06", ok6,
+              "the rebuild's findability parity over the derived view (the SEV round-1 P1 "
+              "repair's pin): a bookmark anchored into the EPUB source (its span a phrase of "
+              "the DERIVED text) is searchable at creation AND REMAINS searchable after "
+              "rebuild_keyword_index — the rebuild's every arm re-derives the epub's view "
+              "through the ONE read_text home, never a raw decode that silently vanishes the "
+              "epub-anchored entities from search; the source's own row survives the rebuild "
+              "(the control)",
+              "commands.py's rebuild bookmark arm: the anchor's source digest read WITH its "
+              "media type through formats.read_text — the same routing every other "
+              "text-access site carries")
+
         if FAILS:
             print(f"\nEPUB SUITE RED — {len(FAILS)} open: {', '.join(FAILS)} "
                   "(the EPUB intake contract is broken or unimplemented)")
             return 1
-        print("\nEPUB SUITE GREEN — EPB-01..05 (the EPUB intake: the synthetic round-trip "
+        print("\nEPUB SUITE GREEN — EPB-01..06 (the EPUB intake: the synthetic round-trip "
               "through the one ladder, the third measured matrix row, the typed epub-family "
               "refusals with staged bytes, the composition arm over the derived view)")
         return 0

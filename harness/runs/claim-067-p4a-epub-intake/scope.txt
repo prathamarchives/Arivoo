@@ -25,4 +25,5 @@ AGENTS.md D-043
 PLAN.md D-037
 context/WORKLOG.md D-043
 context/extracted/59-P4A-EPUB-INTAKE.md D-042
+context/extracted/58-P4A-POSITION-SURFACE.md D-042
 harness/runs/claim-067-p4a-epub-intake D-042

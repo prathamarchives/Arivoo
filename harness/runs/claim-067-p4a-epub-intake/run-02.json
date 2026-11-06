@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_epub.py",
+  "exit_code": 0,
+  "commit": "d84b202e110ed9b3aaff6f96108890a6b525f306",
+  "output_sha256": "5846ed54f199f08a23ba04a569b0321aa3ff313f984ef5e9f274f44dac9fde9c",
+  "recorded_at": "2026-11-06T18:05:42.731421+00:00"
+}

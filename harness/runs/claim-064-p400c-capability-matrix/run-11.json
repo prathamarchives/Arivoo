@@ -1,0 +1,7 @@
+{
+  "command": "SLICE=claim-064-p400c-capability-matrix GATE_DIFF=origin/main make gate",
+  "exit_code": 0,
+  "commit": "d44b3e9fe6c3d97d99978a3e73cbaff698217ff1",
+  "output_sha256": "54729bdba709ae53bc68702bdc054170a110125a8b223937f534f18c9a6c8e7d",
+  "recorded_at": "2026-11-06T07:18:15.845586+00:00"
+}

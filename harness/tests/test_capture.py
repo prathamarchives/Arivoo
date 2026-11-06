@@ -259,7 +259,14 @@ def main() -> int:
         ok9 = (t.returncode == 0 and tj.get("selected_text") == "marginalia"
                and tj.get("source_digest") == digest and tj.get("revision") == 1
                and cross.returncode != 0 and "ARV-QRY-001" in cross.stdout + cross.stderr
-               and listed.returncode == 0 and listed.stdout.strip() in ("", "0 rows"))
+               # P4-00b amendment (CLAIM-063, disclosed): the empty listing now
+               # answers '# api_version=1' + '# more=false' ALONE — never pure
+               # silence (the truthful-surface form; BND-05 pins it). The
+               # pin's SUBSTANCE is unchanged: B still sees NOTHING of A's.
+               and listed.returncode == 0
+               and (listed.stdout.strip() in ("", "0 rows")
+                    or ("# more=false" in listed.stdout
+                        and all(ln.startswith("#") for ln in listed.stdout.splitlines() if ln.strip()))))
         check("CAP-09", ok9,
               "the owner retrieves the capture through the scoped read; owner B gets the SAME ARV-QRY-001 for A's capture (existence never revealed) and lists nothing",
               "RLS must scope every read; the not-found refusal must be identical for 'absent' and 'another owner's' — never a side channel")

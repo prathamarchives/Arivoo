@@ -36,6 +36,15 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import pg  # noqa: E402
+from harness.commands import API_VERSION  # noqa: E402  # P4-00b: the version's ONE home (commands.py) — the read surface reports the same value as every write ack
+
+# P4-00b (CLAIM-063): the LIST CONTRACT's bounds — every list response is
+# BOUNDED (the default page), the client pages with the --after keyset cursor,
+# and an out-of-bounds request is the typed ARV-QRY-004 refusal (never a
+# silent clamp, never an unbounded dump). The bounds change only through the
+# boundary contract's own change process.
+DEFAULT_LIST_LIMIT = 100
+MAX_LIST_LIMIT = 1000
 
 # THE P1 SEV FIX (the round-1 BLOCKED finding): free-text fields legally carry
 # pipes and newlines, so the output is structured AT THE SQL BOUNDARY (row_to_json
@@ -53,10 +62,10 @@ SRC_SQL = ("SELECT row_to_json(t)::text FROM (SELECT s.id AS id, s.work_id, w.ti
 # restore_count; order-independent, rebuildable — never a state column).  An
 # HAVING over zero lifecycle rows yields no row -> NOT EXISTS -> active stays listed.
 LIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT DISTINCT h.id FROM arv.highlight h "
-            "WHERE NOT EXISTS (SELECT 1 FROM arv.highlight_lifecycle l "
+            "WHERE {after}NOT EXISTS (SELECT 1 FROM arv.highlight_lifecycle l "
             "WHERE l.highlight_id = h.id AND l.owner_scope = h.owner_scope "
             "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
-            "count(*) FILTER (WHERE l.event = 'restore')) ORDER BY h.id) t;")
+            "count(*) FILTER (WHERE l.event = 'restore')) ORDER BY h.id LIMIT {limit}) t;")
 # P3-04: the governed history — EVERY revision + EVERY lifecycle event, one JSON
 # row per line (the ANC-10/#88 newline-only framing contract: row_to_json escapes
 # below U+0020 ONLY, so U+2028 travels raw inside the string and the reader splits
@@ -91,10 +100,10 @@ BMSTATE_SQL = ("SELECT count(*) FILTER (WHERE event = 'tombstone') || '|' || "
 # tombstoned hidden from the ordinary listing (the LIST_SQL convention — the
 # HAVING-over-zero-rows form keeps active listed)
 BMLIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT DISTINCT b.id FROM arv.bookmark b "
-              "WHERE NOT EXISTS (SELECT 1 FROM arv.bookmark_lifecycle l "
+              "WHERE {after}NOT EXISTS (SELECT 1 FROM arv.bookmark_lifecycle l "
               "WHERE l.bookmark_id = b.id AND l.owner_scope = b.owner_scope "
               "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
-              "count(*) FILTER (WHERE l.event = 'restore')) ORDER BY b.id) t;")
+              "count(*) FILTER (WHERE l.event = 'restore')) ORDER BY b.id LIMIT {limit}) t;")
 # the governed history — every revision + every lifecycle event, one JSON row per
 # line (the newline-only framing law; the revision rows carry the anchor's location
 # evidence so the current view rebuilds from history ALONE — BMK-09's projection)
@@ -137,10 +146,10 @@ NOTE_SQL = ("SELECT COALESCE((SELECT count(*) FILTER (WHERE event = 'tombstone')
 # tombstoned hidden from the ordinary listing (the LIST_SQL convention — the
 # HAVING-over-zero-rows form keeps active listed)
 NOTELIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT DISTINCT n.id FROM arv.note n "
-                "WHERE NOT EXISTS (SELECT 1 FROM arv.note_lifecycle l "
+                "WHERE {after}NOT EXISTS (SELECT 1 FROM arv.note_lifecycle l "
                 "WHERE l.note_id = n.id AND l.owner_scope = n.owner_scope "
                 "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
-                "count(*) FILTER (WHERE l.event = 'restore')) ORDER BY n.id) t;")
+                "count(*) FILTER (WHERE l.event = 'restore')) ORDER BY n.id LIMIT {limit}) t;")
 # the governed history — every revision + every lifecycle event, one JSON row
 # per line (the newline-only framing law; the revision rows carry the content
 # so the current view rebuilds from history ALONE — the export-ready history)
@@ -239,6 +248,52 @@ def _refuse_tombstoned_note(id_: str) -> int:
     return 1
 
 
+def _refuse_list_bounds(msg: str) -> int:
+    """P4-00b (CLAIM-063): the list contract's bounds — a typed refusal,
+    never a silent clamp and never an unbounded dump (the frozen refusal
+    shape: exit 1 + the FAIL prefix + zero effect)."""
+    print(f"FAIL ARV-QRY-004: {msg}")
+    print(f"      repair: --limit within 1..{MAX_LIST_LIMIT} (the default {DEFAULT_LIST_LIMIT}); "
+          "--after a listed id of the same family (the keyset cursor — the next page starts "
+          "strictly after it)")
+    return 1
+
+
+def _list_arm(db: str, owner: str, sql: str, alias: str, limit, after) -> int:
+    """P4-00b (CLAIM-063): the bounded, paginated list arm — the frozen
+    contract's ONE implementation (list-captures/list-bookmarks/list-notes
+    share it): the request bounds are VALIDATED at the boundary (a typed
+    ARV-QRY-004 refusal, never a clamp); the fetch takes limit+1 rows so the
+    truth marker is OBSERVED, never inferred; the response opens with the
+    version header and closes with '# more=true|false' — an empty listing
+    answers header + marker ALONE (never pure silence — the P4-00a lesson
+    extended to the lists; the empty answer is distinguishable from a
+    truncation)."""
+    import uuid as _u
+    try:
+        limit = int(limit)
+    except (TypeError, ValueError):
+        return _refuse_list_bounds(f"--limit {limit!r} is not an integer")
+    if limit < 1 or limit > MAX_LIST_LIMIT:
+        return _refuse_list_bounds(f"--limit {limit} is outside the bounds 1..{MAX_LIST_LIMIT}")
+    after_clause = ""
+    if after is not None:
+        try:
+            after_clause = f"{alias}.id > '{_u.UUID(after)}' AND "
+        except (ValueError, AttributeError, TypeError):
+            return _refuse_list_bounds(f"--after {after!r} is not a valid id (the keyset cursor "
+                                       "takes a listed id of the same family)")
+    rows = _read(db, owner, sql.format(after=after_clause, limit=limit + 1))
+    if rows is None:
+        return 1
+    more = len(rows) > limit
+    print(f"# api_version={API_VERSION}")
+    for ln in rows[:limit]:
+        print(json.loads(ln)["id"])
+    print(f"# more={'true' if more else 'false'}")
+    return 0
+
+
 def _verdict(db: str, owner: str, anchor_id: str) -> "dict | None":
     """SYS-05's typed resolution AS A VALUE (P3-05: the bookmark read composes
     it with the entity row; resolve-anchor prints it).  Returns the answer
@@ -302,15 +357,15 @@ def _verdict(db: str, owner: str, anchor_id: str) -> "dict | None":
 
 def _resolve(db: str, owner: str, anchor_id: str) -> int:
     """resolve-anchor (P3-03b): the typed verdict printed — ONE JSON answer
-    line at exit 0; ARV-QRY-001 for out-of-scope/absent (the resolve-anchor
-    arm's output contract is pinned byte-for-byte by the ANC suite — this
-    wrapper only prints the SAME dict _verdict builds)."""
+    line at exit 0; ARV-QRY-001 for out-of-scope/absent (the answer is the
+    SAME dict _verdict builds + the P4-00b version key — the ANC suite's
+    key-level pins hold; the answer stays ONE line)."""
     v = _verdict(db, owner, anchor_id)
     if v is None:
         return 1
     if not v:
         return _refuse(anchor_id)
-    _say(v)
+    _say(_versioned(v))  # P4-00b: the version key rides the resolution ANSWER too
     return 0
 
 
@@ -339,10 +394,24 @@ def _get_bookmark(db: str, owner: str, bm_id: str) -> int:
         return 1
     if not v:
         return _refuse(bm_id)   # the anchor row vanished under the entity: the honest refusal, never a guess
-    out = {"bookmark_id": b["bookmark_id"], "revision": b["revision"]}
+    out = {"api_version": API_VERSION,  # P4-00b: the version key on every read body
+           "bookmark_id": b["bookmark_id"], "revision": b["revision"]}
     out.update(v)
     print(json.dumps(out, ensure_ascii=False))
     return 0
+
+
+def _versioned(obj: dict) -> dict:
+    """P4-00b (CLAIM-063): the version key injected at the READ print
+    boundary — every JSON body and every history row carries
+    "api_version": the same value every write ack names. The SQL stays
+    byte-identical (the injection is ONE pattern at one boundary, never a
+    per-query rewrite); the re-serialization preserves the parsed key order
+    and the newline-only framing law (ensure_ascii=False — U+2028/U+2029
+    travel raw, exactly as row_to_json emitted them)."""
+    out = dict(obj)
+    out["api_version"] = API_VERSION
+    return out
 
 
 def _say(out: dict, **kw) -> None:
@@ -368,6 +437,11 @@ def main() -> int:
     for name in ("list-captures", "list-bookmarks", "list-notes"):
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
+        # P4-00b: the list contract — the bounded page + the keyset cursor
+        p.add_argument("--limit", type=int, default=DEFAULT_LIST_LIMIT,
+                       help=f"the page size (bounds 1..{MAX_LIST_LIMIT}, default {DEFAULT_LIST_LIMIT})")
+        p.add_argument("--after", default=None, metavar="ID",
+                       help="the keyset cursor — the next page starts strictly after this listed id")
     p = sub.add_parser("resolve-anchor")
     p.add_argument("--owner", required=True)
     p.add_argument("--id", required=True)
@@ -388,10 +462,11 @@ def main() -> int:
                                                     nterms=len(terms_u)))
         if rows is None:
             return 1
-        # P4-00a (CLAIM-062): the labeled form — the header names the columns
-        # before the rows (the acceptance run's 'unlabeled search output'
-        # finding; the row shape itself unchanged)
-        print("# kind|entity_id|revision|matched_terms")
+        # P4-00a (CLAIM-062) + P4-00b (CLAIM-063): the labeled, versioned form —
+        # the header names the api_version AND the columns before the rows
+        # (the acceptance run's 'unlabeled search output' finding; the row
+        # shape itself unchanged)
+        print(f"# api_version={API_VERSION} kind|entity_id|revision|matched_terms")
         for ln in rows:
             print(ln)
         return 0
@@ -411,64 +486,51 @@ def main() -> int:
         flag, payload = rows[0].split("|", 1)
         if flag == "true":
             return _refuse_tombstoned_note(a.id)
-        print(payload)
+        print(json.dumps(_versioned(json.loads(payload)), ensure_ascii=False))
         return 0
     if a.what == "get-note-history":
         # the governed history (P3-06): every revision + every lifecycle
-        # event — rows printed as-is, each already ONE escaped JSON line
-        # (the framing law)
+        # event — one JSON line per row, each carrying the version key
+        # (the framing law; the _versioned injection at the print boundary)
         rows = _read(db, a.owner, NOTEHIST_SQL.format(id="'" + a.id.replace("'", "''") + "'"))
         if rows is None:
             return 1
         if not rows:
             return _refuse(a.id)
         for ln in rows:
-            print(ln)
+            print(json.dumps(_versioned(json.loads(ln)), ensure_ascii=False))
         return 0
     if a.what == "list-notes":
-        rows = _read(db, a.owner, NOTELIST_SQL)
-        if rows is None:
-            return 1
-        for ln in rows:
-            print(json.loads(ln)["id"])
-        return 0
+        return _list_arm(db, a.owner, NOTELIST_SQL, "n", a.limit, a.after)
     if a.what == "get-bookmark":
         return _get_bookmark(db, a.owner, a.id)
     if a.what == "get-bookmark-history":
         # the governed history (P3-05): every revision + every lifecycle event —
-        # rows printed as-is, each already ONE escaped JSON line (the framing law)
+        # one JSON line per row, each carrying the version key (the framing law;
+        # the _versioned injection at the print boundary)
         rows = _read(db, a.owner, BMHIST_SQL.format(id="'" + a.id.replace("'", "''") + "'"))
         if rows is None:
             return 1
         if not rows:
             return _refuse(a.id)
         for ln in rows:
-            print(ln)
+            print(json.dumps(_versioned(json.loads(ln)), ensure_ascii=False))
         return 0
     if a.what == "list-bookmarks":
-        rows = _read(db, a.owner, BMLIST_SQL)
-        if rows is None:
-            return 1
-        for ln in rows:
-            print(json.loads(ln)["id"])
-        return 0
+        return _list_arm(db, a.owner, BMLIST_SQL, "b", a.limit, a.after)
     if a.what == "list-captures":
-        rows = _read(db, a.owner, LIST_SQL)
-        if rows is None:
-            return 1
-        for ln in rows:
-            print(json.loads(ln)["id"])
-        return 0
+        return _list_arm(db, a.owner, LIST_SQL, "h", a.limit, a.after)
     if a.what == "get-history":
         # the governed history (P3-04): every revision + every lifecycle event —
-        # rows printed as-is, each already ONE escaped JSON line (the framing law)
+        # one JSON line per row, each carrying the version key (the framing law;
+        # the _versioned injection at the print boundary)
         rows = _read(db, a.owner, HIST_SQL.format(id="'" + a.id.replace("'", "''") + "'"))
         if rows is None:
             return 1
         if not rows:
             return _refuse(a.id)
         for ln in rows:
-            print(ln)
+            print(json.dumps(_versioned(json.loads(ln)), ensure_ascii=False))
         return 0
     if a.what == "get-capture":
         # P3-04 (RTM §3.3): the ordinary read refuses tombstoned ids with the
@@ -485,7 +547,7 @@ def main() -> int:
             return 1
         if not rows:
             return _refuse(a.id)
-        print(json.dumps(json.loads(rows[0]), ensure_ascii=False))
+        print(json.dumps(_versioned(json.loads(rows[0])), ensure_ascii=False))
         return 0
     sql = SRC_SQL
     rows = _read(db, a.owner, sql.format(id="'" + a.id.replace("'", "''") + "'"))
@@ -493,7 +555,7 @@ def main() -> int:
         return 1
     if not rows:
         return _refuse(a.id)
-    print(json.dumps(json.loads(rows[0]), ensure_ascii=False))
+    print(json.dumps(_versioned(json.loads(rows[0])), ensure_ascii=False))
     return 0
 
 

@@ -414,8 +414,13 @@ def main() -> int:
         s_src = cli(str(REPO / "harness" / "query.py"), "search", "--owner", "A",
                     "welkin", env=ENV)
         _empty_lines = [ln for ln in empty_search.stdout.strip().split("\n") if ln.strip()]
+        # P4-00b amendment (CLAIM-063, disclosed — the second extension of this
+        # line, the P4-00a precedent): the search header now carries the
+        # api_version token (BND-06's frozen form). The pin's substance is
+        # unchanged: the EMPTY-index search answers with the header ALONE.
+        _hdr = "# api_version=1 kind|entity_id|revision|matched_terms"
         ok9 = (empty_search.returncode == 0
-               and _empty_lines == ["# kind|entity_id|revision|matched_terms"]
+               and _empty_lines == [_hdr]
                and rb.returncode == 0 and "status=committed" in rb.stdout
                and s_dst.returncode == 0 and bool(s_dst.stdout.strip())
                and sorted(s_dst.stdout.strip().split("\n")) == sorted(s_src.stdout.strip().split("\n")))

@@ -210,10 +210,19 @@ def _read(db: str, owner: str, sql: str) -> list:
     return [ln for ln in r.out.split("\n") if ln.strip()]
 
 
-def _refuse(id_: str) -> int:
+def _refuse(id_: str, family: str = "capture") -> int:
     print(f"FAIL ARV-QRY-001: no such object ({id_}) in the caller's scope — absent and "
           "another owner's are the SAME refusal, never a side channel")
-    print("      repair: check the id against the caller's own capture list (query.py list-captures)")
+    # P4-00c (the F10 routing): the repair hint names the caller's OWN list
+    # arm per family (the pre-P4-00c form said 'capture list' on every arm —
+    # byte-frozen then by the template-equality pins, now unified honestly:
+    # the pins compare WITHIN one arm, so the per-family wording is free)
+    hints = {"capture": "check the id against the caller's own capture list (query.py list-captures)",
+             "note": "check the id against the caller's own note list (query.py list-notes)",
+             "bookmark": "check the id against the caller's own bookmark list (query.py list-bookmarks)",
+             "source": "the id is the import ack's result_ref (query.py get-source reads it back)",
+             "anchor": "the anchor id comes from get-capture's anchor_id; resolve-anchor re-resolves it"}
+    print(f"      repair: {hints.get(family, hints['capture'])}")
     return 1
 
 
@@ -364,7 +373,7 @@ def _resolve(db: str, owner: str, anchor_id: str) -> int:
     if v is None:
         return 1
     if not v:
-        return _refuse(anchor_id)
+        return _refuse(anchor_id, family="anchor")
     _say(_versioned(v))  # P4-00b: the version key rides the resolution ANSWER too
     return 0
 
@@ -387,13 +396,13 @@ def _get_bookmark(db: str, owner: str, bm_id: str) -> int:
     if rows is None:
         return 1
     if not rows:
-        return _refuse(bm_id)
+        return _refuse(bm_id, family="bookmark")
     b = json.loads(rows[0])
     v = _verdict(db, owner, b["anchor_id"])
     if v is None:
         return 1
     if not v:
-        return _refuse(bm_id)   # the anchor row vanished under the entity: the honest refusal, never a guess
+        return _refuse(bm_id, family="bookmark")   # the anchor row vanished under the entity: the honest refusal, never a guess
     out = {"bookmark_id": b["bookmark_id"], "revision": b["revision"]}
     out.update(v)
     # P4-00b: the version key at the SAME print boundary as every other read
@@ -484,7 +493,7 @@ def main() -> int:
         if rows is None:
             return 1
         if not rows:
-            return _refuse(a.id)
+            return _refuse(a.id, family="note")
         flag, payload = rows[0].split("|", 1)
         if flag == "true":
             return _refuse_tombstoned_note(a.id)
@@ -498,7 +507,7 @@ def main() -> int:
         if rows is None:
             return 1
         if not rows:
-            return _refuse(a.id)
+            return _refuse(a.id, family="note")
         for ln in rows:
             print(json.dumps(_versioned(json.loads(ln)), ensure_ascii=False))
         return 0
@@ -514,7 +523,7 @@ def main() -> int:
         if rows is None:
             return 1
         if not rows:
-            return _refuse(a.id)
+            return _refuse(a.id, family="bookmark")
         for ln in rows:
             print(json.dumps(_versioned(json.loads(ln)), ensure_ascii=False))
         return 0
@@ -556,7 +565,7 @@ def main() -> int:
     if rows is None:
         return 1
     if not rows:
-        return _refuse(a.id)
+        return _refuse(a.id, family="source")
     print(json.dumps(_versioned(json.loads(rows[0])), ensure_ascii=False))
     return 0
 

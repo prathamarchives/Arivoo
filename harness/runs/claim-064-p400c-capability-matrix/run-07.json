@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_capability.py",
+  "exit_code": 0,
+  "commit": "b3a5d1cc3d02e143974bec33de7d3171e68878e0",
+  "output_sha256": "b204d2b54e046816353e01614d9eba2e5039351211f311d9bb991d3e465fb067",
+  "recorded_at": "2026-11-06T07:06:22.195738+00:00"
+}

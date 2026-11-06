@@ -1,0 +1,7 @@
+{
+  "command": "ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-064-p400c-capability-matrix python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "d44b3e9fe6c3d97d99978a3e73cbaff698217ff1",
+  "output_sha256": "441e37519ddf1ad20391a8e1a6ca90f6970d05b655d9a7f182dd070746fcc38e",
+  "recorded_at": "2026-11-06T07:19:25.262009+00:00"
+}

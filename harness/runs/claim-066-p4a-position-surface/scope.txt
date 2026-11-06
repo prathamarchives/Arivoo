@@ -1,0 +1,28 @@
+# CLAIM-066 — P4-A slice two: the source-open/position surface (the reserved
+# surface made real; PLAN's elaborated P4-A slice two card; the #99
+# notverified's serving-generation routing rides here — record 58 §2).
+# The reading-position contract on the EXISTING substrate: the position rows
+# (owner+source scoped, keyed to the CURRENT generation — the
+# serving-generation field), the save/open/return commands through the
+# spine's own ack contract, the position read arm on query.py (the
+# last-saved position + its generation binding, the no-oracle), ONE
+# migration (0014). RED-first at CLAIM-065's merged head 562b70f. Commit A
+# carries the post-#100 reconciliation (CLAIM-065's rule-4 close row + the
+# five-area re-derivation) + record 58.
+# THE BOUNDED EXCLUSIONS: no reader-client work (P4-B's repo); no
+# dwell/session events (D-010's boundary, P4-C's); no EPUB/PDF increments
+# (the following P4-A slices).
+harness/tests/test_position.py D-041
+harness/commands.py D-041
+harness/query.py D-041
+harness/capability.py D-041
+harness/migrations/0014_reading_position.sql D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/58-P4A-POSITION-SURFACE.md D-042
+harness/runs/claim-066-p4a-position-surface D-042

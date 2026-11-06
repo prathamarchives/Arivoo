@@ -57,6 +57,21 @@ CAP_SQL = ("SELECT row_to_json(t)::text FROM (SELECT h.id AS id, h.revision, h.s
 SRC_SQL = ("SELECT row_to_json(t)::text FROM (SELECT s.id AS id, s.work_id, w.title, s.digest, "
            "s.media_type, s.byte_size, s.import_state, s.source_version, s.created_at "
            "FROM arv.source s JOIN arv.work w ON w.id = s.work_id WHERE s.id = {id}) t;")
+# P4-A slice two (CLAIM-066; record 58 §2): the position read arm — ONE
+# statement, ONE snapshot: the source existence (the outer row — absent under
+# RLS yields NO row, the same refusal as get-source), the last-saved position
+# (max save_ordinal — the DERIVED current, never a state column), and the
+# source's CURRENT generation (the serving-generation binding's other half).
+# The flag|payload form rides the SAME structured-at-the-SQL-boundary law: the
+# position travels as row_to_json text (pipes/newlines escaped by SQL itself);
+# '' means NEVER SAVED (the typed no_position_saved ANSWER, never a failure).
+POS_SQL = ("SELECT COALESCE((SELECT row_to_json(p)::text FROM "
+           "(SELECT q.save_ordinal, q.start_off, q.end_off, q.generation_id AS saved_generation_id "
+           "FROM arv.reading_position q WHERE q.source_id = s.id AND q.owner_scope = s.owner_scope "
+           "ORDER BY q.save_ordinal DESC LIMIT 1) p), '') || '|' || "
+           "COALESCE((SELECT g.id::text FROM arv.extraction_generation g "
+           "WHERE g.source_id = s.id AND g.owner_scope = s.owner_scope AND g.state = 'current' "
+           "ORDER BY g.ordinal DESC LIMIT 1), '') FROM arv.source s WHERE s.id = {id};")
 # P3-04 (RTM §3.3): tombstoned hides from ordinary retrieval — the list EXCLUDES
 # the ids whose committed event parity says tombstoned (tombstone_count >
 # restore_count; order-independent, rebuildable — never a state column).  An
@@ -411,6 +426,42 @@ def _get_bookmark(db: str, owner: str, bm_id: str) -> int:
     return 0
 
 
+def _get_position(db: str, owner: str, source_id: str) -> int:
+    """P4-A slice two (CLAIM-066; record 58 §2): the reading-position read
+    arm — the reopen half of the save->reopen->return round-trip.  ONE
+    statement, ONE snapshot carries the source existence, the last-saved
+    position, and the current generation (the #91 round-3 class: no two-read
+    race between the existence probe and the payload fetch).  THE
+    NO-ORACLE: an absent source and another owner's are the SAME refusal as
+    get-source's — the shared _refuse form, family="source", byte-equal on
+    the same id (never a leak that a position exists).  THE
+    SERVING-GENERATION BINDING: the answer names saved_generation_id (the
+    generation the reader was reading — byte-stable across a re-extraction)
+    AND current_generation_id (the serving one now) AND the derived
+    generation_matches flag — never a silent retarget (the offsets are the
+    saved row's own, whatever the derived view did).  An in-scope source
+    NEVER SAVED is a typed ANSWER at exit 0 (a state, never a failure — the
+    capability-measure precedent), carrying the version key."""
+    qid = "'" + source_id.replace("'", "''") + "'"
+    rows = _read(db, owner, POS_SQL.format(id=qid))
+    if rows is None:
+        return 1
+    if not rows:
+        return _refuse(source_id, family="source")
+    pos, cur = rows[0].split("|", 1)
+    if not pos:
+        _say(_versioned({"state": "no_position_saved", "source_id": source_id}))
+        return 0
+    p = json.loads(pos)
+    out = {"state": "saved", "source_id": source_id,
+           "save_ordinal": p["save_ordinal"], "start_off": p["start_off"],
+           "end_off": p["end_off"], "saved_generation_id": p["saved_generation_id"],
+           "current_generation_id": cur,
+           "generation_matches": bool(cur) and p["saved_generation_id"] == cur}
+    print(json.dumps(_versioned(out), ensure_ascii=False))
+    return 0
+
+
 def _versioned(obj: dict) -> dict:
     """P4-00b (CLAIM-063): the version key injected at the READ print
     boundary — every JSON body and every history row carries
@@ -453,6 +504,11 @@ def main() -> int:
                             "a non-integer refuses with the typed ARV-QRY-004, never argparse's usage exit")
         p.add_argument("--after", default=None, metavar="ID",
                        help="the keyset cursor — the next page starts strictly after this listed id")
+    p = sub.add_parser("get-position")
+    p.add_argument("--owner", required=True)
+    p.add_argument("--source", required=True,
+                   help="the source id (the import ack's result_ref) whose last-saved reading "
+                        "position the reopen returns")
     p = sub.add_parser("resolve-anchor")
     p.add_argument("--owner", required=True)
     p.add_argument("--id", required=True)
@@ -560,6 +616,9 @@ def main() -> int:
             return _refuse(a.id)
         print(json.dumps(_versioned(json.loads(rows[0])), ensure_ascii=False))
         return 0
+    if a.what == "get-position":
+        # P4-A slice two (CLAIM-066): the position read arm — the reopen
+        return _get_position(db, a.owner, a.source)
     sql = SRC_SQL
     rows = _read(db, a.owner, sql.format(id="'" + a.id.replace("'", "''") + "'"))
     if rows is None:

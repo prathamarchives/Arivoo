@@ -60,7 +60,8 @@ API_VERSION = 1
 _SYNC_COMMANDS = ("import_source", "create_highlight", "revise_highlight",
                   "tombstone_highlight", "restore_highlight", "create_bookmark",
                   "move_bookmark", "tombstone_bookmark", "restore_bookmark",
-                  "create_note", "revise_note", "tombstone_note", "restore_note")
+                  "create_note", "revise_note", "tombstone_note", "restore_note",
+                  "save_position")
 
 
 def _q(s: str) -> str:
@@ -1557,6 +1558,83 @@ def _extract_source(**kwargs):
     return extract_source(**kwargs)
 
 
+def save_position(*, db, owner, actor, client_id, idem_key, source_id,
+                  start, end, crash_at: str = None) -> int:
+    """P4-A slice two (CLAIM-066; record 58 §2): the source-open/position
+    surface — the reading-position contract on the EXISTING substrate.  The
+    position rows are owner+source scoped, keyed to the CURRENT generation
+    (THE SERVING-GENERATION FIELD: the position binds to the extraction
+    generation the reader was reading — a re-extraction's answer is honest
+    about which generation the position addresses, never a silent
+    retarget).  Append-only saves (the bookmark revision shape); the read
+    arm derives the last-saved position (max ordinal).  NO content column
+    exists — the row is the owner's reading state, never a copy of source
+    text.  THE SERIALIZED SAVE (the 0009/#90 pattern): the complete
+    transition — the per-(owner, source) advisory xact lock (the SAME lock
+    the 0014 guard takes), then the state read, the validation, the
+    construction, and the commit, ALL inside ONE transaction — competing
+    savers serialize (both saves persist, legal ordering) and the ordinal
+    law holds by construction (max+1 under the lock)."""
+    body = json.dumps({"source_id": source_id, "start": start, "end": end},
+                      sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build_txn(sess: "Session", body_hash: str):
+        key = owner + "|" + source_id
+        _sess_row(sess, f"SELECT hashtext({_q(key)}) || '|' || pg_advisory_xact_lock(hashtext({_q(key)}));")  # the lock FIRST, held to the commit
+        # ONE read: the source's digest + the CURRENT generation (the serving
+        # generation the new save binds; '' when none serves — ARV-POS-002)
+        row = _sess_row(sess, f"SELECT s.digest || '|' || COALESCE((SELECT g.id::text "
+                              f"FROM arv.extraction_generation g WHERE g.source_id = s.id "
+                              f"AND g.owner_scope = s.owner_scope AND g.state = 'current' "
+                              f"ORDER BY g.ordinal DESC LIMIT 1), '') FROM arv.source s "
+                              f"WHERE s.id = {_q(source_id)};")
+        if not row:
+            raise _CapRefusal("ARV-POS-001",
+                              f"source {source_id} does not exist in the caller's scope — absent and "
+                              "another owner's are the SAME refusal, never a side channel (RTM §2.10 "
+                              "on the write path)",
+                              "check the id against the caller's own sources (query.py get-source "
+                              "reads the import ack's result_ref back); a position is only ever "
+                              "saved by the source's owner")
+        digest, gen_id = row.split("|", 1)
+        if not gen_id:
+            raise _CapRefusal("ARV-POS-002",
+                              f"source {source_id} has no current extraction generation — the position "
+                              "binds to the generation the reader was reading (the serving-generation "
+                              "field); a source with no serving generation has no readable derived "
+                              "view to position into",
+                              "extract the source first (harness/extract.py extract_source); the "
+                              "position save follows the serving generation")
+        try:
+            text = blob.get(digest).decode("utf-8")
+        except (KeyError, UnicodeDecodeError) as e:
+            # the corrupt-blob class (one code, one home — the bookmark family's
+            # own wording): the bytes cannot verify for the position's boundary
+            raise _CapRefusal("ARV-CAP-004", f"the source's blob failed to verify — {e}",
+                              "the store is corrupt at this digest; never a position against "
+                              "unverifiable bytes")
+        if not (0 <= start < end <= len(text)):
+            raise _CapRefusal("ARV-POS-003",
+                              f"offsets [{start},{end}) are invalid for a {len(text)}-character text — "
+                              "never clamped, never guessed",
+                              "supply 0 <= start < end <= the decoded text length (the derived "
+                              "view's own coordinates)")
+        nxt = _sess_row(sess, f"SELECT COALESCE(max(save_ordinal), 0) || '|' FROM "
+                              f"arv.reading_position WHERE source_id = {_q(source_id)} "
+                              f"AND owner_scope = {_q(owner)};")
+        ordinal = int(nxt.rstrip("|") or "0") + 1
+        pos_id, ts, run_id, ih = ids.new_id(), clock.now(), "run-" + client_id, body_hash[:16]
+        stmt = (f"INSERT INTO arv.reading_position (id, owner_scope, source_id, save_ordinal, "
+                f"generation_id, start_off, end_off, actor, run_id, input_hash, "
+                f"idempotency_key, created_at) VALUES ({_q(pos_id)}, {_q(owner)}, "
+                f"{_q(source_id)}, {ordinal}, {_q(gen_id)}, {start}, {end}, {_q(actor)}, "
+                f"{_q(run_id)}, {_q(ih)}, {_q(idem_key)}, {_q(ts)});")
+        return f"{source_id}@{ordinal}", [stmt], f" save={ordinal} durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="save_position", payload=body, build_txn=build_txn, crash_at=crash_at)
+
+
 REGISTRY = {"record_event": record_event, "import_source": import_source,
             "create_highlight": create_highlight, "extract_source": _extract_source,
             "revise_highlight": revise_highlight, "tombstone_highlight": tombstone_highlight,
@@ -1565,7 +1643,7 @@ REGISTRY = {"record_event": record_event, "import_source": import_source,
             "restore_bookmark": restore_bookmark, "create_note": create_note,
             "revise_note": revise_note, "tombstone_note": tombstone_note,
             "rebuild_keyword_index": rebuild_keyword_index,
-            "restore_note": restore_note}
+            "restore_note": restore_note, "save_position": save_position}
 
 
 def main() -> int:
@@ -1628,6 +1706,13 @@ def main() -> int:
         p = sub.add_parser(name)
         _common(p)
         p.add_argument("--id", required=True)
+    p = sub.add_parser("save_position")
+    _common(p)
+    p.add_argument("--source-id", required=True)
+    p.add_argument("--start", required=True, type=int,
+                   help="the reading window's start offset (decoded-text coordinates)")
+    p.add_argument("--end", required=True, type=int,
+                   help="the reading window's end offset (0 <= start < end <= the text length)")
     a = ap.parse_args()
     db = os.environ.get("PGDATABASE", "postgres")
     if a.command == "record_event":
@@ -1677,6 +1762,10 @@ def main() -> int:
     if a.command == "restore_note":
         return restore_note(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                             idem_key=a.idem_key, id_=a.id)
+    if a.command == "save_position":
+        return save_position(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                             idem_key=a.idem_key, source_id=a.source_id,
+                             start=a.start, end=a.end)
     return create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                             idem_key=a.idem_key, source_id=a.source_id,
                             start=a.start, end=a.end)

@@ -159,9 +159,17 @@ def query(*args) -> subprocess.CompletedProcess:
 
 def save(source_id: str, start: int, end: int, key: str, owner="A",
          crash_at=None) -> subprocess.CompletedProcess:
+    if crash_at is not None:
+        # THE HOUSE CRASH VOCABULARY (the NTE-06 pattern; the implementation-cycle
+        # amendment disclosed in the GREEN commit): the injection rides
+        # harness/crash.py --point — commands.py itself carries no --crash-at flag
+        # (exit 2 is crash.py's vocabulary, never argparse's)
+        return cli(str(REPO / "harness" / "crash.py"), "--command", "save_position",
+                   "--point", crash_at, "--owner", owner, "--actor", "owner",
+                   "--client-id", "cli-1", "--idem-key", key,
+                   "--source-id", source_id, "--start", str(start), "--end", str(end))
     return cmd("save_position", "--source-id", source_id,
-               "--start", str(start), "--end", str(end),
-               key=key, owner=owner, crash_at=crash_at)
+               "--start", str(start), "--end", str(end), key=key, owner=owner)
 
 
 def get_pos(owner: str, source_id: str) -> subprocess.CompletedProcess:
@@ -304,13 +312,13 @@ def main() -> int:
         g_del = super_sql(f"DELETE FROM arv.reading_position;")
         g_ord = app_sql(f"INSERT INTO arv.reading_position (id, owner_scope, source_id, "
                         f"save_ordinal, generation_id, start_off, end_off, actor, run_id, "
-                        f"input_hash, idempotency_key, created_at) VALUES "
+                        f"input_hash, idempotency_key, created_at) VALUES ("
                         f"'{_uuid.uuid4()}', 'A', '{src1}', 9, '{gen1}', 0, 5, 'owner', "
                         f"'run-hostile', 'deadbeef', 'hostile-1', now());")
         gen2_src = jline(cap("measure", "--owner", "A", "--source", src2)).get("generation_id", "")
         g_bind = app_sql(f"INSERT INTO arv.reading_position (id, owner_scope, source_id, "
                          f"save_ordinal, generation_id, start_off, end_off, actor, run_id, "
-                         f"input_hash, idempotency_key, created_at) VALUES "
+                         f"input_hash, idempotency_key, created_at) VALUES ("
                          f"'{_uuid.uuid4()}', 'A', '{src1}', 2, '{gen2_src}', 0, 5, 'owner', "
                          f"'run-hostile', 'deadbeef', 'hostile-2', now());")
         rows_after = audit("SELECT count(*) FROM arv.reading_position;")
@@ -349,12 +357,15 @@ def main() -> int:
         r_s2 = save(src1, start2, end2, key="pos-2")
         r_g2 = get_pos("A", src1)
         g2 = jline(r_g2)
-        # the outbox ride: the save enqueues the client sync intent
-        obx = audit("SELECT count(*) FROM arv.outbox WHERE command_name = 'save_position';")
         # the crash matrix's lost-ack arm: post-commit-pre-ack exits 2, the effect IS committed,
         # the same-key replay converges the ack
         start3, end3 = 20, 30
         r_cr = save(src1, start3, end3, key="pos-3", crash_at="post-commit-pre-ack")
+        # the outbox ride (the implementation-cycle amendment, disclosed: counted AFTER the
+        # crash arm — the CRASHED-BUT-COMMITTED save's sync intent rode the same transaction,
+        # so the count proves both the ordinary saves AND the crash-committed one; the RED's
+        # pre-crash placement could never reach 3 — refusals enqueue nothing, by POS-02's own law)
+        obx = audit("SELECT count(*) FROM arv.outbox WHERE command_name = 'save_position';")
         g3_after_crash = jline(get_pos("A", src1))
         r_conv = save(src1, start3, end3, key="pos-3")
         ack_conv = next((ln for ln in r_conv.stdout.splitlines() if ln.startswith("ACK")), "")
@@ -471,7 +482,8 @@ def main() -> int:
                     "'arv.reading_position'::regclass AND contype = 'f' "
                     "AND array_length(conkey, 1) = 2;")
         uniq = audit("SELECT count(*) FROM pg_constraint WHERE conrelid = "
-                     "'arv.reading_position'::regclass AND contype = 'u';")
+                     "'arv.reading_position'::regclass AND contype = 'u' "
+                     "AND pg_get_constraintdef(oid) = 'UNIQUE (owner_scope, source_id, save_ordinal)';")
         ok6 = (r_sur.returncode == 0
                and all(row.get("api_version") == 1 for row in srows)
                and pos_row.get("owner_phase") == "P4-A/B"
@@ -479,7 +491,7 @@ def main() -> int:
                and "get_position" in str(pos_row.get("reservation", ""))
                and defaults == "0"
                and rls == "t" and pol == "1"
-               and grants == "t|f|f|t"
+               and grants == "true|false|false|true"  # the || concatenation's full-word form (the test_import.py:533 precedent; the RED's 't|f|f|t' was never green — the implementation-cycle amendment, disclosed)
                and fks == "2" and uniq == "1"
                and "api_version=1" in ack1 and "api_version=1" in ack_rep)
         check("POS-06", ok6,

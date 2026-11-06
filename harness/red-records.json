@@ -997,6 +997,15 @@
     "binding_sha256": "ed98a2197e7f9ec5ec2fdde5bbe9c5102b5858b8afb07c806694158c2e6f7b64",
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
-    "red_evidence": "the POS suite's observed RED at commit a571792 (machinery-absent ARV-TEST-000: the save_position command absent, the get-position arm absent, migration 0014 absent \u2014 exit 1, red-01.txt at harness/runs/claim-066-p4a-position-surface/)"
+    "red_evidence": "the POS suite's observed RED at commit a571792 (machinery-absent ARV-TEST-000: the save_position command absent, the get-position arm absent, migration 0014 absent \u2014 exit 1, red-01.txt at harness/runs/claim-066-p4a-position-surface/)",
+    "current_sha256": "f26ca6edb4625c4bf73279c0d1cf77a8d469192fe933b19e9d1a5533c32d35b4",
+    "amendments": [
+      {
+        "prior_sha256": "ed98a2197e7f9ec5ec2fdde5bbe9c5102b5858b8afb07c806694158c2e6f7b64",
+        "new_sha256": "f26ca6edb4625c4bf73279c0d1cf77a8d469192fe933b19e9d1a5533c32d35b4",
+        "note": "the five implementation-cycle amendments (disclosed in the GREEN commit): (1) the crash arm routed through harness/crash.py --point \u2014 the NTE-06 house vocabulary, commands.py carries no --crash-at flag (the RED's --crash-at invocation was argparse's exit 2, never the crash vocabulary); (2) the two hostile INSERT probes' missing VALUES paren repaired \u2014 a syntax error never reaches the ARV-POS-004/006 guards they probe; (3) the grants comparison's full-word form true|false|false|true \u2014 the || concatenation's bool::text output (the test_import.py:533 precedent; the RED's t|f|f|t was never green); (4) the outbox count placed AFTER the crash arm \u2014 the crashed-but-committed save's sync intent rode the same transaction, so >=3 is reachable and proves more (refusals enqueue nothing, POS-02's own law); (5) the ordinal-law UNIQUE audited by pg_get_constraintdef \u2014 the (id, owner_scope) composite is the substrate standard, not the pin's target",
+        "observed_at": "2026-11-06T14:16:41.030894+00:00"
+      }
+    ]
   }
 }

@@ -97,7 +97,7 @@ def _create_key(local_db: str, owner: str, local_id: str) -> str:
     if not key:
         key = _scalar(local_db, owner,
                       f"SELECT c.idempotency_key FROM arv.source s "
-                      f"JOIN arv.command_log c ON c.result_ref = s.id "
+                      f"JOIN arv.command_log c ON c.result_ref = s.id::text "
                       f"AND c.owner_scope = s.owner_scope "
                       f"JOIN arv.outbox o ON o.owner_scope = c.owner_scope "
                       f"AND o.idempotency_key = c.idempotency_key "

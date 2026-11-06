@@ -1,5 +1,7 @@
 # Record 59 — P4-A slice three: the EPUB intake (the zip/XHTML adapter by the stdlib path)
 
+> STATUS: SESSION ENGINEERING RECORD (2026-11-06; the standing do-not-stop chain INT-134..146; D-037/D-041/D-042/D-043). Historical process artifact per D-022: NOT owner intent, outranks nothing. Worklog entry: Task 83. PR #101 MERGED (the P4-A slice two position surface, under INT-145); the CLAIM-067 PR follows at this slice's end.
+
 > Session 41 (2026-11-06), CLAIM-067, opened at the merged head `269921ac` (the PR #101 merge — P4-A slice two).
 > Record 58 carries the position-surface account; this record carries the EPUB slice's contract + chain.
 

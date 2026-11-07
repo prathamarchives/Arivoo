@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-071-p4c-session-dwell-events (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): fc50d3b84842f967a45deab6d398e401f2415d5b
-- generated (last record's timestamp): 2026-11-07T07:34:33.247107+00:00
-- run records: 7
+- commit (last run record's): 5a99c3de3cec5f6c15ffa82a2456e2ede05d1d95
+- generated (last record's timestamp): 2026-11-07T14:00:28.576647+00:00
+- run records: 9
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_session.py` -> exit 0 · output sha256 8efb2e95327cc070 · 2026-11-07T06:42:54.599623+00:00
@@ -12,6 +12,8 @@
 - `make verify` -> exit 0 · output sha256 eff6fe4974f5db70 · 2026-11-07T06:56:02.266210+00:00
 - `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 dae07e5a6668a218 · 2026-11-07T07:28:28.607989+00:00
 - `make verify` -> exit 0 · output sha256 5831a8bb21d7c2b8 · 2026-11-07T07:34:33.247107+00:00
+- `env SLICE=claim-071-p4c-session-dwell-events GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 dd4d5c4ca8f31560 · 2026-11-07T14:00:03.318742+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-071-p4c-session-dwell-events python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 9c27fb7c6eae592b · 2026-11-07T14:00:28.576647+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - CLAIM-071 — the honest not-verified list (LAW-04: the explicit statement, never
@@ -72,4 +74,4 @@
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 819c21dd2ceb6c69252798796808439e3db5f1fc91af17877095852385f69fa4
+- sheet sha256 (of the content above, excluding this line): 56ff96b782c82f44cbbb8b1cb8ba7af4dbab944e94984eda24f38d6144823d80

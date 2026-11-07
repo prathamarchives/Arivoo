@@ -182,15 +182,21 @@ def rec(source_id: str, event: str, start: int, end: int, key: str, owner="A",
 
 
 def crash_rec(source_id: str, event: str, start: int, end: int, key: str,
-              point: str) -> subprocess.CompletedProcess:
+              point: str, dwell=None) -> subprocess.CompletedProcess:
     # THE HOUSE CRASH VOCABULARY (the NTE-06 pattern): the injection rides
     # harness/crash.py --point — commands.py itself carries no --crash-at flag
-    # (exit 2 is crash.py's vocabulary, never argparse's)
-    return cli(str(REPO / "harness" / "crash.py"), "--command", "record_session",
-               "--point", point, "--owner", "A", "--actor", "owner",
-               "--client-id", "cli-1", "--idem-key", key,
-               "--source-id", source_id, "--event", event,
-               "--start", str(start), "--end", str(end))
+    # (exit 2 is crash.py's vocabulary, never argparse's).  The dwell rides
+    # the same invocation (the shape law: a dwell event without --dwell-ms
+    # refuses BEFORE the crash vocabulary could ever fire — the RED draft's
+    # omission, amended)
+    a = [str(REPO / "harness" / "crash.py"), "--command", "record_session",
+         "--point", point, "--owner", "A", "--actor", "owner",
+         "--client-id", "cli-1", "--idem-key", key,
+         "--source-id", source_id, "--event", event,
+         "--start", str(start), "--end", str(end)]
+    if dwell is not None:
+        a += ["--dwell-ms", str(dwell)]
+    return cli(*a)
 
 
 def save_pos(source_id: str, start: int, end: int, key: str) -> subprocess.CompletedProcess:
@@ -438,9 +444,10 @@ def main() -> int:
         obx = audit("SELECT count(*) FROM arv.outbox WHERE command_name = 'record_session';")
         # the crash matrix's lost-ack arm: post-commit-pre-ack exits 2, the
         # effect IS committed, the same-key replay converges the ack
-        r_cr = crash_rec(src1, "dwell", 20, 30, key="ses-cr", point="post-commit-pre-ack")
+        r_cr = crash_rec(src1, "dwell", 20, 30, key="ses-cr", point="post-commit-pre-ack",
+                         dwell=1500)
         rows_after_crash = audit("SELECT count(*) FROM arv.reading_session;")
-        r_conv = rec(src1, "dwell", 20, 30, key="ses-cr")
+        r_conv = rec(src1, "dwell", 20, 30, key="ses-cr", dwell=1500)
         ack_conv = next((ln for ln in r_conv.stdout.splitlines() if ln.startswith("ACK")), "")
         ok3 = (r_rep.returncode == 0 and "status=replayed" in ack_rep
                and f"result_ref={src1}@2" in ack_rep
@@ -450,7 +457,7 @@ def main() -> int:
                and r_cr.returncode == 2
                and rows_after_crash == "6"
                and r_conv.returncode == 0 and "status=replayed" in ack_conv
-               and f"result_ref={src1}@6" in ack_conv)
+               and f"result_ref={src1}@5" in ack_conv)
         check("SES-03", ok3,
               "the idempotency + the outbox ride + the lost-ack arm: same key+body -> "
               "status=replayed (one row, the same result_ref); same key+different body -> "
@@ -481,7 +488,7 @@ def main() -> int:
         l2b_rows = jlines(query("list-session-events", "--owner", "A", "--limit", "100"))
         l2_new = next((row for row in l2b_rows
                        if row.get("source_id") == src1 and row.get("event") == "checkpoint"
-                       and row.get("event_ordinal") == 7), {})
+                       and row.get("event_ordinal") == 6), {})
         gp2 = jline(get_pos("A", src1))
         ok4 = (r_pos.returncode == 0
                and gp.get("state") == "saved" and gp.get("save_ordinal") == 1
@@ -490,7 +497,7 @@ def main() -> int:
                and gen_new and gen_new != gen1
                and rec_gens == gen1
                and l2_old.get("generation_id") == gen1
-               and r_new.returncode == 0 and "events=7" in r_new.stdout
+               and r_new.returncode == 0 and "events=6" in r_new.stdout
                and l2_new.get("generation_id") == gen_new
                and gp2.get("saved_generation_id") == gen1
                and gp2.get("current_generation_id") == gen_new
@@ -501,7 +508,7 @@ def main() -> int:
               "are unchanged (append-only: the recorded generation_id stays the ORIGINAL — "
               "the behavior history never retargets, never rewrites; the read arm reports "
               "the recorded binding); a NEW event after the re-extraction binds the CURRENT "
-              "generation (events=7, the new generation); the position composition: a "
+              "generation (events=6, the new generation); the position composition: a "
               "checkpoint at the same coordinates as a saved position coexists (the event "
               "stream and the position rows are SEPARATE surfaces over the SAME coordinates "
               "— never a second position path: get-position still answers the position row "

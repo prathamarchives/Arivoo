@@ -1088,7 +1088,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the SES suite's observed RED at commit 7804737 (machinery-absent ARV-TEST-000: the record_session command absent + the list-session-events arm absent + migration 0015 absent \u2014 exit 1, red-01.txt at harness/runs/claim-071-p4c-session-dwell/)",
-    "current_sha256": "748c2a2fae714f92814505324875647afbaf7bbe726ac86343b4893ca8e52559",
-    "amendments": []
+    "current_sha256": "000f5899a9b770ec4245b01553a1829320c3cfe8d67bb22e3fdfb26d7b2d2eff",
+    "amendments": [
+      {
+        "prior_sha256": "748c2a2fae714f92814505324875647afbaf7bbe726ac86343b4893ca8e52559",
+        "new_sha256": "000f5899a9b770ec4245b01553a1829320c3cfe8d67bb22e3fdfb26d7b2d2eff",
+        "note": "the SES suite's two implementation-cycle amendments (disclosed in the GREEN commit): (1) the crash arm's dwell forwarded \u2014 the RED draft's crash_rec omitted --dwell-ms, so the dwell event's ARV-SES-005 shape law refused the invocation BEFORE the crash vocabulary could ever fire (the crash arm observed exit 1 typed, never exit 2); the same-key convergence replay carries the same dwell (the idempotent body). (2) the ordinal arithmetic corrected \u2014 the RED draft miscounted the per-source ordinals across the two fixture sources: the crash-committed dwell takes src1's ordinal 5 (result_ref @5), the post-re-extraction event takes 6 (events=6), and the SES-04 what-string's stale events=7 aligned to the pin",
+        "observed_at": "2026-11-07T06:35:59.288248+00:00"
+      }
+    ]
   }
 }

@@ -68,6 +68,22 @@ RESERVED_SURFACES = {
                         "re-extraction, the no-oracle); the reader CLIENT that opens a source "
                         "at the saved position is P4-B's separate repo (no client work here)"),
     },
+    # P4-C slice one (CLAIM-070; record 62 §2): the library surface LANDED —
+    # the reserved registry's second row promoted from the 4C plan row to
+    # the named landed contract (the same promotion source-open/position
+    # took at P4-A slice two)
+    "library/current-reading": {
+        "owner_phase": "P4-C",
+        "reservation": ("LANDED in P4-C slice one (CLAIM-070): the backend verbs are real — "
+                        "list-library (query.py list-library — the owner's imported sources "
+                        "as a stable, bounded, paginated list on the P4-00b contract) + "
+                        "get-reading-state (query.py get-reading-state — the derived "
+                        "current-reading view over the landed position rows: the last-saved "
+                        "position per source, its generation binding honest, the no-position "
+                        "sources the honest not-yet-open state; every row get-position's own "
+                        "answer — never a second position path); the reader CLIENT that "
+                        "renders the library is P4-B's separate repo (no client work here)"),
+    },
 }
 
 

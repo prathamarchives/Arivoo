@@ -1070,5 +1070,15 @@
         "observed_at": "2026-11-06T20:38:54.084238+00:00"
       }
     ]
+  },
+  "harness/tests/test_library.py": {
+    "schema": 2,
+    "binding_commit": "35fae66",
+    "binding_sha256": "7e342b741a00b084b5347ff42d09e4b922e9fd5235d1e093a6ce08fcf9189630",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the LIB suite's observed RED at commit 35fae66 (machinery-absent ARV-TEST-000: the list-library arm absent + the get-reading-state arm absent \u2014 exit 1, red-01.txt at harness/runs/claim-070-p4c-library-reading-state/)",
+    "current_sha256": "7e342b741a00b084b5347ff42d09e4b922e9fd5235d1e093a6ce08fcf9189630",
+    "amendments": []
   }
 }

@@ -1,0 +1,26 @@
+# CLAIM-070 — P4-C slice one: the library + current-reading state (over the
+# existing substrate; PLAN's 4C row elaborated one phase deep at P4-B slice
+# one's landing; record 62 §2). The library list (the owner's imported
+# sources, bounded/paginated/api_version'd — the P4-00b contract) + the
+# current-reading state (ONE read arm deriving the reading surface from the
+# LANDED position rows: the sources with a saved position + the generation
+# binding + the no-position sources). RED-first at CLAIM-069's merged head
+# 9c138a0. THE BOUNDED EXCLUSIONS: no session/dwell events (D-010 — the
+# following slice); no reading lists/collections beyond the library itself;
+# no reader-client work (P4-B's repo).
+harness/tests/test_library.py D-041
+harness/commands.py D-041
+harness/query.py D-041
+harness/capability.py D-041
+harness/migrations/0015_library.sql D-041
+harness/gate.py D-041
+harness/sync.py D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/61-P4B-CLIENT-ACCEPTANCE.md D-042
+context/extracted/62-P4C-LIBRARY-READING-STATE.md D-042
+harness/runs/claim-070-p4c-library-reading-state D-042

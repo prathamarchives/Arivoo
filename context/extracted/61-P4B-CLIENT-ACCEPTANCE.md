@@ -73,3 +73,14 @@ LAST) → the artifact re-bind (the PR-mode gate record + the trusted-gate repro
 push → the PR → the five checks at the exact final head → the merge-gate review (D-042 (1a)) →
 **the merge under INT-145** → the post-merge verification (the five checks on the merge commit
 observed live) → P4-C..F → the Phase 4 exit gate — NO PAUSE EVEN FOR UPDATES (INT-146).
+
+## §4 The close (LANDED — PR #104 = merge `9c138a0`, 2026-11-06T21:29:06Z under INT-145)
+
+The slice landed with its full chain green: the five checks at the exact final head `cd32c19` AND
+on the merge commit (all observed live); the merge-gate review D-042 (1a) `5807263269`; the
+flip/merge/restore with the protections re-read byte-equivalent; the branch deleted; 0 open PRs.
+The ONE-ROUND SEV CHAIN (agent-5e8c31a7 PASS — zero open P0/P1/P2; four P3 notes
+routed/recorded in notverified). The 7-record proof sheet (the trusted-gate reproduction green
+on the first attempt). LANDED: the clean external client driver + the CAC-01..09 suite — the
+backend's proof of the client contract. The full merge account: record 62 §1 + CLAIM-069's
+rule-4 close row + WORKLOG Task 86.

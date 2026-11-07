@@ -11,6 +11,20 @@ list-captures) AND exit 0 = a typed resolution ANSWER (resolved | unresolved |
 ambiguous — SYS-05's states are answers, never failures); exit 1 = the named
 refusal.
 
+P4-C slice one (CLAIM-070; record 62 §2): the library + the current-reading
+state, over the LANDED substrate (no new table, no second position path) —
+  list-library         the owner's imported sources as a stable, bounded,
+                       paginated list (the _list_arm keyset contract over
+                       arv.source; membership IS the source set — rows are
+                       BORN complete at import, the failed import's
+                       dead-letter is the journal's, never the library's)
+  get-reading-state    the derived current-reading view: every source with
+                       its last-saved position + the generation binding, or
+                       the honest no_position_saved state — the rows ride
+                       _position_row (the SAME builder get-position uses;
+                       the derived view can never drift from the arm it
+                       derives from)
+
 THE TYPED RESOLUTION (resolve-anchor; P3-03b): a typed query, NEVER a
 nearest-match guess —
   resolved     the location evidence validates WITHIN the anchor's OWN Source
@@ -208,6 +222,33 @@ SEARCH_SQL = ("SELECT k.kind || '|' || k.entity_id || '|' || k.revision || '|' |
               "AND e.kind = k.kind AND e.entity_id = k.entity_id)) "
               "GROUP BY k.kind, k.entity_id, k.revision "
               "HAVING count(DISTINCT k.token) = {nterms} ORDER BY k.kind, k.entity_id;")
+# P4-C slice one (CLAIM-070; record 62 §2): the library membership list —
+# the owner's imported sources (RLS the owner boundary).  A source row is
+# BORN complete at import (a failed import never creates one — its
+# dead-letter is the import journal's, never the library's), so membership
+# IS the arv.source set: stable (append-only, no source tombstone), never
+# a hand-maintained second registry.  The {after}/{limit} placeholders
+# ride the _list_arm keyset contract.
+SRCLIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT s.id FROM arv.source s "
+               "WHERE {after}TRUE ORDER BY s.id LIMIT {limit}) t;")
+# P4-C slice one (CLAIM-070; record 62 §2): the current-reading state — the
+# SET-SHAPED lift of POS_SQL (one statement, one snapshot per page): every
+# source carries its last-saved position (max save_ordinal — the DERIVED
+# current) and its CURRENT generation, the same derivation get-position
+# performs per source.  THE NO-SECOND-PATH LAW: this arm formats its rows
+# through _position_row — the SAME row builder get-position uses (never a
+# drifting second implementation).  The line form id|pos|cur splits EXACTLY
+# on two pipes: the id is a uuid, the payload is row_to_json over ints + a
+# uuid (NO free-text field — no pipe can occur inside it; the P1 SEV fix
+# class holds by the payload's own vocabulary), the generation a uuid or ''.
+READING_SQL = ("SELECT s.id || '|' || COALESCE((SELECT row_to_json(p)::text FROM "
+               "(SELECT q.save_ordinal, q.start_off, q.end_off, q.generation_id AS saved_generation_id "
+               "FROM arv.reading_position q WHERE q.source_id = s.id AND q.owner_scope = s.owner_scope "
+               "ORDER BY q.save_ordinal DESC LIMIT 1) p), '') || '|' || "
+               "COALESCE((SELECT g.id::text FROM arv.extraction_generation g "
+               "WHERE g.source_id = s.id AND g.owner_scope = s.owner_scope AND g.state = 'current' "
+               "ORDER BY g.ordinal DESC LIMIT 1), '') "
+               "FROM arv.source s WHERE {after}TRUE ORDER BY s.id LIMIT {limit};")
 
 
 def _read(db: str, owner: str, sql: str) -> list:
@@ -283,30 +324,50 @@ def _refuse_list_bounds(msg: str) -> int:
     return 1
 
 
-def _list_arm(db: str, owner: str, sql: str, alias: str, limit, after) -> int:
-    """P4-00b (CLAIM-063): the bounded, paginated list arm — the frozen
-    contract's ONE implementation (list-captures/list-bookmarks/list-notes
-    share it): the request bounds are VALIDATED at the boundary (a typed
-    ARV-QRY-004 refusal, never a clamp); the fetch takes limit+1 rows so the
-    truth marker is OBSERVED, never inferred; the response opens with the
-    version header and closes with '# more=true|false' — an empty listing
-    answers header + marker ALONE (never pure silence — the P4-00a lesson
-    extended to the lists; the empty answer is distinguishable from a
-    truncation)."""
+def _page_args(limit, after, alias: str):
+    """P4-00b (CLAIM-063) + P4-C slice one (CLAIM-070; record 62 §2): the
+    list contract's boundary validation — ONE home shared by every bounded
+    arm (the ids-only _list_arm AND the row-carrying reading-state arm:
+    both new P4-C arms ride the SAME typed law, never a second validator
+    that could drift): the request bounds are VALIDATED at the boundary
+    (the typed ARV-QRY-004, never a clamp, never argparse's usage exit);
+    the keyset cursor takes a valid id of the same family.  Returns
+    (limit, after_clause) or None when the refusal already printed."""
     import uuid as _u
     try:
         limit = int(limit)
     except (TypeError, ValueError):
-        return _refuse_list_bounds(f"--limit {limit!r} is not an integer")
+        _refuse_list_bounds(f"--limit {limit!r} is not an integer")
+        return None
     if limit < 1 or limit > MAX_LIST_LIMIT:
-        return _refuse_list_bounds(f"--limit {limit} is outside the bounds 1..{MAX_LIST_LIMIT}")
+        _refuse_list_bounds(f"--limit {limit} is outside the bounds 1..{MAX_LIST_LIMIT}")
+        return None
     after_clause = ""
     if after is not None:
         try:
             after_clause = f"{alias}.id > '{_u.UUID(after)}' AND "
         except (ValueError, AttributeError, TypeError):
-            return _refuse_list_bounds(f"--after {after!r} is not a valid id (the keyset cursor "
-                                       "takes a listed id of the same family)")
+            _refuse_list_bounds(f"--after {after!r} is not a valid id (the keyset cursor "
+                               "takes a listed id of the same family)")
+            return None
+    return limit, after_clause
+
+
+def _list_arm(db: str, owner: str, sql: str, alias: str, limit, after) -> int:
+    """P4-00b (CLAIM-063): the bounded, paginated list arm — the frozen
+    contract's ONE implementation (list-captures/list-bookmarks/list-notes
+    share it; P4-C slice one adds list-library over arv.source): the
+    request bounds are VALIDATED at the boundary through _page_args (a
+    typed ARV-QRY-004 refusal, never a clamp); the fetch takes limit+1
+    rows so the truth marker is OBSERVED, never inferred; the response
+    opens with the version header and closes with '# more=true|false' —
+    an empty listing answers header + marker ALONE (never pure silence —
+    the P4-00a lesson extended to the lists; the empty answer is
+    distinguishable from a truncation)."""
+    page = _page_args(limit, after, alias)
+    if page is None:
+        return 1
+    limit, after_clause = page
     rows = _read(db, owner, sql.format(after=after_clause, limit=limit + 1))
     if rows is None:
         return 1
@@ -426,6 +487,27 @@ def _get_bookmark(db: str, owner: str, bm_id: str) -> int:
     return 0
 
 
+def _position_row(pos: str, cur: str, source_id: str) -> dict:
+    """P4-C slice one (CLAIM-070; record 62 §2): the position answer's ONE
+    construction home — get-position AND the reading-state arm build the
+    SAME row (the no-second-path law made STRUCTURAL: one builder, never
+    two implementations that could drift).  An empty pos means NEVER SAVED
+    (the typed no_position_saved ANSWER — a state, never a failure, the
+    capability-measure precedent); otherwise the saved row + the
+    serving-generation binding (saved_generation_id byte-stable across a
+    re-extraction, current_generation_id the serving one now, the derived
+    generation_matches flag — never a silent retarget).  Every row carries
+    the version key (P4-00b)."""
+    if not pos:
+        return _versioned({"state": "no_position_saved", "source_id": source_id})
+    p = json.loads(pos)
+    return _versioned({"state": "saved", "source_id": source_id,
+                       "save_ordinal": p["save_ordinal"], "start_off": p["start_off"],
+                       "end_off": p["end_off"], "saved_generation_id": p["saved_generation_id"],
+                       "current_generation_id": cur,
+                       "generation_matches": bool(cur) and p["saved_generation_id"] == cur})
+
+
 def _get_position(db: str, owner: str, source_id: str) -> int:
     """P4-A slice two (CLAIM-066; record 58 §2): the reading-position read
     arm — the reopen half of the save->reopen->return round-trip.  ONE
@@ -449,16 +531,38 @@ def _get_position(db: str, owner: str, source_id: str) -> int:
     if not rows:
         return _refuse(source_id, family="source")
     pos, cur = rows[0].split("|", 1)
-    if not pos:
-        _say(_versioned({"state": "no_position_saved", "source_id": source_id}))
-        return 0
-    p = json.loads(pos)
-    out = {"state": "saved", "source_id": source_id,
-           "save_ordinal": p["save_ordinal"], "start_off": p["start_off"],
-           "end_off": p["end_off"], "saved_generation_id": p["saved_generation_id"],
-           "current_generation_id": cur,
-           "generation_matches": bool(cur) and p["saved_generation_id"] == cur}
-    print(json.dumps(_versioned(out), ensure_ascii=False))
+    print(json.dumps(_position_row(pos, cur, source_id), ensure_ascii=False))
+    return 0
+
+
+def _reading_state(db: str, owner: str, limit, after) -> int:
+    """P4-C slice one (CLAIM-070; record 62 §2): the current-reading state —
+    ONE read arm deriving the owner's reading surface from the LANDED
+    position rows: every source of the keyset page carries its last-saved
+    position + the generation binding, or the honest no_position_saved
+    state (the not-yet-open sources are PART of the answer, never silence).
+    THE NO-SECOND-PATH LAW: the rows ride _position_row — the SAME builder
+    get-position uses, so the derived view can never drift from the arm it
+    derives from (every row equals get-position's own answer for that
+    source).  Bounded + paginated on the P4-00b contract through
+    _page_args (the typed ARV-QRY-004 at the boundary, never a clamp); the
+    limit+1 fetch OBSERVES the truth marker; an empty surface answers
+    header + more=false ALONE (never pure silence — the P4-00a lesson).
+    The view is DERIVED live at every invocation (no materialized copy, no
+    second position store — the no-new-table law)."""
+    page = _page_args(limit, after, "s")
+    if page is None:
+        return 1
+    limit, after_clause = page
+    rows = _read(db, owner, READING_SQL.format(after=after_clause, limit=limit + 1))
+    if rows is None:
+        return 1
+    more = len(rows) > limit
+    print(f"# api_version={API_VERSION}")
+    for ln in rows[:limit]:
+        sid, pos, cur = ln.split("|", 2)
+        print(json.dumps(_position_row(pos, cur, sid), ensure_ascii=False))
+    print(f"# more={'true' if more else 'false'}")
     return 0
 
 
@@ -495,10 +599,13 @@ def main() -> int:
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         p.add_argument("--id", required=True)
-    for name in ("list-captures", "list-bookmarks", "list-notes"):
+    for name in ("list-captures", "list-bookmarks", "list-notes", "list-library",
+                 "get-reading-state"):
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         # P4-00b: the list contract — the bounded page + the keyset cursor
+        # (P4-C slice one: the same contract rides list-library +
+        # get-reading-state — every list-shaped response is bounded)
         p.add_argument("--limit", default=str(DEFAULT_LIST_LIMIT),
                        help=f"the page size (bounds 1..{MAX_LIST_LIMIT}, default {DEFAULT_LIST_LIMIT}) — "
                             "a non-integer refuses with the typed ARV-QRY-004, never argparse's usage exit")
@@ -619,6 +726,14 @@ def main() -> int:
     if a.what == "get-position":
         # P4-A slice two (CLAIM-066): the position read arm — the reopen
         return _get_position(db, a.owner, a.source)
+    if a.what == "list-library":
+        # P4-C slice one (CLAIM-070): the library membership list — the
+        # owner's imported sources on the P4-00b list contract
+        return _list_arm(db, a.owner, SRCLIST_SQL, "s", a.limit, a.after)
+    if a.what == "get-reading-state":
+        # P4-C slice one (CLAIM-070): the current-reading state — the
+        # derived reading surface over the landed position rows
+        return _reading_state(db, a.owner, a.limit, a.after)
     sql = SRC_SQL
     rows = _read(db, a.owner, sql.format(id="'" + a.id.replace("'", "''") + "'"))
     if rows is None:

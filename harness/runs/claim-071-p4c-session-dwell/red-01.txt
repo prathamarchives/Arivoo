@@ -1,0 +1,6 @@
+== python3 harness/tests/test_session.py  (RED observation at the pre-implementation tree)
+FAIL ARV-TEST-000: the P4-C slice two session/dwell machinery is absent (machinery-absent class; record_session command absent: True; list-session-events arm absent: True; migration 0015 present: False) — the implementation lands after this RED, never before it (LAW-11)
+EXIT=1
+
+tree: 6bdb561 (the RED lands as the NEXT commit at this head, tests-only per LAW-11)
+date: 2026-11-07T06:29:22Z

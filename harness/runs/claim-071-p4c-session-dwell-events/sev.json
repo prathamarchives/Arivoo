@@ -1,0 +1,85 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-071-p4c-session-dwell-events",
+ "base_sha": "fd6fb9fb6a9133d39a324447cbc4f0defae37951",
+ "reviewed_diff_sha256": "0967194337bd4264ae9620123a8b94375290736a1a356c03c84081f378bf9b4d",
+ "sheet_section": true,
+ "intent_ids": ["INT-144", "INT-145", "INT-146"],
+ "requirement_ids": ["SYS-06", "SYS-09", "SYS-01"],
+ "system_claims": ["C1", "C2"],
+ "changed_components": [
+  "harness/migrations/0015_reading_session.sql (the event rows on the 0014 substrate pattern: the CLOSED vocabulary CHECK — session_start|checkpoint|dwell|session_end, D-010's boundary made structural; the dwell shape + bounds CHECKs; the coarse-span CHECK; the two composite FKs; the (owner, source, event_ordinal) UNIQUE; the serialized advisory-lock guard ARV-SES-007/008; the append-only triggers ARV-SES-006; RLS forced + the owner policy; the grants; NO DEFAULTs, NO free-text column)",
+  "harness/commands.py (record_session through the spine's own ack contract: idempotent, result_ref=<source>@<ordinal> events=<n>, the outbox ride, the crash-matrix membership; the typed refusals ARV-SES-001/002/003/004/005 — the D-010 boundary refused WITH the decision named)",
+  "harness/query.py (list-session-events: the owner's behavior-event stream, one JSON row per event, bounded/paginated through the shared page-args, the version key on every row)",
+  "harness/sync.py (the _cli_args record_session delivery branch — the round-1 repair: the translated source id, the kind/span/dwell forwarding, the site-local generation binding, the retryable ARV-SES-002 rest, ARV-SYN-009)",
+  "harness/capability.py (the session/dwell-events reserved-surface row: owner_phase P4-C, the LANDED verbs, the D-010 boundary named)",
+  "harness/crash.py (the record_session crash-vocabulary membership — --event/--dwell-ms forwarded)",
+  "harness/tests/test_session.py (the SES-01..06 suite) + harness/tests/test_sync.py (the additive SYN-19 pin — the delivery end-to-end)",
+  "harness/gate.py (the TESTS registration) + harness/red-records.json (the typed RED binding at 7804737 + the two disclosed additive amendments)"
+ ],
+ "interfaces_reviewed": [
+  "the spine's own ack contract on the new write path (the frozen grammar, the idempotency, the outbox ride, the crash matrix)",
+  "the D-010 boundary at both layers (the command's typed ARV-SES-004 + the substrate's closed vocabulary CHECK)",
+  "the read arm's list contract (the shared page-args, the truth markers, the JSON row framing, the version key)",
+  "the sync delivery arm (the translated source id, the site-local generation binding, the retryable rest states)",
+  "the label/branch alignment (gate.py's branch derivation from the slice label — the round-3 repair's own surface)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the SES suite (run-01..03) x3 green at the GREEN tree, byte-exact digests",
+   "the SYN suite SYN-01..19 (run-06) green at the round-1 repair tree, byte-exact digest — the additive SYN-19 delivery pin"
+  ],
+  "integration_verification": [
+   "make verify x3 (run-04/05 at the GREEN tree, run-07 at the repair tree) — all suites + the gate + the canonical layer 54/0",
+   "the PR-mode gate green under the corrected label (run-08) + the local trusted-gate reproduction (run-09) at the final tree"
+  ],
+  "system_verification": [
+   "SYS-06 trace: the D-010 failures explicit and recoverable (the typed ARV-SES vocabulary; the retryable sync rests with named reasons, never a dead letter)",
+   "SYS-09 trace: the behavior stream retrievable through the real backend boundary (list-session-events, RLS the owner boundary)",
+   "SYS-01 trace: every record_session ack names its durability rung (the frozen grammar on the new write path)"
+  ],
+  "validation": [
+   "the three-round SEV chain: round 1 (agent-5e8a71c4) BLOCKED — the sync dead-letter P1, repaired RED-first at fc50d3b (the SYN-19 pin + the delivery branch); round 2 (b3f7c2a9) BLOCKED — the round-1 P1 VERIFIED-REPAIRED live + the two declaration/records blockers, repaired at c8fed14; round 3 (agent-9c41e7b2) BLOCKED — the label-divergence P1 (the branch slug vs the run-dir label — the PR-time checks would have refused), repaired at 3a5c9d0 (the run-dir rename + the cell alignment) and verified by the exact machinery that refused (the PR-mode gate green under the corrected label + the trusted-gate reproduction run-08/09)",
+   "the RED reproduced at the archived 7804737 worktree; both red-records chains exact with the amendments additive (~35 adversarial probes across the three rounds: the D-010 boundary, the dwell shape/bounds, the no-oracle byte-identity, the substrate guards, the two-DB sync rig, the hostile outbox replay)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a fine-grained trace channel smuggled through the behavior-data surface (keystrokes, queries, prompts)",
+   "control": "the closed vocabulary at BOTH layers: the substrate CHECK refuses out-of-vocabulary kinds below the command; the command refuses ARV-SES-004 with D-010 NAMED (zero effect); NO free-text column exists on the table; the hostile outbox replay refused server-side (round 2's poisoned-payload probes)",
+   "proof_ids": ["run-01", "run-03"]
+  },
+  {
+   "id": "FM-02",
+   "scenario": "the durable behavior data dead-lettering in the client outbox (the enqueue without a delivery arm — the claim-066 class)",
+   "control": "the sync delivery branch + the additive SYN-19 pin (the translated source id, the site-local generation binding, the retryable ARV-SES-002 rest, the ARV-SYN-009 dependency); the round-2 enqueue/delivery sweep set-wide (all 15 _SYNC_COMMANDS members carry _cli_args branches)",
+   "proof_ids": ["run-06", "run-07"]
+  },
+  {
+   "id": "FM-03",
+   "scenario": "the event stream dishonest or corrupt (a skipped ordinal, a cross-source generation bind, a mutation of history)",
+   "control": "the serialized advisory-lock guard (ARV-SES-007 the ordinal law, ARV-SES-008 the generation-bind law) + the append-only triggers (ARV-SES-006) + the coarse-span offsets against the ONE read_text home (ARV-SES-003); the read arm reports the RECORDED facts only",
+   "proof_ids": ["run-01", "run-02"]
+  },
+  {
+   "id": "FM-04",
+   "scenario": "an unbounded dump, a cross-owner leak, or an untyped failure on the read path",
+   "control": "the shared page-args bounds (the typed ARV-QRY-004, the observed truth markers, the empty-stream honesty) + RLS the owner boundary + the no-oracle byte-identity (ARV-SES-001 on the write side, the isolation probes on the read side)",
+   "proof_ids": ["run-01", "run-04"]
+  }
+ ],
+ "findings": [],
+ "not_verified": [
+  "no fine-grained tracing beyond the approved vocabulary (D-010's boundary judged CLOSED at this surface); no journal/blocks surface (the following P4-C slice); no reader-client work (P4-B's separate repo)",
+  "SEV round-1 F-071-2 routed: the dwell bounds + the remaining substrate CHECKs pinned structurally, suite-exercised forms the named follow-up (every one verified live by the reviewer)",
+  "SEV round-1 F-071-3/F-071-4 routed: the advisory-lock raw-spelling note (the substrate backstop holds) + the non-uuid ARV-CMD-010 repair-hint wording (the pre-existing shared class)",
+  "SEV round-1 F-071-5 owner-accepted-debt: the provenance columns unconstrained caller text (the substrate-wide LAW-20/21 convention)",
+  "SEV round-2 F-071-R2-4/F-071-R2-5 routed: the amendment-note wording + the auto-generated CHECK names (the 0014 house convention)",
+  "SEV round-3 F-071-R3-1 repaired at 3a5c9d0: the label divergence (the run-dir rename + the cell alignment), verified by the exact machinery that refused — the full list at notverified.txt"
+ ],
+ "builder_context": "Super Z (GLM host) — the standing do-not-stop chain INT-134..146",
+ "reviewer_context": "three fresh-context SEV agents across the chain: agent-5e8a71c4 (round 1), b3f7c2a9 (round 2), agent-9c41e7b2 (round 3 + the post-repair gate verification)",
+ "disposition": "PASS",
+ "review_summary": "the three-round chain, every blocker repaired and verified: round 1 (agent-5e8a71c4) BLOCKED — the sync dead-letter P1 (every session event's outbox row terminally failing ARV-SYN-000 on the reviewer's own two-DB rig), repaired RED-first at fc50d3b (the _cli_args record_session delivery branch + the additive SYN-19 pin: the translated source id, the site-local generation binding, the retryable ARV-SES-002 rest, ARV-SYN-009); round 2 (b3f7c2a9) BLOCKED — the round-1 P1 VERIFIED-REPAIRED live (the delivery/binding/retryable-recovery/dependency quartet on the rig; the D-010 replay-path hostility probes all refusing server-side) + the two declaration/records blockers (the CLAIMS row's crash.py + test_sync.py; the round-1 report's absence), repaired at c8fed14; round 3 (agent-9c41e7b2) BLOCKED — the one NEW P1: the branch slug ...-session-dwell-events vs the run-dir label claim-071-p4c-session-dwell (the first divergence in the repo's history — the PR-mode gate could not pass under either label, ARV-CLM-005/ARV-SCOPE-001 observed live, and the five PR-time checks derive the label from github.head_ref), repaired at 3a5c9d0 (the run-dir rename + the CLAIMS/scope cell alignment; the historical reports' prose left as written) and verified by the exact machinery that refused: the PR-mode gate green under the corrected label + the local trusted-gate reproduction at the final tree (run-08/09). Round 3's other verifications all held: the suites green with byte-exact digest reproduction (SES 6/6, SYN-01..19), the RED reproduced at the archived 7804737 worktree, both red-records chains exact with the two amendments additive, ~35 adversarial probes green. The digest binds LAST over the final content (validate_report GREEN at the finalize head; no ARV-SEV-003 round at the push)."
+}

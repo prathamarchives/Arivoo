@@ -24,6 +24,12 @@ state, over the LANDED substrate (no new table, no second position path) —
                        _position_row (the SAME builder get-position uses;
                        the derived view can never drift from the arm it
                        derives from)
+  list-session-events  the owner's session/dwell event stream (D-010's
+                       durable behavior data: the closed vocabulary
+                       session_start/checkpoint/dwell/session_end, the
+                       coarse spans, the coarse dwell), bounded + paginated
+                       on the same list contract — the recorded rows only,
+                       never retargeted
 
 THE TYPED RESOLUTION (resolve-anchor; P3-03b): a typed query, NEVER a
 nearest-match guess —
@@ -249,6 +255,17 @@ READING_SQL = ("SELECT s.id || '|' || COALESCE((SELECT row_to_json(p)::text FROM
                "WHERE g.source_id = s.id AND g.owner_scope = s.owner_scope AND g.state = 'current' "
                "ORDER BY g.ordinal DESC LIMIT 1), '') "
                "FROM arv.source s WHERE {after}TRUE ORDER BY s.id LIMIT {limit};")
+# P4-C slice two (CLAIM-071; record 63 §2): the session/dwell event listing —
+# the owner's behavior-event stream, one JSON row per event (the framing
+# law), ordered by the event id (the keyset convention every list arm
+# rides).  The row reports the RECORDED facts only (the serving-generation
+# binding as written at event time — the behavior history is provenance,
+# never retargeted by a later re-extraction); dwell_ms is NULL on every
+# non-dwell event (the shape law at the substrate).
+SESLIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT e.id AS event_id, e.source_id, "
+               "e.event, e.event_ordinal, e.start_off, e.end_off, e.dwell_ms, "
+               "e.generation_id, e.created_at FROM arv.reading_session e "
+               "WHERE {after}TRUE ORDER BY e.id LIMIT {limit}) t;")
 
 
 def _read(db: str, owner: str, sql: str) -> list:
@@ -566,6 +583,33 @@ def _reading_state(db: str, owner: str, limit, after) -> int:
     return 0
 
 
+def _session_events(db: str, owner: str, limit, after) -> int:
+    """P4-C slice two (CLAIM-071; record 63 §2): the session/dwell event
+    listing — the owner's behavior-event stream (D-010's durable behavior
+    data), one JSON row per event: the recorded kind (the closed
+    vocabulary), the coarse span, the coarse dwell (dwell events only), the
+    serving-generation binding AS WRITTEN at event time (the behavior
+    history is provenance — never retargeted by a later re-extraction), the
+    ordinal, the timestamp.  Bounded + paginated on the P4-00b contract
+    through _page_args (the typed ARV-QRY-004 at the boundary, never a
+    clamp); the limit+1 fetch OBSERVES the truth marker; the empty stream
+    answers header + more=false ALONE (never pure silence — the P4-00a
+    lesson).  Every row carries the version key (P4-00b)."""
+    page = _page_args(limit, after, "e")
+    if page is None:
+        return 1
+    limit, after_clause = page
+    rows = _read(db, owner, SESLIST_SQL.format(after=after_clause, limit=limit + 1))
+    if rows is None:
+        return 1
+    more = len(rows) > limit
+    print(f"# api_version={API_VERSION}")
+    for ln in rows[:limit]:
+        print(json.dumps(_versioned(json.loads(ln)), ensure_ascii=False))
+    print(f"# more={'true' if more else 'false'}")
+    return 0
+
+
 def _versioned(obj: dict) -> dict:
     """P4-00b (CLAIM-063): the version key injected at the READ print
     boundary — every JSON body and every history row carries
@@ -600,7 +644,7 @@ def main() -> int:
         p.add_argument("--owner", required=True)
         p.add_argument("--id", required=True)
     for name in ("list-captures", "list-bookmarks", "list-notes", "list-library",
-                 "get-reading-state"):
+                 "get-reading-state", "list-session-events"):
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         # P4-00b: the list contract — the bounded page + the keyset cursor
@@ -734,6 +778,10 @@ def main() -> int:
         # P4-C slice one (CLAIM-070): the current-reading state — the
         # derived reading surface over the landed position rows
         return _reading_state(db, a.owner, a.limit, a.after)
+    if a.what == "list-session-events":
+        # P4-C slice two (CLAIM-071): the session/dwell event listing — the
+        # owner's behavior-event stream on the P4-00b list contract
+        return _session_events(db, a.owner, a.limit, a.after)
     sql = SRC_SQL
     rows = _read(db, a.owner, sql.format(id="'" + a.id.replace("'", "''") + "'"))
     if rows is None:

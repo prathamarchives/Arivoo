@@ -1,0 +1,50 @@
+CLAIM-071 — the honest not-verified list (LAW-04: the explicit statement, never
+empty-by-omission). The full SEV account: sev.json + sev-round-1/2/3.md.
+
+- NO fine-grained tracing beyond the approved vocabulary (D-010's boundary):
+  the closed event set is session_start | checkpoint | dwell | session_end;
+  keystroke/mouse-shaped payloads and search-query/agent-prompt kinds refuse
+  ARV-SES-004 with D-010 NAMED. The boundary is judged CLOSED at this surface
+  (round 1's F-071-5: every data channel the slice introduces is a closed
+  CHECK, an int, or a uuid).
+- NO journal/blocks surface (the following P4-C slice); no reader-client work
+  (P4-B's separate repo).
+- SEV round-1 F-071-2 (P3, routed): the dwell bounds and the remaining
+  substrate CHECKs (the dwell shape, the inverted span, the ordinal floor, the
+  actor vocabulary) are pinned structurally but not exercised by the suite's
+  own probes — every one verified live by the round-1 reviewer, all refusing
+  correctly; the suite-exercised forms remain the named follow-up.
+- SEV round-1 F-071-3 (P3, routed): the command's advisory-lock key uses the
+  raw caller-spelled source id while the 0015 trigger uses the canonical uuid
+  text — a non-canonical spelling takes a divergent command-level lock; the
+  substrate's canonical-lock + max+1 backstop keeps ARV-SES-007's law in every
+  traced interleaving (worst case a typed SES-007 refusal, never corruption).
+  save_position shares the raw-spelling form — the consistency note, its own
+  slice.
+- SEV round-1 F-071-4 (P3, routed): a non-uuid --source-id refuses
+  ARV-CMD-010 with a misleading repair hint — byte-identical to the
+  save_position precedent; a pre-existing shared class, not introduced here.
+- SEV round-1 F-071-5 (owner-accepted-debt): the provenance columns
+  (owner_scope, run_id, idempotency_key) are unconstrained caller text — the
+  substrate-wide LAW-20/21 convention on every table since 0001.
+- SEV round-2 F-071-R2-4 (P3, routed): the amendment note's "committed
+  WITHOUT its check() call" wording — the reflog shows a clean linear chain;
+  the silent-pass form was a working-tree state reconstructed by the reviewer,
+  not a commit. The substance honest and reproducible (both forms
+  reconstructed).
+- SEV round-2 F-071-R2-5 (P3, routed): the auto-generated substrate CHECK
+  names (reading_session_check, _check1) — the 0014 house convention
+  (unnamed CHECKs); only the D-010 vocabulary CHECK is deliberately named and
+  pinned by name. Cosmetic; precedented.
+- SEV round-3 F-071-R3-1 (P1, REPAIRED at 3a5c9d0): the label divergence —
+  the branch slug carried -events while the run-dir label did not; repaired
+  by the run-dir rename + the CLAIMS/scope cell alignment; the sev reports'
+  own prose left as written (the divergence they named is the finding's own
+  evidence). Verified by the exact machinery that refused: the PR-mode gate
+  green under the corrected label + the trusted-gate reproduction (run-08/09).
+- The session-event rows are the RECORDED facts only (the serving-generation
+  binding as written) — the behavior history is provenance, never retargeted;
+  no aggregation/analytics surface is claimed (none exists).
+- The suite's scratch-dir litter (mkdtemp prefixes): the standing cosmetic
+  class (the claim-069/070 notverified notes) — the DB is always dropped in
+  finally, the temp dirs are not.

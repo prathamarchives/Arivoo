@@ -68,6 +68,23 @@ RESERVED_SURFACES = {
                         "re-extraction, the no-oracle); the reader CLIENT that opens a source "
                         "at the saved position is P4-B's separate repo (no client work here)"),
     },
+    # P4-C slice two (CLAIM-071; record 63 §2): the session/dwell surface
+    # LANDED — the reserved registry's third row promoted from the 4C plan
+    # row (D-010's durable behavior data; the RTM §2.10 reservation)
+    "session/dwell-events": {
+        "owner_phase": "P4-C",
+        "reservation": ("LANDED in P4-C slice two (CLAIM-071): the backend verbs are real — "
+                        "record_session (commands.py — the append-only event through the "
+                        "spine, the D-010 closed vocabulary session_start/checkpoint/dwell/"
+                        "session_end, the coarse spans + the coarse dwell, the typed "
+                        "ARV-SES-004 boundary refusals: keystroke/mouse-shaped payloads and "
+                        "search-query/agent-prompt event kinds refused named, never stored) + "
+                        "list-session-events (query.py list-session-events — the owner's "
+                        "behavior-event stream, bounded/paginated, the recorded "
+                        "serving-generation binding as written at event time); the reader "
+                        "CLIENT that renders the reading sessions is P4-B's separate repo "
+                        "(no client work here)"),
+    },
     # P4-C slice one (CLAIM-070; record 62 §2): the library surface LANDED —
     # the reserved registry's second row promoted from the 4C plan row to
     # the named landed contract (the same promotion source-open/position

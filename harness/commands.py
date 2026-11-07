@@ -61,7 +61,7 @@ _SYNC_COMMANDS = ("import_source", "create_highlight", "revise_highlight",
                   "tombstone_highlight", "restore_highlight", "create_bookmark",
                   "move_bookmark", "tombstone_bookmark", "restore_bookmark",
                   "create_note", "revise_note", "tombstone_note", "restore_note",
-                  "save_position")
+                  "save_position", "record_session")
 
 
 def _q(s: str) -> str:
@@ -1675,6 +1675,132 @@ def save_position(*, db, owner, actor, client_id, idem_key, source_id,
                   command="save_position", payload=body, build_txn=build_txn, crash_at=crash_at)
 
 
+# P4-C slice two (CLAIM-071; record 63 §2): D-010's APPROVED event vocabulary
+# — the closed set of coarse behavior facts. Anything else (the D-010-named
+# exclusions: keystroke/mouse-shaped payloads, search-query/agent-prompt
+# event kinds) is REFUSED at the write boundary with the boundary named,
+# never silently stored, never clamped into the vocabulary.
+SESSION_EVENTS = ("session_start", "checkpoint", "dwell", "session_end")
+
+
+def record_session(*, db, owner, actor, client_id, idem_key, source_id,
+                   event, start, end, dwell_ms=None, crash_at: str = None) -> int:
+    """P4-C slice two (CLAIM-071; record 63 §2): the session/dwell events
+    surface — D-010's durable behavior data as the reading-session
+    checkpoint events (the RTM §2.10 reservation).  THE CLOSED VOCABULARY:
+    session_start | checkpoint | dwell | session_end — coarse behavior
+    facts; an event kind outside the set refuses ARV-SES-004 WITH D-010
+    NAMED (the boundary is the refusal, never a clamp, never a silent
+    store).  THE SHAPE LAW (ARV-SES-005): a dwell event carries --dwell-ms
+    (bounded 1..86400000 — a coarse measure); every other kind refuses it.
+    THE NO-ORACLE (ARV-SES-001): absent and another owner's source are the
+    SAME refusal.  THE SERVING-GENERATION BINDING (ARV-SES-002): an event
+    positions into the derived view — never extracted means nothing to
+    checkpoint into; the row records the CURRENT generation (the behavior
+    history is provenance, never retargeted by a later re-extraction).  THE
+    COARSE SPAN (ARV-SES-003): the offsets validate against the derived
+    view's extent (the ONE read_text home — never a second decode path).
+    THE SERIALIZED SAVE (the 0009/0014 pattern): the advisory lock, the
+    state read, the validation, the construction, and the commit ALL inside
+    ONE transaction; the ordinal law holds by construction (max+1 under the
+    lock).  NO free-text argument exists — the row is coordinates + the
+    coarse dwell, never captured input (the structural D-010 no-trace law)."""
+    try:
+        if event not in SESSION_EVENTS:
+            raise _CapRefusal("ARV-SES-004",
+                              f"event kind {event!r} is outside the approved session-event "
+                              "vocabulary (session_start | checkpoint | dwell | session_end) — "
+                              "D-010's boundary: durable behavior data is explicit actions + "
+                              "reading sessions + coarse position/dwell; NO keystroke/mouse "
+                              "traces, NO search-query or agent-prompt history (refused, never "
+                              "stored, never clamped into the vocabulary)",
+                              "record one of the approved kinds; input traces and query/prompt "
+                              "histories are outside the durable-behavior contract by the "
+                              "owner's D-010 decision")
+        if event == "dwell":
+            if dwell_ms is None or not (1 <= dwell_ms <= 86400000):
+                raise _CapRefusal("ARV-SES-005",
+                                  f"a dwell event requires --dwell-ms within 1..86400000 "
+                                  f"(got {dwell_ms!r}) — the coarse dwell is the event's own "
+                                  "fact, bounded to a day (never a fine-grained trace)",
+                                  "supply --dwell-ms (milliseconds, 1..86400000) on dwell "
+                                  "events only")
+        elif dwell_ms is not None:
+            raise _CapRefusal("ARV-SES-005",
+                              f"--dwell-ms is carried only by dwell events (got event "
+                              f"{event!r} with --dwell-ms {dwell_ms!r}) — the shape law: the "
+                              "coarse dwell is the dwell event's own fact",
+                              "drop --dwell-ms (only 'dwell' events carry it)")
+    except _CapRefusal as r:  # the boundary check precedes the spine (the NTE parse precedent)
+        print(f"FAIL {r.code}: {r}")
+        print(f"      repair: {r.repair}")
+        return 1
+    body = json.dumps({"source_id": source_id, "event": event, "start": start,
+                       "end": end, "dwell_ms": dwell_ms},
+                      sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build_txn(sess: "Session", body_hash: str):
+        key = owner + "|" + source_id
+        _sess_row(sess, f"SELECT hashtext({_q(key)}) || '|' || pg_advisory_xact_lock(hashtext({_q(key)}));")  # the lock FIRST, held to the commit
+        # ONE read: the source's digest + media type + the CURRENT generation
+        # (the serving generation the new event binds; '' when none serves —
+        # ARV-SES-002). The media type rides the same ONE read — the event's
+        # offsets validate against the DERIVED view (the ONE read_text home)
+        row = _sess_row(sess, f"SELECT s.digest || '|' || s.media_type || '|' || COALESCE((SELECT g.id::text "
+                              f"FROM arv.extraction_generation g WHERE g.source_id = s.id "
+                              f"AND g.owner_scope = s.owner_scope AND g.state = 'current' "
+                              f"ORDER BY g.ordinal DESC LIMIT 1), '') FROM arv.source s "
+                              f"WHERE s.id = {_q(source_id)};")
+        if not row:
+            raise _CapRefusal("ARV-SES-001",
+                              f"source {source_id} does not exist in the caller's scope — absent and "
+                              "another owner's are the SAME refusal, never a side channel (RTM §2.10 "
+                              "on the write path)",
+                              "check the id against the caller's own sources (query.py get-source "
+                              "reads the import ack's result_ref back); a session event is only "
+                              "ever recorded by the source's owner")
+        digest, media_type, gen_id = row.split("|", 2)
+        if not gen_id:
+            raise _CapRefusal("ARV-SES-002",
+                              f"source {source_id} has no current extraction generation — the session "
+                              "event binds to the generation the reader was reading (the "
+                              "serving-generation binding); a source with no serving generation has "
+                              "no readable derived view to checkpoint into",
+                              "extract the source first (harness/extract.py extract_source); the "
+                              "session event follows the serving generation")
+        try:
+            # the ONE read_text home — the derived view is the event's offset domain
+            text = read_text(media_type, digest)
+        except (KeyError, UnicodeDecodeError) as e:
+            raise _CapRefusal("ARV-CAP-004", f"the source's blob failed to verify — {e}",
+                              "the store is corrupt at this digest; never a session event "
+                              "against unverifiable bytes")
+        except _FmtRefusal as r:
+            raise _CapRefusal("ARV-CAP-004", f"the source's derived text cannot be produced — {r}",
+                              "the store's bytes changed under the digest (the corruption class); never an event against an underivable view")
+        if not (0 <= start < end <= len(text)):
+            raise _CapRefusal("ARV-SES-003",
+                              f"offsets [{start},{end}) are invalid for a {len(text)}-character text — "
+                              "never clamped, never guessed",
+                              "supply 0 <= start < end <= the decoded text length (the derived "
+                              "view's own coordinates — the coarse span)")
+        nxt = _sess_row(sess, f"SELECT COALESCE(max(event_ordinal), 0) || '|' FROM "
+                              f"arv.reading_session WHERE source_id = {_q(source_id)} "
+                              f"AND owner_scope = {_q(owner)};")
+        ordinal = int(nxt.rstrip("|") or "0") + 1
+        ev_id, ts, run_id, ih = ids.new_id(), clock.now(), "run-" + client_id, body_hash[:16]
+        stmt = (f"INSERT INTO arv.reading_session (id, owner_scope, source_id, event, "
+                f"event_ordinal, generation_id, start_off, end_off, dwell_ms, actor, run_id, "
+                f"input_hash, idempotency_key, created_at) VALUES ({_q(ev_id)}, {_q(owner)}, "
+                f"{_q(source_id)}, {_q(event)}, {ordinal}, {_q(gen_id)}, {start}, {end}, "
+                f"{dwell_ms if dwell_ms is not None else 'NULL'}, {_q(actor)}, "
+                f"{_q(run_id)}, {_q(ih)}, {_q(idem_key)}, {_q(ts)});")
+        return f"{source_id}@{ordinal}", [stmt], f" events={ordinal} durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="record_session", payload=body, build_txn=build_txn, crash_at=crash_at)
+
+
 REGISTRY = {"record_event": record_event, "import_source": import_source,
             "create_highlight": create_highlight, "extract_source": _extract_source,
             "revise_highlight": revise_highlight, "tombstone_highlight": tombstone_highlight,
@@ -1683,7 +1809,8 @@ REGISTRY = {"record_event": record_event, "import_source": import_source,
             "restore_bookmark": restore_bookmark, "create_note": create_note,
             "revise_note": revise_note, "tombstone_note": tombstone_note,
             "rebuild_keyword_index": rebuild_keyword_index,
-            "restore_note": restore_note, "save_position": save_position}
+            "restore_note": restore_note, "save_position": save_position,
+            "record_session": record_session}
 
 
 def main() -> int:
@@ -1753,6 +1880,18 @@ def main() -> int:
                    help="the reading window's start offset (decoded-text coordinates)")
     p.add_argument("--end", required=True, type=int,
                    help="the reading window's end offset (0 <= start < end <= the text length)")
+    p = sub.add_parser("record_session")
+    _common(p)
+    p.add_argument("--source-id", required=True)
+    p.add_argument("--event", required=True,
+                   help="the session-event kind (the D-010 closed vocabulary: session_start | "
+                        "checkpoint | dwell | session_end — anything else refuses ARV-SES-004)")
+    p.add_argument("--start", required=True, type=int,
+                   help="the coarse span's start offset (decoded-text coordinates)")
+    p.add_argument("--end", required=True, type=int,
+                   help="the coarse span's end offset (0 <= start < end <= the text length)")
+    p.add_argument("--dwell-ms", default=None, type=int,
+                   help="the coarse dwell in milliseconds (dwell events only, 1..86400000)")
     a = ap.parse_args()
     db = os.environ.get("PGDATABASE", "postgres")
     if a.command == "record_event":
@@ -1806,6 +1945,11 @@ def main() -> int:
         return save_position(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                              idem_key=a.idem_key, source_id=a.source_id,
                              start=a.start, end=a.end)
+    if a.command == "record_session":
+        return record_session(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                              idem_key=a.idem_key, source_id=a.source_id,
+                              event=a.event, start=a.start, end=a.end,
+                              dwell_ms=a.dwell_ms)
     return create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                             idem_key=a.idem_key, source_id=a.source_id,
                             start=a.start, end=a.end)

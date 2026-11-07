@@ -1,0 +1,7 @@
+{
+  "command": "env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-071-p4c-session-dwell-events python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "5a99c3de3cec5f6c15ffa82a2456e2ede05d1d95",
+  "output_sha256": "9c27fb7c6eae592b25618cd174d21f9a9c9773f872c788a9b4b36de047790603",
+  "recorded_at": "2026-11-07T14:00:28.576647+00:00"
+}

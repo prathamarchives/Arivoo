@@ -842,7 +842,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-059 (P3-08) the RED: the SYN-01..15 suite's RED observed at the exact predecessor 67e37fa (CLAIM-058's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the driver + migration 0012 absent), red-01.txt; the typed observed red per F-007",
-    "current_sha256": "c25318b53b1d803a11c0410691a4d4d711815e2a22c4f338791a72ed45e0fdc4",
+    "current_sha256": "5ea85e0012bcba3536b5e8e07a35f416abe1b5d2c54f15c991839fe30bd3bfac",
     "amendments": [
       {
         "prior_sha256": "d2158263fb30078c71c5874e85f781b12d5182605e917ca36420511d43a9b720",
@@ -861,6 +861,12 @@
         "new_sha256": "c25318b53b1d803a11c0410691a4d4d711815e2a22c4f338791a72ed45e0fdc4",
         "note": "the SEV round-1 F1 repair's pin (CLAIM-066): SYN-18 ADDED \u2014 the position delivery (the save_position outbox row delivers through the translated source id, binds the server's own serving generation per the site-local binding law, acks <server-source>@<ordinal>, acknowledges with server_ref, and the server's read arm answers the delivered row). The RED observed at the pre-repair tree: FAIL SYN-18, the dead letter (sync.py _cli_args carried no save_position branch \u2014 the enqueue rode _SYNC_COMMANDS but the delivery refused ARV-SYN-000, the row resting retryable with the named reason; the server never received a single save). Purely additive: SYN-01..17 untouched, no assertion removed",
         "observed_at": "2026-11-06T15:47:59.264672+00:00"
+      },
+      {
+        "prior_sha256": "c25318b53b1d803a11c0410691a4d4d711815e2a22c4f338791a72ed45e0fdc4",
+        "new_sha256": "5ea85e0012bcba3536b5e8e07a35f416abe1b5d2c54f15c991839fe30bd3bfac",
+        "note": "the CLAIM-071 SEV round-1 F1 repair's ADDITIVE pin (the SYN-18 precedent's form): SYN-19 added to test_sync.py \u2014 the record_session outbox row DELIVERS through the translated source id (the kind/span/dwell re-executed server-side, the site-local generation binding, the acknowledged server_ref, the server read arm answering) \u2014 observed RED at the unrepaired tree (the dead letter ARV-SYN-000, exit 1) then GREEN at the sync.py repair; the RED form itself was first committed WITHOUT its check() call by mistake and completed one run later \u2014 the honest chain (the missing call observed as a silent pass, caught, completed, then the true RED observed)",
+        "observed_at": "2026-11-07T07:22:02.075217+00:00"
       }
     ]
   },
@@ -1080,5 +1086,22 @@
     "red_evidence": "the LIB suite's observed RED at commit 35fae66 (machinery-absent ARV-TEST-000: the list-library arm absent + the get-reading-state arm absent \u2014 exit 1, red-01.txt at harness/runs/claim-070-p4c-library-reading-state/)",
     "current_sha256": "7e342b741a00b084b5347ff42d09e4b922e9fd5235d1e093a6ce08fcf9189630",
     "amendments": []
+  },
+  "harness/tests/test_session.py": {
+    "schema": 2,
+    "binding_commit": "7804737",
+    "binding_sha256": "748c2a2fae714f92814505324875647afbaf7bbe726ac86343b4893ca8e52559",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the SES suite's observed RED at commit 7804737 (machinery-absent ARV-TEST-000: the record_session command absent + the list-session-events arm absent + migration 0015 absent \u2014 exit 1, red-01.txt at harness/runs/claim-071-p4c-session-dwell/)",
+    "current_sha256": "000f5899a9b770ec4245b01553a1829320c3cfe8d67bb22e3fdfb26d7b2d2eff",
+    "amendments": [
+      {
+        "prior_sha256": "748c2a2fae714f92814505324875647afbaf7bbe726ac86343b4893ca8e52559",
+        "new_sha256": "000f5899a9b770ec4245b01553a1829320c3cfe8d67bb22e3fdfb26d7b2d2eff",
+        "note": "the SES suite's two implementation-cycle amendments (disclosed in the GREEN commit): (1) the crash arm's dwell forwarded \u2014 the RED draft's crash_rec omitted --dwell-ms, so the dwell event's ARV-SES-005 shape law refused the invocation BEFORE the crash vocabulary could ever fire (the crash arm observed exit 1 typed, never exit 2); the same-key convergence replay carries the same dwell (the idempotent body). (2) the ordinal arithmetic corrected \u2014 the RED draft miscounted the per-source ordinals across the two fixture sources: the crash-committed dwell takes src1's ordinal 5 (result_ref @5), the post-re-extraction event takes 6 (events=6), and the SES-04 what-string's stale events=7 aligned to the pin",
+        "observed_at": "2026-11-07T06:35:59.288248+00:00"
+      }
+    ]
   }
 }

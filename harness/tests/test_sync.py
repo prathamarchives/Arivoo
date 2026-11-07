@@ -92,6 +92,13 @@ Cases (the SYN registry; each pin's full statement lives at its check()):
          each site's rows bind that site's generation ids, never a
          cross-site uuid transplant); the row acknowledges with its
          server_ref and the server's read arm answers the delivered row
+  SYN-19 the session-event delivery (the CLAIM-071 SEV round-1 F1 repair —
+         the same dead-letter class SYN-18 closed for the position family):
+         the record_session outbox row DELIVERS — the server-side event
+         re-executes through the TRANSLATED source id with the recorded
+         kind/span/dwell and binds the SERVER's own serving generation
+         (the site-local binding law); the row acknowledges with its
+         server_ref and the server's read arm answers the delivered event
 
 Run: python3 harness/tests/test_sync.py   (exit 0 = green)
 """
@@ -775,11 +782,47 @@ def main() -> int:
               "the command was already in _SYNC_COMMANDS (the enqueue); the delivery completes the "
               "no-lost-writes law for the position family")
 
+        # ---- SYN-19 — the session-event delivery (the CLAIM-071 SEV round-1
+        # F1 repair: the dead letter closed for the session family — the
+        # command was added to _SYNC_COMMANDS (the enqueue); the _cli_args
+        # delivery branch completes the no-lost-writes law)
+        r_ses = cmd("record_session", "--source-id", sid, "--event", "checkpoint",
+                    "--start", str(s3), "--end", str(s3 + 8), key="sy-ses1")
+        r19 = sync()
+        st19 = ob(LOC, "sy-ses1")
+        ref19 = ob(LOC, "sy-ses1", "server_ref")
+        srv_ses = audit(SRV, f"SELECT event || '|' || start_off || '|' || end_off || '|' "
+                             f"|| COALESCE(dwell_ms::text, '') || '|' || generation_id "
+                             f"FROM arv.reading_session WHERE owner_scope='A' "
+                             f"AND source_id='{srv_sid}';")
+        g19 = cli(str(REPO / "harness" / "query.py"), "list-session-events",
+                  "--owner", "A", env=srv_env)
+        ok19 = (r_ses.returncode == 0 and f"result_ref={sid}@1" in r_ses.stdout
+                and "events=1" in r_ses.stdout
+                and r19.returncode == 0
+                and st19 == "acknowledged" and ref19 == f"{srv_sid}@1"
+                and srv_ses == f"checkpoint|{s3}|{s3 + 8}||{srv_gen}"
+                and g19.returncode == 0
+                and '"event": "checkpoint"' in g19.stdout
+                and '"event_ordinal": 1' in g19.stdout)
+        check("SYN-19", ok19,
+              "the session-event delivery (the CLAIM-071 SEV round-1 F1 repair — the same "
+              "dead-letter class SYN-18 closed for the position family): the record_session "
+              "outbox row DELIVERS — the server-side event re-executes through the TRANSLATED "
+              "source id with the recorded kind/span, binds the SERVER's own serving "
+              "generation (the site-local binding law), acks <server-source>@1, and the row "
+              "acknowledges with its server_ref; the server's read arm answers the delivered "
+              "event (kind checkpoint, ordinal 1) — never a dead letter in the "
+              "outbox-carrying set",
+              "harness/sync.py _cli_args' record_session branch (the translated source id + "
+              "the event kind/span/dwell) — the command was already in _SYNC_COMMANDS (the "
+              "enqueue); the delivery completes the no-lost-writes law for the session family")
+
         print()
         if FAILS:
             print(f"RED — the P3-08 sync suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-08 acceptance suite (SYN-01..18) passes")
+        print("GREEN — the P3-08 acceptance suite (SYN-01..19) passes")
         return 0
     finally:
         pg.drop_scratch_db(LOC)

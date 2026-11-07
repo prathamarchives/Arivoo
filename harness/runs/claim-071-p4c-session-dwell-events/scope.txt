@@ -1,0 +1,29 @@
+# CLAIM-071 — P4-C slice two: the session/dwell events surface (D-010's
+# durable behavior data; PLAN's 4C row elaborated one phase deep at P4-C
+# slice one's landing; record 63 §2; the RTM §2.10 reservation). The closed
+# event vocabulary (session_start | checkpoint | dwell | session_end)
+# recorded durably through the spine + the typed D-010 boundary refusals
+# (keystroke/mouse-shaped payloads, search-query/agent-prompt event kinds
+# refused named) + the read arm bounded/paginated + the sync delivery (the
+# SEV round-1 repair). RED-first at CLAIM-070's merged head fd6fb9f. THE
+# BOUNDED EXCLUSIONS: no journal/blocks surface (the following P4-C slice);
+# no reader-client work (P4-B's repo); no fine-grained tracing beyond the
+# approved vocabulary (D-010).
+harness/tests/test_session.py D-041
+harness/tests/test_sync.py D-041
+harness/commands.py D-041
+harness/query.py D-041
+harness/capability.py D-041
+harness/crash.py D-041
+harness/migrations/0015_reading_session.sql D-041
+harness/gate.py D-041
+harness/sync.py D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/62-P4C-LIBRARY-READING-STATE.md D-042
+context/extracted/63-P4C-SESSION-DWELL.md D-042
+harness/runs/claim-071-p4c-session-dwell-events D-042

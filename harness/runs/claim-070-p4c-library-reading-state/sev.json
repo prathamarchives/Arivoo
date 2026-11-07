@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-070-p4c-library-reading-state",
+  "base_sha": "9c138a0e10a349a129a31be539bf35f372ee189d",
+  "reviewed_diff_sha256": "db023430a5d2d6944367330846a4fc1598d882a46060fb8fb578186641909516",
+  "sheet_section": true,
+  "intent_ids": [
+    "INT-144",
+    "INT-145",
+    "INT-146"
+  ],
+  "requirement_ids": [
+    "SYS-09",
+    "SYS-06",
+    "SYS-01"
+  ],
+  "system_claims": [
+    "C1",
+    "C2"
+  ],
+  "changed_components": [
+    "harness/query.py (the TWO new read arms: list-library \u2014 the owner's imported sources on the P4-00b list contract over arv.source; get-reading-state \u2014 the derived current-reading view over the landed position rows; PLUS the two shared extractions: _position_row \u2014 the position answer's ONE construction home shared by get-position and the reading-state arm (the no-second-path law made structural) + _page_args \u2014 the list contract's boundary validation shared by every bounded arm)",
+    "harness/capability.py (the RESERVED_SURFACES registry's library/current-reading row: owner_phase P4-C, the LANDED verbs named, the reader-client exclusion held \u2014 the second row promoted exactly as source-open/position was at P4-A slice two)",
+    "harness/gate.py (the TESTS registration widened \u2014 the ARV-RED-008 class)",
+    "harness/tests/test_library.py (the LIB-01..06 suite: the library arm at the real boundary, the bounds + pagination on both arms, the owner isolation, the derived state with the no-second-path law pinned at exact JSON equality, the generation binding honest across a re-extraction + the liveness, the reserved surface + the no-new-table law)"
+  ],
+  "interfaces_reviewed": [
+    "the public CLI boundary (the two new read arms as the client's only surface)",
+    "the P4-00b list contract on every list-shaped response (the bounded page, the keyset cursor, the observed truth marker, the typed ARV-QRY-004)",
+    "the position answer's row shape (get-position == get-reading-state rows \u2014 one builder)",
+    "the reserved-surface registry's honesty (the landed verbs named, the owner phase, the separate-repo exclusion)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the LIB suite (run-01..03) x3 green \u2014 6/6, zero test amendments"
+    ],
+    "integration_verification": [
+      "make verify x2 (run-04, 05) \u2014 all 30 suites + the gate + the canonical layer 54/0"
+    ],
+    "system_verification": [
+      "SYS-09 trace: the retrieval surface's two new arms at the real boundary (the reviewer reproduced the walk, the isolation, the empty forms from the raw CLIs on a fresh scratch DB)",
+      "SYS-06 trace: the explicit reading states \u2014 no_position_saved the honest not-yet-open answer, the generation binding honest across a re-extraction (saved_generation_id byte-stable, current_generation_id the serving one, the derived matches flag)",
+      "SYS-01 trace: api_version on every read body, every header, and every refusal's frozen shape"
+    ],
+    "validation": [
+      "the one-round SEV chain: round 1 (agent-4f2b9d6a) PASS \u2014 zero open P0/P1/P2; the RED reproduced at the archived tree; the no-second-path law verified structurally (one builder) + behaviorally (byte-equal rows); 30 adversarial probes on the reviewer's own scratch DB; the sha chain closed with zero amendments; five P3 notes routed/recorded in notverified"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "the derived reading view drifting from the position arm it derives from (a second position path)",
+      "control": "the no-second-path law: _position_row \u2014 ONE construction home shared by get-position and get-reading-state (structural) + the LIB-04/05 exact-JSON-equality pins + the reviewer's byte-equality probes on saved/no-position/re-extracted states",
+      "proof_ids": [
+        "run-01",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "an unbounded or silently-clamped library/reading dump",
+      "control": "the P4-00b list contract on both arms: _page_args validates the bounds at the boundary (the typed ARV-QRY-004, exit 1, zero effect); the limit+1 fetch OBSERVES the truth marker; the empty owner answers header + more=false alone",
+      "proof_ids": [
+        "run-01",
+        "run-02"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "a cross-owner leak through the new list arms",
+      "control": "RLS the owner boundary (the owner-scoped _read with the GUC + the policy); LIB-03's isolation pins + the reviewer's B-vs-A probes including the cross-owner --after cursor and hostile --owner strings",
+      "proof_ids": [
+        "run-01",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "a silent retarget of the reading surface across a re-extraction (the saved position rebinding to the new generation)",
+      "control": "the serving-generation binding carried per row (saved_generation_id byte-stable, current_generation_id, generation_matches=false on mismatch) + LIB-05's re-extraction pins + the reviewer's live re-extraction probe",
+      "proof_ids": [
+        "run-01",
+        "run-02"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "no concurrency observation for the derived view (two interleaved walks with a mid-walk save \u2014 the page-boundary race class; one-snapshot-per-page is the pinned semantics, never cross-page consistency)",
+    "the failed/building extraction states never exercised against get-reading-state (the no-serving-generation row shape unpinned \u2014 the SQL's own COALESCE-'' form, never an observed answer)",
+    "scale untested on the new arms (at most five sources; the default page, the 1000 bound, and the correlated-subquery plan at real library scale unmeasured; the default value itself pinned only indirectly through the shared constant + BND-05)",
+    "RLS exercised only through arv_app (the arv_read bypass-auditor's view of the new arms unprobed)",
+    "the reader-client consumption contract invisible here by the slice's own bounded exclusion (P4-B's separate repo)",
+    "the no-drift pin compares parsed JSON dicts, not raw bytes (byte equality verified by the round's probes + the shared print path; a serialization-ORDER divergence alone would pass LIB-04) \u2014 the full list at notverified.txt"
+  ],
+  "builder_context": "Super Z (GLM host) \u2014 the standing do-not-stop chain INT-134..146",
+  "reviewer_context": "one fresh-context SEV agent: agent-4f2b9d6a (round 1, PASS)",
+  "disposition": "PASS",
+  "review_summary": "the one-round chain: round 1 (agent-4f2b9d6a) PASS \u2014 zero open P0/P1/P2. The RED chain genuinely closed (the binding sha matches the RED form at 35fae66, the test byte-identical to HEAD, zero amendments, the RED reproduced at the archived tree); the measured set reproduced (the suite 6/6 with a byte-identical output digest; make verify exit 0, canonical 54/0); the no-second-path law holds structurally (_position_row the single construction home) and behaviorally (byte-equal to get-position on saved, no-position, and re-extracted states); the bounds/cursor law refuses typedly on both arms with no injection surface; owner isolation and the empty-owner answer hold on both arms; the generation binding honest across a re-extraction; the no-new-table + registry claims verify. Five P3 notes routed/recorded in notverified (the untracked run records awaiting the re-bind; the two pin-weaker-than-prose gaps; the make-verify digest non-determinism; the permissive-but-safe uuid cursor forms)."
+}

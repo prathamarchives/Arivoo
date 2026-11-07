@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-070-p4c-library-reading-state (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): a99da0bb9cfc2585db9f21fef6ba059f46c26430
-- generated (last record's timestamp): 2026-11-07T05:28:18.548772+00:00
-- run records: 5
+- commit (last run record's): d3b47caf4c7feb6c129f479a6445931e986183db
+- generated (last record's timestamp): 2026-11-07T06:01:57.908872+00:00
+- run records: 8
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_library.py` -> exit 0 · output sha256 c1f1435d34119a21 · 2026-11-07T05:15:36.925949+00:00
@@ -10,6 +10,9 @@
 - `python3 harness/tests/test_library.py` -> exit 0 · output sha256 c1f1435d34119a21 · 2026-11-07T05:15:48.910106+00:00
 - `make verify` -> exit 0 · output sha256 c7e759e36d959f90 · 2026-11-07T05:21:54.491744+00:00
 - `make verify` -> exit 0 · output sha256 2c7beb6536d3af65 · 2026-11-07T05:28:18.548772+00:00
+- `env SLICE=claim-070-p4c-library-reading-state GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 f8ebeec80f53a955 · 2026-11-07T05:59:03.472471+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-070-p4c-library-reading-state python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 1 · output sha256 1bc8d429ce8fde41 · 2026-11-07T05:59:29.542728+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-070-p4c-library-reading-state python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 61632878222cc7b5 · 2026-11-07T06:01:57.908872+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - NOT VERIFIED — the honest limits of CLAIM-070 / P4-C slice one (the library +
@@ -87,4 +90,4 @@
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): d54758b00df5689dd6b6f25cd46eaab1ef3eeb70e9bf83f37f78bd8848db9332
+- sheet sha256 (of the content above, excluding this line): fb6ef4ae21aea3d68c195165653b10992203ebd82ba84748d753448221dbe2e9

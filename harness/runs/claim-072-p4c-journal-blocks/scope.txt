@@ -1,0 +1,29 @@
+# CLAIM-072 — P4-C slice three: the journal/blocks surface (the writing lab;
+# PLAN's 4C journal letter elaborated one phase deep at P4-C slice two's
+# landing; record 64 §2). The append-only journal blocks (the raw/creative
+# kind vocabulary CLOSED at the substrate; the long raw thinking preserved
+# LOSSLESSLY; revisions as NEW rows) + the write through the spine's own ack
+# contract + the read arms (the bounded/paginated listing + the lossless
+# single-block read) + the source-OPTIONAL law + the no-forced-funnel law
+# (the note machine stays its own surface). RED-first at CLAIM-071's merged
+# head 78b3654. THE BOUNDED EXCLUSIONS: no @-reference resolution over
+# journal blocks (beyond the landed note machine — its own increment); no
+# diagram/structured-block contract (the P4-C reservation); no reader-client
+# work (P4-B's repo).
+harness/tests/test_journal.py D-041
+harness/commands.py D-041
+harness/query.py D-041
+harness/capability.py D-041
+harness/crash.py D-041
+harness/migrations/0016_journal_block.sql D-041
+harness/gate.py D-041
+harness/sync.py D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/63-P4C-SESSION-DWELL.md D-042
+context/extracted/64-P4C-JOURNAL-BLOCKS.md D-042
+harness/runs/claim-072-p4c-journal-blocks D-042

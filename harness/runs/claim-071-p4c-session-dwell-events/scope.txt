@@ -26,4 +26,4 @@ PLAN.md D-037
 context/WORKLOG.md D-043
 context/extracted/62-P4C-LIBRARY-READING-STATE.md D-042
 context/extracted/63-P4C-SESSION-DWELL.md D-042
-harness/runs/claim-071-p4c-session-dwell D-042
+harness/runs/claim-071-p4c-session-dwell-events D-042

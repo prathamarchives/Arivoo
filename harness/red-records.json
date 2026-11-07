@@ -1103,5 +1103,15 @@
         "observed_at": "2026-11-07T06:35:59.288248+00:00"
       }
     ]
+  },
+  "harness/tests/test_journal.py": {
+    "schema": 2,
+    "binding_commit": "f22d8d0",
+    "binding_sha256": "d399ed44ba95cd543ff7f3b77ddb1c5043a56066f9e991809669e9ee218f47a2",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the JNL suite's observed RED at commit f22d8d0 (machinery-absent ARV-TEST-000: the journal_block command, the list-journal/get-journal arms, and migration 0016 absent at commit A's tree 87ffe31; exit 1, red-01.txt at harness/runs/claim-072-p4c-journal-blocks/)",
+    "current_sha256": "d399ed44ba95cd543ff7f3b77ddb1c5043a56066f9e991809669e9ee218f47a2",
+    "amendments": []
   }
 }

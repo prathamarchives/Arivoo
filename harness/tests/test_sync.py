@@ -100,14 +100,6 @@ Cases (the SYN registry; each pin's full statement lives at its check()):
          (the site-local binding law); the row acknowledges with its
          server_ref and the server's read arm answers the delivered event
 
-         (The CLAIM-072 LAW-05 split note: the SYN-20 journal-delivery pin —
-         authored and observed RED at 838b1e9 (red-02.txt, the dead letter
-         live) then GREEN at 806ef04 — re-homes to the FOLLOWING slice with
-         the delivery branches when the ARV-SIZE-002 refusal split the
-         over-limit tree; its RED re-observes at that slice's own commit,
-         the P3-06 re-home precedent. This suite returns to SYN-01..19 at
-         this tree.)
-
 Run: python3 harness/tests/test_sync.py   (exit 0 = green)
 """
 import json

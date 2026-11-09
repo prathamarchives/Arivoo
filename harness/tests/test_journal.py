@@ -19,8 +19,10 @@ losslessly, no forced short-note funnel:
   never a funneled rewrite; the write->read round-trip byte-honest);
   revisions are NEW rows (the governed-history convention).
 - THE WRITE — through the spine's own ack contract (idempotent, the frozen
-  grammar, the client-outbox ride, the crash-matrix membership via
-  crash.py): result_ref=<block>@<revision>.
+  grammar, the crash-matrix membership via crash.py; the client-outbox ride
+  re-homed to the FOLLOWING slice by the LAW-05 split — the membership and
+  the delivery land TOGETHER there, never the dead-letter window):
+  result_ref=<block>@<revision>.
 - THE READ ARMS — the journal listing (bounded/paginated on the P4-00b
   contract, the keyset cursor, the version key) + the single-block read
   (the lossless round-trip) + the governed history (every revision).

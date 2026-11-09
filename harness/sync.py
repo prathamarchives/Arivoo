@@ -85,12 +85,7 @@ def _create_key(local_db: str, owner: str, local_id: str) -> str:
     SOUNDNESS GATE: the key counts ONLY when its outbox row rests
     'acknowledged' (a 409-divergent creator's server answer belongs to a
     different logical command). A WORK id is never a result_ref — the work
-    bridge goes through any acknowledged source of that work.
-
-    (The CLAIM-072 LAW-05 split note: the address-form extension — matching
-    the revision-1 address <id>@1 alongside the bare uuid, for the journal
-    family's @-suffixed create refs — re-homes to the FOLLOWING slice with
-    the journal delivery branches; this tree carries no journal branch.)"""
+    bridge goes through any acknowledged source of that work."""
     key = _scalar(local_db, owner,
                   f"SELECT c.idempotency_key FROM arv.command_log c JOIN arv.outbox o "
                   f"ON o.owner_scope = c.owner_scope AND o.idempotency_key = c.idempotency_key "
@@ -240,11 +235,6 @@ def _cli_args(row: dict, local_db: str, server_db: str, owner: str) -> "tuple[li
         if err:
             return None, err
         return ["--id", i, "--content", p["content"]] + refs, ""
-    # (The CLAIM-072 LAW-05 split: the journal_block/revise_journal_block
-    # delivery branches re-home to the FOLLOWING slice — the ARV-SIZE-002
-    # refusal observed live at the pre-split tree; the enqueue and the
-    # delivery land TOGETHER there, never an enqueue-without-delivery
-    # dead-letter window on a landed family)
     return None, f"ARV-SYN-000: the command {c} is not in the outbox-carrying set — never delivered"
 
 

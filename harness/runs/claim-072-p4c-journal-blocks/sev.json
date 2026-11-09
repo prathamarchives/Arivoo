@@ -1,0 +1,106 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-072-p4c-journal-blocks",
+ "base_sha": "78b3654a10366d7228fe054ca9499dc50278fb8c",
+ "reviewed_diff_sha256": "8c835b060890c9ba989f54df8e91457abe273dab298c212959989e7aeae49015",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-06",
+  "SYS-09"
+ ],
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "changed_components": [
+  "harness/migrations/0016_journal_block.sql (the block rows on the 0009 revision-table pattern: PK (id, revision) with NOTHING unique over (id, owner_scope) — a revision is a NEW row; content TEXT, the LONG raw thinking preserved LOSSLESSLY; the closed kind vocabulary CHECK raw|creative by name, the 0015 D-010 pattern; the source-OPTIONAL composite FK (source_id, owner_scope) with MATCH SIMPLE — NULL rides unconstrained; the append-only triggers ARV-JNL-006; the insert guard — the SAME advisory xact lock the command takes (hashtext(id::text)), the source-bind law ARV-JNL-008 checked FIRST, the revision-contiguity law ARV-JNL-007 second; RLS enabled AND forced, the owner_isolation policy; the grants INSERT+SELECT arv_app / SELECT arv_read / no UPDATE/DELETE; NO DEFAULTs)",
+  "harness/commands.py (journal_block + revise_journal_block through the spine's own ack contract: idempotent, the frozen grammar, result_ref=<block>@<revision>; the two content channels with the exactly-one law ARV-JNL-003, the file read losslessly read_bytes+UTF-8; the empty and NUL-carrying bodies refused ARV-JNL-004; the out-of-vocabulary kind refused ARV-JNL-002 never clamped; the absent/cross-owner source at the bind refused ARV-JNL-005, the absent/cross-owner block on the revise refused ARV-JNL-001 — the no-oracles; the revise's serialized transition — the per-block advisory lock as the transaction's FIRST statement, the state read, the INSERT...SELECT carrying kind + binding forward, the commit, ONE transaction)",
+  "harness/query.py (list-journal — the DISTINCT block identity on the _list_arm keyset contract, one row per block IDENTITY; get-journal — the current revision, ONE statement ONE snapshot, the content WHOLE; get-journal-history — every revision in order, the export-ready form; _jline_safe — the U+2028/U+2029/U+0085 JSON-escape form keeping the one-line-per-row framing; the journal no-oracle names NO id)",
+  "harness/capability.py (the journal/blocks reserved-surface row: owner_phase P4-C, the LANDED verbs named, the P4-B reader-client exclusion)",
+  "harness/crash.py (the journal_block/revise_journal_block crash-matrix membership — --kind/--id/--content/--file forwarded)",
+  "harness/gate.py (the TESTS registration, landed AT the RED commit) + harness/red-records.json (the typed RED binding at f22d8d0 + the four disclosed additive amendments: the pre-GREEN strengtheners, the SYN-20 pin, the split revert, the round-2 repair)"
+ ],
+ "interfaces_reviewed": [
+  "the spine's own ack contract on the two new write paths (the frozen grammar, the idempotency, the crash matrix — the outbox ride re-homed to CLAIM-073 by the LAW-05 split)",
+  "the closed kind vocabulary at both layers (the command's typed ARV-JNL-002 + the substrate's named CHECK)",
+  "the read arms' list contract (the shared _page_args bounds, the observed truth markers, the version key, the line-safe JSON framing)",
+  "the source-OPTIONAL binding at both layers (the command's typed ARV-JNL-005 no-oracle + the composite FK with the guard's ARV-JNL-008)",
+  "the revision machine (the serialized advisory lock shared by command and guard, the contiguity law, the governed history)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the JNL suite (run-01..03 at the GREEN tree, run-08..10 at the split tree) x6 total green, byte-exact digests",
+   "the SYN suite SYN-01..19 green at the split tree (run-11's make verify carries it; the SYN-20 pin re-homed to CLAIM-073)"
+  ],
+  "integration_verification": [
+   "make verify x3 (run-04 the honest intermediate exit 2 — the red-records amendment class; run-05 at the amendment tree; run-11 at the split/repair tree) — all suites + the gate + the canonical layer 54/0",
+   "the PR-mode gate + the local trusted-gate reproduction at the final tree (run-12/13, the records at the re-bind)"
+  ],
+  "system_verification": [
+   "SYS-01 trace: every journal ack names its durability rung (the frozen grammar on both write paths — run-01/08's JNL-01/JNL-04)",
+   "SYS-06 trace: the journal failures explicit and typed (the ARV-JNL-001..008 vocabulary, every refusal zero-effect — run-02/09's JNL-02)",
+   "SYS-09 trace: the journal retrievable through the real backend boundary (list-journal/get-journal/get-journal-history, RLS the owner boundary — run-03/10's JNL-05)"
+  ],
+  "validation": [
+   "the three-round SEV chain: round 1 (agent-34277f24) PASS zero P0/P1/P2 over the ten-commit pre-split chain — 17 live probes incl. the lock-key blocking proof and the byte-identical >8KB round-trip; round 2 (agent-6a2f91c4) BLOCKED — the split's scope-residue P1 (sync.py/test_sync.py comment edits outside the declared scope; the gate still refusing), repaired at be413b8 (both files reverted to base bytes + the two docstring drifts); round 3 (agent-79d0e3ab) PASS — the round-2 P1 VERIFIED-REPAIRED live (the pre-repair refusal reproduced at 6e2b6ac, the post-repair gate refusing only the expected artifact-pending pair)",
+   "the RED reproduced at the archived trees (f22d8d0/8f1ae13 ARV-TEST-000 exit 1; 838b1e9 the SYN-20 dead letter); the sha chains exact with the amendments additive; the LAW-05 split (ARV-SIZE-002: 422 -> 387 source lines, the P3-06 precedent) with the enqueue and the delivery re-homed TOGETHER to CLAIM-073"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "the long raw thinking truncated, funneled, or rewritten on its way through the system (a length cap, a note-machine conversion, a newline translation, an argv-bound sync channel)",
+   "control": "content TEXT with no length cap; the write->read round-trip byte-honest (the >8KB multi-paragraph framing-law corpus, U+2028/U+2029/U+0085/CR/CJK — the _jline_safe escape parses to the byte-identical value); the no-forced-funnel law (a journal write leaves arv.note's count unchanged, the note machine its own surface); the NUL-carrying body refused ARV-JNL-004 (never a silent substitution)",
+   "proof_ids": [
+    "run-01",
+    "run-08"
+   ]
+  },
+  {
+   "id": "FM-02",
+   "scenario": "the block history corrupted (a revision skipped, a phantom inserted, a row mutated, a competing reviser silently overwriting)",
+   "control": "the serialized per-block advisory xact lock shared by the command and the 0016 guard (ONE key form, hashtext(id::text)); the revision-contiguity law ARV-JNL-007 (max+1 under the lock); the append-only triggers ARV-JNL-006 (UPDATE/DELETE refused); the revise's INSERT...SELECT inside ONE transaction (both revisions persist, legal ordering)",
+   "proof_ids": [
+    "run-02",
+    "run-09"
+   ]
+  },
+  {
+   "id": "FM-03",
+   "scenario": "an out-of-vocabulary kind, a hostile source binding, or a cross-owner access smuggling through the surface",
+   "control": "the closed kind vocabulary at both layers (the typed ARV-JNL-002 + the named substrate CHECK); the source-OPTIONAL law with the composite FK + the guard's ARV-JNL-008 (the bind checked FIRST — a hostile bind names its own defect); the no-oracles (ARV-JNL-001/005 on the writes, the no-id-echo ARV-QRY-001 on the reads); RLS forced with the owner_isolation policy; the grants carry no UPDATE/DELETE",
+   "proof_ids": [
+    "run-02",
+    "run-03",
+    "run-10"
+   ]
+  },
+  {
+   "id": "FM-04",
+   "scenario": "an unbounded dump, a silent truncation, or an untyped failure on the read path",
+   "control": "the shared _page_args bounds (the typed ARV-QRY-004 — 0/1001/not-an-integer refused, never clamped); the observed truth markers (the limit+1 fetch); the empty journal's two-line answer (never pure silence); the version key on every row",
+   "proof_ids": [
+    "run-03",
+    "run-10"
+   ]
+  }
+ ],
+ "findings": [],
+ "not_verified": [
+  "NO SYNC DELIVERY at this slice — the LAW-05 split: the _SYNC_COMMANDS membership and the delivery land TOGETHER in CLAIM-073, never the dead-letter window (the CLAIM-066/071 SEV-round law); this tree carries ZERO journal outbox rows (JNL-04's own pin)",
+  "no @-reference resolution over journal blocks; no diagram/structured-block contract; no reader-client work (P4-B's repo); no tombstone/restore machine on the blocks (the §3.3 increment, D-011's governed-erasure question); no anchor-class location beyond the optional source binding",
+  "SEV round-1 F-072-1/3/4/5 routed (the malformed-id echo class family-wide; the inert --kind on the revise CLI; the raw-spelling ack display; the ARV-CMD-010 misleading hint) — the full account at notverified.txt",
+  "SEV round-3 F-072-R3-4/5/6 noted/routed (the record-64 §2 pre-split letter with §4's dated amendment; the commit-message citation drift; the round-2 environmental scratch DBs dropped at the finalize)",
+  "the pre-GREEN suite repairs (both strengtheners, the amendments chained); the provenance columns unconstrained caller text (the LAW-20/21 convention); the scratch-dir litter (the standing cosmetic class)"
+ ],
+ "builder_context": "Super Z (GLM host) — the standing do-not-stop chain INT-134..146",
+ "reviewer_context": "three fresh-context SEV agents across the chain: agent-34277f24 (round 1, PASS over the pre-split chain), agent-6a2f91c4 (round 2, BLOCKED the split's scope-residue P1), agent-79d0e3ab (round 3, PASS — the P1 verified repaired live)",
+ "disposition": "PASS",
+ "review_summary": "the three-round chain: round 1 PASS over the pre-split ten-commit chain (17 live probes — the lock-key blocking proof, the byte-identical >8KB round-trip through write/read/revise/history, the guard order, the two-DB delivery); the PR-mode gate then refused ARV-SIZE-002 (422 source lines > 400) and the LAW-05 split re-homed the sync delivery to CLAIM-073 (the P3-06 precedent — the enqueue and the delivery land TOGETHER, never the dead-letter window); round 2 BLOCKED the split's scope residue (both files repaired to base bytes); round 3 PASS — the repair verified by the exact machinery that refused (the gate refusing only the expected artifact-pending pair). Zero open P0/P1/P2; the five routed P3s at notverified.txt"
+}

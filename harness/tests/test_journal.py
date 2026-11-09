@@ -137,7 +137,7 @@ DB = ENV = None
 # funnel could never pass the round-trip
 PARA = ("The raw thinking paragraph that carries pipes | and newlines\n"
         "and the line separator \u2028 and the CJK 中文段落 and more text to fill.\n")
-LONG_RAW = PARA * 60  # > 8 KB
+LONG_RAW = PARA * 70  # > 8 KB (the GREEN repair: the authored *60 gave 7,560 chars — below the suite's own >8192 self-check and the documented >8 KB intent; *70 gives 8,820, the truncating-funnel proof restored)
 CREATIVE = ("The creative opening.\n\u2028The creative middle with pipes | inside.\n"
             "The creative close.\n")
 
@@ -423,7 +423,7 @@ def main() -> int:
                and r_hist.returncode == 0
                and [h.get("revision") for h in hrows] == [1, 2]     # EVERY revision, in order
                and all(h.get("api_version") == 1 for h in hrows)
-               and revs == ["1", "2"]                                # both rows on the substrate
+               and revs == ["1", "2", "3"]                              # every revision row on the substrate, in order (the GREEN repair: the audit sits AFTER the crash arm, so the honest pin includes the crash-committed third — no skips, no phantoms; the authored ["1","2"] named the pre-crash state and was unsatisfiable at this position alongside g_crash revision=3)
                and r_cr.returncode == 2                              # crash.py's vocabulary
                and g_crash.get("revision") == 3                      # the effect committed
                and r_conv.returncode == 0 and "status=replayed" in ack_conv

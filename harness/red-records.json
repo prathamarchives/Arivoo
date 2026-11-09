@@ -1111,7 +1111,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the JNL suite's observed RED at commit f22d8d0 (machinery-absent ARV-TEST-000: the journal_block command, the list-journal/get-journal arms, and migration 0016 absent at commit A's tree 87ffe31; exit 1, red-01.txt at harness/runs/claim-072-p4c-journal-blocks/)",
-    "current_sha256": "d399ed44ba95cd543ff7f3b77ddb1c5043a56066f9e991809669e9ee218f47a2",
-    "amendments": []
+    "current_sha256": "7484bb76fb4539e4b74858dd09c80eaa1682acdb56933a341dea169406279c51",
+    "amendments": [
+      {
+        "prior_sha256": "d399ed44ba95cd543ff7f3b77ddb1c5043a56066f9e991809669e9ee218f47a2",
+        "new_sha256": "7484bb76fb4539e4b74858dd09c80eaa1682acdb56933a341dea169406279c51",
+        "note": "CLAIM-072's pre-GREEN suite repair at 8f1ae13 (both strengtheners, never a gate weakening): JNL-04's revs pin corrected to [1,2,3] \u2014 the substrate audit sits AFTER the crash arm, so the authored [1,2] was unsatisfiable alongside g_crash revision=3; JNL-01's corpus constant PARA*60 -> PARA*70 (7,560 -> 8,820 chars) \u2014 the suite's own len>8192 self-check and the documented >8 KB intent; the RED evidence (red-01.txt at 87ffe31, ARV-TEST-000 machinery-absent) untouched, the ARV-TEST-000 probes unchanged, the suite still machinery-absent RED at the repair tree",
+        "observed_at": "2026-11-09T06:39:45.330504+00:00"
+      }
+    ]
   }
 }

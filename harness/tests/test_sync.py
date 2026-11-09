@@ -99,6 +99,15 @@ Cases (the SYN registry; each pin's full statement lives at its check()):
          kind/span/dwell and binds the SERVER's own serving generation
          (the site-local binding law); the row acknowledges with its
          server_ref and the server's read arm answers the delivered event
+  SYN-20 the journal-block delivery (the CLAIM-072 in-slice repair — the
+         same dead-letter class SYN-18/19 closed for the position and
+         session families): the journal_block outbox row DELIVERS — the
+         server-side block re-executes through the TRANSLATED source
+         binding with the recorded kind and the content BYTE-IDENTICAL
+         (the lossless law through the delivery); the revise DELIVERS
+         through the TRANSLATED block id appending the server's revision 2
+         on the SAME identity (the governed history rides the delivery);
+         the server's read arms answer the block and its history
 
 Run: python3 harness/tests/test_sync.py   (exit 0 = green)
 """
@@ -818,11 +827,91 @@ def main() -> int:
               "the event kind/span/dwell) — the command was already in _SYNC_COMMANDS (the "
               "enqueue); the delivery completes the no-lost-writes law for the session family")
 
+        # ---- SYN-20 — the journal-block delivery (the CLAIM-072 in-slice
+        # repair — the same dead-letter class SYN-18/19 closed for the
+        # position and session families: journal_block/revise_journal_block
+        # joined _SYNC_COMMANDS at the GREEN; the _cli_args delivery branches
+        # complete the no-lost-writes law for the writing lab — never a dead
+        # letter in the outbox-carrying set)
+        jf = pathlib.Path(tempfile.mkdtemp(prefix="arv-jnl-")) / "jraw.txt"
+        JBODY = ("The journal sync corpus: the long raw thinking with pipes | and "
+                 "the line separator \u2028 travels losslessly through the delivery.\n")
+        jf.write_text(JBODY, encoding="utf-8")
+        r_jb = cmd("journal_block", "--kind", "raw", "--file", str(jf),
+                   "--source-id", sid, key="sy-jb1")
+        r20 = sync()
+        st20 = ob(LOC, "sy-jb1")
+        ref20 = ob(LOC, "sy-jb1", "server_ref")
+        srv_blk = ref20.split("@")[0] if "@" in ref20 else ""
+        srv_jb = audit(SRV, f"SELECT kind || '|' || source_id FROM arv.journal_block "
+                            f"WHERE id='{srv_blk}' AND revision=1;") if srv_blk else ""
+        g20 = cli(str(REPO / "harness" / "query.py"), "get-journal", "--owner", "A",
+                  "--id", srv_blk, env=srv_env) if srv_blk else None
+        g20j = {}
+        if g20 is not None and g20.returncode == 0:
+            try:
+                g20j = json.loads(next(ln for ln in g20.stdout.splitlines() if ln.strip()))
+            except Exception:
+                g20j = {}
+        # the revise: the id translation rides the acknowledged creator's
+        # server_ref — the server-side block takes revision 2 (the SAME
+        # server identity, never a second block; the governed history rides
+        # the delivery)
+        rf = jf.parent / "jraw2.txt"
+        rf.write_text("The revised journal corpus: still lossless \u2028 with pipes |.\n",
+                      encoding="utf-8")
+        r_rev = cmd("revise_journal_block",
+                    "--id", ack_field(r_jb, "result_ref").split("@")[0],
+                    "--file", str(rf), key="sy-jb2")
+        r20b = sync()
+        st20b = ob(LOC, "sy-jb2")
+        ref20b = ob(LOC, "sy-jb2", "server_ref")
+        srv_revs = audit_rows(SRV, f"SELECT revision FROM arv.journal_block "
+                                   f"WHERE id='{srv_blk}' ORDER BY revision;") if srv_blk else []
+        h20 = cli(str(REPO / "harness" / "query.py"), "get-journal-history", "--owner", "A",
+                  "--id", srv_blk, env=srv_env) if srv_blk else None
+        h20r = []
+        if h20 is not None and h20.returncode == 0:
+            try:
+                h20r = [json.loads(ln) for ln in h20.stdout.splitlines() if ln.strip()]
+            except Exception:
+                h20r = []
+        ok20 = (r_jb.returncode == 0 and "status=committed" in r_jb.stdout
+                and r20.returncode == 0
+                and st20 == "acknowledged" and ref20.endswith("@1")
+                and srv_jb == f"raw|{srv_sid}"          # the kind + the TRANSLATED binding
+                and g20j.get("content") == JBODY        # THE LOSSLESS LAW through the delivery
+                and g20j.get("source_id") == srv_sid and g20j.get("revision") == 1
+                and r_rev.returncode == 0 and "revision=2" in r_rev.stdout
+                and r20b.returncode == 0
+                and st20b == "acknowledged" and ref20b == f"{srv_blk}@2"
+                and srv_revs == ["1", "2"]
+                and [h.get("revision") for h in h20r] == [1, 2]
+                and (h20r[1].get("content") if len(h20r) > 1 else None)
+                == "The revised journal corpus: still lossless \u2028 with pipes |.\n")
+        check("SYN-20", ok20,
+              "the journal-block delivery (the CLAIM-072 in-slice repair — the same dead-letter "
+              "class SYN-18/19 closed for the position and session families): the "
+              "journal_block outbox row DELIVERS — the server-side block re-executes through "
+              "the TRANSLATED source binding with the recorded kind, the content BYTE-IDENTICAL "
+              "(the long raw thinking with the framing-law characters travels losslessly — the "
+              "delivery re-materializes it through the file channel, never an argv truncation), "
+              "acks <server-block>@1, and the row acknowledges with its server_ref; the revise "
+              "DELIVERS through the TRANSLATED block id (the identity bridge's acknowledged "
+              "creator) appending the server's revision 2 on the SAME server identity — the "
+              "governed history rides the delivery; the server's read arms answer the delivered "
+              "block and its full history — never a dead letter in the outbox-carrying set",
+              "harness/sync.py _cli_args' journal_block/revise_journal_block branches (the "
+              "translated source id for the optional binding, the translated block id for the "
+              "revise, the content re-materialized through the temp-file channel) — the commands "
+              "were already in _SYNC_COMMANDS (the enqueue); the delivery completes the "
+              "no-lost-writes law for the writing lab")
+
         print()
         if FAILS:
             print(f"RED — the P3-08 sync suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-08 acceptance suite (SYN-01..19) passes")
+        print("GREEN — the P3-08 acceptance suite (SYN-01..20) passes")
         return 0
     finally:
         pg.drop_scratch_db(LOC)

@@ -1,0 +1,7 @@
+{
+  "command": "env SLICE=claim-072-p4c-journal-blocks GATE_DIFF=origin/main make gate",
+  "exit_code": 2,
+  "commit": "17925142b6eff94dd844a5020aa629853ffed122",
+  "output_sha256": "33bca2d6f982882374a44e2c1f40dc6232d7b6086852f274eb79a77580278724",
+  "recorded_at": "2026-11-09T09:56:35.307124+00:00"
+}

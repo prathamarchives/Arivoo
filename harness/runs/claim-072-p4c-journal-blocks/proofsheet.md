@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-072-p4c-journal-blocks (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 6e2b6acc70cb7c0b36a6c8f0eadeddbe534a3a75
-- generated (last record's timestamp): 2026-11-09T08:53:31.343495+00:00
-- run records: 11
+- commit (last run record's): 17925142b6eff94dd844a5020aa629853ffed122
+- generated (last record's timestamp): 2026-11-09T10:29:59.938278+00:00
+- run records: 14
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_journal.py` -> exit 0 · output sha256 246769c5bf2bf537 · 2026-11-09T06:21:24.310579+00:00
@@ -16,6 +16,9 @@
 - `python3 harness/tests/test_journal.py` -> exit 0 · output sha256 c24410821fc956a3 · 2026-11-09T08:47:25.501697+00:00
 - `python3 harness/tests/test_journal.py` -> exit 0 · output sha256 c24410821fc956a3 · 2026-11-09T08:47:29.804834+00:00
 - `make verify` -> exit 0 · output sha256 3ab3054ee1c53c50 · 2026-11-09T08:53:31.343495+00:00
+- `env SLICE=claim-072-p4c-journal-blocks GATE_DIFF=origin/main make gate` -> exit 2 · output sha256 33bca2d6f9828823 · 2026-11-09T09:56:35.307124+00:00
+- `env SLICE=claim-072-p4c-journal-blocks GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 4222eca191c8a992 · 2026-11-09T10:29:25.406557+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-072-p4c-journal-blocks python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 7e0a3ee0e14ac153 · 2026-11-09T10:29:59.938278+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - CLAIM-072 — the honest not-verified list (LAW-04: the explicit statement,
@@ -81,5 +84,12 @@
 - class (the claim-069/070/071 notverified notes) — the DB is always
 - dropped in finally, the temp dirs are not.
 
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: e8c5d12787d9620914c27f2e84cff805c211a90f81698a22b7c5904d4cf5fef7
+- reviewed_diff_sha256: 8c835b060890c9ba989f54df8e91457abe273dab298c212959989e7aeae49015
+- disposition: PASS
+- findings: 0 (open P0/P1: 0)
+- not-verified entries: 5
+
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 9d847cebb4ad3f281fb005c8eeb1c4573ac57feba19d9d354773e15680521ef7
+- sheet sha256 (of the content above, excluding this line): 6ab4b2b2933bc4096cfea35334fa35efb84ff19ec0c2af6d2ed4c3e4997e90a0

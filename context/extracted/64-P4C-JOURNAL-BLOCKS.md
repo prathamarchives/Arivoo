@@ -55,3 +55,26 @@ read arms + migration 0016 + whatever the substrate requires) → the measured s
 round(s) → the artifact finalize → the artifact re-bind → the push → the PR → the five checks →
 the merge-gate review (D-042 (1a)) → **the merge under INT-145** → the post-merge verification →
 the following P4-C slices + P4-D..F — NO PAUSE EVEN FOR UPDATES (INT-146).
+
+## §4 The LAW-05 split (the in-slice account, 2026-11-09)
+
+The first PR-mode gate run at the pre-split head `806ef04` REFUSED — the observed codes:
+ARV-SIZE-002 (422 source lines > 400) + ARV-SCOPE-002/ARV-CLM-002 (test_sync.py outside the
+declared scope). The law's own repair — "split the slice", the P3-06 two-slice precedent (record
+47 §43: the reference machine re-homed to CLAIM-057; record 30 §67 and record 22 §641 the same
+class) — executed: **the journal sync delivery re-homes to the FOLLOWING slice (CLAIM-073)** —
+the `_SYNC_COMMANDS` membership (the enqueue) AND `sync.py`'s `_cli_args` journal branches AND
+the identity bridge's address-form extension (the `IN (id, id||'@1')` create-ref match) AND the
+SYN-20 pin land TOGETHER there. The enqueue-without-delivery intermediate state is the dead-letter
+P1 class the CLAIM-066/071 SEV rounds established law for — the split NEVER creates it: this
+slice's tree carries NO journal outbox rows at all (the JNL-04 pin's ZERO-outbox-row form), and
+CLAIM-073 adds the enqueue and the delivery in one slice.
+
+The re-homed work's own history (kept true, never rewritten): the SYN-20 pin was authored and
+observed RED at `838b1e9` (red-02.txt — the dead letter live, the CLAIM-071 round-1 F1 class
+found pre-SEV by the executor), GREEN at `806ef04` (the branches + the bridge extension), then
+RE-HOMED at the split commit — its RED re-observes at CLAIM-073's own commit (the P3-06
+re-home precedent). The SEV round-1 (agent-34277f24, PASS zero P0/P1/P2 over the ten-commit
+pre-split chain) reviewed the pre-split tree; the split-tree verification follows this section
+(the re-run suites + the SEV round over the SPLIT diff, exactly the P3-06 "split-tree measured
+set" pattern).

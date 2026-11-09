@@ -85,20 +85,19 @@ def _create_key(local_db: str, owner: str, local_id: str) -> str:
     SOUNDNESS GATE: the key counts ONLY when its outbox row rests
     'acknowledged' (a 409-divergent creator's server answer belongs to a
     different logical command). A WORK id is never a result_ref — the work
-    bridge goes through any acknowledged source of that work. THE ADDRESS
-    FORM (the SYN-20 repair): entity creates come in two house shapes — the
-    bare uuid (sources, highlights, bookmarks, notes) and the revision-1
-    address <id>@1 (journal blocks — the writing lab's ack grammar pins the
-    @-suffixed form at every revision); the match takes BOTH, and '@1' rows
-    are only ever CREATES (revision 1 is the create's own seq — revisers
-    carry @2+), so the clause adds no cross-entity risk."""
+    bridge goes through any acknowledged source of that work.
+
+    (The CLAIM-072 LAW-05 split note: the address-form extension — matching
+    the revision-1 address <id>@1 alongside the bare uuid, for the journal
+    family's @-suffixed create refs — re-homes to the FOLLOWING slice with
+    the journal delivery branches; this tree carries no journal branch.)"""
     key = _scalar(local_db, owner,
                   f"SELECT c.idempotency_key FROM arv.command_log c JOIN arv.outbox o "
                   f"ON o.owner_scope = c.owner_scope AND o.idempotency_key = c.idempotency_key "
-                  f"WHERE c.owner_scope={_q(owner)} AND c.result_ref IN ({_q(local_id)}, {_q(local_id)} || '@1') "
+                  f"WHERE c.owner_scope={_q(owner)} AND c.result_ref={_q(local_id)} "
                   f"AND o.state = 'acknowledged' "
                   f"ORDER BY (c.command_name IN ('import_source','create_highlight',"
-                  f"'create_bookmark','create_note','journal_block')) DESC, c.created_at, c.idempotency_key "
+                  f"'create_bookmark','create_note')) DESC, c.created_at, c.idempotency_key "
                   f"LIMIT 1;")
     if not key:
         key = _scalar(local_db, owner,
@@ -241,47 +240,11 @@ def _cli_args(row: dict, local_db: str, server_db: str, owner: str) -> "tuple[li
         if err:
             return None, err
         return ["--id", i, "--content", p["content"]] + refs, ""
-    if c == "journal_block":
-        # P4-C slice three (CLAIM-072; the SYN-20 repair — the same
-        # dead-letter class SYN-18/19 closed for the position and session
-        # families: never a dead letter in the outbox-carrying set): the
-        # block DELIVERS with the recorded kind and the content
-        # re-materialized through a temp FILE — the writing lab's long raw
-        # thinking is unbounded and argv is not (the lossless law rides the
-        # delivery, never an argv truncation); the OPTIONAL source binding
-        # translates through the identity bridge (a sourceless block
-        # delivers sourceless — the option rides the delivery; a
-        # not-yet-server-durable source rests the row retryable with the
-        # named ARV-SYN-009 dependency, a truthful state)
-        argv = ["--kind", p["kind"]]
-        if p.get("source_id") is not None:
-            sid = _translate(local_db, server_db, owner, p["source_id"])
-            if not sid:
-                return None, f"ARV-SYN-009: the source {p['source_id']} is not yet server-durable — the identity dependency (the creating command has no server answer; ordering resolves it on the next pass)"
-            argv += ["--source-id", sid]
-        tmp = tempfile.NamedTemporaryFile(prefix="arv-sync-jnl-", delete=False)
-        tmp.write(p["content"].encode("utf-8"))
-        tmp.close()
-        return argv + ["--file", tmp.name], ""
-    if c == "revise_journal_block":
-        # P4-C slice three (CLAIM-072; the SYN-20 repair): the revise
-        # DELIVERS through the TRANSLATED block id (the identity bridge's
-        # acknowledged creator — the server's own block identity, never the
-        # local uuid transplanted), the revised content re-materialized
-        # through the temp-file channel; the server-side command appends the
-        # server's next revision on the SAME identity (the governed history
-        # rides the delivery — the site's own append-only law). THE ADDRESS
-        # STEP: the journal create's server ref is the revision-1 ADDRESS
-        # <block>@1 (the ack grammar's own form); the revise takes the block
-        # IDENTITY — the uuid stem of that address
-        i = _translate(local_db, server_db, owner, p["id"])
-        if not i:
-            return None, f"ARV-SYN-009: the journal block {p['id']} is not yet server-durable — the identity dependency"
-        i = i.rsplit("@", 1)[0] if "@" in i else i
-        tmp = tempfile.NamedTemporaryFile(prefix="arv-sync-jnl-", delete=False)
-        tmp.write(p["content"].encode("utf-8"))
-        tmp.close()
-        return ["--id", i, "--file", tmp.name], ""
+    # (The CLAIM-072 LAW-05 split: the journal_block/revise_journal_block
+    # delivery branches re-home to the FOLLOWING slice — the ARV-SIZE-002
+    # refusal observed live at the pre-split tree; the enqueue and the
+    # delivery land TOGETHER there, never an enqueue-without-delivery
+    # dead-letter window on a landed family)
     return None, f"ARV-SYN-000: the command {c} is not in the outbox-carrying set — never delivered"
 
 

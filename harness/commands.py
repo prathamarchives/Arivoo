@@ -61,8 +61,13 @@ _SYNC_COMMANDS = ("import_source", "create_highlight", "revise_highlight",
                   "tombstone_highlight", "restore_highlight", "create_bookmark",
                   "move_bookmark", "tombstone_bookmark", "restore_bookmark",
                   "create_note", "revise_note", "tombstone_note", "restore_note",
-                  "save_position", "record_session",
-                  "journal_block", "revise_journal_block")
+                  "save_position", "record_session")
+# P4-C slice three (CLAIM-072; the LAW-05 split — the gate's own named repair,
+# the ARV-SIZE-002 refusal observed live at the pre-split tree): the journal
+# family's _SYNC_COMMANDS membership (the enqueue) re-homes to the FOLLOWING
+# slice with its delivery branches TOGETHER — the enqueue-without-delivery
+# intermediate state is the dead-letter P1 class the CLAIM-066/071 SEV rounds
+# established law for (never a landed family whose writes dead-letter)
 
 
 def _q(s: str) -> str:

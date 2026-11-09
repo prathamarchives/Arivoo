@@ -31,6 +31,22 @@ state, over the LANDED substrate (no new table, no second position path) —
                        on the same list contract — the recorded rows only,
                        never retargeted
 
+P4-C slice three (CLAIM-072; record 64 §2): the journal/blocks surface —
+the writing lab (source-optional raw/creative blocks, the long raw
+thinking preserved losslessly, no forced short-note funnel):
+  list-journal         the owner's journal blocks as a stable, bounded,
+                       paginated list (the _list_arm keyset contract over
+                       arv.journal_block; one row per block IDENTITY — a
+                       revisioned block is one journal row, never one per
+                       revision)
+  get-journal          the single-block read — the CURRENT revision's
+                       whole content (the lossless round-trip's read half;
+                       the U+2028-class line-safe form), kind, and the
+                       optional source binding (null when sourceless —
+                       a first-class row)
+  get-journal-history  the governed history — EVERY revision in order,
+                       one JSON line per row (the export-ready form)
+
 THE TYPED RESOLUTION (resolve-anchor; P3-03b): a typed query, NEVER a
 nearest-match guess —
   resolved     the location evidence validates WITHIN the anchor's OWN Source
@@ -266,6 +282,24 @@ SESLIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT e.id AS event_id, e.sou
                "e.event, e.event_ordinal, e.start_off, e.end_off, e.dwell_ms, "
                "e.generation_id, e.created_at FROM arv.reading_session e "
                "WHERE {after}TRUE ORDER BY e.id LIMIT {limit}) t;")
+
+# P4-C slice three (CLAIM-072; record 64 §2): the journal/blocks surface —
+# the writing lab's read arms.  The listing is the DISTINCT block identity
+# (a revisioned block is ONE journal row, never one per revision), ordered
+# by the block id (the keyset convention every list arm rides).  The
+# single-block read takes the CURRENT revision (max under the append-only
+# law — the row the last write authored); the history takes EVERY revision
+# in order (the export-ready governed history).  content rides row_to_json
+# (the ANC-10 framing law: JSON escapes the newlines, the id|payload pipes
+# never appear raw).
+JNLLIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT DISTINCT j.id FROM arv.journal_block j "
+               "WHERE {after}TRUE ORDER BY j.id LIMIT {limit}) t;")
+JNL_SQL = ("SELECT row_to_json(t)::text FROM (SELECT j.id, j.revision, j.kind, j.content, "
+           "j.source_id, j.actor, j.created_at FROM arv.journal_block j WHERE j.id = {id} "
+           "ORDER BY j.revision DESC LIMIT 1) t;")
+JNLHIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT j.id, j.revision, j.kind, j.content, "
+               "j.source_id, j.actor, j.created_at FROM arv.journal_block j WHERE j.id = {id} "
+               "ORDER BY j.revision) t;")
 
 
 def _read(db: str, owner: str, sql: str) -> list:
@@ -623,6 +657,83 @@ def _versioned(obj: dict) -> dict:
     return out
 
 
+def _jline_safe(obj: dict) -> str:
+    """P4-C slice three (CLAIM-072; record 64 §2): the journal read rows'
+    LINE-SAFE serialization — the writing lab's content is the LONG raw
+    thinking, and its framing-law characters include U+2028/U+2029 (the
+    line separators) which json.dumps(ensure_ascii=False) emits RAW.  A
+    raw U+2028 inside an emitted row would split under any
+    splitlines()-class reader (JavaScript's own JSON line hazard), breaking
+    the one-JSON-line-per-row framing the whole read surface rides.  The
+    journal arms therefore emit those three characters (U+0085 NEL
+    included — the same splitlines() class) in the JSON six-character
+    \\uXXXX escape form: the PARSED value is byte-identical (json.loads
+    decodes the escape to the same character), and the line boundaries
+    stay exactly \\n — the ANC-10 newline-only law held honestly at the
+    class boundary, not just the \\n case.  The OTHER read arms' bytes are
+    frozen by their own suites and are NOT touched (one family, one
+    boundary; the escape is the journal's own, where the long raw thinking
+    is the product)."""
+    return (json.dumps(obj, ensure_ascii=False)
+            .replace("\u2028", "\\u2028")
+            .replace("\u2029", "\\u2029")
+            .replace("\u0085", "\\u0085"))
+
+
+def _refuse_journal() -> int:
+    """P4-C slice three (CLAIM-072): the journal read boundary's no-oracle —
+    absent and another owner's are the SAME refusal (RTM §2.10 on the read
+    path).  The journal form names NO id: the refusal bytes stay equal
+    WHATEVER id was asked (absent, another owner's, malformed — the block
+    id is free-form input on this arm, and nothing about the request echoes
+    back), the strongest form of the no-oracle the family carries."""
+    print("FAIL ARV-QRY-001: no such journal block in the caller's scope — absent and "
+          "another owner's are the SAME refusal, never a side channel")
+    print("      repair: check the id against the caller's own journal listing "
+          "(query.py list-journal)")
+    return 1
+
+
+def _get_journal(db: str, owner: str, id_: str) -> int:
+    """P4-C slice three (CLAIM-072; record 64 §2): the single-block read —
+    the lossless round-trip's read half.  ONE statement, ONE snapshot
+    carries the current revision (ORDER BY revision DESC LIMIT 1 — the row
+    the last write authored under the append-only law; the #91 round-3
+    class: no two-read race between the existence probe and the payload
+    fetch).  THE NO-ORACLE: an absent block and another owner's are the
+    SAME refusal — the journal's no-id-echo form, byte-equal whatever was
+    asked.  The content arrives WHOLE (the LONG raw thinking, never a
+    truncated form) and rides _jline_safe (the U+2028-class escape — the
+    line boundaries stay exactly \\n)."""
+    qid = "'" + id_.replace("'", "''") + "'"
+    rows = _read(db, owner, JNL_SQL.format(id=qid))
+    if rows is None:
+        return 1
+    if not rows:
+        return _refuse_journal()
+    print(_jline_safe(_versioned(json.loads(rows[0]))))
+    return 0
+
+
+def _journal_history(db: str, owner: str, id_: str) -> int:
+    """P4-C slice three (CLAIM-072; record 64 §2): the governed history —
+    EVERY revision of one block, in order, one JSON line per row (the
+    export-ready form: the current view rebuilds from history ALONE).  The
+    same no-oracle as the ordinary read (absent and another owner's the
+    SAME refusal); every row carries the version key (P4-00b) and rides
+    _jline_safe (the framing-law characters stay inside their row)."""
+    qid = "'" + id_.replace("'", "''") + "'"
+    rows = _read(db, owner, JNLHIST_SQL.format(id=qid))
+    if rows is None:
+        return 1
+    if not rows:
+        return _refuse_journal()
+    for ln in rows:
+        print(_jline_safe(_versioned(json.loads(ln))))
+    return 0
+
+
+
 def _say(out: dict, **kw) -> None:
     out.update(kw)
     print(json.dumps(out, ensure_ascii=False))
@@ -639,12 +750,12 @@ def main() -> int:
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         p.add_argument("--id", required=True)
-    for name in ("get-note", "get-note-history"):
+    for name in ("get-note", "get-note-history", "get-journal", "get-journal-history"):
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         p.add_argument("--id", required=True)
     for name in ("list-captures", "list-bookmarks", "list-notes", "list-library",
-                 "get-reading-state", "list-session-events"):
+                 "get-reading-state", "list-session-events", "list-journal"):
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         # P4-00b: the list contract — the bounded page + the keyset cursor
@@ -782,6 +893,18 @@ def main() -> int:
         # P4-C slice two (CLAIM-071): the session/dwell event listing — the
         # owner's behavior-event stream on the P4-00b list contract
         return _session_events(db, a.owner, a.limit, a.after)
+    if a.what == "get-journal":
+        # P4-C slice three (CLAIM-072): the single-block read — the current
+        # revision, the lossless round-trip's read half
+        return _get_journal(db, a.owner, a.id)
+    if a.what == "get-journal-history":
+        # P4-C slice three (CLAIM-072): the governed history — every
+        # revision in order
+        return _journal_history(db, a.owner, a.id)
+    if a.what == "list-journal":
+        # P4-C slice three (CLAIM-072): the journal listing — the owner's
+        # blocks on the P4-00b list contract
+        return _list_arm(db, a.owner, JNLLIST_SQL, "j", a.limit, a.after)
     sql = SRC_SQL
     rows = _read(db, a.owner, sql.format(id="'" + a.id.replace("'", "''") + "'"))
     if rows is None:

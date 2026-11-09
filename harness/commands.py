@@ -61,7 +61,8 @@ _SYNC_COMMANDS = ("import_source", "create_highlight", "revise_highlight",
                   "tombstone_highlight", "restore_highlight", "create_bookmark",
                   "move_bookmark", "tombstone_bookmark", "restore_bookmark",
                   "create_note", "revise_note", "tombstone_note", "restore_note",
-                  "save_position", "record_session")
+                  "save_position", "record_session",
+                  "journal_block", "revise_journal_block")
 
 
 def _q(s: str) -> str:
@@ -1590,6 +1591,191 @@ def _extract_source(**kwargs):
     return extract_source(**kwargs)
 
 
+# P4-C slice three (CLAIM-072; record 64 §2): the journal/blocks surface —
+# the writing lab. The closed kind vocabulary (the 0015 D-010 pattern: the
+# substrate CHECK below the command, the command's typed refusal above it).
+_JNL_KINDS = ("raw", "creative")
+
+
+def _jnl_kind(kind: str) -> str:
+    """The writing lab's closed vocabulary: raw (the raw thinking) | creative
+    (the creative writing) — never clamped, never a silent default."""
+    if kind not in _JNL_KINDS:
+        raise _CapRefusal("ARV-JNL-002",
+                          f"the journal block kind {kind!r} is not in the writing lab's "
+                          "closed vocabulary (raw | creative) — the kind is the block's "
+                          "own class, never clamped",
+                          "pass --kind raw (the raw thinking) or --kind creative (the "
+                          "creative writing); a 'summary'/'note'-shaped kind is exactly "
+                          "the forced funnel this surface refuses")
+    return kind
+
+
+def _jnl_content(*, content: "str | None", file: "str | None") -> str:
+    """The journal's content channels: exactly one of --content / --file (the
+    NTE-010 channel-law class, the journal's own code); the file read
+    LOSSLESSLY (read_bytes + UTF-8 decode — no newline translation, no
+    trimming — the long raw thinking arrives whole); the empty body and the
+    NUL-carrying body refused (a block is writing, never a placeholder)."""
+    if (content is None) == (file is None):
+        raise _CapRefusal("ARV-JNL-003",
+                          "exactly one of --content / --file is required — the journal "
+                          "body must arrive through one named channel",
+                          "pass --file for the long-form thinking surface (read "
+                          "losslessly), or --content for an inline body; never both, "
+                          "never neither")
+    try:
+        body = content if content is not None else \
+            pathlib.Path(file).read_bytes().decode("utf-8")
+    except FileNotFoundError:
+        raise _CapRefusal("ARV-JNL-003",
+                          f"the content file {file!r} does not exist — the journal body "
+                          "cannot be read",
+                          "supply an existing readable file path")
+    except (IsADirectoryError, PermissionError, OSError) as e:
+        raise _CapRefusal("ARV-JNL-003", f"the content file cannot be read — {e}",
+                          "supply an existing readable file path")
+    except UnicodeDecodeError:
+        raise _CapRefusal("ARV-JNL-003",
+                          "the content file is not valid UTF-8 — the journal preserves "
+                          "the owner's thinking losslessly and refuses a lossy "
+                          "interpretation",
+                          "supply valid UTF-8; binary formats are their own slices")
+    if not body:
+        raise _CapRefusal("ARV-JNL-004",
+                          "the journal body is empty — a block is writing, never a "
+                          "placeholder",
+                          "pass the body through --file or --content; an empty block "
+                          "is refused, never stored")
+    if "\x00" in body:
+        raise _CapRefusal("ARV-JNL-004",
+                          "the journal body contains NUL (U+0000) — PostgreSQL TEXT "
+                          "cannot carry it losslessly, and the journal never rewrites "
+                          "the owner's thinking",
+                          "remove the NUL bytes; the lossless law refuses a silent "
+                          "substitution")
+    return body
+
+
+def _jnl_refusal(code: str, block_id: str) -> _CapRefusal:
+    """The journal-family boundary refusal — absent and another owner's are
+    the SAME refusal, never a side channel (RTM §2.10 on the write path)."""
+    return _CapRefusal(code, f"journal block {block_id} does not exist in the caller's "
+                       "scope — absent and another owner's are the SAME refusal, never "
+                       "a side channel",
+                       "check the id against the caller's own journal listing "
+                       "(query.py list-journal); a block is only ever addressable by "
+                       "its owner")
+
+
+def _jnl_current(sess: "Session", block_id: str) -> int:
+    """One read: the current (max) revision — None when the block is absent
+    from the caller's scope (RLS makes absent and cross-owner the same
+    no-row; the no-oracle rides the caller's own refusal)."""
+    row = _sess_row(sess, f"SELECT revision || '|' FROM arv.journal_block "
+                    f"WHERE id = {_q(block_id)} ORDER BY revision DESC LIMIT 1;")
+    if not row:
+        raise _jnl_refusal("ARV-JNL-001", block_id)
+    return int(row.split("|")[0])
+
+
+def _jnl_check_source(sess: "Session", source_id: "str | None", owner: str) -> None:
+    """THE SOURCE-OPTIONAL LAW's honest boundary: a binding is OPTIONAL (None
+    is a first-class sourceless block) but a BOUND block's source must exist
+    in the caller's scope — absent and cross-owner the SAME refusal (the
+    no-oracle at the binding; the source row is immutable so the pre-BEGIN
+    validation cannot be invalidated by a race)."""
+    if source_id is None:
+        return
+    n = _sess_row(sess, f"SELECT count(*) || '|' FROM arv.source "
+                  f"WHERE id = {_q(source_id)} AND owner_scope = {_q(owner)};")
+    if not n or int(n.split("|")[0]) == 0:
+        raise _CapRefusal("ARV-JNL-005",
+                          f"the bound block's source {source_id} does not exist in the "
+                          "caller's scope — absent and another owner's are the SAME "
+                          "refusal, never a side channel",
+                          "the source binding is OPTIONAL (omit --source-id for a "
+                          "sourceless block — a first-class journal row); a bound "
+                          "block names one of the caller's own sources "
+                          "(query.py list-library)")
+
+
+def journal_block(*, db, owner, actor, client_id, idem_key, kind,
+                  content=None, file=None, source_id=None, crash_at: str = None) -> int:
+    """P4-C slice three (CLAIM-072; record 64 §2): the writing lab's write —
+    a fresh journal block identity + revision 1 + the authored body (the
+    LONG raw thinking preserved LOSSLESSLY — never a truncated or funneled
+    form) + the OPTIONAL source binding. The no-forced-funnel law lives
+    here: the write never touches arv.note (the note machine stays its own
+    surface — no silent conversion either way)."""
+    try:
+        kind_c = _jnl_kind(kind)
+        body_content = _jnl_content(content=content, file=file)
+    except _CapRefusal as r:  # the parse precedes the spine (the body hash needs the canonical form)
+        print(f"FAIL {r.code}: {r}")
+        print(f"      repair: {r.repair}")
+        return 1
+    payload = {"kind": kind_c, "content": body_content}
+    if source_id is not None:
+        payload["source_id"] = source_id
+    body = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build(sess: "Session", body_hash: str):
+        _jnl_check_source(sess, source_id, owner)
+        block_id = ids.new_id()
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmts = [f"INSERT INTO arv.journal_block (id, revision, kind, content, "
+                 f"source_id, owner_scope, actor, run_id, input_hash, idempotency_key, "
+                 f"created_at) VALUES ({_q(block_id)}, 1, {_q(kind_c)}, "
+                 f"{_q(body_content)}, {_qn(source_id)}, {_q(owner)}, {_q(actor)}, "
+                 f"{_q(run_id)}, {_q(ih)}, {_q(idem_key)}, {_q(ts)});"]
+        return f"{block_id}@1", stmts, " revision=1 durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="journal_block", payload=body, build=build, crash_at=crash_at)
+
+
+def revise_journal_block(*, db, owner, actor, client_id, idem_key, id_,
+                         content=None, file=None, crash_at: str = None) -> int:
+    """The writing lab's edit transition: append a NEW immutable revision
+    (n+1) carrying its OWN full body (replacement semantics — the prior
+    revision's row stays untouched and accurate; the governed history). THE
+    SERIALIZED TRANSITION (the 0009 pattern): the per-block advisory xact
+    lock (the SAME lock the 0016 guard takes) acquired as the transaction's
+    FIRST statement, then the state read, the insert, and the commit, ALL
+    inside ONE transaction — competing revisers serialize (both revisions
+    persist, legal ordering — never a silent overwrite)."""
+    try:
+        body_content = _jnl_content(content=content, file=file)
+    except _CapRefusal as r:
+        print(f"FAIL {r.code}: {r}")
+        print(f"      repair: {r.repair}")
+        return 1
+    payload = {"id": _nte_canon_id(id_), "content": body_content}
+    body = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build_txn(sess: "Session", body_hash: str):
+        # THE CANONICAL LOCK KEY (the note family's F3 form): the substrate
+        # guard locks on hashtext(NEW.id::text) — the uuid TEXT rendering is
+        # canonical — so the boundary lock takes the SAME key whatever the
+        # CLI spelling, never a second lock for one block
+        key = _nte_canon_id(id_)
+        _sess_row(sess, f"SELECT hashtext({_q(key)}) || '|' || pg_advisory_xact_lock(hashtext({_q(key)}));")  # the lock FIRST, held to the commit
+        revision = _jnl_current(sess, id_)
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmts = [f"INSERT INTO arv.journal_block (id, revision, kind, content, "
+                 f"source_id, owner_scope, actor, run_id, input_hash, idempotency_key, "
+                 f"created_at) SELECT {_q(id_)}, {revision + 1}, kind, {_q(body_content)}, "
+                 f"source_id, {_q(owner)}, {_q(actor)}, {_q(run_id)}, {_q(ih)}, "
+                 f"{_q(idem_key)}, {_q(ts)} FROM arv.journal_block "
+                 f"WHERE id = {_q(id_)} AND revision = {revision};"]
+        return f"{id_}@{revision + 1}", stmts, f" revision={revision + 1} durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="revise_journal_block", payload=body, build_txn=build_txn,
+                  crash_at=crash_at)
+
+
 def save_position(*, db, owner, actor, client_id, idem_key, source_id,
                   start, end, crash_at: str = None) -> int:
     """P4-A slice two (CLAIM-066; record 58 §2): the source-open/position
@@ -1892,6 +2078,25 @@ def main() -> int:
                    help="the coarse span's end offset (0 <= start < end <= the text length)")
     p.add_argument("--dwell-ms", default=None, type=int,
                    help="the coarse dwell in milliseconds (dwell events only, 1..86400000)")
+    # P4-C slice three (CLAIM-072): the writing lab — the journal/blocks surface
+    for name in ("journal_block", "revise_journal_block"):
+        p = sub.add_parser(name)
+        _common(p)
+        p.add_argument("--kind", required=(name == "journal_block"),
+                       help="the writing lab's closed vocabulary: raw (the raw thinking) | "
+                            "creative (the creative writing) — anything else refuses ARV-JNL-002")
+        p.add_argument("--content", default=None,
+                       help="the journal body, inline (exactly one of --content / --file)")
+        p.add_argument("--file", default=None,
+                       help="the long-form thinking surface: a UTF-8 file read losslessly "
+                            "(the long raw thinking arrives whole, never truncated)")
+        if name == "journal_block":
+            p.add_argument("--source-id", default=None,
+                           help="the OPTIONAL source binding (omit for a sourceless block — "
+                                "a first-class journal row; a bound block names one of the "
+                                "caller's own sources)")
+        else:
+            p.add_argument("--id", required=True)
     a = ap.parse_args()
     db = os.environ.get("PGDATABASE", "postgres")
     if a.command == "record_event":
@@ -1948,8 +2153,16 @@ def main() -> int:
     if a.command == "record_session":
         return record_session(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                               idem_key=a.idem_key, source_id=a.source_id,
-                              event=a.event, start=a.start, end=a.end,
-                              dwell_ms=a.dwell_ms)
+                              event=a.event, start=a.start, end=a.end, dwell_ms=a.dwell_ms)
+    if a.command == "journal_block":
+        # P4-C slice three (CLAIM-072): the writing lab's write
+        return journal_block(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                             idem_key=a.idem_key, kind=a.kind, content=a.content,
+                             file=a.file, source_id=a.source_id)
+    if a.command == "revise_journal_block":
+        return revise_journal_block(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                    idem_key=a.idem_key, id_=a.id, content=a.content,
+                                    file=a.file)
     return create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                             idem_key=a.idem_key, source_id=a.source_id,
                             start=a.start, end=a.end)

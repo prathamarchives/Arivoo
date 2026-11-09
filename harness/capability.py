@@ -59,6 +59,22 @@ FORMATS = ADAPTERS
 # declared here so the contract sketch is visible from day one, never smuggled
 # in later. The reader UI itself is the separate repository.
 RESERVED_SURFACES = {
+    # P4-C slice three (CLAIM-072; record 64 §2): the journal/blocks surface
+    # LANDED — the writing lab's own row (the same promotion the library and
+    # session rows took at their landings)
+    "journal/blocks": {
+        "owner_phase": "P4-C",
+        "reservation": ("LANDED in P4-C slice three (CLAIM-072): the backend verbs are real — "
+                        "journal_block + revise_journal_block (commands.py — the append-only "
+                        "raw/creative blocks through the spine's own ack contract, the LONG raw "
+                        "thinking preserved losslessly, the revisions as NEW rows, the "
+                        "source-OPTIONAL binding, no forced note funnel — the two surfaces "
+                        "separate by construction) + list-journal / get-journal / "
+                        "get-journal-history (query.py — the bounded/paginated listing on the "
+                        "P4-00b contract, the lossless single-block read, the governed "
+                        "history); the reader CLIENT that renders the writing lab is P4-B's "
+                        "separate repo (no client work here)"),
+    },
     "source-open/position": {
         "owner_phase": "P4-A/B",
         "reservation": ("LANDED in P4-A slice two (CLAIM-066): the backend verbs are real — "

@@ -107,6 +107,18 @@ Cases (the SYN registry; each pin's full statement lives at its check()):
          through the TRANSLATED block id appending the server's revision 2
          on the SAME identity (the governed history rides the delivery);
          the server's read arms answer the block and its history
+  SYN-21 the wrong-typed-value containment (the CLAIM-073 SEV round-1
+         F-073-1 repair — the family-wide completion of the SYN-16
+         containment): a hostile outbox row whose payload parses as
+         JSON but carries a WRONG-TYPED value (kind=5 on a journal
+         row; content=5 on a note row — inserted directly at the
+         substrate, the SYN-16 technique) is a NAMED terminal failure
+         for THAT row (ARV-SYN-013) and the walk CONTINUES — the later
+         rows deliver and acknowledge; never an unhandled crash at
+         the argv-consumption sites, never a blocked queue, never a
+         leaked staging file (the TMPDIR-steered walk leaves the
+         staging dir empty — the cleanup follows the temp dir's own
+         resolution, never a hard-coded /tmp)
 
 Run: python3 harness/tests/test_sync.py   (exit 0 = green)
 """
@@ -913,11 +925,68 @@ def main() -> int:
               "and the delivery land TOGETHER at this slice, never the "
               "enqueue-without-delivery dead-letter window")
 
+        # ---- SYN-21 — the wrong-typed-value containment (the CLAIM-073 SEV
+        # round-1 F-073-1 repair — the family-wide completion of the SYN-16
+        # containment: the wrong-typed payload VALUE passed through _cli_args
+        # without raising and crashed the driver at the argv-consumption sites
+        # OUTSIDE the per-row try — the row resting delivered-unapplied and
+        # every later pass crashing identically, the queue permanently
+        # blocked; this pin closes the class at the driver boundary AND the
+        # staging-channel boundary)
+        steer = pathlib.Path(tempfile.mkdtemp(prefix="arv-steer-"))
+        env_steer = dict(ENV, TMPDIR=str(steer))
+        app_sql(LOC, "INSERT INTO arv.outbox (owner_scope, idempotency_key, client_id, "
+                     "actor, command_name, body_hash, payload, state, attempts, "
+                     "created_at, updated_at) VALUES "
+                     "('A', 'sy-poison3', 'cli-1', 'owner', 'journal_block', '" + "0" * 64 + "', "
+                     "'{\"kind\":5,\"content\":\"x\"}', 'pending', 0, now(), now()), "
+                     "('A', 'sy-poison5', 'cli-1', 'owner', 'create_note', '" + "0" * 64 + "', "
+                     "'{\"content\":5}', 'pending', 0, now(), now());")
+        f21 = pathlib.Path(tempfile.mkdtemp(prefix="arv-jnl-")) / "jraw3.txt"
+        f21.write_text("The steered staging corpus: lossless.\n", encoding="utf-8")
+        r_jb3 = cmd("journal_block", "--kind", "raw", "--file", str(f21),
+                    "--source-id", sid, key="sy-jb3")
+        pr21 = cmd("create_note", "--content", "The post-poison note: the amaranth.",
+                   key="sy-poison4")
+        r21 = sync(env=env_steer)
+        st21a = ob(LOC, "sy-poison3")
+        reason21a = ob(LOC, "sy-poison3", "last_reason") or ""
+        st21b = ob(LOC, "sy-poison5")
+        reason21b = ob(LOC, "sy-poison5", "last_reason") or ""
+        st21c = ob(LOC, "sy-jb3")
+        st21d = ob(LOC, "sy-poison4")
+        residue21 = sorted(p.name for p in steer.iterdir())
+        ok21 = (r_jb3.returncode == 0 and pr21.returncode == 0
+                and r21.returncode == 0
+                and st21a == "failed" and "ARV-SYN-013" in reason21a
+                and st21b == "failed" and "ARV-SYN-013" in reason21b
+                and st21c == "acknowledged" and st21d == "acknowledged"
+                and residue21 == [])
+        check("SYN-21", ok21,
+              "the wrong-typed-value containment (the CLAIM-073 SEV round-1 F-073-1 repair "
+              "— the family-wide completion of the SYN-16 containment): a hostile outbox "
+              "row whose payload parses as JSON but carries a WRONG-TYPED value (kind=5 on "
+              "a journal row; content=5 on a note row — inserted directly at the substrate, "
+              "the SYN-16 technique) is a NAMED terminal failure for THAT row "
+              "(ARV-SYN-013, the undeliverable class) and the walk CONTINUES — the later "
+              "rows deliver and acknowledge (the real journal block and the post-poison "
+              "note both acknowledged); never an unhandled crash at the argv-consumption "
+              "sites, never a blocked queue (the pass exits 0), never a leaked staging "
+              "file (the TMPDIR-steered walk leaves the staging dir empty — the cleanup "
+              "follows the temp dir's own resolution, never a hard-coded /tmp)",
+              "harness/sync.py's driver-boundary argv guard INSIDE the per-row containment "
+              "(an argv element that is not a string is the named undeliverable class, "
+              "never a str() coercion and never an unhandled crash) + the journal "
+              "branches' early validation (the kind checked and the content encoded BEFORE "
+              "the staging file exists — the contained paths never create one) + the "
+              "staging-cleanup prefix resolving through tempfile.gettempdir() (the "
+              "TMPDIR-steered delivery cleans up after itself)")
+
         print()
         if FAILS:
             print(f"RED — the P3-08 sync suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-08 acceptance suite (SYN-01..20) passes")
+        print("GREEN — the P3-08 acceptance suite (SYN-01..21) passes")
         return 0
     finally:
         pg.drop_scratch_db(LOC)

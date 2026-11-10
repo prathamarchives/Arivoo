@@ -1,0 +1,31 @@
+# CLAIM-073 — P4-C slice four: the journal sync delivery (the LAW-05 split's
+# named re-home; CLAIM-072's bounded exclusion landing; record 65 §2). The
+# writing lab's no-lost-writes law — the journal family joins the
+# outbox-carrying set, the enqueue AND the delivery landing TOGETHER in one
+# slice (never the enqueue-without-delivery dead-letter window the
+# CLAIM-066/071 SEV rounds established law for): commands.py's _SYNC_COMMANDS
+# membership (journal_block + revise_journal_block); sync.py's _cli_args
+# journal branches (the temp-file content channel — the lossless law rides
+# the delivery; the translated source binding; the translated block id for
+# the revise); the identity bridge's address-form extension (result_ref IN
+# (id, id||'@1')); the SYN-20 pin (re-observing its RED at this slice's own
+# commit per the P3-06 re-home precedent); the JNL-04 supersession (the
+# delivery-carrying form, typed and disclosed). RED-first at CLAIM-072's
+# merged head 7286b3c. THE BOUNDED EXCLUSIONS: no new journal read/write
+# surface (CLAIM-072's landed arms unchanged); no @-reference resolution over
+# journal blocks (P4-D's increment); no tombstone/restore machine on journal
+# blocks (the §3.3 increment — D-011's governed-erasure question); no
+# reader-client work (P4-B's repo).
+harness/commands.py D-041
+harness/sync.py D-041
+harness/tests/test_sync.py D-041
+harness/tests/test_journal.py D-041
+harness/red-records.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/64-P4C-JOURNAL-BLOCKS.md D-042
+context/extracted/65-P4C-JOURNAL-SYNC-DELIVERY.md D-042
+harness/runs/claim-073-p4c-journal-sync-delivery D-042

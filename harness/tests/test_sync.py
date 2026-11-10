@@ -99,6 +99,26 @@ Cases (the SYN registry; each pin's full statement lives at its check()):
          kind/span/dwell and binds the SERVER's own serving generation
          (the site-local binding law); the row acknowledges with its
          server_ref and the server's read arm answers the delivered event
+  SYN-20 the journal-block delivery (the CLAIM-073 re-home — the LAW-05
+         split's named landing): the journal_block outbox row DELIVERS —
+         the server-side block re-executes through the TRANSLATED source
+         binding with the recorded kind and the content BYTE-IDENTICAL
+         (the lossless law through the delivery); the revise DELIVERS
+         through the TRANSLATED block id appending the server's revision 2
+         on the SAME identity (the governed history rides the delivery);
+         the server's read arms answer the block and its history
+  SYN-21 the wrong-typed-value containment (the CLAIM-073 SEV round-1
+         F-073-1 repair — the family-wide completion of the SYN-16
+         containment): a hostile outbox row whose payload parses as
+         JSON but carries a WRONG-TYPED value (kind=5 on a journal
+         row; content=5 on a note row — inserted directly at the
+         substrate, the SYN-16 technique) is a NAMED terminal failure
+         for THAT row (ARV-SYN-013) and the walk CONTINUES — the later
+         rows deliver and acknowledge; never an unhandled crash at
+         the argv-consumption sites, never a blocked queue, never a
+         leaked staging file (the TMPDIR-steered walk leaves the
+         staging dir empty — the cleanup follows the temp dir's own
+         resolution, never a hard-coded /tmp)
 
 Run: python3 harness/tests/test_sync.py   (exit 0 = green)
 """
@@ -818,11 +838,155 @@ def main() -> int:
               "the event kind/span/dwell) — the command was already in _SYNC_COMMANDS (the "
               "enqueue); the delivery completes the no-lost-writes law for the session family")
 
+        # ---- SYN-20 — the journal-block delivery (the CLAIM-073 re-home —
+        # the LAW-05 split's named landing, the P3-06 re-home precedent: the
+        # original RED at 838b1e9 + GREEN at 806ef04 are preserved in
+        # CLAIM-072's chain, never rewritten; this slice's tree re-adds the
+        # pin and observes the RED against its own machinery-absent state —
+        # no _SYNC_COMMANDS membership, no delivery branches, no journal
+        # outbox row, the delivered block never observed — the same
+        # dead-letter class SYN-18/19 closed for the position and session
+        # families: the enqueue and the delivery land TOGETHER at this
+        # slice, never the enqueue-without-delivery window)
+        jf = pathlib.Path(tempfile.mkdtemp(prefix="arv-jnl-")) / "jraw.txt"
+        JBODY = ("The journal sync corpus: the long raw thinking with pipes | and "
+                 "the line separator \u2028 travels losslessly through the delivery.\n")
+        jf.write_text(JBODY, encoding="utf-8")
+        r_jb = cmd("journal_block", "--kind", "raw", "--file", str(jf),
+                   "--source-id", sid, key="sy-jb1")
+        r20 = sync()
+        st20 = ob(LOC, "sy-jb1")
+        ref20 = ob(LOC, "sy-jb1", "server_ref")
+        srv_blk = ref20.split("@")[0] if "@" in ref20 else ""
+        srv_jb = audit(SRV, f"SELECT kind || '|' || source_id FROM arv.journal_block "
+                            f"WHERE id='{srv_blk}' AND revision=1;") if srv_blk else ""
+        g20 = cli(str(REPO / "harness" / "query.py"), "get-journal", "--owner", "A",
+                  "--id", srv_blk, env=srv_env) if srv_blk else None
+        g20j = {}
+        if g20 is not None and g20.returncode == 0:
+            try:
+                g20j = json.loads(next(ln for ln in g20.stdout.splitlines() if ln.strip()))
+            except Exception:
+                g20j = {}
+        # the revise: the id translation rides the acknowledged creator's
+        # server_ref — the server-side block takes revision 2 (the SAME
+        # server identity, never a second block; the governed history rides
+        # the delivery)
+        rf = jf.parent / "jraw2.txt"
+        rf.write_text("The revised journal corpus: still lossless \u2028 with pipes |.\n",
+                      encoding="utf-8")
+        r_rev = cmd("revise_journal_block",
+                    "--id", ack_field(r_jb, "result_ref").split("@")[0],
+                    "--file", str(rf), key="sy-jb2")
+        r20b = sync()
+        st20b = ob(LOC, "sy-jb2")
+        ref20b = ob(LOC, "sy-jb2", "server_ref")
+        srv_revs = audit_rows(SRV, f"SELECT revision FROM arv.journal_block "
+                                   f"WHERE id='{srv_blk}' ORDER BY revision;") if srv_blk else []
+        h20 = cli(str(REPO / "harness" / "query.py"), "get-journal-history", "--owner", "A",
+                  "--id", srv_blk, env=srv_env) if srv_blk else None
+        h20r = []
+        if h20 is not None and h20.returncode == 0:
+            try:
+                h20r = [json.loads(ln) for ln in h20.stdout.splitlines() if ln.strip()]
+            except Exception:
+                h20r = []
+        ok20 = (r_jb.returncode == 0 and "status=committed" in r_jb.stdout
+                and r20.returncode == 0
+                and st20 == "acknowledged" and ref20.endswith("@1")
+                and srv_jb == f"raw|{srv_sid}"          # the kind + the TRANSLATED binding
+                and g20j.get("content") == JBODY        # THE LOSSLESS LAW through the delivery
+                and g20j.get("source_id") == srv_sid and g20j.get("revision") == 1
+                and r_rev.returncode == 0 and "revision=2" in r_rev.stdout
+                and r20b.returncode == 0
+                and st20b == "acknowledged" and ref20b == f"{srv_blk}@2"
+                and srv_revs == ["1", "2"]
+                and [h.get("revision") for h in h20r] == [1, 2]
+                and (h20r[1].get("content") if len(h20r) > 1 else None)
+                == "The revised journal corpus: still lossless \u2028 with pipes |.\n")
+        check("SYN-20", ok20,
+              "the journal-block delivery (the CLAIM-073 re-home — the LAW-05 split's named "
+              "landing, the same dead-letter class SYN-18/19 closed for the position and "
+              "session families): the journal_block outbox row DELIVERS — the server-side "
+              "block re-executes through the TRANSLATED source binding with the recorded "
+              "kind, the content BYTE-IDENTICAL (the long raw thinking with the framing-law "
+              "characters travels losslessly — the delivery re-materializes it through the "
+              "file channel, never an argv truncation), acks <server-block>@1, and the row "
+              "acknowledges with its server_ref; the revise DELIVERS through the TRANSLATED "
+              "block id (the identity bridge's acknowledged creator) appending the server's "
+              "revision 2 on the SAME server identity — the governed history rides the "
+              "delivery; the server's read arms answer the delivered block and its full "
+              "history — never a dead letter in the outbox-carrying set",
+              "commands.py's _SYNC_COMMANDS membership (journal_block + revise_journal_block "
+              "— the enqueue) + harness/sync.py _cli_args' journal branches (the translated "
+              "source id for the optional binding, the translated block id for the revise, "
+              "the content re-materialized through the temp-file channel) + the identity "
+              "bridge's address-form extension (result_ref IN (id, id||'@1')) — the enqueue "
+              "and the delivery land TOGETHER at this slice, never the "
+              "enqueue-without-delivery dead-letter window")
+
+        # ---- SYN-21 — the wrong-typed-value containment (the CLAIM-073 SEV
+        # round-1 F-073-1 repair — the family-wide completion of the SYN-16
+        # containment: the wrong-typed payload VALUE passed through _cli_args
+        # without raising and crashed the driver at the argv-consumption sites
+        # OUTSIDE the per-row try — the row resting delivered-unapplied and
+        # every later pass crashing identically, the queue permanently
+        # blocked; this pin closes the class at the driver boundary AND the
+        # staging-channel boundary)
+        steer = pathlib.Path(tempfile.mkdtemp(prefix="arv-steer-"))
+        env_steer = dict(ENV, TMPDIR=str(steer))
+        app_sql(LOC, "INSERT INTO arv.outbox (owner_scope, idempotency_key, client_id, "
+                     "actor, command_name, body_hash, payload, state, attempts, "
+                     "created_at, updated_at) VALUES "
+                     "('A', 'sy-poison3', 'cli-1', 'owner', 'journal_block', '" + "0" * 64 + "', "
+                     "'{\"kind\":5,\"content\":\"x\"}', 'pending', 0, now(), now()), "
+                     "('A', 'sy-poison5', 'cli-1', 'owner', 'create_note', '" + "0" * 64 + "', "
+                     "'{\"content\":5}', 'pending', 0, now(), now());")
+        f21 = pathlib.Path(tempfile.mkdtemp(prefix="arv-jnl-")) / "jraw3.txt"
+        f21.write_text("The steered staging corpus: lossless.\n", encoding="utf-8")
+        r_jb3 = cmd("journal_block", "--kind", "raw", "--file", str(f21),
+                    "--source-id", sid, key="sy-jb3")
+        pr21 = cmd("create_note", "--content", "The post-poison note: the amaranth.",
+                   key="sy-poison4")
+        r21 = sync(env=env_steer)
+        st21a = ob(LOC, "sy-poison3")
+        reason21a = ob(LOC, "sy-poison3", "last_reason") or ""
+        st21b = ob(LOC, "sy-poison5")
+        reason21b = ob(LOC, "sy-poison5", "last_reason") or ""
+        st21c = ob(LOC, "sy-jb3")
+        st21d = ob(LOC, "sy-poison4")
+        residue21 = sorted(p.name for p in steer.iterdir())
+        ok21 = (r_jb3.returncode == 0 and pr21.returncode == 0
+                and r21.returncode == 0
+                and st21a == "failed" and "ARV-SYN-013" in reason21a
+                and st21b == "failed" and "ARV-SYN-013" in reason21b
+                and st21c == "acknowledged" and st21d == "acknowledged"
+                and residue21 == [])
+        check("SYN-21", ok21,
+              "the wrong-typed-value containment (the CLAIM-073 SEV round-1 F-073-1 repair "
+              "— the family-wide completion of the SYN-16 containment): a hostile outbox "
+              "row whose payload parses as JSON but carries a WRONG-TYPED value (kind=5 on "
+              "a journal row; content=5 on a note row — inserted directly at the substrate, "
+              "the SYN-16 technique) is a NAMED terminal failure for THAT row "
+              "(ARV-SYN-013, the undeliverable class) and the walk CONTINUES — the later "
+              "rows deliver and acknowledge (the real journal block and the post-poison "
+              "note both acknowledged); never an unhandled crash at the argv-consumption "
+              "sites, never a blocked queue (the pass exits 0), never a leaked staging "
+              "file (the TMPDIR-steered walk leaves the staging dir empty — the cleanup "
+              "follows the temp dir's own resolution, never a hard-coded /tmp)",
+              "harness/sync.py's driver-boundary argv guard INSIDE the per-row containment "
+              "(an argv element that is not a string is the named undeliverable class, "
+              "never a str() coercion and never an unhandled crash) + the journal "
+              "branches' early validation (the kind checked and the content encoded BEFORE "
+              "the staging file exists — the contained paths never create one) + the "
+              "staging-cleanup prefix resolving through tempfile.gettempdir() (the "
+              "TMPDIR-steered delivery cleans up after itself)")
+
         print()
         if FAILS:
             print(f"RED — the P3-08 sync suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-08 acceptance suite (SYN-01..19) passes")
+        print("GREEN — the P3-08 acceptance suite (SYN-01..21) passes")
         return 0
     finally:
         pg.drop_scratch_db(LOC)

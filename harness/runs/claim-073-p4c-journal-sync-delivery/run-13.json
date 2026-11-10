@@ -1,0 +1,7 @@
+{
+  "command": "env SLICE=claim-073-p4c-journal-sync-delivery GATE_DIFF=origin/main make gate",
+  "exit_code": 0,
+  "commit": "10339be47932e0314701a385246b87daaef3c8dd",
+  "output_sha256": "1c000549e6a1602f16e52a6107a224e19348f4d34a68dd9ffcb2d7fef9134819",
+  "recorded_at": "2026-11-10T15:55:56.175969+00:00"
+}

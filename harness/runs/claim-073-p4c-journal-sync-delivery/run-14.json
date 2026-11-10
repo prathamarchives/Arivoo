@@ -1,0 +1,7 @@
+{
+  "command": "env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-073-p4c-journal-sync-delivery python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 1,
+  "commit": "10339be47932e0314701a385246b87daaef3c8dd",
+  "output_sha256": "f2b49704f333e85a60d024a2204d8a7e00c323c5ef588d75bb64afb1369547ec",
+  "recorded_at": "2026-11-10T15:57:06.478501+00:00"
+}

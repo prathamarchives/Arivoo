@@ -1,0 +1,92 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-073-p4c-journal-sync-delivery",
+ "base_sha": "7286b3cf2555686476569e4c3663f7ecd2b8885e",
+ "reviewed_diff_sha256": "acac4831964c2462165fb4f3adb745293b790b585443d3660a3090a594b4842d",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-06",
+  "SYS-09"
+ ],
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "changed_components": [
+  "harness/commands.py (the ENQUEUE — _SYNC_COMMANDS carries journal_block + revise_journal_block: every committed journal write rides the client outbox in the SAME transaction, the refusals and replays adding none; the writing lab's no-lost-writes law; the split comment superseded by the landing comment)",
+  "harness/sync.py (the DELIVERY — _cli_args' journal_block branch: the recorded kind, the content re-materialized through a TEMP FILE (the lossless law rides the delivery — unbounded content, never an argv truncation), the OPTIONAL source binding translated through the identity bridge with a not-yet-durable source resting the row retryable ARV-SYN-009; the revise_journal_block branch: the TRANSLATED block id — the uuid stem of the server's acknowledged @1 address — the server appending its own next revision on the SAME identity; THE IDENTITY BRIDGE'S ADDRESS-FORM EXTENSION — _create_key matches result_ref IN (id, id||'@1') with journal_block in the creator-preference list; THE SEV ROUND-1 REPAIR — the driver-boundary all-string argv guard INSIDE the per-row containment (a wrong-typed payload value is the named ARV-SYN-013 undeliverable class, never a str() coercion, never an unhandled crash), the journal branches' validation-before-staging order (zero residue on the contained paths), the gettempdir()-based staging-cleanup prefix)",
+  "harness/tests/test_sync.py (the SYN-20 pin re-added tests-only per the P3-06 re-home precedent — the RED re-observed at this slice's own commit 7756bbd, red-01.txt; the SYN-21 pin — the SEV round-1 F-073-1 repair RED at 094eb07, red-02.txt: the wrong-typed-value containment, the walk continuing, the TMPDIR-steered staging dir empty)",
+  "harness/tests/test_journal.py (the JNL-04 SUPERSESSION — the pin's ZERO-outbox-row form (the split tree's honest state) superseded by the delivery-carrying form: the observed count 6, the atomic law asserted positively; the amendment typed and disclosed)",
+  "harness/red-records.json (the typed amendments: test_sync.py's re-home RED chaining 5ea85e00->d72d258a at 7756bbd + the SYN-21 repair RED chaining to the round-1-repair form at 45b47ce; test_journal.py's supersession chaining 8015c6d6->dfa6df0e)"
+ ],
+ "interfaces_reviewed": [
+  "the enqueue's atomicity (the effect rows + the command-log row + the outbox row in ONE transaction — the JNL-04 delivery-carrying pin: the creates + the revise + the crash-committed revise, the refusals and replays adding none)",
+  "the journal_block delivery (the translated source binding, the recorded kind, the byte-identical content through the temp-file channel — the framing-law characters included)",
+  "the revise_journal_block delivery (the translated block id via the acknowledged creator's @1 address, the server's revision 2 on the SAME identity, the governed history riding the delivery)",
+  "the identity bridge's address-form extension (the two house shapes of entity creates; the creator-preference ORDER BY; no cross-entity risk — the position/session @1 acks verified to keep their translations on the import row)",
+  "the per-row containment family-wide (the wrong-typed payload VALUE class named ARV-SYN-013 at the driver boundary; the dependency class ARV-SYN-009 retryable; the walk always continuing; the staging dir always empty)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the sync suite GREEN SYN-01..21 exit 0 at the repair tree (runs 08-10, x3, byte-exact digests) — SYN-20 the re-home delivery + SYN-21 the containment repair",
+   "the journal suite GREEN JNL-01..06 exit 0 (runs 04-06 at the GREEN tree + run-11 at the repair tree — the superseded JNL-04 delivery-carrying form)"
+  ],
+  "integration_verification": [
+   "make verify exit 0 at the GREEN tree (run-07) AND the repair tree (run-12) — all suites + the gate + the canonical layer 54/0",
+   "the SEV rounds' independent two-DB walks: the byte-identical >8KB round-trip (md5 + sha256), the same-identity revision chain 1,2,3, the sourceless block, the crash-then-replay convergence, the ARV-SYN-009 dependency classes, the hostile payload containment"
+  ],
+  "system_verification": [
+   "the SEV round-2 live verification: the P1 repair confirmed at both boundaries (the repro + the reviewer's own probes: the note twin and a third family representative contained, the well-formed delivery unregressed)",
+   "the recorded PR-mode gate + the local trusted-gate reproduction at the final head (the records at the re-bind)"
+  ],
+  "validation": [
+   "the wrong-typed-value containment pin (SYN-21) — hostile substrate-inserted payloads (journal kind=5, note content=5) rest failed ARV-SYN-013 named with the walk continuing and the TMPDIR-steered staging dir empty",
+   "the queue-block class closed: both sync passes exit 0 after a hostile row (the pre-repair tree crashed identically on every pass — the orchestrator's repro, red-02.txt)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a journal write silently resting local-only — the family outside the outbox-carrying set (the dead-letter window the CLAIM-066/071 SEV rounds established law for)",
+   "control": "the enqueue and the delivery landing TOGETHER in one slice: _SYNC_COMMANDS membership + the _cli_args branches + the bridge extension (SYN-20; the JNL-04 delivery-carrying pin asserting the atomic enqueue positively)"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "the long raw thinking truncated or rewritten through the delivery (an argv-bound channel, a newline translation)",
+   "control": "the temp-file content channel: the payload's content re-materialized to a staging file, byte-identical through the server's own --file read (the SEV walks' md5/sha256 equality on >8KB bodies with the framing-law characters)"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "the revise delivered against the WRONG server identity (the local uuid transplanted, a second block created)",
+   "control": "the translated block id — the uuid stem of the acknowledged creator's @1 address; the server's revision 2 on the SAME identity (the walks' same-identity chain 1,2,3; the history read answering every revision)"
+  },
+  {
+   "id": "FM-04",
+   "scenario": "a hostile or corrupted outbox payload crashing the driver and blocking every later row (the wrong-typed VALUE class — the round-1 P1)",
+   "control": "the driver-boundary all-string argv guard INSIDE the per-row containment: the named ARV-SYN-013 terminal failure for THAT row, the walk continuing, the queue never blocked (SYN-21; the round-2 live verification)"
+  },
+  {
+   "id": "FM-05",
+   "scenario": "staging-file residue (a file created then abandoned on a contained path; a cleanup missing TMPDIR-steered runs)",
+   "control": "the validation-before-staging order (the kind checked and the content encoded BEFORE the file exists) + the gettempdir()-based cleanup prefix (SYN-21's staging-dir-empty assertion under a steered TMPDIR)"
+  }
+ ],
+ "findings": [],
+ "not_verified": [
+  "F-073-6 (P3, ROUTED): the import_source branch stages its blob BEFORE argv construction — a contained refusal or the ARV-SYN-009 work-dependency leg leaves a staging file behind (the F-073-3(a) class on the one family outside this slice's journal-scoped reorder; the same reorder recommended in a follow-up slice)",
+  "the standing family-wide classes routed by the prior slices' reviews: the read arms' malformed-id echo (F-072-1's routing — the _nte_canon_id pattern's own family-wide slice) and the raw-spelling boundary locks/bodies (records 47-48 §9)",
+  "no fresh full-suite re-run inside the SEV rounds themselves — the recorded runs (01-12) stand as the evidence, spot-checked by the round-2 reviewer",
+  "no reader-client work (P4-B's repo); harness/client.py's surface unchanged at this slice",
+  "no @-reference resolution over journal blocks (P4-D's increment); no tombstone/restore machine on journal blocks (the §3.3 increment — D-011's governed-erasure question)"
+ ],
+ "builder_context": "Super Z (GLM host) — the standing do-not-stop chain INT-134..146",
+ "reviewer_context": "two fresh-context SEV agents in the chain: agent-41d77e6c (round 1, BLOCKED — the F-073-1 P1 found by the round's own probes, independently reproduced by the orchestrator; the heavy probes by a prior fresh-context agent whose raw captures the round re-verified), agent-0361ce20 (round 2, PASS — the P1 verified repaired live at both boundaries, family-wide, no new P0/P1/P2; F-073-6 the new P3 routed)",
+ "disposition": "PASS",
+ "review_summary": "the two-round chain: round 1 BLOCKED on F-073-1 (the wrong-typed payload VALUE containment escape — the driver crashed unhandled at the argv-consumption sites outside the per-row containment, the row resting delivered-unapplied, every later pass crashing, the queue permanently blocked; family-wide: the journal kind plus the pre-existing note-content pass-through), independently reproduced by the orchestrator and repaired RED-first at 45b47ce (the SYN-21 pin at 094eb07 — the driver-boundary all-string argv guard inside the containment, the validation-before-staging order, the gettempdir() cleanup prefix); round 2 PASS — the repair verified live at both boundaries (the repro re-run, the reviewer's own note-twin and third-family probes, the guard-placement code read, the well-formed delivery unregressed), F-073-3 both legs verified live, F-073-2/4/5 adjudicated, F-073-6 (the import_source staging-before-argv residue, a strict improvement over the pre-repair crash) routed. The core acceptance verified: the enqueue and the delivery landed TOGETHER (never the dead-letter window), the byte-identical lossless delivery through the temp-file channel, the same-identity governed revision history, the translated bindings, SYN-01..21 and JNL-01..06 green with make verify 54/0 at the final tree"
+}

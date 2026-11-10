@@ -842,7 +842,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-059 (P3-08) the RED: the SYN-01..15 suite's RED observed at the exact predecessor 67e37fa (CLAIM-058's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the driver + migration 0012 absent), red-01.txt; the typed observed red per F-007",
-    "current_sha256": "5ea85e0012bcba3536b5e8e07a35f416abe1b5d2c54f15c991839fe30bd3bfac",
+    "current_sha256": "d72d258ad1ad97fcd239617be7ea08d3f0f5b4f5cc6534d68c4cd205a65c2069",
     "amendments": [
       {
         "prior_sha256": "d2158263fb30078c71c5874e85f781b12d5182605e917ca36420511d43a9b720",
@@ -885,6 +885,12 @@
         "new_sha256": "5ea85e0012bcba3536b5e8e07a35f416abe1b5d2c54f15c991839fe30bd3bfac",
         "note": "CLAIM-072's SEV round-2 repair (F-072-R2-1 the P1: the split's residual comment edits left sync.py +11 and test_sync.py +8 outside the declared scope \u2014 the PR-mode gate still refusing ARV-SCOPE-002/CLM-002; F-072-R2-2/3 the docstring contradictions): sync.py + test_sync.py REVERTED TO BASE BYTES (the split's account lives in the CLAIMS row + record 64 \u00a74 + the split commit's own tree \u2014 the files carry zero journal residue in the final diff); test_journal.py's header phrase amended (the client-outbox ride named as re-homed, matching JNL-04's ZERO-outbox-row pin); PLAN.md's slice-three card amended the same way. The suites re-run at the repair tree",
         "observed_at": "2026-11-09T09:17:16.742918+00:00"
+      },
+      {
+        "prior_sha256": "5ea85e0012bcba3536b5e8e07a35f416abe1b5d2c54f15c991839fe30bd3bfac",
+        "new_sha256": "d72d258ad1ad97fcd239617be7ea08d3f0f5b4f5cc6534d68c4cd205a65c2069",
+        "note": "CLAIM-073's SYN-20 re-home RED (the P3-06 re-home precedent): the pin re-added to test_sync.py at 7756bbd (tests-only per LAW-11) and observed RED there \u2014 SYN-01..19 GREEN, SYN-20 FAIL, exit 1 (red-01.txt at harness/runs/claim-073-p4c-journal-sync-delivery/): the machinery-absent state at this tree (no _SYNC_COMMANDS membership, no _cli_args delivery branches, no journal outbox row); the original RED at 838b1e9 + GREEN at 806ef04 are preserved in CLAIM-072's chain, never rewritten; the enqueue + the delivery + the bridge's address-form extension land TOGETHER at this slice \u2014 never the enqueue-without-delivery dead-letter window",
+        "observed_at": "2026-11-10T13:41:23.887489+00:00"
       }
     ]
   },
@@ -1129,7 +1135,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the JNL suite's observed RED at commit f22d8d0 (machinery-absent ARV-TEST-000: the journal_block command, the list-journal/get-journal arms, and migration 0016 absent at commit A's tree 87ffe31; exit 1, red-01.txt at harness/runs/claim-072-p4c-journal-blocks/)",
-    "current_sha256": "8015c6d6b578664bc5b84babe8aca735ec6c3b53266e163d34969b74066f44a5",
+    "current_sha256": "dfa6df0e0802528342cbb38199864aaa4b764440e9df6b240d3888f19b9ba6c5",
     "amendments": [
       {
         "prior_sha256": "d399ed44ba95cd543ff7f3b77ddb1c5043a56066f9e991809669e9ee218f47a2",
@@ -1148,6 +1154,12 @@
         "new_sha256": "8015c6d6b578664bc5b84babe8aca735ec6c3b53266e163d34969b74066f44a5",
         "note": "CLAIM-072's SEV round-2 repair (F-072-R2-1 the P1: the split's residual comment edits left sync.py +11 and test_sync.py +8 outside the declared scope \u2014 the PR-mode gate still refusing ARV-SCOPE-002/CLM-002; F-072-R2-2/3 the docstring contradictions): sync.py + test_sync.py REVERTED TO BASE BYTES (the split's account lives in the CLAIMS row + record 64 \u00a74 + the split commit's own tree \u2014 the files carry zero journal residue in the final diff); test_journal.py's header phrase amended (the client-outbox ride named as re-homed, matching JNL-04's ZERO-outbox-row pin); PLAN.md's slice-three card amended the same way. The suites re-run at the repair tree",
         "observed_at": "2026-11-09T09:17:16.743284+00:00"
+      },
+      {
+        "prior_sha256": "8015c6d6b578664bc5b84babe8aca735ec6c3b53266e163d34969b74066f44a5",
+        "new_sha256": "dfa6df0e0802528342cbb38199864aaa4b764440e9df6b240d3888f19b9ba6c5",
+        "note": "CLAIM-073's JNL-04 supersession amendment (typed, disclosed \u2014 the LAW-05 split's named landing): the pin's ZERO-outbox-row form was the SPLIT tree's honest state (CLAIM-072, the JNL-04 pin's split form); at this slice the family ENQUEUES (the _SYNC_COMMANDS membership landed together with the delivery \u2014 never the dead-letter window), so the pin's form rides the delivery: every committed journal write carries its outbox row in the SAME transaction (the observed count 6 \u2014 the creates jnl-1..4 + the revise jnl-5 + the crash-committed revise jnl-6; the refusals and replays add none). The RED evidence (red-01.txt at 87ffe31, ARV-TEST-000 machinery-absent, CLAIM-072's original RED) untouched; the ARV-TEST-000 probes unchanged; the assertions only strengthened \u2014 the delivery-carrying form subsumes the split form's intent (the atomic-law pin now asserted positively, never the absent-row negative)",
+        "observed_at": "2026-11-10T13:45:39.778221+00:00"
       }
     ]
   }

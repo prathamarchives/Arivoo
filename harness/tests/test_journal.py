@@ -62,10 +62,11 @@ Cases (the JNL registry; each pin's full statement lives at its check()):
          content byte-honest; the history returns EVERY revision in
          order; the idempotency (same key+body -> replayed, the same
          result_ref; same key+different body -> ARV-CMD-409, zero
-         effect); the ZERO-outbox-row pin (the sync enqueue re-homed to
-         the following slice by the LAW-05 split — the membership and
-         the delivery land TOGETHER there, never the enqueue-without-
-         delivery dead-letter window); the crash matrix's lost-ack arm
+         effect); the ENQUEUE pin (the delivery-carrying form —
+         CLAIM-073's re-home LANDED: every committed journal write
+         carries its outbox row in the SAME transaction, the refusals
+         and replays adding none — the family rides the client outbox
+         like every landed family); the crash matrix's lost-ack arm
          (post-commit-pre-ack exits 2, the effect committed, the replay
          converges)
   JNL-05 the read arms' list contract + the owner isolation:
@@ -431,24 +432,25 @@ def main() -> int:
                and g_crash.get("revision") == 3                      # the effect committed
                and r_conv.returncode == 0 and "status=replayed" in ack_conv
                and f"result_ref={blk1}@3" in ack_conv
-               and audit("SELECT count(*) FROM arv.outbox WHERE command_name IN "
-                         "('journal_block', 'revise_journal_block');") == "0")  # the enqueue re-homed (the LAW-05 split): NO outbox rows at this tree — the membership + the delivery land TOGETHER in the following slice, never the dead-letter window
+               and int(audit("SELECT count(*) FROM arv.outbox WHERE command_name IN "
+                            "('journal_block', 'revise_journal_block');")) == 6)  # the ENQUEUE pin, the delivery-carrying form (CLAIM-073's re-home LANDED — the SUPERSESSION of the split tree's ZERO-outbox-row form, the amendment typed and disclosed): every committed journal write rides the client outbox in the SAME transaction — jnl-1/jnl-2 the JNL-01 creates + jnl-3/jnl-4 the JNL-03 creates + jnl-5 the revise + jnl-6 the crash-committed revise; the refusals (jnlx-*: the vocabulary/channel/no-oracle/cross-owner classes) and the replays (jnl-1 replay, jnl-6 converge) add NONE — the spine's own atomic law
         check("JNL-04", ok4,
               "the revision machine + the governed history + the spine's whole contract: the "
               "revise command appends revision 2 (a NEW row; revision 1 intact on the "
               "substrate); the current read returns revision 2's content byte-honest; the "
               "history returns EVERY revision in order (the export-ready form); the "
               "idempotency (same key+body -> replayed, the same result_ref; same "
-              "key+different body -> ARV-CMD-409, zero effect); the ZERO-outbox-row pin "
-              "(the sync enqueue re-homed to the following slice by the LAW-05 split — the "
-              "membership and the delivery land TOGETHER there, never the "
-              "enqueue-without-delivery dead-letter window the CLAIM-066/071 SEV rounds "
-              "established law for); the crash matrix's lost-ack arm (post-commit-pre-ack "
+              "key+different body -> ARV-CMD-409, zero effect); the ENQUEUE pin "
+              "(the delivery-carrying form — CLAIM-073's re-home LANDED, the supersession of "
+              "the split tree's ZERO-outbox-row form: every committed journal write carries "
+              "its outbox row in the SAME transaction, the refusals and replays adding none — "
+              "the family rides the client outbox like every landed family, the writing lab's "
+              "no-lost-writes law); the crash matrix's lost-ack arm (post-commit-pre-ack "
               "exits 2, the effect committed, the same-key replay converges the ack)",
               "revise_journal_block through the spine's own idempotency + the crash.py "
               "injection — the journal inherits the command path's whole contract; the "
-              "outbox ride lands with the sync-delivery slice that follows (the split's "
-              "own account)")
+              "outbox ride landed with CLAIM-073 (the re-home's own account, the LAW-05 "
+              "split's named landing)")
 
         # ---- JNL-05 — the read arms' list contract + the owner isolation
         r_l0 = query("list-journal", "--owner", "A", "--limit", "0")

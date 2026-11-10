@@ -62,12 +62,15 @@ _SYNC_COMMANDS = ("import_source", "create_highlight", "revise_highlight",
                   "move_bookmark", "tombstone_bookmark", "restore_bookmark",
                   "create_note", "revise_note", "tombstone_note", "restore_note",
                   "save_position", "record_session", "journal_block",
-                  "revise_journal_block")
+                  "revise_journal_block", "create_reading_list", "add_to_list",
+                  "remove_from_list")
 # P4-C slice four (CLAIM-073; the LAW-05 split's named re-home — the enqueue
 # and the delivery landing TOGETHER, never the enqueue-without-delivery
 # dead-letter window the CLAIM-066/071 SEV rounds established law for): the
 # journal family joins the outbox-carrying set — the writing lab's
-# no-lost-writes law completes with sync.py's _cli_args journal branches
+# no-lost-writes law completes with sync.py's _cli_args journal branches.
+# P4-C slice five (CLAIM-074): the reading-list family rides the SAME law —
+# the enqueue and the delivery in one slice (the SYN-22 pin's own letter)
 
 
 def _q(s: str) -> str:
@@ -1781,6 +1784,137 @@ def revise_journal_block(*, db, owner, actor, client_id, idem_key, id_,
                   crash_at=crash_at)
 
 
+def _rls_name(name: str) -> str:
+    """The name law (ARV-RLS-003): the owner's own label, 1..512 chars, no
+    NULs — refused, never clamped, never silently defaulted."""
+    if not (1 <= len(name) <= 512):
+        raise _CapRefusal("ARV-RLS-003",
+                          f"the list name length {len(name)} is outside 1..512 — the "
+                          "name is the owner's own label, bounded, never clamped",
+                          "pass a name of 1..512 characters")
+    if "\x00" in name:
+        raise _CapRefusal("ARV-RLS-003",
+                          "the list name contains NUL (U+0000) — PostgreSQL TEXT "
+                          "cannot carry it losslessly, and the list never rewrites "
+                          "the owner's label",
+                          "remove the NUL bytes; the lossless law refuses a silent "
+                          "substitution")
+    return name
+
+
+def _rls_check_list(sess: "Session", list_id: str, owner: str) -> None:
+    """THE NO-ORACLE (ARV-RLS-001): absent and another owner's list are the
+    SAME refusal, never a side channel (the RTM §2.10 law on the write
+    path; the list row is immutable so the in-transaction check cannot be
+    invalidated by a race)."""
+    n = _sess_row(sess, f"SELECT count(*) || '|' FROM arv.reading_list "
+                  f"WHERE id = {_q(list_id)} AND owner_scope = {_q(owner)};")
+    if not n or int(n.split("|")[0]) == 0:
+        raise _CapRefusal("ARV-RLS-001",
+                          f"the reading list {list_id} does not exist in the caller's "
+                          "scope — absent and another owner's are the SAME refusal, "
+                          "never a side channel",
+                          "check the id against the caller's own list-lists answer; a "
+                          "list is only ever addressable by its owner")
+
+
+def _rls_check_source(sess: "Session", source_id: str, owner: str) -> None:
+    """THE NO-ORACLE AT THE MEMBERSHIP (ARV-RLS-002): the member source must
+    exist in the caller's scope — absent and another owner's the SAME
+    refusal (the 0016 source-bind law's shape, REQUIRED here: the list
+    membership is never source-optional)."""
+    n = _sess_row(sess, f"SELECT count(*) || '|' FROM arv.source "
+                  f"WHERE id = {_q(source_id)} AND owner_scope = {_q(owner)};")
+    if not n or int(n.split("|")[0]) == 0:
+        raise _CapRefusal("ARV-RLS-002",
+                          f"the member source {source_id} does not exist in the "
+                          "caller's scope — absent and another owner's are the SAME "
+                          "refusal, never a side channel",
+                          "check the id against the caller's own list-library answer; "
+                          "a membership names one of the caller's own sources")
+
+
+def _rls_event(*, db, owner, actor, client_id, idem_key, list_id, source_id,
+               op, command, crash_at: str = None) -> int:
+    """The membership event write (CLAIM-074; record 66 §2): ONE append-only
+    event row ('added' or 'removed') — the current membership is DERIVED
+    (the last op per pair wins), the event rows are the recovery substrate
+    (RTM §2 item 9: every add/remove retained, never a destructive delete).
+    The alternation law lives at the substrate (ARV-RLS-008, the guard under
+    the per-pair advisory lock); the command's own idempotency (the spine's
+    key semantics) never double-inserts — a same-key replay returns the
+    recorded result, a different-body same-key refuses ARV-CMD-409."""
+    payload = {"list": _nte_canon_id(list_id), "source": _nte_canon_id(source_id),
+               "op": op}
+    body = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build(sess: "Session", body_hash: str):
+        _rls_check_list(sess, _nte_canon_id(list_id), owner)
+        _rls_check_source(sess, _nte_canon_id(source_id), owner)
+        ev_id = ids.new_id()
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmts = [f"INSERT INTO arv.reading_list_member (id, list_id, source_id, op, "
+                 f"owner_scope, actor, run_id, input_hash, idempotency_key, created_at) "
+                 f"VALUES ({_q(ev_id)}, {_q(_nte_canon_id(list_id))}, "
+                 f"{_q(_nte_canon_id(source_id))}, {_q(op)}, {_q(owner)}, {_q(actor)}, "
+                 f"{_q(run_id)}, {_q(ih)}, {_q(idem_key)}, {_q(ts)});"]
+        return ev_id, stmts, " durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command=command, payload=body, build=build, crash_at=crash_at)
+
+
+def create_reading_list(*, db, owner, actor, client_id, idem_key, name,
+                        crash_at: str = None) -> int:
+    """P4-C slice five (CLAIM-074; record 66 §2): the reading-list surface —
+    the user-defined lists over the landed library (the North Star owner
+    words' third surface). THE NAME LAW (ARV-RLS-003): 1..512, no NULs —
+    the owner's own label, refused never clamped. THE IDENTITY LAW (Q11's
+    baseline): the identity is the uuid, NEVER the name — two lists may
+    share one name (no uniqueness, no auto-merge); the ack carries
+    result_ref=<list-id> (the bare uuid, the create class)."""
+    try:
+        name_c = _rls_name(name)
+    except _CapRefusal as r:  # the parse precedes the spine (the body hash needs the canonical form)
+        print(f"FAIL {r.code}: {r}")
+        print(f"      repair: {r.repair}")
+        return 1
+    payload = {"name": name_c}
+    body = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def build(sess: "Session", body_hash: str):
+        list_id = ids.new_id()
+        ts, run_id, ih = clock.now(), "run-" + client_id, body_hash[:16]
+        stmts = [f"INSERT INTO arv.reading_list (id, name, owner_scope, actor, "
+                 f"run_id, input_hash, idempotency_key, created_at) "
+                 f"VALUES ({_q(list_id)}, {_q(name_c)}, {_q(owner)}, {_q(actor)}, "
+                 f"{_q(run_id)}, {_q(ih)}, {_q(idem_key)}, {_q(ts)});"]
+        return list_id, stmts, " durability_rung=local_durable"
+
+    return _spine(db=db, owner=owner, actor=actor, client_id=client_id, idem_key=idem_key,
+                  command="create_reading_list", payload=body, build=build,
+                  crash_at=crash_at)
+
+
+def add_to_list(*, db, owner, actor, client_id, idem_key, list_id, source_id,
+                crash_at: str = None) -> int:
+    """The membership add: ONE 'added' event row (append-only; the current
+    view derives). See _rls_event for the whole contract."""
+    return _rls_event(db=db, owner=owner, actor=actor, client_id=client_id,
+                      idem_key=idem_key, list_id=list_id, source_id=source_id,
+                      op="added", command="add_to_list", crash_at=crash_at)
+
+
+def remove_from_list(*, db, owner, actor, client_id, idem_key, list_id, source_id,
+                     crash_at: str = None) -> int:
+    """The membership remove: ONE 'removed' event row (append-only; the
+    current view derives — the history keeps the membership). See _rls_event
+    for the whole contract."""
+    return _rls_event(db=db, owner=owner, actor=actor, client_id=client_id,
+                      idem_key=idem_key, list_id=list_id, source_id=source_id,
+                      op="removed", command="remove_from_list", crash_at=crash_at)
+
+
 def save_position(*, db, owner, actor, client_id, idem_key, source_id,
                   start, end, crash_at: str = None) -> int:
     """P4-A slice two (CLAIM-066; record 58 §2): the source-open/position
@@ -2102,6 +2236,23 @@ def main() -> int:
                                 "caller's own sources)")
         else:
             p.add_argument("--id", required=True)
+    # P4-C slice five (CLAIM-074): the reading-list surface — the user-defined
+    # lists over the landed library (the membership event writes)
+    for name in ("create_reading_list", "add_to_list", "remove_from_list"):
+        p = sub.add_parser(name)
+        _common(p)
+        if name == "create_reading_list":
+            p.add_argument("--name", required=True,
+                           help="the list's own label, 1..512 chars (the identity is the "
+                                "uuid, NEVER the name — two lists may share one; the "
+                                "name is immutable at this slice)")
+        else:
+            p.add_argument("--list", required=True,
+                           help="the caller's own list id (absent/cross-owner refuses "
+                                "ARV-RLS-001 — the no-oracle)")
+            p.add_argument("--source", required=True,
+                           help="the member source id (absent/cross-owner refuses "
+                                "ARV-RLS-002 — the no-oracle at the binding)")
     a = ap.parse_args()
     db = os.environ.get("PGDATABASE", "postgres")
     if a.command == "record_event":
@@ -2168,6 +2319,17 @@ def main() -> int:
         return revise_journal_block(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                                     idem_key=a.idem_key, id_=a.id, content=a.content,
                                     file=a.file)
+    # P4-C slice five (CLAIM-074): the reading-list writes
+    if a.command == "create_reading_list":
+        return create_reading_list(db=db, owner=a.owner, actor=a.actor,
+                                   client_id=a.client_id, idem_key=a.idem_key,
+                                   name=a.name)
+    if a.command == "add_to_list":
+        return add_to_list(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                           idem_key=a.idem_key, list_id=a.list, source_id=a.source)
+    if a.command == "remove_from_list":
+        return remove_from_list(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                idem_key=a.idem_key, list_id=a.list, source_id=a.source)
     return create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                             idem_key=a.idem_key, source_id=a.source_id,
                             start=a.start, end=a.end)

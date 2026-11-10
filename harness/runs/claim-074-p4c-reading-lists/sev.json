@@ -1,0 +1,98 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-074-p4c-reading-lists",
+ "base_sha": "3f6922bf1a347d90a0ea5635d8b5f324f4c5813d",
+ "reviewed_diff_sha256": "65c0d3421b1aa7e97f865a5d1094a8d265cca451479f73e69c5e66b3c032878d",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-06",
+  "SYS-09"
+ ],
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "changed_components": [
+  "harness/migrations/0017_reading_list.sql (arv.reading_list the header — UNIQUE (id, owner_scope) the single-row family shape, the name CHECK 1..512, NO name uniqueness per Q11's identity baseline; the append-only trigger ARV-RLS-006; RLS enabled AND forced + the owner policy; the grants; NO DEFAULTs. arv.reading_list_member the append-only MEMBERSHIP EVENT rows — the closed op CHECK 'added'|'removed' by name, the composite FKs to the list AND the source, the ALTERNATION LAW ARV-RLS-008 under the per-(list,source) advisory xact lock, the append-only trigger ARV-RLS-007, the same RLS/grants laws)",
+  "harness/commands.py (create_reading_list + add_to_list + remove_from_list through the spine's own ack contract: idempotent, the frozen grammar, result_ref the bare uuid for the create; the name law ARV-RLS-003 empty/>512/NUL refused never clamped; the no-oracles ARV-RLS-001 the absent/cross-owner list + ARV-RLS-002 the absent/cross-owner source, byte-equal after the id normalize; the crash-matrix membership; THE OUTBOX RIDE — the _SYNC_COMMANDS membership landing together with the delivery)",
+  "harness/query.py (list-lists — one JSON line per list: the id, the name, the DERIVED member_count, the created_at, the keyset walk, the empty answer; get-list — the CURRENT membership derived: DISTINCT ON the source pair with the last-op-wins ORDER then the op='added' filter, the projection over the event rows per RTM §2 item 9; the no-id-echo no-oracle; the member page on the same list contract)",
+  "harness/sync.py (the delivery branches: the create's name through argv (a bounded label); the membership events through the TRANSLATED list + source ids; the not-yet-durable dependencies resting retryable ARV-SYN-009)",
+  "harness/capability.py (the reading-lists reserved-surface row: owner_phase P4-C, the LANDED verbs named, the reader-client exclusion)",
+  "harness/crash.py (the create_reading_list/add_to_list crash-matrix membership)",
+  "harness/gate.py (the TESTS registration for test_reading_list.py, landed AT the RED commit) + harness/red-records.json (the typed NEW record at the RED commit + the disclosed pre-GREEN strenghtener amendment; test_sync.py's SYN-22 amendment)",
+  "harness/tests/test_reading_list.py (the RLS-01..06 suite: the create round-trip + Q11's shared-name law; the typed refusals + the zero-effect law + the NUL unit-probe; the membership event machine (add/remove/re-add, the replay/409, the crash arm); the read arms + the owner isolation; the substrate audit + the registry rows; the outbox enqueue count)",
+  "harness/tests/test_sync.py (the SYN-22 delivery pin: the event history landing server-side in order, the current membership equal on both domains through the translated ids)"
+ ],
+ "interfaces_reviewed": [
+  "the spine's own ack contract on the three write paths (the frozen grammar, the idempotency, the crash matrix)",
+  "the derived current-membership view (the last-op-wins projection over the append-only event rows — the recovery substrate per RTM §2 item 9)",
+  "the alternation law at the substrate (ARV-RLS-008 under the per-pair advisory lock — the hostile duplicate-op refusal + the serialization blocking proof)",
+  "the outbox ride (the enqueue AND the delivery TOGETHER — the translated list + source ids, the dependency class ARV-SYN-009)",
+  "the read arms' bounded/paginated contract (the keyset walk, the member counts, the empty answers, the no-id-echo no-oracle)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the RLS suite GREEN RLS-01..06 exit 0 x3 at the GREEN tree (runs 01-03, byte-exact digests)",
+   "the sync suite GREEN SYN-01..22 exit 0 (run-04 — SYN-22 the reading-list delivery) + the journal suite GREEN JNL-01..06 exit 0 (run-05)"
+  ],
+  "integration_verification": [
+   "make verify exit 0 at the GREEN tree (run-06 — all suites + the gate + the canonical layer 54/0)",
+   "the SEV round's own two-DB walk: the event history [added, removed, added] on the server's list id, the name byte-identical (a 512-char unicode+newline name delivered whole), the current membership equal on both domains, the second pass a no-op, the spelling-variant retry REPLAYS"
+  ],
+  "system_verification": [
+   "the SEV round 1 live verification (~92 probes): the alternation law's serialization proof (the held per-pair advisory lock blocking a hostile insert), the substrate audits, the no-oracles byte-equal, the RED chain git-verified + independently reproduced",
+   "the recorded PR-mode gate + the local trusted-gate reproduction at the final head (the records at the re-bind)"
+  ],
+  "validation": [
+   "the outbox enqueue count pin (RLS-06: 10 rows over the suite's own traffic — the refusals, the replays, the 409, and the pre-commit crash adding none)",
+   "the derived-view law pin (RLS-03: remove hides, the history keeps, re-add reactivates as a NEW event row)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a list write silently resting local-only (the family outside the outbox-carrying set — the dead-letter window)",
+   "control": "the outbox ride TOGETHER: the _SYNC_COMMANDS membership + the delivery branches in one slice (SYN-22; RLS-06's enqueue count pin)"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "the membership destructively mutated (an UPDATE/DELETE erasing the history, a phantom duplicate event)",
+   "control": "the append-only event rows + the triggers ARV-RLS-006/007 + the alternation law ARV-RLS-008 under the per-pair advisory lock (the SEV round's hostile-insert + blocking proofs); the current view DERIVED, never a state column"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "an existence side channel (the absent vs cross-owner distinction leaking)",
+   "control": "the no-oracles: ARV-RLS-001/002 byte-equal after the id normalize on the writes; the no-id-echo ARV-QRY-001 byte-equal RAW on the reads (the SEV round's probes)"
+  },
+  {
+   "id": "FM-04",
+   "scenario": "the name law or Q11's identity law broken (a clamped name, a rejected shared name, an auto-merge)",
+   "control": "ARV-RLS-003 (empty/>512/NUL refused never clamped) + NO name uniqueness at the substrate (two lists share one name, the uuid disambiguates — the SEV round's live probes)"
+  },
+  {
+   "id": "FM-05",
+   "scenario": "an unbounded or unversioned read arm",
+   "control": "the _page_args bounds (ARV-QRY-004) + the limit+1 truth marker + the api_version key on every row + the empty answers header+more=false ALONE"
+  }
+ ],
+ "findings": [],
+ "not_verified": [
+  "F-074-1 (P2, ROUTED): the leading-dash argv-value class — a legal list name like '--evil' (creatable via the --name= spelling) enqueues an outbox row whose server-side apply dies at argparse; the row rests uncertain (honest, visible, the local write durable; the walk continues). PRE-EXISTING family-wide: import_source --title shows the identical behavior at this tree. Routed with the import-title/note-content family to the argv-value convention's own slice (the repair — the --name= form in _cli_args — spans every argv-carrying delivery branch; a list-only fix would fork the convention)",
+  "F-074-2 (P3): a different-key duplicate-op membership write surfaces as the generic ARV-CMD-010 (the raw cause naming ARV-RLS-008) — zero effect, the declared design boundary; a precision note for the family-wide typed-refusal slice",
+  "F-074-3 (P3): red-01.txt names the commit-A tree as the observation tree (the standing family convention, F-073-5's class) — reasoned no-fix: contemporaneous evidence, the exact binding in the typed record naming e7e833f, the RED independently reproduced at the RED commit by the reviewer",
+  "F-074-4 (P3, assessment): get-list's two-read shape (the header then the member page, two snapshots) — no vanish class (the header append-only); a momentary member_count/page divergence possible; the family's known bounded read-arm class",
+  "the standing family-wide classes routed by the prior slices' reviews (unchanged): the read arms' malformed-id echo (F-072-1's routing — the _nte_canon_id pattern's slice), the import_source staging-before-argv residue (F-073-6), the F-073-3(a)-class staging reorder",
+  "no fresh full-suite re-run inside the SEV round itself (the recorded runs 01-06 stand); the single-owner walk shape (B's delivery verified through the suite's SYN-08 class, not re-walked)",
+  "no reader-client work (P4-B's repo); no list ordering/pinning; no list-of-lists or nested collections; no shared/multi-owner lists; no @-reference resolution over lists (P4-D's increment); no rename/revision machine on the list header (a rename is its own increment)"
+ ],
+ "builder_context": "Super Z (GLM host) — the standing do-not-stop chain INT-134..146",
+ "reviewer_context": "one fresh-context SEV agent: agent-caf66233 (round 1, PASS — zero open P0/P1; ~92 live probes + ~10 static/git checks; the two-DB delivery walk, the derived-view law, the alternation law's serialization proof, the no-oracles, the substrate audits, the RED chain reproduced)",
+ "disposition": "PASS",
+ "review_summary": "the one-round PASS (the CLAIM-068/069/070 pattern): the reviewer's own two-DB walk proved the delivery end-to-end (the event history [added, removed, added] on the server's list id through the translated ids, the name byte-identical incl. a 512-char unicode name, the second pass a no-op, the spelling-variant retry replaying); the derived-view law, the alternation law's serialization, the no-oracles, the name/Q11 laws, the bounds, and the substrate audits all verified live; the RED chain git-verified and independently reproduced at the RED commit; the scope clean (19/19 paths declared). The findings: F-074-1 the P2 ROUTED (the pre-existing family-wide leading-dash argv-value class — the row rests uncertain honestly, the local write durable; routed with import-title to the argv-value convention's slice), F-074-2/3/4 the P3s (the typed-refusal precision note, the red-01 tree-header convention, the two-read shape assessment). The recorded evidence: the RLS suite x3 + the sync suite SYN-01..22 + the journal suite + make verify 54/0, all exit 0 at the GREEN tree"
+}

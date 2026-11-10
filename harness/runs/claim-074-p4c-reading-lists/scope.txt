@@ -1,0 +1,22 @@
+# CLAIM-074 — P4-C slice five: the reading-list surface (the post-#108 reconciliation's
+# landing; the North Star owner words' third surface). The declared scope (LAW-06): the
+# list machine over the landed library — the event-history membership, the outbox ride
+# TOGETHER, the bounded read arms. RED-first at CLAIM-073's merged head 3f6922b.
+harness/migrations/0017_reading_list.sql D-041
+harness/commands.py D-041
+harness/query.py D-041
+harness/sync.py D-041
+harness/capability.py D-041
+harness/crash.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+harness/tests/test_reading_list.py D-041
+harness/tests/test_sync.py D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/65-P4C-JOURNAL-SYNC-DELIVERY.md D-042
+context/extracted/66-P4C-READING-LISTS.md D-042
+harness/runs/claim-074-p4c-reading-lists D-042

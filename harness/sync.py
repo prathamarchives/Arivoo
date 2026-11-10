@@ -298,6 +298,28 @@ def _cli_args(row: dict, local_db: str, server_db: str, owner: str) -> "tuple[li
         tmp.write(body)
         tmp.close()
         return ["--id", i, "--file", tmp.name], ""
+    if c == "create_reading_list":
+        # P4-C slice five (CLAIM-074; record 66 §2): the reading-list
+        # create DELIVERS — the name rides argv (a bounded label, 1..512,
+        # never the unbounded content class); the server-side create mints
+        # its OWN list identity (the two domains' ids differ — the identity
+        # bridge's equality contract is over counts + contents + per-entity
+        # chains, never raw id equality)
+        return ["--name", p["name"]], ""
+    if c in ("add_to_list", "remove_from_list"):
+        # P4-C slice five (CLAIM-074): the membership event DELIVERS through
+        # the TRANSLATED list + source ids (the identity bridge's
+        # acknowledged creators — the server's own identities, never the
+        # local uuids transplanted); a not-yet-durable dependency rests the
+        # row retryable with the named ARV-SYN-009 (the same truthful
+        # dependency class every translated binding carries)
+        li = _translate(local_db, server_db, owner, p["list"])
+        if not li:
+            return None, f"ARV-SYN-009: the reading list {p['list']} is not yet server-durable — the identity dependency"
+        si = _translate(local_db, server_db, owner, p["source"])
+        if not si:
+            return None, f"ARV-SYN-009: the source {p['source']} is not yet server-durable — the identity dependency (the creating command has no server answer; ordering resolves it on the next pass)"
+        return ["--list", li, "--source", si], ""
     return None, f"ARV-SYN-000: the command {c} is not in the outbox-carrying set — never delivered"
 
 

@@ -1,0 +1,7 @@
+{
+  "command": "env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-074-p4c-reading-lists python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "ed3b27aa7333693ec2bb795a833cb2578c27a195",
+  "output_sha256": "5945fa09b0aba8b26651bb2b13bc8f3664dc741e6f0c6f58b0810c6592393e37",
+  "recorded_at": "2026-11-10T17:24:18.970716+00:00"
+}

@@ -89,18 +89,77 @@ or nested collections; no shared/multi-owner lists; no @-reference resolution ov
 (P4-D's increment); no rename/revision machine on the list header (the name immutable at
 this slice — a rename is its own increment); no reader-client work (P4-B's repo).
 
-## §3 The slice chain in flight
+## §3 The slice chain (EXECUTED — the account of what landed)
 
-commit A (this commit: the post-#108 five-area reconciliation + CLAIM-074 opened + record 66
-minted; the branch pushed EARLY per the standing owner instruction) → the RED (the RLS
-suite authored tests-only per LAW-11 against the machinery-absent tree — migration 0017, the
-commands, and the read arms absent; the ARV-TEST-000 machinery-absent probe + the behavioral
-pins, observed RED) → the typed red-record binding (make red) → the GREEN (migration 0017 +
-the three commands through the spine + the two read arms + the outbox ride TOGETHER + the
-capability row + the crash membership + the gate's TESTS registration) → the measured set
-(the RLS suite x3 + the sync suite + the journal suite + make verify) → the SEV round(s) →
-the artifact finalize → the artifact re-bind → the push → the PR → the five checks → the
-merge-gate review → **the merge under INT-145** → the post-merge verification → the P4-C
-exit check (every required backend behavior landed: the library membership, the
-current-reading state, the reading lists, the session/dwell behavior, the journal/blocks +
-the sync delivery) → P4-D..F — NO PAUSE EVEN FOR UPDATES (INT-146).
+commit A `73bfd8c` (the post-#108 five-area reconciliation + CLAIM-074 opened + record 66
+minted; the branch pushed EARLY per the standing owner instruction) → the RED `e7e833f`
+(the RLS suite authored tests-only per LAW-11 — the ARV-TEST-000 machinery-absent probe
+(create_reading_list absent, list-lists/get-list absent, migration 0017 absent) + the
+behavioral pins RLS-01..06 + the SYN-22 delivery pin in the sync suite; OBSERVED RED:
+red-01.txt — the RLS suite exit 1 at the ARV-TEST-000 probe, the sync suite SYN-01..21
+green + SYN-22 FAIL exit 1; the gate's TESTS registration + the scope/CLAIMS amendment
+declaring test_sync.py rode the RED commit) → the GREEN `60fab3d` (migration 0017 +
+the three commands through the spine + the two read arms + THE OUTBOX RIDE TOGETHER
+(_SYNC_COMMANDS membership + the delivery branches) + the capability row + the crash
+membership + the four DISCLOSED pre-GREEN test strenghteners riding the typed amendment:
+the NUL unit-probe at the law's own layer (argv cannot carry NUL), the keyset cursor's
+parsed-id form, the has_table_privilege grants audit, the superuser channel for the
+append-only trigger probes — arv_app refused at the PERMISSION layer first, the grants
+law's own proof); OBSERVED: the RLS suite GREEN RLS-01..06 exit 0 + the sync suite GREEN
+SYN-01..22 exit 0) → the measured set (runs 01-06: the RLS suite x3 + the sync suite +
+the journal suite + make verify — all exit 0 at the GREEN tree; the canonical layer 54/0)
+→ **the SEV round 1** (agent-caf66233, fresh context; PASS — zero open P0/P1; ~92 live
+probes + ~10 static/git checks) → the artifact finalize (this commit: the record-66
+account) → the artifact re-bind (sev.json binding the one-round PASS + notverified + the
+proofsheet + the recorded PR-mode gate + the trusted-gate reproduction) → the push → the
+PR → the five checks → the merge-gate review → **the merge under INT-145** → the
+post-merge verification → the P4-C exit check → P4-D..F — NO PAUSE EVEN FOR UPDATES
+(INT-146).
+
+## §4 The SEV account (round 1 — the one-round PASS)
+
+**Round 1 (agent-caf66233) — PASS, zero open P0/P1.** The reviewer's own two-DB walk:
+the server event history `[added, removed, added]` on the SERVER's list id; the name
+byte-identical (a 512-char unicode+newline name delivered whole); the current membership
+equal on both domains through the TRANSLATED ids; all outbox rows acknowledged with
+server_refs; the second pass a true no-op; the spelling-variant retry REPLAYS (the
+id-normalize law). The derived-view law verified (active→hidden→active; the event rows
+retained on both domains; the member counts owner-isolated). The alternation law
+verified at the substrate (the hostile duplicate-op INSERT refused ARV-RLS-008; the
+lawful alternation passes; the held per-pair advisory lock BLOCKS a hostile insert —
+the serialization proven). The no-oracles byte-equal (write: after the id-normalize;
+read: RAW — the no-id-echo form). The name law, Q11's shared-name law, the bounds, the
+substrate audits (RLS forced, the policies, the grants, NO DEFAULTs, the named op CHECK,
+the composite FKs), the capability row, the crash arm — all green. The RED chain
+git-verified across the three commits (the reviewer independently reproduced the RED at
+`e7e833f` itself); the scope clean (19/19 diff paths declared, no residue).
+
+**The findings, dispositioned:**
+- **F-074-1 (P2, ROUTED):** a legal leading-dash list name (`--evil`, creatable via the
+  `--name=` spelling) enqueues an outbox row whose server-side apply dies at argparse —
+  the row rests `uncertain` (honest, visible, the local write durable; the walk
+  continues), never landing server-side. Live-reproduced end-to-end — but a
+  **pre-existing family-wide argv-value class**: `import_source --title=--eviltoo`
+  shows the identical behavior at this tree. ROUTED with the import-title/note-content
+  family to the argv-value convention's own slice (the repair is trivial — the `--name=`
+  form in `_cli_args` — but the class spans every argv-carrying delivery branch; a
+  journal-only fix would fork the convention; the F-072-1/F-073-6 routing precedent).
+- **F-074-2 (P3):** a different-key duplicate-op membership write surfaces as the
+  generic ARV-CMD-010 (the raw cause naming ARV-RLS-008) — zero effect, the declared
+  design boundary (the alternation law's own refusal shape); a precision note for the
+  family-wide typed-refusal slice.
+- **F-074-3 (P3):** red-01.txt names the commit-A tree as the observation tree rather
+  than the RED commit — the standing family convention (F-073-5's class); reasoned
+  no-fix (contemporaneous evidence; the exact binding in the typed record naming
+  `e7e833f`; the reviewer independently reproduced the RED at the RED commit itself).
+- **F-074-4 (P3, assessment):** get-list's two-read shape (the header read then the
+  member page, two snapshots) — no vanish class (the header is append-only); a
+  momentary member_count/page divergence possible; the family's known bounded class
+  (the F-072-1 read-arm family), assess-only.
+
+**The honest not-verified list** (notverified.txt): the routed F-074-1 (the argv-value
+family); the standing family-wide classes (the read arms' malformed-id echo, the
+`_nte_canon_id` pattern's slice, the two-read shape); no fresh full-suite re-run inside
+the SEV round (the recorded runs stand); the single-owner walk shape (B's delivery
+verified through the suite's SYN-08 class, not re-walked); no reader-client work
+(P4-B's repo).

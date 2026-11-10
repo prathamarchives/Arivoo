@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_reading_list.py",
+  "exit_code": 0,
+  "commit": "60fab3daed4efb607cbd61c188c0dbc43c768a78",
+  "output_sha256": "19d0471dfa8c69c9b4d6db5cb1c563a1427ca7624975ad094251853ec44f4b6c",
+  "recorded_at": "2026-11-10T16:42:10.114229+00:00"
+}

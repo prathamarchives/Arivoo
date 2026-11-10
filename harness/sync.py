@@ -90,9 +90,12 @@ def _create_key(local_db: str, owner: str, local_id: str) -> str:
     two house shapes — the bare uuid (sources, highlights, bookmarks,
     notes) and the revision-1 address <id>@1 (journal blocks — the writing
     lab's ack grammar pins the @-suffixed form at every revision); the match
-    takes BOTH, and '@1' rows are only ever CREATES (revision 1 is the
-    create's own seq — revisers carry @2+), so the clause adds no
-    cross-entity risk."""
+    takes BOTH. The clause adds no cross-entity risk: for the JOURNAL family
+    @1 rows are only ever creates (revisers carry @2+, and id||'@1' can
+    never equal a @2+ address); position/session firsts also ack <id>@1
+    addressing EXISTING sources — for those the creator-preference ORDER BY
+    keeps the translation on the import/create row (verified live, the
+    F-072-2/F-073-4 probes)."""
     key = _scalar(local_db, owner,
                   f"SELECT c.idempotency_key FROM arv.command_log c JOIN arv.outbox o "
                   f"ON o.owner_scope = c.owner_scope AND o.idempotency_key = c.idempotency_key "
@@ -253,15 +256,23 @@ def _cli_args(row: dict, local_db: str, server_db: str, owner: str) -> "tuple[li
         # translates through the identity bridge (a sourceless block
         # delivers sourceless — the option rides the delivery; a
         # not-yet-server-durable source rests the row retryable with the
-        # named ARV-SYN-009 dependency, a truthful state)
+        # named ARV-SYN-009 dependency, a truthful state). THE VALIDATION
+        # ORDER (the SEV round-1 F-073-1 repair): the kind's type checked
+        # and the content encoded BEFORE the staging file exists — a
+        # wrong-typed value is refused (or raises into the containment)
+        # with ZERO staging residue, never a file created then abandoned
+        if not isinstance(p["kind"], str):
+            return None, ("ARV-SYN-013: the payload is undeliverable — the kind is not a "
+                          "string (the canonical payload is a JSON object of strings)")
         argv = ["--kind", p["kind"]]
         if p.get("source_id") is not None:
             sid = _translate(local_db, server_db, owner, p["source_id"])
             if not sid:
                 return None, f"ARV-SYN-009: the source {p['source_id']} is not yet server-durable — the identity dependency (the creating command has no server answer; ordering resolves it on the next pass)"
             argv += ["--source-id", sid]
+        body = p["content"].encode("utf-8")
         tmp = tempfile.NamedTemporaryFile(prefix="arv-sync-jnl-", delete=False)
-        tmp.write(p["content"].encode("utf-8"))
+        tmp.write(body)
         tmp.close()
         return argv + ["--file", tmp.name], ""
     if c == "revise_journal_block":
@@ -275,13 +286,16 @@ def _cli_args(row: dict, local_db: str, server_db: str, owner: str) -> "tuple[li
         # append-only law). THE ADDRESS STEP: the journal create's server
         # ref is the revision-1 ADDRESS <block>@1 (the ack grammar's own
         # form); the revise takes the block IDENTITY — the uuid stem of
-        # that address
+        # that address. THE VALIDATION ORDER (the F-073-1 repair): the
+        # content encoded BEFORE the staging file exists — zero residue on
+        # the contained paths
         i = _translate(local_db, server_db, owner, p["id"])
         if not i:
             return None, f"ARV-SYN-009: the journal block {p['id']} is not yet server-durable — the identity dependency"
         i = i.rsplit("@", 1)[0] if "@" in i else i
+        body = p["content"].encode("utf-8")
         tmp = tempfile.NamedTemporaryFile(prefix="arv-sync-jnl-", delete=False)
-        tmp.write(p["content"].encode("utf-8"))
+        tmp.write(body)
         tmp.close()
         return ["--id", i, "--file", tmp.name], ""
     return None, f"ARV-SYN-000: the command {c} is not in the outbox-carrying set — never delivered"
@@ -362,13 +376,25 @@ def do_sync(owner: str, server_db: str, timeout: float, max_attempts: int,
             _die()
         # THE PER-ROW CONTAINMENT (the SEV round-1 F1 repair): an undeliverable
         # payload is the named ARV-SYN-013 terminal failure for THAT row — the
-        # walk CONTINUES; one poisoned row may never block every later row
+        # walk CONTINUES; one poisoned row may never block every later row.
+        # THE ARGV BOUNDARY (the CLAIM-073 SEV round-1 F-073-1 repair — the
+        # family-wide completion): a payload VALUE of the wrong type (an int
+        # kind, an int content) passes through some branches without raising
+        # and would crash the argv-consumption sites below — the guard names
+        # the class HERE, inside the containment, never a str() coercion and
+        # never an unhandled crash
         try:
             argv, err = _cli_args(row, local_db, server_db, owner)
+            if argv is not None and not all(isinstance(a, str) for a in argv):
+                argv, err = None, ("ARV-SYN-013: the payload is undeliverable — a payload "
+                                   "value of the wrong type (the canonical payload is a "
+                                   "JSON object of strings; the argv channel carries "
+                                   "strings only)")
         except Exception as e:  # the undeliverable class — named, contained
             argv, err = None, (f"ARV-SYN-013: the payload is undeliverable — "
                                f"{type(e).__name__}: {e}")
-        tmp_file = next((a for a in (argv or []) if a.startswith("/tmp/arv-sync-")), None)
+        tmp_file = next((a for a in (argv or [])
+                         if a.startswith(os.path.join(tempfile.gettempdir(), "arv-sync-"))), None)
         if argv is None:
             # the undeliverable class (ARV-SYN-013) is TERMINAL on first
             # observation — a payload that cannot parse will never parse; the

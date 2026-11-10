@@ -78,3 +78,50 @@ re-home precedent). The SEV round-1 (agent-34277f24, PASS zero P0/P1/P2 over the
 pre-split chain) reviewed the pre-split tree; the split-tree verification follows this section
 (the re-run suites + the SEV round over the SPLIT diff, exactly the P3-06 "split-tree measured
 set" pattern).
+
+## §5 The #107 merge close (CLAIM-072 LANDED — P4-C slice three, 2026-11-10)
+
+PR #107 merged as `7286b3cf2555686476569e4c3663f7ecd2b8885e` under INT-145's standing
+authorization (the agent-performed merge after checks): the five required green at the exact
+final head `d1c1190` AND on the merge commit — all observed live (canonical-layer, head-tools,
+harness, harness-suites, harness-trusted, success on both heads; the closing agent additionally
+re-ran the JNL suite locally at `d1c1190` — JNL-01..06 GREEN exit 0 — and `validate_report` —
+codes `[]`, GREEN). The merge-gate review D-042 (1a) posted as review `5840270161` BEFORE the
+merge (the substantive risk surface engaged: the lossless law, the split's no-dead-letter window,
+the serialized revision + the 0016 guards read at the migration, the no-oracle discipline, the
+test provenance + digest integrity, the three-round SEV chain).
+
+THE CODERABBIT CHAIN (D-042 (1b), this PR's review coverage): three Minor findings, each with an
+explicit in-thread disposition BEFORE the merge —
+- `4512207526` (the `standard_conforming_strings` hypothetical): reasoned no-fix, evidence-based
+  (live probes at `d1c1190`: the setting `on` as the spine's own session flags observe it —
+  `psql -X -A -t` against the rig's PG 17.11; a backslash-heavy raw body ENDING IN A TRAILING
+  BACKSLASH written through the real spine — exit 0, the frozen ack grammar — and read back
+  byte-identical, 92/92). CodeRabbit's correction ACCEPTED and recorded in-thread: under the
+  counterfactual `off`, the embedded-escape class (`\n` et al.) could land LOSSY, not merely
+  fail closed — the disposition's counterfactual statement sharpened; the operative conclusion
+  unchanged (the premise exists in no supported configuration); the named follow-up (a transport
+  GUC pin at `Session` construction — a cross-family change, its own bounded slice) stands.
+- `4512207541` (the malformed journal IDs): fixed-in-named-followup-slice — the documented
+  raw-cast class (SEV round-1 F-072-1/F-072-5, the `_nte_canon_id` docstring's own routing,
+  records 47 §9/48 §9); the live probe reproduced the exact documented behavior (exit 1,
+  `ARV-CMD-010`, ZERO effect); the journal arm shares the one canonicalization home — a
+  journal-only pre-validation would fork the pattern.
+- `4512207548` (the buffered history read): reasoned no-fix — the export-ready whole-history
+  design for ONE identity (the JNL-04 pin; the current view rebuilds from history ALONE); the
+  bounded-response law rides the list arms (P4-00b); a streaming fork would diverge the shared
+  ANC-10 framing across every read arm.
+All three threads RESOLVED after the dispositions (the host's resolve-before-merge gate — the
+merge API refused with "All comments must be resolved" until the resolutions landed; the
+dispositions are the resolutions' substance).
+
+The flip/merge/restore with the protections re-read byte-equivalent after the restore
+(approving=1, dismiss_stale=true, require_code_owner=false, require_last_push_approval=false,
+strict=true, the five contexts, enforce_admins, restrictions none, no force pushes, no
+deletions). The branch deleted; 0 open PRs; only main on the remote. No ARV-SEV-003 round —
+the digest bound LAST (`8c835b06`) + the local trusted-gate reproduction green before the push
+(run-14, FIRST attempt).
+
+The full account of the chain: CLAIMS.md's CLAIM-072 close row. The following slice:
+CLAIM-073 (the journal sync delivery — the LAW-05 split's re-home), opened at `7286b3c` in
+record 65.

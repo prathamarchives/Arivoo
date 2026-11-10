@@ -1,0 +1,15 @@
+# CLAIM-073 — P4-C slice four: the journal sync delivery (the LAW-05 split's re-home)
+# The declared scope (LAW-06): the enqueue + the delivery + the bridge extension, all together.
+harness/commands.py
+harness/sync.py
+harness/tests/test_sync.py
+harness/tests/test_journal.py
+harness/red-records.json
+harness/runs/claim-073-p4c-journal-sync-delivery
+CLAIMS.md
+STATE.md
+AGENTS.md
+PLAN.md
+context/WORKLOG.md
+context/extracted/64-P4C-JOURNAL-BLOCKS.md
+context/extracted/65-P4C-JOURNAL-SYNC-DELIVERY.md

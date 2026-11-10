@@ -1,0 +1,20 @@
+CLAIM-074 — the observed RED (LAW-11: tests-only, committed BEFORE the implementation)
+
+Command: python3 harness/tests/test_reading_list.py
+Tree:    73bfd8cda4b51204add2d4301d621795bd813725 (CLAIM-074's commit A — the post-#108 reconciliation + the P4-C
+         slice five open, at CLAIM-073's merged head 3f6922b)
+Exit:    1
+Output:
+  FAIL ARV-TEST-000: the P4-C slice five reading-list machinery is absent (machinery-absent class; create_reading_list command absent: True; list-lists arm absent: True; get-list arm absent: True; migration 0017 present: False) — the implementation lands after this RED, never before it (LAW-11)
+
+Command: python3 harness/tests/test_sync.py   (the SYN-22 delivery pin, tests-only)
+Exit:    1
+Output tail (SYN-01..21 GREEN at this tree, SYN-22 the observed RED):
+        repair: commands.py's _SYNC_COMMANDS membership (create_reading_list + add_to_list + remove_from_list — the enqueue) + harness/sync.py _cli_args' reading-list branches (the translated list id — the create's bare-uuid result_ref, the bridge's existing form — + the translated source id) — the enqueue and the delivery land TOGETHER at this slice
+  
+  RED — the P3-08 sync suite fails: SYN-22
+
+Observed live at the exact tree above. The machinery lands in the immediately-following
+commit, never before this RED (LAW-11) — the migration 0017 + the three commands + the
+read arms + the outbox ride TOGETHER (the enqueue AND the delivery, never the
+dead-letter window).

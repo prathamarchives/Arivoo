@@ -119,6 +119,15 @@ Cases (the SYN registry; each pin's full statement lives at its check()):
          leaked staging file (the TMPDIR-steered walk leaves the
          staging dir empty — the cleanup follows the temp dir's own
          resolution, never a hard-coded /tmp)
+  SYN-22 the reading-list delivery (CLAIM-074, P4-C slice five: the outbox
+         ride TOGETHER — the enqueue and the delivery in one slice, never
+         the dead-letter window): the create_reading_list outbox row
+         DELIVERS (the server-side list through the translated identity,
+         the name byte-identical); the add_to_list row DELIVERS through
+         the TRANSLATED list + source ids (the membership event landing
+         server-side); the remove_from_list row DELIVERS the same way —
+         the current membership derived on BOTH domains equal, the event
+         history retained on both
 
 Run: python3 harness/tests/test_sync.py   (exit 0 = green)
 """
@@ -982,11 +991,77 @@ def main() -> int:
               "staging-cleanup prefix resolving through tempfile.gettempdir() (the "
               "TMPDIR-steered delivery cleans up after itself)")
 
+        # ---- SYN-22 — the reading-list delivery (CLAIM-074, P4-C slice
+        # five: the outbox ride TOGETHER — the enqueue AND the delivery in
+        # one slice, never the enqueue-without-delivery dead-letter window
+        # the CLAIM-066/071/073 rounds established law for)
+        r_rl = cmd("create_reading_list", "--name", "The Sync Reading List",
+                   key="sy-rl1")
+        rlid = ack_field(r_rl, "result_ref")
+        r_rladd = cmd("add_to_list", "--list", rlid, "--source", sid, key="sy-rl2")
+        r_rlrem = cmd("remove_from_list", "--list", rlid, "--source", sid,
+                      key="sy-rl3")
+        r_rladd2 = cmd("add_to_list", "--list", rlid, "--source", sid, key="sy-rl4")
+        r22 = sync()
+        st22a = ob(LOC, "sy-rl1")
+        ref22a = ob(LOC, "sy-rl1", "server_ref")
+        srv_rlid = ref22a if ref22a else ""
+        g22 = cli(str(REPO / "harness" / "query.py"), "get-list", "--owner", "A",
+                  "--id", srv_rlid, env=srv_env) if srv_rlid else None
+        g22rows = []
+        if g22 is not None and g22.returncode == 0:
+            try:
+                g22rows = [json.loads(ln) for ln in g22.stdout.splitlines()
+                           if ln.strip() and not ln.startswith("#")]
+            except Exception:
+                g22rows = []
+        l22 = cli(str(REPO / "harness" / "query.py"), "list-lists", "--owner", "A",
+                  env=srv_env)
+        l22name = ""
+        if l22.returncode == 0:
+            try:
+                l22name = next(json.loads(ln).get("name", "")
+                               for ln in l22.stdout.splitlines()
+                               if ln.strip() and not ln.startswith("#"))
+            except Exception:
+                l22name = ""
+        srv_ev = audit_rows(SRV, f"SELECT op FROM arv.reading_list_member "
+                                 f"WHERE list_id='{srv_rlid}' "
+                                 f"ORDER BY created_at, id;") if srv_rlid else []
+        ok22 = (r_rl.returncode == 0 and "status=committed" in r_rl.stdout
+                and r_rladd.returncode == 0 and r_rlrem.returncode == 0
+                and r_rladd2.returncode == 0
+                and r22.returncode == 0
+                and st22a == "acknowledged" and ref22a == srv_rlid
+                and ob(LOC, "sy-rl2") == "acknowledged"
+                and ob(LOC, "sy-rl3") == "acknowledged"
+                and ob(LOC, "sy-rl4") == "acknowledged"
+                and srv_ev == ["added", "removed", "added"]   # the event history rides the delivery
+                and len(g22rows) == 1                              # the derived current view: active again
+                and g22rows[0].get("source_id") == srv_sid       # the TRANSLATED source binding
+                and l22name == "The Sync Reading List")           # the name byte-identical
+        check("SYN-22", ok22,
+              "the reading-list delivery (CLAIM-074, P4-C slice five — the outbox ride "
+              "TOGETHER, never the dead-letter window): the create_reading_list outbox "
+              "row DELIVERS (the server-side list through the translated identity, the "
+              "name byte-identical on the server's own read arm); the add_to_list and "
+              "remove_from_list rows DELIVER through the TRANSLATED list + source ids — "
+              "the membership EVENT history landing server-side in order (added, "
+              "removed, added), the derived CURRENT membership equal on both domains "
+              "(the re-added source active, bound to the SERVER's own source id — the "
+              "identity bridge's translation, never a local uuid transplant) — the "
+              "event rows the recovery substrate on BOTH domains",
+              "commands.py's _SYNC_COMMANDS membership (create_reading_list + "
+              "add_to_list + remove_from_list — the enqueue) + harness/sync.py "
+              "_cli_args' reading-list branches (the translated list id — the create's "
+              "bare-uuid result_ref, the bridge's existing form — + the translated "
+              "source id) — the enqueue and the delivery land TOGETHER at this slice")
+
         print()
         if FAILS:
             print(f"RED — the P3-08 sync suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-08 acceptance suite (SYN-01..21) passes")
+        print("GREEN — the P3-08 acceptance suite (SYN-01..22) passes")
         return 0
     finally:
         pg.drop_scratch_db(LOC)

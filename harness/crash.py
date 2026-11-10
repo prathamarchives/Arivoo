@@ -21,6 +21,7 @@ from harness.commands import (create_note, revise_note,  # noqa: E402
                               tombstone_note, restore_note)
 from harness.commands import save_position  # noqa: E402  # P4-A slice two: the position save joins the crash matrix
 from harness.commands import record_session  # noqa: E402  # P4-C slice two: the session event joins the crash matrix
+from harness.commands import (journal_block, revise_journal_block)  # noqa: E402  # P4-C slice three: the journal writes join the crash matrix
 from harness.extract import extract_source  # noqa: E402
 
 POINTS = ("after-begin", "pre-commit", "post-commit-pre-ack",
@@ -44,7 +45,8 @@ def main() -> int:
                              "restore_highlight", "create_bookmark", "move_bookmark",
                              "tombstone_bookmark", "restore_bookmark",
                              "create_note", "revise_note", "tombstone_note",
-                             "restore_note", "save_position", "record_session"])
+                             "restore_note", "save_position", "record_session",
+                             "journal_block", "revise_journal_block"])
     ap.add_argument("--point", required=True, choices=POINTS)
     ap.add_argument("--owner", required=True)
     ap.add_argument("--actor", default="owner")
@@ -63,7 +65,9 @@ def main() -> int:
                     help="the session-event kind (record_session; P4-C slice two)")
     ap.add_argument("--dwell-ms", default=None, type=int,
                     help="the coarse dwell in milliseconds (dwell events only)")
-    ap.add_argument("--id", default=None, help="the highlight/bookmark/note id (the P3-04/05/06 families)")
+    ap.add_argument("--id", default=None, help="the highlight/bookmark/note/journal id (the P3-04/05/06 + P4-C slice three families)")
+    ap.add_argument("--kind", default=None,
+                    help="the writing lab's closed vocabulary: raw | creative (journal_block; P4-C slice three)")
     ap.add_argument("--content", default=None,
                     help="the note's authored content, inline (P3-06)")
     ap.add_argument("--content-file", default=None,
@@ -134,6 +138,14 @@ def main() -> int:
                             idem_key=a.idem_key, source_id=a.source_id,
                             event=a.event, start=a.start, end=a.end,
                             dwell_ms=a.dwell_ms, crash_at=a.point)
+    elif a.command == "journal_block":
+        rc = journal_block(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                           idem_key=a.idem_key, kind=a.kind, content=a.content,
+                           file=a.file, source_id=a.source_id, crash_at=a.point)
+    elif a.command == "revise_journal_block":
+        rc = revise_journal_block(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
+                                  idem_key=a.idem_key, id_=a.id, content=a.content,
+                                  file=a.file, crash_at=a.point)
     else:
         rc = create_highlight(db=db, owner=a.owner, actor=a.actor, client_id=a.client_id,
                               idem_key=a.idem_key, source_id=a.source_id,

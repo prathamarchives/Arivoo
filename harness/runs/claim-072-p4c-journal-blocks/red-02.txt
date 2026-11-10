@@ -1,0 +1,22 @@
+CLAIM-072 — the observed in-slice RED (the SYN-20 repair; LAW-11: the pin
+committed BEFORE the delivery branches, at 838b1e9)
+
+Command: python3 harness/tests/test_sync.py
+Tree:    838b1e9 (the SYN-20 pin alone — sync.py still carries no journal
+         branch)
+Exit:    1
+Output:
+  FAIL SYN-20: the journal-block delivery (the CLAIM-072 in-slice repair —
+  the same dead-letter class SYN-18/19 closed for the position and session
+  families) ... never a dead letter in the outbox-carrying set
+  RED — the P3-08 sync suite fails: SYN-20
+
+The observed failure mode: the journal_block outbox row terminally
+dead-letters ARV-SYN-000 (sync.py _cli_args has no journal branch — the
+commands joined _SYNC_COMMANDS at the GREEN 4a35546 but the delivery half
+never landed); every other pin (SYN-01..19) GREEN at this tree.
+
+The defect class: the exact P1 the CLAIM-071 SEV round 1 caught for the
+session family (F-071-1) and the CLAIM-066 round caught for the position
+family — found by the executor pre-SEV this round. The delivery branches
+land in the immediately-following commit, never before this RED.

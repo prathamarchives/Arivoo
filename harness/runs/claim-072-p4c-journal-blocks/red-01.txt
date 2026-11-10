@@ -1,0 +1,21 @@
+CLAIM-072 — the observed RED (LAW-11: tests-only, committed BEFORE the implementation)
+
+Command: python3 harness/tests/test_journal.py
+Tree:    87ffe31bafab1ad5ce2ea99a1b0d3ad9d1e6e1b74 (CLAIM-072's commit A — the post-#106
+         reconciliation + the P4-C slice three open, at CLAIM-071's merged head 78b3654)
+Exit:    1
+Output:
+  FAIL ARV-TEST-000: the P4-C slice three journal/blocks machinery is absent
+  (machinery-absent class; journal_block command absent: True; list-journal arm
+  absent: True; get-journal arm absent: True; migration 0016 present: False) —
+  the implementation lands after this RED, never before it (LAW-11)
+
+The machinery-absent probes: at the RED tree commands.py carries no
+journal_block command (and no revise_journal_block), query.py carries no
+list-journal and no get-journal arm (argparse's invalid choice), and no
+migration 0016_*.sql exists. The suite registered in gate.py's TESTS at this
+commit (the ARV-RED-008 class).
+
+Observed live at the exact tree above (the cheapest honest probe per
+surface). The implementation lands in the immediately-following commit,
+never before this RED.

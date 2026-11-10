@@ -1,0 +1,106 @@
+# Record 66 — P4-C slice five: the reading-list surface (the post-#108 reconciliation's landing)
+
+> STATUS: SESSION ENGINEERING RECORD (2026-11-10; the standing do-not-stop chain INT-134..146;
+> D-037/D-041/D-042/D-043). Historical process artifact per D-022: NOT owner intent, outranks
+> nothing. Worklog entry: Task 90. PR #108 MERGED (the P4-C slice four journal sync delivery,
+> under INT-145); the CLAIM-074 PR follows at this slice's end.
+
+Session 41 (2026-11-10), CLAIM-074, opened at the merged head `3f6922b` (the PR #108 merge —
+P4-C slice four). Record 65 carries the journal sync delivery's account (complete, §5 closed
+at this commit); this record carries the reading-list slice's contract + chain.
+
+## §1 The #108 merge close (CLAIM-073 LANDED — P4-C slice four)
+
+PR #108 merged at 2026-11-10 as `3f6922bf1a347d90a0ea5635d8b5f324f4c5813d` under INT-145's
+standing authorization: the five checks green at the exact final head `5e53682` AND on the
+merge commit (all observed live); the merge-gate review D-042 (1a) `5845109949`; CodeRabbit
+the skip state (no automatic reviews — noted per D-042 (1c)); zero review threads; the
+flip/merge/restore with the protections re-read byte-equivalent; the branch deleted; 0 open
+PRs. No ARV-SEV-003 round — the digest bound LAST (`acac4831`) + the local trusted-gate
+reproduction green before the push (run-15; run-14 the disclosed sheet-lag RED — caught
+BEFORE the push this time). THE TWO-ROUND SEV CHAIN (round 1 BLOCKED the F-073-1 P1 — the
+wrong-typed payload VALUE containment escape, repaired RED-first at `45b47ce`; round 2 PASS —
+the repair verified live at both boundaries family-wide). The full account: record 65 §4/§5 +
+CLAIM-073's rule-4 close row.
+
+## §2 The reading-list slice's contract (the post-#108 reconciliation, one phase deep)
+
+**The reconciliation (the directive's named question):** "The reading-list and collection
+requirements must be reconciled against the complete canonical P4-C outcome. Do not silently
+assume that the basic library list fulfills them." The evidence: the North Star owner words
+name THREE surfaces — "I have lists, a library, and lists of what I'm currently reading" — of
+which the library LANDED (CLAIM-070 list-library) and the current-reading lists LANDED
+(CLAIM-070 get-reading-state), but the user-defined LISTS did not: CLAIM-070's own bounded
+exclusion deferred them ("no reading lists/collections beyond the library itself"), and the
+PLAN 4C row's title names "reading lists" ("stable library/list membership"). The RTM's
+frozen entity contracts never reserved a list entity — the Phase-4 reservations were
+JournalBlock, @Reference, ReadingSession — so the shape elaborates NOW (one phase deep at
+slice four's landing, the P4-A..F rule). "Collections" (the directive's word) is the same
+surface: a list IS a collection of sources; no separate collection entity is invented
+without owner intent.
+
+**The letter:** the user-defined lists over the landed library —
+
+- **Migration 0017_reading_list** (the 0015/0016 substrate pattern):
+  - `arv.reading_list` — the list header: id, owner_scope, name TEXT (the owner's own name,
+    1..512 chars, no NULs), provenance (actor, run_id, input_hash, idempotency_key,
+    created_at), the append-only triggers, RLS enabled AND forced + the owner policy, the
+    grants (INSERT+SELECT arv_app / SELECT arv_read / no UPDATE/DELETE), NO DEFAULTs. NO
+    name uniqueness — Q11's identity baseline: the identity is the uuid, never the name
+    (two lists may share a name; the id disambiguates).
+  - `arv.reading_list_member` — the append-only MEMBERSHIP EVENT rows: (id, list_id,
+    source_id, owner_scope, op, provenance, created_at) with the closed op vocabulary CHECK
+    ('added' | 'removed'), the composite FKs (list + source, both owner-scoped), the same
+    substrate laws. The CURRENT membership is DERIVED: the last op per (list, source) wins —
+    a projection; the event rows are the recovery substrate (RTM §2 item 9's derived-state
+    rule: every add/remove retained, never a destructive delete, the full history
+    reconstructable from the events alone).
+- **The commands** (commands.py, through the spine's own ack contract — idempotent, the
+  frozen grammar, the crash-matrix membership): `create_reading_list --name <n>` (the list
+  header row; result_ref=<list-id>, the bare-uuid create class); `add_to_list --list <id>
+  --source <id>` (the 'added' event row); `remove_from_list --list <id> --source <id>` (the
+  'removed' event row). The typed no-oracle refusals: ARV-RLS-001 the absent/cross-owner
+  list; ARV-RLS-002 the absent/cross-owner source at the membership; ARV-RLS-003 the name
+  law (empty / oversized / NUL-carrying refused, never clamped).
+- **THE OUTBOX RIDE** (the CLAIM-073 law: the enqueue AND the delivery TOGETHER, never the
+  dead-letter window): the three commands join `_SYNC_COMMANDS`; sync.py's delivery branches
+  carry the translated list id (the create's bare-uuid result_ref — the bridge's existing
+  form, no address-form extension needed) + the translated source id; a not-yet-durable
+  dependency rests the row retryable ARV-SYN-009.
+- **The read arms** (query.py): `list-lists` (the owner's lists, bounded/paginated on the
+  P4-00b contract, each row with the derived member count, api_version'd, the empty
+  library's honest two-line answer) + `get-list --id` (the CURRENT membership — one row per
+  active member, bounded/paginated, the no-oracle byte-equal refusals for absent vs
+  cross-owner, the empty list's honest answer).
+- **The registry rows**: capability.py's reading-lists reserved-surface row (owner_phase
+  P4-C, the LANDED verbs) + crash.py's command membership.
+
+**The design boundary (the acceptance the RED pins):** the create→add→list→read round-trip;
+the membership event history complete (every add/remove retained, the current view derived —
+remove hides from the current view, the history keeps it; re-add after remove reactivates as
+a NEW event row, never a mutation); idempotent writes and replay (same key+body → replayed;
+same key+different body → ARV-CMD-409); the outbox delivery round-trip through the
+translated ids (both domains' memberships equal); owner isolation (B's lists invisible to A,
+the no-oracle byte-equal); the spine's crash matrix (the lost-ack arm); the sibling suites
+no-regression (SYN-01..21, JNL-01..06).
+
+**THE BOUNDED EXCLUSIONS:** no list ordering/pinning (a future increment); no list-of-lists
+or nested collections; no shared/multi-owner lists; no @-reference resolution over lists
+(P4-D's increment); no rename/revision machine on the list header (the name immutable at
+this slice — a rename is its own increment); no reader-client work (P4-B's repo).
+
+## §3 The slice chain in flight
+
+commit A (this commit: the post-#108 five-area reconciliation + CLAIM-074 opened + record 66
+minted; the branch pushed EARLY per the standing owner instruction) → the RED (the RLS
+suite authored tests-only per LAW-11 against the machinery-absent tree — migration 0017, the
+commands, and the read arms absent; the ARV-TEST-000 machinery-absent probe + the behavioral
+pins, observed RED) → the typed red-record binding (make red) → the GREEN (migration 0017 +
+the three commands through the spine + the two read arms + the outbox ride TOGETHER + the
+capability row + the crash membership + the gate's TESTS registration) → the measured set
+(the RLS suite x3 + the sync suite + the journal suite + make verify) → the SEV round(s) →
+the artifact finalize → the artifact re-bind → the push → the PR → the five checks → the
+merge-gate review → **the merge under INT-145** → the post-merge verification → the P4-C
+exit check (every required backend behavior landed: the library membership, the
+current-reading state, the reading lists, the session/dwell behavior, the journal/blocks +
+the sync delivery) → P4-D..F — NO PAUSE EVEN FOR UPDATES (INT-146).

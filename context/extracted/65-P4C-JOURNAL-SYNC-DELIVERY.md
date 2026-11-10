@@ -139,3 +139,30 @@ family-wide classes (the read arms' malformed-id echo — the F-072-1 routing; t
 `_nte_canon_id` family-wide slice); no fresh full-suite re-run inside the SEV rounds
 themselves (the recorded runs stand); no reader-client work (P4-B's repo); the
 `harness/client.py` surface unchanged at this slice.
+
+## §5 The close (CLAIM-073 LANDED — at this commit, the post-#108 reconciliation)
+
+PR #108 merged at 2026-11-10 as `3f6922bf1a347d90a0ea5635d8b5f324f4c5813d` under INT-145's
+standing authorization: the five checks green at the exact final head `5e53682` AND on the
+merge commit `3f6922b` (all observed live — re-read at the exact head immediately before the
+merge); the merge-gate review D-042 (1a) `5845109949`; CodeRabbit the skip state (fewer than
+10 stars, no automatic reviews, its comment carrying no findings — the best-effort bot class,
+D-042 (1c): noted, never silently accepted); zero review threads (the resolve-before-merge
+gate satisfied with the D-042 (1a) review posted BEFORE the merge); the flip/merge/restore
+with the protections re-read byte-equivalent (approving=1, dismiss_stale=true, strict=true,
+the five contexts, enforce_admins, no force pushes, no deletions); the branch deleted; 0 open
+PRs; only main. No ARV-SEV-003 round — the digest bound LAST (`acac4831`, validate_report
+GREEN) + the local trusted-gate reproduction green before the push (run-15; run-14 the
+DISCLOSED sheet-lag RED — the claim-070 class caught BEFORE the push this time: the sheet
+regenerated between the gate records so every invocation saw a sheet covering exactly the
+records on disk).
+
+THE TWO-ROUND SEV CHAIN (the account in §4): round 1 BLOCKED on F-073-1 (the P1 — the
+wrong-typed payload VALUE containment escape), repaired RED-first; round 2 PASS — the repair
+verified live at both boundaries, family-wide. The routed follow-ups: F-073-6 (the
+import_source staging-before-argv residue) + the standing family-wide classes.
+
+The writing lab's no-lost-writes law is COMPLETE: the journal family rides the client outbox
+with its delivery, the LAW-05 split's named re-home landed, and the per-row containment
+family-widely completed by the round-1 repair. The full account: CLAIM-073's rule-4 close
+row + this record. Record 66 carries the reading-list slice (the post-#108 reconciliation).

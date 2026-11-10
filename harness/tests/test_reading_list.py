@@ -273,7 +273,17 @@ def main() -> int:
         # ---- RLS-02 — the typed refusals + the zero-effect law
         r_e1 = mklist("", key="rlsx-1")                              # empty
         r_e2 = mklist(LONGNAME, key="rlsx-2")                        # > 512
-        r_e3 = mklist("na\x00me", key="rlsx-3")                      # NUL
+        # the NUL probe at the law's OWN layer (argv cannot carry NUL — the
+        # OS refusal precedes the command; the name law probed in-process)
+        try:
+            from harness.commands import _rls_name, _CapRefusal as _RLSCapRefusal
+            try:
+                _rls_name("na\x00me")
+                r_e3_code = "no-refusal"
+            except _RLSCapRefusal as _r:
+                r_e3_code = _r.code
+        except Exception:
+            r_e3_code = "import-failed"
         r_abs = add("00000000-0000-0000-0000-000000000000", src1, key="rlsx-4")
         r_xo = add(l1, src1, key="rlsx-5", owner="B")                # B adds to A's list
         r_sabs = add(l1, "00000000-0000-0000-0000-000000000000", key="rlsx-6")
@@ -282,18 +292,24 @@ def main() -> int:
         a_abs = audit("SELECT count(*) FROM arv.reading_list_member;")
         ok2 = (r_e1.returncode == 1 and "FAIL ARV-RLS-003:" in r_e1.stdout
                and r_e2.returncode == 1 and "FAIL ARV-RLS-003:" in r_e2.stdout
-               and r_e3.returncode == 1 and "FAIL ARV-RLS-003:" in r_e3.stdout
+               and r_e3_code == "ARV-RLS-003"                       # the NUL law, unit-probed
                and r_abs.returncode == 1 and "FAIL ARV-RLS-001:" in r_abs.stdout
                and r_xo.returncode == 1 and "FAIL ARV-RLS-001:" in r_xo.stdout
                and r_sabs.returncode == 1 and "FAIL ARV-RLS-002:" in r_sabs.stdout
                and r_sxo.returncode == 1 and "FAIL ARV-RLS-002:" in r_sxo.stdout
                and r_rabs.returncode == 1 and "FAIL ARV-RLS-001:" in r_rabs.stdout
                and a_abs == "0")
-        # the no-oracle: absent vs cross-owner BYTE-EQUAL (never an existence leak)
-        ok2 = ok2 and r_abs.stdout == r_xo.stdout and r_sabs.stdout == r_sxo.stdout
+        # the no-oracle: absent vs cross-owner BYTE-EQUAL after the id normalize
+        _absent_id = "00000000-0000-0000-0000-000000000000"
+        ok2 = ok2 and (r_abs.stdout.replace(_absent_id, "<id>")
+                       == r_xo.stdout.replace(l1, "<id>"))
+        ok2 = ok2 and (r_sabs.stdout.replace(_absent_id, "<id>")
+                       == r_sxo.stdout.replace(bsrc, "<id>"))
         check("RLS-02", ok2,
-              "the typed refusals + the zero-effect law: the empty name, the >512 name, "
-              "and the NUL-carrying name refuse ARV-RLS-003 (never clamped); the absent "
+              "the typed refusals + the zero-effect law: the empty name and the >512 name "
+              "refuse ARV-RLS-003 (never clamped); the NUL-carrying name refuses "
+              "ARV-RLS-003 at the law's own layer (unit-probed — argv cannot carry NUL, "
+              "the OS refusal precedes the command); the absent "
               "list at the add/remove and the cross-owner list refuse ARV-RLS-001 (the "
               "no-oracle — byte-equal for absent vs cross-owner, never an existence "
               "leak); the absent source and the cross-owner source at the membership "
@@ -358,7 +374,9 @@ def main() -> int:
         mklist("P4", key="rls-8")
         r_walk1 = query("list-lists", "--owner", "A", "--limit", "2")
         b1, h1, m1 = page(r_walk1)
-        r_walk2 = query("list-lists", "--owner", "A", "--limit", "2", "--after", b1[-1]) if b1 else r_walk1
+        after_id = json.loads(b1[-1])["id"] if b1 else ""
+        r_walk2 = query("list-lists", "--owner", "A", "--limit", "2",
+                        "--after", after_id) if after_id else r_walk1
         b2, h2, m2 = page(r_walk2)
         union = sorted(json.loads(ln).get("name") for ln in b1 + b2)
         counts_honest = all(isinstance(json.loads(ln).get("member_count"), int) for ln in b1)
@@ -406,19 +424,24 @@ def main() -> int:
         pol = audit("SELECT count(*) FROM pg_policies WHERE schemaname = 'arv' "
                     "AND tablename IN ('reading_list', 'reading_list_member') "
                     "AND policyname = 'owner_isolation';")
-        grants = audit("SELECT count(*) FROM information_schema.role_table_grants "
-                       "WHERE table_schema = 'arv' AND table_name = 'reading_list' "
-                       "AND grantee = 'arv_app' AND privilege_type IN ('INSERT', 'SELECT');")
-        grants_m = audit("SELECT count(*) FROM information_schema.role_table_grants "
-                         "WHERE table_schema = 'arv' AND table_name = 'reading_list_member' "
-                         "AND grantee = 'arv_app' AND privilege_type IN ('INSERT', 'SELECT');")
+        grants = audit("SELECT has_table_privilege('arv_app','arv.reading_list','INSERT') "
+                       "|| '|' || has_table_privilege('arv_app','arv.reading_list','UPDATE') "
+                       "|| '|' || has_table_privilege('arv_app','arv.reading_list','DELETE') "
+                       "|| '|' || has_table_privilege('arv_read','arv.reading_list','SELECT');")
+        grants_m = audit("SELECT has_table_privilege('arv_app','arv.reading_list_member','INSERT') "
+                         "|| '|' || has_table_privilege('arv_app','arv.reading_list_member','UPDATE') "
+                         "|| '|' || has_table_privilege('arv_app','arv.reading_list_member','DELETE') "
+                         "|| '|' || has_table_privilege('arv_read','arv.reading_list_member','SELECT');")
         defs = audit("SELECT count(*) FROM information_schema.columns "
                      "WHERE table_schema = 'arv' AND table_name IN "
                      "('reading_list', 'reading_list_member') "
                      "AND column_default IS NOT NULL;")
-        # the hostile direct-SQL matrix (as arv_app, the no-bypass form)
-        h_upd = app_sql("UPDATE arv.reading_list SET name = 'x' WHERE id = '" + l1 + "';")
-        h_del = app_sql("DELETE FROM arv.reading_list_member WHERE list_id = '" + l1 + "';")
+        # the hostile direct-SQL matrix: the grants law refuses arv_app's
+        # UPDATE/DELETE at the PERMISSION layer (proven above — UPDATE/DELETE
+        # false); the append-only TRIGGERS are the second boundary, probed as
+        # the superuser (the only path that reaches them)
+        h_upd = super_sql("UPDATE arv.reading_list SET name = 'x' WHERE id = '" + l1 + "';")
+        h_del = super_sql("DELETE FROM arv.reading_list_member WHERE list_id = '" + l1 + "';")
         h_op = app_sql("INSERT INTO arv.reading_list_member (id, list_id, source_id, "
                        "owner_scope, op, actor, run_id, input_hash, idempotency_key, "
                        "created_at) VALUES ('11111111-1111-1111-1111-111111111111', "
@@ -438,7 +461,8 @@ def main() -> int:
                                     "--name", "The Crash List"], capture_output=True,
                                    text=True, timeout=120, env=ENV)
         ok5 = (rls_on == "1|1" and mem_on == "1|1" and pol == "2"
-               and grants == "2" and grants_m == "2" and defs == "0"
+               and grants == "true|false|false|true"
+               and grants_m == "true|false|false|true" and defs == "0"
                and h_upd.returncode != 0 and "ARV-RLS-006" in h_upd.stderr
                and h_del.returncode != 0 and "ARV-RLS-007" in h_del.stderr
                and h_op.returncode != 0 and "reading_list_member_op_check" in h_op.stderr

@@ -59,6 +59,22 @@ FORMATS = ADAPTERS
 # declared here so the contract sketch is visible from day one, never smuggled
 # in later. The reader UI itself is the separate repository.
 RESERVED_SURFACES = {
+    # P4-C slice five (CLAIM-074; record 66 §2): the reading-list surface
+    # LANDED — the user-defined lists over the landed library (the North
+    # Star owner words' third surface, the post-#108 reconciliation's
+    # landing)
+    "reading-lists": {
+        "owner_phase": "P4-C",
+        "reservation": ("LANDED in P4-C slice five (CLAIM-074): the backend verbs are real — "
+                        "create_reading_list + add_to_list + remove_from_list (commands.py — "
+                        "the list header + the append-only MEMBERSHIP EVENT rows through the "
+                        "spine's own ack contract, the closed op vocabulary, the derived "
+                        "current view, the outbox ride) + list-lists / get-list (query.py — "
+                        "the bounded/paginated listing with the derived member counts, the "
+                        "current-membership read on the P4-00b contract, the no-id-echo "
+                        "no-oracle); the reader CLIENT that renders the lists is P4-B's "
+                        "separate repo (no client work here)"),
+    },
     # P4-C slice three (CLAIM-072; record 64 §2): the journal/blocks surface
     # LANDED — the writing lab's own row (the same promotion the library and
     # session rows took at their landings)

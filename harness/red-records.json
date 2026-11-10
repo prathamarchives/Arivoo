@@ -842,7 +842,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-059 (P3-08) the RED: the SYN-01..15 suite's RED observed at the exact predecessor 67e37fa (CLAIM-058's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the driver + migration 0012 absent), red-01.txt; the typed observed red per F-007",
-    "current_sha256": "e13aca94ec9e32d61343fa2998f5fb4e76bc722bee6530b03594ca63ecee2e70",
+    "current_sha256": "12a8d905c842285ec27123e745824155348cef88d930ae4e7ebc3e3c01b8c570",
     "amendments": [
       {
         "prior_sha256": "d2158263fb30078c71c5874e85f781b12d5182605e917ca36420511d43a9b720",
@@ -897,6 +897,12 @@
         "new_sha256": "e13aca94ec9e32d61343fa2998f5fb4e76bc722bee6530b03594ca63ecee2e70",
         "note": "CLAIM-073's SEV round-1 F-073-1 repair RED (the SYN-21 pin, tests-only per LAW-11, added at 094eb07 and observed RED there): the wrong-typed payload VALUE containment escape \u2014 the hostile journal row {\"kind\":5,...} crashed the driver at the argv-consumption site OUTSIDE the per-row containment (AttributeError 'int' object has no attribute 'startswith'), the row resting delivered-unapplied, every later pass crashing identically, the queue permanently blocked (red-02.txt; the SEV round-1 report F-073-1 P1 BLOCKED; the orchestrator's independent repro). The repair follows: the driver-boundary all-string argv guard INSIDE the containment + the journal branches' early validation + the TMPDIR-correct staging-cleanup prefix",
         "observed_at": "2026-11-10T15:23:00.281249+00:00"
+      },
+      {
+        "prior_sha256": "e13aca94ec9e32d61343fa2998f5fb4e76bc722bee6530b03594ca63ecee2e70",
+        "new_sha256": "12a8d905c842285ec27123e745824155348cef88d930ae4e7ebc3e3c01b8c570",
+        "note": "CLAIM-074's RED (the RLS suite authored tests-only per LAW-11 at this commit and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure + the sync suite's SYN-22 delivery pin observed RED (SYN-01..21 green, SYN-22 FAIL exit 1); the implementation lands in the immediately-following commit, never before this RED",
+        "observed_at": "2026-11-10T16:29:30.347110+00:00"
       }
     ]
   },
@@ -1166,6 +1172,23 @@
         "new_sha256": "dfa6df0e0802528342cbb38199864aaa4b764440e9df6b240d3888f19b9ba6c5",
         "note": "CLAIM-073's JNL-04 supersession amendment (typed, disclosed \u2014 the LAW-05 split's named landing): the pin's ZERO-outbox-row form was the SPLIT tree's honest state (CLAIM-072, the JNL-04 pin's split form); at this slice the family ENQUEUES (the _SYNC_COMMANDS membership landed together with the delivery \u2014 never the dead-letter window), so the pin's form rides the delivery: every committed journal write carries its outbox row in the SAME transaction (the observed count 6 \u2014 the creates jnl-1..4 + the revise jnl-5 + the crash-committed revise jnl-6; the refusals and replays add none). The RED evidence (red-01.txt at 87ffe31, ARV-TEST-000 machinery-absent, CLAIM-072's original RED) untouched; the ARV-TEST-000 probes unchanged; the assertions only strengthened \u2014 the delivery-carrying form subsumes the split form's intent (the atomic-law pin now asserted positively, never the absent-row negative)",
         "observed_at": "2026-11-10T13:45:39.778221+00:00"
+      }
+    ]
+  },
+  "harness/tests/test_reading_list.py": {
+    "schema": 2,
+    "binding_commit": "e7e833f952ce3934add454bf0ccb31526d49a186",
+    "binding_sha256": "a0f5f339018d9dbc0059d918d33a98921f6674ccedd40be3356f1e5f1dcbfe21",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-074's RED (the RLS suite authored tests-only per LAW-11 at this commit and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure + the sync suite's SYN-22 delivery pin observed RED (SYN-01..21 green, SYN-22 FAIL exit 1); the implementation lands in the immediately-following commit, never before this RED",
+    "current_sha256": "ba6ed39313c99dc03372eaf724c4476d6ff782e6ced2fc9e6736e0dfe58e887b",
+    "amendments": [
+      {
+        "prior_sha256": "a0f5f339018d9dbc0059d918d33a98921f6674ccedd40be3356f1e5f1dcbfe21",
+        "new_sha256": "ba6ed39313c99dc03372eaf724c4476d6ff782e6ced2fc9e6736e0dfe58e887b",
+        "note": "CLAIM-074's pre-GREEN suite repairs (the disclosed additive amendments, never a gate weakening \u2014 the CLAIM-072 strenghtener class): (1) the NUL-name probe moved to the law's OWN layer (unit-probed in-process \u2014 argv cannot carry NUL, the OS ValueError precedes the command; the ARV-RLS-003 law itself unchanged); (2) the keyset cursor takes the parsed id field (the JSON row's id, never the raw line \u2014 the row-carrying arm's cursor form); (3) the grants audit switched to has_table_privilege (the journal family's form \u2014 information_schema.role_table_grants is grantee-scoped and shows nothing to arv_read); (4) the append-only TRIGGER probes moved to the superuser channel (arv_app is refused at the PERMISSION layer first \u2014 the grants law's own proof; the triggers are the second boundary, reachable only as postgres). The RED evidence (red-01.txt at e7e833f: ARV-TEST-000 machinery-absent + the SYN-22 FAIL) untouched; the ARV-TEST-000 probes unchanged; the assertions only strengthened",
+        "observed_at": "2026-11-10T16:41:48.215950+00:00"
       }
     ]
   }

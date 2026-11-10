@@ -47,6 +47,21 @@ thinking preserved losslessly, no forced short-note funnel):
   get-journal-history  the governed history — EVERY revision in order,
                        one JSON line per row (the export-ready form)
 
+P4-C slice five (CLAIM-074; record 66 §2): the reading-list surface — the
+user-defined lists over the landed library (the North Star owner words'
+third surface). The membership is an EVENT HISTORY (every add/remove an
+append-only event row); the CURRENT membership is DERIVED (the last op per
+pair wins — a projection; the event rows the recovery substrate):
+  list-lists           the owner's lists as a stable, bounded, paginated
+                       list (one JSON line per list: the id, the name, the
+                       derived member count, the created_at; the keyset
+                       walk on the list id)
+  get-list             one list's CURRENT membership — one JSON line per
+                       active member (the source id + the added_at),
+                       bounded + paginated on the same list contract; the
+                       no-id-echo no-oracle (absent and another owner's
+                       the SAME refusal, byte-equal whatever was asked)
+
 THE TYPED RESOLUTION (resolve-anchor; P3-03b): a typed query, NEVER a
 nearest-match guess —
   resolved     the location evidence validates WITHIN the anchor's OWN Source
@@ -294,6 +309,28 @@ SESLIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT e.id AS event_id, e.sou
 # never appear raw).
 JNLLIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT DISTINCT j.id FROM arv.journal_block j "
                "WHERE {after}TRUE ORDER BY j.id LIMIT {limit}) t;")
+# P4-C slice five (CLAIM-074; record 66 §2): the reading-list surface's
+# read arms.  The listing carries one JSON line per list (the id, the name,
+# the DERIVED member count — the count over the current view, never a
+# state column), ordered by the list id (the keyset convention every list
+# arm rides).  The member arm derives the CURRENT membership: DISTINCT ON
+# the source pair with the last-op-wins ORDER, then the op='added' filter —
+# the projection over the event rows (RTM §2 item 9), never a second
+# store.  The member cursor rides the derived source-id column aliased id
+# (the _page_args keyset form).
+RLLIST_SQL = ("SELECT row_to_json(t)::text FROM (SELECT l.id, l.name, l.created_at, "
+              "(SELECT count(*) FROM (SELECT DISTINCT ON (m.source_id) m.source_id, m.op "
+              "FROM arv.reading_list_member m WHERE m.list_id = l.id "
+              "ORDER BY m.source_id, m.created_at DESC, m.id DESC) c "
+              "WHERE c.op = 'added') AS member_count "
+              "FROM arv.reading_list l WHERE {after}TRUE ORDER BY l.id LIMIT {limit}) t;")
+RLMEM_SQL = ("SELECT row_to_json(t)::text FROM (SELECT c.id AS source_id, c.added_at FROM "
+             "(SELECT DISTINCT ON (m.source_id) m.source_id AS id, m.op, "
+             "m.created_at AS added_at FROM arv.reading_list_member m "
+             "WHERE m.list_id = {id} ORDER BY m.source_id, m.created_at DESC, m.id DESC) c "
+             "WHERE c.op = 'added' AND {after}TRUE ORDER BY c.id LIMIT {limit}) t;")
+RL_SQL = ("SELECT row_to_json(t)::text FROM (SELECT l.id, l.name, l.created_at FROM "
+          "arv.reading_list l WHERE l.id = {id}) t;")
 JNL_SQL = ("SELECT row_to_json(t)::text FROM (SELECT j.id, j.revision, j.kind, j.content, "
            "j.source_id, j.actor, j.created_at FROM arv.journal_block j WHERE j.id = {id} "
            "ORDER BY j.revision DESC LIMIT 1) t;")
@@ -733,6 +770,76 @@ def _journal_history(db: str, owner: str, id_: str) -> int:
     return 0
 
 
+def _refuse_reading_list() -> int:
+    """P4-C slice five (CLAIM-074): the reading-list read boundary's
+    no-oracle — absent and another owner's are the SAME refusal (RTM
+    §2.10 on the read path).  The journal family's no-id-echo form: the
+    refusal bytes stay equal WHATEVER id was asked, the strongest form of
+    the no-oracle (the F-072-1 malformed-id class stays routed family-wide
+    — the shared _nte_canon_id pattern's own slice)."""
+    print("FAIL ARV-QRY-001: no such reading list in the caller's scope — absent and "
+          "another owner's are the SAME refusal, never a side channel")
+    print("      repair: check the id against the caller's own list-lists answer "
+          "(query.py list-lists)")
+    return 1
+
+
+def _lists(db: str, owner: str, limit, after) -> int:
+    """P4-C slice five (CLAIM-074; record 66 §2): the owner's lists — one
+    JSON line per list (the id, the name, the DERIVED member count over
+    the current view, the created_at), bounded + paginated on the P4-00b
+    contract through _page_args (the typed ARV-QRY-004 at the boundary,
+    never a clamp); the limit+1 fetch OBSERVES the truth marker; the empty
+    surface answers header + more=false ALONE (never pure silence).  NO
+    name uniqueness is implied or enforced — the identity is the uuid
+    (Q11's baseline); two lists may share one name and BOTH appear."""
+    page = _page_args(limit, after, "l")
+    if page is None:
+        return 1
+    limit, after_clause = page
+    rows = _read(db, owner, RLLIST_SQL.format(after=after_clause, limit=limit + 1))
+    if rows is None:
+        return 1
+    more = len(rows) > limit
+    print(f"# api_version={API_VERSION}")
+    for ln in rows[:limit]:
+        print(json.dumps(_versioned(json.loads(ln)), ensure_ascii=False))
+    print(f"# more={'true' if more else 'false'}")
+    return 0
+
+
+def _get_list(db: str, owner: str, id_: str, limit, after) -> int:
+    """P4-C slice five (CLAIM-074; record 66 §2): one list's CURRENT
+    membership — the DERIVED view (DISTINCT ON the source pair, the last
+    op wins, then the op='added' filter), one JSON line per active member
+    (the source id + the added_at), bounded + paginated on the same list
+    contract (the member cursor rides the derived source-id column).  The
+    header read and the member page are the list arm's OWN reads — the
+    membership derives live at every invocation (no materialized copy, no
+    second store).  THE NO-ORACLE: an absent list and another owner's are
+    the SAME refusal (the no-id-echo form, byte-equal whatever was
+    asked).  The empty list answers header + more=false ALONE."""
+    qid = "'" + id_.replace("'", "''") + "'"
+    rows = _read(db, owner, RL_SQL.format(id=qid))
+    if rows is None:
+        return 1
+    if not rows:
+        return _refuse_reading_list()
+    page = _page_args(limit, after, "c")
+    if page is None:
+        return 1
+    limit, after_clause = page
+    mrows = _read(db, owner, RLMEM_SQL.format(id=qid, after=after_clause,
+                                              limit=limit + 1))
+    if mrows is None:
+        return 1
+    more = len(mrows) > limit
+    print(f"# api_version={API_VERSION}")
+    for ln in mrows[:limit]:
+        print(json.dumps(_versioned(json.loads(ln)), ensure_ascii=False))
+    print(f"# more={'true' if more else 'false'}")
+    return 0
+
 
 def _say(out: dict, **kw) -> None:
     out.update(kw)
@@ -754,8 +861,19 @@ def main() -> int:
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         p.add_argument("--id", required=True)
+    # P4-C slice five (CLAIM-074): the member page rides the same list
+    # contract as the listing (bounded + the keyset cursor)
+    p = sub.add_parser("get-list")
+    p.add_argument("--owner", required=True)
+    p.add_argument("--id", required=True)
+    p.add_argument("--limit", default=str(DEFAULT_LIST_LIMIT),
+                   help=f"the member page size (bounds 1..{MAX_LIST_LIMIT}, default {DEFAULT_LIST_LIMIT}) — "
+                        "a non-integer refuses with the typed ARV-QRY-004, never argparse's usage exit")
+    p.add_argument("--after", default=None, metavar="ID",
+                   help="the keyset cursor — the next page starts strictly after this listed source id")
     for name in ("list-captures", "list-bookmarks", "list-notes", "list-library",
-                 "get-reading-state", "list-session-events", "list-journal"):
+                 "get-reading-state", "list-session-events", "list-journal",
+                 "list-lists"):
         p = sub.add_parser(name)
         p.add_argument("--owner", required=True)
         # P4-00b: the list contract — the bounded page + the keyset cursor
@@ -905,6 +1023,14 @@ def main() -> int:
         # P4-C slice three (CLAIM-072): the journal listing — the owner's
         # blocks on the P4-00b list contract
         return _list_arm(db, a.owner, JNLLIST_SQL, "j", a.limit, a.after)
+    if a.what == "list-lists":
+        # P4-C slice five (CLAIM-074): the reading-list listing — the owner's
+        # lists, one JSON line per list with the derived member count
+        return _lists(db, a.owner, a.limit, a.after)
+    if a.what == "get-list":
+        # P4-C slice five (CLAIM-074): one list's CURRENT membership — the
+        # derived view over the membership event rows
+        return _get_list(db, a.owner, a.id, a.limit, a.after)
     sql = SRC_SQL
     rows = _read(db, a.owner, sql.format(id="'" + a.id.replace("'", "''") + "'"))
     if rows is None:

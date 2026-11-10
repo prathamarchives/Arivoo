@@ -1,0 +1,7 @@
+{
+  "command": "env SLICE=claim-074-p4c-reading-lists GATE_DIFF=origin/main make gate",
+  "exit_code": 0,
+  "commit": "ed3b27aa7333693ec2bb795a833cb2578c27a195",
+  "output_sha256": "aaf1cf0edd9c54f23c7ac909658611d4094c854010ec8c9741058caca8b5132c",
+  "recorded_at": "2026-11-10T17:23:59.655444+00:00"
+}

@@ -83,6 +83,7 @@ nearest-match guess —
 import argparse
 import json
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -542,6 +543,174 @@ def _resolve(db: str, owner: str, anchor_id: str) -> int:
     return 0
 
 
+# ------------------------------------------------- P4-D slice one: the stable @-reference resolution (RTM §2 item 10)
+
+# the seven landed families, split by the revision dimension exactly as the
+# CLAIM-057 substrate's grammar law splits its kinds (the note-reference
+# machine's five + the two P4-C families the resolution surface covers):
+# bare = the identity IS the version; revisioned = the (id, revision) pair.
+_REF_BARE = ("work", "source", "anchor")
+_REF_REV = ("highlight", "bookmark", "note", "journal_block")
+_REF_UUID_RE = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                          r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+# per family: the entity table, its lifecycle table (None = the family
+# carries no tombstone machine), and the lifecycle's id column
+_REF_FAMILY = {"work": ("arv.work", None, None),
+               "source": ("arv.source", None, None),
+               "highlight": ("arv.highlight", "arv.highlight_lifecycle", "highlight_id"),
+               "bookmark": ("arv.bookmark", "arv.bookmark_lifecycle", "bookmark_id"),
+               "note": ("arv.note", "arv.note_lifecycle", "note_id"),
+               "journal_block": ("arv.journal_block", None, None)}
+
+
+def _ref_parse(ref: str):
+    """P4-D slice one (CLAIM-075; record 67 §2): parse + shape-validate the
+    reference string — the CLAIM-057 substrate's grammar composed at the
+    RESOLUTION boundary (the same uuid law, the same per-family revision
+    dimension), with the pin OPTIONAL here: the WRITE boundary requires the
+    pin (a stored reference is exact — version-aware by construction), the
+    resolution boundary answers both 'where is the current?' (unpinned) and
+    'exactly as pinned, never a retarget' (@rev).  Returns (kind, id,
+    rev|None) or the malformed-reason string."""
+    kind, sep, rest = ref.partition(":")
+    if not sep or kind not in _REF_BARE + _REF_REV:
+        return f"the kind {kind!r} is not in the vocabulary {_REF_BARE + _REF_REV}"
+    target, at, rev = rest.partition("@")
+    if not _REF_UUID_RE.match(target):
+        return "the target id is not a UUID"
+    if kind in _REF_BARE:
+        if at:
+            return (f"the {kind} reference must not name a revision — the "
+                    f"{kind} identity IS the version (the substrate's own law)")
+        return kind, target, None
+    r_ = None
+    if at:
+        if not rev.isdigit() or int(rev) < 1:
+            return "the pinned revision must be digits >= 1"
+        r_ = int(rev)
+    return kind, target, r_
+
+
+def _ref_refuse_dangling(ref: str) -> int:
+    """ARV-REF-001 — the no-oracle at the resolution boundary (the
+    substrate's ARV-NTE-003 law carried to the read side): the absent id,
+    another owner's id, and a nonexistent target revision on a live target
+    are the SAME refusal, byte-equal whatever was asked — never an
+    existence side channel."""
+    print(f"FAIL ARV-REF-001: the reference {ref!r} does not resolve in the caller's scope — "
+          "absent, another owner's, and a nonexistent target revision are the SAME "
+          "refusal, never a side channel")
+    print("      repair: reference a target from the caller's own library at an existing "
+          "revision (query.py list-* / get-*); resolve-reference answers the six states, "
+          "never a guess")
+    return 1
+
+
+def _ref_refuse_malformed(ref: str, why: str) -> int:
+    """ARV-REF-002 — the closed grammar, never a clamp and never a guess: a
+    reference string is DATA, never an instruction (imported hostile strings
+    never acquire authority by being read; the repr echo is framing-safe —
+    control characters stay escaped, the one-line refusal law holds)."""
+    print(f"FAIL ARV-REF-002: the reference {ref!r} is malformed — {why}")
+    print("      repair: supply kind:id[@rev] with kind in "
+          "work/source/anchor/highlight/bookmark/note/journal_block; "
+          "highlight|bookmark|note|journal_block may pin @rev (digits >= 1); "
+          "work|source|anchor never name a revision")
+    return 1
+
+
+def _resolve_reference(db: str, owner: str, ref: str) -> int:
+    """resolve-reference (P4-D slice one; CLAIM-075, record 67 §2): the
+    typed SIX-STATE resolution — ONE JSON answer line at exit 0 (an answer,
+    never a failure); ARV-REF-001 the no-oracle dangling refusal;
+    ARV-REF-002 the malformed grammar.  THE PRECEDENCE: the governed purge
+    (the 0013 permanence record — RLS scopes the ledger to the caller)
+    WINS over every state; the tombstone parity beats the revision
+    resolution (a pin never bypasses a tombstone); the anchor family
+    composes the P3-03b machinery's typed verdict VERBATIM (resolved ->
+    current + the serving generation_id, unresolved -> unavailable + the
+    named cause, ambiguous -> ambiguous + the hit count).  The revisioned
+    families read max-revision / pin-existence / parity from ONE statement
+    (subselects — one snapshot, the #91 read-path law); the unpinned form
+    answers current at the DERIVED max revision; the pinned form serves
+    EXACTLY as pinned (historical names the current alongside — never a
+    silent retarget)."""
+    parsed = _ref_parse(ref)
+    if isinstance(parsed, str):
+        return _ref_refuse_malformed(ref, parsed)
+    kind, tid, rev = parsed
+    qid = "'" + tid.replace("'", "''") + "'"
+    # the precedence's first law: the governed purge invalidates the access
+    rows = _read(db, owner, f"SELECT count(*) FROM arv.purge_ledger "
+                            f"WHERE kind='{kind}' AND entity_id={qid};")
+    if rows is None:
+        return 1
+    if rows and int(rows[0]) > 0:
+        _say(_versioned({"kind": kind, "id": tid, "state": "purged"}))
+        return 0
+    if kind == "anchor":
+        v = _verdict(db, owner, tid)   # the P3-03b machinery composed, never re-implemented
+        if v is None:
+            return 1
+        if not v:
+            return _ref_refuse_dangling(ref)
+        if v["state"] == "resolved":
+            _say(_versioned({"kind": "anchor", "id": tid, "state": "current",
+                             "resolved_ref": f"anchor:{tid}",
+                             "generation_id": v["generation_id"]}))
+        elif v["state"] == "ambiguous":
+            _say(_versioned({"kind": "anchor", "id": tid, "state": "ambiguous",
+                             "evidence_hits": v["evidence_hits"]}))
+        else:
+            _say(_versioned({"kind": "anchor", "id": tid, "state": "unavailable",
+                             "cause": v["cause"]}))
+        return 0
+    table, life, lcol = _REF_FAMILY[kind]
+    if kind in _REF_BARE:
+        rows = _read(db, owner, f"SELECT count(*) FROM {table} WHERE id={qid};")
+        if rows is None:
+            return 1
+        if not rows or int(rows[0]) == 0:
+            return _ref_refuse_dangling(ref)
+        _say(_versioned({"kind": kind, "id": tid, "state": "current",
+                         "resolved_ref": f"{kind}:{tid}"}))
+        return 0
+    pin = (f"COALESCE((SELECT count(*) FROM {table} WHERE id={qid} AND "
+           f"revision={rev if rev is not None else 0}), 0)")
+    mx = f"COALESCE((SELECT max(revision) FROM {table} WHERE id={qid}), 0)"
+    sql = f"SELECT {mx} || '|' || {pin}"
+    if life:
+        sql += (f" || '|' || COALESCE((SELECT count(*) FILTER (WHERE event = 'tombstone') > "
+                f"count(*) FILTER (WHERE event = 'restore') FROM {life} "
+                f"WHERE {lcol}={qid}), false)")
+    rows = _read(db, owner, sql + ";")
+    if rows is None:
+        return 1
+    parts = rows[0].split("|")
+    cur_rev, pinned = int(parts[0]), int(parts[1])
+    tomb = len(parts) > 2 and parts[2] == "true"
+    if cur_rev == 0:
+        return _ref_refuse_dangling(ref)
+    if tomb:
+        _say(_versioned({"kind": kind, "id": tid, "state": "tombstoned"}))
+        return 0
+    if rev is None:
+        _say(_versioned({"kind": kind, "id": tid, "state": "current",
+                         "resolved_ref": f"{kind}:{tid}@{cur_rev}",
+                         "revision": cur_rev}))
+        return 0
+    if pinned == 0:
+        return _ref_refuse_dangling(ref)   # the live target's pinned revision is absent: the same class
+    if rev == cur_rev:
+        _say(_versioned({"kind": kind, "id": tid, "state": "current",
+                         "resolved_ref": f"{kind}:{tid}@{rev}", "revision": rev}))
+    else:
+        _say(_versioned({"kind": kind, "id": tid, "state": "historical",
+                         "resolved_ref": f"{kind}:{tid}@{rev}",
+                         "pinned_revision": rev, "current_revision": cur_rev}))
+    return 0
+
+
 def _get_bookmark(db: str, owner: str, bm_id: str) -> int:
     """P3-05's ACCEPTANCE arm (RTM §2.5 item 6): return to the saved location
     or report the typed unresolved-anchor state — the entity row composed
@@ -892,6 +1061,14 @@ def main() -> int:
     p = sub.add_parser("resolve-anchor")
     p.add_argument("--owner", required=True)
     p.add_argument("--id", required=True)
+    # P4-D slice one (CLAIM-075): the stable @-reference resolution — the
+    # six-state typed answer over the seven landed families
+    p = sub.add_parser("resolve-reference")
+    p.add_argument("--owner", required=True)
+    p.add_argument("--ref", required=True, metavar="KIND:ID[@REV]",
+                   help="the reference to resolve: work/source/anchor bare; "
+                        "highlight/bookmark/note/journal_block optionally "
+                        "pinned @rev (the pinned form serves exactly as pinned)")
     p = sub.add_parser("search")
     p.add_argument("--owner", required=True)
     p.add_argument("terms", nargs="+", help="the keyword terms (AND semantics — every term must hit the document)")
@@ -899,6 +1076,8 @@ def main() -> int:
     db = os.environ.get("PGDATABASE", "postgres")
     if a.what == "resolve-anchor":
         return _resolve(db, a.owner, a.id)
+    if a.what == "resolve-reference":
+        return _resolve_reference(db, a.owner, a.ref)
     if a.what == "search":
         # P3-07: the keyword search — case-folded whole-token terms, the
         # multi-term AND intersection, the tombstone parity joined at query

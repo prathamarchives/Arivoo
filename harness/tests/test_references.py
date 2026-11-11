@@ -294,7 +294,11 @@ def main() -> int:
             key="ref-hl-2")
         cmd("revise_highlight", "--id", hl1, "--start", "68", "--end", "88",
             key="ref-hl-3")
-        anc1 = audit(f"SELECT anchor_id FROM arv.highlight WHERE id='{hl1}';")
+        # the anchor OF REVISION 1 (each highlight revision derives its OWN
+        # anchor at its own offsets — the §3.3 edit transition's law; the
+        # pinned companion of the note's highlight:<hl1>@1 reference)
+        anc1 = audit(f"SELECT anchor_id FROM arv.highlight WHERE id='{hl1}' "
+                     f"AND revision=1;")
         gen1 = audit(f"SELECT id FROM arv.extraction_generation WHERE "
                      f"source_id='{src1}' AND state='current';")
 
@@ -590,7 +594,7 @@ def main() -> int:
                and all("revision" not in d and "resolved_ref" not in d
                        for d in (g_np, g_npp, g_pt))
                and v_jb.returncode != 0
-               and "purge_ledger_purge_kind_check" in (v_jb.stderr or ""))
+               and "purge_ledger_kind_check" in (v_jb.stderr or ""))
         check("REF-05", ok5,
               "the purged state + the precedence: a purge-ledger row makes the "
               "reference answer purged for BOTH the unpinned and the PINNED forms "

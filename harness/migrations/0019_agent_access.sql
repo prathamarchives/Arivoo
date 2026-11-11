@@ -128,4 +128,10 @@ GRANT INSERT, SELECT, UPDATE ON arv.agent_credential TO arv_app;
 GRANT SELECT ON arv.agent_credential TO arv_read;
 GRANT INSERT, SELECT ON arv.agent_read_log TO arv_app;
 GRANT SELECT ON arv.agent_read_log TO arv_read;
+-- F-077-2 (the SEV round-1 repair): PostgreSQL grants EXECUTE on functions to
+-- PUBLIC by default — the "narrow lookup" letter requires the explicit
+-- revocation (arv_read resolving a live hash observed live by the reviewer;
+-- the impact bounded — the caller needs the 190-bit hash — but the letter
+-- must hold)
+REVOKE EXECUTE ON FUNCTION arv.agent_token_lookup(TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION arv.agent_token_lookup(TEXT) TO arv_app;

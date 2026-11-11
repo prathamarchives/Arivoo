@@ -4,6 +4,7 @@
 # arbitrary database access; Q10 handled honestly). RED-first at CLAIM-076's merged head
 # 898b9f2a. The scope elaborates at the RED per the one-phase-deep rule.
 harness/commands.py D-041
+harness/adapters/ids.py D-041
 harness/query.py D-041
 harness/capability.py D-041
 harness/crash.py D-041

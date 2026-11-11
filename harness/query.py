@@ -1081,59 +1081,6 @@ def _agent_audit(db: str, owner: str, cred_id: str, arm: str, limit, after) -> i
     return 0
 
 
-# ------------------------------------------------- P4-E slice one: the scoped agent read mode (CLAIM-077; record 69 §2)
-
-def _agent_resolve(db: str, token: str):
-    """The credential resolution: the sha256 -> the narrow SECURITY DEFINER
-    lookup (arv.agent_token_lookup — the system's own authentication
-    primitive, exposing ONLY the live 'read'-scoped credential's owner scope;
-    never an agent-reachable arbitrary read) -> (owner_scope, credential_id).
-    ARV-AGT-001 — the no-oracle invalid-token class: unknown, revoked, and
-    scope-missing are the SAME refusal, and the TOKEN IS NEVER ECHOED (it is
-    a secret — the refusal names the class, never the credential, never the
-    scope, never the value)."""
-    h = hashlib.sha256(token.encode("utf-8")).hexdigest()
-    qh = "'" + h.replace("'", "''") + "'"
-    rows = _read(db, "_agent_lookup",
-                 f"SELECT owner_scope || '|' || credential_id::text FROM "
-                 f"arv.agent_token_lookup({qh});")
-    if rows is None:
-        return None
-    if not rows:
-        print("FAIL ARV-AGT-001: the credential does not grant access — unknown, "
-              "revoked, and scope-missing are the SAME refusal, never a side channel "
-              "(the token is never echoed: it is a secret)")
-        print("      repair: use a live credential's token value exactly as "
-              "displayed at its mint; mint a new credential if the old was revoked "
-              "(the owner's revocation is final)")
-        return None
-    owner, cid = rows[0].split("|")
-    return owner, cid
-
-
-def _agent_audit(db: str, owner: str, cred_id: str, arm: str, limit, after) -> int:
-    """The audit row for one SERVED agent read: the credential + the arm + the
-    bounded REQUEST facts (the page limit and the keyset cursor as requested),
-    NEVER the content (a read log that stored what was read would be a second
-    copy of the library — the structural no-content law). Append-only at the
-    substrate (the 0019 immutable trigger); RLS-scoped to the credential's own
-    owner. A failure here is LOUD (exit 1 after the served read): an unaudited
-    agent read is a contract violation, never a silent pass."""
-    qlim = "NULL" if limit is None else str(int(limit))
-    qaft = "NULL" if after is None else "'" + str(after).replace("'", "''") + "'"
-    qid = "'" + str(cred_id).replace("'", "''") + "'"
-    r = pg.psql(f"SET app.current_owner='{owner}'; INSERT INTO arv.agent_read_log "
-                f"(id, credential_id, owner_scope, arm, req_limit, req_after, "
-                f"created_at) VALUES (gen_random_uuid(), {qid}, "
-                f"'{owner}', '{arm}', {qlim}, {qaft}, now());", db=db, user="arv_app")
-    if r.returncode != 0:
-        print(f"FAIL ARV-AGT-005: the agent read was served but the audit row "
-              f"refused — {r.stderr.strip()[:200]} (an unaudited agent read is a "
-              "contract violation, never a silent pass)")
-        return 1
-    return 0
-
-
 def main() -> int:
     ap = argparse.ArgumentParser(description="the authenticated retrieval surface (P3-01)")
     sub = ap.add_subparsers(dest="what", required=True)

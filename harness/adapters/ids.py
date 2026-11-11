@@ -46,7 +46,7 @@ def new_agent_token() -> str:
     the ONLY secrets-class randomness in the id/adapter layer (LAW-24: ambient
     randomness lives here, never in the command surface). 32 bytes of
     os.urandom, urlsafe-encoded (~190 bits); the FIRST CHARACTER constrained
-    to the alphanumeric range (the F-074-1 class caught live by CLAIM-077's
+    to the non-dash range (a leading '_' is argv-safe and occurs) (the F-074-1 class caught live by CLAIM-077's
     own measured set: a leading '-' breaks the separate-argv form
     '--agent-token <value>' at argparse — a property of the generated value,
     never an argv-convention change; the entropy cost 1/64 of the space)."""

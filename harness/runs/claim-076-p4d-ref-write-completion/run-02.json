@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_note_reference.py",
+  "exit_code": 0,
+  "commit": "b50f5d987074d6978b99c23dee3a31ab70714e65",
+  "output_sha256": "18e734ac08a245b1c6825d36a299a963fa9d3e49d87d25882b5483415bbd33a5",
+  "recorded_at": "2026-11-11T12:42:08.326361+00:00"
+}

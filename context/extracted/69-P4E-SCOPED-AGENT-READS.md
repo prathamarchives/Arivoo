@@ -89,11 +89,75 @@ no reader-client work (P4-B's repo).
 
 ## §3 The executed chain
 
-(In flight — appended as the slice executes.)
+commit A (docs: the post-#111 reconciliation + THE P4-D EXIT CHECK + CLAIM-077 opened + record
+69 minted; the branch pushed EARLY) → **the RED** (`048a1ddb`: the AGT suite authored
+tests-only per LAW-11 — 407 lines, the AGT-01..08 registry; the DB-free machinery-absent
+probe; red-01.txt exit 1 ARV-TEST-000) → the typed red-record binding (`6d5e22e`:
+red-records.json + red-01.txt + the gate.py TESTS registration — the ARV-RED-008 class,
+diff-visible) → **the pre-GREEN amendments** (the four disclosed pin-authoring repairs: the
+AGT-02 NUL probe moved to the law's own layer — argv cannot carry NUL, the CLAIM-074 lesson;
+AGT-06's bare-id listing form; AGT-07's before/after audit-count form; AGT-08's
+has_table_privilege grants audit + the boolean renderings) → **the GREEN** (`cf0fe44`:
+migration 0019 + commands.py's mint/revoke + query.py's --agent-token mode + capability.py's
+row) → **the measured-set repair** (`79b5f43`: the F-074-1 class caught live by the slice's
+OWN measured set — runs 02/03 RED, the disclosed evidence kept: token_urlsafe CAN generate a
+leading dash and the separate-argv form then dies at argparse; the repair — the token's first
+character constrained non-dash + the AGT-01 twelve-mint strengthener) → **the LAW-24 repair**
+(`f7b6b58`: the gate's own boundary lint caught commands.py calling secrets.token_urlsafe —
+the token mint moved to its LAW-24 home, adapters/ids.py's new_agent_token) → **the SEV
+round-1 repairs** (`20cd5c5`: F-077-1 the P2 — the scope-declaration drift, adapters/ids.py
+added to scope.txt + the CLAIMS row; F-077-2 the P3 — the lookup's default PUBLIC EXECUTE
+revoked in the still-unmerged 0019; F-077-3 the P3 — the duplicated helper block deleted;
+F-077-4 the P3 — the docstring wording) → **the SEV round-2 repair** (the head: F2-077-5 the
+P3 — _agent_audit's unescaped owner interpolation, demonstrated live on owner O'Brien; the
+repair — the owner travels escaped (the file's own _read convention, BOTH the GUC set and the
+VALUES list) + the AGT-09 regression pin) → the measured sets at each tree (runs 01-19: the
+GREEN tree x3 + verify, the disclosed flake runs 02/03, the token-repair tree x3 + verify,
+the round-1-repair tree x3 + verify, the round-2-repair tree x3 + verify — all exit 0 except
+the disclosed 02/03/07) → the artifact finalize (this commit) → the artifact re-bind (sev.json
++ notverified + the proof sheet + the recorded PR-mode gate + the local trusted-gate
+reproduction) → the push → the PR → the five checks → the merge-gate review → **the merge
+under INT-145** → the post-merge verification → P4-E slice two (the MCP wrapper) → P4-F → the
+Phase 4 exit gate — NO PAUSE EVEN FOR UPDATES (INT-146).
 
-## §4 The SEV account
+## §4 The SEV account (the two-round chain)
 
-(In flight — appended at the rounds.)
+**Round 1 (agent-e2095ac5, PASS zero open P0/P1 — 56 live probes + 18 static/git checks).**
+Every claimed behavior reproduced on the reviewer's own scratch rigs: the mint + the one-time
+display (the replay never re-displaying; the whole-database pg_dump grep finding the token
+value ZERO times; the argv-safe first char over 21 mints + a 3000-mint adapter distribution);
+the agent read mode byte-equal on TWENTY-ONE arm shapes (not just the seven claimed); the
+audit row landing only on served reads (never on refusals); the no-oracle invalid-token class
+(unknown vs revoked byte-equal; five hostile strings all the same refusal, never echoed, never
+a traceback); the identity law (both/neither refused ARV-AGT-002); the read-only closure
+(including the slice's OWN mint/revoke commands refusing --agent-token); the scope isolation
+(B's credential seeing only B, the read log RLS-scoped); the revocation (the one-way
+transition, the alternation, the no-oracle, the post-revocation refusal, the audit history
+preserved); the substrate (the closed scopes CHECK refusing a hostile write-scoped INSERT
+— with the reviewer's own CHECK-drop-and-restore probe proving the lookup filters
+independently; the one-transition guard incl. the superuser un-revoke refused; the RLS
+forced; the grants; the SECURITY DEFINER lookup returning exactly the scope+id pair); the
+audit-row honesty FORCED LIVE (the INSERT grant revoked mid-rig → the read serves then fails
+LOUD ARV-AGT-005); the budget (ARV-QRY-004 byte-equal to the owner's); Q10's honest boundary
+(the capability row matching the code); the RED reproduced from the archived tree + the
+4-way sha256 amendment-chain verification. THE FINDINGS, ALL IN-SLICE: F-077-1 the P2 (the
+scope-declaration drift — the gate's own ARV-SCOPE-002/ARV-CLM-002 firing live on
+adapters/ids.py's omission), F-077-2 the P3 (the lookup's default PUBLIC EXECUTE — arv_read
+resolving a live hash), F-077-3 the P3 (query.py's duplicated helper block), F-077-4 the P3
+(the alphanumeric-vs-non-dash wording) — ALL FOUR REPAIRED in-slice at 20cd5c5 (the scope
+declarations widened; the REVOKE FROM PUBLIC added to the still-unmerged 0019, verified live:
+arv_read denied, arv_app resolving; the duplicate block deleted; the wording corrected).
+
+**Round 2 (agent-6a8d56b7, PASS zero open P0/P1 — 19 live probes + 10 static checks + the
+regression suites).** All four round-1 repairs verified CLOSED live (the gate's own checks
+green over the 28-path diff; the permission matrix; the single definitions; the docstring;
+the SECURITY DEFINER census — 0019's lookup the system's only one). The sweep re-verified
+every core invariant + the regressions (gate_dispatch, commands). ONE NEW FINDING: F2-077-5
+the P3 (_agent_audit's unescaped owner interpolation — a quote-bearing owner's read served
+then failed loudly with no audit row, demonstrated live on owner O'Brien; fail-loud, zero
+escalation, the one-line repair) — REPAIRED in-slice at the head (the owner escaped with the
+file's own convention, BOTH the GUC set and the VALUES list + the AGT-09 regression pin:
+O'Brien's credential mints, the read serves, the audit row lands).
 
 ## §5 The close
 

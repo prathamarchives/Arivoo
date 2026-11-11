@@ -419,11 +419,31 @@ def main() -> int:
               "the budget + the substrate: the page bounds enforced on the agent reads (the shared _page_args limits — an oversize --limit refuses ARV-QRY-004 exactly as the owner's reads); the read_log append-only (UPDATE/DELETE refused at the substrate); the credential's one-transition guard (the label and token_hash immutable; revoked_at the ONLY settable column, one-way — the un-revoke refused); the schema audits (RLS enabled AND forced on both tables, arv_app INSERT+SELECT only)",
               "the budgets at this phase are the shared page bounds (the deeper response budgets are Phase 5's retrieval increments — recorded, never claimed here); the substrate mirrors the command surface (the 0007/0008 convention)")
 
+        # ---- AGT-09 — the quote-bearing owner (F2-077-5's regression pin:
+        # the served read MUST audit — the owner travels escaped)
+        pmq = cmd("mint_agent_credential", "--label", "quote owner probe",
+                  key="ag-mintQ", owner="O'Brien")
+        tokq = token_of(pmq)
+        cidq = ack_field(pmq, "result_ref")
+        tfq = pathlib.Path(tempfile.mkdtemp(prefix="arv-agtq-")) / "q.md"
+        tfq.write_text("the quote-owner corpus text.\n", encoding="utf-8")
+        cmd("import_source", "--file", str(tfq), "--media-type", "text/plain",
+            "--title", "O'Brien's Corpus", key="ag-impQ", owner="O'Brien")
+        gq = agt("list-library", tokq)
+        aq = audit(f"SELECT count(*) FROM arv.agent_read_log "
+                   f"WHERE credential_id='{cidq}';")
+        ok9 = (pmq.returncode == 0 and tokq and cidq
+               and gq.returncode == 0 and "ARV-AGT-005" not in gq.stdout
+               and int(aq) == 1)
+        check("AGT-09", ok9,
+              "the quote-bearing owner (F2-077-5's regression pin): O'Brien's credential mints; the agent read SERVES (no ARV-AGT-005 loud failure) and the audit row LANDS (the owner travels escaped through the audit insert — the file's own _read convention, never raw interpolation)",
+              "a served read must always audit — the escape closes the quote-bearing-owner class the round-2 reviewer demonstrated live")
+
         print()
         if FAILS:
             print(f"RED — the P4-E agent-access suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P4-E agent-access suite (AGT-01..08) passes")
+        print("GREEN — the P4-E agent-access suite (AGT-01..09) passes")
         return 0
     finally:
         pg.drop_scratch_db(DB)

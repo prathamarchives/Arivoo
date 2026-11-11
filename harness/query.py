@@ -1069,10 +1069,15 @@ def _agent_audit(db: str, owner: str, cred_id: str, arm: str, limit, after) -> i
     qlim = "NULL" if limit is None else str(int(limit))
     qaft = "NULL" if after is None else "'" + str(after).replace("'", "''") + "'"
     qid = "'" + str(cred_id).replace("'", "''") + "'"
-    r = pg.psql(f"SET app.current_owner='{owner}'; INSERT INTO arv.agent_read_log "
+    # F2-077-5 (the SEV round-2 repair): the owner travels ESCAPED — the
+    # file's own convention (_read's owner.replace), never raw interpolation
+    # (a quote-bearing owner's served read left unaudited, observed live by
+    # the round-2 reviewer)
+    qown = "'" + owner.replace("'", "''") + "'"
+    r = pg.psql(f"SET app.current_owner={qown}; INSERT INTO arv.agent_read_log "
                 f"(id, credential_id, owner_scope, arm, req_limit, req_after, "
                 f"created_at) VALUES (gen_random_uuid(), {qid}, "
-                f"'{owner}', '{arm}', {qlim}, {qaft}, now());", db=db, user="arv_app")
+                f"{qown}, '{arm}', {qlim}, {qaft}, now());", db=db, user="arv_app")
     if r.returncode != 0:
         print(f"FAIL ARV-AGT-005: the agent read was served but the audit row "
               f"refused — {r.stderr.strip()[:200]} (an unaudited agent read is a "

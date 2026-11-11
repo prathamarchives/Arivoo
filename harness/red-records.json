@@ -1246,7 +1246,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-077's RED (the AGT suite authored tests-only per LAW-11 at this commit 048a1ddb and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: the mint_agent_credential command absent from the CLI; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
-    "current_sha256": "cccefecc0881ddc9eff3096fe258867e4d76b790a722e929bcc8b9d2c3d15cb5",
+    "current_sha256": "ff78298e14705b16aca1d6d8f5c2dc34b3c0d3619f7a70f6307b07abe6fe70a1",
     "amendments": [
       {
         "prior_sha256": "6d95aa818ea5e9785c9f5f5d47e94205c051ca08aa4e4e204a2dc0c09a84fd13",
@@ -1259,6 +1259,12 @@
         "new_sha256": "cccefecc0881ddc9eff3096fe258867e4d76b790a722e929bcc8b9d2c3d15cb5",
         "note": "CLAIM-077's measured-set repair (the F-074-1 class caught live by THIS slice's own measured set \u2014 runs 02/03 RED, kept as the disclosed evidence: token_urlsafe CAN generate a leading '-', and the separate-argv form '--agent-token -abc' then dies at argparse exit 2; the AGT-03/04/05/06/07 failures moved between the two runs exactly as the 1-in-64-per-token probability predicts): THE REPAIR \u2014 the minted token's FIRST CHARACTER constrained to the alphanumeric range (a property of the generated value, never an argv-convention change; the family-wide argv-value convention stays routed to F-074-1's own slice; the entropy cost 1/64 of the space, ~190 bits retained) + the AGT-01 STRENGTHENER (twelve mints, no token starting with '-', every ack committed \u2014 the structural property pinned). The RED evidence (red-01.txt at 048a1ddb) untouched",
         "observed_at": "2026-11-11T14:13:28.847746+00:00"
+      },
+      {
+        "prior_sha256": "cccefecc0881ddc9eff3096fe258867e4d76b790a722e929bcc8b9d2c3d15cb5",
+        "new_sha256": "ff78298e14705b16aca1d6d8f5c2dc34b3c0d3619f7a70f6307b07abe6fe70a1",
+        "note": "CLAIM-077's SEV round-2 repair (F2-077-5 the P3 \u2014 _agent_audit interpolated the owner UNESCAPED: a quote-bearing owner's agent read served and then failed loudly with no audit row, demonstrated live by the round-2 reviewer on owner O'Brien): THE REPAIR \u2014 the owner travels escaped through the audit insert (the file's own _read convention, owner.replace quote-doubling, applied to BOTH the GUC set and the VALUES list) + the AGT-09 regression pin (O'Brien's credential mints; the agent read SERVES with no ARV-AGT-005 and the audit row LANDS). The RED evidence (red-01.txt at 048a1ddb) untouched",
+        "observed_at": "2026-11-11T15:36:54.848181+00:00"
       }
     ]
   }

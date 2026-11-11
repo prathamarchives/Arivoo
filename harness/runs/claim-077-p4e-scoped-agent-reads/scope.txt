@@ -1,0 +1,21 @@
+# CLAIM-077 — P4-E slice one: the scoped agent read surface (the PLAN 4E row: authorized
+# agents read the owner's journal and capture context through the same API with
+# provenance/scope/budgets; READ-ONLY at first; owner-scope enforced on every query; no
+# arbitrary database access; Q10 handled honestly). RED-first at CLAIM-076's merged head
+# 898b9f2a. The scope elaborates at the RED per the one-phase-deep rule.
+harness/commands.py D-041
+harness/query.py D-041
+harness/capability.py D-041
+harness/crash.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+harness/tests/test_agent_access.py D-041
+harness/migrations/0019_agent_access.sql D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/68-P4D-REF-WRITE-COMPLETION.md D-042
+context/extracted/69-P4E-SCOPED-AGENT-READS.md D-042
+harness/runs/claim-077-p4e-scoped-agent-reads D-042

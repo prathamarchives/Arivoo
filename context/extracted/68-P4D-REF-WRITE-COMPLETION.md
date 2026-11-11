@@ -166,4 +166,32 @@ no dead letter.
 
 ## §5 The close
 
-(Appended at the merge.)
+PR #111 merged at 2026-11-11 as `898b9f2ac6679c87f989b52d22941ba3b5f8b546` under INT-145's
+standing authorization: the five checks green at the exact final head `c44d17b5` AND on the
+merge commit `898b9f2a` (all observed live — re-read at the exact head immediately before the
+merge, the post-merge run on the merge commit re-observed green); the merge-gate review D-042
+(1a) `5859574863` (the substantive host review engaging the actual diff with the reviewer's
+own fresh probes: the oversize-pin identical-class verification on the old vs new kind — the
+routing honesty proven live; the seven-kind write + render + compose at the final tree);
+CodeRabbit the skip state (noted per D-042 (1c)); zero review threads; the flip/merge/restore
+with the protections re-read byte-equivalent (approving=1, dismiss_stale=true, strict=true,
+the five contexts, enforce_admins, no force pushes, no deletions); the branch deleted; 0 open
+PRs; only main. No ARV-SEV-003 round — the digest bound LAST (`8b5b0c86`, validate_report
+GREEN re-verified at the re-bind head) + the local trusted-gate reproduction green before the
+push (run-06, FIRST attempt — the anchored BASE driver sha256-verified against the trusted
+base reset to the current main `af95e3c0`). THE ONE-ROUND SEV CHAIN (the account in §4):
+agent-ca4c6f8e PASS zero open P0/P1 — 94 live probes + 13 static checks, four findings ALL
+ROUTED to the substrate grammar owner (F-076-1 the P2 oversize-pin traceback — the F-075-1
+commands.py twin, pre-existing, fail-closed; F-076-2/3/4 the P3s). The 6-record proof sheet,
+no sheet-lag round.
+
+**THE P4-D EXIT CHECK (2026-11-11, at the #111 merge):** every required P4-D backend behavior
+is landed and verified — the stable @-reference RESOLUTION system (CLAIM-075: the six explicit
+states, the version-aware resolution over the seven families, the logical identity separated
+from the selected revision, the no-oracle byte-equal refusals, the purge precedence, the
+hostile-string law, titles/labels changing without breaking references) + the WRITE completion
+(CLAIM-076: the seven-kind note --ref vocabulary, the shape law and the no-oracle identical at
+the write boundary, the guard routing to the families' own tables, the sync delivery through
+the translated ids). A reference to every landed family is STORABLE and RESOLVABLE through the
+one system. **P4-D COMPLETE.** Record 69 carries the scoped-agent-access slice (P4-E's
+opening).

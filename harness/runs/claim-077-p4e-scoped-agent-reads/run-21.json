@@ -1,0 +1,7 @@
+{
+  "command": "env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-077-p4e-scoped-agent-reads python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "5f51eb1ee776df0c6498d2a0f595446e8ad55ec5",
+  "output_sha256": "271bead3ffffc4627a7667c182a48fd9c7571c853337488a796108b1221c8cfc",
+  "recorded_at": "2026-11-11T15:55:03.558280+00:00"
+}

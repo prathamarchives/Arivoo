@@ -106,6 +106,9 @@ TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          "harness/tests/test_journal.py",
          "harness/tests/test_reading_list.py",
          "harness/tests/test_references.py",
+         # P4-E slice one (CLAIM-077; the ARV-RED-008 class: the new suite's
+         # registration rides the binding commit, diff-visible)
+         "harness/tests/test_agent_access.py",
          "harness/tests/test_gate_dispatch.py",
          "harness/tests/test_mutation_floor.py",
          "harness/tests/test_trusted_gate.py",

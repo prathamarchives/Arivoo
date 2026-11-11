@@ -1,0 +1,101 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-077-p4e-scoped-agent-reads",
+ "base_sha": "898b9f2ac6679c87f989b52d22941ba3b5f8b546",
+ "reviewed_diff_sha256": "13023b93deb6798b65af48ae78205504d601e8dd13c4b12629e76ce07d54533a",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-02",
+  "SYS-04",
+  "SYS-08"
+ ],
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "changed_components": [
+  "harness/migrations/0019_agent_access.sql (the scoped agent access substrate: arv.agent_credential \u2014 the owner-minted credential with the closed scopes CHECK 'read' (READ-ONLY structural), the ONE-WAY revocation under the one-transition guard (every other column immutable, revoked_at NULL->set never unset, DELETE refused), RLS forced + the owner policy, INSERT+SELECT+UPDATE to arv_app (the UPDATE constrained by the guard) + arv.agent_read_log \u2014 the append-only audit trail (the arm + the bounded REQUEST facts, NEVER the content) + arv.agent_token_lookup \u2014 the narrow SECURITY DEFINER verification function (sha256 -> the live read-scoped credential's scope+id, REVOKE FROM PUBLIC per the F-077-2 repair, exposing nothing else \u2014 the system's own authentication primitive))",
+  "harness/adapters/ids.py (new_agent_token \u2014 the LAW-24 home for the credential's token randomness: 32 bytes os.urandom urlsafe ~190 bits, the FIRST CHARACTER constrained non-dash \u2014 the argv-safe property, the F-074-1 class caught live by this slice's own measured set, structural at the adapter)",
+  "harness/commands.py (mint_agent_credential \u2014 through the spine's ack contract: the token VALUE shown ONCE in the first ack (the replay never re-displaying), only the sha256 stored, the token NOT part of the canonical body (the EFFECT, never the request), the label law ARV-AGT-003, NO outbox ride (a local access primitive, never owner content) + revoke_agent_credential \u2014 the no-oracle ARV-AGT-001 for absent/cross-owner, the alternation ARV-AGT-004 for the already-revoked, the read log never touched)",
+  "harness/query.py (the --agent-token read mode on EVERY arm: --agent-token REPLACES --owner \u2014 the identity law ARV-AGT-002 (both refused, neither refused); the scope binds from the credential via the lookup; the SAME arms' answers byte-equal (the dispatch extracted to _dispatch verbatim, the identity law added in main \u2014 no arm logic changed); the audit row appended after every SERVED read with the owner ESCAPED (the F2-077-5 repair \u2014 the file's own _read convention, both the GUC set and the VALUES list), a failing audit insert LOUD (ARV-AGT-005); the no-oracle invalid-token class ARV-AGT-001 (unknown/revoked/scope-missing the SAME refusal, the token never echoed))",
+  "harness/capability.py (the scoped-agent-access reserved-surface row: Q10 HONESTLY named \u2014 the access-shape surface never workflow-tamper hardening, the local single-user threat model, the non-constant-time comparison, no rotation/expiry claims, the narrow remaining owner choice recorded)",
+  "harness/tests/test_agent_access.py (the AGT-01..09 suite: the mint round-trip with the one-time display + the argv-safe property; the label law; the agent read mode byte-equal over seven arms with the audit row; the no-oracle invalid-token class; the identity law + the read-only structure; the scope isolation; the revocation with the audit preservation; the budget + the substrate; the quote-bearing owner regression pin) + harness/gate.py (the TESTS registration \u2014 the ARV-RED-008 class, riding the binding commit) + harness/red-records.json (the typed RED + five amendments: the four pin repairs, the measured-set repair, the round-2 repair)"
+ ],
+ "interfaces_reviewed": [
+  "the spine's ack contract (the mint riding ack_extra for the one-time display; the replay path never re-running build \u2014 verified structurally and empirically)",
+  "RLS + the owner-scope policy on both new tables (the credential-bound scope \u2014 the agent of one owner never widening scope, SYS-02's agent matrix)",
+  "the SECURITY DEFINER lookup (the scope-from-credential chicken-and-egg resolved; the function exposing only the scope+id pair; PUBLIC revoked; the census \u2014 the system's only SECURITY DEFINER function)",
+  "the shared _page_args budget law (identical at both identities \u2014 the owner's and the credential's reads)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the AGT suite GREEN AGT-01..09 exit 0 x3 at the round-2-repair tree (runs 16-18) + the earlier trees' runs (the GREEN tree, the token-repair tree, the round-1-repair tree \u2014 runs 01/04-06/08-10/12-14)",
+   "make verify exit 0 at the GREEN, token-repair, round-1-repair, and round-2-repair trees (runs 07 the DISCLOSED LAW-24 catch, 11, 15, 19)"
+  ],
+  "integration_verification": [
+   "the agent read byte-equal to the owner's read on 21 arm shapes (round 1's probe beyond the suite's seven)",
+   "the audit row landing only on served reads; the forced-failure probe (the INSERT grant revoked mid-rig -> the read serves then fails LOUD ARV-AGT-005)",
+   "the regressions: gate_dispatch + commands + the REF/LIB family suites re-run GREEN by round 2"
+  ],
+  "system_verification": [
+   "the SEV round 1 live verification (agent-e2095ac5, 56 probes + 18 static checks): every claimed behavior reproduced incl. the whole-database token grep (the value ZERO times in pg_dump), the 3000-mint distribution, the CHECK-drop-and-restore lookup probe, the superuser un-revoke refusal",
+   "the SEV round 2 live verification (agent-6a8d56b7, 19 probes + 10 static checks): all four round-1 repairs verified CLOSED live; the quote-bearing owner class characterized and repaired"
+  ],
+  "validation": [
+   "the one-time display law (the token exists only in the first ack and the caller's own records \u2014 the whole-database grep the proof)",
+   "the scope-binding law (the credential, never the caller's claim, names the scope \u2014 the RLS enforcement through the resolved owner)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "the token value persisted or logged anywhere",
+   "control": "only the sha256 stored; the token rides ack_extra exactly once (the replay never re-runs build); the whole-database pg_dump grep finds the value ZERO times (round 1's probe)"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "an invalid credential distinguishing anything (the no-oracle)",
+   "control": "ARV-AGT-001 byte-equal for unknown/revoked/scope-missing; the token never echoed; five hostile strings the same refusal (round 1)"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "the agent's scope widening beyond the credential's owner",
+   "control": "the scope binds from the credential (the lookup), RLS enforced on every query through the resolved owner; B's credential seeing only B (the suite + both rounds' live probes)"
+  },
+  {
+   "id": "FM-04",
+   "scenario": "a write through the agent path",
+   "control": "READ-ONLY structural: no write command accepts --agent-token (the closure including the slice's own mint/revoke \u2014 round 1's probe); the closed scopes CHECK 'read'"
+  },
+  {
+   "id": "FM-05",
+   "scenario": "an unaudited served read",
+   "control": "the audit insert after every exit-0 read; a failing insert LOUD (ARV-AGT-005 \u2014 the forced-failure probe); the owner escaped (the F2-077-5 repair + the AGT-09 pin)"
+  },
+  {
+   "id": "FM-06",
+   "scenario": "the credential un-revoked or mutated",
+   "control": "the one-transition guard (every column immutable; revoked_at one-way; the superuser un-revoke refused); the alternation ARV-AGT-004"
+  }
+ ],
+ "findings": [],
+ "not_verified": [
+  "F-077-4b (P3, noted): the guard's no-op UPDATE wording nuance \u2014 stricter than claimed, fail-closed",
+  "the historical red-records amendment note carries the pre-repair 'alphanumeric' wording (append-only; the live docstring the corrected truth)",
+  "Q10's honest boundary: the non-constant-time hash comparison (named, not measured); the token visible to local ps (the argv form; the non-argv form's natural home is the MCP wrapper \u2014 slice two); no rotation/expiry windows; the minting policy and server-deployment scoping owner-gated",
+  "no MCP wrapper (P4-E slice two); no write scopes; no response-budget machinery beyond the shared page bounds (Phase 5's retrieval); no multi-owner credential sharing; no reader-client work (P4-B's repo)",
+  "no concurrency or DoS claims; the revoke's read-before-BEGIN shape reasoning-verified only (the worst case a typed refusal)",
+  "the invalid-token attempts not audited (no attribution exists for an unknown credential \u2014 construction, not omission)",
+  "the standing family-wide classes carry forward: F-072-1, F-074-1 (the minted token structurally unable to hit it; the family itself stays routed), F-073-6, F-075-3/F-076-1..4 (the substrate grammar owner), F-075-5 (D-011's slice)",
+  "the rig hygiene note: the author's stale debug scratch DBs on the shared rig (outside the repo)"
+ ],
+ "builder_context": "Super Z (GLM host) \u2014 the standing do-not-stop chain INT-134..146",
+ "reviewer_context": "two fresh-context SEV agents: agent-e2095ac5 (round 1, PASS zero open P0/P1 \u2014 56 live probes + 18 static checks; four in-slice findings all repaired: F-077-1 the P2 scope-declaration drift, F-077-2 the P3 PUBLIC EXECUTE, F-077-3 the P3 duplicate block, F-077-4 the P3 wording) + agent-6a8d56b7 (round 2, PASS \u2014 all four repairs verified CLOSED live, one new P3 found and repaired: F2-077-5 the unescaped owner in _agent_audit)",
+ "disposition": "PASS",
+ "review_summary": "the two-round chain (the CLAIM-075/076 repair-in-slice precedent): round 1 (agent-e2095ac5) PASS zero open P0/P1 \u2014 every claimed behavior reproduced on the reviewer's own rigs (the one-time token display with the whole-database grep, the 21-arm byte-equality, the forced audit-failure probe, the CHECK-drop-and-restore lookup probe, the superuser un-revoke refusal, the 3000-mint distribution), four in-slice findings all repaired at 20cd5c5 (the scope-declaration drift P2 caught by the gate's own checks firing live; the PUBLIC EXECUTE revoked in the still-unmerged 0019, verified live; the duplicate block; the wording); round 2 (agent-6a8d56b7) PASS \u2014 all four repairs verified CLOSED live (the gate green over the 28-path diff, the permission matrix, the census), the regressions green, one new P3 (the unescaped owner in _agent_audit, demonstrated live on owner O'Brien \u2014 a served read left unaudited, fail-loud, zero escalation) repaired at the head with the AGT-09 regression pin; the recorded evidence: the AGT suite x3 + make verify at four trees, all exit 0 (the disclosed RED runs 02/03 kept as the leading-dash defect's evidence, run-07 the LAW-24 catch)"
+}

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_agent_access.py",
+  "exit_code": 1,
+  "commit": "cf0fe446fa51d5511dc2c58166ba0e87e4b647d0",
+  "output_sha256": "29cc4ffdf74db7c50cbb3241f8842c8d68d69e1ae74a06482b0d7f29af1dc090",
+  "recorded_at": "2026-11-11T14:12:04.148738+00:00"
+}

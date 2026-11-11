@@ -1,0 +1,7 @@
+{
+  "command": "env SLICE=claim-077-p4e-scoped-agent-reads GATE_DIFF=origin/main make gate",
+  "exit_code": 0,
+  "commit": "233822644e196862e68b839c7bfa260a2686b24c",
+  "output_sha256": "39862538d07dc4a2d114466b7265e7996f4cfd76f79b0ae35c493372b2fb4e39",
+  "recorded_at": "2026-11-11T16:20:35.587855+00:00"
+}

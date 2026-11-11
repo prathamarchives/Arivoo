@@ -39,3 +39,19 @@ def new_id() -> str:
     ]) + rand[3:10]
     h = b.hex()
     return f"{h[0:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:32]}"
+
+
+def new_agent_token() -> str:
+    """P4-E slice one (CLAIM-077): the scoped-agent credential's token VALUE —
+    the ONLY secrets-class randomness in the id/adapter layer (LAW-24: ambient
+    randomness lives here, never in the command surface). 32 bytes of
+    os.urandom, urlsafe-encoded (~190 bits); the FIRST CHARACTER constrained
+    to the non-dash range (a leading '_' is argv-safe and occurs) (the F-074-1 class caught live by CLAIM-077's
+    own measured set: a leading '-' breaks the separate-argv form
+    '--agent-token <value>' at argparse — a property of the generated value,
+    never an argv-convention change; the entropy cost 1/64 of the space)."""
+    import base64
+    while True:
+        tok = base64.urlsafe_b64encode(os.urandom(32)).decode("ascii").rstrip("=")
+        if tok and tok[0] != "-":
+            return tok

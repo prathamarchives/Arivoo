@@ -1,0 +1,21 @@
+CLAIM-077 — the observed RED (LAW-11: tests-only, committed BEFORE the implementation)
+
+Command: python3 harness/tests/test_agent_access.py
+Tree:    048a1ddb (CLAIM-077's RED commit, on commit A at CLAIM-076's merged
+         head 898b9f2a)
+Exit:    1
+Output:
+  FAIL ARV-TEST-000: the P4-E slice one scoped-agent-read machinery is absent
+  (machinery-absent class; the mint_agent_credential command absent from the
+  CLI) — the implementation lands after this RED, never before it (LAW-11)
+
+Observed live at the exact tree above (the suite committed in its tests-only RED
+form — 407 lines, the AGT-01..08 registry; the DB-free machinery-absent probe at
+the module head — the argparse refusal precedes any connection, the nonexistent
+probe database never reached). The gate.py TESTS registration rides the binding
+commit (the ARV-RED-008 class — the registration in the candidate's gate.py,
+diff-visible, never a smuggle). The implementation lands in the
+immediately-following commit, never before this RED: migration 0019
+(arv.agent_credential + arv.agent_read_log) + commands.py's
+mint_agent_credential/revoke_agent_credential + query.py's --agent-token read
+mode.

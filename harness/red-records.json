@@ -1238,5 +1238,15 @@
         "observed_at": "2026-11-11T10:02:35.461666+00:00"
       }
     ]
+  },
+  "harness/tests/test_agent_access.py": {
+    "schema": 2,
+    "binding_commit": "048a1ddb19ed88a9caad972a53076e16c02d0744",
+    "binding_sha256": "6d95aa818ea5e9785c9f5f5d47e94205c051ca08aa4e4e204a2dc0c09a84fd13",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-077's RED (the AGT suite authored tests-only per LAW-11 at this commit 048a1ddb and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: the mint_agent_credential command absent from the CLI; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
+    "current_sha256": "6d95aa818ea5e9785c9f5f5d47e94205c051ca08aa4e4e204a2dc0c09a84fd13",
+    "amendments": []
   }
 }

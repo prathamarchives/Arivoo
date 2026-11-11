@@ -790,7 +790,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-057 (P3-06 slice two) commit B: the NTR-01..12 suite's RED observed at the exact predecessor 36e34920 (CLAIM-056's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000: the --ref surface on create_note absent, migration 0010 absent; the transcript at the slice's runs dir red-01.txt; record 49 \u00a711 (the record-18 \u00a74.1 / claim-055/claim-056 precedent class)",
-    "current_sha256": "c8946151600c2d1d15dfc23f8feb441176bbc2057b22ce5ca9864d53b5869324",
+    "current_sha256": "96ded73a0e7d47ff24b913977fff9809e73125c009179d411cabdbc66e73146e",
     "amendments": [
       {
         "prior_sha256": "1bbd84fb8cc715f123ced5e23097b58ffff58f8cd28f8a5e08f32956e55710aa",
@@ -803,6 +803,12 @@
         "new_sha256": "c8946151600c2d1d15dfc23f8feb441176bbc2057b22ce5ca9864d53b5869324",
         "note": "CLAIM-076's RED (the write-completion pins authored tests-only per LAW-11 at this commit 0537873 and observed RED there \u2014 red-01.txt: the NTR suite's ARV-TEST-000 machinery-absent failure (the DB-free probe: the five-kind vocabulary refusing the bookmark kind, exit 1) + red-02.txt: the sync suite's SYN-23 delivery pin observed RED (SYN-01..22 green, SYN-23 FAIL exit 1 \u2014 the note-with-new-kind-refs create refusing ARV-NTE-006 at the five-kind tree); the implementation lands in the immediately-following commit, never before this RED",
         "observed_at": "2026-11-11T12:35:09.835187+00:00"
+      },
+      {
+        "prior_sha256": "c8946151600c2d1d15dfc23f8feb441176bbc2057b22ce5ca9864d53b5869324",
+        "new_sha256": "96ded73a0e7d47ff24b913977fff9809e73125c009179d411cabdbc66e73146e",
+        "note": "CLAIM-076's pre-GREEN suite amendment (the e7aac7d precedent \u2014 the disclosed additive repair, never a gate weakening): NTR-16's layer attribution corrected to the OBSERVED substrate behavior \u2014 the BEFORE-INSERT guard fires before the CHECK constraints, so the NULL-revision and out-of-vocabulary-with-a-non-note-target forms die at the guard's ARV-NTE-003 (fail-closed either way, the row can never be stored); the kind CHECK proven by the note-target form that PASSES the guard's ELSE arm (a real note at a real revision) and refuses at the vocabulary; the row-count assertions added (every refusal zero-effect, every admission exactly-once). The probe's intent unchanged: the closed vocabulary + the guard routing + the no-oracle; the RED evidence (red-01.txt at 0537873) untouched; the machinery-absent probe unchanged",
+        "observed_at": "2026-11-11T12:39:55.685485+00:00"
       }
     ]
   },

@@ -749,15 +749,32 @@ def main() -> int:
               "the no-oracle at the widened write boundary: the absent bookmark/journal_block target, another owner's bookmark/journal_block, and a nonexistent revision on a live bookmark are the SAME ARV-NTE-003 refusal — template-normalized byte-equal — with zero effect, never an existence side channel",
               "the caller-scope law composes over the new families identically (RTM §2.5 item 7's never-a-side-channel, both boundaries)")
 
-        # ---- NTR-16 — the substrate backstop (the 0018 widening)
+        # ---- NTR-16 — the substrate backstop (the 0018 widening). THE
+        # OBSERVED LAYERING (the pre-GREEN amendment, the e7aac7d precedent):
+        # the BEFORE-INSERT guard fires BEFORE the CHECK constraints, so the
+        # NULL-revision and the out-of-vocabulary-with-a-non-note-target
+        # forms die at the guard's ARV-NTE-003 (fail-closed either way); the
+        # kind CHECK is proven by the note-target form that PASSES the
+        # guard's ELSE arm (a real note at a real revision) and then refuses
+        # at the vocabulary — the structural proof the widening is exactly
+        # the two named kinds, never an open enum.
         p16 = mk_note("n-16", content="the backstop subject.")
         n16 = ack_field(p16, "result_ref")
+        p16b = mk_note("n-16b", content="the note-target subject.")
+        n16b = ack_field(p16b, "result_ref")
         _cols = ("(id, note_id, note_revision, ref_kind, ref_id, ref_revision, "
                  "owner_scope, actor, run_id, input_hash, idempotency_key, created_at)")
+        _nr16a = int(audit("SELECT count(*) FROM arv.note_reference;"))
         p_ov = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
                        f"('11111111-1111-4111-8111-111111111111', '{n16}', 1, "
                        f"'reading_list', '{bm1}', NULL, 'A', 'owner', 'run-hostile', "
                        f"'deadbeef', 'hostile-ov', now());")
+        # the kind CHECK's own proof: this form passes the guard's ELSE arm
+        # (a REAL note target at a REAL revision) and dies at the vocabulary
+        p_ovck = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
+                         f"('12121212-1212-4121-8121-121212121212', '{n16}', 1, "
+                         f"'reading_list', '{n16b}', 1, 'A', 'owner', 'run-hostile', "
+                         f"'deadbeef', 'hostile-ovck', now());")
         p_null_bm = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
                             f"('22222222-2222-4222-8222-222222222222', '{n16}', 1, "
                             f"'bookmark', '{bm1}', NULL, 'A', 'owner', 'run-hostile', "
@@ -766,6 +783,7 @@ def main() -> int:
                             f"('33333333-3333-4333-8333-333333333333', '{n16}', 1, "
                             f"'journal_block', '{jb1}', NULL, 'A', 'owner', 'run-hostile', "
                             f"'deadbeef', 'hostile-njb', now());")
+        _nr16b = int(audit("SELECT count(*) FROM arv.note_reference;"))
         p_ok_bm = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
                           f"('44444444-4444-4444-8444-444444444444', '{n16}', 1, "
                           f"'bookmark', '{bm1}', 1, 'A', 'owner', 'run-hostile', "
@@ -774,21 +792,25 @@ def main() -> int:
                           f"('55555555-5555-4555-8555-555555555555', '{n16}', 1, "
                           f"'journal_block', '{jb1}', 2, 'A', 'owner', 'run-hostile', "
                           f"'deadbeef', 'hostile-okjb', now());")
+        _nr16c = int(audit("SELECT count(*) FROM arv.note_reference;"))
         p_ghost = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
                           f"('66666666-6666-4666-8666-666666666666', '{n16}', 1, "
                           f"'bookmark', '{ghost}', 1, 'A', 'owner', 'run-hostile', "
                           f"'deadbeef', 'hostile-gh', now());")
-        ok16 = (p_ov.returncode != 0
-                and "note_reference_ref_kind_check" in p_ov.stderr
-                and p_null_bm.returncode != 0
-                and "note_reference_ref_shape_check" in p_null_bm.stderr
-                and p_null_jb.returncode != 0
-                and "note_reference_ref_shape_check" in p_null_jb.stderr
+        _nr16d = int(audit("SELECT count(*) FROM arv.note_reference;"))
+        ok16 = (p_ov.returncode != 0 and "ARV-NTE-003" in p_ov.stderr
+                and p_ovck.returncode != 0
+                and "note_reference_ref_kind_check" in p_ovck.stderr
+                and p_null_bm.returncode != 0 and "ARV-NTE-003" in p_null_bm.stderr
+                and p_null_jb.returncode != 0 and "ARV-NTE-003" in p_null_jb.stderr
+                and _nr16b == _nr16a          # every refused form: zero rows
                 and p_ok_bm.returncode == 0
                 and p_ok_jb.returncode == 0
-                and p_ghost.returncode != 0 and "ARV-NTE-003" in p_ghost.stderr)
+                and _nr16c == _nr16a + 2       # the two admitted rows
+                and p_ghost.returncode != 0 and "ARV-NTE-003" in p_ghost.stderr
+                and _nr16d == _nr16c)         # the ghost: zero rows
         check("NTR-16", ok16,
-              "the 0018 substrate backstop: the out-of-vocabulary direct INSERT ('reading_list') still refuses the kind CHECK — the widening is exactly the two named kinds, never an open enum; a bookmark/journal_block row without the revision refuses the shape CHECK; the WELL-FORMED direct row for each new kind is ADMITTED — the guard routes the new kinds to THEIR tables (a real bookmark at revision 1 accepted: had the note ELSE arm run, the bookmark uuid would refuse ARV-NTE-007/003 — the routing proven by acceptance, not by prose); the ghost target refuses ARV-NTE-003 at the substrate (both boundaries, never one alone)",
+              "the 0018 substrate backstop, at the OBSERVED layering (the guard fires before the CHECKs — fail-closed at both): the out-of-vocabulary direct INSERT ('reading_list') refuses — at the guard's ARV-NTE-003 for a non-note target, and at the kind CHECK for the note-target form that passes the guard's ELSE arm — the widening is exactly the two named kinds, never an open enum; a bookmark/journal_block row without the revision refuses at the guard (the NULL revision never matches the arm's existence read — the row can never be stored shapeless); the WELL-FORMED direct row for each new kind is ADMITTED — the guard routes the new kinds to THEIR tables (a real bookmark at revision 1 accepted: had the note ELSE arm run, the bookmark uuid would refuse ARV-NTE-003 — the routing proven by acceptance, not by prose); the ghost target refuses ARV-NTE-003 at the substrate; the row counts prove every refusal zero-effect and every admission exactly-once",
               "the substrate mirrors the command surface exactly (the 0007/0008 convention); the widened guard arms are part of the widening, never a vocabulary-only change")
 
         print()

@@ -790,13 +790,19 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-057 (P3-06 slice two) commit B: the NTR-01..12 suite's RED observed at the exact predecessor 36e34920 (CLAIM-056's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000: the --ref surface on create_note absent, migration 0010 absent; the transcript at the slice's runs dir red-01.txt; record 49 \u00a711 (the record-18 \u00a74.1 / claim-055/claim-056 precedent class)",
-    "current_sha256": "af78a2ac5cb03c09cb73b70925361b8b82d2581e9b3b98a5be8555f747e4c88c",
+    "current_sha256": "c8946151600c2d1d15dfc23f8feb441176bbc2057b22ce5ca9864d53b5869324",
     "amendments": [
       {
         "prior_sha256": "1bbd84fb8cc715f123ced5e23097b58ffff58f8cd28f8a5e08f32956e55710aa",
         "new_sha256": "af78a2ac5cb03c09cb73b70925361b8b82d2581e9b3b98a5be8555f747e4c88c",
         "note": "CLAIM-057 (P3-06 slice two) the implementation-cycle repairs on the NTR suite (the #89/#90/#91 precedent class \u2014 assertions corrected against the live rig, none removed, none weakened): (a) NTR-01's provenance read renders pipe-joined STRINGS under psql -A -t (the first-draft pr[0] indexed a CHARACTER, never a column \u2014 the conjunct now pins the exact row set owner|n-A1 x4); (b) NTR-04's no-side-channel pin recast to the honest form: the refusal TEMPLATE is byte-identical to the absent-target refusal modulo the caller-supplied id (the first draft's replace-inequality was ill-typed \u2014 the command legitimately echoes the id the caller itself supplied); (c) NTR-11's schema audits aligned to the live catalog: pg_trigger's tgname (never trigger_name), the auto-generated UNIQUE name note_reference_note_id_note_revision_ref_kind_ref_id_owner__key, the alphabetical CHECK ordering, and the direct relacl read (arv_app=ar \u2014 INSERT+SELECT only)",
         "observed_at": "2026-11-04T11:06:56.215138+00:00"
+      },
+      {
+        "prior_sha256": "af78a2ac5cb03c09cb73b70925361b8b82d2581e9b3b98a5be8555f747e4c88c",
+        "new_sha256": "c8946151600c2d1d15dfc23f8feb441176bbc2057b22ce5ca9864d53b5869324",
+        "note": "CLAIM-076's RED (the write-completion pins authored tests-only per LAW-11 at this commit 0537873 and observed RED there \u2014 red-01.txt: the NTR suite's ARV-TEST-000 machinery-absent failure (the DB-free probe: the five-kind vocabulary refusing the bookmark kind, exit 1) + red-02.txt: the sync suite's SYN-23 delivery pin observed RED (SYN-01..22 green, SYN-23 FAIL exit 1 \u2014 the note-with-new-kind-refs create refusing ARV-NTE-006 at the five-kind tree); the implementation lands in the immediately-following commit, never before this RED",
+        "observed_at": "2026-11-11T12:35:09.835187+00:00"
       }
     ]
   },
@@ -842,7 +848,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-059 (P3-08) the RED: the SYN-01..15 suite's RED observed at the exact predecessor 67e37fa (CLAIM-058's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the driver + migration 0012 absent), red-01.txt; the typed observed red per F-007",
-    "current_sha256": "12a8d905c842285ec27123e745824155348cef88d930ae4e7ebc3e3c01b8c570",
+    "current_sha256": "13bfa84777cea007bee1f214645f9c16cc30ed1819da2801f59e0af81693618e",
     "amendments": [
       {
         "prior_sha256": "d2158263fb30078c71c5874e85f781b12d5182605e917ca36420511d43a9b720",
@@ -903,6 +909,12 @@
         "new_sha256": "12a8d905c842285ec27123e745824155348cef88d930ae4e7ebc3e3c01b8c570",
         "note": "CLAIM-074's RED (the RLS suite authored tests-only per LAW-11 at this commit and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure + the sync suite's SYN-22 delivery pin observed RED (SYN-01..21 green, SYN-22 FAIL exit 1); the implementation lands in the immediately-following commit, never before this RED",
         "observed_at": "2026-11-10T16:29:30.347110+00:00"
+      },
+      {
+        "prior_sha256": "12a8d905c842285ec27123e745824155348cef88d930ae4e7ebc3e3c01b8c570",
+        "new_sha256": "13bfa84777cea007bee1f214645f9c16cc30ed1819da2801f59e0af81693618e",
+        "note": "CLAIM-076's RED (the write-completion pins authored tests-only per LAW-11 at this commit 0537873 and observed RED there \u2014 red-01.txt: the NTR suite's ARV-TEST-000 machinery-absent failure (the DB-free probe: the five-kind vocabulary refusing the bookmark kind, exit 1) + red-02.txt: the sync suite's SYN-23 delivery pin observed RED (SYN-01..22 green, SYN-23 FAIL exit 1 \u2014 the note-with-new-kind-refs create refusing ARV-NTE-006 at the five-kind tree); the implementation lands in the immediately-following commit, never before this RED",
+        "observed_at": "2026-11-11T12:35:09.835303+00:00"
       }
     ]
   },

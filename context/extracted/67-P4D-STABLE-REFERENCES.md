@@ -70,17 +70,86 @@ that I remember, or reference the article to the book, or the book to the articl
 (P4-E's increment); no reference graph queries (P5's world); no new entity families; no
 reader-client work (P4-B's repo).
 
-## §3 The slice chain in flight
+## §3 The executed chain
 
-commit A (this commit: the post-#109 five-area reconciliation + THE P4-C EXIT CHECK
-recorded + CLAIM-075 opened + record 67 minted; the branch pushed EARLY per the standing
-owner instruction) → the RED (the REF suite authored tests-only per LAW-11 against the
-machinery-absent tree — the ARV-TEST-000 machinery-absent probe + the behavioral pins over
-the six states, the entity-family coverage, the version pinning, the no-oracles, the
-hostile-string law) → the typed red-record binding (make red) → the GREEN (the resolution
-surface + the state machine — the design deciding whether migration 0018 is truly
-required; the expectation: NO new table, the resolution DERIVED over the landed entity
-rows) → the measured set → the SEV round(s) → the artifact finalize → the artifact
+commit A (`b0efb68`: the post-#109 five-area reconciliation + THE P4-C EXIT CHECK recorded +
+CLAIM-075 opened + record 67 minted; the branch pushed EARLY per the standing owner
+instruction) → **the RED** (`37917ec`: the REF suite authored tests-only per LAW-11 — 687
+lines, the REF-01..06 registry: the seven-family round-trip with the frozen answer shape and
+the identity/revision separation; the version pinning and the historical state with the
+note-machine compose probe; the tombstoned state across the three lifecycle families for
+unpinned AND pinned forms; the unavailable/ambiguous anchor compose; the purged state and the
+precedence with the 0013 closed-vocabulary substrate pin; the typed refusals, the no-oracle
+byte-equality for every family, the hostile-string battery, and the six-state exclusivity
+law; the gate.py TESTS registration riding the same commit, the ARV-RED-008 class; red-01.txt:
+exit 1, ARV-TEST-000 machinery-absent) → the typed red-record binding (`114231b`) → **the
+amendment** (`e7aac7d`: the disclosed pre-GREEN suite repair — the refs attach PER REVISION
+so the revise_note calls must restate the --ref pin; the STRENGTHENER form, the probe reading
+the CURRENT revision's own stored reference) → **the GREEN** (`6fde990`: query.py's
+resolve-reference — the typed six-state answer; the grammar composed from the CLAIM-057
+substrate with the pin OPTIONAL at the resolution boundary; THE PRECEDENCE purge >
+tombstone > revision resolution; the anchor compose via _verdict verbatim; the per-family
+state read in ONE statement ONE snapshot; the no-oracle ARV-REF-001 byte-equal; the
+malformed ARV-REF-002 with the framing-safe repr echo; capability.py's references
+reserved-surface row; plus the two disclosed suite repairs riding the same commit — the
+anchor-of-revision-1 selection and the 0013 CHECK name) → the measured set at the GREEN tree
+(runs 01-04: the suite x3 + make verify, the canonical layer 54/0) → **the SEV round 1**
+(agent-0b1de793: PASS zero open P0/P1 — 108 live probes + 13 static checks; the two
+NEW-CODE findings: F-075-1 the P2 all-digits-oversize-pin untyped crash, F-075-2 the P3
+trailing-newline uuid; the three routed/accepted P3s: F-075-3 the substrate's isdigit law
+composed verbatim, F-075-4 the uppercase-echo debt, F-075-5 the landed resolve-anchor's
+purge-unawareness routed to D-011) → **the SEV round-1 repair** (the current head: the
+length bound BEFORE int() — 18 digits, far above any plausible revision, far below CPython's
+4300-digit crash boundary; the \Z regex anchor — the substrate's own $ form routed to the
+_nte_canon_id family-wide slice, the F-072-1 precedent; the two suite strengtheners in the
+hostile battery, the typed third amendment) → the repair-tree measured set (runs 05-08: the
+suite x3 + make verify) → **the SEV round 2** (agent-c927a15b: PASS — both repaired classes
+verified closed live with the exact boundary behavior (the 18-digit pin still parses, the
+19-digit refuses), no new findings, the routing honest, the amendment chain typed; 46 live
+probes + 1 independent suite run + 12 static checks) → the artifact finalize → the artifact
 re-bind → the push → the PR → the five checks → the merge-gate review → **the merge under
 INT-145** → the post-merge verification → P4-D's remaining increments → P4-E → P4-F → the
 Phase 4 exit gate — NO PAUSE EVEN FOR UPDATES (INT-146).
+
+## §4 The SEV account (the two-round chain)
+
+**Round 1 (agent-0b1de793, PASS zero open P0/P1).** The reviewer independently reproduced
+on scratch databases of their own construction: the seven-family current round-trip with the
+frozen one-line JSON shape and the bare/revisioned split; the historical state on all four
+revisioned families serving exactly-as-pinned with current_revision alongside; the
+tombstoned state across the three lifecycle families for unpinned AND pinned forms with no
+revision/resolved_ref/content keys; the unavailable state for BOTH no-current-generation and
+their OWN stale-generation fixture, and the ambiguous state from a replicated ANC-05 drift
+plant; the purged state over note/highlight/work/source/anchor beating tombstone, ambiguity,
+and pins, with B's ledger rows RLS-invisible to A; the no-oracle as RAW-BYTES equality for
+all seven families plus the nonexistent-revision class; a 20-form hostile battery all
+ARV-REF-002 at exit 1 with zero answer lines; the command_log count unchanged across every
+resolution probe; the 0010/0013 substrate boundaries unchanged; the compose agreement between
+resolve-anchor and resolve-reference on four anchors of all four verdict classes; the RED
+reproduced independently from the archived 37917ec tree with the binding hash matching; the
+amendment chain hashes traced to the actual git trees. THE FINDINGS: F-075-1 (P2) the
+all-digits pin ≥4301 chars crashed _ref_parse with an uncaught ValueError (CPython's
+int-str limit) instead of the typed ARV-REF-002 — fail-closed but untyped; F-075-2 (P3) a
+trailing-newline uuid passed the $-anchored regex and died at the SQL cast as an untyped
+ARV-QRY-002; F-075-3 (P3, ROUTED) the unicode-digit/leading-zero pin normalization — the
+substrate's own isdigit law (commands.py:1219) composed verbatim, narrowing it here would be
+the forbidden second implementation; F-075-4 (P3, owner-accepted-debt) the uppercase-hex
+uuid echo case-preserved (RFC 4122 case-insensitivity, cosmetic); F-075-5 (P3, ROUTED) the
+landed resolve-anchor arm does not consult the purge ledger — pre-existing landed behavior
+outside this slice's diff, routed to D-011's governed-purge command slice.
+
+**The repair (applied in-slice, the CLAIM-058/071 precedent):** F-075-1 closed by the length
+bound BEFORE int() (len(rev) > 18 → the typed malformed refusal — every plausible pin's
+behavior identical, the crash boundary unreachable); F-075-2 closed by the \Z anchor in
+_REF_UUID_RE (the substrate's own copy routed, never modified — the F-072-1 routing
+precedent); the two SEV-devised hostile forms added to the suite's battery as the typed
+third amendment.
+
+**Round 2 (agent-c927a15b, PASS).** The repair verified by fresh eyes: both classes closed
+live (the 5000/4301-digit pins and the trailing-newline/leading-newline/trailing-char uuids
+all the typed ARV-REF-002, zero tracebacks); the boundary exact (the 18-digit pin still
+PARSES — answering the dangling ARV-REF-001 class, not malformed; a 19-digit pin refuses);
+no plausible-pin regression (pins @1..@3 unchanged); the routing honest (git diff over
+commands.py EMPTY); the amendment chain typed and tree-verified. The spot-regression battery:
+all six states reproduced, the no-oracle byte-equal, the command_log-unchanged law. No new
+findings.

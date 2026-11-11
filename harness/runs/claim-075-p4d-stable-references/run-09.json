@@ -1,0 +1,7 @@
+{
+  "command": "env SLICE=claim-075-p4d-stable-references GATE_DIFF=origin/main make gate",
+  "exit_code": 0,
+  "commit": "2988f560ba1eaa63099567ba03202af0ffcc3012",
+  "output_sha256": "84033a6a33e72216b70729d4347ea2a1b503dddc69a4a38b1424c63b9e09db56",
+  "recorded_at": "2026-11-11T10:30:51.001978+00:00"
+}

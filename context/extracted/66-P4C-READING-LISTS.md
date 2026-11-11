@@ -163,3 +163,21 @@ family); the standing family-wide classes (the read arms' malformed-id echo, the
 the SEV round (the recorded runs stand); the single-owner walk shape (B's delivery
 verified through the suite's SYN-08 class, not re-walked); no reader-client work
 (P4-B's repo).
+
+## §5 The close (CLAIM-074 LANDED — at this commit, the post-#109 reconciliation)
+
+PR #109 merged at 2026-11-10 as `4a750db327fac4d9b7540a6029d74b48e88ce99d` under INT-145's
+standing authorization: the five checks green at the exact final head `982b273` AND on the
+merge commit `4a750db` (all observed live); the merge-gate review D-042 (1a) `5846447048`;
+CodeRabbit the skip state (noted per D-042 (1c)); zero review threads; the flip/merge/restore
+with the protections re-read byte-equivalent; the branch deleted; 0 open PRs. No ARV-SEV-003
+round — the digest bound LAST (`65c0d342`) + the local trusted-gate reproduction green before
+the push (run-08, first attempt). THE ONE-ROUND SEV CHAIN (the account in §4): agent-caf66233
+PASS, zero open P0/P1. The routed follow-ups: F-074-1 (the leading-dash argv-value family)
++ the standing family-wide classes.
+
+**THE P4-C EXIT:** with this landing every required P4-C backend behavior is landed and
+verified — the library membership, the current-reading state, the reading lists, the
+approved session/dwell behavior, the journal/blocks + the sync delivery. **P4-C COMPLETE.**
+The full account: CLAIM-074's rule-4 close row + this record. Record 67 carries the
+stable-reference slice (P4-D's opening).

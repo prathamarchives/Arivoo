@@ -59,6 +59,25 @@ FORMATS = ADAPTERS
 # declared here so the contract sketch is visible from day one, never smuggled
 # in later. The reader UI itself is the separate repository.
 RESERVED_SURFACES = {
+    # P4-D slice one (CLAIM-075; record 67 §2): the stable @-reference
+    # system LANDED — the RTM §2 item 10 reservation's own row (the same
+    # promotion every landed surface took at its landing)
+    "references": {
+        "owner_phase": "P4-D",
+        "reservation": ("LANDED in P4-D slice one (CLAIM-075): the backend verb is real — "
+                        "resolve-reference (query.py — the typed SIX-STATE resolution over "
+                        "the seven landed families work/source/anchor/highlight/bookmark/"
+                        "note/journal_block: current | historical | tombstoned | "
+                        "unavailable | ambiguous | purged; the logical target identity "
+                        "separated from the selected historical revision; the explicit "
+                        "version pinning serving exactly as pinned; the purge-ledger "
+                        "precedence; the no-oracle byte-equal refusals — composing the "
+                        "CLAIM-057 note-reference substrate, never a second "
+                        "implementation); the agent-facing resolution and the reference "
+                        "graph queries are the later increments (P4-E / P5); the reader "
+                        "CLIENT that renders references is P4-B's separate repo (no "
+                        "client work here)"),
+    },
     # P4-C slice five (CLAIM-074; record 66 §2): the reading-list surface
     # LANDED — the user-defined lists over the landed library (the North
     # Star owner words' third surface, the post-#108 reconciliation's

@@ -1,0 +1,35 @@
+- CLAIM-075 — the honest not-verified list (LAW-04: the explicit statement, never
+- empty-by-omission). The full SEV account: sev.json + sev-round-1.md + sev-round-2.md.
+- - F-075-3 (P3, ROUTED): the unicode-digit and leading-zero pin normalization — the
+- CLAIM-057 substrate's own isdigit law (commands.py:1219) composed VERBATIM at the
+- resolution boundary; narrowing it here would be the forbidden second implementation.
+- Routed to the substrate grammar owner (tighten both boundaries together if ASCII-only
+- pins are wanted).
+- - F-075-4 (P3, owner-accepted-debt): the uppercase-hex uuid resolves and is echoed
+- case-preserved (RFC 4122 case-insensitivity; the regex allows A-F, the same as the
+- substrate) — cosmetic identity-echo debt.
+- - F-075-5 (P3, ROUTED): the landed resolve-anchor arm does not consult the purge
+- ledger (a purged anchor: resolve-reference answers purged, resolve-anchor still answers
+- its P3-03b verdict) — pre-existing landed behavior outside this slice's diff; routed to
+- D-011's governed-purge command slice.
+- - the standing family-wide classes routed by the prior slices' reviews (unchanged):
+- the read arms' malformed-id echo + the substrate's own $-anchored _UUID_RE (F-072-1's
+- routing — the _nte_canon_id pattern's slice; this slice repaired only ITS OWN copy to
+- \Z), the leading-dash argv-value family (F-074-1), the import_source staging-before-argv
+- residue (F-073-6).
+- - no agent-facing reference resolution (P4-E's increment); no reference graph queries
+- (P5's world); no reader-client work (P4-B's repo).
+- - no concurrency probes — the single-statement single-snapshot law verified
+- structurally (the per-family state read IS one statement), never under actual parallel
+- writes (both SEV rounds' honest limits).
+- - the note machine's WRITE vocabulary stays at its five kinds this slice (the 0010
+- CHECK would need a migration to widen — a substrate change never made here;
+- bookmark/journal_block references are RESOLVABLE through the surface but not yet
+- WRITABLE through note --ref).
+- - no performance/DoS measurements (the F-075-1 crash class verified functionally;
+- no cost curves measured).
+- - the purge-vs-malformed precedence corner (a caller's ledger row naming another
+- owner's entity id) reasoned but not probed — requires contrived uuid collisions.
+- - the location-unmatched unavailable cause covered by the landed ANC suite, not
+- re-derived from scratch by the SEV rigs (the compose agreement verified on the other
+- three verdict classes).

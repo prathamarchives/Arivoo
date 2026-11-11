@@ -1,0 +1,106 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-075-p4d-stable-references",
+ "base_sha": "4a750db327fac4d9b7540a6029d74b48e88ce99d",
+ "reviewed_diff_sha256": "b712dcf27a7a83aa1084ebe848bba19729083ecb0d9ab9cae8b6720e595bf47f",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-02",
+  "SYS-05",
+  "SYS-10"
+ ],
+ "system_claims": [
+  "C1",
+  "C5"
+ ],
+ "changed_components": [
+  "harness/query.py (resolve-reference — the P4-D slice one resolution surface: the typed SIX-STATE answer current|historical|tombstoned|unavailable|ambiguous|purged over the seven landed families; _ref_parse the CLAIM-057 substrate's grammar composed at the resolution boundary — the same uuid law (the \\Z anchor after the round-1 repair), the same per-family revision dimension (bare work/source/anchor, revisioned highlight/bookmark/note/journal_block), the pin OPTIONAL here (unpinned asks where-is-current, pinned asks exactly-as-pinned); THE PRECEDENCE — the 0013 purge ledger first (RLS-scoped, purged WINS over every state), the lifecycle parity second (a pin never bypasses a tombstone; the answer carries no revision and no content), the revision resolution last (the unpinned form current at the derived max revision; the pinned form historical serving exactly as pinned with current_revision named alongside — never a silent retarget; a nonexistent target revision on a live target the SAME ARV-REF-001 dangling refusal, the substrate's ARV-NTE-003 law at the read side); the anchor family composes _verdict VERBATIM (the P3-03b machinery: resolved->current+generation_id, unresolved->unavailable+the named cause, ambiguous->ambiguous+evidence_hits); the per-family state read in ONE statement ONE snapshot (the #91 read-path law — max revision, pin existence, tombstone parity as subselects in a single flag|payload row); the no-oracle ARV-REF-001 byte-equal for absent/cross-owner/nonexistent-revision; the malformed ARV-REF-002 with the framing-safe repr echo and the SEV round-1 repairs — the length bound BEFORE int() (18 digits, the CPython 4300-digit crash class closed) and the \\Z regex anchor (the trailing-newline uuid class closed))",
+  "harness/capability.py (the references reserved-surface row: owner_phase P4-D, the LANDED verb named, the P4-E/P5 increments and the P4-B reader-client exclusion carried)",
+  "harness/gate.py (the TESTS registration for test_references.py, landed AT the RED commit — the ARV-RED-008 class) + harness/red-records.json (the typed NEW record at the RED commit + THREE chained amendments, each prior->new, the binding_commit unchanged)",
+  "harness/tests/test_references.py (the REF-01..06 suite: the seven-family round-trip with the frozen answer shape and the identity/revision separation; the version pinning + the historical state + the note-machine compose probe over the CURRENT revision's own stored reference; the tombstoned state across the three lifecycle families for unpinned AND pinned forms with no content leak; the unavailable/ambiguous anchor compose incl. the ANC-05 drift fixture; the purged state + the precedence + the 0013 closed-vocabulary substrate pin; the typed refusals + the no-oracle byte-equality for every family + the hostile battery incl. the two SEV-round-1-devised forms + the command_log-unchanged law + the six-state exclusivity/coverage law)"
+ ],
+ "interfaces_reviewed": [
+  "the CLAIM-057 note-reference substrate's grammar at the resolution boundary (the uuid law, the per-family revision dimension, the ARV-NTE-003 no-oracle class carried to the read side — composed, never re-implemented)",
+  "the P3-03b anchor-resolution machinery (_verdict composed verbatim for the anchor family — the compose agreement verified live by both SEV rounds on all four verdict classes)",
+  "the lifecycle parity machines (highlight/bookmark/note tombstones>restores — the tombstoned state and the restore transition)",
+  "the 0013 purge ledger (the permanence record's precedence over every state; the RLS owner isolation; the closed kind vocabulary — the journal_block refusal pinned)",
+  "the one-statement one-snapshot read law (the per-family state read as subselects in a single row — the #91 read-path class)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the REF suite GREEN REF-01..06 exit 0 x3 at the GREEN tree (runs 01-03) AND x3 at the SEV-repair tree (runs 05-07) — the repair introduced no regression",
+   "make verify exit 0 at BOTH trees (runs 04 and 08 — all suites + the gate + the canonical layer 54/0)"
+  ],
+  "integration_verification": [
+   "the note-machine composition: the stored reference (get-note's CURRENT-revision refs) resolves through the ONE surface to the same pinned answer (REF-02's compose probe)",
+   "the anchor compose agreement: resolve-anchor and resolve-reference agree on the same anchors across all four verdict classes (both SEV rounds' live probes)",
+   "the substrate boundaries unchanged: the 0010 note-write kinds NOT widened (bookmark/journal_block refs refuse ARV-NTE-006 at the write boundary), the 0013 ledger vocabulary unchanged (the journal_block INSERT refuses purge_ledger_kind_check)"
+  ],
+  "system_verification": [
+   "the SEV round 1 live verification (agent-0b1de793, 108 probes + 13 static checks): every claimed behavior reproduced on the reviewer's own scratch rigs — the six states, the precedence, the raw-byte no-oracle for all seven families, the hostile battery, the command_log-unchanged law, the RED independently reproduced from the archived tree",
+   "the SEV round 2 live verification (agent-c927a15b, 46 probes + 12 static checks): both round-1 repairs verified closed with the exact boundary behavior, no new findings, the routing honest, the amendment chain typed and tree-verified",
+   "the recorded PR-mode gate + the local trusted-gate reproduction at the final head (the records at the re-bind)"
+  ],
+  "validation": [
+   "the six-state exclusivity/coverage law (REF-06: the observed states across the whole suite are EXACTLY the closed six — every answer one state, every state exercised)",
+   "the identity/revision separation law (REF-01/02: the bare families carry no revision field; the unpinned and pinned forms of one target differ exactly by the selected revision)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a stale reference silently retargets (a pinned superseded revision serving the current instead of the pin)",
+   "control": "the pinned form serves EXACTLY as pinned (resolved_ref = the pinned form, the pinned_revision echoed, the current_revision named alongside — never a silent retarget); REF-02 + both SEV rounds' live probes"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "an existence side channel (the absent vs cross-owner distinction leaking at the resolution boundary)",
+   "control": "ARV-REF-001 byte-equal (template-normalized raw-byte comparison) for absent vs cross-owner vs nonexistent-revision, for EVERY family; REF-06 + both SEV rounds' raw-byte probes"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a tombstone or purge bypassed through a pinned historical reference",
+   "control": "the precedence: the purge ledger first, the tombstone parity second, the revision resolution last — a pin NEVER bypasses either; the tombstoned/purged answers carry no revision, no resolved_ref, no content (deleted private content never leaks); REF-03/05 + the SEV rounds' live probes"
+  },
+  {
+   "id": "FM-04",
+   "scenario": "an untyped crash or an untyped SQL failure on hostile reference strings (the hostile-string law: a reference string is DATA, never an instruction)",
+   "control": "the closed grammar ARV-REF-002 with the framing-safe repr echo: unknown kinds, non-uuid ids, revisions on the bare families, non-digit/zero/oversize pins (the round-1 F-075-1 length bound closing CPython's int-str crash), trailing-newline uuids (the round-1 F-075-2 \\Z anchor), SQL metacharacters, the 10k oversize string — all the named refusal, never a clamp, never a traceback; REF-06 + round 2's boundary probes"
+  },
+  {
+   "id": "FM-05",
+   "scenario": "a second reference implementation drifting from the substrate (the grammar or the anchor machinery forking)",
+   "control": "the compose verified structurally (the anchor family invokes _verdict verbatim; the grammar laws mirror the substrate's) and behaviorally (the compose-agreement probes; the substrate's isdigit law composed VERBATIM — F-075-3 routed rather than narrowed, exactly the no-second-implementation law)"
+  }
+ ],
+ "findings": [
+  {
+   "id": "F-075-1",
+   "severity": "P2",
+   "status": "resolved",
+   "summary": "the all-digits pin >= 4301 chars crashed _ref_parse with an untyped ValueError (CPython's int-str limit) instead of the typed ARV-REF-002 — repaired in-slice by the length bound BEFORE int() (18 digits; every plausible pin's behavior identical); verified closed live by SEV round 2 with the exact boundary (the 18-digit pin still parses, the 19-digit refuses)"
+  }
+ ],
+ "not_verified": [
+  "F-075-2 (P3, RESOLVED in-slice): a trailing-newline uuid passed the $-anchored regex and died at the SQL cast as an untyped ARV-QRY-002 — repaired by the \\Z anchor (the substrate's own _UUID_RE copy routed to the _nte_canon_id family-wide slice, the F-072-1 precedent, never modified here); verified closed live by SEV round 2 (the frozen sev severities P0/P1/P2 keep the P3 class here, never in findings)",
+  "F-075-3 (P3, ROUTED): the unicode-digit and leading-zero pin normalization — the CLAIM-057 substrate's own isdigit law (commands.py:1219) composed VERBATIM at the resolution boundary; narrowing it here would be the forbidden second implementation; routed to the substrate grammar owner (tighten both boundaries together if ASCII-only pins are wanted)",
+  "F-075-4 (P3, owner-accepted-debt): an uppercase-hex uuid resolves and is echoed case-preserved (RFC 4122 case-insensitivity; the regex allows A-F, the same as the substrate) — cosmetic identity-echo debt",
+  "F-075-5 (P3, ROUTED): the landed resolve-anchor arm does not consult the purge ledger (a purged anchor: resolve-reference answers purged, resolve-anchor still answers its P3-03b verdict) — pre-existing landed behavior outside this slice's diff; routed to D-011's governed-purge command slice",
+  "no agent-facing reference resolution (P4-E's increment — the scoped agent reads); no reference graph queries (P5's world); no new entity families; no reader-client work (P4-B's separate repo)",
+  "no concurrency probes — the single-statement single-snapshot law was verified structurally (the per-family state read IS one statement), never under actual parallel writes (the SEV rounds' honest limits)",
+  "the routed classes carry forward unchanged: the standing family-wide classes (the F-072-1 _nte_canon_id pattern's slice incl. the substrate's own $-anchored _UUID_RE, the F-074-1 leading-dash argv-value family, the F-073-6 import staging residue)",
+  "the note machine's WRITE vocabulary stays at its five kinds this slice (the 0010 CHECK would need a migration to widen — a substrate change never made here; bookmark/journal_block references are RESOLVABLE through the surface but not yet WRITABLE through note --ref)",
+  "no performance/DoS measurements (the F-075-1 crash class verified functionally; no cost curves measured)",
+  "the purge-vs-malformed precedence corner (a caller's ledger row naming another owner's entity id) reasoned but not probed — requires contrived uuid collisions",
+  "the location-unmatched unavailable cause covered by the landed ANC suite, not re-derived from scratch by the SEV rigs (the compose agreement verified on the other three verdict classes)"
+ ],
+ "builder_context": "Super Z (GLM host) — the standing do-not-stop chain INT-134..146",
+ "reviewer_context": "two fresh-context SEV agents: agent-0b1de793 (round 1, PASS zero open P0/P1 — 108 live probes + 13 static checks; the two new-code findings F-075-1/F-075-2 repaired in-slice) + agent-c927a15b (round 2, PASS — both repairs verified closed live, the boundary exact, no new findings, 46 live probes + 12 static checks)",
+ "disposition": "PASS",
+ "review_summary": "the two-round chain (the CLAIM-058/071 repair-in-slice precedent): round 1 (agent-0b1de793) PASS zero open P0/P1 — every claimed behavior independently reproduced on the reviewer's own scratch rigs (the seven families, the six states, the precedence, the raw-byte no-oracle, the hostile battery, the compose agreements, the substrate boundaries, the RED reproduced from the archived tree with the binding hash matching), with one P2 and one P3 in the NEW code (the all-digits oversize pin's untyped crash; the trailing-newline uuid's untyped SQL failure) plus three routed/accepted observations; the repair applied in-slice (the length bound before int(); the \\Z anchor; the two hostile-battery strengtheners as the typed third amendment); round 2 (agent-c927a15b) PASS — both repaired classes verified closed live with the exact boundary behavior (the 18-digit pin still parses, the 19-digit refuses; the trailing-newline/leading-newline/trailing-char uuids all the typed refusal), no plausible-pin regression, the routing honest (commands.py untouched), the amendment chain typed and tree-verified, no new findings. The recorded evidence: the REF suite x3 at BOTH the GREEN and repair trees + make verify 54/0 at both, all exit 0"
+}

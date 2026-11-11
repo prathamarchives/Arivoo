@@ -1,0 +1,21 @@
+# CLAIM-075 — P4-D slice one: the stable @-reference system (the RTM §2 item 10
+# reservation landing; the six explicit states; the version-aware resolution over the
+# seven entity families; composing the CLAIM-057 note-reference substrate). RED-first at
+# CLAIM-074's merged head 4a750db. The scope elaborates at the RED per the one-phase-deep
+# rule (the file set finalized against the actual design).
+harness/commands.py D-041
+harness/query.py D-041
+harness/sync.py D-041
+harness/capability.py D-041
+harness/crash.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+harness/tests/test_references.py D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/66-P4C-READING-LISTS.md D-042
+context/extracted/67-P4D-STABLE-REFERENCES.md D-042
+harness/runs/claim-075-p4d-stable-references D-042

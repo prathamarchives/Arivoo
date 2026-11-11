@@ -119,6 +119,12 @@ Cases (the SYN registry; each pin's full statement lives at its check()):
          leaked staging file (the TMPDIR-steered walk leaves the
          staging dir empty — the cleanup follows the temp dir's own
          resolution, never a hard-coded /tmp)
+  SYN-23 the note-with-new-kind-refs delivery (CLAIM-076, P4-D slice two:
+         the note carrying --ref bookmark:<id>@rev + --ref journal_block:<id>@rev
+         DELIVERS through the TRANSLATED target ids — the journal family's
+         @1-addressed server ref reduced to its uuid stem at the ref boundary,
+         the same address step the revise branch takes; the server's note
+         carries the SERVER's ids; the server's resolve-reference composes)
   SYN-22 the reading-list delivery (CLAIM-074, P4-C slice five: the outbox
          ride TOGETHER — the enqueue and the delivery in one slice, never
          the dead-letter window): the create_reading_list outbox row
@@ -1057,11 +1063,64 @@ def main() -> int:
               "bare-uuid result_ref, the bridge's existing form — + the translated "
               "source id) — the enqueue and the delivery land TOGETHER at this slice")
 
+        # ---- SYN-23 — the note-with-new-kind-refs delivery (CLAIM-076,
+        # P4-D slice two: the write completion's delivery arm — a note
+        # referencing a bookmark and a journal block DELIVERS through the
+        # identity bridge; the journal family's translated ref is the @1
+        # ADDRESS, reduced to its uuid stem at the --ref boundary)
+        r_bm = cmd("create_bookmark", "--source-id", sid, "--start", str(s1),
+                   "--end", str(e1), key="sy-bm23")
+        lbm = ack_field(r_bm, "result_ref")
+        r_jb = cmd("journal_block", "--kind", "raw",
+                   "--content", "The sync-referenced raw thinking.",
+                   key="sy-jb23")
+        ljb = ack_field(r_jb, "result_ref").split("@")[0]
+        r_nt = cmd("create_note", "--content", "The note referencing both.",
+                   "--ref", f"bookmark:{lbm}@1", "--ref", f"journal_block:{ljb}@1",
+                   key="sy-nt23")
+        lnt = ack_field(r_nt, "result_ref")
+        r23 = sync()
+        srv_bm = ob(LOC, "sy-bm23", "server_ref")
+        srv_jb = ob(LOC, "sy-jb23", "server_ref")
+        srv_nt = ob(LOC, "sy-nt23", "server_ref")
+        g23 = cli(str(REPO / "harness" / "query.py"), "get-note", "--owner", "A",
+                  "--id", srv_nt, env=srv_env) if srv_nt else None
+        g23refs = None
+        if g23 is not None and g23.returncode == 0:
+            try:
+                g23refs = json.loads(g23.stdout.splitlines()[0]).get("refs")
+            except Exception:
+                g23refs = None
+        srv_jb_stem = srv_jb.rsplit("@", 1)[0] if srv_jb and "@" in srv_jb else srv_jb
+        rr23 = cli(str(REPO / "harness" / "query.py"), "resolve-reference",
+                   "--owner", "A", "--ref", f"bookmark:{srv_bm}@1",
+                   env=srv_env) if srv_bm else None
+        bm23 = None
+        if rr23 is not None and rr23.returncode == 0:
+            try:
+                bm23 = json.loads(rr23.stdout.splitlines()[0])
+            except Exception:
+                bm23 = None
+        ok23 = (r_bm.returncode == 0 and r_jb.returncode == 0
+                and r_nt.returncode == 0 and "status=committed" in r_nt.stdout
+                and r23.returncode == 0
+                and ob(LOC, "sy-bm23") == "acknowledged"
+                and ob(LOC, "sy-jb23") == "acknowledged"
+                and ob(LOC, "sy-nt23") == "acknowledged"
+                and srv_bm and srv_jb and srv_nt
+                and g23refs == [{"kind": "bookmark", "id": srv_bm, "revision": 1},
+                                {"kind": "journal_block", "id": srv_jb_stem, "revision": 1}]
+                and bm23 is not None and bm23.get("state") == "current"
+                and bm23.get("kind") == "bookmark")
+        check("SYN-23", ok23,
+              "the note-with-new-kind-refs delivery (CLAIM-076, P4-D slice two — the write completion's delivery arm): the note carrying bookmark@1 + journal_block@1 references DELIVERS through the identity bridge's TRANSLATED target ids — the journal family's server ref is the @1 ADDRESS, reduced to its uuid stem at the --ref boundary (the same address step the revise branch takes, never the malformed double-pin); the server's note carries the SERVER's own ids (get-note's refs array on the server domain); the server's resolve-reference composes over the delivered reference (the bookmark answering current at the server's own identity)",
+              "harness/sync.py _refs_args' journal stem step + the widened vocabulary at the server's own command kernel — the delivery lands with the write, never a dead letter")
+
         print()
         if FAILS:
             print(f"RED — the P3-08 sync suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-08 acceptance suite (SYN-01..22) passes")
+        print("GREEN — the P3-08 acceptance suite (SYN-01..23) passes")
         return 0
     finally:
         pg.drop_scratch_db(LOC)

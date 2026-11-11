@@ -1,0 +1,21 @@
+CLAIM-076 — the observed RED, record two (LAW-11: the delivery pin rides the same tests-only commit)
+
+Command: python3 harness/tests/test_sync.py
+Tree:    0537873 (CLAIM-076's RED commit, on commit A at CLAIM-075's merged
+         head af95e3c0)
+Exit:    1
+Output:
+  PASS SYN-01 .. PASS SYN-22 (the landed machinery green at this tree)
+  FAIL SYN-23: the note-with-new-kind-refs delivery (CLAIM-076, P4-D slice
+  two — the write completion's delivery arm): the note carrying bookmark@1 +
+  journal_block@1 references DELIVERS through the identity bridge's
+  TRANSLATED target ids ...
+  RED — the P3-08 sync suite fails: SYN-23
+
+Observed live at the exact tree above: SYN-01..22 green (the landed delivery
+machinery unregressed), SYN-23 RED — the local note create carrying
+--ref bookmark:<id>@1 --ref journal_block:<id>@1 refuses ARV-NTE-006 at the
+five-kind vocabulary (the machinery-absent class for the delivery arm). The
+GREEN requires the widened vocabulary at the server's own command kernel AND
+sync.py's journal stem step (the translated @1-addressed server ref reduced
+to its uuid stem at the --ref boundary — never the malformed double-pin).

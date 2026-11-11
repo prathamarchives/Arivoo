@@ -1,0 +1,21 @@
+CLAIM-076 — the observed RED (LAW-11: tests-only, committed BEFORE the implementation)
+
+Command: python3 harness/tests/test_note_reference.py
+Tree:    0537873 (CLAIM-076's RED commit, on commit A at CLAIM-075's merged
+         head af95e3c0)
+Exit:    1
+Output:
+  FAIL ARV-TEST-000: the P4-D slice two write-completion machinery is absent
+  (machinery-absent class; the note --ref vocabulary still refuses the
+  bookmark kind — the seven-kind widening is not landed) — the implementation
+  lands after this RED, never before it (LAW-11)
+
+Observed live at the exact tree above (the suite committed in its tests-only RED
+form — the NTR-13..16 additions: the seven-kind write round-trip with the
+compose through resolve-reference + the replacement semantics; the shape law at
+the widened boundary; the no-oracle for the new kinds; the 0018 substrate
+backstop; the DB-free machinery-absent probe — the parse refusal precedes the
+spine's connection, the nonexistent probe database never reached). The
+implementation lands in the immediately-following commit, never before this
+RED: migration 0018 (the 0010 CHECK widening + the guard's per-kind arms) +
+commands.py's `_REF_KINDS`/`_nte_refs`/`_nte_check_targets` widening.

@@ -1187,7 +1187,14 @@ def _nte_body(content: str, note_id: "str | None" = None,
                       ensure_ascii=False)
 
 
-_REF_KINDS = ("work", "source", "anchor", "highlight", "note")
+# P4-D slice two (CLAIM-076; record 68 §2): the write completion — the
+# seven landed families, the revision dimension split exactly as the
+# resolution surface's grammar law (CLAIM-075) and the 0018 substrate
+# CHECK: bare work/source/anchor; revisioned highlight/note/bookmark/
+# journal_block (the @rev pin required — the immutable (id, revision) pair
+# is what a stored reference MEANS).
+_REF_KINDS = ("work", "source", "anchor", "highlight", "note",
+              "bookmark", "journal_block")
 _UUID_RE = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
                       r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
@@ -1208,14 +1215,15 @@ def _nte_refs(refs: "list[str] | None") -> list:
             raise _CapRefusal("ARV-NTE-006",
                               f"the reference {r!r} names an unknown kind {kind!r} — the "
                               f"referenceable kinds are exactly {_REF_KINDS}",
-                              "supply kind:id with kind in work/source/anchor/highlight/note")
+                              "supply kind:id with kind in work/source/anchor/highlight/"
+                              "note/bookmark/journal_block")
         target, at, rev = rest.partition("@")
         if not _UUID_RE.match(target):
             raise _CapRefusal("ARV-NTE-006",
                               f"the reference {r!r} carries a malformed id {target!r} — a "
                               "reference target is a UUID",
                               "supply the target's UUID (query.py list-* / get-*)")
-        if kind in ("highlight", "note"):
+        if kind in ("highlight", "note", "bookmark", "journal_block"):
             if not rev or not rev.isdigit() or int(rev) < 1:
                 raise _CapRefusal("ARV-NTE-006",
                                   f"the {kind} reference {r!r} must name the target revision "
@@ -1260,6 +1268,15 @@ def _nte_check_targets(sess: "Session", refs: list) -> None:
         elif kind == "highlight":
             row = _sess_row(sess, f"SELECT id || '|' FROM arv.highlight WHERE id={_q(target)} "
                                   f"AND revision={rev};")
+        elif kind == "bookmark":
+            # P4-D slice two (CLAIM-076): the write completion's target arm —
+            # the same RLS-scoped existence-at-revision read, the same
+            # no-oracle refusal (the 0018 guard's own arm mirrors this)
+            row = _sess_row(sess, f"SELECT id || '|' FROM arv.bookmark WHERE id={_q(target)} "
+                                  f"AND revision={rev};")
+        elif kind == "journal_block":
+            row = _sess_row(sess, f"SELECT id || '|' FROM arv.journal_block WHERE "
+                                  f"id={_q(target)} AND revision={rev};")
         else:
             row = _sess_row(sess, f"SELECT id || '|' FROM arv.note WHERE id={_q(target)} "
                                   f"AND revision={rev};")
@@ -2188,8 +2205,9 @@ def main() -> int:
         p.add_argument("--content-file", default=None,
                        help="the long-form authoring surface: a UTF-8 file read losslessly")
         p.add_argument("--ref", action="append", default=None, metavar="KIND:ID[@REV]",
-                       help="an explicit version-aware reference (repeatable; highlight/note "
-                            "MUST name the target revision, work/source/anchor MUST NOT)")
+                       help="an explicit version-aware reference (repeatable; highlight/note/"
+                            "bookmark/journal_block MUST name the target revision, "
+                            "work/source/anchor MUST NOT)")
         if name == "revise_note":
             p.add_argument("--id", required=True)
     p = sub.add_parser("rebuild_keyword_index")

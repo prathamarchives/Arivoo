@@ -58,6 +58,25 @@ Cases (the NTR registry; each pin's full statement lives at its check()):
   NTR-12 the tombstone boundary: a tombstoned note's governed history
          retains every revision with its OWN refs; restore returns the
          current view with its refs; the ordinary read never leaks them
+  NTR-13 (P4-D slice two, CLAIM-076) the seven-kind write round-trip: the
+         full mixed set incl. bookmark@rev + journal_block@rev lands; get-note
+         renders the seven-entry refs array; the STORED new-kind refs resolve
+         through the ONE surface (the compose); revision 2 carries its OWN
+         new-kind set (the replacement semantics)
+  NTR-14 the shape law for the new kinds: a bare bookmark/journal_block (no
+         @rev) and a non-digit pin refuse ARV-NTE-006; a duplicate target
+         008; the same set SHUFFLED replays under the same key (LAW-23); a
+         different set under the same key 409s
+  NTR-15 the no-oracle for the new kinds: absent, cross-owner, and a
+         nonexistent revision on a live target are the SAME ARV-NTE-003
+         refusal (template-normalized byte-equal), zero effect
+  NTR-16 the substrate backstop (0018): the out-of-vocabulary direct INSERT
+         still refuses the kind CHECK (the widening is exactly two kinds,
+         never open); a bookmark/journal_block row without the revision
+         refuses the shape CHECK; the WELL-FORMED direct row for each new
+         kind is ADMITTED — proving the guard routes the new kinds to THEIR
+         tables (not the note ELSE arm); the ghost target refuses ARV-NTE-003
+         at the substrate
 
 Run: python3 harness/tests/test_note_reference.py   (exit 0 = green)
 """
@@ -72,6 +91,27 @@ REPO = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 FAILS: list[str] = []
+
+# P4-D slice two (CLAIM-076) — the machinery-absent probe (LAW-11): the
+# write-completion machinery is the SEVEN-kind vocabulary at the note --ref
+# boundary. The probe is DB-FREE by construction: the parse refusal precedes
+# the spine's connection (the nonexistent database below is never reached at
+# the RED tree — the vocabulary refusal fires first; at the GREEN tree the
+# parse passes and the connection refuses, the probe's one-job output check
+# unaffected). At the five-kind tree this prints the machinery-absent RED.
+_p76 = subprocess.run(
+    [sys.executable, str(REPO / "harness" / "commands.py"), "create_note",
+     "--owner", "A", "--actor", "owner", "--client-id", "cli-probe",
+     "--idem-key", "p4d2-machinery-absent-probe", "--content", "probe",
+     "--ref", "bookmark:00000000-0000-0000-0000-000000000000@1"],
+    capture_output=True, text=True, timeout=60,
+    env=dict(os.environ, PGDATABASE="arv_p4d2_red_probe_absent"))
+if "ARV-NTE-006" in _p76.stdout and "bookmark" in _p76.stdout:
+    print("FAIL ARV-TEST-000: the P4-D slice two write-completion machinery is "
+          "absent (machinery-absent class; the note --ref vocabulary still "
+          "refuses the bookmark kind — the seven-kind widening is not landed) "
+          "— the implementation lands after this RED, never before it (LAW-11)")
+    sys.exit(1)
 
 
 def check(code: str, ok: bool, what: str, repair: str) -> None:
@@ -582,11 +622,202 @@ def main() -> int:
               "a tombstoned note's ordinary read refuses ARV-QRY-003 with NO refs leak; the governed history retains every revision WITH its own reference set; list-notes hides it; restore returns the current view with its current reference set — the tombstone governs visibility, never the recorded references",
               "tombstone hides from ordinary retrieval while the governed history retains everything (§3.3; the reference rows are part of the retained record)")
 
+        # ---- NTR-13 — the seven-kind write round-trip (P4-D slice two,
+        # CLAIM-076: the bookmark + journal_block families join the write
+        # vocabulary — the bounded increment CLAIM-075's own not-verified
+        # list named; the reference system completes over the seven families)
+        pbm = cli(str(REPO / "harness" / "commands.py"), "create_bookmark",
+                  "--owner", "A", "--actor", "owner", "--client-id", "cli-1",
+                  "--idem-key", "bm-A1", "--source-id", sid_a,
+                  "--start", str(s1), "--end", str(e1))
+        bm1 = ack_field(pbm, "result_ref")
+        mbm = cli(str(REPO / "harness" / "commands.py"), "move_bookmark",
+                  "--owner", "A", "--actor", "owner", "--client-id", "cli-1",
+                  "--idem-key", "bm-A1m", "--id", bm1,
+                  "--start", str(s2), "--end", str(e2))
+        pjb = cli(str(REPO / "harness" / "commands.py"), "journal_block",
+                  "--owner", "A", "--actor", "owner", "--client-id", "cli-1",
+                  "--idem-key", "jb-A1", "--kind", "raw",
+                  "--content", "The raw thinking the note references.")
+        jb1 = ack_field(pjb, "result_ref").split("@")[0]
+        rjb = cli(str(REPO / "harness" / "commands.py"), "revise_journal_block",
+                  "--owner", "A", "--actor", "owner", "--client-id", "cli-1",
+                  "--idem-key", "jb-A1r", "--id", jb1,
+                  "--content", "The revised raw thinking.")
+        pbmb = cli(str(REPO / "harness" / "commands.py"), "create_bookmark",
+                   "--owner", "B", "--actor", "owner", "--client-id", "cli-1",
+                   "--idem-key", "bm-B1", "--source-id", sid_b,
+                   "--start", str(s1), "--end", str(e1))
+        bmb = ack_field(pbmb, "result_ref")
+        pjbb = cli(str(REPO / "harness" / "commands.py"), "journal_block",
+                   "--owner", "B", "--actor", "owner", "--client-id", "cli-1",
+                   "--idem-key", "jb-B1", "--kind", "creative",
+                   "--content", "B's private creative block.")
+        jbb = ack_field(pjbb, "result_ref").split("@")[0]
+        refs7 = [f"work:{wid_a}", f"source:{sid_a}", f"anchor:{anc_a}",
+                 f"highlight:{h1}@1", f"note:{nfs}@1",
+                 f"bookmark:{bm1}@1", f"journal_block:{jb1}@2"]
+        p13 = mk_note("n-13", content="The seven-kind referenced thinking.", refs=refs7)
+        n13 = ack_field(p13, "result_ref")
+        g13 = typed(qy("get-note", "A", n13))
+        rr13 = audit_rows(f"SELECT ref_kind, ref_id, ref_revision::text FROM "
+                          f"arv.note_reference WHERE note_id='{n13}' AND note_revision=1 "
+                          f"ORDER BY ref_kind, ref_id;")
+        # the compose round-trip: the STORED new-kind refs resolve through the
+        # ONE surface (CLAIM-075's resolve-reference — pinned bookmark@1 is
+        # HISTORICAL after the move to revision 2; journal_block@2 is CURRENT)
+        rb = cli(str(REPO / "harness" / "query.py"), "resolve-reference",
+                 "--owner", "A", "--ref", f"bookmark:{bm1}@1")
+        rj = cli(str(REPO / "harness" / "query.py"), "resolve-reference",
+                 "--owner", "A", "--ref", f"journal_block:{jb1}@2")
+        bm_ans = json.loads(rb.stdout.splitlines()[0]) if rb.returncode == 0 else None
+        jb_ans = json.loads(rj.stdout.splitlines()[0]) if rj.returncode == 0 else None
+        # revision 2's OWN new-kind set (the replacement semantics: the pinned
+        # pair may be any existing revision — journal_block@1 superseded-but-retained)
+        p13r = revise_note("n-13r", n13, content="The second seven-kind thinking.",
+                           refs=[f"bookmark:{bm1}@2", f"journal_block:{jb1}@1"])
+        g13r = typed(qy("get-note", "A", n13))
+        ok13 = (pbm.returncode == 0 and mbm.returncode == 0
+                and pjb.returncode == 0 and rjb.returncode == 0
+                and p13.returncode == 0 and "status=committed" in p13.stdout
+                and g13 is not None and g13.get("refs") == [
+                    {"kind": "anchor", "id": anc_a, "revision": None},
+                    {"kind": "bookmark", "id": bm1, "revision": 1},
+                    {"kind": "highlight", "id": h1, "revision": 1},
+                    {"kind": "journal_block", "id": jb1, "revision": 2},
+                    {"kind": "note", "id": nfs, "revision": 1},
+                    {"kind": "source", "id": sid_a, "revision": None},
+                    {"kind": "work", "id": wid_a, "revision": None}]
+                and len(rr13) == 7
+                and f"bookmark|{bm1}|1" in rr13 and f"journal_block|{jb1}|2" in rr13
+                and bm_ans is not None and bm_ans.get("state") == "historical"
+                and bm_ans.get("pinned_revision") == 1 and bm_ans.get("current_revision") == 2
+                and jb_ans is not None and jb_ans.get("state") == "current"
+                and jb_ans.get("revision") == 2
+                and p13r.returncode == 0
+                and g13r is not None and g13r.get("refs") == [
+                    {"kind": "bookmark", "id": bm1, "revision": 2},
+                    {"kind": "journal_block", "id": jb1, "revision": 1}])
+        check("NTR-13", ok13,
+              "the seven-kind write round-trip: the full mixed reference set incl. bookmark@1 + journal_block@2 lands (the per-revision rows + the committed ack); get-note renders the seven-entry version-aware refs array in the canonical order; the STORED new-kind refs resolve through the ONE surface (the pinned bookmark@1 answering historical with current_revision alongside — never a silent retarget; the journal_block@2 answering current); revision 2 carries its OWN new-kind set (the replacement semantics over the new families, the pinned pair at any existing revision)",
+              "the reference system is complete over the seven landed families only when a reference to a bookmark or a journal block can be STORED (RTM §2 item 10's @Reference over the entity families; the CLAIM-057 substrate widened, never a second implementation)")
+
+        # ---- NTR-14 — the shape law + the canonical replay for the new kinds
+        before14 = audit("SELECT count(*) FROM arv.note;")
+        p_bare_bm = mk_note("n-14a", content="x", refs=[f"bookmark:{bm1}"])
+        p_bare_jb = mk_note("n-14b", content="x", refs=[f"journal_block:{jb1}"])
+        p_nonrev = mk_note("n-14c", content="x", refs=[f"bookmark:{bm1}@x"])
+        p_dup = mk_note("n-14d", content="x",
+                        refs=[f"bookmark:{bm1}@1", f"bookmark:{bm1}@1"])
+        after14 = audit("SELECT count(*) FROM arv.note;")
+        p14 = mk_note("n-14e", content="the replay subject.",
+                      refs=[f"bookmark:{bm1}@1", f"journal_block:{jb1}@2"])
+        n14 = ack_field(p14, "result_ref")
+        p14s = note_cmd("create_note", "n-14e", content="the replay subject.",
+                        refs=[f"journal_block:{jb1}@2", f"bookmark:{bm1}@1"])
+        p14x = note_cmd("create_note", "n-14e", content="the replay subject.",
+                        refs=[f"bookmark:{bm1}@1"])
+        ok14 = (p_bare_bm.returncode == 1 and "ARV-NTE-006" in p_bare_bm.stdout
+                and p_bare_jb.returncode == 1 and "ARV-NTE-006" in p_bare_jb.stdout
+                and p_nonrev.returncode == 1 and "ARV-NTE-006" in p_nonrev.stdout
+                and p_dup.returncode == 1 and "ARV-NTE-008" in p_dup.stdout
+                and after14 == before14
+                and p14.returncode == 0
+                and p14s.returncode == 0 and ack_field(p14s, "result_ref") == n14
+                and p14x.returncode == 1 and "ARV-CMD-409" in p14x.stdout)
+        check("NTR-14", ok14,
+              "the shape law at the widened boundary: a bare bookmark/journal_block reference (no @rev — version-aware by construction) and a non-digit pin refuse ARV-NTE-006 with zero effect; the duplicate target refuses ARV-NTE-008 (the set semantics over the new kinds); the same logical set in a SHUFFLED CLI order replays under the same idem key (LAW-23 — the canonical body covers the sorted set); a different set under the same key is the ARV-CMD-409 conflict",
+              "the grammar is exact and closed: the two new kinds join the revisioned arm (kind:id@rev), never the bare arm — the same substrate law, the same canonical body")
+
+        # ---- NTR-15 — the no-oracle for the new kinds (ARV-NTE-003)
+        before15 = audit("SELECT count(*) FROM arv.note;")
+        p_abs_bm = mk_note("n-15a", content="x", refs=[f"bookmark:{ghost}@1"])
+        p_abs_jb = mk_note("n-15b", content="x", refs=[f"journal_block:{ghost}@1"])
+        p_x_bm = mk_note("n-15c", content="x", refs=[f"bookmark:{bmb}@1"])
+        p_x_jb = mk_note("n-15d", content="x", refs=[f"journal_block:{jbb}@1"])
+        p_rev99 = mk_note("n-15e", content="x", refs=[f"bookmark:{bm1}@99"])
+        after15 = audit("SELECT count(*) FROM arv.note;")
+        ok15 = (p_abs_bm.returncode == 1 and "ARV-NTE-003" in p_abs_bm.stdout
+                and p_abs_jb.returncode == 1 and "ARV-NTE-003" in p_abs_jb.stdout
+                and p_x_bm.returncode == 1 and "ARV-NTE-003" in p_x_bm.stdout
+                and p_x_jb.returncode == 1 and "ARV-NTE-003" in p_x_jb.stdout
+                and p_rev99.returncode == 1 and "ARV-NTE-003" in p_rev99.stdout
+                and after15 == before15
+                and p_x_bm.stdout.replace(bmb, ghost) == p_abs_bm.stdout
+                and p_x_jb.stdout.replace(jbb, ghost) == p_abs_jb.stdout)
+        check("NTR-15", ok15,
+              "the no-oracle at the widened write boundary: the absent bookmark/journal_block target, another owner's bookmark/journal_block, and a nonexistent revision on a live bookmark are the SAME ARV-NTE-003 refusal — template-normalized byte-equal — with zero effect, never an existence side channel",
+              "the caller-scope law composes over the new families identically (RTM §2.5 item 7's never-a-side-channel, both boundaries)")
+
+        # ---- NTR-16 — the substrate backstop (the 0018 widening). THE
+        # OBSERVED LAYERING (the pre-GREEN amendment, the e7aac7d precedent):
+        # the BEFORE-INSERT guard fires BEFORE the CHECK constraints, so the
+        # NULL-revision and the out-of-vocabulary-with-a-non-note-target
+        # forms die at the guard's ARV-NTE-003 (fail-closed either way); the
+        # kind CHECK is proven by the note-target form that PASSES the
+        # guard's ELSE arm (a real note at a real revision) and then refuses
+        # at the vocabulary — the structural proof the widening is exactly
+        # the two named kinds, never an open enum.
+        p16 = mk_note("n-16", content="the backstop subject.")
+        n16 = ack_field(p16, "result_ref")
+        p16b = mk_note("n-16b", content="the note-target subject.")
+        n16b = ack_field(p16b, "result_ref")
+        _cols = ("(id, note_id, note_revision, ref_kind, ref_id, ref_revision, "
+                 "owner_scope, actor, run_id, input_hash, idempotency_key, created_at)")
+        _nr16a = int(audit("SELECT count(*) FROM arv.note_reference;"))
+        p_ov = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
+                       f"('11111111-1111-4111-8111-111111111111', '{n16}', 1, "
+                       f"'reading_list', '{bm1}', NULL, 'A', 'owner', 'run-hostile', "
+                       f"'deadbeef', 'hostile-ov', now());")
+        # the kind CHECK's own proof: this form passes the guard's ELSE arm
+        # (a REAL note target at a REAL revision) and dies at the vocabulary
+        p_ovck = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
+                         f"('12121212-1212-4121-8121-121212121212', '{n16}', 1, "
+                         f"'reading_list', '{n16b}', 1, 'A', 'owner', 'run-hostile', "
+                         f"'deadbeef', 'hostile-ovck', now());")
+        p_null_bm = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
+                            f"('22222222-2222-4222-8222-222222222222', '{n16}', 1, "
+                            f"'bookmark', '{bm1}', NULL, 'A', 'owner', 'run-hostile', "
+                            f"'deadbeef', 'hostile-nbm', now());")
+        p_null_jb = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
+                            f"('33333333-3333-4333-8333-333333333333', '{n16}', 1, "
+                            f"'journal_block', '{jb1}', NULL, 'A', 'owner', 'run-hostile', "
+                            f"'deadbeef', 'hostile-njb', now());")
+        _nr16b = int(audit("SELECT count(*) FROM arv.note_reference;"))
+        p_ok_bm = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
+                          f"('44444444-4444-4444-8444-444444444444', '{n16}', 1, "
+                          f"'bookmark', '{bm1}', 1, 'A', 'owner', 'run-hostile', "
+                          f"'deadbeef', 'hostile-okbm', now());")
+        p_ok_jb = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
+                          f"('55555555-5555-4555-8555-555555555555', '{n16}', 1, "
+                          f"'journal_block', '{jb1}', 2, 'A', 'owner', 'run-hostile', "
+                          f"'deadbeef', 'hostile-okjb', now());")
+        _nr16c = int(audit("SELECT count(*) FROM arv.note_reference;"))
+        p_ghost = app_sql(f"INSERT INTO arv.note_reference {_cols} VALUES "
+                          f"('66666666-6666-4666-8666-666666666666', '{n16}', 1, "
+                          f"'bookmark', '{ghost}', 1, 'A', 'owner', 'run-hostile', "
+                          f"'deadbeef', 'hostile-gh', now());")
+        _nr16d = int(audit("SELECT count(*) FROM arv.note_reference;"))
+        ok16 = (p_ov.returncode != 0 and "ARV-NTE-003" in p_ov.stderr
+                and p_ovck.returncode != 0
+                and "note_reference_ref_kind_check" in p_ovck.stderr
+                and p_null_bm.returncode != 0 and "ARV-NTE-003" in p_null_bm.stderr
+                and p_null_jb.returncode != 0 and "ARV-NTE-003" in p_null_jb.stderr
+                and _nr16b == _nr16a          # every refused form: zero rows
+                and p_ok_bm.returncode == 0
+                and p_ok_jb.returncode == 0
+                and _nr16c == _nr16a + 2       # the two admitted rows
+                and p_ghost.returncode != 0 and "ARV-NTE-003" in p_ghost.stderr
+                and _nr16d == _nr16c)         # the ghost: zero rows
+        check("NTR-16", ok16,
+              "the 0018 substrate backstop, at the OBSERVED layering (the guard fires before the CHECKs — fail-closed at both): the out-of-vocabulary direct INSERT ('reading_list') refuses — at the guard's ARV-NTE-003 for a non-note target, and at the kind CHECK for the note-target form that passes the guard's ELSE arm — the widening is exactly the two named kinds, never an open enum; a bookmark/journal_block row without the revision refuses at the guard (the NULL revision never matches the arm's existence read — the row can never be stored shapeless); the WELL-FORMED direct row for each new kind is ADMITTED — the guard routes the new kinds to THEIR tables (a real bookmark at revision 1 accepted: had the note ELSE arm run, the bookmark uuid would refuse ARV-NTE-003 — the routing proven by acceptance, not by prose); the ghost target refuses ARV-NTE-003 at the substrate; the row counts prove every refusal zero-effect and every admission exactly-once",
+              "the substrate mirrors the command surface exactly (the 0007/0008 convention); the widened guard arms are part of the widening, never a vocabulary-only change")
+
         print()
         if FAILS:
             print(f"RED — the P3-06 reference suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P3-06 acceptance suite, slice two (NTR-01..12) passes")
+        print("GREEN — the P3-06 acceptance suite, slice two (NTR-01..16) passes")
         return 0
     finally:
         pg.drop_scratch_db(DB)

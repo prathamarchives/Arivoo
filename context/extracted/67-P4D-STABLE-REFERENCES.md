@@ -153,3 +153,47 @@ no plausible-pin regression (pins @1..@3 unchanged); the routing honest (git dif
 commands.py EMPTY); the amendment chain typed and tree-verified. The spot-regression battery:
 all six states reproduced, the no-oracle byte-equal, the command_log-unchanged law. No new
 findings.
+
+## §5 The close (CLAIM-075 LANDED — at this commit, the post-#110 reconciliation)
+
+PR #110 merged at 2026-11-11 as `af95e3c0940fd0eac3eda4339ded0cd5c80212cd` under INT-145's
+standing authorization: the five checks green at the exact final head `7f164c20` AND on the
+merge commit `af95e3c0` (all observed live — re-read at the exact head immediately before the
+merge, and the post-merge run on the merge commit re-observed green); the merge-gate review
+D-042 (1a) `5858438424` (posted 2026-11-11T12:06:21Z — the substantive host review engaging
+the actual diff: the six-state precedence, the no-oracle, the hostile-string law, the compose
+law, the one-statement read, the evidence integrity, each verified against the live tree +
+the reviewer's own fresh probes — the REF suite re-run GREEN at the final tree, the 18/19-pin
+boundary, the no-oracle byte-equality, the hostile metacharacter refusal); CodeRabbit the
+skip state (noted per D-042 (1c)); zero review threads; the flip/merge/restore with the
+protections re-read byte-equivalent (approving=1, dismiss_stale=true, strict=true, the five
+contexts, enforce_admins, no force pushes, no deletions); the branch deleted; 0 open PRs; only
+main. No ARV-SEV-003 round — the digest bound LAST (`b712dcf2`, validate_report GREEN
+re-verified at the re-bind head) + the local trusted-gate reproduction green before the push
+(run-10, FIRST attempt — the anchored BASE driver sha256-verified against the trusted base
+reset to the current main `4a750db`, the exact S4c path the CI runs). THE TWO-ROUND SEV
+CHAIN (the account in §4): round 1 (agent-0b1de793) PASS zero open P0/P1 — 108 live probes +
+13 static checks, every claimed behavior reproduced on the reviewer's own scratch rigs, the
+RED independently reproduced from the archived tree; F-075-1 the P2 (the all-digits oversize
+pin's untyped crash) + F-075-2 the P3 (the trailing-newline uuid) both REPAIRED in-slice;
+F-075-3/4/5 the P3s routed/accepted. Round 2 (agent-c927a15b) PASS — both repairs verified
+closed live with the exact boundary, no new findings. Zero open P0/P1/P2 at the final tree.
+
+**The routed follow-ups:** F-075-3 (the substrate's isdigit pin law — the grammar owner's
+slice), F-075-4 (the uppercase-echo cosmetic debt, owner-accepted), F-075-5 (the landed
+resolve-anchor's purge-unawareness — D-011's governed-purge command slice), + the standing
+family-wide classes (the F-072-1 `_nte_canon_id` pattern incl. the substrate's own
+`$`-anchored `_UUID_RE`, the F-074-1 leading-dash argv-value family, the F-073-6 import
+staging residue).
+
+**THE P4-D REMAINING-INCREMENT CHECK (at this merge):** the 4D row's resolution system is
+landed (the six states, the seven-family coverage, the no-oracle, the version pinning, the
+hostile-string law). ONE named gap remains from CLAIM-075's own not-verified list: the note
+machine's WRITE vocabulary stays at its five kinds — `bookmark` and `journal_block`
+references are RESOLVABLE through the surface but not yet WRITABLE through note `--ref`
+(the 0010 CHECK + `_REF_KINDS` would need the widening — a substrate change never made in
+the resolution slice). The reference system is not complete over the seven families until a
+reference to a bookmark or a journal block can be STORED; CLAIM-076 (P4-D slice two — the
+note-reference write completion) takes exactly that bounded increment, then the P4-D exit
+check. The full account: CLAIM-075's rule-4 close row + this record. Record 68 carries the
+write-completion slice's contract + chain.

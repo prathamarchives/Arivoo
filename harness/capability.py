@@ -64,7 +64,8 @@ RESERVED_SURFACES = {
     # promotion every landed surface took at its landing)
     "references": {
         "owner_phase": "P4-D",
-        "reservation": ("LANDED in P4-D slice one (CLAIM-075): the backend verb is real — "
+        "reservation": ("LANDED in P4-D slice one (CLAIM-075) + slice two (CLAIM-076 — "
+                        "the write completion): the backend verbs are real — "
                         "resolve-reference (query.py — the typed SIX-STATE resolution over "
                         "the seven landed families work/source/anchor/highlight/bookmark/"
                         "note/journal_block: current | historical | tombstoned | "
@@ -73,7 +74,13 @@ RESERVED_SURFACES = {
                         "version pinning serving exactly as pinned; the purge-ledger "
                         "precedence; the no-oracle byte-equal refusals — composing the "
                         "CLAIM-057 note-reference substrate, never a second "
-                        "implementation); the agent-facing resolution and the reference "
+                        "implementation) + the note --ref WRITE vocabulary over the same "
+                        "seven families (migration 0018's CHECK widening + commands.py's "
+                        "_REF_KINDS — bookmark/journal_block references storable with the "
+                        "@rev pin, the shape law and the no-oracle identical at the write "
+                        "boundary; the sync delivery translating the targets through the "
+                        "identity bridge, the journal family's @1 address reduced to its "
+                        "uuid stem); the agent-facing resolution and the reference "
                         "graph queries are the later increments (P4-E / P5); the reader "
                         "CLIENT that renders references is P4-B's separate repo (no "
                         "client work here)"),

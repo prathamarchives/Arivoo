@@ -1,0 +1,23 @@
+# CLAIM-076 — P4-D slice two: the note-reference write completion (the seven-family
+# @-reference system's write boundary). The bounded increment named by CLAIM-075's own
+# not-verified list: bookmark/journal_block references RESOLVABLE but not yet WRITABLE
+# through note --ref. RED-first at CLAIM-075's merged head af95e3c0. The scope elaborates
+# at the RED per the one-phase-deep rule (the file set finalized against the actual design).
+harness/commands.py D-041
+harness/query.py D-041
+harness/sync.py D-041
+harness/capability.py D-041
+harness/crash.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+harness/tests/test_note_reference.py D-041
+harness/tests/test_sync.py D-041
+harness/migrations/0018_note_ref_kinds.sql D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/67-P4D-STABLE-REFERENCES.md D-042
+context/extracted/68-P4D-REF-WRITE-COMPLETION.md D-042
+harness/runs/claim-076-p4d-ref-write-completion D-042

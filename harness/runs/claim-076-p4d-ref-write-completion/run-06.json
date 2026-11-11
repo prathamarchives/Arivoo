@@ -1,0 +1,7 @@
+{
+  "command": "env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-076-p4d-ref-write-completion python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "9aad97d404790110eed0fb964980e38d8ae881fc",
+  "output_sha256": "ef329be1f6fce8721af9ab9bf27c7b6d2596f994ab9edae5df6552e76eac412b",
+  "recorded_at": "2026-11-11T13:24:27.906444+00:00"
+}

@@ -216,7 +216,18 @@ def main() -> int:
                         f"WHERE id='{cid}';")) == 64
         val_not_stored = audit(f"SELECT count(*) FROM arv.agent_credential "
                                f"WHERE token_hash = '{tok}';") == "0"
-        ok1 = (pm.returncode == 0 and "status=committed" in pm.stdout
+        # the argv-safe first character (the F-074-1 class caught live by the
+        # measured set: no minted token may start with '-' — the separate-argv
+        # form '--agent-token <value>' must always parse)
+        dash_free = True
+        for _i in range(12):
+            _pm = cmd("mint_agent_credential", "--label", f"probe-{_i}",
+                      key=f"ag-mintp{_i}")
+            _tok = token_of(_pm)
+            if _pm.returncode != 0 or not _tok or _tok[0] == "-":
+                dash_free = False
+        ok1 = (dash_free
+               and pm.returncode == 0 and "status=committed" in pm.stdout
                and tok and cid
                and row and row[0] == "research assistant|read||t"
                and prov and prov[0] == "owner"

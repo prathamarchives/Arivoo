@@ -1337,7 +1337,17 @@ def mint_agent_credential(*, db, owner, actor, client_id, idem_key, label,
         print(f"FAIL {r.code}: {r}")
         print(f"      repair: {r.repair}")
         return 1
+    # THE ARGV-SAFE FIRST CHARACTER (the F-074-1 class caught live by this
+    # slice's own measured set — runs 02/03 RED: a token_urlsafe value CAN
+    # start with '-', and the separate-argv form '--agent-token -abc...' then
+    # dies at argparse). The token's first char is constrained to the
+    # alphanumeric range — a property of the GENERATED VALUE, never an
+    # argv-convention change (the family-wide argv-value convention stays
+    # routed to F-074-1's own slice); the entropy cost is 1/64 of the space,
+    # the token still carrying ~190 bits
     token = secrets.token_urlsafe(32)
+    while token[0] == "-":
+        token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
     payload = json.dumps({"label": label_c}, sort_keys=True, separators=(",", ":"),
                          ensure_ascii=False)

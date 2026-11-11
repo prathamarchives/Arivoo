@@ -154,6 +154,13 @@ def _refs_args(refs: list, local_db: str, server_db: str, owner: str) -> "tuple[
                         "server-durable — the identity dependency (the creating "
                         "command has no server answer; ordering resolves it on "
                         "the next pass)")
+        # P4-D slice two (CLAIM-076): the journal family's translated ref is
+        # the revision-1 ADDRESS <block>@1 (the ack grammar's own form) — the
+        # --ref boundary takes the uuid STEM, the same address step the
+        # revise branch takes (never the malformed double-pin <id>@1@rev);
+        # every other family's ack grammar is the bare uuid
+        if r[0] == "journal_block" and "@" in t:
+            t = t.rsplit("@", 1)[0]
         out += ["--ref", f"{r[0]}:{t}@{r[2]}" if r[2] is not None else f"{r[0]}:{t}"]
     return out, ""
 

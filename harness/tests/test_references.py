@@ -312,15 +312,17 @@ def main() -> int:
         cmd("move_bookmark", "--id", bm1, "--start", "63", "--end", "83",
             key="ref-bm-2")
 
-        # note1: revisions 1..3, CARRYING the substrate reference
-        # highlight:<hl1>@1 (the note machine's own --ref law)
+        # note1: revisions 1..3, EVERY revision CARRYING the substrate
+        # reference highlight:<hl1>@1 (the note machine's own --ref law — the
+        # refs attach PER REVISION, so each revise restates the pin; the
+        # compose probe then reads the CURRENT revision's stored ref)
         n1 = ack_field(cmd("create_note", "--content", "The first note body.",
                            "--ref", f"highlight:{hl1}@1", key="ref-n-1"),
                        "result_ref")
         cmd("revise_note", "--id", n1, "--content", "The second body.",
-            key="ref-n-2")
+            "--ref", f"highlight:{hl1}@1", key="ref-n-2")
         cmd("revise_note", "--id", n1, "--content", "The third body.",
-            key="ref-n-3")
+            "--ref", f"highlight:{hl1}@1", key="ref-n-3")
 
         # note_tomb: created, then tombstoned (rev 1 only)
         nt = ack_field(cmd("create_note", "--content", "The tombstone note body.",

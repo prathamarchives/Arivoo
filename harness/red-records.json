@@ -1191,5 +1191,15 @@
         "observed_at": "2026-11-10T16:41:48.215950+00:00"
       }
     ]
+  },
+  "harness/tests/test_references.py": {
+    "schema": 2,
+    "binding_commit": "37917ec6376e7c7e61b36ee876028efaa0b97085",
+    "binding_sha256": "9ad1de2978bbb8c2e2aac7947dfb984d1d337e46c753b2d07e9ae07ff7342aa4",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "red run at the test-only commit -- record where it was observed",
+    "current_sha256": "9ad1de2978bbb8c2e2aac7947dfb984d1d337e46c753b2d07e9ae07ff7342aa4",
+    "amendments": []
   }
 }

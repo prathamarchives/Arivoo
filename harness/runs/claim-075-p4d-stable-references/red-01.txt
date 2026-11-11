@@ -1,0 +1,17 @@
+CLAIM-075 — the observed RED (LAW-11: tests-only, committed BEFORE the implementation)
+
+Command: python3 harness/tests/test_references.py
+Tree:    37917ec (CLAIM-075's RED commit, on commit A b0efb68 at CLAIM-074's merged
+         head 4a750db)
+Exit:    1
+Output:
+  FAIL ARV-TEST-000: the P4-D slice one reference-resolution machinery is absent
+  (machinery-absent class; the resolve-reference arm absent: True) — the
+  implementation lands after this RED, never before it (LAW-11)
+
+Observed live at the exact tree above (the suite committed in its tests-only RED
+form — 687 lines, the REF-01..06 registry; the TESTS registration in gate.py rides
+the same commit, the ARV-RED-008 class). The implementation lands in the
+immediately-following commit, never before this RED: the resolve-reference read
+arm (query.py — the six explicit states, the seven-family coverage, the version
+pinning, the no-oracle) + the references reserved-surface row (capability.py).

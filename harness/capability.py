@@ -59,6 +59,33 @@ FORMATS = ADAPTERS
 # declared here so the contract sketch is visible from day one, never smuggled
 # in later. The reader UI itself is the separate repository.
 RESERVED_SURFACES = {
+    # P4-E slice one (CLAIM-077; record 69 §2): the scoped agent read
+    # surface LANDED — the PLAN 4E row's own reservation promoted
+    "scoped-agent-access": {
+        "owner_phase": "P4-E",
+        "reservation": ("LANDED in P4-E slice one (CLAIM-077): the backend verbs are real — "
+                        "mint_agent_credential + revoke_agent_credential (commands.py — the "
+                        "owner-minted credential through the spine's own ack contract: the "
+                        "token VALUE shown ONCE at mint with only the sha256 stored, the "
+                        "closed scopes CHECK 'read' — READ-ONLY structural, the one-way "
+                        "revocation with the alternation refusal, the label law, the "
+                        "no-oracle invalid-token class; NO outbox ride — a local access "
+                        "primitive, never owner content) + the --agent-token read mode "
+                        "(query.py — the credential REPLACES --owner on every read arm: the "
+                        "scope binds from the credential through the narrow SECURITY DEFINER "
+                        "lookup, the SAME arms' answers, the append-only audit row per "
+                        "served read with the bounded request facts never the content, the "
+                        "shared page bounds as the read budget, the ambiguous-identity "
+                        "refusal) + migration 0019 (arv.agent_credential + arv.agent_read_log "
+                        "+ the one-transition guard + the lookup function). Q10 HONESTLY: the "
+                        "access-shape surface, never workflow-tamper hardening — the local "
+                        "single-user threat model, the non-constant-time hash comparison, no "
+                        "rotation/expiry claims (the narrow remaining owner choice — the "
+                        "minting policy and any server-deployment scoping — recorded, "
+                        "owner-gated). The MCP wrapper over the same retrieval core is P4-E "
+                        "slice two; the deeper response budgets are Phase 5's retrieval "
+                        "increments; the reader CLIENT is P4-B's separate repo"),
+    },
     # P4-D slice one (CLAIM-075; record 67 §2): the stable @-reference
     # system LANDED — the RTM §2 item 10 reservation's own row (the same
     # promotion every landed surface took at its landing)

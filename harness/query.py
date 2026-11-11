@@ -81,6 +81,7 @@ nearest-match guess —
                evidence is preserved (the anchor row is immutable)
 """
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -1027,25 +1028,131 @@ def _say(out: dict, **kw) -> None:
     print(json.dumps(out, ensure_ascii=False))
 
 
+# ------------------------------------------------- P4-E slice one: the scoped agent read mode (CLAIM-077; record 69 §2)
+
+def _agent_resolve(db: str, token: str):
+    """The credential resolution: the sha256 -> the narrow SECURITY DEFINER
+    lookup (arv.agent_token_lookup — the system's own authentication
+    primitive, exposing ONLY the live 'read'-scoped credential's owner scope;
+    never an agent-reachable arbitrary read) -> (owner_scope, credential_id).
+    ARV-AGT-001 — the no-oracle invalid-token class: unknown, revoked, and
+    scope-missing are the SAME refusal, and the TOKEN IS NEVER ECHOED (it is
+    a secret — the refusal names the class, never the credential, never the
+    scope, never the value)."""
+    h = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    qh = "'" + h.replace("'", "''") + "'"
+    rows = _read(db, "_agent_lookup",
+                 f"SELECT owner_scope || '|' || credential_id::text FROM "
+                 f"arv.agent_token_lookup({qh});")
+    if rows is None:
+        return None
+    if not rows:
+        print("FAIL ARV-AGT-001: the credential does not grant access — unknown, "
+              "revoked, and scope-missing are the SAME refusal, never a side channel "
+              "(the token is never echoed: it is a secret)")
+        print("      repair: use a live credential's token value exactly as "
+              "displayed at its mint; mint a new credential if the old was revoked "
+              "(the owner's revocation is final)")
+        return None
+    owner, cid = rows[0].split("|")
+    return owner, cid
+
+
+def _agent_audit(db: str, owner: str, cred_id: str, arm: str, limit, after) -> int:
+    """The audit row for one SERVED agent read: the credential + the arm + the
+    bounded REQUEST facts (the page limit and the keyset cursor as requested),
+    NEVER the content (a read log that stored what was read would be a second
+    copy of the library — the structural no-content law). Append-only at the
+    substrate (the 0019 immutable trigger); RLS-scoped to the credential's own
+    owner. A failure here is LOUD (exit 1 after the served read): an unaudited
+    agent read is a contract violation, never a silent pass."""
+    qlim = "NULL" if limit is None else str(int(limit))
+    qaft = "NULL" if after is None else "'" + str(after).replace("'", "''") + "'"
+    qid = "'" + str(cred_id).replace("'", "''") + "'"
+    r = pg.psql(f"SET app.current_owner='{owner}'; INSERT INTO arv.agent_read_log "
+                f"(id, credential_id, owner_scope, arm, req_limit, req_after, "
+                f"created_at) VALUES (gen_random_uuid(), {qid}, "
+                f"'{owner}', '{arm}', {qlim}, {qaft}, now());", db=db, user="arv_app")
+    if r.returncode != 0:
+        print(f"FAIL ARV-AGT-005: the agent read was served but the audit row "
+              f"refused — {r.stderr.strip()[:200]} (an unaudited agent read is a "
+              "contract violation, never a silent pass)")
+        return 1
+    return 0
+
+
+# ------------------------------------------------- P4-E slice one: the scoped agent read mode (CLAIM-077; record 69 §2)
+
+def _agent_resolve(db: str, token: str):
+    """The credential resolution: the sha256 -> the narrow SECURITY DEFINER
+    lookup (arv.agent_token_lookup — the system's own authentication
+    primitive, exposing ONLY the live 'read'-scoped credential's owner scope;
+    never an agent-reachable arbitrary read) -> (owner_scope, credential_id).
+    ARV-AGT-001 — the no-oracle invalid-token class: unknown, revoked, and
+    scope-missing are the SAME refusal, and the TOKEN IS NEVER ECHOED (it is
+    a secret — the refusal names the class, never the credential, never the
+    scope, never the value)."""
+    h = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    qh = "'" + h.replace("'", "''") + "'"
+    rows = _read(db, "_agent_lookup",
+                 f"SELECT owner_scope || '|' || credential_id::text FROM "
+                 f"arv.agent_token_lookup({qh});")
+    if rows is None:
+        return None
+    if not rows:
+        print("FAIL ARV-AGT-001: the credential does not grant access — unknown, "
+              "revoked, and scope-missing are the SAME refusal, never a side channel "
+              "(the token is never echoed: it is a secret)")
+        print("      repair: use a live credential's token value exactly as "
+              "displayed at its mint; mint a new credential if the old was revoked "
+              "(the owner's revocation is final)")
+        return None
+    owner, cid = rows[0].split("|")
+    return owner, cid
+
+
+def _agent_audit(db: str, owner: str, cred_id: str, arm: str, limit, after) -> int:
+    """The audit row for one SERVED agent read: the credential + the arm + the
+    bounded REQUEST facts (the page limit and the keyset cursor as requested),
+    NEVER the content (a read log that stored what was read would be a second
+    copy of the library — the structural no-content law). Append-only at the
+    substrate (the 0019 immutable trigger); RLS-scoped to the credential's own
+    owner. A failure here is LOUD (exit 1 after the served read): an unaudited
+    agent read is a contract violation, never a silent pass."""
+    qlim = "NULL" if limit is None else str(int(limit))
+    qaft = "NULL" if after is None else "'" + str(after).replace("'", "''") + "'"
+    qid = "'" + str(cred_id).replace("'", "''") + "'"
+    r = pg.psql(f"SET app.current_owner='{owner}'; INSERT INTO arv.agent_read_log "
+                f"(id, credential_id, owner_scope, arm, req_limit, req_after, "
+                f"created_at) VALUES (gen_random_uuid(), {qid}, "
+                f"'{owner}', '{arm}', {qlim}, {qaft}, now());", db=db, user="arv_app")
+    if r.returncode != 0:
+        print(f"FAIL ARV-AGT-005: the agent read was served but the audit row "
+              f"refused — {r.stderr.strip()[:200]} (an unaudited agent read is a "
+              "contract violation, never a silent pass)")
+        return 1
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="the authenticated retrieval surface (P3-01)")
     sub = ap.add_subparsers(dest="what", required=True)
     for name in ("get-capture", "get-source", "get-history"):
         p = sub.add_parser(name)
-        p.add_argument("--owner", required=True)
+        p.add_argument("--owner", default=None)
         p.add_argument("--id", required=True)
     for name in ("get-bookmark", "get-bookmark-history"):
         p = sub.add_parser(name)
-        p.add_argument("--owner", required=True)
+        p.add_argument("--owner", default=None)
         p.add_argument("--id", required=True)
     for name in ("get-note", "get-note-history", "get-journal", "get-journal-history"):
         p = sub.add_parser(name)
-        p.add_argument("--owner", required=True)
+        p.add_argument("--owner", default=None)
         p.add_argument("--id", required=True)
     # P4-C slice five (CLAIM-074): the member page rides the same list
     # contract as the listing (bounded + the keyset cursor)
     p = sub.add_parser("get-list")
-    p.add_argument("--owner", required=True)
+    p.add_argument("--owner", default=None)
     p.add_argument("--id", required=True)
     p.add_argument("--limit", default=str(DEFAULT_LIST_LIMIT),
                    help=f"the member page size (bounds 1..{MAX_LIST_LIMIT}, default {DEFAULT_LIST_LIMIT}) — "
@@ -1056,7 +1163,7 @@ def main() -> int:
                  "get-reading-state", "list-session-events", "list-journal",
                  "list-lists"):
         p = sub.add_parser(name)
-        p.add_argument("--owner", required=True)
+        p.add_argument("--owner", default=None)
         # P4-00b: the list contract — the bounded page + the keyset cursor
         # (P4-C slice one: the same contract rides list-library +
         # get-reading-state — every list-shaped response is bounded)
@@ -1066,26 +1173,64 @@ def main() -> int:
         p.add_argument("--after", default=None, metavar="ID",
                        help="the keyset cursor — the next page starts strictly after this listed id")
     p = sub.add_parser("get-position")
-    p.add_argument("--owner", required=True)
+    p.add_argument("--owner", default=None)
     p.add_argument("--source", required=True,
                    help="the source id (the import ack's result_ref) whose last-saved reading "
                         "position the reopen returns")
     p = sub.add_parser("resolve-anchor")
-    p.add_argument("--owner", required=True)
+    p.add_argument("--owner", default=None)
     p.add_argument("--id", required=True)
     # P4-D slice one (CLAIM-075): the stable @-reference resolution — the
     # six-state typed answer over the seven landed families
     p = sub.add_parser("resolve-reference")
-    p.add_argument("--owner", required=True)
+    p.add_argument("--owner", default=None)
     p.add_argument("--ref", required=True, metavar="KIND:ID[@REV]",
                    help="the reference to resolve: work/source/anchor bare; "
                         "highlight/bookmark/note/journal_block optionally "
                         "pinned @rev (the pinned form serves exactly as pinned)")
     p = sub.add_parser("search")
-    p.add_argument("--owner", required=True)
+    p.add_argument("--owner", default=None)
     p.add_argument("terms", nargs="+", help="the keyword terms (AND semantics — every term must hit the document)")
+    # P4-E slice one (CLAIM-077): the scoped agent read mode — --agent-token
+    # REPLACES --owner (exactly one of the two, never both, never neither)
+    for _p in sub.choices.values():
+        _p.add_argument("--agent-token", default=None, metavar="VALUE",
+                        help="the scoped agent credential (P4-E): REPLACES --owner — "
+                             "the owner scope comes from the credential, never the "
+                             "caller's claim; READ-ONLY (no write command accepts it)")
     a = ap.parse_args()
     db = os.environ.get("PGDATABASE", "postgres")
+    agent_ctx = None
+    if getattr(a, "agent_token", None) is not None:
+        if a.owner is not None:
+            print("FAIL ARV-AGT-002: the ambiguous identity — --owner and "
+                  "--agent-token together (never a silent preference between the "
+                  "caller's claim and the credential's binding; the credential's "
+                  "scope wins NOTHING here, the refusal is the answer)")
+            print("      repair: pass exactly one of --owner (the owner's own "
+                  "read) or --agent-token (the scoped agent read)")
+            return 1
+        resolved = _agent_resolve(db, a.agent_token)
+        if resolved is None:
+            return 1
+        a.owner, _cred_id = resolved
+        agent_ctx = (_cred_id, a.what, getattr(a, "limit", None),
+                     getattr(a, "after", None))
+    elif a.owner is None:
+        print("FAIL ARV-AGT-002: the missing identity — neither --owner nor "
+              "--agent-token (every read is scoped: the owner's own name or the "
+              "credential's binding, never an unscoped query)")
+        print("      repair: pass exactly one of --owner or --agent-token")
+        return 1
+    rc = _dispatch(a, db)
+    if agent_ctx is not None and rc == 0:
+        if _agent_audit(db, a.owner, agent_ctx[0], agent_ctx[1],
+                        agent_ctx[2], agent_ctx[3]) != 0:
+            return 1
+    return rc
+
+
+def _dispatch(a, db) -> int:
     if a.what == "resolve-anchor":
         return _resolve(db, a.owner, a.id)
     if a.what == "resolve-reference":

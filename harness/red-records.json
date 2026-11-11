@@ -1199,7 +1199,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "red run at the test-only commit -- record where it was observed",
-    "current_sha256": "7d913c81f4b69f8bf9cbc26df0ae82909723c7cee3c6fd002b5e1b8df2c8f08f",
+    "current_sha256": "8363ccd0a5259bf915855c1549efc77010c4c334006f098496660cfab4f55e9b",
     "amendments": [
       {
         "prior_sha256": "9ad1de2978bbb8c2e2aac7947dfb984d1d337e46c753b2d07e9ae07ff7342aa4",
@@ -1212,6 +1212,12 @@
         "new_sha256": "7d913c81f4b69f8bf9cbc26df0ae82909723c7cee3c6fd002b5e1b8df2c8f08f",
         "note": "red run at the test-only commit -- record where it was observed",
         "observed_at": "2026-11-11T09:11:07.300797+00:00"
+      },
+      {
+        "prior_sha256": "7d913c81f4b69f8bf9cbc26df0ae82909723c7cee3c6fd002b5e1b8df2c8f08f",
+        "new_sha256": "8363ccd0a5259bf915855c1549efc77010c4c334006f098496660cfab4f55e9b",
+        "note": "red run at the test-only commit -- record where it was observed",
+        "observed_at": "2026-11-11T10:02:35.461666+00:00"
       }
     ]
   }

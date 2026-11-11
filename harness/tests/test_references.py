@@ -643,6 +643,8 @@ def main() -> int:
             f"note:{n1}@x",                           # non-digit revision
             "note:' OR '1'='1",                       # SQL metacharacters
             "journal_block:" + "z" * 10000,           # the oversize hostile string
+            f"note:{n1}@" + "1" * 5000,               # the ALL-DIGITS oversize pin (the SEV round-1 F-075-1 class: int() crashes above CPython's 4300-digit limit — the typed refusal, never a traceback)
+            f"work:{work1}\n",                        # the trailing-newline uuid (the SEV round-1 F-075-2 class: $ matches before \n — the grammar must refuse, never an untyped SQL-cast failure)
         ]
         m_ok = True
         for h in hostiles:

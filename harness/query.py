@@ -551,8 +551,14 @@ def _resolve(db: str, owner: str, anchor_id: str) -> int:
 # bare = the identity IS the version; revisioned = the (id, revision) pair.
 _REF_BARE = ("work", "source", "anchor")
 _REF_REV = ("highlight", "bookmark", "note", "journal_block")
+# \Z (never $): Python's $ ALSO matches just before a trailing newline, so a
+# "<uuid>\n" id would pass the grammar and die at the SQL cast as an untyped
+# ARV-QRY-002 — the SEV round-1 F-075-2 class; \Z anchors the true end. (The
+# substrate's own _UUID_RE shares the $ form — that LANDED boundary's copy is
+# routed to the _nte_canon_id pattern's family-wide slice, the F-072-1
+# precedent; this new surface repairs its own copy now.)
 _REF_UUID_RE = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
-                          r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+                          r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\Z")
 # per family: the entity table, its lifecycle table (None = the family
 # carries no tombstone machine), and the lifecycle's id column
 _REF_FAMILY = {"work": ("arv.work", None, None),
@@ -585,8 +591,13 @@ def _ref_parse(ref: str):
         return kind, target, None
     r_ = None
     if at:
-        if not rev.isdigit() or int(rev) < 1:
-            return "the pinned revision must be digits >= 1"
+        # the length bound BEFORE int() (the SEV round-1 F-075-1 class):
+        # CPython 3.11+ raises ValueError above the 4300-digit int-str limit,
+        # an untyped crash on an all-digits pin — the hostile-string law
+        # demands the named refusal; 18 digits is far above any plausible
+        # revision and far below the crash boundary
+        if len(rev) > 18 or not rev.isdigit() or int(rev) < 1:
+            return "the pinned revision must be a plausible revision number (digits, at most 18, >= 1)"
         r_ = int(rev)
     return kind, target, r_
 
@@ -614,7 +625,8 @@ def _ref_refuse_malformed(ref: str, why: str) -> int:
     print(f"FAIL ARV-REF-002: the reference {ref!r} is malformed — {why}")
     print("      repair: supply kind:id[@rev] with kind in "
           "work/source/anchor/highlight/bookmark/note/journal_block; "
-          "highlight|bookmark|note|journal_block may pin @rev (digits >= 1); "
+          "highlight|bookmark|note|journal_block may pin @rev (a plausible "
+          "revision number: digits, at most 18, >= 1); "
           "work|source|anchor never name a revision")
     return 1
 

@@ -232,11 +232,18 @@ def main() -> int:
         before2 = audit("SELECT count(*) FROM arv.agent_credential;")
         p2a = cmd("mint_agent_credential", "--label", "", key="ag-lab1")
         p2b = cmd("mint_agent_credential", "--label", "x" * 129, key="ag-lab2")
-        p2c = cmd("mint_agent_credential", "--label", "bad\x00label", key="ag-lab3")
+        # the NUL class: argv cannot carry NUL (the OS ValueError precedes the
+        # command — the CLAIM-074 lesson) — the law's OWN layer probed in-process
+        from harness.commands import _agt_label as _label_law
+        try:
+            _label_law("bad\x00label")
+            p2c_refused = False
+        except Exception as _e:
+            p2c_refused = getattr(_e, "code", None) == "ARV-AGT-003"
         after2 = audit("SELECT count(*) FROM arv.agent_credential;")
         ok2 = (p2a.returncode == 1 and "ARV-AGT-003" in p2a.stdout
                and p2b.returncode == 1 and "ARV-AGT-003" in p2b.stdout
-               and p2c.returncode == 1 and "ARV-AGT-003" in p2c.stdout
+               and p2c_refused
                and after2 == before2)
         check("AGT-02", ok2,
               "the label law: empty, oversized (>128), and NUL-carrying labels refuse ARV-AGT-003 with zero rows — never a clamp, never a silent truncation",
@@ -313,25 +320,26 @@ def main() -> int:
                   key="ag-mintB", owner="B")
         tokb = token_of(pmb)
         gb = agt("list-library", tokb)
-        # B's credential sees ONLY B's corpus (one source, B's title)
-        rows_b = [json.loads(ln) for ln in gb.stdout.splitlines()
-                  if ln.strip() and not ln.startswith("#")] if gb.returncode == 0 else []
-        titles_b = sorted(r.get("title", "") for r in rows_b)
-        # A's reads through A's credential show A's title
+        # B's credential sees ONLY B's corpus (the bare-id listing: B's source
+        # id present, A's absent — the credential-bound RLS)
+        ids_b = sorted(ln.strip() for ln in gb.stdout.splitlines()
+                       if ln.strip() and not ln.startswith("#")) if gb.returncode == 0 else []
         ga = agt("list-library", tok)
-        rows_a = [json.loads(ln) for ln in ga.stdout.splitlines()
-                  if ln.strip() and not ln.startswith("#")] if ga.returncode == 0 else []
-        titles_a = sorted(r.get("title", "") for r in rows_a)
+        ids_a = sorted(ln.strip() for ln in ga.stdout.splitlines()
+                       if ln.strip() and not ln.startswith("#")) if ga.returncode == 0 else []
         logb = audit_rows(f"SELECT count(*) FROM arv.agent_read_log "
                           f"WHERE credential_id='{ack_field(pmb, 'result_ref')}';")
         ok6 = (gb.returncode == 0 and ga.returncode == 0
-               and titles_b == ["B's Corpus"] and titles_a == ["The Agent Corpus"]
+               and ids_b == [sid_b] and sid not in ids_b
+               and ids_a == [sid] and sid_b not in ids_a
                and logb and int(logb[0]) >= 1)
         check("AGT-06", ok6,
               "the scope isolation: B's credential reads B's scope (only B's corpus — A's material invisible through the credential-bound RLS) while A's credential reads A's; B's reads audited under B's own credential — the agent of one owner never widens scope (SYS-02's agent matrix, the C2 law)",
               "the owner scope comes from the credential, enforced by RLS on every query — never from the caller's claim")
 
         # ---- AGT-07 — the revocation (the one-way transition)
+        kept_before = audit(f"SELECT count(*) FROM arv.agent_read_log "
+                            f"WHERE credential_id='{cid}';")
         p7r = cmd("revoke_agent_credential", "--id", cid, key="ag-rvk1")
         rev = audit_rows(f"SELECT revoked_at IS NOT NULL FROM arv.agent_credential "
                          f"WHERE id='{cid}';")
@@ -352,7 +360,7 @@ def main() -> int:
                and "ARV-AGT-001" in p7g.stdout and "ARV-AGT-001" in p7x.stdout
                and p7g.stdout == p7x.stdout.replace(cid2, ghost7)
                and p7read.returncode == 1 and "ARV-AGT-001" in p7read.stdout
-               and int(kept) == len(arms))         # AGT-03's rows intact
+               and int(kept) == int(kept_before))   # every pre-revocation row intact
         check("AGT-07", ok7,
               "the revocation: the one-way transition (revoked_at NULL->set); the already-revoked refuses (the alternation — no un-revoke, the purge's own finality class); the absent and cross-owner credentials the SAME no-oracle ARV-AGT-001; after revocation the reads refuse ARV-AGT-001 (the invalid-token class — revoked and unknown indistinguishable); the read log PRESERVES the pre-revocation audit rows (the history intact — the audit trail is append-only evidence, never rewritten by the revocation)",
               "the revocation is the owner's kill switch — final, auditable, and never silently widening or narrowing the recorded history")
@@ -381,14 +389,21 @@ def main() -> int:
         rls = audit_rows("SELECT relrowsecurity || '|' || relforcerowsecurity FROM "
                          "pg_class WHERE relname IN ('agent_credential', "
                          "'agent_read_log') ORDER BY relname;")
-        grants = audit("SELECT count(*) FROM information_schema.role_table_grants "
-                       "WHERE table_schema='arv' AND table_name='agent_credential' "
-                       "AND grantee='arv_app' AND privilege_type IN ('INSERT','SELECT');")
+        # the grants audit: has_table_privilege (the journal family's form —
+        # information_schema.role_table_grants is grantee-scoped and shows
+        # nothing to arv_read)
+        grants = audit("SELECT has_table_privilege('arv_app', 'arv.agent_credential', 'INSERT')"
+                       " AND has_table_privilege('arv_app', 'arv.agent_credential', 'SELECT')"
+                       " AND has_table_privilege('arv_app', 'arv.agent_credential', 'UPDATE')"
+                       " AND NOT has_table_privilege('arv_app', 'arv.agent_credential', 'DELETE')"
+                       " AND has_table_privilege('arv_app', 'arv.agent_read_log', 'INSERT')"
+                       " AND has_table_privilege('arv_app', 'arv.agent_read_log', 'SELECT')"
+                       " AND NOT has_table_privilege('arv_app', 'arv.agent_read_log', 'UPDATE');")
         ok8 = (p8a.returncode == 1 and "ARV-QRY-004" in p8a.stdout
                and p8u.returncode != 0 and p8d.returncode != 0
                and p8l.returncode != 0 and p8h.returncode != 0
                and p8rev.returncode == 0 and p8unrev.returncode != 0
-               and rls == ["t|t", "t|t"] and grants == "2")
+               and rls == ["true|true", "true|true"] and grants == "t")
         check("AGT-08", ok8,
               "the budget + the substrate: the page bounds enforced on the agent reads (the shared _page_args limits — an oversize --limit refuses ARV-QRY-004 exactly as the owner's reads); the read_log append-only (UPDATE/DELETE refused at the substrate); the credential's one-transition guard (the label and token_hash immutable; revoked_at the ONLY settable column, one-way — the un-revoke refused); the schema audits (RLS enabled AND forced on both tables, arv_app INSERT+SELECT only)",
               "the budgets at this phase are the shared page bounds (the deeper response budgets are Phase 5's retrieval increments — recorded, never claimed here); the substrate mirrors the command surface (the 0007/0008 convention)")

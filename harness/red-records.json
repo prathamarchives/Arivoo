@@ -1246,7 +1246,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-077's RED (the AGT suite authored tests-only per LAW-11 at this commit 048a1ddb and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: the mint_agent_credential command absent from the CLI; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
-    "current_sha256": "6d95aa818ea5e9785c9f5f5d47e94205c051ca08aa4e4e204a2dc0c09a84fd13",
-    "amendments": []
+    "current_sha256": "ec4f4a6978092a89cc40ca91be74a218d4b403ab99a96cac5e4687c08ff54508",
+    "amendments": [
+      {
+        "prior_sha256": "6d95aa818ea5e9785c9f5f5d47e94205c051ca08aa4e4e204a2dc0c09a84fd13",
+        "new_sha256": "ec4f4a6978092a89cc40ca91be74a218d4b403ab99a96cac5e4687c08ff54508",
+        "note": "CLAIM-077's pre-GREEN suite amendments (the CLAIM-074 precedent \u2014 the disclosed pin-authoring repairs, never a gate weakening; the assertions only strengthened or corrected to the OBSERVED rendering): (1) AGT-02's NUL probe moved to the law's OWN layer (unit-probed in-process \u2014 argv cannot carry NUL, the OS ValueError precedes the command; the CLAIM-074 lesson); (2) AGT-06's listing comparison corrected to the bare-id form (list-library emits bare source ids, not JSON rows); (3) AGT-07's audit-count assertion strengthened to the before/after form (the count captured immediately before the revocation, asserted unchanged after \u2014 the exact-count-in-arms form was over-strict against AGT-06's additional read); (4) AGT-08's grants audit switched to has_table_privilege (the journal family's form \u2014 information_schema.role_table_grants is grantee-scoped and shows nothing to arv_read) + the boolean renderings corrected (psql -t renders bare booleans as t, concatenated ones as true). The RED evidence (red-01.txt at 048a1ddb) untouched; the machinery-absent probe unchanged",
+        "observed_at": "2026-11-11T14:11:14.609794+00:00"
+      }
+    ]
   }
 }

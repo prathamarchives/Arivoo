@@ -1,0 +1,98 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-076-p4d-ref-write-completion",
+ "base_sha": "af95e3c0940fd0eac3eda4339ded0cd5c80212cd",
+ "reviewed_diff_sha256": "8b5b0c8667e18565ae2a3784821893eb8215afd1c1636f51fad02d7ecb9c3cec",
+ "sheet_section": true,
+ "intent_ids": [
+  "INT-144",
+  "INT-145",
+  "INT-146"
+ ],
+ "requirement_ids": [
+  "SYS-02",
+  "SYS-03",
+  "SYS-07"
+ ],
+ "system_claims": [
+  "C1",
+  "C5"
+ ],
+ "changed_components": [
+  "harness/migrations/0018_note_ref_kinds.sql (the 0010 CHECK widening \u2014 the seven-family @-reference system's write boundary: ref_kind gains exactly 'bookmark' and 'journal_block' (never an open enum \u2014 the out-of-vocabulary INSERT still refused at the kind CHECK, proven by the note-target form that passes the guard's ELSE arm); both join the REVISIONED arm of the shape check (ref_revision IS NOT NULL AND >= 1 \u2014 the immutable (id, revision) pair is what a stored reference MEANS, the substrate's own law); the constraint NAMES unchanged (NTR-11's audit form); the guard's per-kind arms widened \u2014 bookmark reads arv.bookmark at the pinned revision, journal_block reads arv.journal_block at the pinned revision, both owner-scoped, the ELSE arm staying the note family's own (the routing proven by the WELL-FORMED direct rows ADMITTED); the arv-baseline-bump directive per ARV-MIG-003 \u2014 the drops and re-adds ride the runner's ONE transaction)",
+  "harness/commands.py (the write boundary: _REF_KINDS the seven landed kinds matching the 0018 CHECK vocabulary exactly \u2014 no drift between the two homes; the revision branch \u2014 bookmark/journal_block REQUIRE the @rev pin, the same shape law as highlight/note; _nte_check_targets' two arms \u2014 the same RLS-scoped existence-at-revision read, the same ARV-NTE-003 no-oracle (absent, cross-owner, and nonexistent-revision the SAME refusal, never a side channel))",
+  "harness/sync.py (the delivery arm: _refs_args' journal stem step \u2014 the translated journal ref is the @1 ADDRESS (the ack grammar's own form), reduced to its uuid stem at the --ref boundary, the same address step the revise branch takes, never the malformed double-pin <id>@1@rev)",
+  "harness/capability.py (the references reserved-surface row's write completion named: the note --ref WRITE vocabulary over the same seven families + the sync delivery)",
+  "harness/tests/test_note_reference.py (the NTR-13..16 write-completion pins: the seven-kind write round-trip with the compose through resolve-reference + the replacement semantics over the new families; the shape law at the widened boundary incl. the canonical shuffled replay + the conflicting-set 409; the no-oracle for the new kinds \u2014 template-normalized byte-equal with zero effect; the 0018 substrate backstop at the OBSERVED layering \u2014 the guard fires before the CHECKs, the kind CHECK proven by the note-target form, the guard routing proven by ADMISSION, the row-count laws) + harness/tests/test_sync.py (the SYN-23 delivery pin: the note carrying bookmark@1 + journal_block@1 refs delivering through the identity bridge's TRANSLATED ids, the journal @1 address reduced to its stem, the server's own ids rendered, the server's resolve-reference composing) + harness/red-records.json (the typed RED binding + the pre-GREEN amendment, both chained from the suites' trusted prior states)"
+ ],
+ "interfaces_reviewed": [
+  "the CLAIM-057 note-reference substrate at the write boundary (the 0010 CHECKs + the guard + _nte_refs + _nte_check_targets \u2014 widened in place, never a second implementation; the vocabulary's two homes \u2014 _REF_KINDS and the CHECK \u2014 compared programmatically, no drift)",
+  "CLAIM-075's resolve-reference read surface (composed unchanged \u2014 query.py's diff EMPTY; the STORED new-kind refs resolve through the ONE surface)",
+  "the identity bridge (sync.py _translate + _refs_args \u2014 the journal family's @1 address form; the bookmark's bare-uuid form; the ARV-SYN-009 dependency rest + recovery verified live on the two-DB rig)",
+  "the migration runner's contract (ARV-MIG-003's baseline-bump directive for the destructive DROP CONSTRAINT class; the one-transaction law; the clean apply + verify on fresh rigs)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the NTR suite GREEN NTR-01..16 exit 0 x3 at the GREEN tree (runs 01-03)",
+   "make verify exit 0 at the GREEN tree (run-04 \u2014 all suites + the gate + the canonical layer 54/0)"
+  ],
+  "integration_verification": [
+   "the write->read compose: a note's STORED bookmark/journal_block refs render through get-note's kind-agnostic aggregation and resolve through resolve-reference to the same pinned answers (NTR-13 + the SEV round's live probes)",
+   "the two-DB delivery: the note with new-kind refs delivers through the TRANSLATED target ids (the journal stem step; the ARV-SYN-009 rest + recovery; zero local-uuid leakage; the second pass touching nothing) \u2014 SYN-23 + the SEV round's rig",
+   "the substrate boundaries: the widening exactly two kinds (the out-of-vocabulary INSERT refused at the kind CHECK), the shape law's revisioned arm, the guard routing to the new families' own tables"
+  ],
+  "system_verification": [
+   "the SEV round 1 live verification (agent-ca4c6f8e, 94 probes + 13 static checks): every claimed behavior reproduced on the reviewer's own scratch rigs \u2014 the seven-kind round-trip, the shape law, the no-oracle byte-equality, the substrate backstop with the routing proven by admission, the two-DB sync delivery with the stem step and the dependency rest, the RED reproduced from the archived tree with the binding digests matching, the NTR suite's output sha256 equal to the recorded runs' digests (determinism cross-checked)"
+  ],
+  "validation": [
+   "the seven-family coverage law (a reference to every landed family STORABLE and RESOLVABLE \u2014 the write boundary and the read boundary in agreement)",
+   "the zero-effect law (every refusal class leaves note/reference/command_log counts unchanged \u2014 the suite's and the reviewer's independent counts)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a stored reference to a bookmark or journal block silently retargets (the pinned (id, revision) pair drifting to a later revision)",
+   "control": "the pinned pair is immutable by construction (the revisioned arm of the shape CHECK; the guard's existence-at-revision read; NTR-13's pinned historical answers + the SEV round's live probes)"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "an existence side channel at the widened write boundary (the absent vs cross-owner distinction leaking)",
+   "control": "ARV-NTE-003 byte-equal (template-normalized) for absent vs cross-owner vs nonexistent-revision, both new kinds, zero rows written; NTR-15 + the SEV round's raw-byte probes"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "the vocabulary opens silently (a future kind admitted without the guard routing or the shape law)",
+   "control": "the widening is exactly the two named kinds at BOTH homes (the CHECK and _REF_KINDS compared programmatically); the out-of-vocabulary INSERT refused at the kind CHECK; the guard's per-kind chain explicit (the ELSE arm staying the note family's own)"
+  },
+  {
+   "id": "FM-04",
+   "scenario": "a malformed journal ref delivered with a double pin (<id>@1@rev) or a local uuid transplanted to the server",
+   "control": "the stem step (the @1 ADDRESS reduced to its uuid stem \u2014 the SEV round's live probe: stem vs address distinct, never a double-pin; a @3 pin delivering as <stem>@3); zero local-uuid leakage into the server's rows; the not-yet-durable target resting retryable ARV-SYN-009, never a wrong-id delivery"
+  },
+  {
+   "id": "FM-05",
+   "scenario": "a hostile reference string acquiring authority at the widened boundary (the hostile-string law)",
+   "control": "the closed grammar ARV-NTE-006 with the framing-safe echo: unknown kinds, non-uuid ids, bare new-kind forms, non-digit pins, duplicates, SQL metacharacters, the 10k oversize string \u2014 all the named refusal, never a clamp; the four routed classes (the substrate's pre-existing grammar laws) all fail-closed with zero writes"
+  }
+ ],
+ "findings": [],
+ "not_verified": [
+  "F-076-1 (P2, ROUTED): the all-digits oversize pin (>= 4301 digits) crashes the note --ref parser with an untyped ValueError traceback (CPython's int-str limit) instead of the typed ARV-NTE-006 \u2014 the commands.py twin of CLAIM-075's F-075-1, PRE-EXISTING at the CLAIM-057 substrate's _nte_refs (reproduced on the OLD kind highlight identically by the reviewer), composed verbatim by this slice's vocabulary widening per the never-a-second-implementation doctrine; fail-closed, zero writes; routed to the family-wide _nte_refs grammar slice (the pin-length bound before int())",
+  "F-076-2 (P3, ROUTED): the trailing-newline uuid \u2014 the F-075-2 commands.py twin (the $-anchored _UUID_RE; a typed ARV-CMD-010 at the session layer rather than the grammar's own refusal); routed to the _nte_canon_id family-wide slice",
+  "F-076-3 (P3, ROUTED): the unicode-digit/leading-zero pin normalization \u2014 the substrate's isdigit law composed verbatim (the F-075-3 class); routed to the grammar owner; the write boundary carries NO uppercase-echo debt (the UUID column canonicalizes)",
+  "F-076-4 (P3, ROUTED): the ARV-NTE-008 message wording ('per target per revision' vs the enforced per-(kind, target) law) \u2014 pre-existing, cosmetic, routed",
+  "the standing family-wide classes carry forward unchanged: the F-072-1 _nte_canon_id pattern (incl. the substrate's $-anchored _UUID_RE), the F-074-1 leading-dash argv-value family, the F-073-6 import staging residue, F-075-5 (resolve-anchor's purge-unawareness \u2014 D-011's slice)",
+  "no agent-facing reference resolution (P4-E's increment); no reference graph queries (P5's world); no new entity families; no reader-client work (P4-B's separate repo)",
+  "no concurrency probes (the single-statement/one-transaction laws verified structurally and behaviorally, never under actual parallel writes)",
+  "no performance/DoS measurements (the F-076-1 crash class verified functionally)",
+  "the journal-block family carries no tombstone machine at this slice (the \u00a73.3 increment, D-011's governed-erasure question \u2014 a tombstoned-state reference answer for journal_block targets unreachable by construction)",
+  "the revise_note --ref path shares create_note's _nte_refs parse by code reading, not a separate live probe",
+  "migration 0018's failure/rollback path not deliberately fault-injected (clean apply + verify on five fresh databases)",
+  "the crash matrix around new-kind refs covered by NTR-10's generic pins, not re-probed individually by the SEV rig"
+ ],
+ "builder_context": "Super Z (GLM host) \u2014 the standing do-not-stop chain INT-134..146",
+ "reviewer_context": "one fresh-context SEV agent: agent-ca4c6f8e (round 1, PASS zero open P0/P1 \u2014 94 live probes + 13 static/git checks on three self-built rigs incl. two two-DB sync rigs; four findings all routed to the substrate grammar owner, every one the commands.py twin of a class CLAIM-075's SEV round 1 already dispositioned, all fail-closed)",
+ "disposition": "PASS",
+ "review_summary": "the one-round chain: round 1 (agent-ca4c6f8e) PASS zero open P0/P1 \u2014 every claimed behavior independently reproduced on the reviewer's own scratch rigs (the seven-kind write round-trip with the compose through the untouched read arm; the shape law incl. the canonical replay and the 409; the no-oracle as byte equality for both new kinds; the 0018 substrate with the guard routing proven by ADMISSION and the out-of-vocabulary refusal at the kind CHECK via the note-target form; the two-DB sync delivery with the journal stem step, the ARV-SYN-009 rest + recovery, and zero local-uuid leakage; the RED chain reproduced from the archived tree with the binding digests matching; the suite determinism cross-checked against the recorded run digests); four findings ALL ROUTED to the substrate grammar owner (F-076-1 the P2 oversize-pin traceback \u2014 the F-075-1 commands.py twin, pre-existing, fail-closed; F-076-2/3/4 the P3s \u2014 the trailing-newline uuid, the isdigit normalization, the 008 message wording), none opened by this diff, none serving a wrong answer or leaking existence; the recorded evidence: the NTR suite x3 + make verify 54/0 at the GREEN tree, all exit 0"
+}

@@ -1,0 +1,7 @@
+{
+  "command": "env SLICE=claim-076-p4d-ref-write-completion GATE_DIFF=origin/main make gate",
+  "exit_code": 0,
+  "commit": "9aad97d404790110eed0fb964980e38d8ae881fc",
+  "output_sha256": "6786dd0614cdc4bdc009c0a18aa292ca84a3990cad5bdf14b393edcd581cbc28",
+  "recorded_at": "2026-11-11T13:23:33.615599+00:00"
+}

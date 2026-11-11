@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-077-p4e-scoped-agent-reads (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 5f51eb1ee776df0c6498d2a0f595446e8ad55ec5
-- generated (last record's timestamp): 2026-11-11T15:55:42.619996+00:00
-- run records: 22
+- commit (last run record's): 233822644e196862e68b839c7bfa260a2686b24c
+- generated (last record's timestamp): 2026-11-11T16:20:55.391885+00:00
+- run records: 26
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_agent_access.py` -> exit 0 · output sha256 94d65b635b13068e · 2026-11-11T14:11:55.050421+00:00
@@ -27,6 +27,10 @@
 - `env SLICE=claim-077-p4e-scoped-agent-reads GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 68c1bba86ca6ec92 · 2026-11-11T15:54:34.630348+00:00
 - `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-077-p4e-scoped-agent-reads python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 271bead3ffffc462 · 2026-11-11T15:55:03.558280+00:00
 - `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-077-p4e-scoped-agent-reads python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 80ab90743178db3f · 2026-11-11T15:55:42.619996+00:00
+- `python3 harness/tests/test_agent_access.py` -> exit 0 · output sha256 ccdfa199994d21d0 · 2026-11-11T16:06:31.865574+00:00
+- `make verify` -> exit 0 · output sha256 bafbd4c3a46ad6b9 · 2026-11-11T16:13:27.378663+00:00
+- `env SLICE=claim-077-p4e-scoped-agent-reads GATE_DIFF=origin/main make gate` -> exit 0 · output sha256 39862538d07dc4a2 · 2026-11-11T16:20:35.587855+00:00
+- `env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-077-p4e-scoped-agent-reads python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main` -> exit 0 · output sha256 e0a6ffe9e1687ccf · 2026-11-11T16:20:55.391885+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - CLAIM-077 — the honest not-verified list (LAW-04: the explicit statement, never
@@ -63,11 +67,11 @@
 - d042probe*) — cosmetic rig hygiene, noted by round 2, no shared state affected.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 4b9ff02f439efa87e9591adf88895282b0a1eb98097451287b76e97fc039526e
-- reviewed_diff_sha256: f899fe1ed1343c67a654d923e7f818a202d8604e7e2130dee8633370b6b4f6bc
+- report sha256: 775cfef45d03e1981dfcdc49ef600d2623cf4f195c1e574c43f4611e1117d8b4
+- reviewed_diff_sha256: 13023b93deb6798b65af48ae78205504d601e8dd13c4b12629e76ce07d54533a
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 8
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 6c72b4ea7e89309d79b1526a01021164cf586a759c76a2899e223ce1d74c4f1b
+- sheet sha256 (of the content above, excluding this line): 21b2844edc3d719b0a491dcadb1486a6eb2103c8f598335c39f3850337d0f16d

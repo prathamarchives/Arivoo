@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-077-p4e-scoped-agent-reads",
  "base_sha": "898b9f2ac6679c87f989b52d22941ba3b5f8b546",
- "reviewed_diff_sha256": "f899fe1ed1343c67a654d923e7f818a202d8604e7e2130dee8633370b6b4f6bc",
+ "reviewed_diff_sha256": "13023b93deb6798b65af48ae78205504d601e8dd13c4b12629e76ce07d54533a",
  "sheet_section": true,
  "intent_ids": [
   "INT-144",

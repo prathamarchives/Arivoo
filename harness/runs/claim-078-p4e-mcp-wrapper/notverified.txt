@@ -1,0 +1,52 @@
+- CLAIM-078 — the honest not-verified list (LAW-04: the explicit statement, never
+  empty-by-omission). The full SEV account: sev.json + sev-round-1.md + sev-round-2.md.
+- - F-078-2 (P3, ROUTED): a tools/call sent BEFORE any initialize is served — the MCP
+  spec's ordering is a client-side SHOULD NOT and the slice letter claims no pre-init
+  rejection; rejecting would need the spec's -32002 class (a future hardening increment,
+  never claimed here). Observed live by both rounds; every pre-init read still
+  credential-scoped and audited.
+- - F-078-3 (P3, ROUTED): a request with "id": null is answered with "id": null — the
+  faithful JSON-RPC echo (discouraged from clients, harmless to answer).
+- - F-078-4 (P3, ROUTED): invalid UTF-8 on stdin survives under the rig's default locale
+  (utf-8/surrogateescape) — answered -32700, the session continuing; a strict
+  PYTHONIOENCODING=utf-8:strict override kills the process at the decode. An environment
+  property, not a wrapper behavior; the delivered rig and the CI default are the surviving
+  configuration.
+- - F2-078-2 (P3, ROUTED — PRODUCT-side, outside this slice's diff): the retrieval core
+  itself (pg.py's _run_psql) dies with an UNTYPED OSError "[Errno 7] Argument list too
+  long: 'psql'" traceback when a read argument pushes the SQL past the psql -c argv limit
+  (~131k chars, the kernel's MAX_ARG_STRLEN) — the substrate's named-code law violated at
+  the oversize boundary; the wrapper's own claims hold there (isError, byte-preserving,
+  no crash, no audit row). Joins the F-075-1/F-076-1 untyped-traceback family at the
+  substrate grammar owner's slice.
+- - the resource-exhaustion classes unprobed and unclaimed: a ~100MB single line (the
+  same exposure any line-based JSON-RPC peer has); a ~100k-term search riding the
+  unchanged 240s READ_TIMEOUT arm (answered -32603 without ARV-MCP-003 — the timeout
+  arm, unchanged by the repairs); memory exhaustion. No DoS claims are made (the local
+  single-user threat model).
+- - the json recursion cliff is interpreter-dependent: bracketed live at (9000 parses,
+  10000 raises) on this rig's CPython 3.12.16; the MCPW-10 pin demonstrates at depth
+  20000. A wrapper-level depth budget (interpreter-independent) would be a future
+  increment.
+- - no concurrency or load claims (single-client rigs; the round-2 reviewer ran two
+  concurrent instances scope-correct, never a load claim).
+- - the byte-equality law verified as decoded-UTF-8 string equality (both sides decode
+  the same bytes; the transport's ensure_ascii=False re-encoding exercised, not
+  byte-inspected).
+- - the no-token-in-argv proof is behavioral + static (the two-channel refusal + the
+  env-only serving + the AST argv inspection jointly establish it; not a ptrace of the
+  child's execve).
+- - Q10's honest boundary: the environment channel is visible to the same user's
+  processes (narrows argv exposure; NOT a multi-user isolation mechanism); stdio only
+  (no HTTP/SSE transport, never claimed); the hash comparison non-constant-time (slice
+  one's standing residual); no token rotation/expiry windows; the minting policy and any
+  server-deployment scoping stay owner-gated.
+- - the bounded exclusions of §2 carry: no write scopes; no MCP resources/prompts
+  surfaces (tools only); no HTTP/SSE; no new migration (the 0019 substrate serves
+  unchanged); no reader-client work (P4-B's repo); no Phase 5 retrieval machinery (the
+  deeper response budgets).
+- - the standing family-wide classes carry forward unchanged: the F-072-1 _nte_canon_id
+  pattern, the F-074-1 leading-dash argv-value family (closed AT THE WRAPPER boundary by
+  the --opt=value/-- convention; the CLI's own direct argv exposure stays routed),
+  F-073-6, F-075-3/F-076-1..4 (the substrate grammar owner's slice, now joined by
+  F2-078-2), F-075-5.

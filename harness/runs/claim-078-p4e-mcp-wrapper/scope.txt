@@ -1,0 +1,19 @@
+# CLAIM-078 — P4-E slice two: the MCP wrapper over the same retrieval core (the PLAN 4E
+# row's completion at the connection layer; record 69 §2's named exclusion landing: "no
+# MCP wrapper (P4-E slice two — the same retrieval core behind the protocol adapter)";
+# the non-argv token form's natural home). RED-first at CLAIM-077's merged head 505cb336.
+# The scope elaborates at the RED per the one-phase-deep rule.
+harness/mcp.py D-041
+harness/query.py D-041
+harness/capability.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+harness/tests/test_mcp_wrapper.py D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/69-P4E-SCOPED-AGENT-READS.md D-042
+context/extracted/70-P4E-MCP-WRAPPER.md D-042
+harness/runs/claim-078-p4e-mcp-wrapper D-042

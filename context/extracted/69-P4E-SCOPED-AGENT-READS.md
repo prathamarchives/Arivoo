@@ -161,4 +161,38 @@ O'Brien's credential mints, the read serves, the audit row lands).
 
 ## §5 The close
 
-(Appended at the merge.)
+PR #112 merged at 2026-11-11T17:17:39Z as `505cb33632d668f33f1dadf24346dcb37f523949` under INT-145's
+standing authorization: the five checks green at the exact final head `169cbd42` AND on the
+merge commit `505cb336` (all observed live — the verify run 43057445083 at the head, the run
+43066742494 on the merge commit); the merge-gate review D-042 (1a) `5862653355` (the
+substantive host review engaging the actual diff — the token-secrecy headline risk verified
+against the SEV round's whole-database probe, the no-oracle, the read-only closure, the
+substrate audits); CodeRabbit the skip state (fewer than 10 stars, no automatic reviews —
+noted per D-042 (1c), the host review the floor); zero review threads; the flip/merge/restore
+with the protections re-read byte-equivalent (approving=1, dismiss_stale=true, strict=true,
+the five contexts, enforce_admins, no force pushes, no deletions); the branch deleted; 0 open
+PRs; only main. No ARV-SEV-003 round — the digest bound LAST (`13023b93` at the final content
+head `169cbd42`, the post-scanner-repair re-bind; validate_report GREEN) + the local
+trusted-gate reproduction green before the push (run-26, exit 0, the trusted base reset to
+the current main `898b9f2a`). THE TWO-ROUND SEV CHAIN (the account in §4): round 1
+(agent-e2095ac5) PASS zero open P0/P1 — 56 live probes + 18 static checks, four in-slice
+findings ALL REPAIRED at `20cd5c5`; round 2 (agent-6a8d56b7) PASS — all four repairs verified
+CLOSED live, one new P3 (F2-077-5 the unescaped-owner interpolation) found and repaired at
+the head `88d1e829` with the AGT-09 regression pin. THE SCANNER-COLLISION REPAIR (the two
+commits `2338226`/`169cbd42`, the standing lesson applied): the CI secret-scanner's
+generic-assignment pattern matching commands.py's token-assignment line + the round-1
+report's quoted values — the local renamed, the report's quoted value redacted + the diff
+line masked, the repair comment worded without the literal pattern (the self-reference
+guard); the whole-diff scan clean; the digest re-bound over the NEW content head per the
+anti-lag ordering. The 26-record proof sheet (runs 23/24 the scanner-repair tree's measured
+set — the AGT suite GREEN + make verify — + run-25 the PR-mode gate GREEN + run-26 the
+trusted-gate reproduction exit 0).
+
+**THE P4-E REMAINING-INCREMENT CHECK (2026-11-12, at the #112 merge):** every slice-one
+behavior landed and verified — the credential (the one-time display, the one-way revocation,
+the closed scopes CHECK), the mint/revoke commands, the `--agent-token` read mode (byte-equal
+to the owner's reads, audited, budgeted, no-oracle), the read-only structure, the scope
+isolation. ONE named increment remains from §2's own exclusions: the MCP wrapper (slice two —
+the same retrieval core behind the protocol adapter; the non-argv token form's natural home).
+CLAIM-078 takes exactly that, then P4-F (the recovery + contract gate) → the Phase 4 exit
+gate. Record 70 carries the MCP-wrapper slice.

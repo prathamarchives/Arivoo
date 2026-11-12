@@ -1,0 +1,7 @@
+{
+  "command": "env ARV_EVENT_NAME=pull_request ARV_PR_HEAD=slice/claim-078-p4e-mcp-wrapper python3 -I /home/z/my-project/verification/anchored/trusted_gate_anchored.py --repo /home/z/my-project/Arivoo --base /home/z/my-project/verification/trusted-base --phase gate --diff-ref origin/main",
+  "exit_code": 0,
+  "commit": "6569801ff1de198c3c635986b47ed47f263aac77",
+  "output_sha256": "954328615ea807b8f95bfebc70f6549f792ad59b1281203526610b1598880a94",
+  "recorded_at": "2026-11-12T07:41:17.568826+00:00"
+}

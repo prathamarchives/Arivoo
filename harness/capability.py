@@ -59,11 +59,14 @@ FORMATS = ADAPTERS
 # declared here so the contract sketch is visible from day one, never smuggled
 # in later. The reader UI itself is the separate repository.
 RESERVED_SURFACES = {
-    # P4-E slice one (CLAIM-077; record 69 §2): the scoped agent read
-    # surface LANDED — the PLAN 4E row's own reservation promoted
+    # P4-E slice one (CLAIM-077; record 69 §2) + slice two (CLAIM-078;
+    # record 70 §2): the scoped agent read surface LANDED + the MCP wrapper
+    # LANDED — the PLAN 4E row's own reservation promoted, then completed at
+    # the connection layer
     "scoped-agent-access": {
         "owner_phase": "P4-E",
-        "reservation": ("LANDED in P4-E slice one (CLAIM-077): the backend verbs are real — "
+        "reservation": ("LANDED in P4-E slice one (CLAIM-077) + slice two (CLAIM-078): "
+                        "the backend verbs are real — "
                         "mint_agent_credential + revoke_agent_credential (commands.py — the "
                         "owner-minted credential through the spine's own ack contract: the "
                         "token VALUE shown ONCE at mint with only the sha256 stored, the "
@@ -77,14 +80,23 @@ RESERVED_SURFACES = {
                         "served read with the bounded request facts never the content, the "
                         "shared page bounds as the read budget, the ambiguous-identity "
                         "refusal) + migration 0019 (arv.agent_credential + arv.agent_read_log "
-                        "+ the one-transition guard + the lookup function). Q10 HONESTLY: the "
+                        "+ the one-transition guard + the lookup function) + the MCP wrapper "
+                        "(mcp.py — the protocol adapter over the SAME retrieval core: stdio "
+                        "JSON-RPC 2.0, the tool registry = EXACTLY the 22 landed read arms, "
+                        "every tools/call through query.py byte-preserving with the same "
+                        "audit row and the same budgets, the product's typed refusals "
+                        "surfaced as the tool errors; the ARIVO_AGENT_TOKEN environment is "
+                        "the NON-ARGV token channel — the child argv carries no secret "
+                        "end-to-end; READ-ONLY structural at the registry — ARV-MCP-001; "
+                        "stdio only, the local single-user threat model). Q10 HONESTLY: the "
                         "access-shape surface, never workflow-tamper hardening — the local "
                         "single-user threat model, the non-constant-time hash comparison, no "
-                        "rotation/expiry claims (the narrow remaining owner choice — the "
-                        "minting policy and any server-deployment scoping — recorded, "
-                        "owner-gated). The MCP wrapper over the same retrieval core is P4-E "
-                        "slice two; the deeper response budgets are Phase 5's retrieval "
-                        "increments; the reader CLIENT is P4-B's separate repo"),
+                        "rotation/expiry claims, the environment channel visible to the same "
+                        "user's processes (never a multi-user isolation mechanism; the "
+                        "narrow remaining owner choice — the minting policy and any "
+                        "server-deployment scoping — recorded, owner-gated). The deeper "
+                        "response budgets are Phase 5's retrieval increments; the reader "
+                        "CLIENT is P4-B's separate repo"),
     },
     # P4-D slice one (CLAIM-075; record 67 §2): the stable @-reference
     # system LANDED — the RTM §2 item 10 reservation's own row (the same

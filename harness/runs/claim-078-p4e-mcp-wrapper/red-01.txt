@@ -1,0 +1,22 @@
+CLAIM-078 — the observed RED (LAW-11: tests-only, committed BEFORE the implementation)
+
+Command: python3 harness/tests/test_mcp_wrapper.py
+Tree:    e090ba2 (CLAIM-078's RED commit, on commit A at CLAIM-077's merged
+         head 505cb336)
+Exit:    1
+Output:
+  FAIL ARV-TEST-000: the P4-E slice two MCP-wrapper machinery is absent
+  (machinery-absent class; harness/mcp.py not on disk) — the implementation
+  lands after this RED, never before it (LAW-11)
+
+Observed live at the exact tree above (the suite committed in its tests-only RED
+form — 540 lines, the MCPW-01..08 registry; the DB-free machinery-absent probe at
+the module head — harness/mcp.py's absence precedes any connection, the
+nonexistent probe database never reached). The gate.py TESTS registration rides
+the binding commit (the ARV-RED-008 class — the registration in the candidate's
+gate.py, diff-visible, never a smuggle). The implementation lands in the
+immediately-following commit, never before this RED: harness/mcp.py (the MCP
+server — the stdio JSON-RPC protocol adapter over the same retrieval core) +
+query.py's ARIVO_AGENT_TOKEN env form (the non-argv token channel, the identity
+law extended to exactly one of --owner/--agent-token/ARIVO_AGENT_TOKEN) +
+capability.py's scoped-agent-access row update.

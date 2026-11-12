@@ -208,4 +208,40 @@ class at the oversize boundary).
 
 ## §5 The close
 
-(Appended at the merge.)
+PR #113 merged at 2026-11-12 as `d21ca44e9984b40931432fb8e33f8e639e1892e9` under INT-145's
+standing authorization: the five checks green at the exact final head `fa09e6c` AND on the
+merge commit `d21ca44e` (all observed live — the verify runs 43179237216 at the head, the
+run 43180625779 on the merge commit); the merge-gate review D-042 (1a) `5871123952` (the
+substantive host review engaging the actual diff — the same-core law, the token's
+end-to-end secrecy, the read-only registry, both repaired crash classes with their
+observed REDs, the audit + the budgets, the identity-law extension, the process evidence);
+CodeRabbit the skip state (fewer than 10 stars — noted per D-042 (1c), the host review
+the floor); zero review threads; the flip/merge/restore with the protections re-read
+byte-equivalent (approving=1, dismiss_stale=true, strict=true, the five contexts,
+enforce_admins, no force pushes, no deletions); the branch deleted; 0 open PRs; only
+main. No ARV-SEV-003 round — the digest bound LAST (`42fcff79` at the final content head
+`9f526e6`, re-bound twice as the size repair and the scanner-collision repair moved the
+head — the anti-lag ordering held each time; validate_report GREEN re-verified) + the
+local trusted-gate reproduction green before the push (run-23, exit 0, FIRST attempt —
+the anchored BASE driver at the trusted base reset to the current main `505cb336`). THE
+TWO-ROUND SEV CHAIN (the account in §4): round 1 (agent-1adef410) PASS zero open P0/P1 —
+57 probes, F-078-1 the P2 repaired at `865ac1c` with the MCPW-09 pin; round 2
+(agent-99b5afc0) PASS — the repair verified CLOSED live + F2-078-1 the P2 repaired at
+`511dc0a` with the MCPW-10 pin; the P3s routed (F-078-2/3/4 + F2-078-2 product-side).
+The in-slice catches: the ARV-SIZE-002 repair (407→388 — the docstring condensed to the
+summary + pointer form, the one-fact-one-home repair) + the scanner-collision class
+caught LOCALLY by the whole-diff scan BEFORE the push (the fixture kwarg renamed). The
+23-record proof sheet (PRF-004 byte-identical; runs 01-21 the measured sets across the
+five trees incl. the three DISCLOSED RED runs 05/10 kept + run-22 the PR-mode gate GREEN
++ run-23 the trusted-gate reproduction exit 0).
+
+**THE P4-E EXIT CHECK (2026-11-12, at the #113 merge):** every required P4-E backend
+behavior is landed and verified — the scoped agent read surface (CLAIM-077: the
+owner-minted credential with the one-time display + the one-way revocation, the
+mint/revoke commands, the `--agent-token` read mode with the credential-bound owner scope
++ the append-only audit row + the page bounds, the no-oracle invalid-token class, the
+read-only structure) + the connection layer (CLAIM-078: the MCP wrapper over the same
+retrieval core — the tool registry = exactly the 22 read arms, every tools/call through
+query.py byte-preserving with the same audit row and budgets, the ARIVO_AGENT_TOKEN env
+channel, the argv-safety convention, the typed wrapper refusals). **P4-E COMPLETE.**
+Record 71 carries the recovery/contract-gate slice (P4-F's opening — the Phase 4 exit).

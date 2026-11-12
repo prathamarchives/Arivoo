@@ -1302,5 +1302,15 @@
         "observed_at": "2026-11-12T07:42:15.298351+00:00"
       }
     ]
+  },
+  "harness/tests/test_recovery_contract.py": {
+    "schema": 2,
+    "binding_commit": "4eb49442e00761dc7c8f4e4602d62eb7c8cf54f1",
+    "binding_sha256": "ea570a0e497f79916237165100b0548d0d80d0472dd8ed4f5b46017fc55c942d",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-079's RED (the RCW suite authored tests-only per LAW-11 at the RED commit 4eb4944 on commit A at CLAIM-078's merged head d21ca44e and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: harness/client.py's P4-F condition set absent; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
+    "current_sha256": "ea570a0e497f79916237165100b0548d0d80d0472dd8ed4f5b46017fc55c942d",
+    "amendments": []
   }
 }

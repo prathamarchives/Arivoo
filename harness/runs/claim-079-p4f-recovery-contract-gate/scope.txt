@@ -1,0 +1,21 @@
+# CLAIM-079 — P4-F: the recovery/regression proof + the contract gate (the Phase 4
+# exit; the PLAN 4F row elaborated one phase deep at the #113 landing; record 71
+# §2). RED-first at CLAIM-078's merged head d21ca44e. The scope elaborates at
+# the RED per the one-phase-deep rule.
+harness/client.py D-041
+# the owning-family repair the proof authorizes (record 71 §2's letter: the
+# export machine widened to the full P4-C family set — the journal blocks with
+# their revisions, the reading lists + membership events, the session/dwell
+# events ride the authoritative table set; a defect found by the proof repairs
+# the owning family in its own bounded increment)
+harness/export.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+harness/tests/test_recovery_contract.py D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/71-P4F-RECOVERY-CONTRACT-GATE.md D-042
+harness/runs/claim-079-p4f-recovery-contract-gate D-042

@@ -122,11 +122,89 @@ precedes the registry per the AGT form.)
 
 ## §3 The executed chain
 
-(In flight — appended at the rounds.)
+commit A (`96aeda4`: docs — the post-#112 reconciliation + THE P4-E REMAINING-INCREMENT
+CHECK + CLAIM-077's rule-4 close row + CLAIM-078 registered + record 70 minted; the branch
+pushed EARLY per the standing owner instruction) → **the RED** (`e090ba2`: the MCPW-01..08
+suite authored tests-only per LAW-11 — 540 lines; the DB-free machinery-absent probe at the
+module head; red-01.txt exit 1 ARV-TEST-000) → the typed red-record binding (`db0ead9`:
+red-records.json + the gate.py TESTS registration — the ARV-RED-008 class, diff-visible —
++ the run dir opened with red-01.txt + scope.txt) → **the pre-GREEN amendments**
+(`ec46d46`: the three disclosed pin-authoring repairs — MCPW-03's audit-count
+baselines-first form (every direct --agent-token baseline read lands its own audit row);
+MCPW-06's leading-dash ID pin corrected to the OBSERVED typed refusal (the UUID-keyed
+arm's ARV-QRY-002 for a malformed id — the argv-safety claim itself unchanged); MCPW-07's
+id-set form (list-library emits BARE ids, never titles — the AGT-06 lesson repeated and
+caught) + B's audit count 2) → **the GREEN** (`63143e4`: harness/mcp.py — the MCP server —
++ query.py's ARIVO_AGENT_TOKEN env form (the identity law extended to exactly one of the
+three channels) + capability.py's scoped-agent-access row completed) → the measured set at
+the GREEN tree (`169f9de`: runs 01-04 — the MCPW suite x3 + make verify 54/0) → **the SEV
+round-1 repair pin** (`1506df3`: MCPW-09 added — the spawn-refusal regression — with its
+own RED observed and kept as red-02.txt + run-05) → **the SEV round-1 repair** (`865ac1c`:
+the spawn arm's (ValueError, OSError) catch — the typed ARV-MCP-003 refusal in the -32603
+form) → the measured set at the repair tree (`bd5d719`: runs 06-09) → **the SEV round-2
+repair pin** (`7c4ec1e`: MCPW-10 added — the parse-refusal regression — with its own RED
+observed and kept as red-03.txt + run-10) → **the SEV round-2 repair** (`511dc0a`: the
+parse arm's (ValueError, RecursionError) catch — the deep-nesting class joins the
+malformed-JSON class as the -32700 answer) → the measured set at the round-2-repair tree
+(`26904b5`: runs 11-14 — the MCPW suite x3 (MCPW-01..10) + make verify 54/0) → the
+artifact finalize (this commit — the content head) → the artifact re-bind (sev.json binding
+the two-round SEV chain + notverified + the two round reports + the proof sheet + the
+recorded PR-mode gate + the local trusted-gate reproduction) → the push → the PR → the
+five checks → the merge-gate review (D-042 (1a)) → **the merge under INT-145** → the
+post-merge verification → **THE P4-E EXIT CHECK** → P4-F (the recovery + contract gate) →
+the Phase 4 exit gate — NO PAUSE EVEN FOR UPDATES (INT-146).
 
-## §4 The SEV account
+## §4 The SEV account (the two-round chain)
 
-(In flight — appended at the rounds.)
+**Round 1 (agent-1adef410, PASS zero open P0/P1 — 57 probes: 52 PASS + 5 OBSERVE).**
+Every claimed behavior reproduced live on the reviewer's own scratch rig: the transport
+(a long adversarial session — 16/16 stdout lines valid JSON, stderr empty, the clean
+exit; the invalid-UTF-8 line answered -32700 and the session continuing under the rig's
+default locale); the protocol surface (the version negotiation incl. the missing/hostile
+versions; the notification silence; the string-id echo incl. unicode; -32601/-32700/
+-32600; a blank line no message); the registry (22 arms exact; write names, path names,
+a 10k name, a NUL name, an empty name — all ARV-MCP-001 in the -32602 form, NO echo of
+the requested name, the command_log delta ZERO proving no passthrough); THE SAME-CORE
+LAW on SIXTEEN arms (beyond the suite's four — byte-equal wrapper-vs-direct incl.
+unicode content; the typed refusals byte-equal as isError); the token by environment
+(the six-form identity matrix on query.py; the token VALUE never in any response; the
+env answer byte-equal to the argv answer); the audit (served reads +1 each with the arm
++ the REQUEST facts; refused reads zero; B's isolation with B's audit rows); the budgets
++ the argv-safety (the leading-dash term/id to the product's typed rules; the
+malformed-uuid ARV-QRY-002; the argument law across ten hostile forms); the RED
+reproduced from the archived tree e090ba2; the amendment chain linked; the scope
+declaration clean through the gate's own check_scope; the siblings GREEN (AGT 9/9,
+references, library — and the MCPW suite 8/8 on the reviewer's own rig); the AST static
+sweep (stdlib-only imports; NO os.environ read anywhere in code — the wrapper is
+credential-blind; no randomness/time (LAW-24); no sockets; no DB path — exactly ONE
+subprocess.run (the query.py child) and exactly ONE stdout writer). THE FINDINGS:
+F-078-1 the P2 (the NUL-bearing/over-long string argument crashing the spawn arm —
+ValueError/OSError escaping the TimeoutExpired-only catch; the process dying with the
+request unanswered) — REPAIRED in-slice at `865ac1c` with the MCPW-09 pin (its own RED
+observed, red-02.txt); F-078-2/3/4 the P3s (the pre-initialize serving — the spec's
+SHOULD NOT ordering; the id-null echo; the strict-locale environment caveat) — ROUTED,
+out of letter, honestly noted in notverified.
+
+**Round 2 (agent-99b5afc0, PASS — 19 probes + a 21-form OS-hostile sweep).** F-078-1
+VERIFIED CLOSED live: both hostile forms answered -32603/ARV-MCP-003 (the exception
+TYPE only in the message, never the value); the SAME session answering the next ping
+and exiting 0 on the stdin close; the 21-form sweep all answered (control characters,
+a 2MB id, 240KB of unicode, NUL in every declared key, 2000 search terms, a 2.8MB argv
+— never a crash). The invariants re-verified: byte-equality; the audit law (the
+refused-spawn ZERO rows); the identity matrix (8 forms — all three single-identity
+forms byte-equal); the registry; the hygiene; the pin's RED reproduced from the
+archived pre-repair tree 1506df3; the amendment chain 3-linked (every sha verified
+against git); the measured-set records verified (runs 06-09 at 865ac1c exit 0; run-05
+the RED kept in place); the AGT sibling GREEN 9/9; the repair exactly the except arm
+(the diff 12 lines, nothing else). ONE NEW FINDING: F2-078-1 the P2 (a deep VALID-JSON
+line — nesting beyond the interpreter's json recursion cliff — RecursionError escaping
+the ValueError-only parse arm; PRE-EXISTING at the pre-repair tree, verified by the
+reviewer against 1506df3, outside round 1's spawn-arm sweep) — REPAIRED in-slice at
+`511dc0a` with the MCPW-10 pin (its own RED observed, red-03.txt); F2-078-2 the P3
+(the retrieval core's own untyped E2BIG traceback at pg.py's _run_psql for
+~131k-char arguments — PRODUCT-side, pre-existing, outside this slice's diff) — ROUTED
+to the substrate owner (the same family as F-075-1/F-076-1: the untyped-traceback
+class at the oversize boundary).
 
 ## §5 The close
 

@@ -1152,13 +1152,32 @@ def main() -> int:
                              "caller's claim; READ-ONLY (no write command accepts it)")
     a = ap.parse_args()
     db = os.environ.get("PGDATABASE", "postgres")
+    # P4-E slice two (CLAIM-078): the env token channel — ARIVO_AGENT_TOKEN as
+    # the NON-ARGV token form (the MCP wrapper's natural home; the
+    # argv-visible residual's named home). The identity law extends to EXACTLY
+    # ONE of --owner / --agent-token / ARIVO_AGENT_TOKEN: the two token
+    # channels together is the SAME ambiguous refusal (never a silent
+    # preference between channels; the value is never echoed — it is a secret).
+    _env_tok = os.environ.get("ARIVO_AGENT_TOKEN")
+    if getattr(a, "agent_token", None) is not None and _env_tok is not None:
+        print("FAIL ARV-AGT-002: the ambiguous identity — the --agent-token "
+              "argument and the ARIVO_AGENT_TOKEN environment together (never "
+              "a silent preference between the two token channels; pass the "
+              "token exactly once, never both)")
+        print("      repair: pass the token through exactly one channel — "
+              "either the --agent-token argument or the ARIVO_AGENT_TOKEN "
+              "environment (the wrapper's channel)")
+        return 1
+    if getattr(a, "agent_token", None) is None and _env_tok is not None:
+        a.agent_token = _env_tok  # the SAME downstream path as the argv form
     agent_ctx = None
     if getattr(a, "agent_token", None) is not None:
         if a.owner is not None:
             print("FAIL ARV-AGT-002: the ambiguous identity — --owner and "
                   "--agent-token together (never a silent preference between the "
                   "caller's claim and the credential's binding; the credential's "
-                  "scope wins NOTHING here, the refusal is the answer)")
+                  "scope wins NOTHING here, the refusal is the answer; the token "
+                  "channel is the argv form or ARIVO_AGENT_TOKEN)")
             print("      repair: pass exactly one of --owner (the owner's own "
                   "read) or --agent-token (the scoped agent read)")
             return 1
@@ -1170,9 +1189,12 @@ def main() -> int:
                      getattr(a, "after", None))
     elif a.owner is None:
         print("FAIL ARV-AGT-002: the missing identity — neither --owner nor "
-              "--agent-token (every read is scoped: the owner's own name or the "
-              "credential's binding, never an unscoped query)")
-        print("      repair: pass exactly one of --owner or --agent-token")
+              "--agent-token nor the ARIVO_AGENT_TOKEN environment (every read "
+              "is scoped: the owner's own name or the credential's binding, "
+              "never an unscoped query)")
+        print("      repair: pass exactly one of --owner (the owner's own "
+              "read), --agent-token (the scoped agent read), or "
+              "ARIVO_AGENT_TOKEN (the wrapper's channel)")
         return 1
     rc = _dispatch(a, db)
     if agent_ctx is not None and rc == 0:

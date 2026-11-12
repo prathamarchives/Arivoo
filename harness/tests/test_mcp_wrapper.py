@@ -77,6 +77,11 @@ Cases (the MCPW registry; each pin's full statement lives at its check()):
           string, an over-long argument) is refused TYPED — the -32603 form
           naming ARV-MCP-003, the server ALIVE for the next request, the
           process never crashed, the value never echoed
+  MCPW-10 the parse-refusal pin (F2-078-1's regression, the SEV round-2
+          repair): a single VALID-JSON line nested beyond the interpreter's
+          json recursion cliff (a deep bracket chain) is answered as the
+          -32700 parse-error class with id null — never a RecursionError
+          crash, the server ALIVE for the next request, the clean exit
 
 Run: python3 harness/tests/test_mcp_wrapper.py   (exit 0 = green)
 """
@@ -576,11 +581,29 @@ def main() -> int:
               "the spawn-refusal pin (F-078-1's regression): a NUL-bearing search term and a 200k-character id — values the OS exec layer cannot carry — are refused TYPED in the -32603 form naming ARV-MCP-003 (the value never echoed); the server answers the next ping and exits cleanly on the stdin close (the process never crashed, the request never left unanswered by silence)",
               "the adapter's own robustness law: hostile scalar values that pass the argument law but cannot cross the OS boundary are a TYPED refusal at the protocol layer — the convention the timeout arm already followed")
 
+        # ---- MCPW-10 — the parse-refusal pin (F2-078-1's regression, the
+        # SEV round-2 repair: a deep VALID-JSON line — nesting beyond the
+        # interpreter's json recursion cliff — is a PARSE-ERROR answer, never
+        # a RecursionError crash)
+        sD = Server(token=tokA)
+        sD.handshake()
+        sD.send_raw("[" * 20000)  # valid JSON syntax, depth 20000
+        r_deep = sD.recv()
+        r_alive10 = sD.ping(90)
+        rc10 = sD.close()
+        ok10 = (isinstance(r_deep, dict) and r_deep.get("id") is None
+                and r_deep.get("error", {}).get("code") == -32700
+                and isinstance(r_alive10, dict) and r_alive10.get("id") == 90
+                and rc10 == 0)
+        check("MCPW-10", ok10,
+              "the parse-refusal pin (F2-078-1's regression): a single valid-JSON line nested 20000 deep (beyond the interpreter's json recursion cliff) is answered as the -32700 parse-error class with id null — never a RecursionError crash; the server answers the next ping and exits cleanly on the stdin close",
+              "the parse arm's own robustness law: the deep-nesting class joins the malformed-JSON class as a PARSE-ERROR answer — the interpreter's RecursionError is a parse failure at this boundary, never a process death")
+
         print()
         if FAILS:
             print(f"RED — the P4-E MCP-wrapper suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P4-E MCP-wrapper suite (MCPW-01..09) passes")
+        print("GREEN — the P4-E MCP-wrapper suite (MCPW-01..10) passes")
         return 0
     finally:
         pg.drop_scratch_db(DB)

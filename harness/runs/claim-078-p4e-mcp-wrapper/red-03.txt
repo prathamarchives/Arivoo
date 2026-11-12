@@ -1,0 +1,24 @@
+CLAIM-078 — the observed RED for the F2-078-1 repair (LAW-11: the regression pin
+observed RED at the pre-repair tree, kept as the disclosed evidence)
+
+Command: python3 harness/tests/test_mcp_wrapper.py
+Tree:    the repair-tree measured set bd5d719 + the MCPW-10 pin authored (the
+         SEV round-2 finding F2-078-1: a single VALID-JSON line nested beyond
+         the interpreter's json recursion cliff — a deep bracket chain, depth
+         20000 — raised RecursionError from json.loads, which is NOT a
+         ValueError and so escaped the parse arm's except; the process died
+         with the request unanswered, demonstrated live by the round-2
+         reviewer at P06)
+Exit:    1
+Output:
+  PASS MCPW-01 .. PASS MCPW-09 (the nine landed cases unchanged, all PASS)
+  FAIL MCPW-10: the parse-refusal pin — the deep valid-JSON line is NOT
+  answered as the -32700 parse-error class: the server died on the line (the
+  reader thread saw EOF; the process exit 1 with the RecursionError traceback
+  on stderr only — stdout stayed clean, no invalid MCP line ever emitted)
+
+The repair lands in the immediately-following commit: mcp.py's parse arm
+extended to catch (ValueError, RecursionError) — the deep-nesting class joins
+the malformed-JSON class as the -32700 parse-error answer with id null (the
+interpreter's recursion cliff is a parse failure at this boundary, never a
+process death).

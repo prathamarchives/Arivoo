@@ -1,54 +1,35 @@
 #!/usr/bin/env python3
-"""harness/mcp.py — P4-E slice two: the MCP wrapper (the protocol adapter over the
-same retrieval core; CLAIM-078, record 70 §2; the PLAN 4E row's completion at the
-connection layer).
+"""harness/mcp.py — P4-E slice two: the MCP wrapper (CLAIM-078; record 70 §2 —
+the binding contract's ONE home; this docstring carries the summary + the
+pointer, never a second copy of the letter).
 
-THE CONTRACT: "authorized agents read the owner's journal and capture context
-through the same API with provenance/scope/budgets; READ-ONLY at first;
-owner-scope enforced on every query; imported text untrusted; no arbitrary
-database access; Q9/Q10 handled honestly." The North Star's own words:
-"Specifically for AI, I can just connect an agent and it has all the context of
-me" (C2) — the connection this adapter completes.
+An MCP (Model Context Protocol) server: the protocol adapter over the SAME
+retrieval core — every tools/call invokes harness/query.py with the arm's
+arguments; the tool result is the CLI's stdout VERBATIM (byte-preserving),
+and a nonzero exit is isError with the CLI's typed refusal text (the wrapper
+generates NO auth answers of its own; its only refusals are protocol-level:
+ARV-MCP-001 the read-only registry, ARV-MCP-002 the argument law, ARV-MCP-003
+the spawn refusal).
 
-THE DESIGN (record 70 §2, the binding form):
-- THE TRANSPORT: stdio — JSON-RPC 2.0, newline-delimited, UTF-8. NOTHING but
-  valid MCP messages is ever written to stdout (the spec law); there is no
-  other stdout writer in this file. The stdin close (the spec's client-initiated
-  shutdown) ends the loop and the process exits 0.
-- THE PROTOCOL SURFACE: initialize (the version negotiation + the server info +
-  the tools capability) / notifications/initialized (a notification is NEVER
-  answered) / ping (the empty result) / tools/list / tools/call. An unknown
-  method is the JSON-RPC -32601; malformed JSON is the -32700 parse error with
-  id null (never a crash); a non-object line (an array — MCP has no batching)
-  is the -32600 invalid request; a blank line is no message at all.
-- THE TOOL REGISTRY: EXACTLY the landed READ arms of query.py — the same API,
-  zero translation (the tool names ARE the arm names, the 22 read arms). NO
-  write tool, NO arbitrary-command tool: a tools/call naming anything outside
-  the registry refuses ARV-MCP-001 (the -32602 form) — READ-ONLY structural.
-- THE SAME RETRIEVAL CORE: every tools/call invokes harness/query.py as a
-  subprocess with the arm's arguments. The wrapper is a protocol translation,
-  NEVER a second retrieval path: the tool result is the CLI's stdout VERBATIM
-  (byte-preserving), and a nonzero exit is isError with the CLI's typed refusal
-  text (the no-oracle ARV-AGT-001, the bounds ARV-QRY-004, the no-object
-  ARV-QRY-001 — the wrapper generates NO auth answers of its own).
-- THE TOKEN BY ENVIRONMENT: the wrapper never reads, parses, or echoes the
-  credential — ARIVO_AGENT_TOKEN (query.py's non-argv token channel, the
-  argv-visible residual's named home) passes through the inherited environment
-  to the child, so the child argv carries NO secret end-to-end. The identity
-  law (EXACTLY ONE of --owner / --agent-token / ARIVO_AGENT_TOKEN) and the
-  audit row per served read are query.py's own laws, unchanged here.
-- THE ARGV-SAFETY CONVENTION (the F-074-1 class closed AT THE WRAPPER
-  boundary): every option is assembled in the --opt=value equals form and the
-  positional search terms ride after the -- separator — a hostile DATA value
-  (a leading dash) reaches the product's own typed rules, never argparse's
-  usage exit. The argument law (ARV-MCP-002, the -32602 form): an undeclared
-  key, a non-scalar value, a missing required argument, or an empty terms
-  array never reaches the child argv.
+The transport: stdio, JSON-RPC 2.0, newline-delimited UTF-8 — NOTHING but
+valid MCP messages is ever written to stdout (the _out single writer); the
+stdin close exits 0. The protocol surface: initialize (the honest version
+negotiation — 2025-06-18 the only claimed version) / notifications/initialized
+(a notification NEVER answered) / ping / tools/list / tools/call; unknown
+method -32601; malformed JSON -32700 (id null); a non-object line -32600.
 
-Q10 honestly: stdio only (the local single-user threat model — no HTTP/SSE
-transport, never claimed); the environment channel narrows argv exposure and
-is NOT a multi-user isolation mechanism (the boundary named in the capability
-row + notverified).
+The tool registry: EXACTLY the 22 landed READ arms (the tool names ARE the
+arm names) — NO write tool, never a passthrough. THE TOKEN BY ENVIRONMENT:
+the wrapper never reads, parses, or echoes the credential — ARIVO_AGENT_TOKEN
+(query.py's non-argv channel) passes through the inherited environment; the
+child argv carries NO secret end-to-end. THE ARGV-SAFETY CONVENTION: the
+--opt=value forms + the -- separator — hostile DATA reaches the product's
+typed rules, never argparse's usage exit.
+
+Q10 honestly: stdio only (the local single-user threat model — no HTTP/SSE,
+never claimed; the environment channel is not a multi-user isolation
+mechanism). The full contract, the laws, and the bounded exclusions: record
+70 §2; the acceptance registry: harness/tests/test_mcp_wrapper.py (MCPW).
 """
 import json
 import os

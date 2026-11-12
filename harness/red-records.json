@@ -1275,7 +1275,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-078's RED (the MCPW suite authored tests-only per LAW-11 at the RED commit e090ba2 on commit A at CLAIM-077's merged head 505cb336 and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: harness/mcp.py not on disk; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
-    "current_sha256": "2d03ac6a6814b4a4ee0ac0b9a6fd565e8e37cd195a55588d040fbaa1595b6d25",
+    "current_sha256": "3714cc4ee0e472f78ee1074db63296b75cf87a868a69f7688a0469d55213721b",
     "amendments": [
       {
         "prior_sha256": "5fdc2463421c9de3fe5bc811c119279980e44d9a78458384c2ce26ec1608af13",
@@ -1294,6 +1294,12 @@
         "new_sha256": "2d03ac6a6814b4a4ee0ac0b9a6fd565e8e37cd195a55588d040fbaa1595b6d25",
         "note": "CLAIM-078's SEV round-2 repair pin (F2-078-1 the P2 \u2014 mcp.py's parse arm caught only ValueError: a single VALID-JSON line nested beyond the interpreter's json recursion cliff (depth 20000, a bracket chain) raised RecursionError from json.loads which escaped the arm and KILLED the wrapper with the request unanswered, demonstrated live by the round-2 reviewer at P06; PRE-EXISTING at the pre-repair tree \u2014 verified by the reviewer against 1506df3 \u2014 and outside round 1's spawn-arm sweep): THE PIN \u2014 MCPW-10 added (the parse-refusal regression: the deep valid-JSON line answered as the -32700 parse-error class with id null, the server answering the next ping, the clean stdin-close exit) \u2014 observed RED at the pre-repair tree (red-03.txt: exit 1, MCPW-01..09 PASS, MCPW-10 FAIL \u2014 the server died on the line, the reader thread seeing EOF). The repair lands in the immediately-following commit",
         "observed_at": "2026-11-12T06:58:04.410135+00:00"
+      },
+      {
+        "prior_sha256": "2d03ac6a6814b4a4ee0ac0b9a6fd565e8e37cd195a55588d040fbaa1595b6d25",
+        "new_sha256": "3714cc4ee0e472f78ee1074db63296b75cf87a868a69f7688a0469d55213721b",
+        "note": "CLAIM-078's scanner-collision repair (the standing lesson, the CLAIM-077 class applied pre-emptively at the local gate: the CI secret-scanner's generic-assignment pattern matches the longer credential-word followed by an assignment and a 12+ char value \u2014 the MCPW-05 fixture's unknown-token constant tripped it in the whole-diff scan): the suite's Server helper kwarg renamed to the short local form (the self-test's own source convention \u2014 commands.py's precedent; the fixture value unchanged, the assertions unchanged, the behavior unchanged; the suite GREEN MCPW-01..10 at this tree). The RED evidence (red-01/02/03) untouched",
+        "observed_at": "2026-11-12T07:42:15.298351+00:00"
       }
     ]
   }

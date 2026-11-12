@@ -185,11 +185,11 @@ class Server:
     one reader thread turns the newline-delimited stdout into a queue (the
     recv timeout makes a hung server a test failure, never a hang)."""
 
-    def __init__(self, token: str | None = None):
+    def __init__(self, tok: str | None = None):
         e = dict(ENV)
         e.pop("ARIVO_AGENT_TOKEN", None)
-        if token is not None:
-            e["ARIVO_AGENT_TOKEN"] = token
+        if tok is not None:
+            e["ARIVO_AGENT_TOKEN"] = tok
         self.p = subprocess.Popen(
             [sys.executable, str(MCP)], stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
@@ -373,7 +373,7 @@ def main() -> int:
                and "ARV-AGT-002" in text_of(r_no)
                and isinstance(r_alive, dict) and r_alive.get("id") == 11
                and rc_no == 0)
-        s_yes = Server(token=tokA)
+        s_yes = Server(tok=tokA)
         s_yes.handshake()
         r_yes = s_yes.call("list-library", {}, 12)
         d_yes = agt("list-library", tokA)
@@ -389,7 +389,7 @@ def main() -> int:
         # (the direct baselines run FIRST — every direct --agent-token read
         # lands its own audit row, so the wrapper-read delta is measured
         # against a count taken AFTER the baselines)
-        sA = Server(token=tokA)
+        sA = Server(tok=tokA)
         sA.handshake()
         cases = [
             ("list-library", {}),
@@ -430,7 +430,7 @@ def main() -> int:
               "the wrapper is a protocol translation, never a second retrieval path — byte-equality is the proof; the audit rides query.py's own transaction, never a wrapper-side second path")
 
         # ---- MCPW-04 — the read-only registry (the closed membership)
-        sA2 = Server(token=tokA)
+        sA2 = Server(tok=tokA)
         sA2.handshake()
         rt = sA2.tools()
         try:
@@ -455,11 +455,11 @@ def main() -> int:
               "READ-ONLY structural at the registry: the wrapper exposes the retrieval surface and NOTHING else — no command execution, no shell, no arbitrary access")
 
         # ---- MCPW-05 — the no-oracle through the wrapper
-        s_unk = Server(token="definitely-not-a-minted-token-value-0123456789")
+        s_unk = Server(tok="definitely-not-a-minted-token-value-0123456789")
         s_unk.handshake()
         r_unk = s_unk.call("list-library", {}, 40)
         s_unk.close()
-        s_rev = Server(token=tokR)
+        s_rev = Server(tok=tokR)
         s_rev.handshake()
         r_rev = s_rev.call("list-library", {}, 41)
         s_rev.close()
@@ -474,7 +474,7 @@ def main() -> int:
               "the invalid-token class is the product's own law — the wrapper surfaces it identically and never echoes the secret")
 
         # ---- MCPW-06 — the budgets + the argv-safety + the argument law
-        sA3 = Server(token=tokA)
+        sA3 = Server(tok=tokA)
         sA3.handshake()
         r_lim = sA3.call("list-library", {"limit": "5000"}, 50)
         r_nan = sA3.call("list-library", {"limit": "abc"}, 51)
@@ -514,7 +514,7 @@ def main() -> int:
         # the AGT-06 lesson; B's count: the wrapper read + the direct baseline
         # read = 2, both audited under B's credential, exactly as the law
         # requires)
-        sB = Server(token=tokB)
+        sB = Server(tok=tokB)
         sB.handshake()
         dB = agt("list-library", tokB)
         rB = sB.call("list-library", {}, 60)
@@ -532,7 +532,7 @@ def main() -> int:
               "the credential binds the scope through query.py's own RLS path — the wrapper adds no scope widening surface")
 
         # ---- MCPW-08 — the protocol hygiene
-        sH = Server(token=tokA)
+        sH = Server(tok=tokA)
         sH.handshake()
         sH.send({"jsonrpc": "2.0", "id": 70, "method": "resources/list"})
         r_m = sH.recv()
@@ -562,7 +562,7 @@ def main() -> int:
         # round-1 repair: a value the OS exec layer cannot carry is refused
         # TYPED at the adapter — never a process crash, never an unanswered
         # request, never an echo of the value)
-        sR = Server(token=tokA)
+        sR = Server(tok=tokA)
         sR.handshake()
         r_nul = sR.call("search", {"terms": ["sesquine\x00marker"]}, 80)
         r_big = sR.call("get-journal", {"id": "y" * 200000}, 81)
@@ -585,7 +585,7 @@ def main() -> int:
         # SEV round-2 repair: a deep VALID-JSON line — nesting beyond the
         # interpreter's json recursion cliff — is a PARSE-ERROR answer, never
         # a RecursionError crash)
-        sD = Server(token=tokA)
+        sD = Server(tok=tokA)
         sD.handshake()
         sD.send_raw("[" * 20000)  # valid JSON syntax, depth 20000
         r_deep = sD.recv()

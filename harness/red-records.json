@@ -1275,13 +1275,19 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-078's RED (the MCPW suite authored tests-only per LAW-11 at the RED commit e090ba2 on commit A at CLAIM-077's merged head 505cb336 and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: harness/mcp.py not on disk; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
-    "current_sha256": "e8d63b414e39679ef3b80abf87a9e8dc23d8f9b0cc53540c025c0f7f40024687",
+    "current_sha256": "4d769e36d6c29203c1d348e336a6093ade3e38efea56dd9eb3d300bfffea96ff",
     "amendments": [
       {
         "prior_sha256": "5fdc2463421c9de3fe5bc811c119279980e44d9a78458384c2ce26ec1608af13",
         "new_sha256": "e8d63b414e39679ef3b80abf87a9e8dc23d8f9b0cc53540c025c0f7f40024687",
         "note": "CLAIM-078's pre-GREEN suite amendments (the CLAIM-074/077 precedent \u2014 the disclosed pin-authoring repairs, never a gate weakening; the assertions corrected to the OBSERVED behavior): (1) MCPW-03's audit-count form corrected \u2014 every direct --agent-token baseline read lands its OWN audit row, so the four wrapper reads are measured against a count taken AFTER the baselines run (the delta asserted on the wrapper reads alone, the baselines' rows accounted); (2) MCPW-06's leading-dash ID pin corrected to the observed typed refusal \u2014 the UUID-keyed get-journal arm refuses a malformed id with ARV-QRY-002 (the product's own read-failure class), never ARV-QRY-001 (the no-object class fires for well-formed absent ids \u2014 the all-zeros UUID in MCPW-03) \u2014 the argv-safety claim itself unchanged (the product's typed rule, never argparse's usage exit); (3) MCPW-07's scope-isolation pin corrected to the id-set form \u2014 list-library emits BARE source ids, never titles (the AGT-06 lesson from CLAIM-077's own amendment chain, repeated and caught here): B's own source id visible, A's source id invisible, A's read showing A's id; B's audit count corrected to 2 (the wrapper read + the direct baseline read, both audited under B's credential). The RED evidence (red-01.txt at e090ba2) untouched; the machinery-absent probe unchanged",
         "observed_at": "2026-11-12T05:26:53.220661+00:00"
+      },
+      {
+        "prior_sha256": "e8d63b414e39679ef3b80abf87a9e8dc23d8f9b0cc53540c025c0f7f40024687",
+        "new_sha256": "4d769e36d6c29203c1d348e336a6093ade3e38efea56dd9eb3d300bfffea96ff",
+        "note": "CLAIM-078's SEV round-1 repair pin (F-078-1 the P2 \u2014 mcp.py's spawn arm caught only TimeoutExpired: a NUL-bearing string argument (ValueError 'embedded null byte') or an over-long argument (OSError 'Argument list too long') propagated and KILLED the wrapper process with the request unanswered, demonstrated live by the round-1 reviewer at P36c/P36d): THE PIN \u2014 MCPW-09 added (the spawn-refusal regression: both hostile values refused TYPED in the -32603 form naming ARV-MCP-003, the value never echoed, the server answering the next ping, the clean stdin-close exit) \u2014 observed RED at the pre-repair tree (red-02.txt: exit 1, MCPW-01..08 PASS, MCPW-09 FAIL \u2014 the first hostile call killed the server, the reader thread saw EOF); THE PIN-AUTHORING REPAIRS disclosed with it \u2014 the suite's Server helper made pipe-tolerant (send/send_raw/close catch the BrokenPipeError of a dead server \u2014 the failure recorded cleanly at exit 1, never a suite crash). The repair lands in the immediately-following commit",
+        "observed_at": "2026-11-12T06:16:22.532410+00:00"
       }
     ]
   }

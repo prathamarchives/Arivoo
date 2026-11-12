@@ -72,6 +72,11 @@ Cases (the MCPW registry; each pin's full statement lives at its check()):
           line → -32600 (MCP has no batching); an unknown NOTIFICATION → no
           response; the responses carry the request id (the string-id echo);
           the clean EOF exit
+  MCPW-09 the spawn-refusal pin (F-078-1's regression, the SEV round-1
+          repair): a value the OS exec layer cannot carry (a NUL-bearing
+          string, an over-long argument) is refused TYPED — the -32603 form
+          naming ARV-MCP-003, the server ALIVE for the next request, the
+          process never crashed, the value never echoed
 
 Run: python3 harness/tests/test_mcp_wrapper.py   (exit 0 = green)
 """
@@ -184,6 +189,7 @@ class Server:
             [sys.executable, str(MCP)], stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
             env=e, cwd=str(REPO))
+        self.dead = False  # set when a write hits a closed pipe — the pin records it
         self.q: queue.Queue = queue.Queue()
         self.err: list[str] = []
         threading.Thread(target=self._reader, daemon=True).start()
@@ -199,12 +205,18 @@ class Server:
             self.err.append(ln)
 
     def send(self, obj) -> None:
-        self.p.stdin.write(json.dumps(obj) + "\n")
-        self.p.stdin.flush()
+        try:
+            self.p.stdin.write(json.dumps(obj) + "\n")
+            self.p.stdin.flush()
+        except (BrokenPipeError, ValueError, OSError):
+            self.dead = True  # the server died mid-call — the pin records it
 
     def send_raw(self, line: str) -> None:
-        self.p.stdin.write(line + "\n")
-        self.p.stdin.flush()
+        try:
+            self.p.stdin.write(line + "\n")
+            self.p.stdin.flush()
+        except (BrokenPipeError, ValueError, OSError):
+            self.dead = True  # the server died mid-call — the pin records it
 
     def recv(self, timeout: float = 90.0):
         try:
@@ -218,7 +230,10 @@ class Server:
     def close(self) -> int:
         """The clean shutdown: close stdin (the spec's client-initiated form)
         → the server exits; the returncode returned (0 = the clean exit)."""
-        self.p.stdin.close()
+        try:
+            self.p.stdin.close()
+        except (BrokenPipeError, ValueError, OSError):
+            pass  # the pipe was already broken — the server died mid-call
         try:
             return self.p.wait(timeout=30)
         except subprocess.TimeoutExpired:
@@ -538,11 +553,34 @@ def main() -> int:
               "the protocol hygiene: an unknown method → the JSON-RPC -32601 (with the request id); malformed JSON → the -32700 parse error with id null (never a crash); a JSON array line → the -32600 invalid request (MCP has no batching); an unknown NOTIFICATION → NO response (the next response is the string-id ping's echo); the stdin close → the clean exit 0",
               "the wrapper is a well-formed JSON-RPC 2.0 peer on the MCP stdio transport — nothing but valid MCP messages on stdout (the spec law), diagnostics to stderr")
 
+        # ---- MCPW-09 — the spawn-refusal pin (F-078-1's regression, the SEV
+        # round-1 repair: a value the OS exec layer cannot carry is refused
+        # TYPED at the adapter — never a process crash, never an unanswered
+        # request, never an echo of the value)
+        sR = Server(token=tokA)
+        sR.handshake()
+        r_nul = sR.call("search", {"terms": ["sesquine\x00marker"]}, 80)
+        r_big = sR.call("get-journal", {"id": "y" * 200000}, 81)
+        r_alive9 = sR.ping(82)
+        rc9 = sR.close()
+        ok9 = (isinstance(r_nul, dict) and "error" in r_nul
+               and r_nul["error"].get("code") == -32603
+               and "ARV-MCP-003" in r_nul["error"].get("message", "")
+               and isinstance(r_big, dict) and "error" in r_big
+               and r_big["error"].get("code") == -32603
+               and "ARV-MCP-003" in r_big["error"].get("message", "")
+               and "y" * 200000 not in json.dumps(r_big)
+               and isinstance(r_alive9, dict) and r_alive9.get("id") == 82
+               and rc9 == 0)
+        check("MCPW-09", ok9,
+              "the spawn-refusal pin (F-078-1's regression): a NUL-bearing search term and a 200k-character id — values the OS exec layer cannot carry — are refused TYPED in the -32603 form naming ARV-MCP-003 (the value never echoed); the server answers the next ping and exits cleanly on the stdin close (the process never crashed, the request never left unanswered by silence)",
+              "the adapter's own robustness law: hostile scalar values that pass the argument law but cannot cross the OS boundary are a TYPED refusal at the protocol layer — the convention the timeout arm already followed")
+
         print()
         if FAILS:
             print(f"RED — the P4-E MCP-wrapper suite fails: {', '.join(FAILS)}")
             return 1
-        print("GREEN — the P4-E MCP-wrapper suite (MCPW-01..08) passes")
+        print("GREEN — the P4-E MCP-wrapper suite (MCPW-01..09) passes")
         return 0
     finally:
         pg.drop_scratch_db(DB)

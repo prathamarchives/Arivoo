@@ -1,0 +1,7 @@
+{
+  "command": "env SLICE=claim-078-p4e-mcp-wrapper GATE_DIFF=origin/main make gate",
+  "exit_code": 0,
+  "commit": "6569801ff1de198c3c635986b47ed47f263aac77",
+  "output_sha256": "c9af13f17e8506f49bb5ee1fcc480b3c0bd78c143354191996cf045d6d47053f",
+  "recorded_at": "2026-11-12T07:40:38.046342+00:00"
+}

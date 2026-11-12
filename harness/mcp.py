@@ -327,7 +327,11 @@ def main() -> int:
             continue  # a blank line is no message — never a response
         try:
             msg = json.loads(line)
-        except ValueError:
+        except (ValueError, RecursionError):
+            # malformed JSON is the -32700 parse error; F2-078-1 (the SEV
+            # round-2 repair, pinned by MCPW-10): the interpreter's own
+            # recursion cliff on a deep VALID-JSON line is a parse failure
+            # at this boundary too — answered, never a process death
             _err(None, -32700, "Parse error: the line is not valid JSON")
             continue
         if not isinstance(msg, dict):

@@ -1267,5 +1267,15 @@
         "observed_at": "2026-11-11T15:36:54.848181+00:00"
       }
     ]
+  },
+  "harness/tests/test_mcp_wrapper.py": {
+    "schema": 2,
+    "binding_commit": "e090ba2b899e8eee7dd881dd0289b20941e9c638",
+    "binding_sha256": "5fdc2463421c9de3fe5bc811c119279980e44d9a78458384c2ce26ec1608af13",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "CLAIM-078's RED (the MCPW suite authored tests-only per LAW-11 at the RED commit e090ba2 on commit A at CLAIM-077's merged head 505cb336 and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: harness/mcp.py not on disk; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
+    "current_sha256": "5fdc2463421c9de3fe5bc811c119279980e44d9a78458384c2ce26ec1608af13",
+    "amendments": []
   }
 }

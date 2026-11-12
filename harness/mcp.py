@@ -287,6 +287,18 @@ def _tools_call(msg_id, params: dict) -> None:
              "the read did not complete within the adapter's bound "
              f"({READ_TIMEOUT}s) — no result is claimed")
         return
+    except (ValueError, OSError) as e:
+        # F-078-1 (the SEV round-1 repair, pinned by MCPW-09): a value the
+        # OS exec layer cannot carry (a NUL-bearing string, an over-long
+        # argument) is refused TYPED at the adapter — never a process crash,
+        # never a request left unanswered by silence, never an echo of the
+        # value (the convention the timeout arm already followed).
+        _err(msg_id, -32603,
+             "ARV-MCP-003: the argument value cannot be carried to the read "
+             f"(the OS exec layer refused it: {type(e).__name__}) — a hostile "
+             "or oversized value is refused typed, never a crash, and the "
+             "value is never echoed")
+        return
     # byte-preserving: the CLI's stdout VERBATIM; the stderr surfaces only
     # when stdout is empty (nothing is silently swallowed, never a rewrite)
     text = r.stdout if r.stdout.strip() else r.stderr

@@ -366,6 +366,9 @@ def main() -> int:
               "the env channel is the argv-visible residual's named home — the identity law rides query.py's own refusals, never wrapper-invented answers")
 
         # ---- MCPW-03 — the same-API law (byte-equality) + the audit row
+        # (the direct baselines run FIRST — every direct --agent-token read
+        # lands its own audit row, so the wrapper-read delta is measured
+        # against a count taken AFTER the baselines)
         sA = Server(token=tokA)
         sA.handshake()
         cases = [
@@ -375,16 +378,19 @@ def main() -> int:
             ("resolve-reference", {"ref": "note:" + nid}),
         ]
         ok3 = True
-        aud0 = int(audit(f"SELECT count(*) FROM arv.agent_read_log "
-                         f"WHERE credential_id='{cidA}';"))
-        for i, (arm, args) in enumerate(cases):
-            rw = sA.call(arm, args, 20 + i)
+        baselines = {}
+        for arm, args in cases:
             extra = []
             if "id" in args:
                 extra = ["--id", args["id"]]
             if "ref" in args:
                 extra = ["--ref", args["ref"]]
-            rd = agt(arm, tokA, *extra)
+            baselines[arm] = agt(arm, tokA, *extra)
+        aud0 = int(audit(f"SELECT count(*) FROM arv.agent_read_log "
+                         f"WHERE credential_id='{cidA}';"))
+        for i, (arm, args) in enumerate(cases):
+            rw = sA.call(arm, args, 20 + i)
+            rd = baselines[arm]
             ok3 = ok3 and (not is_err(rw) and rw is not None
                            and text_of(rw) == rd.stdout
                            and rd.returncode == 0)
@@ -456,7 +462,9 @@ def main() -> int:
         # DATA (the search serves — the term simply matches nothing), never
         # argparse's usage exit
         r_dash = sA3.call("search", {"terms": ["-dashy", "sesquine"]}, 52)
-        # a leading-dash ID reaches the product's typed no-oracle refusal
+        # a leading-dash ID reaches the product's typed read-failure refusal
+        # (the UUID-keyed arm's own ARV-QRY-002 for a malformed id — the
+        # product's typed rule, never argparse's usage exit)
         r_iddash = sA3.call("get-journal", {"id": "-not-a-real-id"}, 53)
         # the argument law: an undeclared key and a non-scalar value refuse
         # the typed ARV-MCP-002 (the JSON-RPC -32602 form)
@@ -465,9 +473,9 @@ def main() -> int:
         r_alive6 = sA3.ping(56)
         ok6 = (is_err(r_lim) and "ARV-QRY-004" in text_of(r_lim)
                and is_err(r_nan) and "ARV-QRY-004" in text_of(r_nan)
-               and not is_err(r_dash) and "usage:" not in text_of(r_dash)
+               and is_err(r_dash) is False and "usage:" not in text_of(r_dash)
                and "api_version=" in text_of(r_dash)
-               and is_err(r_iddash) and "ARV-QRY-001" in text_of(r_iddash)
+               and is_err(r_iddash) and "ARV-QRY-002" in text_of(r_iddash)
                and "usage:" not in text_of(r_iddash)
                and isinstance(r_key, dict) and "error" in r_key
                and r_key["error"].get("code") == -32602
@@ -478,25 +486,29 @@ def main() -> int:
                and isinstance(r_alive6, dict) and r_alive6.get("id") == 56)
         sA3.close()
         check("MCPW-06", ok6,
-              "the budgets + the argv-safety + the argument law: the page params ride the tool arguments with the SAME ARV-QRY-004 bounds refusals as the direct read (an oversize and a non-integer limit); a leading-dash SEARCH TERM serves as DATA (the product's own semantics, never argparse's usage exit); a leading-dash ID reaches the typed ARV-QRY-001 no-oracle refusal (never argparse); an undeclared key or a non-scalar value refuses the typed ARV-MCP-002 in the -32602 form; the server alive after every refusal",
+              "the budgets + the argv-safety + the argument law: the page params ride the tool arguments with the SAME ARV-QRY-004 bounds refusals as the direct read (an oversize and a non-integer limit); a leading-dash SEARCH TERM serves as DATA (the product's own semantics, never argparse's usage exit); a leading-dash ID reaches the product's typed ARV-QRY-002 read-failure refusal for a malformed id (never argparse); an undeclared key or a non-scalar value refuses the typed ARV-MCP-002 in the -32602 form; the server alive after every refusal",
               "the wrapper's own conventions: the --opt=value forms + the -- separator carry hostile DATA to the product's typed rules; the argument law is the schema's contract — unknown keys and non-scalar values never reach the child argv")
 
         # ---- MCPW-07 — the scope isolation (B through the wrapper)
+        # (the id-set form — list-library emits bare source ids, never titles:
+        # the AGT-06 lesson; B's count: the wrapper read + the direct baseline
+        # read = 2, both audited under B's credential, exactly as the law
+        # requires)
         sB = Server(token=tokB)
         sB.handshake()
-        rB = sB.call("list-library", {}, 60)
         dB = agt("list-library", tokB)
+        rB = sB.call("list-library", {}, 60)
         dA = qy("list-library", "A")
         aB = audit(f"SELECT count(*) FROM arv.agent_read_log "
                    f"WHERE credential_id='{cidB}';")
         ok7 = (not is_err(rB) and text_of(rB) == dB.stdout
-               and "The Agent Corpus" not in text_of(rB)
-               and "B's Corpus" in text_of(rB)
-               and "The Agent Corpus" in dA.stdout
-               and int(aB) == 1)
+               and sid not in text_of(rB)
+               and sid_b in text_of(rB)
+               and sid in dA.stdout
+               and int(aB) == 2)
         sB.close()
         check("MCPW-07", ok7,
-              "the scope isolation: B's credential through the wrapper reads B's scope — byte-equal to B's direct read, A's content (the source title) invisible, B's own visible, the audit row under B's credential (never A's)",
+              "the scope isolation: B's credential through the wrapper reads B's scope — byte-equal to B's direct read, B's own source id visible, A's source id invisible (the id-set form — list-library emits bare ids, the AGT-06 lesson), the audit rows under B's credential (never A's)",
               "the credential binds the scope through query.py's own RLS path — the wrapper adds no scope widening surface")
 
         # ---- MCPW-08 — the protocol hygiene

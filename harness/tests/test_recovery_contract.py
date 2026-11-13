@@ -178,12 +178,39 @@ def main() -> int:
 
         # ---- RCW-02 — the full-lifecycle export/restore round-trip
         cond = client.condition_export_restore(ENV, TEXT)
+        # the D-042 round-1 P1's pin: the ledgered-source restore shape
+        # (a note @-referencing a SOURCE-BOUND journal block + the
+        # destination ledgered on that source — the cascade registers,
+        # the refs drop, the restore completes). The destination's ledger
+        # row rides THIS suite's substrate hand (the EXP-07 pattern — the
+        # test substrate writes the governed purge; the client stays
+        # clean of every privileged path, RCW-07's law)
+        ls_dst = pg.create_scratch_db("p4fls")
+
+        def ls_ledger(sid, denv):
+            subprocess.run(
+                ["psql", "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1", "-U", "arv_app",
+                 "-d", ls_dst, "-c",
+                 "SET app.current_owner='A'; INSERT INTO arv.purge_ledger "
+                 "(owner_scope, kind, entity_id, reason, actor, created_at) "
+                 f"VALUES ('A', 'source', '{sid}', "
+                 "'the governed purge (the proof substrate)', 'owner', now());"],
+                capture_output=True, text=True, timeout=60, env=denv, check=True)
+
+        try:
+            led = client.condition_ledgered_source_restore(
+                ENV, TEXT, dst=ls_dst, ledger=ls_ledger)
+        finally:
+            pg.drop_scratch_db(ls_dst)
         ok2 = (cond["walk_complete"] is True
                and cond["export_exit"] == 0
                and cond["restore_exit"] == 0
                and cond["journal_revisions"] is True
                and cond["post_restore_byte_equal"] is True
-               and cond["credentials_absent"] is True)
+               and cond["credentials_absent"] is True
+               and led["written"] is True and led["export_exit"] == 0
+               and led["ledger_written"] is True and led["restore_exit"] == 0
+               and led["dangling_refs"] == 0)
         check("RCW-02", ok2,
               "the full-lifecycle export/restore: one walk writing every landed family "
               "(the source + position + highlight + bookmark + notes with @-references + "

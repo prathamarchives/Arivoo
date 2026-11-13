@@ -197,31 +197,33 @@ def _drop_purged(rows: dict, ledger: list) -> dict:
             drop("note_reference", "note_id", gone)
         elif kind in ("highlight", "bookmark"):
             drop(kind + "_lifecycle", kind + "_id", gone)
-    # the reference cascade (F3): every reference row whose target is purged
-    rows["note_reference"] = [r for r in rows["note_reference"]
-                               if not (r["ref_kind"] in dropped
-                                       and r["ref_id"] in dropped[r["ref_kind"]])]
     # F-079-3's repair: the cascade keys on the DROPPED set (never a
     # re-read of the drained rows["source"]) — a ledgered journal_block/
     # reading_list drops its rows (+membership); a LEDGERED SOURCE drops
-    # every row bound to it (incl. reading_position); sessions never drop
+    # every row bound to it (incl. reading_position); sessions never drop.
+    # EVERY cascade-dropped id REGISTERS in dropped BEFORE the F3 filter
+    # below runs (the D-042 round-1 P1: the registration ran after it, so
+    # a journal_block bound to a ledgered source dropped unregistered and
+    # the note_reference rows pointing at it survived the filter to refuse
+    # the whole archive at ARV-NTE-003)
     for kind in ("journal_block", "reading_list"):
         gone = {r["id"] for r in rows[kind] if (kind, r["id"]) in led}
         if gone:
             drop(kind, "id", gone)
+            dropped[kind] = dropped.get(kind, set()) | gone
             if kind == "reading_list":
                 drop("reading_list_member", "list_id", gone)
     gone_sources = dropped.get("source", set())
     if gone_sources:
-        # the cascade-dropped rows REGISTER in dropped (the reviewer's P1:
-        # the note_reference cascade keys on dropped — an unregistered
-        # journal_block bound to a ledgered source left its note refs
-        # dangling, refusing the whole archive at ARV-NTE-003)
         for t in ("journal_block", "reading_list_member", "reading_session",
                   "extraction_generation", "reading_position"):
             dropped[t] = dropped.get(t, set()) | {
                 r["id"] for r in rows.get(t, []) if r.get("source_id") in gone_sources}
             drop(t, "source_id", gone_sources)
+    # the reference cascade (F3): every reference row whose target is purged
+    rows["note_reference"] = [r for r in rows["note_reference"]
+                               if not (r["ref_kind"] in dropped
+                                       and r["ref_id"] in dropped[r["ref_kind"]])]
     return rows
 
 

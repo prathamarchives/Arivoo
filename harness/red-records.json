@@ -1322,13 +1322,19 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-079's RED (the RCW suite authored tests-only per LAW-11 at the RED commit 4eb4944 on commit A at CLAIM-078's merged head d21ca44e and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: harness/client.py's P4-F condition set absent; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
-    "current_sha256": "a5e64d5bc850d48fd4e8564c0a6008eed7024ae9074df0635c0e728b92b29076",
+    "current_sha256": "4715572e6d5904211895320011c0bee633b8b971bec57143224281d8ae699e36",
     "amendments": [
       {
         "prior_sha256": "ea570a0e497f79916237165100b0548d0d80d0472dd8ed4f5b46017fc55c942d",
         "new_sha256": "a5e64d5bc850d48fd4e8564c0a6008eed7024ae9074df0635c0e728b92b29076",
         "note": "CLAIM-079's pre-GREEN suite amendments (the CLAIM-078 precedent \u2014 disclosed pin-authoring repairs, never a gate weakening; the RED evidence red-01.txt at 4eb4944 untouched): (1) test_recovery_contract.py RCW-05's pin corrected to the condition's boolean form \u2014 condition_prior_state_migration's migrate_exit carries the BOTH-migrations-succeeded boolean (the two runner invocations' joint outcome), never a bare process exit; the pin authored at the RED assumed the int form before the condition's shape existed \u2014 the observed behavior (all-True dict, the check FAILING on True==0) is what the pin now asserts; (2) test_export.py's TABLES/TSV widened to the export machine's P4-C family set \u2014 the owning suite's manifest-set pin follows the widened authoritative TABLES (the RCW proof's finding-authorized repair at the GREEN commit 09d60b0): journal_block/reading_list/reading_list_member/reading_session/extraction_generation join the manifest set, the per-table TSV forms added, EXP-01's 'thirteen tables' prose corrected to the widened set's form; the fixture writes none of the new families so the pins observe the empty rows honestly",
         "observed_at": "2026-11-13T06:37:39.912334+00:00"
+      },
+      {
+        "prior_sha256": "a5e64d5bc850d48fd4e8564c0a6008eed7024ae9074df0635c0e728b92b29076",
+        "new_sha256": "4715572e6d5904211895320011c0bee633b8b971bec57143224281d8ae699e36",
+        "note": "the D-042 round-1 P1's pin (condition_ledgered_source_restore + the RCW-02 conjunction: the note @-referencing a SOURCE-BOUND journal block restoring into a destination ledgered on that source \u2014 the cascade-dropped ids REGISTER before the F3 reference filter runs; the ordering repair at the second falsification: the first repair registered the ids but AFTER the filter, so the refs survived it and the restore still refused at ARV-NTE-003 \u2014 the live probe caught both)",
+        "observed_at": "2026-11-13T14:49:12.725491+00:00"
       }
     ]
   }

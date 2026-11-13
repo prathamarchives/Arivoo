@@ -559,6 +559,62 @@ def condition_phase_isolation(env, text):
     }
 
 
+def condition_ledgered_source_restore(env, text, dst=None, ledger=None):
+    """The D-042 round-1 P1 pin: a note @-referencing a SOURCE-BOUND
+    journal block restores into a destination ledgered on that source —
+    the cascade-dropped ids REGISTER, the note_reference rows cascade,
+    the restore completes (never the whole-archive refusal). The ledger
+    row itself rides the caller's own substrate hand (the EXP-07 pattern
+    — the suite writes the destination's ledger; the client stays clean
+    of every privileged path)."""
+    from harness.adapters import pg as _pg
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="arv-client-"))
+    (tmp / "corpus.txt").write_text(text, encoding="utf-8")
+    r_imp = _cmd(env, "import_source", "--title", "The Ledgered-Source Corpus",
+                 "--file", str(tmp / "corpus.txt"), key="ls-imp-1")
+    sid = _ref(r_imp)
+    _extract(env, "ls-ext-1", sid)
+    # the SOURCE-BOUND block (the reviewer's failing shape: the block rides
+    # the source's capture tree, so a ledgered SOURCE cascades to it)
+    r_j1 = _cmd(env, "journal_block", "--kind", "creative", "--source-id", sid,
+                "--content", "A source-bound block.", key="ls-j1")
+    j1 = (_ref(r_j1) or "").rsplit("@", 1)[0]
+    r_n1 = _cmd(env, "create_note", "--content", "The ledgered-source note.",
+                "--ref", f"journal_block:{j1}@1", key="ls-n1")
+    arch = tmp / "archive"
+    r_ex = subprocess.run([sys.executable, str(REPO / "harness" / "export.py"),
+                           "export", "--owner", "A", "--out", str(arch)],
+                          capture_output=True, text=True, timeout=600, env=env)
+    own_dst = dst is None
+    dst = dst or _pg.create_scratch_db("p4fls")
+    try:
+        denv = dict(env, PGDATABASE=dst)
+        r_mig = subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
+                               capture_output=True, text=True, timeout=180,
+                               env=denv, check=True)
+        # the caller's ledger hand (the suite's own substrate write; this
+        # client's discipline holds — every privileged path stays outside)
+        ledger(sid, denv)
+        r_rs = subprocess.run([sys.executable, str(REPO / "harness" / "export.py"),
+                              "restore", "--archive", str(arch)],
+                             capture_output=True, text=True, timeout=600, env=denv)
+        # the dangling-ref probe rides the READ CLI's own answer (the typed
+        # surface: the note's refs list the surviving targets; a ref row
+        # to a cascade-dropped block never appears)
+        refs = _jline(_query(denv, "get-note", "--owner", "A", "--id",
+                             _ref(r_n1))).get("refs") or []
+        return {
+            "written": all(r.returncode == 0 for r in (r_imp, r_j1, r_n1)),
+            "export_exit": r_ex.returncode,
+            "ledger_written": r_mig.returncode == 0,
+            "restore_exit": r_rs.returncode,
+            "dangling_refs": sum(1 for r in refs if r.get("id") == j1),
+        }
+    finally:
+        if own_dst:
+            _pg.drop_scratch_db(dst)
+
+
 def condition_prior_state_migration(env):
     """RCW-05's contract: 0001..0014 prior content migrates forward,
     survives, the guards live at the CLI."""

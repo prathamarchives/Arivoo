@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-079-p4f-recovery-contract-gate (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 82be251943385a051128499fcc336c7359f511f1
-- generated (last record's timestamp): 2026-11-13T12:04:48.529335+00:00
-- run records: 16
+- commit (last run record's): e90e1b843cc4d1660b7e61dc84a14013ef5570c7
+- generated (last record's timestamp): 2026-11-13T15:11:22.261752+00:00
+- run records: 20
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T06:28:24.522185+00:00
@@ -21,6 +21,10 @@
 - `make verify` -> exit 0 · output sha256 bb1611ba48e38396 · 2026-11-13T11:42:33.373697+00:00
 - `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T11:57:18.066018+00:00
 - `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T12:04:48.529335+00:00
+- `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T14:50:00.235509+00:00
+- `python3 harness/tests/test_export.py` -> exit 0 · output sha256 a38628469c906935 · 2026-11-13T14:50:10.028608+00:00
+- `make verify` -> exit 0 · output sha256 bdd97ebb8c4e7e48 · 2026-11-13T14:57:02.270102+00:00
+- `make verify` -> exit 0 · output sha256 89af6ef1658b4475 · 2026-11-13T15:11:22.261752+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - CLAIM-079 — the honest not-verified list (LAW-04: the explicit statement, never
@@ -61,11 +65,11 @@
 - F-075-5 (D-011's governed-purge widening).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: fdfe0d4c023b90934532aa2a78d24872624a4b22ea6aa0ff189350d9b092d4fc
-- reviewed_diff_sha256: 40cdbb9d475f8b67bfc4c2482f615330c7ce35a79f609ff59737de19ba412b24
+- report sha256: 98e951a1d6c4dbcefd8bd83bb14f1730dd81edcf3a04b28777d1a5bbad64083c
+- reviewed_diff_sha256: 76cf14f3a73157907c6d8992a357911231f0b70a1ae5d1fa01874f348146af37
 - disposition: PASS
 - findings: 5 (open P0/P1: 0)
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): cc5562c28090a224afaf29f641b85c5aa62d2e8007bf35fe888981a1e1c9ebf5
+- sheet sha256 (of the content above, excluding this line): c2ea1b5b12585a70acfe64a4fa837e9c62ef7fe48ee4ddac9be04ad6fa7b8be6

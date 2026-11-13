@@ -931,7 +931,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-060 (P3-09) the RED: the EXP-01..10 suite's RED observed at the exact predecessor 7df713b (CLAIM-059's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the export arm + migration 0013 absent), red-01.txt; the typed observed red per F-007",
-    "current_sha256": "c0b89f981e3767c8f635258369cf77691806b8f41698b66da73067e8367e7f9a",
+    "current_sha256": "6384e4b1a1d4510ca2c601b19d36508b5721c7434885d09c2d3bad38ce9d16d8",
     "amendments": [
       {
         "prior_sha256": "2b6962b91aae8005a915483117c7de02fa8a38230c913c190b70992430df0464",
@@ -962,6 +962,12 @@
         "new_sha256": "c0b89f981e3767c8f635258369cf77691806b8f41698b66da73067e8367e7f9a",
         "note": "CLAIM-063 the disclosed implementation-cycle amendment (the SEV round-1 F4 correction: this note originally named CAP-09 by copy-paste \u2014 the REAL change is EXP-09's empty-search expectation carrying the P4-00b versioned header '# api_version=1 kind|entity_id|revision|matched_terms' (BND-06's frozen form); the pin's SUBSTANCE unchanged \u2014 the EMPTY-index search still answers with the header ALONE, zero result rows, and the dst==src search equality is retained verbatim; the digest chain (prior 6711140e -> new c0b89f98) was verified exact by the SEV round BEFORE this prose correction)",
         "observed_at": "2026-11-06T03:06:41.569362+00:00"
+      },
+      {
+        "prior_sha256": "c0b89f981e3767c8f635258369cf77691806b8f41698b66da73067e8367e7f9a",
+        "new_sha256": "6384e4b1a1d4510ca2c601b19d36508b5721c7434885d09c2d3bad38ce9d16d8",
+        "note": "CLAIM-079's pre-GREEN suite amendments (the CLAIM-078 precedent \u2014 disclosed pin-authoring repairs, never a gate weakening; the RED evidence red-01.txt at 4eb4944 untouched): (1) test_recovery_contract.py RCW-05's pin corrected to the condition's boolean form \u2014 condition_prior_state_migration's migrate_exit carries the BOTH-migrations-succeeded boolean (the two runner invocations' joint outcome), never a bare process exit; the pin authored at the RED assumed the int form before the condition's shape existed \u2014 the observed behavior (all-True dict, the check FAILING on True==0) is what the pin now asserts; (2) test_export.py's TABLES/TSV widened to the export machine's P4-C family set \u2014 the owning suite's manifest-set pin follows the widened authoritative TABLES (the RCW proof's finding-authorized repair at the GREEN commit 09d60b0): journal_block/reading_list/reading_list_member/reading_session/extraction_generation join the manifest set, the per-table TSV forms added, EXP-01's 'thirteen tables' prose corrected to the widened set's form; the fixture writes none of the new families so the pins observe the empty rows honestly",
+        "observed_at": "2026-11-13T06:37:39.911808+00:00"
       }
     ]
   },
@@ -1310,7 +1316,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-079's RED (the RCW suite authored tests-only per LAW-11 at the RED commit 4eb4944 on commit A at CLAIM-078's merged head d21ca44e and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: harness/client.py's P4-F condition set absent; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
-    "current_sha256": "ea570a0e497f79916237165100b0548d0d80d0472dd8ed4f5b46017fc55c942d",
-    "amendments": []
+    "current_sha256": "a5e64d5bc850d48fd4e8564c0a6008eed7024ae9074df0635c0e728b92b29076",
+    "amendments": [
+      {
+        "prior_sha256": "ea570a0e497f79916237165100b0548d0d80d0472dd8ed4f5b46017fc55c942d",
+        "new_sha256": "a5e64d5bc850d48fd4e8564c0a6008eed7024ae9074df0635c0e728b92b29076",
+        "note": "CLAIM-079's pre-GREEN suite amendments (the CLAIM-078 precedent \u2014 disclosed pin-authoring repairs, never a gate weakening; the RED evidence red-01.txt at 4eb4944 untouched): (1) test_recovery_contract.py RCW-05's pin corrected to the condition's boolean form \u2014 condition_prior_state_migration's migrate_exit carries the BOTH-migrations-succeeded boolean (the two runner invocations' joint outcome), never a bare process exit; the pin authored at the RED assumed the int form before the condition's shape existed \u2014 the observed behavior (all-True dict, the check FAILING on True==0) is what the pin now asserts; (2) test_export.py's TABLES/TSV widened to the export machine's P4-C family set \u2014 the owning suite's manifest-set pin follows the widened authoritative TABLES (the RCW proof's finding-authorized repair at the GREEN commit 09d60b0): journal_block/reading_list/reading_list_member/reading_session/extraction_generation join the manifest set, the per-table TSV forms added, EXP-01's 'thirteen tables' prose corrected to the widened set's form; the fixture writes none of the new families so the pins observe the empty rows honestly",
+        "observed_at": "2026-11-13T06:37:39.912334+00:00"
+      }
+    ]
   }
 }

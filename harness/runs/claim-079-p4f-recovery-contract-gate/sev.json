@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-079-p4f-recovery-contract-gate",
+  "base_sha": "d21ca44e9984b40931432fb8e33f8e639e1892e9",
+  "reviewed_diff_sha256": "80e5bad876688d50e3233f0fe44e76ce974c3c22afd4a61880f8be8662ece15e",
+  "intent_ids": [
+    "INT-145",
+    "INT-140"
+  ],
+  "requirement_ids": [
+    "SYS-10",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C5"
+  ],
+  "changed_components": [
+    "harness/client.py",
+    "harness/export.py",
+    "harness/tests/test_recovery_contract.py",
+    "harness/tests/test_export.py",
+    "harness/gate.py",
+    "harness/red-records.json"
+  ],
+  "interfaces_reviewed": [
+    "the export machine's authoritative TABLES (the manifest table set + the restore insert order)",
+    "the restore's reconciliation cascade (the ledger-vs-archive resolution)",
+    "the clean external client's P4-F condition set (six conditions over the recovery/regression surface)",
+    "the RCW suite's eight pinned contracts",
+    "the red-record amendment chain (ARV-RED-006)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the RCW suite's eight contracts over the real CLIs, proof runs 01-03 + 09 (GREEN, digest-recorded)",
+      "the export suite's fifteen contracts over the widened machine, proof run 10"
+    ],
+    "integration_verification": [
+      "make verify at the repair tree (all suites + the gate + the canonical layer), proof run 11 (exit 0)",
+      "the PR-mode gate over the real diff (scope/size/red-records/lint/deps/proofsheet)"
+    ],
+    "system_verification": [
+      "SYS-10's export/restore contract re-proven live at the grader's own scratch rigs (round 2)",
+      "SYS-11's independent two-round SEV chain (round 1 BLOCKED -> the three P1 repairs -> round 2 PASS)"
+    ],
+    "validation": [
+      "the SEV round-1 live falsifications (each P1 reproduced at a fresh rig before repair)",
+      "the round-2 closure probes (each P1 re-falsified-then-closed at HEAD; the pin-strength discrimination proof)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-01",
+      "scenario": "a note @-referencing a journal block breaks the whole archive's restore (0018's insert-time guard)",
+      "control": "the TABLES insert order (entities before note_reference) + the RCW-02 walk's journal-block ref pin",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-02",
+      "scenario": "the owner's saved reading position silently lost across export/restore",
+      "control": "reading_position rides the authoritative TABLES + the position read arm's authored-field pin",
+      "proof_ids": [
+        "run-09"
+      ]
+    },
+    {
+      "id": "FM-03",
+      "scenario": "a ledgered source with extracted content refuses restore (the dead cascade's dangling FK)",
+      "control": "the cascade keys on the dropped set (never the drained rows); the bound families drop with the ledger",
+      "proof_ids": [
+        "run-10"
+      ]
+    },
+    {
+      "id": "FM-04",
+      "scenario": "the crash matrix's uncertain-ack arm diverges (a duplicate or a lost block)",
+      "control": "the same-key replay convergence (status=replayed, the same ref) + the durable-prefix reads",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-079-4",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "summary": "RCW-08's observed-families set carries exit-code-level entries (bookmark never authored in the walk); pin-strength only \u2014 the family rides RCW-02's content-level pin; routed to the next pin-strength increment"
+    },
+    {
+      "id": "F-079-5",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "summary": "RCW-01's replay pin asserts status=replayed without the result_ref identity compare; the replay machinery itself is pinned by the earlier suites; pin-strength debt only"
+    },
+    {
+      "id": "F-079-6",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "summary": "the compaction commit's 'behavioral code untouched' prose was inaccurate (AST differs; behavior verified unchanged by the byte-identical suite digests)"
+    },
+    {
+      "id": "F-079-7",
+      "severity": "P2",
+      "status": "owner-accepted-debt",
+      "summary": "the P4-F conditions carry rig-provisioning adapter calls (create_scratch_db) inside the clean external client \u2014 rig lifecycle only, every observation rides the real CLIs, disclosed in notverified.txt"
+    },
+    {
+      "id": "F-079-8",
+      "severity": "P2",
+      "status": "resolved",
+      "summary": "the measured set lagged the content head \u2014 CLOSED at the finalize: runs 09-11 minted at the repair tree, the proof sheet re-bound (this report rides that tree)"
+    }
+  ],
+  "not_verified": [
+    "the rigs are suite-class (create_scratch_db, the 0001..0014 copy) \u2014 the rig-building is harness code, never a product surface; the conditions observe through the real CLIs only",
+    "the crash matrix rides the post-commit-pre-ack arm (exit 2) alone at this slice; the pre-commit/post-ack arms ride the earlier suites' pins",
+    "the byte-equality compare is over the walk's read arms; columns not in any read arm ride by the manifest's table-set pin, never a per-column compare",
+    "the position read arm's runtime fields (current_generation_id, generation_matches) are normalized out \u2014 they are the reader's live serving-generation view, moved by the destination's own legitimate re-extraction",
+    "no concurrency or load claims; no cross-version migration matrix beyond the 0001..0014 supported prior baseline",
+    "RLS and the append-only trigger are probed at the CLI boundary; the pg_catalog-level policy definitions ride test_substrate/test_migrations' own pins"
+  ],
+  "builder_context": "builder-zcode-slice-claim-079 (the session-42/43 build context: the RED->GREEN->measured chain + the compaction + the three P1 repairs)",
+  "reviewer_context": "grader-sev-round2-agent-64c4145b (a fresh-context subagent, the round-1 grader's findings re-verified live; the identity limit stated: a differing context string is not cryptographic independence)",
+  "disposition": "PASS",
+  "review_summary": "Round 1 returned BLOCKED with three live-falsified P1s (the TABLES insert order breaking journal-block-referencing notes' restore; the authored reading_position family silently lost; the dead reconciliation cascade). All three repaired at their owning sites with the pins widened to the failing shapes; round 2 verified each closure at fresh scratch rigs through the real CLIs (restore exit 0 + the bound rows dropped + the position preserved), re-ran the suites GREEN (RCW-01..08 + EXP-01..15, digests byte-identical to the recorded runs), and demonstrated the widened RCW-02 pin discriminates repaired from broken machines. The remaining P2/P3s are pin-strength and process-debt findings, honestly carried. The full account: sev-round-1.md + sev-round-2.md at the slice's run dir.",
+  "sheet_section": true
+}

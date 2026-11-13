@@ -17,9 +17,10 @@ Two surfaces:
                               save position -> highlight -> bookmark -> note
                               -> the reopen round-trip), returning the
                               structured observations + the ids
-  condition_<name>(env, walk) P4-B's named adversarial conditions, each
-                              returning its typed refusals / truthful
-                              answers as structured observations
+  condition_<name>(env, ...) P4-B's adversarial + P4-F's recovery
+                              conditions (each pinned in its owning suite),
+                              returning typed refusals / answers as
+                              structured observations
 
 Exit contract: the driver never crashes on a refusal — a typed refusal is
 DATA (the code + the line), exactly what a client consumes; the suite judges.
@@ -296,11 +297,12 @@ def condition_deleted_target(env, w):
     }
 
 
-# ---- P4-F's recovery/regression conditions (CLAIM-079; record 71 §2) ----
+# ---- P4-F's recovery/regression conditions (CLAIM-079; record 71 §2). Each
+# condition's full contract statement lives at its check() in the RCW suite
+# (test_recovery_contract.py) — the one-fact-one-home law.
 
 def _ids_of(r):
-    """The list arms' ids: the rows between the version header and the
-    more-marker (the P4-00b list contract's shape)."""
+    """The list arms' ids (the P4-00b shape: rows between header/marker)."""
     lines = [ln for ln in r.stdout.split("\n") if ln != ""]
     return lines[1:-1] if len(lines) >= 2 else []
 
@@ -310,74 +312,63 @@ def _page_ids(env, arm, owner="A", limit="2"):
     out, after = [], None
     while True:
         a = [sys.executable, str(REPO / "harness" / "query.py"), arm,
-             "--owner", owner, "--limit", limit]
-        if after:
-            a += ["--after", after]
+             "--owner", owner, "--limit", limit] + (["--after", after] if after else [])
         r = subprocess.run(a, capture_output=True, text=True, timeout=300, env=env)
         if r.returncode != 0:
             return None
         ids = _ids_of(r)
         out.extend(ids)
-        if not ids or (len(ids) < int(limit)):
+        if not ids or len(ids) < int(limit):
             return out
         after = ids[-1]
 
 
 def condition_recovery_walk(env, text):
-    """P4-F (CLAIM-079): the recovery walk — a journal-authoring sequence
-    interrupted by the crash matrix's post-commit-pre-ack arm. The durable
-    prefix survives (fresh reads), the uncertain-ack replay converges
-    (status=replayed, the same ref), the post-restart reads truthful. The
-    observed families ride the return (the phase gate's mechanical form)."""
+    """P4-F: the recovery walk (RCW-01's contract; crash mid-sequence ->
+    prefix survives, replay converges, post-restart reads truthful; the
+    observed families ride the return — the phase gate's mechanical form)."""
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="arv-client-"))
     f = tmp / "corpus.txt"
     f.write_text(text, encoding="utf-8")
     r_imp = _cmd(env, "import_source", "--title", "The Recovery Walk Corpus",
                  "--file", str(f), key="rw-imp-1")
     sid = _ref(r_imp)
-    r_ext = _extract(env, "rw-ext-1", sid)
-    r_p = _cmd(env, "save_position", "--source-id", sid, "--start", "2",
-               "--end", "9", key="rw-pos-1")
+    _extract(env, "rw-ext-1", sid)
+    _cmd(env, "save_position", "--source-id", sid, "--start", "2", "--end", "9",
+         key="rw-pos-1")
     r_b1 = _cmd(env, "journal_block", "--kind", "raw", "--content",
-                "The durable prefix block, authored before the crash.",
-                key="rw-j1")
-    b1 = _ref(r_b1).split("@")[0]  # the ack's <id>@<rev> address; the read takes the uuid
-    # the crash arm: committed, no ack (exit 2 — the honest unknown)
+                "The durable prefix block, authored before the crash.", key="rw-j1")
+    b1 = _ref(r_b1).split("@")[0]  # <id>@<rev> address; the read takes the uuid
+    # the crash arm (exit 2 — the honest unknown) + the same-key replay
+    _body = "The block authored across the lost ack."
     r_cr = _cmd(env, "journal_block", "--kind", "creative", "--content",
-                "The block authored across the lost ack.", key="rw-j2",
-                crash_at="post-commit-pre-ack")
-    # the same-key replay converges
+                _body, key="rw-j2", crash_at="post-commit-pre-ack")
     r_rp = _cmd(env, "journal_block", "--kind", "creative", "--content",
-                "The block authored across the lost ack.", key="rw-j2")
-    # fresh reads over every family (the families the walk observes)
+                _body, key="rw-j2")
+    # fresh reads over every family
     g_b1 = _query(env, "get-journal", "--owner", "A", "--id", b1)
     g_pos = _query(env, "get-position", "--owner", "A", "--source", sid)
     g_lib = _query(env, "list-library", "--owner", "A")
     g_ses = _query(env, "list-session-events", "--owner", "A")
-    g_lists = _query(env, "list-lists", "--owner", "A")
-    g_notes = _query(env, "list-notes", "--owner", "A")
-    g_caps = _query(env, "list-captures", "--owner", "A")
     g_bms = _query(env, "list-bookmarks", "--owner", "A")
     jl = _page_ids(env, "list-journal")
-    j2 = _ref(r_rp) or ""
-    g_b2 = _query(env, "get-journal", "--owner", "A", "--id",
-                  j2.rsplit("@", 1)[0] if "@" in j2 else j2) if j2 else None
+    j2 = (_ref(r_rp) or "").rsplit("@", 1)[0]
+    g_b2 = _query(env, "get-journal", "--owner", "A", "--id", j2) if j2 else None
     r_hl = _cmd(env, "create_highlight", "--source-id", sid, "--start", "5",
                 "--end", "13", key="rw-hl-1")
     hid = _ref(r_hl)
     g_hl = _query(env, "get-capture", "--owner", "A", "--id", hid)
     r_nt = _cmd(env, "create_note", "--content",
-                "The recovery-walk note about the meridian.", "--ref",
-                f"highlight:{hid}@1", key="rw-n1")
+                "The recovery-walk note about the meridian.",
+                "--ref", f"highlight:{hid}@1", key="rw-n1")
     nid = _ref(r_nt)
     g_nt = _query(env, "get-note", "--owner", "A", "--id", nid)
-    r_rl = _cmd(env, "create_reading_list", "--name", "The recovery shelf",
-                key="rw-l1")
+    r_rl = _cmd(env, "create_reading_list", "--name", "The recovery shelf", key="rw-l1")
     lid = _ref(r_rl)
-    r_ad = _cmd(env, "add_to_list", "--list", lid, "--source", sid, key="rw-a1")
+    _cmd(env, "add_to_list", "--list", lid, "--source", sid, key="rw-a1")
     g_rl = _query(env, "get-list", "--owner", "A", "--id", lid)
-    r_se = _cmd(env, "record_session", "--source-id", sid, "--event",
-                "session_start", "--start", "0", "--end", "10", key="rw-s1")
+    _cmd(env, "record_session", "--source-id", sid, "--event", "session_start",
+         "--start", "0", "--end", "10", key="rw-s1")
     families = {
         "library": g_lib.returncode == 0 and sid in _ids_of(g_lib),
         "position": g_pos.returncode == 0 and _jline(g_pos).get("state") == "saved",
@@ -388,29 +379,23 @@ def condition_recovery_walk(env, text):
         "journal_block": (g_b1.returncode == 0 and jl is not None and b1 in jl
                           and (g_b2 is None or g_b2.returncode == 0)),
         "reading_list": g_rl.returncode == 0,
-        "reading_session": g_ses.returncode == 0 and len(_ids_of(g_ses)) >= 0,
+        "reading_session": g_ses.returncode == 0,
     }
     return {
         "prefix_survives": (r_b1.returncode == 0 and g_b1.returncode == 0
-                             and "durable prefix" in _jline(g_b1).get("content", "")),
+                            and "durable prefix" in _jline(g_b1).get("content", "")),
         "crash_exit": r_cr.returncode,
         "replay_exit": r_rp.returncode,
         "replay_replayed": "status=replayed" in r_rp.stdout,
         "post_restart_reads": all(families.values()),
         "families": sorted(k for k, v in families.items() if v),
-        "walk_provenance": {
-            "import": r_imp.returncode, "extract": r_ext.returncode,
-            "position": r_p.returncode, "session": r_se.returncode,
-            "list": r_rl.returncode, "add": r_ad.returncode,
-        },
     }
 
 
 def condition_export_restore(env, text):
-    """P4-F (CLAIM-079): the full-lifecycle export/restore round-trip —
-    every landed family written, exported, restored into a clean
-    destination; the post-restore reads BYTE-EQUAL the pre-export reads;
-    the agent credentials never ride the export."""
+    """P4-F: the full-lifecycle export/restore round-trip (RCW-02's
+    contract; every family written, exported, restored clean; post-restore
+    reads byte-equal; the credentials never ride the archive)."""
     from harness.adapters import pg as _pg
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="arv-client-"))
     f = tmp / "corpus.txt"
@@ -419,8 +404,8 @@ def condition_export_restore(env, text):
                  "--file", str(f), key="er-imp-1")
     sid = _ref(r_imp)
     _extract(env, "er-ext-1", sid)
-    _cmd(env, "save_position", "--source-id", sid, "--start", "2",
-         "--end", "9", key="er-pos-1")
+    _cmd(env, "save_position", "--source-id", sid, "--start", "2", "--end", "9",
+         key="er-pos-1")
     m = text.index("meridian")
     r_hl = _cmd(env, "create_highlight", "--source-id", sid, "--start", str(m),
                 "--end", str(m + len("meridian")), key="er-hl-1")
@@ -428,63 +413,62 @@ def condition_export_restore(env, text):
     r_bm = _cmd(env, "create_bookmark", "--source-id", sid, "--start", str(m),
                 "--end", str(m + len("meridian")), key="er-bm-1")
     r_n1 = _cmd(env, "create_note", "--content",
-                "The lifecycle note: the welkin token.", "--ref",
-                f"highlight:{hid}@1", "--ref", f"source:{sid}", key="er-n1")
+                "The lifecycle note: the welkin token.",
+                "--ref", f"highlight:{hid}@1", "--ref", f"source:{sid}", key="er-n1")
     nid = _ref(r_n1)
     _cmd(env, "revise_note", "--id", nid, "--content",
          "The lifecycle note revised: the welkin stays.", key="er-n1r")
     r_j1 = _cmd(env, "journal_block", "--kind", "raw", "--content",
                 "The first journal revision of the lifecycle.", key="er-j1")
-    j1 = _ref(r_j1).split("@")[0]  # the ack's <id>@<rev> address; reads/revise take the uuid
+    j1 = _ref(r_j1).split("@")[0]  # <id>@<rev>; reads/revise take the uuid
     _cmd(env, "revise_journal_block", "--id", j1, "--content",
          "The second journal revision (the lossless law's proof).", key="er-j2")
     _cmd(env, "journal_block", "--kind", "creative", "--source-id", sid,
          "--content", "A bound creative block.", key="er-j3")
-    r_l1 = _cmd(env, "create_reading_list", "--name", "The lifecycle shelf",
-                key="er-l1")
+    r_l1 = _cmd(env, "create_reading_list", "--name", "The lifecycle shelf", key="er-l1")
     lid = _ref(r_l1)
     _cmd(env, "add_to_list", "--list", lid, "--source", sid, key="er-a1")
-    _cmd(env, "record_session", "--source-id", sid, "--event",
-         "session_start", "--start", "0", "--end", "10", key="er-s1")
+    _cmd(env, "record_session", "--source-id", sid, "--event", "session_start",
+         "--start", "0", "--end", "10", key="er-s1")
     _cmd(env, "record_session", "--source-id", sid, "--event", "dwell",
          "--start", "4", "--end", "6", "--dwell-ms", "1500", key="er-s2")
     # a credential minted BEFORE the export (the never-ride law's probe)
     r_mint = _cmd(env, "mint_agent_credential", "--label",
                   "the lifecycle probe", key="er-ag1")
-    walk_complete = (r_imp.returncode == 0 and r_hl.returncode == 0
-                     and r_bm.returncode == 0 and r_n1.returncode == 0
-                     and r_j1.returncode == 0 and r_l1.returncode == 0
-                     and r_mint.returncode == 0)
-    # the pre-export reads (the byte-equality compare's left side)
-    pre = {
-        "note": _query(env, "get-note", "--owner", "A", "--id", nid).stdout,
-        "journal": _query(env, "get-journal-history", "--owner", "A",
-                          "--id", j1).stdout,
-        "journals": _page_ids(env, "list-journal") or [],
-        "lists": _query(env, "list-lists", "--owner", "A").stdout,
-        "members": _query(env, "get-list", "--owner", "A", "--id", lid).stdout,
-        "sessions": _query(env, "list-session-events", "--owner", "A").stdout,
-        "notes_list": _query(env, "list-notes", "--owner", "A").stdout,
-        "captures": _query(env, "list-captures", "--owner", "A").stdout,
-        "bookmarks": _query(env, "list-bookmarks", "--owner", "A").stdout,
-        "search": _query(env, "search", "--owner", "A", "meridian").stdout,
-    }
-    # the export
+    walk_complete = all(r.returncode == 0 for r in
+                        (r_imp, r_hl, r_bm, r_n1, r_j1, r_l1, r_mint))
+    # the pre/post read set (the byte-equality compare's both sides)
+    _ARMS = (("note", "get-note", lambda: nid),
+             ("journal", "get-journal-history", lambda: j1),
+             ("journals", "list-journal", None), ("lists", "list-lists", None),
+             ("members", "get-list", lambda: lid),
+             ("sessions", "list-session-events", None),
+             ("notes_list", "list-notes", None), ("captures", "list-captures", None),
+             ("bookmarks", "list-bookmarks", None),
+             ("search", "search", ("--owner", "A", "meridian")))
+
+    def _reads(e):
+        out = {}
+        for k, arm, tgt in _ARMS:
+            if arm == "list-journal":
+                out[k] = _page_ids(e, arm) or []
+            elif callable(tgt):
+                out[k] = _query(e, arm, "--owner", "A", "--id", tgt()).stdout
+            else:
+                out[k] = _query(e, arm, *(tgt or ("--owner", "A"))).stdout
+        return out
+
+    pre = _reads(env)
+    # the export; the credential absence (the never-ride law): no
+    # credential TABLES in the manifest, no token VALUE anywhere in it
     arch = tmp / "archive"
     r_ex = subprocess.run([sys.executable, str(REPO / "harness" / "export.py"),
                            "export", "--owner", "A", "--out", str(arch)],
                           capture_output=True, text=True, timeout=600, env=env)
-    # the credential absence in the archive (the never-ride law): the
-    # credential TABLES never ride the manifest, and the one-time token
-    # VALUE never appears anywhere in the archive text (the audit trail's
-    # command_log may name the mint COMMAND — provenance, never the secret)
-    man_p = arch / "manifest.json"
-    man_text = man_p.read_text(encoding="utf-8") if man_p.is_file() else ""
-    tok_val = ""
-    for ln in r_mint.stdout.splitlines():
-        if "token=" in ln and "ACK" in ln:
-            tok_val = ln.split("token=")[1].split()[0]
-            break
+    man_text = (arch / "manifest.json").read_text(encoding="utf-8") \
+        if (arch / "manifest.json").is_file() else ""
+    tok_val = next((ln.split("token=")[1].split()[0] for ln in
+                    r_mint.stdout.splitlines() if "token=" in ln and "ACK" in ln), "")
     try:
         m_tables = set(json.loads(man_text).get("tables", {}))
     except Exception:
@@ -492,44 +476,27 @@ def condition_export_restore(env, text):
     creds_absent = ("agent_credential" not in m_tables
                     and "agent_read_log" not in m_tables
                     and (not tok_val or tok_val not in man_text))
-    # the restore into a clean migrated destination
+    # the restore into a clean migrated destination (RTM §3.7's derived
+    # rebuild at the destination BEFORE the post-restore reads)
     dst = _pg.create_scratch_db("p4fdst")
     try:
+        denv = dict(env, PGDATABASE=dst)
         r_mig = subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
                                capture_output=True, text=True, timeout=180,
-                               env=dict(env, PGDATABASE=dst), check=True)
+                               env=denv, check=True)
         r_rs = subprocess.run([sys.executable, str(REPO / "harness" / "export.py"),
                                "restore", "--archive", str(arch)],
-                              capture_output=True, text=True, timeout=600,
-                              env=dict(env, PGDATABASE=dst))
-        denv = dict(env, PGDATABASE=dst)
-        # the restore's own completion names the derived rebuild (RTM
-        # §3.7): the re-derivation runs at the destination BEFORE the
-        # post-restore reads — the derived index is rebuilt from the
-        # restored authoritative rows, the searches answer equal
+                              capture_output=True, text=True, timeout=600, env=denv)
         subprocess.run([sys.executable, str(REPO / "harness" / "extract.py"),
                        "--owner", "A", "--actor", "owner", "--client-id", "cli-1",
                        "--idem-key", "er-rex-1", "--source-id", sid],
                       capture_output=True, text=True, timeout=300, env=denv)
-        r_rb = _cmd(denv, "rebuild_keyword_index", key="er-rb-1")
-        post = {
-            "note": _query(denv, "get-note", "--owner", "A", "--id", nid).stdout,
-            "journal": _query(denv, "get-journal-history", "--owner", "A",
-                              "--id", j1).stdout,
-            "journals": _page_ids(denv, "list-journal") or [],
-            "lists": _query(denv, "list-lists", "--owner", "A").stdout,
-            "members": _query(denv, "get-list", "--owner", "A", "--id", lid).stdout,
-            "sessions": _query(denv, "list-session-events", "--owner", "A").stdout,
-            "notes_list": _query(denv, "list-notes", "--owner", "A").stdout,
-            "captures": _query(denv, "list-captures", "--owner", "A").stdout,
-            "bookmarks": _query(denv, "list-bookmarks", "--owner", "A").stdout,
-            "search": _query(denv, "search", "--owner", "A", "meridian").stdout,
-        }
-        # the lossless law: EVERY journal revision round-trips (the journal
-        # history's rows are ALL revisions — kind carries raw/creative)
+        _cmd(denv, "rebuild_keyword_index", key="er-rb-1")
+        post = _reads(denv)
+        # the lossless law: EVERY journal revision round-trips
         jhist = [json.loads(ln) for ln in pre["journal"].splitlines()
                  if ln.strip() and ln.startswith("{")]
-        revisions = sorted(r.get("revision") for r in jhist) if jhist else []
+        revisions = sorted(r["revision"] for r in jhist)
         return {
             "walk_complete": walk_complete,
             "export_exit": r_ex.returncode,
@@ -544,49 +511,42 @@ def condition_export_restore(env, text):
 
 
 def condition_rebuild_parity(env):
-    """P4-F (CLAIM-079): the rebuild parity — rebuild_keyword_index over
-    the authored rows; the search answers unchanged across the rebuild."""
+    """P4-F: the rebuild parity (RCW-03's contract; the search answers
+    unchanged across rebuild_keyword_index — the index derived, never
+    governing)."""
+    _rows = lambda r: [ln for ln in r.stdout.split("\n")
+                       if ln.strip() and not ln.lstrip().startswith("#")]
     before = _query(env, "search", "--owner", "A", "meridian")
     r_rb = _cmd(env, "rebuild_keyword_index", key="rb-1")
     after = _query(env, "search", "--owner", "A", "meridian")
-    rows_b = [ln for ln in before.stdout.split("\n")
-              if ln.strip() and not ln.lstrip().startswith("#")]
-    rows_a = [ln for ln in after.stdout.split("\n")
-              if ln.strip() and not ln.lstrip().startswith("#")]
     return {
         "before_exit": before.returncode,
         "rebuild_exit": r_rb.returncode,
         "after_exit": after.returncode,
-        "parity": (rows_a == rows_b and r_rb.returncode == 0
+        "parity": (_rows(after) == _rows(before) and r_rb.returncode == 0
                    and "status=committed" in r_rb.stdout),
     }
 
 
 def condition_phase_isolation(env, text):
-    """P4-F (CLAIM-079): the phase-level owner isolation — one walk's
-    every family invisible to the other owner, the no-oracle byte-equal at
-    the phase level."""
+    """P4-F: the phase-level owner isolation (RCW-04's contract; every
+    family invisible to the other owner; the no-oracle byte-equal)."""
     w = condition_recovery_walk(env, text)
-    sid = _ids_of(_query(env, "list-library", "--owner", "A"))[0]
     absent = str(_uuid.uuid4())
-    # B's view of A's families: the cross-family invisibility
-    lib_b = _query(env, "list-library", "--owner", "B")
-    jl_b = _query(env, "list-journal", "--owner", "B")
-    lists_b = _query(env, "list-lists", "--owner", "B")
+    # B's view of A's families: the cross-family invisibility (the plain
+    # list arms answer ids; the session rows are JSON between the markers)
+    a_ids = [_ids_of(_query(env, arm, "--owner", "B")) for arm in
+             ("list-library", "list-journal", "list-lists", "list-notes",
+              "list-captures", "list-bookmarks")]
     ses_b = _query(env, "list-session-events", "--owner", "B")
-    notes_b = _query(env, "list-notes", "--owner", "B")
-    caps_b = _query(env, "list-captures", "--owner", "B")
-    bms_b = _query(env, "list-bookmarks", "--owner", "B")
-    a_empty = (not _ids_of(lib_b) and not _ids_of(jl_b) and not _ids_of(lists_b)
+    a_empty = (not any(a_ids)
                and not [ln for ln in ses_b.stdout.splitlines()
-                        if ln.strip() and not ln.startswith("#")]
-               and not _ids_of(notes_b) and not _ids_of(caps_b)
-               and not _ids_of(bms_b))
+                        if ln.strip() and not ln.startswith("#")])
     # the no-oracle at the phase level: A's id vs an absent id at B
+    a_jl = _ids_of(_query(env, "list-journal", "--owner", "A"))
     r_abs = _query(env, "get-journal", "--owner", "B", "--id", absent)
-    r_for = _query(env, "get-journal", "--owner", "B", "--id",
-                   _ids_of(_query(env, "list-journal", "--owner", "A"))[0]
-                   if _ids_of(_query(env, "list-journal", "--owner", "A")) else absent)
+    r_for = _query(env, "get-journal", "--owner", "B",
+                   "--id", a_jl[0] if a_jl else absent)
     ra = _norm(_fail_line(r_abs), absent)
     rf = _norm(_fail_line(r_for), absent)
     return {
@@ -597,33 +557,28 @@ def condition_phase_isolation(env, text):
 
 
 def condition_prior_state_migration(env):
-    """P4-F (CLAIM-079): the supported-prior-state migration — a database
-    carrying real prior-state content (0001..0014, the P3-era families)
-    migrating FORWARD through the chain to the current head; the content
-    survives; the post-migration invariants hold (the append-only trigger
-    live, RLS forced); the post-migration reads answer the prior content.
-    The rig setup (the prior-baseline directory + the scratch database) is
-    the SUITE's class; every observation a real CLI invocation."""
+    """P4-F: the supported-prior-state migration (RCW-05's contract; the
+    0001..0014 prior-baseline content migrating forward, surviving, the
+    current substrate's guards live at the CLI)."""
     from harness.adapters import pg as _pg
-    import shutil as _shutil
+    from shutil import copy as _copy
     db = _pg.create_scratch_db("p4fprior")
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="arv-prior-"))
     mdir = tmp / "migrations"
     mdir.mkdir()
-    real_dir = REPO / "harness" / "migrations"
-    for p in sorted(real_dir.glob("*.sql")):
+    for p in sorted((REPO / "harness" / "migrations").glob("*.sql")):
         if int(p.name[:4]) <= 14:
-            _shutil.copy(p, mdir / p.name)
+            _copy(p, mdir / p.name)
     try:
         menv = dict(env, PGDATABASE=db, ARV_MIGRATIONS_DIR=str(mdir))
-        # the prior baseline applies
+        wenv = dict(env, PGDATABASE=db)
+        # the prior baseline applies; real P3-era content lands on it; the
+        # forward chain runs to the current head
         r_m1 = subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
                                capture_output=True, text=True, timeout=180, env=menv)
-        # real prior-state content at the prior baseline (the P3 families)
         f = tmp / "prior.txt"
         f.write_text("The prior-state corpus: the enduring token rides.\n"
                      "A second line for the capture window.\n", encoding="utf-8")
-        wenv = dict(env, PGDATABASE=db)
         r_imp = _cmd(wenv, "import_source", "--title", "The Prior-State Corpus",
                      "--file", str(f), key="pm-imp-1")
         sid = _ref(r_imp)
@@ -632,46 +587,32 @@ def condition_prior_state_migration(env):
         r_nt = _cmd(wenv, "create_note", "--content",
                      "The prior-state note: the welkin rides.", key="pm-n1")
         nid = _ref(r_nt)
-        prior_written = (r_imp.returncode == 0 and r_hl.returncode == 0
-                         and r_nt.returncode == 0)
-        # the forward migration through the chain to the current head
         r_m2 = subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
                               capture_output=True, text=True, timeout=180, env=wenv)
-        # the post-migration reads answer the prior content
+        # the post-migration reads answer the prior content; the invariant
+        # probe: a hostile journal revise answers the typed no-oracle refusal
         g_s = _query(wenv, "get-source", "--owner", "A", "--id", sid)
         g_n = _query(wenv, "get-note", "--owner", "A", "--id", nid)
-        # the invariant probe: journal_block's append-only guard answers a
-        # hostile revise of a NONEXISTENT id at the CLI boundary with the
-        # typed no-oracle refusal — the migrated substrate is live (a
-        # journal write at the CURRENT head answers the current guards);
-        # the prior note still reads after the forward chain
         r_inv = _cmd(wenv, "revise_journal_block", "--id",
                     "00000000-0000-0000-0000-0000000000ff", "--content",
                     "tampered", key="pm-inv1")
-        inv_line = _fail_line(r_inv)
-        trigger_live = (r_inv.returncode == 1
-                        and "ARV-JNL-001" in inv_line)  # the guard live at the CLI
         return {
-            "prior_written": prior_written,
-            "migrate_exit": (r_m1.returncode == 0 and r_m2.returncode == 0),
+            "prior_written": all(r.returncode == 0 for r in (r_imp, r_hl, r_nt)),
+            "migrate_exit": all(r.returncode == 0 for r in (r_m1, r_m2)),
             "content_survives": (g_s.returncode == 0 and g_n.returncode == 0
                                  and "welkin" in _jline(g_n).get("content", "")),
-            "invariants_hold": trigger_live,
+            "invariants_hold": (r_inv.returncode == 1
+                                and "ARV-JNL-001" in _fail_line(r_inv)),
         }
     finally:
         _pg.drop_scratch_db(db)
 
 
 def condition_sync_conflict(env):
-    """P4-F (CLAIM-079): the sync-conflict walk — the two-DB delivery with
-    a CONFLICTING write (the same idem key, different bodies); the typed
-    conflict (ARV-CMD-409 in the row's failed state, terminal + visible),
-    BOTH bodies preserved (never a silent last-write-wins). The rig setup
-    (the two scratch databases) is the SUITE's class; every observation a
-    real CLI invocation."""
+    """P4-F: the sync-conflict walk (RCW-06's contract; the typed
+    ARV-CMD-409 failed row, BOTH bodies preserved — never a silent LWW)."""
     from harness.adapters import pg as _pg
-    loc = _pg.create_scratch_db("p4floc")
-    srv = _pg.create_scratch_db("p4fsrv")
+    loc, srv = _pg.create_scratch_db("p4floc"), _pg.create_scratch_db("p4fsrv")
     try:
         lenv = dict(env, PGDATABASE=loc)
         senv = dict(env, PGDATABASE=srv, ARV_SITE="server")
@@ -679,14 +620,12 @@ def condition_sync_conflict(env):
             subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
                            capture_output=True, text=True, timeout=180,
                            env=e, check=True)
-        # the local write + the server's COMPETING write under the same key
+        # the local write + the server's COMPETING write under the same key;
+        # the delivery pass surfaces the typed conflict (the SYNC line)
         r_loc = _cmd(lenv, "create_note", "--content",
                      "The local body for the same key.", key="cf-n1")
         r_srv = _cmd(senv, "create_note", "--content",
                      "The server's competing body for the key.", key="cf-n1")
-        # the delivery pass surfaces the typed conflict (the SYNC line
-        # carries the state + the named reason; the status arm's counts
-        # carry the failed row)
         r_sync = subprocess.run(
             [sys.executable, str(REPO / "harness" / "sync.py"), "sync",
              "--owner", "A", "--server-db", srv],
@@ -694,8 +633,7 @@ def condition_sync_conflict(env):
         line = next((ln for ln in r_sync.stdout.splitlines()
                      if "cf-n1" in ln), "")
         # BOTH bodies preserved (each site's own read)
-        g_loc = _query(lenv, "get-note", "--owner", "A",
-                       "--id", _ref(r_loc))
+        g_loc = _query(lenv, "get-note", "--owner", "A", "--id", _ref(r_loc))
         g_srv = _query(senv, "get-note", "--owner", "A", "--id", _ref(r_srv))
         return {
             "local_exit": r_loc.returncode,

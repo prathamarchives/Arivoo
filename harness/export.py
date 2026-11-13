@@ -61,25 +61,17 @@ sys.path.insert(0, str(REPO))
 from harness.adapters import pg, clock, blob  # noqa: E402
 
 FORMAT = "arv-export-1"
-# the authoritative table set in the RESTORE's insert order (the guards'
-# dependency order: entities before their lifecycle events, notes before
-# their references; command_log/outbox/purge_ledger last). P4-F (CLAIM-079;
-# record 71 §2's letter — the owning-family repair the proof authorizes):
-# the P4-C families ride the authoritative set — the journal blocks (EVERY
-# revision — the lossless law), the reading lists + their membership event
-# rows, the session/dwell events, and the generation BINDING SUBSTRATE the
-# session rows name by FK (the generation header rows are provenance the
-# authoritative set binds; the derived CONTENT layers — passages, keyword
-# index — stay unexported and rebuild); the insert order places every
-# table after the entities it references (generations after source,
-# journal/reading_session after source, the membership rows after
-# reading_list; note_reference after note as before).
+# the authoritative table set in the RESTORE's insert order (dependencies
+# first: entities before their lifecycle events, the generation binding
+# substrate after source, the P4-C families — journal blocks with EVERY
+# revision (the lossless law), reading lists + membership events, the
+# session/dwell events — after the entities they reference; the derived
+# CONTENT layers (passages, keyword index) stay unexported and rebuild;
+# command_log/outbox/purge_ledger last).
 TABLES = {
     "work": "id,title,owner_scope,actor,run_id,input_hash,created_at",
     "source": "id,work_id,digest,media_type,byte_size,blob_ref,acquired_via,import_state,source_version,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
-    # the generation BINDING SUBSTRATE (P4-F): inserted immediately after
-    # source — every later table that names a generation by FK (the session
-    # rows) sees its substrate row already restored
+    # the generation BINDING SUBSTRATE (P4-F): before every table naming it by FK
     "extraction_generation": "id,source_id,ordinal,state,extractor,extractor_config,input_digest,idempotency_key,body_hash,fail_reason,owner_scope,actor,run_id,input_hash,created_at,updated_at",
     "anchor": "id,source_id,source_digest,start_off,end_off,context_before,context_after,media_type,owner_scope,actor,run_id,input_hash,created_at",
     "highlight": "id,revision,selected_text,source_id,anchor_id,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
@@ -212,29 +204,20 @@ def _drop_purged(rows: dict, ledger: list) -> dict:
                                if not (r["ref_kind"] in dropped
                                        and r["ref_id"] in dropped[r["ref_kind"]])]
     # P4-F (CLAIM-079): the P4-C families ride the reconciliation — a
-    # ledgered journal_block drops its EVERY revision (the tree's leaf rows;
-    # the note_reference rows targeting it already drop through the F3
-    # cascade above); a ledgered reading_list drops the header + its
-    # membership event rows; the SESSION events never purge-drop as
-    # entities (no ledger kind names them — the behavior history is not a
-    # purge target at this slice, D-011's governed-purge increment owns
-    # that widening); a ledgered source/anchor/work already drops the
-    # journal blocks bound to it (the capture-tree walk extended to the
-    # writing lab's bound rows) and the reading_list_member + session rows
-    # bound to it (the binding cascade — the FK tree's own semantics)
+    # ledgered journal_block/reading_list drops its rows (the list's
+    # membership with it); a ledgered source drops every row bound to it
+    # (the FK tree's own semantics); SESSION events never purge-drop as
+    # entities (no ledger kind names them at this slice)
     for kind in ("journal_block", "reading_list"):
         gone = {r["id"] for r in rows[kind] if (kind, r["id"]) in led}
         if gone:
             drop(kind, "id", gone)
             if kind == "reading_list":
                 drop("reading_list_member", "list_id", gone)
-    bound_sources = {r["id"] for r in rows.get("source", [])
-                     if (r["id"] in dropped.get("source", set()))}
-    if bound_sources:
-        drop("journal_block", "source_id", bound_sources)
-        drop("reading_list_member", "source_id", bound_sources)
-        drop("reading_session", "source_id", bound_sources)
-        drop("extraction_generation", "source_id", bound_sources)
+    for t in ("journal_block", "reading_list_member", "reading_session",
+              "extraction_generation"):
+        drop(t, "source_id", {r["id"] for r in rows.get("source", [])
+                              if (r["id"] in dropped.get("source", set()))})
     return rows
 
 

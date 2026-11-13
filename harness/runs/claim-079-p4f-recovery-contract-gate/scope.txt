@@ -18,5 +18,6 @@ STATE.md D-043
 AGENTS.md D-043
 PLAN.md D-037
 context/WORKLOG.md D-043
+context/extracted/70-P4E-MCP-WRAPPER.md D-042
 context/extracted/71-P4F-RECOVERY-CONTRACT-GATE.md D-042
 harness/runs/claim-079-p4f-recovery-contract-gate D-042

@@ -61,11 +61,11 @@
 - F-075-5 (D-011's governed-purge widening).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 7e6fdb0eb6272262abfad2ed8f08679bfafc02530b2d840e2cb1d390d409e851
-- reviewed_diff_sha256: f0da4762f5f7c6bfb7e74826adb6cca87577d84d7b3e18fc996573665a0a0686
+- report sha256: fdfe0d4c023b90934532aa2a78d24872624a4b22ea6aa0ff189350d9b092d4fc
+- reviewed_diff_sha256: 40cdbb9d475f8b67bfc4c2482f615330c7ce35a79f609ff59737de19ba412b24
 - disposition: PASS
 - findings: 5 (open P0/P1: 0)
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 8a74aafd1fb138ad18c25b299687cdf2003183d57318618dc8d8c17df3e9513a
+- sheet sha256 (of the content above, excluding this line): cc5562c28090a224afaf29f641b85c5aa62d2e8007bf35fe888981a1e1c9ebf5

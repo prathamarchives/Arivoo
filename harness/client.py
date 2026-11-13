@@ -1,29 +1,12 @@
 #!/usr/bin/env python3
-"""harness/client.py — P4-B slice one (CLAIM-069; record 61 §2): the CLEAN
-EXTERNAL CLIENT DRIVER — P4-F's named proof vehicle ("backend contracts are
-proven through a clean external client, never fabricated").
-
-A thin scripted client over the REAL CLIs (commands.py / extract.py /
-query.py) — the same surface the separate reader-client repo (P4-B's own
-repo) will call. THE NO-PRIVILEGED-PATH LAW (CAC-09's pin, mechanically
-enforced by the suite's source scan): no direct database tooling, no role
-names, no SQL, no
-table access of any kind — every observation comes from a subprocess invocation of the
-public boundary, exactly as a client would see it.
-
-Two surfaces:
-  walk(env, text)             the full user walk (import -> extract -> the
-                              first open's truthful no_position_saved ->
-                              save position -> highlight -> bookmark -> note
-                              -> the reopen round-trip), returning the
-                              structured observations + the ids
-  condition_<name>(env, ...) P4-B's adversarial + P4-F's recovery
-                              conditions (each pinned in its owning suite),
-                              returning typed refusals / answers as
-                              structured observations
-
-Exit contract: the driver never crashes on a refusal — a typed refusal is
-DATA (the code + the line), exactly what a client consumes; the suite judges.
+"""
+harness/client.py — the CLEAN EXTERNAL CLIENT (P4-B's named proof vehicle;
+P4-F's driver — CLAIM-069/079). Speaks ONLY the public CLIs (commands.py,
+query.py, extract.py, sync.py, export.py): no psql, no role names, no SQL,
+no adapters import at module scope. Every observation is a real CLI exit
+code / stdout; every condition returns a named dict consumed by the owning
+suite's pins. The full P4-F contract letter: record 71 §2 (the one-home
+law — never restated here).
 """
 import json
 import os
@@ -78,6 +61,11 @@ def _frozen(r):
             and "api_version=1" in r.stdout)
 
 
+def _obs(k, r):
+    """The walk's per-command observation (exit + the frozen grammar)."""
+    return {k: {"exit": r.returncode, "frozen": _frozen(r)}}
+
+
 def _jline(r):
     try:
         return json.loads(next(ln for ln in r.stdout.splitlines() if ln.strip()))
@@ -113,48 +101,44 @@ def walk(env, text):
     out = {}
     r = _cmd(env, "import_source", "--title", "The Client Walk Corpus",
              "--file", str(f), key="cw-imp-1")
-    out["import"] = {"exit": r.returncode, "frozen": _frozen(r)}
-    sid = _ref(r)
-    out["sid"] = sid
+    out.update(_obs("import", r))
+    sid = out["sid"] = _ref(r)
     r = _extract(env, "cw-ext-1", sid)
-    out["extract"] = {"exit": r.returncode, "frozen": _frozen(r)}
-    r = _query(env, "get-position", "--owner", "A", "--source", sid)
-    out["first_open"] = _jline(r)
+    out.update(_obs("extract", r))
+    out["first_open"] = _jline(_query(
+        env, "get-position", "--owner", "A", "--source", sid))
     start, end = len(text) // 3, len(text) // 2
     r = _cmd(env, "save_position", "--source-id", sid, "--start", str(start),
              "--end", str(end), key="cw-pos-1")
-    out["save_position"] = {"exit": r.returncode, "frozen": _frozen(r)}
+    out.update(_obs("save_position", r))
     out["pos_ref"] = _ref(r)
     out["pos_start"], out["pos_end"] = start, end
     m = text.index("meridian")
     r = _cmd(env, "create_highlight", "--source-id", sid, "--start", str(m),
              "--end", str(m + len("meridian")), key="cw-hl-1")
-    out["highlight"] = {"exit": r.returncode, "frozen": _frozen(r)}
-    hid = _ref(r)
-    out["hid"] = hid
+    out.update(_obs("highlight", r))
+    hid = out["hid"] = _ref(r)
     r = _cmd(env, "create_bookmark", "--source-id", sid, "--start", str(m),
              "--end", str(m + len("meridian")), key="cw-bm-1")
-    out["bookmark"] = {"exit": r.returncode, "frozen": _frozen(r)}
+    out.update(_obs("bookmark", r))
     out["bid"] = _ref(r)
     r = _cmd(env, "create_note", "--content",
              "A client-walk note about the meridian token.", key="cw-n1")
-    out["note"] = {"exit": r.returncode, "frozen": _frozen(r)}
-    nid = _ref(r)
-    out["nid"] = nid
-    r = _query(env, "get-position", "--owner", "A", "--source", sid)
-    out["reopen_position"] = _jline(r)
-    r = _query(env, "get-capture", "--owner", "A", "--id", hid)
-    out["reopen_capture"] = {"exit": r.returncode}
-    r = _query(env, "get-note", "--owner", "A", "--id", nid)
-    out["reopen_note"] = {"body": _jline(r).get("content", "")}
+    out.update(_obs("note", r))
+    nid = out["nid"] = _ref(r)
+    out["reopen_position"] = _jline(_query(
+        env, "get-position", "--owner", "A", "--source", sid))
+    out["reopen_capture"] = {"exit": _query(
+        env, "get-capture", "--owner", "A", "--id", hid).returncode}
+    out["reopen_note"] = {"body": _jline(_query(
+        env, "get-note", "--owner", "A", "--id", nid)).get("content", "")}
     return out
 
 
 # ---- P4-B's named adversarial conditions ----
 
 def condition_forbidden_source(env, w):
-    """Auth/owner-scope expiration + forbidden source: the no-oracle on BOTH
-    paths (byte-equal absent-vs-foreign), never a leak."""
+    """The no-oracle on BOTH paths (byte-equal absent-vs-foreign)."""
     absent = str(_uuid.uuid4())
     r_ra = _query(env, "get-position", "--owner", "A", "--source", absent)
     r_rf = _query(env, "get-position", "--owner", "B", "--source", w["sid"])
@@ -173,9 +157,8 @@ def condition_forbidden_source(env, w):
 
 
 def condition_malformed_dto(env, w):
-    """The typed refusals at every command boundary — each zero-effect (the
-    CLI-observable counts unchanged: the captures list, the notes list, the
-    position's ordinal)."""
+    """Typed refusals at every boundary, each zero-effect (the observable
+    lists/ordinal unchanged)."""
     caps_before = _query(env, "list-captures", "--owner", "A").stdout
     notes_before = _query(env, "list-notes", "--owner", "A").stdout
     pos_before = _jline(_query(env, "get-position", "--owner", "A", "--source", w["sid"]))
@@ -206,9 +189,8 @@ def condition_malformed_dto(env, w):
 
 
 def condition_uncertain_ack(env, w):
-    """Offline transitions + timeout-with-uncertain-ack: the lost-ack arm
-    (exit 2, the effect committed) + the retry-after-lost-response
-    convergence (the same-key replay)."""
+    """The lost-ack arm (exit 2, effect committed) + the same-key replay
+    convergence."""
     start, end = 2, 9
     r_cr = _cmd(env, "save_position", "--source-id", w["sid"], "--start", str(start),
                 "--end", str(end), key="cu-pos-1", crash_at="post-commit-pre-ack")
@@ -281,8 +263,8 @@ def condition_stale_version(env, w):
 
 
 def condition_deleted_target(env, w):
-    """Deleted target: the tombstone refusals (hidden from retrieval, never
-    erased; the history retains; the restore returns)."""
+    """Tombstone refusals: hidden from retrieval, never erased; the history
+    retains; the restore returns."""
     r_t = _cmd(env, "tombstone_highlight", "--id", w["hid"], key="ct-t1")
     r_read = _query(env, "get-capture", "--owner", "A", "--id", w["hid"])
     r_hist = _query(env, "get-history", "--owner", "A", "--id", w["hid"])
@@ -372,14 +354,11 @@ def condition_recovery_walk(env, text):
     families = {
         "library": g_lib.returncode == 0 and sid in _ids_of(g_lib),
         "position": g_pos.returncode == 0 and _jline(g_pos).get("state") == "saved",
-        "highlight": g_hl.returncode == 0,
-        "bookmark": g_bms.returncode == 0,
-        "note": g_nt.returncode == 0,
-        "note_reference": "refs" in _jline(g_nt),
+        "highlight": g_hl.returncode == 0, "bookmark": g_bms.returncode == 0,
+        "note": g_nt.returncode == 0, "note_reference": "refs" in _jline(g_nt),
         "journal_block": (g_b1.returncode == 0 and jl is not None and b1 in jl
                           and (g_b2 is None or g_b2.returncode == 0)),
-        "reading_list": g_rl.returncode == 0,
-        "reading_session": g_ses.returncode == 0,
+        "reading_list": g_rl.returncode == 0, "reading_session": g_ses.returncode == 0,
     }
     return {
         "prefix_survives": (r_b1.returncode == 0 and g_b1.returncode == 0
@@ -487,7 +466,7 @@ def condition_export_restore(env, text):
     man_text = (arch / "manifest.json").read_text(encoding="utf-8") \
         if (arch / "manifest.json").is_file() else ""
     tok_val = next((ln.split("token=")[1].split()[0] for ln in
-                    r_mint.stdout.splitlines() if "token=" in ln and "ACK" in ln), "")
+                    r_mint.stdout.splitlines() if "token=" in ln), "")
     try:
         m_tables = set(json.loads(man_text).get("tables", {}))
     except Exception:
@@ -554,9 +533,9 @@ def condition_phase_isolation(env, text):
     absent = str(_uuid.uuid4())
     # B's view of A's families: the cross-family invisibility (the plain
     # list arms answer ids; the session rows are JSON between the markers)
-    a_ids = [_ids_of(_query(env, arm, "--owner", "B")) for arm in
-             ("list-library", "list-journal", "list-lists", "list-notes",
-              "list-captures", "list-bookmarks")]
+    arms = ("list-library", "list-journal", "list-lists", "list-notes",
+            "list-captures", "list-bookmarks")
+    a_ids = [_ids_of(_query(env, a, "--owner", "B")) for a in arms]
     ses_b = _query(env, "list-session-events", "--owner", "B")
     a_empty = (not any(a_ids)
                and not [ln for ln in ses_b.stdout.splitlines()
@@ -595,9 +574,9 @@ def condition_prior_state_migration(env):
         # forward chain runs to the current head
         r_m1 = subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
                                capture_output=True, text=True, timeout=180, env=menv)
-        f = tmp / "prior.txt"
-        f.write_text("The prior-state corpus: the enduring token rides.\n"
-                     "A second line for the capture window.\n", encoding="utf-8")
+        (tmp / "prior.txt").write_text(
+            "The prior-state corpus: the enduring token rides.\n"
+            "A second line for the capture window.\n", encoding="utf-8")
         r_imp = _cmd(wenv, "import_source", "--title", "The Prior-State Corpus",
                      "--file", str(f), key="pm-imp-1")
         sid = _ref(r_imp)
@@ -660,9 +639,8 @@ def condition_sync_conflict(env):
             "sync_exit": r_sync.returncode,
             "conflict_failed": "state=failed" in line,
             "typed_409": "ARV-CMD-409" in line,
-            "both_bodies_preserved": (
-                "local body" in _jline(g_loc).get("content", "")
-                and "competing body" in _jline(g_srv).get("content", "")),
+            "both_bodies_preserved": ("local body" in _jline(g_loc).get("content", "")
+                                      and "competing body" in _jline(g_srv).get("content", "")),
         }
     finally:
         _pg.drop_scratch_db(loc)

@@ -931,7 +931,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-060 (P3-09) the RED: the EXP-01..10 suite's RED observed at the exact predecessor 7df713b (CLAIM-059's merged head, the branch base) \u2014 machinery-absent ARV-TEST-000 (the export arm + migration 0013 absent), red-01.txt; the typed observed red per F-007",
-    "current_sha256": "6384e4b1a1d4510ca2c601b19d36508b5721c7434885d09c2d3bad38ce9d16d8",
+    "current_sha256": "95b6624400e9c5eeaa5be0a44cd2a451e7ab5f3c82dae5fc3138b39dd1dfaeaf",
     "amendments": [
       {
         "prior_sha256": "2b6962b91aae8005a915483117c7de02fa8a38230c913c190b70992430df0464",
@@ -968,6 +968,12 @@
         "new_sha256": "6384e4b1a1d4510ca2c601b19d36508b5721c7434885d09c2d3bad38ce9d16d8",
         "note": "CLAIM-079's pre-GREEN suite amendments (the CLAIM-078 precedent \u2014 disclosed pin-authoring repairs, never a gate weakening; the RED evidence red-01.txt at 4eb4944 untouched): (1) test_recovery_contract.py RCW-05's pin corrected to the condition's boolean form \u2014 condition_prior_state_migration's migrate_exit carries the BOTH-migrations-succeeded boolean (the two runner invocations' joint outcome), never a bare process exit; the pin authored at the RED assumed the int form before the condition's shape existed \u2014 the observed behavior (all-True dict, the check FAILING on True==0) is what the pin now asserts; (2) test_export.py's TABLES/TSV widened to the export machine's P4-C family set \u2014 the owning suite's manifest-set pin follows the widened authoritative TABLES (the RCW proof's finding-authorized repair at the GREEN commit 09d60b0): journal_block/reading_list/reading_list_member/reading_session/extraction_generation join the manifest set, the per-table TSV forms added, EXP-01's 'thirteen tables' prose corrected to the widened set's form; the fixture writes none of the new families so the pins observe the empty rows honestly",
         "observed_at": "2026-11-13T06:37:39.911808+00:00"
+      },
+      {
+        "prior_sha256": "6384e4b1a1d4510ca2c601b19d36508b5721c7434885d09c2d3bad38ce9d16d8",
+        "new_sha256": "95b6624400e9c5eeaa5be0a44cd2a451e7ab5f3c82dae5fc3138b39dd1dfaeaf",
+        "note": "the SEV round's F-079 repairs (the independent grader's findings, each live-falsified at the pre-repair tree \u2014 the round-1 review /tmp/sev-claim-079-review.md): (1) F-079-1 export.py TABLES reordered \u2014 journal_block/reading_list BEFORE note_reference (0018's ARV-NTE-003 guard checks the journal-block target at INSERT time; a note @-referencing a journal block made the whole archive un-restorable \u2014 the ordering defect the RCW-02 walk now pins by writing exactly that ref); (2) F-079-2 reading_position added to the authoritative TABLES after extraction_generation (0014's authored append-only family \u2014 the owner's saved position was silently lost across restore while the byte-equality pin stayed vacuous; the fixture's empty-rows observation holds) + the position read arm in condition_export_restore with the runtime fields (current_generation_id, generation_matches) normalized out \u2014 the authored row's fields pinned: save_ordinal/start_off/end_off/saved_generation binding; (3) F-079-3 the reconciliation cascade reads the DROPPED source set (never the already-drained rows['source'] \u2014 the dead-code falsification), the bound cascade extended to reading_position (0014's FK); test_export.py's TABLES tuple + _TSV follow the widened machine (the set-compare pin), reading_position's TSV form added",
+        "observed_at": "2026-11-13T10:14:45.004738+00:00"
       }
     ]
   },

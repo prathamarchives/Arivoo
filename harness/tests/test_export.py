@@ -157,20 +157,28 @@ def ack_field(p: subprocess.CompletedProcess, field: str) -> str:
     return ""
 
 
-TABLES = ("work", "source", "anchor", "highlight", "highlight_lifecycle",
+TABLES = ("work", "source", "extraction_generation", "reading_position",
+          "anchor", "highlight", "highlight_lifecycle",
           "bookmark", "bookmark_lifecycle", "note", "note_lifecycle",
-          "note_reference", "journal_block", "reading_list",
-          "reading_list_member", "reading_session", "extraction_generation",
+          "journal_block", "reading_list", "note_reference",
+          "reading_list_member", "reading_session",
           "command_log", "outbox", "purge_ledger")
 # the per-table canonical TSV form read through arv_read (the INDEPENDENT
 # path — a separate role from the restore's own session; SYS-10's rule).
 # P4-F (CLAIM-079): the three P4-C families + the generation binding
 # substrate join the manifest set — the widened authoritative export (the
 # owning suite's table set follows the widened TABLES; the fixture writes
-# none of them, so the pins observe the EMPTY rows honestly)
+# none of them, so the pins observe the EMPTY rows honestly). The SEV
+# repair (F-079-2) adds the AUTHORED reading_position family (0014's
+# append-only position rows — the owner's saved position, exported with
+# its generation binding); F-079-1's reorder rides the machine's TABLES
+# order itself (journal_block/reading_list BEFORE note_reference — 0018's
+# ARV-NTE-003 guard checks the journal-block target at insert time).
 _TSV = {
     "work": "SELECT id||'|'||title FROM arv.work WHERE owner_scope='{}' ORDER BY id",
     "source": "SELECT id||'|'||digest FROM arv.source WHERE owner_scope='{}' ORDER BY id",
+    "extraction_generation": "SELECT id||'|'||state FROM arv.extraction_generation WHERE owner_scope='{}' ORDER BY id",
+    "reading_position": "SELECT source_id||'|'||save_ordinal||'|'||start_off||'|'||end_off FROM arv.reading_position WHERE owner_scope='{}' ORDER BY source_id, save_ordinal",
     "anchor": "SELECT id||'|'||source_id FROM arv.anchor WHERE owner_scope='{}' ORDER BY id",
     "highlight": "SELECT id||'|'||revision||'|'||selected_text FROM arv.highlight WHERE owner_scope='{}' ORDER BY id, revision",
     "highlight_lifecycle": "SELECT highlight_id||'|'||event FROM arv.highlight_lifecycle WHERE owner_scope='{}' ORDER BY id",
@@ -183,7 +191,6 @@ _TSV = {
     "reading_list": "SELECT id||'|'||name FROM arv.reading_list WHERE owner_scope='{}' ORDER BY id",
     "reading_list_member": "SELECT list_id||'|'||source_id||'|'||op FROM arv.reading_list_member WHERE owner_scope='{}' ORDER BY id",
     "reading_session": "SELECT source_id||'|'||event FROM arv.reading_session WHERE owner_scope='{}' ORDER BY id",
-    "extraction_generation": "SELECT id||'|'||state FROM arv.extraction_generation WHERE owner_scope='{}' ORDER BY id",
     "command_log": "SELECT idempotency_key||'|'||body_hash FROM arv.command_log WHERE owner_scope='{}' ORDER BY idempotency_key",
     "outbox": "SELECT idempotency_key||'|'||state FROM arv.outbox WHERE owner_scope='{}' ORDER BY idempotency_key",
     "purge_ledger": "SELECT kind||'|'||entity_id FROM arv.purge_ledger WHERE owner_scope='{}' ORDER BY kind, entity_id",

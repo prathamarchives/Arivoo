@@ -425,6 +425,11 @@ def condition_export_restore(env, text):
          "The second journal revision (the lossless law's proof).", key="er-j2")
     _cmd(env, "journal_block", "--kind", "creative", "--source-id", sid,
          "--content", "A bound creative block.", key="er-j3")
+    # F-079-1's pinned shape: a note @-referencing a JOURNAL BLOCK (0018's
+    # widened ref kind) rides the lifecycle walk — the restore-order proof
+    r_n2 = _cmd(env, "create_note", "--content",
+                "The journal-ref note.", "--ref", f"journal_block:{j1}@1",
+                key="er-n2")
     r_l1 = _cmd(env, "create_reading_list", "--name", "The lifecycle shelf", key="er-l1")
     lid = _ref(r_l1)
     _cmd(env, "add_to_list", "--list", lid, "--source", sid, key="er-a1")
@@ -436,8 +441,9 @@ def condition_export_restore(env, text):
     r_mint = _cmd(env, "mint_agent_credential", "--label",
                   "the lifecycle probe", key="er-ag1")
     walk_complete = all(r.returncode == 0 for r in
-                        (r_imp, r_hl, r_bm, r_n1, r_j1, r_l1, r_mint))
-    # the pre/post read set (the byte-equality compare's both sides)
+                        (r_imp, r_hl, r_bm, r_n1, r_n2, r_j1, r_l1, r_mint))
+    # the pre/post read set (the byte-equality compare's both sides; the
+    # position arm: F-079-2's repair — the authored family rides the compare)
     _ARMS = (("note", "get-note", lambda: nid),
              ("journal", "get-journal-history", lambda: j1),
              ("journals", "list-journal", None), ("lists", "list-lists", None),
@@ -445,6 +451,7 @@ def condition_export_restore(env, text):
              ("sessions", "list-session-events", None),
              ("notes_list", "list-notes", None), ("captures", "list-captures", None),
              ("bookmarks", "list-bookmarks", None),
+             ("position", "get-position", "sid"),
              ("search", "search", ("--owner", "A", "meridian")))
 
     def _reads(e):
@@ -452,6 +459,24 @@ def condition_export_restore(env, text):
         for k, arm, tgt in _ARMS:
             if arm == "list-journal":
                 out[k] = _page_ids(e, arm) or []
+            elif arm == "get-position":
+                # the position arm names its source, never an id; the compare
+                # pins the AUTHORED row's fields — save_ordinal (0014's
+                # append-only ordinal law) + the location window + the
+                # saved_generation BINDING (the generation current at save
+                # time, restored with the generation substrate). The
+                # current_generation_id + generation_matches fields are the
+                # reader's LIVE view of the serving generation — at the
+                # destination the walk's own re-extraction (the derived
+                # rebuild) legitimately advances the current generation,
+                # so they are runtime fields (the search arm's class) and
+                # ride NORMALIZED OUT, never raw
+                j = _jline(_query(e, arm, "--owner", "A", "--source", sid))
+                out[k] = json.dumps({
+                    "state": j.get("state"), "save_ordinal": j.get("save_ordinal"),
+                    "start_off": j.get("start_off"), "end_off": j.get("end_off"),
+                    "saved_generation_id": j.get("saved_generation_id"),
+                }, sort_keys=True) + "\n"
             elif callable(tgt):
                 out[k] = _query(e, arm, "--owner", "A", "--id", tgt()).stdout
             else:

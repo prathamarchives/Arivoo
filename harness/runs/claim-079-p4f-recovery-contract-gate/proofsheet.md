@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-079-p4f-recovery-contract-gate (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 44b03cac7c17b272597b8e389bead763543eda14
-- generated (last record's timestamp): 2026-11-13T11:57:18.066018+00:00
-- run records: 15
+- commit (last run record's): 82be251943385a051128499fcc336c7359f511f1
+- generated (last record's timestamp): 2026-11-13T12:04:48.529335+00:00
+- run records: 16
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T06:28:24.522185+00:00
@@ -20,6 +20,7 @@
 - `python3 harness/tests/test_export.py` -> exit 0 · output sha256 a38628469c906935 · 2026-11-13T11:28:10.722912+00:00
 - `make verify` -> exit 0 · output sha256 bb1611ba48e38396 · 2026-11-13T11:42:33.373697+00:00
 - `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T11:57:18.066018+00:00
+- `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T12:04:48.529335+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - CLAIM-079 — the honest not-verified list (LAW-04: the explicit statement, never
@@ -67,4 +68,4 @@
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 2e49af1908e3911ba3fb1437a0cc629483259387f1064871c54bd86da960e17c
+- sheet sha256 (of the content above, excluding this line): 8a74aafd1fb138ad18c25b299687cdf2003183d57318618dc8d8c17df3e9513a

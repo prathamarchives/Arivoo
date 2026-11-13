@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-079-p4f-recovery-contract-gate (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): f80efec0a0138b3db66f69f2cc3d838cfae546b7
-- generated (last record's timestamp): 2026-11-13T10:40:10.543109+00:00
-- run records: 11
+- commit (last run record's): 7a22cd9b7a92af5e84d7bcd25d318ed2a32ec969
+- generated (last record's timestamp): 2026-11-13T11:42:33.373697+00:00
+- run records: 14
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T06:28:24.522185+00:00
@@ -16,6 +16,9 @@
 - `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T10:32:41.112318+00:00
 - `python3 harness/tests/test_export.py` -> exit 0 · output sha256 a38628469c906935 · 2026-11-13T10:32:52.034043+00:00
 - `make verify` -> exit 0 · output sha256 cbdc4f26795799db · 2026-11-13T10:40:10.543109+00:00
+- `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T11:28:00.410493+00:00
+- `python3 harness/tests/test_export.py` -> exit 0 · output sha256 a38628469c906935 · 2026-11-13T11:28:10.722912+00:00
+- `make verify` -> exit 0 · output sha256 bb1611ba48e38396 · 2026-11-13T11:42:33.373697+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - CLAIM-079 — the honest not-verified list (LAW-04: the explicit statement, never
@@ -56,11 +59,11 @@
 - F-075-5 (D-011's governed-purge widening).
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 61a7e4fd9db05e66945df8567f15baef25d07d7fc19fde1014e6a78b50157056
-- reviewed_diff_sha256: 80e5bad876688d50e3233f0fe44e76ce974c3c22afd4a61880f8be8662ece15e
+- report sha256: cf2814ad5a41195c9118897f4c2fe61cf4441b66ebf41671ff1a008e05f03112
+- reviewed_diff_sha256: fa4b1b520452153cd3685c864042c838e626756c53f560d30d849a09ddf19bd5
 - disposition: PASS
 - findings: 5 (open P0/P1: 0)
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): b8bb0e232c021914d689b1a6258edcfbf25f1a8317960aad91b4356ad282be4a
+- sheet sha256 (of the content above, excluding this line): b8f0538188f5535fcc89ff82a9f3c9b770872e91d75e6cf26ec2cbb99de527dd

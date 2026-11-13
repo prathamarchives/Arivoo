@@ -19,32 +19,38 @@ import uuid as _uuid
 REPO = pathlib.Path(__file__).resolve().parents[1]
 
 
+def _mig(env):
+    """One migration pass (the current chain under ARV_MIGRATIONS_DIR)."""
+    return _run("migrate.py", [], env, t=180)
+
+
+def _run(prog, args, env, t=300):
+    """One CLI subprocess (the shared form of every invocation)."""
+    return subprocess.run([sys.executable, str(REPO / "harness" / prog)] + args,
+                          capture_output=True, text=True, timeout=t, env=env)
+
+
 def _cmd(env, op, *args, owner="A", key=None, crash_at=None):
     """A write through commands.py (or crash.py for the crash arms)."""
     if crash_at is not None:
-        a = [sys.executable, str(REPO / "harness" / "crash.py"), "--command", op,
-             "--point", crash_at, "--owner", owner, "--actor", "owner",
-             "--client-id", "cli-1", "--idem-key", key]
-        return subprocess.run(a + list(args), capture_output=True, text=True,
-                              timeout=300, env=env)
-    a = [sys.executable, str(REPO / "harness" / "commands.py"), op, "--owner", owner,
-         "--actor", "owner", "--client-id", "cli-1"]
+        return _run("crash.py", ["--command", op, "--point", crash_at,
+                                 "--owner", owner, "--actor", "owner",
+                                 "--client-id", "cli-1", "--idem-key", key]
+                    + list(args), env)
+    a = [op, "--owner", owner, "--actor", "owner", "--client-id", "cli-1"]
     if key is not None:
         a += ["--idem-key", key]
-    return subprocess.run(a + list(args), capture_output=True, text=True,
-                          timeout=300, env=env)
+    return _run("commands.py", a + list(args), env)
 
 
 def _query(env, *args):
-    return subprocess.run([sys.executable, str(REPO / "harness" / "query.py"), *args],
-                          capture_output=True, text=True, timeout=300, env=env)
+    return _run("query.py", list(args), env)
 
 
 def _extract(env, key, source_id, owner="A"):
-    return subprocess.run([sys.executable, str(REPO / "harness" / "extract.py"),
-                           "--owner", owner, "--actor", "owner", "--client-id", "cli-1",
-                           "--idem-key", key, "--source-id", source_id],
-                          capture_output=True, text=True, timeout=300, env=env)
+    return _run("extract.py", ["--owner", owner, "--actor", "owner",
+                               "--client-id", "cli-1", "--idem-key", key,
+                               "--source-id", source_id], env)
 
 
 def _ref(r):
@@ -164,10 +170,9 @@ def condition_malformed_dto(env, w):
     pos_before = _jline(_query(env, "get-position", "--owner", "A", "--source", w["sid"]))
     r_off = _cmd(env, "create_highlight", "--source-id", w["sid"], "--start", "5",
                  "--end", "5", key="cm-off-1")           # the empty window
-    r_cnt = subprocess.run([sys.executable, str(REPO / "harness" / "commands.py"),
-                            "create_note", "--owner", "A", "--actor", "owner",
-                            "--client-id", "cli-1", "--idem-key", "cm-cnt-1"],
-                           capture_output=True, text=True, timeout=300, env=env)
+    r_cnt = _run("commands.py", ["create_note", "--owner", "A", "--actor",
+                                  "owner", "--client-id", "cli-1",
+                                  "--idem-key", "cm-cnt-1"], env)
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="arv-client-"))
     bad = tmp / "bad.bin"
     bad.write_bytes(b"\x00\x01 bad type bytes \xff")
@@ -293,9 +298,9 @@ def _page_ids(env, arm, owner="A", limit="2"):
     """The full keyset walk over a bounded list arm (every page)."""
     out, after = [], None
     while True:
-        a = [sys.executable, str(REPO / "harness" / "query.py"), arm,
-             "--owner", owner, "--limit", limit] + (["--after", after] if after else [])
-        r = subprocess.run(a, capture_output=True, text=True, timeout=300, env=env)
+        a = [arm, "--owner", owner, "--limit", limit] + \
+            (["--after", after] if after else [])
+        r = _run("query.py", a, env)
         if r.returncode != 0:
             return None
         ids = _ids_of(r)
@@ -460,9 +465,8 @@ def condition_export_restore(env, text):
     # the export; the credential absence (the never-ride law): no
     # credential TABLES in the manifest, no token VALUE anywhere in it
     arch = tmp / "archive"
-    r_ex = subprocess.run([sys.executable, str(REPO / "harness" / "export.py"),
-                           "export", "--owner", "A", "--out", str(arch)],
-                          capture_output=True, text=True, timeout=600, env=env)
+    r_ex = _run("export.py", ["export", "--owner", "A", "--out", str(arch)],
+                env, t=600)
     man_text = (arch / "manifest.json").read_text(encoding="utf-8") \
         if (arch / "manifest.json").is_file() else ""
     tok_val = next((ln.split("token=")[1].split()[0] for ln in
@@ -479,16 +483,9 @@ def condition_export_restore(env, text):
     dst = _pg.create_scratch_db("p4fdst")
     try:
         denv = dict(env, PGDATABASE=dst)
-        r_mig = subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
-                               capture_output=True, text=True, timeout=180,
-                               env=denv, check=True)
-        r_rs = subprocess.run([sys.executable, str(REPO / "harness" / "export.py"),
-                               "restore", "--archive", str(arch)],
-                              capture_output=True, text=True, timeout=600, env=denv)
-        subprocess.run([sys.executable, str(REPO / "harness" / "extract.py"),
-                       "--owner", "A", "--actor", "owner", "--client-id", "cli-1",
-                       "--idem-key", "er-rex-1", "--source-id", sid],
-                      capture_output=True, text=True, timeout=300, env=denv)
+        r_mig = _mig(denv)
+        r_rs = _run("export.py", ["restore", "--archive", str(arch)], denv, t=600)
+        _extract(denv, "er-rex-1", sid)
         _cmd(denv, "rebuild_keyword_index", key="er-rb-1")
         post = _reads(denv)
         # the lossless law: EVERY journal revision round-trips
@@ -572,8 +569,7 @@ def condition_prior_state_migration(env):
         wenv = dict(env, PGDATABASE=db)
         # the prior baseline applies; real P3-era content lands on it; the
         # forward chain runs to the current head
-        r_m1 = subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
-                               capture_output=True, text=True, timeout=180, env=menv)
+        r_m1 = _mig(menv)
         (tmp / "prior.txt").write_text(
             "The prior-state corpus: the enduring token rides.\n"
             "A second line for the capture window.\n", encoding="utf-8")
@@ -585,8 +581,7 @@ def condition_prior_state_migration(env):
         r_nt = _cmd(wenv, "create_note", "--content",
                      "The prior-state note: the welkin rides.", key="pm-n1")
         nid = _ref(r_nt)
-        r_m2 = subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
-                              capture_output=True, text=True, timeout=180, env=wenv)
+        r_m2 = _mig(wenv)
         # the post-migration reads answer the prior content; the invariant
         # probe: a hostile journal revise answers the typed no-oracle refusal
         g_s = _query(wenv, "get-source", "--owner", "A", "--id", sid)
@@ -615,19 +610,14 @@ def condition_sync_conflict(env):
         lenv = dict(env, PGDATABASE=loc)
         senv = dict(env, PGDATABASE=srv, ARV_SITE="server")
         for e in (lenv, senv):
-            subprocess.run([sys.executable, str(REPO / "harness" / "migrate.py")],
-                           capture_output=True, text=True, timeout=180,
-                           env=e, check=True)
+            _mig(e)
         # the local write + the server's COMPETING write under the same key;
         # the delivery pass surfaces the typed conflict (the SYNC line)
         r_loc = _cmd(lenv, "create_note", "--content",
                      "The local body for the same key.", key="cf-n1")
         r_srv = _cmd(senv, "create_note", "--content",
                      "The server's competing body for the key.", key="cf-n1")
-        r_sync = subprocess.run(
-            [sys.executable, str(REPO / "harness" / "sync.py"), "sync",
-             "--owner", "A", "--server-db", srv],
-            capture_output=True, text=True, timeout=300, env=lenv)
+        r_sync = _run("sync.py", ["sync", "--owner", "A", "--server-db", srv], lenv)
         line = next((ln for ln in r_sync.stdout.splitlines()
                      if "cf-n1" in ln), "")
         # BOTH bodies preserved (each site's own read)

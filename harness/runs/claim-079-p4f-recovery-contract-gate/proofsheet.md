@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-079-p4f-recovery-contract-gate (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 89a5ba6be584d96177c5aaa9771fbfd6ef63b08c
-- generated (last record's timestamp): 2026-11-13T07:01:39.900846+00:00
-- run records: 8
+- commit (last run record's): f80efec0a0138b3db66f69f2cc3d838cfae546b7
+- generated (last record's timestamp): 2026-11-13T10:40:10.543109+00:00
+- run records: 11
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T06:28:24.522185+00:00
@@ -13,6 +13,9 @@
 - `python3 harness/tests/test_export.py` -> exit 0 · output sha256 a38628469c906935 · 2026-11-13T07:01:21.079216+00:00
 - `python3 harness/tests/test_sync.py` -> exit 0 · output sha256 671195a850ef8754 · 2026-11-13T07:01:36.387976+00:00
 - `python3 harness/tests/test_journal.py` -> exit 0 · output sha256 bb621c0318508777 · 2026-11-13T07:01:39.900846+00:00
+- `python3 harness/tests/test_recovery_contract.py` -> exit 0 · output sha256 74e8964da928ad50 · 2026-11-13T10:32:41.112318+00:00
+- `python3 harness/tests/test_export.py` -> exit 0 · output sha256 a38628469c906935 · 2026-11-13T10:32:52.034043+00:00
+- `make verify` -> exit 0 · output sha256 cbdc4f26795799db · 2026-11-13T10:40:10.543109+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - - CLAIM-079 — the honest not-verified list (LAW-04: the explicit statement, never
@@ -52,5 +55,12 @@
 - F-075-3/F-076-1..4 + F2-078-2 (the substrate grammar owner's slice),
 - F-075-5 (D-011's governed-purge widening).
 
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 61a7e4fd9db05e66945df8567f15baef25d07d7fc19fde1014e6a78b50157056
+- reviewed_diff_sha256: 80e5bad876688d50e3233f0fe44e76ce974c3c22afd4a61880f8be8662ece15e
+- disposition: PASS
+- findings: 5 (open P0/P1: 0)
+- not-verified entries: 6
+
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): d4d8844ba24ec50a6d1a5b159b02e833c881d7cc354fce4d487341c225f436e1
+- sheet sha256 (of the content above, excluding this line): b8bb0e232c021914d689b1a6258edcfbf25f1a8317960aad91b4356ad282be4a

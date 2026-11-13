@@ -62,21 +62,15 @@ from harness.adapters import pg, clock, blob  # noqa: E402
 
 FORMAT = "arv-export-1"
 # the authoritative table set in the RESTORE's insert order (dependencies
-# first: entities before their lifecycle events, the generation binding
-# substrate + the authored reading position (0014's append-only family —
-# authored, never rebuildable; F-079-2) after source, the P4-C families —
-# journal blocks with EVERY revision (the lossless law) BEFORE
-# note_reference (0018's ARV-NTE-003 guard checks target existence at
-# insert time — F-079-1), reading lists + membership events, the
-# session/dwell events — after the entities they reference; the derived
-# CONTENT layers (passages, keyword index) stay unexported and rebuild;
-# command_log/outbox/purge_ledger last).
+# first: the generation binding substrate + the authored reading position
+# (0014 — F-079-2) after source; the P4-C entities journal_block/
+# reading_list BEFORE note_reference (0018's ARV-NTE-003 checks the target
+# at insert time — F-079-1); the derived CONTENT layers (passages, keyword
+# index) stay unexported and rebuild; command_log/outbox/purge_ledger last)
 TABLES = {
     "work": "id,title,owner_scope,actor,run_id,input_hash,created_at",
     "source": "id,work_id,digest,media_type,byte_size,blob_ref,acquired_via,import_state,source_version,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
-    # the generation BINDING SUBSTRATE (P4-F): before every table naming it by FK
     "extraction_generation": "id,source_id,ordinal,state,extractor,extractor_config,input_digest,idempotency_key,body_hash,fail_reason,owner_scope,actor,run_id,input_hash,created_at,updated_at",
-    # the AUTHORED position family (0014): rides after its two FK targets
     "reading_position": "id,owner_scope,source_id,save_ordinal,generation_id,start_off,end_off,actor,run_id,input_hash,idempotency_key,created_at",
     "anchor": "id,source_id,source_digest,start_off,end_off,context_before,context_after,media_type,owner_scope,actor,run_id,input_hash,created_at",
     "highlight": "id,revision,selected_text,source_id,anchor_id,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
@@ -85,7 +79,6 @@ TABLES = {
     "bookmark_lifecycle": "id,bookmark_id,event,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
     "note": "id,revision,content,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
     "note_lifecycle": "id,note_id,event,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
-    # BEFORE note_reference: the P4-C entities a note may @-reference
     "journal_block": "id,revision,kind,content,source_id,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
     "reading_list": "id,name,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
     "note_reference": "id,note_id,note_revision,ref_kind,ref_id,ref_revision,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
@@ -209,15 +202,12 @@ def _drop_purged(rows: dict, ledger: list) -> dict:
     rows["note_reference"] = [r for r in rows["note_reference"]
                                if not (r["ref_kind"] in dropped
                                        and r["ref_id"] in dropped[r["ref_kind"]])]
-    # P4-F (CLAIM-079; F-079-3's repair — the cascade reads the DROPPED set,
-    # never the already-drained rows): the P4-C families ride the
-    # reconciliation — a ledgered journal_block/reading_list drops its rows
-    # (the list's membership with it); a LEDGERED SOURCE drops every row
-    # bound to it (the FK tree's own semantics — the ledgered source's own
-    # rows are already gone, so the binding cascade keys on dropped, not a
-    # re-read of rows["source"] which is empty by now); SESSION events never
-    # purge-drop as entities (no ledger kind names them at this slice); the
-    # authored reading_position rides the source's bound set (0014's FK)
+    # P4-F (CLAIM-079; F-079-3's repair — the cascade keys on the DROPPED
+    # set, never a re-read of the already-drained rows["source"]): a
+    # ledgered journal_block/reading_list drops its rows (the list's
+    # membership with it); a LEDGERED SOURCE drops every row bound to it
+    # (incl. the authored reading_position — 0014's FK); SESSION events
+    # never purge-drop as entities (no ledger kind names them)
     for kind in ("journal_block", "reading_list"):
         gone = {r["id"] for r in rows[kind] if (kind, r["id"]) in led}
         if gone:

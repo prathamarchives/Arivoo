@@ -213,8 +213,14 @@ def _drop_purged(rows: dict, ledger: list) -> dict:
                 drop("reading_list_member", "list_id", gone)
     gone_sources = dropped.get("source", set())
     if gone_sources:
+        # the cascade-dropped rows REGISTER in dropped (the reviewer's P1:
+        # the note_reference cascade keys on dropped — an unregistered
+        # journal_block bound to a ledgered source left its note refs
+        # dangling, refusing the whole archive at ARV-NTE-003)
         for t in ("journal_block", "reading_list_member", "reading_session",
                   "extraction_generation", "reading_position"):
+            dropped[t] = dropped.get(t, set()) | {
+                r["id"] for r in rows.get(t, []) if r.get("source_id") in gone_sources}
             drop(t, "source_id", gone_sources)
     return rows
 

@@ -227,7 +227,7 @@ def main() -> int:
         # ---- RCW-05 — the supported-prior-state migration
         cond = client.condition_prior_state_migration(ENV)
         ok5 = (cond["prior_written"] is True
-               and cond["migrate_exit"] == 0
+               and cond["migrate_exit"] is True
                and cond["content_survives"] is True
                and cond["invariants_hold"] is True)
         check("RCW-05", ok5,

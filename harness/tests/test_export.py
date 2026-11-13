@@ -159,9 +159,15 @@ def ack_field(p: subprocess.CompletedProcess, field: str) -> str:
 
 TABLES = ("work", "source", "anchor", "highlight", "highlight_lifecycle",
           "bookmark", "bookmark_lifecycle", "note", "note_lifecycle",
-          "note_reference", "command_log", "outbox", "purge_ledger")
+          "note_reference", "journal_block", "reading_list",
+          "reading_list_member", "reading_session", "extraction_generation",
+          "command_log", "outbox", "purge_ledger")
 # the per-table canonical TSV form read through arv_read (the INDEPENDENT
-# path — a separate role from the restore's own session; SYS-10's rule)
+# path — a separate role from the restore's own session; SYS-10's rule).
+# P4-F (CLAIM-079): the three P4-C families + the generation binding
+# substrate join the manifest set — the widened authoritative export (the
+# owning suite's table set follows the widened TABLES; the fixture writes
+# none of them, so the pins observe the EMPTY rows honestly)
 _TSV = {
     "work": "SELECT id||'|'||title FROM arv.work WHERE owner_scope='{}' ORDER BY id",
     "source": "SELECT id||'|'||digest FROM arv.source WHERE owner_scope='{}' ORDER BY id",
@@ -173,6 +179,11 @@ _TSV = {
     "note": "SELECT id||'|'||revision||'|'||content FROM arv.note WHERE owner_scope='{}' ORDER BY id, revision",
     "note_lifecycle": "SELECT note_id||'|'||event FROM arv.note_lifecycle WHERE owner_scope='{}' ORDER BY id",
     "note_reference": "SELECT note_id||'|'||ref_kind||'|'||ref_id FROM arv.note_reference WHERE owner_scope='{}' ORDER BY id",
+    "journal_block": "SELECT id||'|'||revision FROM arv.journal_block WHERE owner_scope='{}' ORDER BY id, revision",
+    "reading_list": "SELECT id||'|'||name FROM arv.reading_list WHERE owner_scope='{}' ORDER BY id",
+    "reading_list_member": "SELECT list_id||'|'||source_id||'|'||op FROM arv.reading_list_member WHERE owner_scope='{}' ORDER BY id",
+    "reading_session": "SELECT source_id||'|'||event FROM arv.reading_session WHERE owner_scope='{}' ORDER BY id",
+    "extraction_generation": "SELECT id||'|'||state FROM arv.extraction_generation WHERE owner_scope='{}' ORDER BY id",
     "command_log": "SELECT idempotency_key||'|'||body_hash FROM arv.command_log WHERE owner_scope='{}' ORDER BY idempotency_key",
     "outbox": "SELECT idempotency_key||'|'||state FROM arv.outbox WHERE owner_scope='{}' ORDER BY idempotency_key",
     "purge_ledger": "SELECT kind||'|'||entity_id FROM arv.purge_ledger WHERE owner_scope='{}' ORDER BY kind, entity_id",
@@ -247,7 +258,7 @@ def main() -> int:
                and src_digest in blobs and blob_ok
                and len(m["tables"]["note"]) == 2 and len(m["tables"]["note_lifecycle"]) == 2)
         check("EXP-01", ok1,
-              "the export form: the versioned manifest (format arv-export-1, the owner, the thirteen authoritative tables incl. the outbox state and the purge ledger), the canonical state hash (64-hex over the sorted table rows), the blob copies present and non-empty (the source's digest among them) — export = authoritative records + blob references + the purge/retention state under an explicit versioned manifest (SYS-10's interface)",
+              "the export form: the versioned manifest (format arv-export-1, the owner, the authoritative table set incl. the outbox state, the purge ledger, and P4-F's widened families — the journal blocks, the reading lists + membership, the session events, the generation binding substrate), the canonical state hash (64-hex over the sorted table rows), the blob copies present and non-empty (the source's digest among them) — export = authoritative records + blob references + the purge/retention state under an explicit versioned manifest (SYS-10's interface)",
               "the export reads through the owner-scoped session (RLS — B's rows structurally absent), serializes each table canonically, hashes the whole, and copies the referenced blobs by digest")
 
         # ---- EXP-02 — restore + the equality (the INDEPENDENT comparison)

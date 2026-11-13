@@ -62,11 +62,10 @@ from harness.adapters import pg, clock, blob  # noqa: E402
 
 FORMAT = "arv-export-1"
 # the authoritative table set in the RESTORE's insert order (dependencies
-# first: the generation binding substrate + the authored reading position
-# (0014 — F-079-2) after source; the P4-C entities journal_block/
-# reading_list BEFORE note_reference (0018's ARV-NTE-003 checks the target
-# at insert time — F-079-1); the derived CONTENT layers (passages, keyword
-# index) stay unexported and rebuild; command_log/outbox/purge_ledger last)
+# first: the generation substrate + the authored reading position (0014 —
+# F-079-2) after source; the P4-C entities journal_block/reading_list
+# BEFORE note_reference (0018's insert-time guard — F-079-1); the derived
+# CONTENT layers rebuild; command_log/outbox/purge_ledger last)
 TABLES = {
     "work": "id,title,owner_scope,actor,run_id,input_hash,created_at",
     "source": "id,work_id,digest,media_type,byte_size,blob_ref,acquired_via,import_state,source_version,owner_scope,actor,run_id,input_hash,idempotency_key,created_at",
@@ -202,12 +201,10 @@ def _drop_purged(rows: dict, ledger: list) -> dict:
     rows["note_reference"] = [r for r in rows["note_reference"]
                                if not (r["ref_kind"] in dropped
                                        and r["ref_id"] in dropped[r["ref_kind"]])]
-    # P4-F (CLAIM-079; F-079-3's repair — the cascade keys on the DROPPED
-    # set, never a re-read of the already-drained rows["source"]): a
-    # ledgered journal_block/reading_list drops its rows (the list's
-    # membership with it); a LEDGERED SOURCE drops every row bound to it
-    # (incl. the authored reading_position — 0014's FK); SESSION events
-    # never purge-drop as entities (no ledger kind names them)
+    # F-079-3's repair: the cascade keys on the DROPPED set (never a
+    # re-read of the drained rows["source"]) — a ledgered journal_block/
+    # reading_list drops its rows (+membership); a LEDGERED SOURCE drops
+    # every row bound to it (incl. reading_position); sessions never drop
     for kind in ("journal_block", "reading_list"):
         gone = {r["id"] for r in rows[kind] if (kind, r["id"]) in led}
         if gone:

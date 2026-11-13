@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-079-p4f-recovery-contract-gate",
   "base_sha": "d21ca44e9984b40931432fb8e33f8e639e1892e9",
-  "reviewed_diff_sha256": "fa4b1b520452153cd3685c864042c838e626756c53f560d30d849a09ddf19bd5",
+  "reviewed_diff_sha256": "f0da4762f5f7c6bfb7e74826adb6cca87577d84d7b3e18fc996573665a0a0686",
   "intent_ids": [
     "INT-145",
     "INT-140"

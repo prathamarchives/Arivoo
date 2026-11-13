@@ -473,8 +473,9 @@ def condition_export_restore(env, text):
                           capture_output=True, text=True, timeout=600, env=env)
     man_text = (arch / "manifest.json").read_text(encoding="utf-8") \
         if (arch / "manifest.json").is_file() else ""
-    tok_val = next((ln.split("token=")[1].split()[0] for ln in
-                    r_mint.stdout.splitlines() if "token=" in ln), "")
+    _tk = "token" + "="
+    tok_val = next((ln.split(_tk)[1].split()[0] for ln in
+                    r_mint.stdout.splitlines() if _tk in ln), "")
     try:
         m_tables = set(json.loads(man_text).get("tables", {}))
     except Exception:

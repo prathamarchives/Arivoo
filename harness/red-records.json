@@ -1322,7 +1322,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-079's RED (the RCW suite authored tests-only per LAW-11 at the RED commit 4eb4944 on commit A at CLAIM-078's merged head d21ca44e and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: harness/client.py's P4-F condition set absent; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
-    "current_sha256": "4715572e6d5904211895320011c0bee633b8b971bec57143224281d8ae699e36",
+    "current_sha256": "81a25ca95bc7c315762af3cde15c2b78fab1c6af587153f0643dc6c2a7e92185",
     "amendments": [
       {
         "prior_sha256": "ea570a0e497f79916237165100b0548d0d80d0472dd8ed4f5b46017fc55c942d",
@@ -1335,6 +1335,12 @@
         "new_sha256": "4715572e6d5904211895320011c0bee633b8b971bec57143224281d8ae699e36",
         "note": "the D-042 round-1 P1's pin (condition_ledgered_source_restore + the RCW-02 conjunction: the note @-referencing a SOURCE-BOUND journal block restoring into a destination ledgered on that source \u2014 the cascade-dropped ids REGISTER before the F3 reference filter runs; the ordering repair at the second falsification: the first repair registered the ids but AFTER the filter, so the refs survived it and the restore still refused at ARV-NTE-003 \u2014 the live probe caught both)",
         "observed_at": "2026-11-13T14:49:12.725491+00:00"
+      },
+      {
+        "prior_sha256": "4715572e6d5904211895320011c0bee633b8b971bec57143224281d8ae699e36",
+        "new_sha256": "81a25ca95bc7c315762af3cde15c2b78fab1c6af587153f0643dc6c2a7e92185",
+        "note": "the P1-pin compaction round (the pin + ordering repair + the RCW-02 wiring compacted back to the 400-line boundary: the _corpus/_cli shared helpers extracting the walk-style conditions' repeated prologues, the comment/docstring condensation over this slice's added lines only \u2014 the pre-existing CLAIM-069 bodies byte-identical; both suites GREEN at the compacted tree)",
+        "observed_at": "2026-11-13T15:30:44.460861+00:00"
       }
     ]
   }

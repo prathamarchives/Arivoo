@@ -201,11 +201,8 @@ def _drop_purged(rows: dict, ledger: list) -> dict:
     # re-read of the drained rows["source"]) — a ledgered journal_block/
     # reading_list drops its rows (+membership); a LEDGERED SOURCE drops
     # every row bound to it (incl. reading_position); sessions never drop.
-    # EVERY cascade-dropped id REGISTERS in dropped BEFORE the F3 filter
-    # below runs (the D-042 round-1 P1: the registration ran after it, so
-    # a journal_block bound to a ledgered source dropped unregistered and
-    # the note_reference rows pointing at it survived the filter to refuse
-    # the whole archive at ARV-NTE-003)
+    # EVERY cascade-dropped id REGISTERS BEFORE the F3 filter below (the
+    # D-042 round-1 P1: the registration ran after it — the refs survived)
     for kind in ("journal_block", "reading_list"):
         gone = {r["id"] for r in rows[kind] if (kind, r["id"]) in led}
         if gone:

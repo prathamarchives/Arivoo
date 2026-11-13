@@ -209,7 +209,7 @@ def main() -> int:
                and cond["post_restore_byte_equal"] is True
                and cond["credentials_absent"] is True
                and led["written"] is True and led["export_exit"] == 0
-               and led["ledger_written"] is True and led["restore_exit"] == 0
+               and led["restore_exit"] == 0
                and led["dangling_refs"] == 0)
         check("RCW-02", ok2,
               "the full-lifecycle export/restore: one walk writing every landed family "

@@ -1351,7 +1351,14 @@
     "red_exit": 1,
     "red_code": "RPK-01,RPK-02,RPK-03,RPK-04,RPK-06,RPK-07,RPK-08,RPK-09",
     "red_evidence": "the P5-A RED observed at dc2c343 (tests-only; machinery-absent: query.py's pack arm) \u2014 red-01.txt",
-    "current_sha256": "462923cbaf244d16a4b3a7aef8b4e19356eb2a752283449bf730ac6c24d1249b",
-    "amendments": []
+    "current_sha256": "45d7ad4ffc0bb3e1f285722210e14607304a20bedabab8e2c8a8f3d06344bc19",
+    "amendments": [
+      {
+        "prior_sha256": "462923cbaf244d16a4b3a7aef8b4e19356eb2a752283449bf730ac6c24d1249b",
+        "new_sha256": "45d7ad4ffc0bb3e1f285722210e14607304a20bedabab8e2c8a8f3d06344bc19",
+        "note": "the GREEN-commit test-shape repairs (f05e187): the probe polarity to the CLAIM-078 form (the machinery's presence is the GREEN object), RPK-03's empty-after corrected (an invalid cursor form IS the typed ARV-QRY-004 refusal \u2014 the check asserted the wrong thing), ack_field's key=value pair parsing (the ACK grammar's fields are pairs, never a partition-once), the mint idem key (commands.py requires --idem-key), RPK-06's write-refusal leg without --owner (the structural READ-ONLY is the token alone \u2014 cmd()'s --owner injection would refuse for AMBIGUITY, a different law), RPK-09's probe reading mcp.TOOLS (the registry's importable name). Assertions corrected forward, none weakened; the RED's 8 failures at dc2c343 (red-01.txt) remain the honest RED evidence",
+        "observed_at": "2026-11-14T10:47:01.382736+00:00"
+      }
+    ]
   }
 }

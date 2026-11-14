@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_retrieval_packs.py",
+  "exit_code": 0,
+  "commit": "1ea4ce679ee3cfac80ce08623c38313cf593fecf",
+  "output_sha256": "faf2d4366fa6e6bc3bc90c7a1c5be585ec6599bc552f62a05f5db1c7f43da8ba",
+  "recorded_at": "2026-11-14T14:44:38.513228+00:00"
+}

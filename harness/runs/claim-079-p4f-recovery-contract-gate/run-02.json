@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_recovery_contract.py",
+  "exit_code": 0,
+  "commit": "09d60b06c2e5fe0bda5e3e23b9b59d6a42513247",
+  "output_sha256": "74e8964da928ad5023ef5104c8d224d54713597f63e8a636da6d5417ebc77003",
+  "recorded_at": "2026-11-13T06:28:36.808728+00:00"
+}

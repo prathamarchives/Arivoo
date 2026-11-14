@@ -1,0 +1,31 @@
+CLAIM-079 — the observed RED (LAW-11: tests-only, committed BEFORE the implementation)
+
+Command: python3 harness/tests/test_recovery_contract.py
+Tree:    the RED commit (on commit A 9e86186 at CLAIM-078's merged head
+         d21ca44e)
+Exit:    1
+Output:
+  FAIL ARV-TEST-000: the P4-F recovery-contract machinery is absent
+  (machinery-absent class; harness/client.py's P4-F condition set
+  (condition_recovery_walk and its siblings) importable: True) — the
+  implementation lands after this RED, never before it (LAW-11)
+
+Observed live at the exact tree above (the suite committed in its tests-only
+RED form — the RCW-01..08 registry; the DB-free machinery-absent probe at
+the module head: harness/client.py imports (True) but the P4-F condition set
+(condition_recovery_walk, condition_export_restore, condition_rebuild_parity,
+condition_phase_isolation, condition_prior_state_migration,
+condition_sync_conflict) does not exist there — the probe prints False, exit
+1; the nonexistent probe database never reached). The gate.py TESTS
+registration rides the binding commit (the ARV-RED-008 class — the
+registration in the candidate's gate.py, diff-visible, never a smuggle).
+The implementation lands in the immediately-following commit, never before
+this RED: harness/client.py's P4-F condition set (the six conditions over
+the real CLIs — the crash matrix's post-commit-pre-ack arm, export/restore,
+rebuild_keyword_index, the cross-family reads, the migration runner's
+forward chain, the sync driver's two-DB conflict walk) + the export machine's
+P4-C family widening where the proof finds the gap (the owning family's
+bounded repair per record 71 §2's letter: the journal blocks with their
+REVISIONS, the reading lists + membership events, the session/dwell events
+ride the authoritative table set — the lossless law extends to the full
+landed lifecycle).

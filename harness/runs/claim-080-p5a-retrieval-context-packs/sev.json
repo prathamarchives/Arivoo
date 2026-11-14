@@ -51,6 +51,41 @@
    "severity": "P2",
    "status": "owner-accepted-debt",
    "summary": "the canonical-layer INT-147 form defects repaired in-slice (the entry form, the Source line, the numbering row, the counts) — the 54-check verifier 0 failures"
+  },
+  {
+   "id": "F-080-5",
+   "title": "RPK-05's pin is vacuous against weighting",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "note": "D-042 round-1 finding 2: the assertion counts a substring (always >= 0) and compares no rank/order between a classification word and an ordinary word; the uniform-tokenizer law is structurally real (no classification-word literal in query.py/commands.py source), but the pin adds no protection against a future weighting regression. Accepted: P5-B's eval corpus is the honest instrument for rank/order claims — the pin tightens there."
+  },
+  {
+   "id": "F-080-6",
+   "title": "RPK-07 pins only absence-of-A",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "note": "D-042 round-1 finding 3: owner B's pack is asserted free of A's ids but never asserted to CARRY B's own material — the isolation half is genuinely tested (the _read RLS path), the availability half is not. Accepted for this slice: the availability of the owner's own reads is pinned by RPK-01's own-owner pack contract."
+  },
+  {
+   "id": "F-080-7",
+   "title": "RPK-04's pin weaker than its registered claim",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "note": "D-042 round-1 finding 4: the pack output carries ids/provenance/trust (PACK_SQL selects no text column), so 'carries it verbatim' overstates and 'never executes' is unprobed (no state-delta marker, unlike the dispatch suite's A02 form). The law holds structurally (the read path is SQL-only; RPK-06 pins the write-refusal). Accepted: wording tightened in a later slice; the verbatim-carrying claim belongs to the pack CONTENT arm (P5-B)."
+  },
+  {
+   "id": "F-080-8",
+   "title": "the budget's one-item floor (undeclared)",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "note": "D-042 round-1 finding 5: the truncation loop's 'and kept' guard admits the FIRST item regardless of budget (--budget-bytes 1 admits a 154-byte item, a 154x overrun of the bound). Item size is bounded (ids + matched terms). Accepted: the floor is now DECLARED here; the honest alternative (an empty pack on a sub-item budget) breaks the cursor contract's last-admitted-id semantics."
+  },
+  {
+   "id": "F-080-9",
+   "title": "records hygiene: run-01/run-04 same-command different-digest + the amendment chain's intermediate form",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "note": "D-042 round-1 findings 6+7: run-01 and run-04 record the same command at the same commit with digests differing only by the .txt companion's exit=0 trailer (nothing false recorded — both reproduce); the red-record amendment chain types 45d7ad4->84b0668 while the tree at 606d2c8 was 1d30ec0 (the intermediate scanner-collision form unregistered, no assertion touched across the span — verified by the reviewer). Accepted as hygiene debt; the fresh run records below supersede the pair."
   }
  ],
  "interfaces_reviewed": [
@@ -106,6 +141,6 @@
  "builder_context": "builder-zcode-slice-claim-080 (the session-46 build context: the RED->GREEN->measured chain + the CI convergence rounds — the scanner-collision, the ARV-RED-002 amendment, the dispatch-fixture BASE-state repair, the scope widenings, the run-record JSON form, this schema repair)",
  "reviewer_context": "the D-042 (1a) merge-gate review at the PR (the fresh-context reviewer over the real diff — the standing protocol; this sev.json is the builder's measured account, the review appends its own verdict)",
  "disposition": "PASS",
- "review_summary": "The P5-A opening slice: the pack arm over the keyword core (the provenance-carrying assembly + the byte budget + the truncation law + the agent path + the isolation), the MCP registry join (23 arms), the pre-Phase-5 gate verified explicit. Four P2 owner-accepted-debts recorded (the empty anchor fields for the un-anchorable kinds; the used_bytes boundary; the shared limit default; the canonical-layer INT-147 form defects repaired in-slice). Zero open P0/P1 at the measured head.",
+ "review_summary": "The P5-A opening slice: the pack arm over the keyword core (the provenance-carrying assembly + the byte budget + the truncation law + the agent path + the isolation), the MCP registry join (23 arms), the pre-Phase-5 gate verified explicit. D-042 round 1 returned BLOCK-MERGE with ONE P1 (the dead --after keyset cursor: page 2 == page 1) — repaired in-slice (the k.entity_id predicate + PACK_SQL's {after} slot + truthful post-cursor markers) and PINNED by RPK-03's new leg (the advertised cursor fed back advances the page). Findings 2-5 declared as the owner-accepted-debt F-080-5..8 above (the reviewer's P2 residue), findings 6-7 as the F-080-9 hygiene note. Zero open P0/P1 at the measured head.",
  "sheet_section": true
 }

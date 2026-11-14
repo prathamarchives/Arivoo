@@ -299,6 +299,7 @@ PACK_SQL = ("SELECT k.kind || '|' || k.entity_id || '|' || k.revision || '|' || 
             "AND (k.kind = 'source' OR k.revision = ("
             "SELECT MAX(e.revision) FROM arv.keyword_index e WHERE e.owner_scope = k.owner_scope "
             "AND e.kind = k.kind AND e.entity_id = k.entity_id))) "
+            "{after}"
             "GROUP BY k.kind, k.entity_id, k.revision, a.source_id, "
             "c.anchor_id, bm.anchor_id "
             "HAVING count(DISTINCT k.token) = {nterms} "
@@ -331,8 +332,10 @@ def _budget_arg(budget: str):
 def _pack(db: str, owner: str, terms_u: list, budget: int,
           limit, after) -> int:
     """P5-A (CLAIM-080): the context-pack assembly over the keyword core.
-    The pagination rides the standing keyset law (_page_args over the
-    entity ids); the budget is a BYTE bound enforced at the ITEM boundary
+    The pagination rides the standing keyset law (_page_args' validation +
+    a local predicate over k.entity_id — keyword_index's own key, since the
+    table has no id column); the budget is a BYTE bound enforced at the ITEM
+    boundary
     (never a mid-item cut: an item is admitted whole or held back), the
     truncation recorded EXPLICITLY (the kept count + the total + the
     held-back marker), every retained item keeping its full provenance.
@@ -343,10 +346,30 @@ def _pack(db: str, owner: str, terms_u: list, budget: int,
     if page is None:
         return 1
     limit, _after_clause = page
+    # D-042 (1a) round-1 finding 1, repaired: the standing _page_args clause
+    # targets "<alias>.id" and keyword_index has no id column — the validated
+    # cursor was silently dropped here and page 2 was page 1. The keyset
+    # predicate is now composed LOCALLY over k.entity_id (the same
+    # already-validated UUID), carried through PACK_SQL's {after} slot; the
+    # cursor orders against the SAME ORDER BY the pack emits
+    # (k.kind, k.entity_id), so an advertised cursor admits exactly the rows
+    # strictly after it under that order — the same law as the standing
+    # lists, on this table's own key.
+    import uuid as _u
+    after_pred = ""
+    if after is not None:
+        try:
+            after_id = str(_u.UUID(after))
+        except (ValueError, AttributeError, TypeError):
+            _refuse_list_bounds(f"--after {after!r} is not a valid id (the keyset "
+                               "cursor takes a listed id of the same family)")
+            return 1
+        after_pred = f"AND k.entity_id > '{after_id}' "
     terms_u = sorted({tm.casefold() for tm in terms_u})  # deduplicated
     qterms = ", ".join("'" + tm.replace("'", "''") + "'" for tm in terms_u)
     rows = _read(db, owner, PACK_SQL.format(terms="ARRAY[" + qterms + "]",
-                                            nterms=len(terms_u)))
+                                            nterms=len(terms_u),
+                                            after=after_pred))
     if rows is None:
         return 1
     total = len(rows)

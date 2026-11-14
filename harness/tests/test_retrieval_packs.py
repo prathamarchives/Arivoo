@@ -231,15 +231,30 @@ def main() -> int:
         # ---- RPK-03 — the pagination law (the keyset cursor)
         r3b = pack("A", "xylophone", "--limit", "1")
         r3 = pack("A", "xylophone", "--limit", "1", "--after", "not-a-uuid")
+        # D-042 (1a) round-1 finding 1, repaired + pinned: the advertised
+        # cursor, fed back, must ADVANCE the page (page 2 != page 1, the next
+        # entity id served) — the hint an agent follows must never loop.
+        first_ids = result_ids(r3b)
+        cursor = ""
+        for ln in r3b.stdout.splitlines():
+            if ln.startswith("# more=") and "after=" in ln:
+                cursor = ln.rsplit("after=", 1)[1].strip()
+        r3c = pack("A", "xylophone", "--limit", "1", "--after", cursor)
+        second_ids = result_ids(r3c)
         ok3 = (r3b.returncode == 0 and "after=" in r3b.stdout
-               and r3.returncode == 1 and "ARV-QRY-004" in r3.stdout)
+               and r3.returncode == 1 and "ARV-QRY-004" in r3.stdout
+               and bool(cursor)
+               and r3c.returncode == 0
+               and second_ids and second_ids != first_ids
+               and first_ids and second_ids[0] != first_ids[0])
         check("RPK-03", ok3,
               "the pagination law: the bounded page answers with the keyset "
-              "cursor in the header (the next page's --after hint); an "
+              "cursor in the header; the advertised cursor FED BACK advances "
+              "the page (page 2 != page 1 — the D-042 repair pinned); an "
               "invalid cursor form is the typed ARV-QRY-004 refusal (never "
               "argparse's usage exit)",
-              "the pack arm carries the _page_args bounds as its own page "
-              "law")
+              "the pack arm carries the _page_args bounds + the k.entity_id "
+              "keyset predicate as its own page law")
 
         # ---- RPK-04 — the untrusted-content law
         r4 = pack("A", "administrator")

@@ -1,0 +1,34 @@
+# CLAIM-080 — P5-A: the authorized retrieval API / context packs (the PLAN 5A row
+# elaborated one phase deep at the #114 landing; record 72 §2). The pre-Phase-5
+# gate (D-034, the classification-words rule) verified explicit at commit A:
+# the tokenizer already treats every word uniformly (no weighting, no rank, no
+# special tagging behavior) — record 72 §1. RED-first at CLAIM-079's merged
+# head bf8be3a. The scope elaborates at the RED per the one-phase-deep rule.
+harness/query.py D-041
+# the retrieval core widened with the 5A arms: the identity/filter/temporal/
+# behavioral query forms over the LANDED families, the context-pack assembly
+# (source/revision/anchor + trust status + the mechanically true why per item,
+# the explicit truncation retaining provenance), the response budgets as the
+# read budget's deepening (record 69 §2's named Phase 5 increment)
+harness/tests/test_retrieval_packs.py D-041
+harness/red-records.json D-041
+harness/gate.py D-041
+harness/tests/test_search.py D-041
+# the search arm's budget interplay if the pack law touches it (the shared
+# _page_args bounds are the standing floor)
+harness/commands.py D-041
+# only if a pack rebuild/delivery command is required by the contract; no new
+# write arms without the PLAN's letter
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+INTENT-LEDGER.md D-038
+# the INT-147 reservation row (previous-max 146 + 1, one at a time, per rule 3)
+context/WORKLOG.md D-043
+context/extracted/71-P4F-RECOVERY-CONTRACT-GATE.md D-043
+# the staged CLAIM-079 close (record 71 §3/§4/§5 — the executed chain, the
+# two-round SEV account, the Phase 4 exit-gate verification) riding this
+# commit A per the #113-close pattern
+context/extracted/72-P5A-RETRIEVAL-CONTEXT-PACKS.md D-041
+harness/runs/claim-080-p5a-retrieval-context-packs D-041

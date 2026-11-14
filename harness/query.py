@@ -380,6 +380,20 @@ def _pack(db: str, owner: str, terms_u: list, budget: int,
                                "'kind|entity_id' position, or a plain entity id "
                                "within one kind)")
             return 1
+        # D-042 (1a) round-3 finding 1, repaired: the kind half was
+        # interpolated UNVALIDATED (the id half is UUID-normalized, the
+        # terms are quote-escaped, the owner escaped in _read — the kind
+        # was the one raw path; the reviewer's probe demonstrated predicate
+        # bypass and stacked-statement execution through it). The kind is
+        # validated against the pack's OWN kind vocabulary — the four
+        # kinds keyword_index carries — so no caller-controlled byte
+        # reaches the SQL unescaped.
+        if after_kind and after_kind not in ("source", "highlight",
+                                             "bookmark", "note"):
+            _refuse_list_bounds(f"--after {after!r} is not a valid cursor (the "
+                               "kind half must be one of source/highlight/"
+                               "bookmark/note)")
+            return 1
         if after_kind:
             after_pred = (f"AND (k.kind, k.entity_id) > "
                           f"('{after_kind}', '{after_id}') ")
@@ -1312,8 +1326,8 @@ def main() -> int:
     p.add_argument("--limit", default=str(DEFAULT_LIST_LIMIT),
                    help=f"the item page size (bounds 1..{MAX_LIST_LIMIT}, default {DEFAULT_LIST_LIMIT}) — "
                         "the shared bounded-read law")
-    p.add_argument("--after", default=None, metavar="ID",
-                   help="the keyset cursor — the next page starts strictly after this admitted entity id")
+    p.add_argument("--after", default=None, metavar="CURSOR",
+                   help="the keyset cursor — the next page starts strictly after this admitted row's composite position (kind|entity_id)")
     # P4-E slice one (CLAIM-077): the scoped agent read mode — --agent-token
     # REPLACES --owner (exactly one of the two, never both, never neither)
     for _p in sub.choices.values():

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_mcp_wrapper.py",
+  "exit_code": 0,
+  "commit": "1ea4ce679ee3cfac80ce08623c38313cf593fecf",
+  "output_sha256": "6b29eb320271a44f66b0c9335d7acf4261f2589608c1396d2db62bf5a18eeb7e",
+  "recorded_at": "2026-11-14T14:44:24.531407+00:00"
+}

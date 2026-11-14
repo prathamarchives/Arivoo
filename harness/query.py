@@ -261,6 +261,177 @@ SEARCH_SQL = ("SELECT k.kind || '|' || k.entity_id || '|' || k.revision || '|' |
               "AND e.kind = k.kind AND e.entity_id = k.entity_id)) "
               "GROUP BY k.kind, k.entity_id, k.revision "
               "HAVING count(DISTINCT k.token) = {nterms} ORDER BY k.kind, k.entity_id;")
+
+# P5-A (CLAIM-080; record 72 §2): the context-pack assembly — the same
+# keyword core (SEARCH_SQL's admission path), each admitted item carried
+# WITH its provenance: the family's source binding + revision + the anchor
+# id (the source-bound families) + the trust status (source material is
+# UNTRUSTED text — an embedded instruction in it is data, never executed)
+# + the mechanically true why (the exact matched terms per item, emitted
+# by the admitting machine — never a narration). The pack is a READ arm
+# over the same owner boundary (_read's RLS path exactly).
+PACK_SQL = ("SELECT k.kind || '|' || k.entity_id || '|' || k.revision || '|' || "
+            "COALESCE(a.source_id::text, '') || '|' || COALESCE(c.anchor_id::text, '') || '|' || "
+            "CASE WHEN k.kind = 'source' THEN 'untrusted' ELSE 'trusted' END || '|' || "
+            "string_agg(DISTINCT k.token, ',' ORDER BY k.token) "
+            "FROM arv.keyword_index k "
+            "LEFT JOIN arv.highlight c ON k.kind = 'highlight' AND c.id = k.entity_id "
+            "AND c.owner_scope = k.owner_scope "
+            "LEFT JOIN arv.bookmark bm ON k.kind = 'bookmark' AND bm.id = k.entity_id "
+            "AND bm.owner_scope = k.owner_scope "
+            "LEFT JOIN arv.note nt ON k.kind = 'note' AND nt.id = k.entity_id "
+            "AND nt.owner_scope = k.owner_scope "
+            "LEFT JOIN arv.anchor a ON a.id = COALESCE(c.anchor_id, bm.anchor_id) "
+            "WHERE k.token = ANY ({terms}) AND ("
+            "((k.kind = 'note' AND NOT EXISTS (SELECT 1 FROM arv.note_lifecycle l "
+            "WHERE l.note_id = k.entity_id AND l.owner_scope = k.owner_scope "
+            "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
+            "count(*) FILTER (WHERE l.event = 'restore')))"
+            " OR (k.kind = 'highlight' AND NOT EXISTS (SELECT 1 FROM arv.highlight_lifecycle l "
+            "WHERE l.highlight_id = k.entity_id AND l.owner_scope = k.owner_scope "
+            "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
+            "count(*) FILTER (WHERE l.event = 'restore')))"
+            " OR (k.kind = 'bookmark' AND NOT EXISTS (SELECT 1 FROM arv.bookmark_lifecycle l "
+            "WHERE l.bookmark_id = k.entity_id AND l.owner_scope = k.owner_scope "
+            "HAVING count(*) FILTER (WHERE l.event = 'tombstone') > "
+            "count(*) FILTER (WHERE l.event = 'restore')))"
+            " OR k.kind = 'source') "
+            "AND (k.kind = 'source' OR k.revision = ("
+            "SELECT MAX(e.revision) FROM arv.keyword_index e WHERE e.owner_scope = k.owner_scope "
+            "AND e.kind = k.kind AND e.entity_id = k.entity_id))) "
+            "{after}"
+            "GROUP BY k.kind, k.entity_id, k.revision, a.source_id, "
+            "c.anchor_id, bm.anchor_id "
+            "HAVING count(DISTINCT k.token) = {nterms} "
+            "ORDER BY k.kind, k.entity_id;")
+
+# P5-A: the default response budget (bytes) — the pack's own bounded form;
+# the budget changes only through this boundary's own change process.
+DEFAULT_PACK_BUDGET = 65536
+MAX_PACK_BUDGET = 1048576
+
+
+def _budget_arg(budget: str):
+    """P5-A (CLAIM-080): the response budget's boundary validation — the
+    SAME typed law as _page_args (a typed ARV-QRY-004-class refusal, never
+    a clamp): an integer within 1..MAX_PACK_BUDGET or the typed refusal."""
+    try:
+        b = int(budget)
+    except (TypeError, ValueError):
+        print(f"FAIL ARV-QRY-004: --budget-bytes {budget!r} is not an integer "
+              "(the response budget is a byte bound — an invalid form is the "
+              "typed refusal, never a clamp)")
+        return None
+    if b < 1 or b > MAX_PACK_BUDGET:
+        print(f"FAIL ARV-QRY-004: --budget-bytes {b} is outside the bounds "
+              f"1..{MAX_PACK_BUDGET}")
+        return None
+    return b
+
+
+def _pack(db: str, owner: str, terms_u: list, budget: int,
+          limit, after) -> int:
+    """P5-A (CLAIM-080): the context-pack assembly over the keyword core.
+    The pagination rides the standing keyset law (_page_args' validation +
+    the COMPOSITE cursor predicate (k.kind, k.entity_id) — both fields of
+    the pack's own ORDER BY, so the cursor is an exact row position across
+    kind boundaries; a 1-field id is accepted for within-kind walks); the
+    budget is a BYTE bound enforced at the ITEM
+    boundary
+    (never a mid-item cut: an item is admitted whole or held back), the
+    truncation recorded EXPLICITLY (the kept count + the total + the
+    held-back marker), every retained item keeping its full provenance.
+    The why is the admitting machine's own matched-terms emission — the
+    same query twice is the byte-equal pack (deterministic: no clock, no
+    randomness)."""
+    # D-042 (1a) round-1 finding 1, repaired; round-2 finding 1, repaired
+    # again: the standing _page_args clause targets "<alias>.id" and
+    # keyword_index has no id column (why the validated cursor was first
+    # silently dropped — page 2 was page 1), and the round-1 repair's
+    # 1-field k.entity_id predicate could not express a position under the
+    # pack's COMPOSITE order (k.kind, k.entity_id): a row of an
+    # earlier-sorting kind with a smaller id became unreachable forever.
+    # The cursor is now the COMPOSITE row position — both key fields, the
+    # exact ORDER BY the pack emits — so an advertised cursor admits exactly
+    # the rows strictly after it under that order, across kind boundaries;
+    # RPK-03 pins the FULL walk (union == the unbounded pack, no dups, no
+    # skips). The LIMIT half rides _page_args (the shared typed law); the
+    # cursor half is validated here (the composite form is this arm's own).
+    page = _page_args(limit, None, "k")
+    if page is None:
+        return 1
+    limit = page[0]
+    import uuid as _u
+    after_pred = ""
+    if after is not None:
+        # the cursor form: "<kind>|<entity_id>" — the pack's own line form
+        # (the more-marker's after= hint carries BOTH fields; the standing
+        # 1-field form is accepted for back-compat within a single kind,
+        # where it is the correct position)
+        try:
+            if "|" in after:
+                after_kind, after_id_raw = after.split("|", 1)
+                after_id = str(_u.UUID(after_id_raw))
+            else:
+                after_kind, after_id = "", str(_u.UUID(after))
+        except (ValueError, AttributeError, TypeError):
+            _refuse_list_bounds(f"--after {after!r} is not a valid cursor (the "
+                               "keyset cursor takes the pack's advertised "
+                               "'kind|entity_id' position, or a plain entity id "
+                               "within one kind)")
+            return 1
+        # D-042 (1a) round-3 finding 1, repaired: the kind half was
+        # interpolated UNVALIDATED (the id half is UUID-normalized, the
+        # terms are quote-escaped, the owner escaped in _read — the kind
+        # was the one raw path; the reviewer's probe demonstrated predicate
+        # bypass and stacked-statement execution through it). The kind is
+        # validated against the pack's OWN kind vocabulary — the four
+        # kinds keyword_index carries — so no caller-controlled byte
+        # reaches the SQL unescaped.
+        if after_kind and after_kind not in ("source", "highlight",
+                                             "bookmark", "note"):
+            _refuse_list_bounds(f"--after {after!r} is not a valid cursor (the "
+                               "kind half must be one of source/highlight/"
+                               "bookmark/note)")
+            return 1
+        if after_kind:
+            after_pred = (f"AND (k.kind, k.entity_id) > "
+                          f"('{after_kind}', '{after_id}') ")
+        else:
+            after_pred = f"AND k.entity_id > '{after_id}' "
+    terms_u = sorted({tm.casefold() for tm in terms_u})  # deduplicated
+    qterms = ", ".join("'" + tm.replace("'", "''") + "'" for tm in terms_u)
+    rows = _read(db, owner, PACK_SQL.format(terms="ARRAY[" + qterms + "]",
+                                            nterms=len(terms_u),
+                                            after=after_pred))
+    if rows is None:
+        return 1
+    total = len(rows)
+    kept: list = []
+    used = 0
+    for ln in rows[:limit]:
+        item = ln + "|why=" + ",".join(terms_u)
+        if used + len(item.encode("utf-8")) > budget and kept:
+            break
+        kept.append(item)
+        used += len(item.encode("utf-8"))
+    print(f"# api_version={API_VERSION} "
+          "kind|entity_id|revision|source_id|anchor_id|trust|matched_terms|why")
+    for ln in kept:
+        print(ln)
+    # the next-page hint: the LAST ADMITTED row's COMPOSITE position as the
+    # keyset cursor (the standing list arms' more-marker, extended with the
+    # cursor value the agent passes back as --after): both ORDER BY fields,
+    # "kind|entity_id" — the exact position the pack emits its rows under,
+    # so the next page admits exactly the rows strictly after it (the
+    # D-042 round-2 repair: a 1-field hint stranded rows across kind
+    # boundaries; the exhaustion walk is pinned by RPK-03)
+    last_pos = "|".join(kept[-1].split("|")[:2]) if kept else ""
+    print(f"# more={'true' if total > len(kept) else 'false'} "
+          f"kept={len(kept)} total={total} "
+          f"truncated={'true' if len(kept) < total else 'false'} "
+          f"budget_bytes={budget} used_bytes={used} after={last_pos}")
+    return 0
 # P4-C slice one (CLAIM-070; record 62 §2): the library membership list —
 # the owner's imported sources (RLS the owner boundary).  A source row is
 # BORN complete at import (a failed import never creates one — its
@@ -1143,6 +1314,20 @@ def main() -> int:
     p = sub.add_parser("search")
     p.add_argument("--owner", default=None)
     p.add_argument("terms", nargs="+", help="the keyword terms (AND semantics — every term must hit the document)")
+    # P5-A (CLAIM-080; record 72 §2): the context-pack arm — the keyword
+    # admission with the provenance-carrying assembly, the byte budget,
+    # the keyset pagination
+    p = sub.add_parser("pack")
+    p.add_argument("--owner", default=None)
+    p.add_argument("terms", nargs="+", help="the keyword terms (AND semantics — the pack admits the same documents the search admits)")
+    p.add_argument("--budget-bytes", default=str(DEFAULT_PACK_BUDGET),
+                   help=f"the response budget in bytes (bounds 1..{MAX_PACK_BUDGET}, default {DEFAULT_PACK_BUDGET}) — "
+                        "the truncation is explicit at the item boundary, never a mid-item cut")
+    p.add_argument("--limit", default=str(DEFAULT_LIST_LIMIT),
+                   help=f"the item page size (bounds 1..{MAX_LIST_LIMIT}, default {DEFAULT_LIST_LIMIT}) — "
+                        "the shared bounded-read law")
+    p.add_argument("--after", default=None, metavar="CURSOR",
+                   help="the keyset cursor — the next page starts strictly after this admitted row's composite position (kind|entity_id)")
     # P4-E slice one (CLAIM-077): the scoped agent read mode — --agent-token
     # REPLACES --owner (exactly one of the two, never both, never neither)
     for _p in sub.choices.values():
@@ -1227,6 +1412,14 @@ def _dispatch(a, db) -> int:
         for ln in rows:
             print(ln)
         return 0
+    if a.what == "pack":
+        # P5-A (CLAIM-080): the context pack — the budget validated at the
+        # boundary (the typed refusal, never a clamp), the assembly over the
+        # same keyword core, the explicit truncation record
+        budget = _budget_arg(a.budget_bytes)
+        if budget is None:
+            return 1
+        return _pack(db, a.owner, a.terms, budget, a.limit, a.after)
     if a.what == "get-note":
         # P3-06 (RTM §3.3): the ordinary read refuses tombstoned ids with the
         # typed code; the governed history keeps them addressable — the state

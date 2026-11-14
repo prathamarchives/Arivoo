@@ -1,0 +1,21 @@
+RED observed: the 'pack' arm is absent at this tree (LAW-11 — the implementation lands after this RED)
+FAIL RPK-01: the pack assembly: every item carries source/revision + anchor (the source-bound families) + trust status + the mechanically true why
+      repair: the pack arm composes the identity/filter/temporal/behavioral forms with the provenance-carrying item shape
+FAIL RPK-02: the budget + truncation law: the over-budget pack truncates at the item boundary with the explicit truncation record (kept/total) and retained provenance; the invalid budget form is the typed refusal
+      repair: the pack assembly enforces the byte/row budget at the item boundary and emits the truncation record
+FAIL RPK-03: the pagination law: the pack pages by the standing keyset --after cursor (never offset), the page carried in the header
+      repair: the pack arm carries the _page_args bounds as its own page law
+FAIL RPK-04: the untrusted-content law: the hostile source's instruction-like text is served as DATA with the UNTRUSTED status — never executed, never scope-widening
+      repair: the pack marks source material untrusted and carries it verbatim; the pipeline executes nothing from content
+PASS RPK-05: the classification-words law: 'concept'/'fact'/'quote' match exactly like any ordinary word — no dedicated weighting, no rank difference (the tokenizer's uniform treatment pinned)
+FAIL RPK-06: the agent path: the pack serves the scoped agent through the SAME core with the SAME budgets; the pack is READ-ONLY
+      repair: the pack arm joins the --agent-token identity law (the credential-bound owner scope, the audit row)
+FAIL RPK-07: the owner isolation: owner B's pack never contains A's material (RLS — the pack rides the same owner boundary)
+      repair: the pack arm rides the _read RLS path exactly
+FAIL RPK-08: the deterministic why: the same query → the byte-equal pack (the ordering deterministic, the why mechanical — never a narration)
+      repair: the pack assembly is a pure function of the committed rows and the query — no clock, no randomness in the output
+FAIL RPK-09: the MCP registry join: the pack arms appear in the MCP tool registry as read arms over the same core (the wrapper adds NO retrieval logic)
+      repair: the pack arm joins the MCP tool registry through the standing arms-to-tools law
+PASS RPK-10: the no-new-write law: this slice adds NO write command — the pack is a read surface (the write boundary unchanged)
+
+RED — 8 failure(s): RPK-01, RPK-02, RPK-03, RPK-04, RPK-06, RPK-07, RPK-08, RPK-09

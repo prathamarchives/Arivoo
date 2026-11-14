@@ -141,8 +141,28 @@ _tool("search",
                                 "term must hit the document)"}},
       ["terms"])
 
+# P5-A (CLAIM-080; record 72 §2): the context-pack arm — the same retrieval
+# core, the provenance-carrying assembly (source/revision/anchor + trust
+# status + the mechanically true why), the explicit budget truncation
+_tool("pack",
+      "the context pack over the keyword core — every admitted item carries "
+      "its source/revision/anchor + trust status (source material is "
+      "UNTRUSTED text) + the mechanically true why (the matched terms); "
+      "the byte budget truncates at the item boundary with an explicit "
+      "truncation record",
+      {"terms": {"type": "array", "items": {"type": "string"},
+                 "description": "the keyword terms (AND semantics — the pack "
+                                "admits the same documents the search admits)"},
+       "budget-bytes": {"type": "string",
+                        "description": "the response budget in bytes "
+                                       "(bounds 1..1048576, default 65536) — "
+                                       "the explicit-truncation bound"},
+       "limit": _limit_prop(),
+       "after": _after_prop()},
+      ["terms"])
+
 REGISTRY = {t["name"]: t for t in TOOLS}
-assert len(REGISTRY) == 22, "the closed membership: the 22 landed read arms"
+assert len(REGISTRY) == 23, "the closed membership: the 23 landed read arms (the pack arm joined P5-A)"
 
 
 # --------------------------------------------------------------- the argument law
@@ -181,10 +201,10 @@ def _assemble(name: str, arguments: object) -> list:
             raise Refusal(f"ARV-MCP-002: the required argument '{k}' is "
                           f"missing (the inputSchema is the contract)")
     argv: list = []
-    for k in ("id", "source", "ref", "limit", "after"):
+    for k in ("id", "source", "ref", "limit", "after", "budget-bytes"):
         if k in arguments:
             argv.append(f"--{k}={_scalar(arguments[k], k)}")
-    if name == "search":
+    if name in ("search", "pack"):
         terms = arguments["terms"]
         if not isinstance(terms, list) or not terms:
             raise Refusal("ARV-MCP-002: the terms must be a non-empty array "

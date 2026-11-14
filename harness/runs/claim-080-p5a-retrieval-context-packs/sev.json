@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-080-p5a-retrieval-context-packs",
  "base_sha": "bf8be3aeef808a8e9638bbc3b9d89470aa2d2423",
- "reviewed_diff_sha256": "c9e88fca23c5818149d09c86c84a94221499178380152a2d377f516077cdbfea",
+ "reviewed_diff_sha256": "3ed6ee5e4a54a5304fd0766cd257c298b64d5c27e18f9cce3210d4cd3589b6f7",
  "intent_ids": [
   "INT-134",
   "INT-145",
@@ -85,7 +85,7 @@
    "title": "records hygiene: run-01/run-04 same-command different-digest + the amendment chain's intermediate form",
    "severity": "P2",
    "status": "owner-accepted-debt",
-   "note": "D-042 round-1 findings 6+7 (records hygiene), extended by round 2's finding 3 (the repair's comment stated a false invariant — now corrected in the round-2 commit): run-01/run-04 same-command different-digest pair superseded by the fresh records; the amendment chain's intermediate form registered in the round-1 note; the false comment rewritten to the composite-cursor law. Accepted as hygiene debt."
+   "note": "D-042 round-1 findings 6+7 + round-2 finding 3 (the false comment, corrected) + round-3's P2s (the --after metavar/help doc drift, fixed; the refusal echoing the raw --after value back — the standing arms' pattern, accepted as cosmetic): the records-hygiene and doc-drift ledger. Accepted as hygiene debt."
   }
  ],
  "interfaces_reviewed": [
@@ -141,6 +141,6 @@
  "builder_context": "builder-zcode-slice-claim-080 (the session-46 build context: the RED->GREEN->measured chain + the CI convergence rounds — the scanner-collision, the ARV-RED-002 amendment, the dispatch-fixture BASE-state repair, the scope widenings, the run-record JSON form, this schema repair)",
  "reviewer_context": "the D-042 (1a) merge-gate review at the PR (the fresh-context reviewer over the real diff — the standing protocol; this sev.json is the builder's measured account, the review appends its own verdict)",
  "disposition": "PASS",
- "review_summary": "The P5-A opening slice: the pack arm over the keyword core (the provenance-carrying assembly + the byte budget + the truncation law + the agent path + the isolation), the MCP registry join (23 arms), the pre-Phase-5 gate verified explicit. D-042 round 1: BLOCK-MERGE, 1 P1 (the dead cursor) — repaired (k.entity_id predicate) + pinned. Round 2: BLOCK-MERGE, 1 P1 (the 1-field cursor vs the 2-field composite ORDER BY — rows stranded across kind boundaries, the reviewer's deterministic probes) — repaired (the COMPOSITE (k.kind, k.entity_id) cursor predicate + the composite after= hint) + pinned by RPK-03's EXHAUSTION leg (union == full, no dups, no skips; both round-2 probes re-run GREEN); the false comment corrected. Findings 2-5 declared as F-080-5..8 (the reviewer's P2 residue), findings 6-7 + round-2's comment as F-080-9. Zero open P0/P1 at the measured head.",
+ "review_summary": "The P5-A opening slice: the pack arm over the keyword core (the provenance-carrying assembly + the byte budget + the truncation law + the agent path + the isolation), the MCP registry join (23 arms), the pre-Phase-5 gate verified explicit. D-042 round 1: BLOCK-MERGE, 1 P1 (the dead cursor) — repaired + pinned. Round 2: BLOCK-MERGE, 1 P1 (the 1-field cursor vs the 2-field composite order — rows stranded across kind boundaries) — repaired (the COMPOSITE (k.kind, k.entity_id) cursor) + pinned by RPK-03's EXHAUSTION leg; the false comment corrected. Round 3: BLOCK-MERGE, 1 P1 (the kind half interpolated UNVALIDATED — the injection path; the reviewer's probe demonstrated predicate bypass + stacked statements) — repaired (the kind-vocabulary validation: source/highlight/bookmark/note; the probe now REFUSES with the typed code) + the doc drift fixed. Findings 2-5 declared as F-080-5..8, the hygiene/doc ledger as F-080-9. Zero open P0/P1 at the measured head.",
  "sheet_section": true
 }

@@ -75,22 +75,22 @@ def check(code: str, ok: bool, what: str, repair: str) -> None:
         FAILS.append(code)
 
 
-# ---- the machinery-absent probe (LAW-11's RED gate) ----
-# The pack arm must NOT exist at this commit: the probe runs query.py's
-# parser with 'pack' and expects the argparse refusal.
+# ---- the machinery probe (LAW-11's RED gate, the CLAIM-078 form) ----
+# The pack arm's machinery: query.py's 'pack' parser answering. The probe is
+# DB-free by construction. At the RED commit (dc2c343) the arm was ABSENT —
+# the argparse refusal observed + recorded (red-01.txt: 8 failures, exit 1);
+# after the GREEN the arm answers and this probe passes (the machinery is
+# the contract's object; its absence is the RED, its presence the GREEN).
 _probe = subprocess.run([sys.executable, str(REPO / "harness" / "query.py"),
                          "pack", "--help"], capture_output=True, text=True,
                         timeout=60, env=dict(os.environ,
-                                            PGDATABASE="arv_p5a_red_probe_absent"))
+                                            PGDATABASE="arv_p5a_probe"))
 _absent_arm = "invalid choice" in _probe.stderr
-if not _absent_arm:
-    print("FAIL ARV-TEST-000: the P5-A pack machinery is NOT absent at the "
-          "RED commit (the 'pack' arm already answers) — LAW-11's ordering "
-          "violated: the RED must be observed at the machinery-absent tree, "
-          "the implementation lands AFTER this record")
+if _absent_arm:
+    print("FAIL ARV-TEST-000: the P5-A pack machinery is absent "
+          "(machinery-absent class; query.py's 'pack' arm does not answer) — "
+          "the implementation lands after this RED, never before it (LAW-11)")
     sys.exit(1)
-print("RED observed: the 'pack' arm is absent at this tree (LAW-11 — the "
-      "implementation lands after this RED)")
 # The suite CONTINUES to the full condition set so the RED is bound to the
 # complete contract (the exit code carries it; red-01.txt records it).
 
@@ -146,10 +146,11 @@ def search(owner, *terms):
 
 def ack_field(p: subprocess.CompletedProcess, field: str) -> str:
     for ln in p.stdout.split("\n"):
-        if ln.startswith("ACK ") or "=" in ln:
-            k, _, v = ln.partition("=")
-            if k.strip().endswith(field):
-                return v.strip()
+        for tok in ln.split():
+            if "=" in tok:
+                k, _, v = tok.partition("=")
+                if k == field:
+                    return v
     return ""
 
 
@@ -223,16 +224,17 @@ def main() -> int:
               "boundary and emits the truncation record")
 
         # ---- RPK-03 — the pagination law (the keyset cursor)
-        r3 = pack("A", "xylophone", "--limit", "1", "--after", "")
         r3b = pack("A", "xylophone", "--limit", "1")
-        ok3 = (r3.returncode == 0 and r3b.returncode == 0
-               and len(result_ids(r3b)) >= len(result_ids(r3))
-               and ("after=" in r3.stdout or "cursor" in r3.stdout.lower()
-                    or "# api_version" in r3.stdout))
+        r3 = pack("A", "xylophone", "--limit", "1", "--after", "not-a-uuid")
+        ok3 = (r3b.returncode == 0 and "after=" in r3b.stdout
+               and r3.returncode == 1 and "ARV-QRY-004" in r3.stdout)
         check("RPK-03", ok3,
-              "the pagination law: the pack pages by the standing keyset "
-              "--after cursor (never offset), the page carried in the header",
-              "the pack arm carries the _page_args bounds as its own page law")
+              "the pagination law: the bounded page answers with the keyset "
+              "cursor in the header (the next page's --after hint); an "
+              "invalid cursor form is the typed ARV-QRY-004 refusal (never "
+              "argparse's usage exit)",
+              "the pack arm carries the _page_args bounds as its own page "
+              "law")
 
         # ---- RPK-04 — the untrusted-content law
         r4 = pack("A", "administrator")
@@ -262,12 +264,17 @@ def main() -> int:
               "treatment IS the law; any weighting would fail this pin")
 
         # ---- RPK-06 — the agent path (the same core, the same budgets)
-        mint = cmd("mint_agent_credential", "--label", "pack-agent",
-                   "--scope", "read")
+        mint = cmd("mint_agent_credential", "--label", "pack-agent", key="mint-1")
         token = ack_field(mint, "token")
         r6 = cli(str(REPO / "harness" / "query.py"), "pack",
                  "--agent-token", token, "xylophone")
-        w = cmd("create_note", "--agent-token", token, "--content", "x")
+        # the READ-ONLY law: a write command refuses the token — WITHOUT
+        # --owner (the token alone; the cmd() helper always injects --owner,
+        # which would refuse for AMBIGUITY instead — the structural read-only
+        # refusal is the honest check)
+        w = cli(str(REPO / "harness" / "commands.py"), "create_note",
+                "--agent-token", token, "--content", "x",
+                "--actor", "owner", "--client-id", "cli-1", "--idem-key", "w1")
         ok6 = (mint.returncode == 0 and r6.returncode == 0
                and result_ids(r6)
                and w.returncode != 0)
@@ -301,10 +308,7 @@ def main() -> int:
         probe9 = subprocess.run([sys.executable, "-c",
                                  "import sys; sys.path.insert(0, %r);\n"
                                  "from harness import mcp\n"
-                                 "names = mcp._tool_registry() if hasattr(mcp, "
-                                 "'_tool_registry') else []\n"
-                                 "print('pack' in ' '.join(names) if names "
-                                 "else [n for n in dir(mcp) if 'tool' in n.lower()])"
+                                 "print(' '.join(t['name'] for t in mcp.TOOLS))"
                                  % str(REPO)], capture_output=True, text=True,
                                 timeout=60, env=dict(os.environ, PGDATABASE=DB))
         ok9 = probe9.returncode == 0 and "pack" in probe9.stdout

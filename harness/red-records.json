@@ -102,7 +102,7 @@
     "red_code": "ARV-TEST-000/011/019"
   },
   "harness/tests/test_gate_dispatch.py": {
-    "current_sha256": "efdc36da8560d0a45c1b34ae8a3cdf3b5c30ab7c480f9a5a546ff75b8f98277a",
+    "current_sha256": "c2bd662d9e3772b1a380b1eb55ebe13d4fc9e8ed45e75718508010c14adc6cdc",
     "amendments": [
       {
         "note": "H-01a additive amendment (LAW-11: amendments add, never remove): the unrelated-roots fixture left HEAD on the orphan branch \u2014 added gitu(checkout main) so the ARV-DIFF-002 case is a true cross-root diff; the assertion set is unchanged (all 11 named checks stand)"
@@ -154,6 +154,12 @@
         "new_sha256": "efdc36da8560d0a45c1b34ae8a3cdf3b5c30ab7c480f9a5a546ff75b8f98277a",
         "note": "CLAIM-062 the dispatch-fixture amendment (the live-registry dependency class the fixture's own comment names \u2014 caught by ARV-CLM-002 firing EXACTLY as designed when CLAIM-062 legitimately opened README.md): the synthetic CLAIM-998 scope drops README.md for the fixture-owned probe file alone; the fixture's assertions unchanged",
         "observed_at": "2026-11-05T20:43:26.295212+00:00"
+      },
+      {
+        "prior_sha256": "efdc36da8560d0a45c1b34ae8a3cdf3b5c30ab7c480f9a5a546ff75b8f98277a",
+        "new_sha256": "c2bd662d9e3772b1a380b1eb55ebe13d4fc9e8ed45e75718508010c14adc6cdc",
+        "note": "the session-46 fixture repair: test_gate_dispatch.py's fixture_clone now checks out the derived BASE state (the scenarios exercise the gate's dispatch logic on a main-equal tree; a slice-branch HEAD made the clone trip the scope checks on files the fabricated declarations never name \u2014 observed RED on the CLAIM-080 branch). Assertions corrected forward in the fixture's setup only, no scenario weakened; the suite GREEN at the repaired form",
+        "observed_at": "2026-11-14T14:18:26.095056+00:00"
       }
     ],
     "red_evidence": "Amendment 2 (H-01a-R, narrowed not weakened): the bad-base assertion's first draft counted raw 'ARV-DIFF-001' substring mentions \u2014 but the ARV-CLM-000 skip note and the REQUIRED consolidated summary ('RED \u2014 the gate refuses: ...') legitimately contain the code string; the assertion is narrowed to the disposition form (lines starting 'FAIL ARV-DIFF-001' == exactly one) \u2014 no assertion removed, the traceback/exit/skip-note/selfcheck assertions unchanged; the underlying defect (a second disposition print or a crash-repeated code) stays refused",

@@ -1363,7 +1363,7 @@
     "red_exit": 1,
     "red_code": "RPK-01,RPK-02,RPK-03,RPK-04,RPK-06,RPK-07,RPK-08,RPK-09",
     "red_evidence": "the P5-A RED observed at dc2c343 (tests-only; machinery-absent: query.py's pack arm) \u2014 red-01.txt",
-    "current_sha256": "88fbda47101e1a6e0b806780c950c85c618aa5a8db07c0d5d5cc152c745af4ae",
+    "current_sha256": "3ec05ba6540678916be25e06ad096f0a54111216152609061d5e9997986babdd",
     "amendments": [
       {
         "prior_sha256": "462923cbaf244d16a4b3a7aef8b4e19356eb2a752283449bf730ac6c24d1249b",
@@ -1382,6 +1382,12 @@
         "new_sha256": "88fbda47101e1a6e0b806780c950c85c618aa5a8db07c0d5d5cc152c745af4ae",
         "note": "the D-042 round-1 repair: test_retrieval_packs.py's RPK-03 gained the advancing-page leg (the advertised cursor fed back MUST yield a different page with the next entity id \u2014 the P1 finding's pin; the dead-cursor form was repaired in harness/query.py the same commit). Assertions only grew: the leg adds 5 conjuncts to ok3; no prior assertion touched",
         "observed_at": "2026-11-14T16:18:52.395674+00:00"
+      },
+      {
+        "prior_sha256": "88fbda47101e1a6e0b806780c950c85c618aa5a8db07c0d5d5cc152c745af4ae",
+        "new_sha256": "3ec05ba6540678916be25e06ad096f0a54111216152609061d5e9997986babdd",
+        "note": "the D-042 round-2 repair: the pack's keyset cursor is now the COMPOSITE row position (kind|entity_id \u2014 both ORDER BY fields; the round-1 1-field predicate stranded rows across kind boundaries, the reviewer's deterministic probes confirmed) and RPK-03 gained the EXHAUSTION leg (the BND-05 form: the union of the pages == the unbounded pack, no dups, no skips; the walk terminates more=false). Assertions only grew: ok3 gained 4 conjuncts (the composite form, the exhaustive walk's 3 equalities); no prior assertion touched",
+        "observed_at": "2026-11-14T16:42:40.853026+00:00"
       }
     ]
   }

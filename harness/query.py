@@ -333,8 +333,10 @@ def _pack(db: str, owner: str, terms_u: list, budget: int,
           limit, after) -> int:
     """P5-A (CLAIM-080): the context-pack assembly over the keyword core.
     The pagination rides the standing keyset law (_page_args' validation +
-    a local predicate over k.entity_id — keyword_index's own key, since the
-    table has no id column); the budget is a BYTE bound enforced at the ITEM
+    the COMPOSITE cursor predicate (k.kind, k.entity_id) — both fields of
+    the pack's own ORDER BY, so the cursor is an exact row position across
+    kind boundaries; a 1-field id is accepted for within-kind walks); the
+    budget is a BYTE bound enforced at the ITEM
     boundary
     (never a mid-item cut: an item is admitted whole or held back), the
     truncation recorded EXPLICITLY (the kept count + the total + the
@@ -342,29 +344,47 @@ def _pack(db: str, owner: str, terms_u: list, budget: int,
     The why is the admitting machine's own matched-terms emission — the
     same query twice is the byte-equal pack (deterministic: no clock, no
     randomness)."""
-    page = _page_args(limit, after, "k")
+    # D-042 (1a) round-1 finding 1, repaired; round-2 finding 1, repaired
+    # again: the standing _page_args clause targets "<alias>.id" and
+    # keyword_index has no id column (why the validated cursor was first
+    # silently dropped — page 2 was page 1), and the round-1 repair's
+    # 1-field k.entity_id predicate could not express a position under the
+    # pack's COMPOSITE order (k.kind, k.entity_id): a row of an
+    # earlier-sorting kind with a smaller id became unreachable forever.
+    # The cursor is now the COMPOSITE row position — both key fields, the
+    # exact ORDER BY the pack emits — so an advertised cursor admits exactly
+    # the rows strictly after it under that order, across kind boundaries;
+    # RPK-03 pins the FULL walk (union == the unbounded pack, no dups, no
+    # skips). The LIMIT half rides _page_args (the shared typed law); the
+    # cursor half is validated here (the composite form is this arm's own).
+    page = _page_args(limit, None, "k")
     if page is None:
         return 1
-    limit, _after_clause = page
-    # D-042 (1a) round-1 finding 1, repaired: the standing _page_args clause
-    # targets "<alias>.id" and keyword_index has no id column — the validated
-    # cursor was silently dropped here and page 2 was page 1. The keyset
-    # predicate is now composed LOCALLY over k.entity_id (the same
-    # already-validated UUID), carried through PACK_SQL's {after} slot; the
-    # cursor orders against the SAME ORDER BY the pack emits
-    # (k.kind, k.entity_id), so an advertised cursor admits exactly the rows
-    # strictly after it under that order — the same law as the standing
-    # lists, on this table's own key.
+    limit = page[0]
     import uuid as _u
     after_pred = ""
     if after is not None:
+        # the cursor form: "<kind>|<entity_id>" — the pack's own line form
+        # (the more-marker's after= hint carries BOTH fields; the standing
+        # 1-field form is accepted for back-compat within a single kind,
+        # where it is the correct position)
         try:
-            after_id = str(_u.UUID(after))
+            if "|" in after:
+                after_kind, after_id_raw = after.split("|", 1)
+                after_id = str(_u.UUID(after_id_raw))
+            else:
+                after_kind, after_id = "", str(_u.UUID(after))
         except (ValueError, AttributeError, TypeError):
-            _refuse_list_bounds(f"--after {after!r} is not a valid id (the keyset "
-                               "cursor takes a listed id of the same family)")
+            _refuse_list_bounds(f"--after {after!r} is not a valid cursor (the "
+                               "keyset cursor takes the pack's advertised "
+                               "'kind|entity_id' position, or a plain entity id "
+                               "within one kind)")
             return 1
-        after_pred = f"AND k.entity_id > '{after_id}' "
+        if after_kind:
+            after_pred = (f"AND (k.kind, k.entity_id) > "
+                          f"('{after_kind}', '{after_id}') ")
+        else:
+            after_pred = f"AND k.entity_id > '{after_id}' "
     terms_u = sorted({tm.casefold() for tm in terms_u})  # deduplicated
     qterms = ", ".join("'" + tm.replace("'", "''") + "'" for tm in terms_u)
     rows = _read(db, owner, PACK_SQL.format(terms="ARRAY[" + qterms + "]",
@@ -385,14 +405,18 @@ def _pack(db: str, owner: str, terms_u: list, budget: int,
           "kind|entity_id|revision|source_id|anchor_id|trust|matched_terms|why")
     for ln in kept:
         print(ln)
-    # the next-page hint: the LAST ADMITTED id as the keyset cursor (the
-    # standing list arms' more-marker, extended with the cursor value the
-    # agent passes back as --after)
-    last_id = kept[-1].split("|")[1] if kept else ""
+    # the next-page hint: the LAST ADMITTED row's COMPOSITE position as the
+    # keyset cursor (the standing list arms' more-marker, extended with the
+    # cursor value the agent passes back as --after): both ORDER BY fields,
+    # "kind|entity_id" — the exact position the pack emits its rows under,
+    # so the next page admits exactly the rows strictly after it (the
+    # D-042 round-2 repair: a 1-field hint stranded rows across kind
+    # boundaries; the exhaustion walk is pinned by RPK-03)
+    last_pos = "|".join(kept[-1].split("|")[:2]) if kept else ""
     print(f"# more={'true' if total > len(kept) else 'false'} "
           f"kept={len(kept)} total={total} "
           f"truncated={'true' if len(kept) < total else 'false'} "
-          f"budget_bytes={budget} used_bytes={used} after={last_id}")
+          f"budget_bytes={budget} used_bytes={used} after={last_pos}")
     return 0
 # P4-C slice one (CLAIM-070; record 62 §2): the library membership list —
 # the owner's imported sources (RLS the owner boundary).  A source row is

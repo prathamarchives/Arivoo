@@ -231,9 +231,12 @@ def main() -> int:
         # ---- RPK-03 — the pagination law (the keyset cursor)
         r3b = pack("A", "xylophone", "--limit", "1")
         r3 = pack("A", "xylophone", "--limit", "1", "--after", "not-a-uuid")
-        # D-042 (1a) round-1 finding 1, repaired + pinned: the advertised
-        # cursor, fed back, must ADVANCE the page (page 2 != page 1, the next
-        # entity id served) — the hint an agent follows must never loop.
+        # D-042 (1a) round-1 finding 1 repaired + pinned: the advertised
+        # cursor, fed back, must ADVANCE the page. Round-2 finding 1: the
+        # cursor must be the COMPOSITE position (kind|entity_id) — a 1-field
+        # id strands rows across kind boundaries — and the pin must be the
+        # EXHAUSTION walk (the BND-05 form: the union of the pages == the
+        # unbounded pack, no dups, no skips, more=false at the end).
         first_ids = result_ids(r3b)
         cursor = ""
         for ln in r3b.stdout.splitlines():
@@ -241,20 +244,49 @@ def main() -> int:
                 cursor = ln.rsplit("after=", 1)[1].strip()
         r3c = pack("A", "xylophone", "--limit", "1", "--after", cursor)
         second_ids = result_ids(r3c)
+        # the EXHAUSTION walk: keep feeding the advertised cursor until
+        # more=false; the union must equal the unbounded pack exactly.
+        full = result_ids(pack("A", "xylophone"))
+        walked: list = list(first_ids)
+        cur = cursor
+        for _ in range(12):
+            if not cur:
+                break
+            rr = pack("A", "xylophone", "--limit", "1", "--after", cur)
+            ids = result_ids(rr)
+            if not ids:
+                break
+            walked.extend(ids)
+            nxt = ""
+            for ln in rr.stdout.splitlines():
+                if ln.startswith("# more=") and "after=" in ln:
+                    nxt = ln.rsplit("after=", 1)[1].strip()
+            more = False
+            for ln in rr.stdout.splitlines():
+                if ln.startswith("# more="):
+                    more = "more=true" in ln
+            cur = nxt if more else ""
         ok3 = (r3b.returncode == 0 and "after=" in r3b.stdout
                and r3.returncode == 1 and "ARV-QRY-004" in r3.stdout
                and bool(cursor)
                and r3c.returncode == 0
                and second_ids and second_ids != first_ids
-               and first_ids and second_ids[0] != first_ids[0])
+               and first_ids and second_ids[0] != first_ids[0]
+               and "|" in cursor
+               and sorted(walked) == sorted(full)
+               and len(walked) == len(full)
+               and len(set(walked)) == len(walked))
         check("RPK-03", ok3,
-              "the pagination law: the bounded page answers with the keyset "
-              "cursor in the header; the advertised cursor FED BACK advances "
-              "the page (page 2 != page 1 — the D-042 repair pinned); an "
+              "the pagination law: the bounded page answers with the "
+              "COMPOSITE keyset cursor (kind|entity_id — both ORDER BY "
+              "fields, an exact row position across kind boundaries; the "
+              "round-2 repair pinned); the advertised cursor FED BACK "
+              "advances the page; the full walk is EXHAUSTIVE (union == the "
+              "unbounded pack, no dups, no skips — the BND-05 form); an "
               "invalid cursor form is the typed ARV-QRY-004 refusal (never "
               "argparse's usage exit)",
-              "the pack arm carries the _page_args bounds + the k.entity_id "
-              "keyset predicate as its own page law")
+              "the pack arm carries the _page_args bounds + the composite "
+              "(k.kind, k.entity_id) keyset predicate as its own page law")
 
         # ---- RPK-04 — the untrusted-content law
         r4 = pack("A", "administrator")

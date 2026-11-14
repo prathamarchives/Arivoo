@@ -231,6 +231,18 @@ def main() -> int:
         # ---- RPK-03 — the pagination law (the keyset cursor)
         r3b = pack("A", "xylophone", "--limit", "1")
         r3 = pack("A", "xylophone", "--limit", "1", "--after", "not-a-uuid")
+        # D-042 (1a) round-4 spot-check P2, pinned: the KIND half of the
+        # composite cursor is validated against the pack's own vocabulary
+        # (source/highlight/bookmark/note) BEFORE any SQL is composed — a
+        # wrong-word kind (and the injection forms riding it: a tautology
+        # kind "zz') OR true --", a stacked-statement kind) takes the typed
+        # ARV-QRY-004 refusal (the round-3 repair made load-bearing
+        # in-suite: the round-4 mutation test showed the suite alone did
+        # not cover the gate's removal).
+        r3k = pack("A", "xylophone", "--limit", "1",
+                   "--after", "document|01a1daef-0000-7000-8000-000000000000")
+        r3j = pack("A", "xylophone", "--limit", "1",
+                   "--after", "zz') OR true -- |01a1daef-0000-7000-8000-000000000000")
         # D-042 (1a) round-1 finding 1 repaired + pinned: the advertised
         # cursor, fed back, must ADVANCE the page. Round-2 finding 1: the
         # cursor must be the COMPOSITE position (kind|entity_id) — a 1-field
@@ -268,6 +280,8 @@ def main() -> int:
             cur = nxt if more else ""
         ok3 = (r3b.returncode == 0 and "after=" in r3b.stdout
                and r3.returncode == 1 and "ARV-QRY-004" in r3.stdout
+               and r3k.returncode == 1 and "ARV-QRY-004" in r3k.stdout
+               and r3j.returncode == 1 and "ARV-QRY-004" in r3j.stdout
                and bool(cursor)
                and r3c.returncode == 0
                and second_ids and second_ids != first_ids
@@ -282,7 +296,10 @@ def main() -> int:
               "fields, an exact row position across kind boundaries; the "
               "round-2 repair pinned); the advertised cursor FED BACK "
               "advances the page; the full walk is EXHAUSTIVE (union == the "
-              "unbounded pack, no dups, no skips — the BND-05 form); an "
+              "unbounded pack, no dups, no skips — the BND-05 form); the "
+              "composite cursor's KIND half is vocabulary-checked (a "
+              "wrong-word or injection kind is the typed refusal — the "
+              "round-3 repair pinned in-suite); an "
               "invalid cursor form is the typed ARV-QRY-004 refusal (never "
               "argparse's usage exit)",
               "the pack arm carries the _page_args bounds + the composite "

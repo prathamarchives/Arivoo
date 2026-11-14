@@ -1363,7 +1363,7 @@
     "red_exit": 1,
     "red_code": "RPK-01,RPK-02,RPK-03,RPK-04,RPK-06,RPK-07,RPK-08,RPK-09",
     "red_evidence": "the P5-A RED observed at dc2c343 (tests-only; machinery-absent: query.py's pack arm) \u2014 red-01.txt",
-    "current_sha256": "3ec05ba6540678916be25e06ad096f0a54111216152609061d5e9997986babdd",
+    "current_sha256": "f3ca455f3364c8af5dcfd2cd9c568f5c878b1174ef33a8c336c808ccc14ec3c9",
     "amendments": [
       {
         "prior_sha256": "462923cbaf244d16a4b3a7aef8b4e19356eb2a752283449bf730ac6c24d1249b",
@@ -1388,6 +1388,12 @@
         "new_sha256": "3ec05ba6540678916be25e06ad096f0a54111216152609061d5e9997986babdd",
         "note": "the D-042 round-2 repair: the pack's keyset cursor is now the COMPOSITE row position (kind|entity_id \u2014 both ORDER BY fields; the round-1 1-field predicate stranded rows across kind boundaries, the reviewer's deterministic probes confirmed) and RPK-03 gained the EXHAUSTION leg (the BND-05 form: the union of the pages == the unbounded pack, no dups, no skips; the walk terminates more=false). Assertions only grew: ok3 gained 4 conjuncts (the composite form, the exhaustive walk's 3 equalities); no prior assertion touched",
         "observed_at": "2026-11-14T16:42:40.853026+00:00"
+      },
+      {
+        "prior_sha256": "3ec05ba6540678916be25e06ad096f0a54111216152609061d5e9997986babdd",
+        "new_sha256": "f3ca455f3364c8af5dcfd2cd9c568f5c878b1174ef33a8c336c808ccc14ec3c9",
+        "note": "the D-042 round-4 spot-check P2, pinned: RPK-03 gained the kind-vocabulary legs (a wrong-word kind 'document|<uuid>' and an injection kind \"zz') OR true -- |<uuid>\" both take the typed ARV-QRY-004 refusal BEFORE any SQL is composed \u2014 the round-3 repair made load-bearing in-suite; the round-4 mutation test showed the suite alone did not cover the gate's removal). Assertions only grew: ok3 gained 2 conjuncts (r3k + r3j refusal codes); no prior assertion touched",
+        "observed_at": "2026-11-14T17:29:22.843470+00:00"
       }
     ]
   }

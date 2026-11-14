@@ -1,0 +1,12 @@
+PASS RPK-01: the pack assembly: every item carries source/revision + anchor (the source-bound families) + trust status + the mechanically true why
+PASS RPK-02: the budget + truncation law: the over-budget pack truncates at the item boundary with the explicit truncation record (kept/total) and retained provenance; the invalid budget form is the typed refusal
+PASS RPK-03: the pagination law: the bounded page answers with the keyset cursor in the header (the next page's --after hint); an invalid cursor form is the typed ARV-QRY-004 refusal (never argparse's usage exit)
+PASS RPK-04: the untrusted-content law: the hostile source's instruction-like text is served as DATA with the UNTRUSTED status — never executed, never scope-widening
+PASS RPK-05: the classification-words law: 'concept'/'fact'/'quote' match exactly like any ordinary word — no dedicated weighting, no rank difference (the tokenizer's uniform treatment pinned)
+PASS RPK-06: the agent path: the pack serves the scoped agent through the SAME core with the SAME budgets; the pack is READ-ONLY
+PASS RPK-07: the owner isolation: owner B's pack never contains A's material (RLS — the pack rides the same owner boundary)
+PASS RPK-08: the deterministic why: the same query → the byte-equal pack (the ordering deterministic, the why mechanical — never a narration)
+PASS RPK-09: the MCP registry join: the pack arms appear in the MCP tool registry as read arms over the same core (the wrapper adds NO retrieval logic)
+PASS RPK-10: the no-new-write law: this slice adds NO write command — the pack is a read surface (the write boundary unchanged)
+GREEN — the P5-A acceptance suite (RPK-01..10) passes
+exit=0

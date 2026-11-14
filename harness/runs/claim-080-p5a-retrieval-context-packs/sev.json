@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
  "slice_id": "claim-080-p5a-retrieval-context-packs",
- "base_sha": "bf8be3a",
- "reviewed_diff_sha256": "851f5b69cf3a00e7a74de0eb497f7290b31a2f6b9c4f20f8f060eae95c99bf14",
+ "base_sha": "bf8be3aeef808a8e9638bbc3b9d89470aa2d2423",
+ "reviewed_diff_sha256": "9ff6abcc3f7f04c624cd101152f47d545adee922e59327d95f8b33d258d0f276",
  "intent_ids": [
   "INT-134",
   "INT-145",
@@ -106,5 +106,6 @@
  "builder_context": "builder-zcode-slice-claim-080 (the session-46 build context: the RED->GREEN->measured chain + the CI convergence rounds — the scanner-collision, the ARV-RED-002 amendment, the dispatch-fixture BASE-state repair, the scope widenings, the run-record JSON form, this schema repair)",
  "reviewer_context": "the D-042 (1a) merge-gate review at the PR (the fresh-context reviewer over the real diff — the standing protocol; this sev.json is the builder's measured account, the review appends its own verdict)",
  "disposition": "PASS",
- "review_summary": "The P5-A opening slice: the pack arm over the keyword core (the provenance-carrying assembly + the byte budget + the truncation law + the agent path + the isolation), the MCP registry join (23 arms), the pre-Phase-5 gate verified explicit. Four P2 owner-accepted-debts recorded (the empty anchor fields for the un-anchorable kinds; the used_bytes boundary; the shared limit default; the canonical-layer INT-147 form defects repaired in-slice). Zero open P0/P1 at the measured head."
+ "review_summary": "The P5-A opening slice: the pack arm over the keyword core (the provenance-carrying assembly + the byte budget + the truncation law + the agent path + the isolation), the MCP registry join (23 arms), the pre-Phase-5 gate verified explicit. Four P2 owner-accepted-debts recorded (the empty anchor fields for the un-anchorable kinds; the used_bytes boundary; the shared limit default; the canonical-layer INT-147 form defects repaired in-slice). Zero open P0/P1 at the measured head.",
+ "sheet_section": true
 }

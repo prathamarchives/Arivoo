@@ -1287,7 +1287,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "CLAIM-078's RED (the MCPW suite authored tests-only per LAW-11 at the RED commit e090ba2 on commit A at CLAIM-077's merged head 505cb336 and observed RED there \u2014 red-01.txt: the ARV-TEST-000 machinery-absent failure, exit 1, the DB-free probe: harness/mcp.py not on disk; the gate.py TESTS registration rides THIS binding commit per the ARV-RED-008 class \u2014 the new suite in the candidate's TESTS tuple, diff-visible); the implementation lands in the immediately-following commit, never before this RED",
-    "current_sha256": "3714cc4ee0e472f78ee1074db63296b75cf87a868a69f7688a0469d55213721b",
+    "current_sha256": "cee3ad29d8973371440a4e5a8219dc7b89fb22699949f870307d1c13512305ff",
     "amendments": [
       {
         "prior_sha256": "5fdc2463421c9de3fe5bc811c119279980e44d9a78458384c2ce26ec1608af13",
@@ -1312,6 +1312,12 @@
         "new_sha256": "3714cc4ee0e472f78ee1074db63296b75cf87a868a69f7688a0469d55213721b",
         "note": "CLAIM-078's scanner-collision repair (the standing lesson, the CLAIM-077 class applied pre-emptively at the local gate: the CI secret-scanner's generic-assignment pattern matches the longer credential-word followed by an assignment and a 12+ char value \u2014 the MCPW-05 fixture's unknown-token constant tripped it in the whole-diff scan): the suite's Server helper kwarg renamed to the short local form (the self-test's own source convention \u2014 commands.py's precedent; the fixture value unchanged, the assertions unchanged, the behavior unchanged; the suite GREEN MCPW-01..10 at this tree). The RED evidence (red-01/02/03) untouched",
         "observed_at": "2026-11-12T07:42:15.298351+00:00"
+      },
+      {
+        "prior_sha256": "3714cc4ee0e472f78ee1074db63296b75cf87a868a69f7688a0469d55213721b",
+        "new_sha256": "cee3ad29d8973371440a4e5a8219dc7b89fb22699949f870307d1c13512305ff",
+        "note": "the P5-A sibling-suite amendment (f05e187's chain): test_mcp_wrapper.py's READ_ARMS widened with 'pack' (the closed membership 22\u219223 \u2014 the registry's own assert and MCPW-04's expectation carry the new arm; the registry IS the wrapper's read surface and the pack arm joined it by this slice's letter 'MCP wraps the same core'). Assertions corrected forward, none weakened",
+        "observed_at": "2026-11-14T10:52:09.562775+00:00"
       }
     ]
   },

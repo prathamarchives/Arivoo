@@ -2,7 +2,7 @@
  "schema_version": "2",
  "slice_id": "claim-080-p5a-retrieval-context-packs",
  "base_sha": "bf8be3a",
- "reviewed_diff_sha256": null,
+ "reviewed_diff_sha256": "3a182687598a41aec026b0f9d68004898388038ae2c6202880eb8d1cd4b45614",
  "intent_ids": [
   "INT-134",
   "INT-145",
@@ -27,5 +27,30 @@
   "STATE.md",
   "AGENTS.md"
  ],
- "findings": []
+ "findings": [
+  {
+   "id": "F-080-1",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the pack's anchor fields empty for the un-anchorable kinds (note/source) — the honest absence, never a fabricated anchor"
+  },
+  {
+   "id": "F-080-2",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the truncation's used_bytes counts the item set, not the header — the budget is the item boundary by contract"
+  },
+  {
+   "id": "F-080-3",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the pack's --limit rides the shared _list_limit default (100) — no pack-specific row (the shared budget law)"
+  },
+  {
+   "id": "F-080-4",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the canonical-layer INT-147 form defects repaired in-slice (the entry form, the Source line, the numbering row, the counts) — the 54-check verifier 0 failures"
+  }
+ ]
 }

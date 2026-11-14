@@ -123,8 +123,20 @@ canonicalization verifier 54 checks 0 failures). The measured set `11d396c`
 
 ## §4 The SEV account
 
-(In flight — the SEV round(s) run before the PR; this record appends their
-account.)
+The slice's measured account at the PR head: the RPK suite 10/10 GREEN
+(run-01), the MCPW sibling 10/10 GREEN after the 23-arm widening (run-02),
+`make verify` EXIT 0 (the gate GREEN + the canonical layer 54 checks 0
+failures — INT-147's formal entry, STATE's 72 pointer, the counts 129 all
+repaired in-slice). The findings register carries zero open P0/P1 at this
+head (the four named P2s: the PACK_SQL's LEFT JOIN shape rides the search
+arm's own contract — a pack over the un-anchorable kinds emits empty
+anchor fields, the honest absence; the truncation's used_bytes excludes
+the header
+lines — the boundary is the ITEM set; the pack's --limit default rides
+_list_limit not a pack-specific row; the why's matched-terms emission is
+the search arm's own admission, never an LLM narration). The D-042 (1a)
+merge-gate review runs at the PR per the standing protocol; its verdict +
+any repair land before the merge.
 
 ## §5 The close
 

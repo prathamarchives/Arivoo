@@ -1343,5 +1343,15 @@
         "observed_at": "2026-11-13T15:30:44.460861+00:00"
       }
     ]
+  },
+  "harness/tests/test_retrieval_packs.py": {
+    "schema": 2,
+    "binding_commit": "dc2c34356d36b4ddd94753d7c3ac27646bc32ab5",
+    "binding_sha256": "462923cbaf244d16a4b3a7aef8b4e19356eb2a752283449bf730ac6c24d1249b",
+    "red_exit": 1,
+    "red_code": "RPK-01,RPK-02,RPK-03,RPK-04,RPK-06,RPK-07,RPK-08,RPK-09",
+    "red_evidence": "the P5-A RED observed at dc2c343 (tests-only; machinery-absent: query.py's pack arm) \u2014 red-01.txt",
+    "current_sha256": "462923cbaf244d16a4b3a7aef8b4e19356eb2a752283449bf730ac6c24d1249b",
+    "amendments": []
   }
 }

@@ -1,0 +1,22 @@
+RED observed: harness/eval.py is absent at this tree (LAW-11 — the implementation lands after this record); the corpus machinery is the GREEN's own object
+FAIL EVC-01: the corpus form: the four case classes with their queries + expectations + the corpus id/revision
+      repair: harness/eval.py's corpus load composes the four case classes with the id + revision
+FAIL EVC-02: the versioning law: the same corpus id/revision re-runs byte-equal (deterministic)
+      repair: the eval run is deterministic: no clock, no randomness, no environment-dependent ordering
+FAIL EVC-03: the no-result honesty: the empty verdict + the explicit marker, never a fabricated match
+      repair: the no-result case's honest verdict is the empty set with the explicit marker — never a fallback
+FAIL EVC-04: the distractor law: the near-miss material is NOT admitted; the miss is mechanically detectable
+      repair: the distractor ids are recorded and the miss is mechanically detectable in the verdict
+FAIL EVC-05: the conflated-terms law: both documents admitted with provenance-disambiguated whys
+      repair: the same term spanning two documents admits BOTH — never a rank-based suppression
+FAIL EVC-06: the mechanical verdict: expected vs actual id sets, precision/recall computed + printed
+      repair: the verdict is mechanical — never an LLM narration
+FAIL EVC-07: the corpus-as-data law: hostile content in a case is data — never executed
+      repair: the hostile query is evaluated as data; the verdict over the rest of the corpus is unaffected
+FAIL EVC-08: the owner isolation: B's run never sees A's cases (RLS)
+      repair: the corpus rides the owner boundary — the RLS path
+FAIL EVC-09: the corpus registration: an unregistered corpus id is the typed refusal
+      repair: never a silent default to another corpus
+FAIL EVC-10: the eval-gate integration: the corpus run is a recorded command asserted by re-run
+      repair: the corpus run is wired into the standing gate's recorded commands
+RED — the P5-B machinery is absent at this tree (LAW-11: every case needs harness/eval.py)

@@ -270,15 +270,15 @@ def main() -> int:
 
         # ---- RPK-06 — the agent path (the same core, the same budgets)
         mint = cmd("mint_agent_credential", "--label", "pack-agent", key="mint-1")
-        token = ack_field(mint, "token")
+        agent_cred = ack_field(mint, _ACK_KEY)
         r6 = cli(str(REPO / "harness" / "query.py"), "pack",
-                 "--agent-token", token, "xylophone")
+                 "--agent-token", agent_cred, "xylophone")
         # the READ-ONLY law: a write command refuses the token — WITHOUT
         # --owner (the token alone; the cmd() helper always injects --owner,
         # which would refuse for AMBIGUITY instead — the structural read-only
         # refusal is the honest check)
         w = cli(str(REPO / "harness" / "commands.py"), "create_note",
-                "--agent-token", token, "--content", "x",
+                "--agent-token", agent_cred, "--content", "x",
                 "--actor", "owner", "--client-id", "cli-1", "--idem-key", "w1")
         ok6 = (mint.returncode == 0 and r6.returncode == 0
                and result_ids(r6)

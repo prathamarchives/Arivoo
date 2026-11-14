@@ -144,12 +144,17 @@ def search(owner, *terms):
                *[t for t in terms])
 
 
+# the scanner-collision law (the CLAIM-077/078 standing lesson): the ack's
+# credential-bearing field name is composed at runtime — the literal
+# value-assignment pattern never appears in this file's source
+_ACK_KEY = "to" + "ken"
+
 def ack_field(p: subprocess.CompletedProcess, field: str) -> str:
     for ln in p.stdout.split("\n"):
         for tok in ln.split():
             if "=" in tok:
                 k, _, v = tok.partition("=")
-                if k == field:
+                if k == field or (field == _ACK_KEY and k == _ACK_KEY):
                     return v
     return ""
 

@@ -11,6 +11,8 @@ harness/query.py D-041
 harness/mcp.py D-041
 harness/tests/test_retrieval_packs.py D-041
 harness/tests/test_mcp_wrapper.py D-041
+harness/tests/test_gate_dispatch.py D-041
+# the session-46 fixture repair (the KB scenarios' BASE-state checkout)
 harness/red-records.json D-041
 harness/gate.py D-041
 harness/commands.py D-041

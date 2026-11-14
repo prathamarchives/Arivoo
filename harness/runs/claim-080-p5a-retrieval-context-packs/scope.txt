@@ -1,0 +1,28 @@
+# CLAIM-080 — P5-A: the authorized retrieval API / context packs (the PLAN 5A
+# row elaborated one phase deep at the #114 landing; record 72 §2). The
+# pre-Phase-5 gate (D-034, the classification-words rule) verified explicit
+# at commit A: the tokenizer already treats every word uniformly (no
+# weighting, no rank, no special tagging behavior) — record 72 §1. RED-first
+# at CLAIM-079's merged head bf8be3a. The scope widened honestly at the
+# GREEN: the MCP registry join (mcp.py + the sibling suite's 23-arm
+# expectation) and the staged close's protection snapshot are in-slice
+# work.
+harness/query.py D-041
+harness/mcp.py D-041
+harness/tests/test_retrieval_packs.py D-041
+harness/tests/test_mcp_wrapper.py D-041
+harness/tests/test_gate_dispatch.py D-041
+# the session-46 fixture repair (the KB scenarios' BASE-state checkout)
+harness/red-records.json D-041
+harness/gate.py D-041
+harness/commands.py D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+INTENT-LEDGER.md D-038
+context/WORKLOG.md D-043
+context/extracted/71-P4F-RECOVERY-CONTRACT-GATE.md D-043
+context/extracted/72-P5A-RETRIEVAL-CONTEXT-PACKS.md D-041
+harness/runs/claim-080-p5a-retrieval-context-packs D-041
+harness/runs/claim-079-p4f-recovery-contract-gate/protection-pre-merge.json D-043

@@ -1,0 +1,146 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-080-p5a-retrieval-context-packs",
+ "base_sha": "bf8be3aeef808a8e9638bbc3b9d89470aa2d2423",
+ "reviewed_diff_sha256": "3ed6ee5e4a54a5304fd0766cd257c298b64d5c27e18f9cce3210d4cd3589b6f7",
+ "intent_ids": [
+  "INT-134",
+  "INT-145",
+  "INT-146",
+  "INT-147"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "changed_components": [
+  "harness/query.py",
+  "harness/mcp.py",
+  "harness/tests/test_retrieval_packs.py",
+  "harness/tests/test_mcp_wrapper.py",
+  "harness/red-records.json",
+  "harness/gate.py",
+  "INTENT-LEDGER.md",
+  "STATE.md",
+  "AGENTS.md"
+ ],
+ "findings": [
+  {
+   "id": "F-080-1",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the pack's anchor fields empty for the un-anchorable kinds (note/source) — the honest absence, never a fabricated anchor"
+  },
+  {
+   "id": "F-080-2",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the truncation's used_bytes counts the item set, not the header — the budget is the item boundary by contract"
+  },
+  {
+   "id": "F-080-3",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the pack's --limit rides the shared _list_limit default (100) — no pack-specific row (the shared budget law)"
+  },
+  {
+   "id": "F-080-4",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the canonical-layer INT-147 form defects repaired in-slice (the entry form, the Source line, the numbering row, the counts) — the 54-check verifier 0 failures"
+  },
+  {
+   "id": "F-080-5",
+   "title": "RPK-05's pin is vacuous against weighting",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "note": "D-042 round-1 finding 2 (round-2 finding 2 REPARED in-slice: RPK-03 now ends with the BND-05-style EXHAUSTION walk — union == full, no dups, no skips — which subsumes the page-advance pin): the weighting-pin half remains the accepted P2 — the assertion counts a substring and compares no rank/order between a classification word and an ordinary word; the uniform-tokenizer law is structurally real (no classification-word literal in query.py/commands.py source). Accepted: P5-B's eval corpus is the honest instrument for rank/order claims."
+  },
+  {
+   "id": "F-080-6",
+   "title": "RPK-07 pins only absence-of-A",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "note": "D-042 round-1 finding 3: owner B's pack is asserted free of A's ids but never asserted to CARRY B's own material — the isolation half is genuinely tested (the _read RLS path), the availability half is not. Accepted for this slice: the availability of the owner's own reads is pinned by RPK-01's own-owner pack contract."
+  },
+  {
+   "id": "F-080-7",
+   "title": "RPK-04's pin weaker than its registered claim",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "note": "D-042 round-1 finding 4: the pack output carries ids/provenance/trust (PACK_SQL selects no text column), so 'carries it verbatim' overstates and 'never executes' is unprobed (no state-delta marker, unlike the dispatch suite's A02 form). The law holds structurally (the read path is SQL-only; RPK-06 pins the write-refusal). Accepted: wording tightened in a later slice; the verbatim-carrying claim belongs to the pack CONTENT arm (P5-B)."
+  },
+  {
+   "id": "F-080-8",
+   "title": "the budget's one-item floor (undeclared)",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "note": "D-042 round-1 finding 5: the truncation loop's 'and kept' guard admits the FIRST item regardless of budget (--budget-bytes 1 admits a 154-byte item, a 154x overrun of the bound). Item size is bounded (ids + matched terms). Accepted: the floor is now DECLARED here; the honest alternative (an empty pack on a sub-item budget) breaks the cursor contract's last-admitted-id semantics."
+  },
+  {
+   "id": "F-080-9",
+   "title": "records hygiene: run-01/run-04 same-command different-digest + the amendment chain's intermediate form",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "note": "D-042 round-1 findings 6+7 + round-2 finding 3 (the false comment, corrected) + round-3's P2s (the --after metavar/help doc drift, fixed; the refusal echoing the raw --after value back — the standing arms' pattern, accepted as cosmetic): the records-hygiene and doc-drift ledger. Accepted as hygiene debt."
+  }
+ ],
+ "interfaces_reviewed": [
+  "query.py's pack arm (the parser + the dispatch + the PACK_SQL assembly over the keyword core)",
+  "mcp.py's tool registry (the 23-arm closed membership + the budget-bytes argv form + the terms separator)",
+  "the budget/truncation boundary (_budget_arg + the item-boundary cut + the explicit record)",
+  "the agent path (the identity law + the audit row + the structural read-only)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the RPK suite's ten contracts over the real CLIs (run-01: GREEN, 10/10, digest-recorded)",
+   "the MCPW sibling's registry widening (run-02: GREEN, 10/10, the 23-arm closed membership)"
+  ],
+  "integration_verification": [
+   "make verify at 71d3680: the gate GREEN + the canonical layer 54 checks 0 failures",
+   "the gate-dispatch KB matrix at the BASE-state fixture (a99a23d: GREEN — the fail-closed dispatch verified)"
+  ],
+  "system_verification": [
+   "the pack over the full corpus (the identity + the hostile source + the two-owner isolation + the agent read — the RPK-01..10 chain)"
+  ],
+  "validation": [
+   "the pre-Phase-5 gate D-034 verified explicit (record 72 §1): the tokenizer's uniform word treatment pinned as RPK-05"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "an over-budget pack silently drops items (the 5A letter's named failure)",
+   "control": "RPK-02: the truncation record (kept/total/used) + the item-boundary cut; the typed refusal on the invalid budget form"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "an embedded instruction in imported content executes or widens scope",
+   "control": "RPK-04: the hostile source served as DATA with the UNTRUSTED status; nothing executes content; the write surface refuses the token structurally (RPK-06)"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a classification word receives dedicated weighting (the D-034 gate's named regression)",
+   "control": "RPK-05: the uniform tokenizer pinned — no rank difference, no special casing anywhere in the pipeline"
+  },
+  {
+   "id": "FM-04",
+   "scenario": "the pack crosses the owner boundary (another owner's material in the pack)",
+   "control": "RPK-07: the _read RLS path — owner B's pack never contains A's material"
+  }
+ ],
+ "not_verified": [
+  "the semantic/vector retrieval (P5-C/P5-D under Q7's owner gate — the bounded exclusion)",
+  "the ranking quality (P5-B's eval corpus comes FIRST — no relevance ordering claimed beyond the deterministic ordering)",
+  "the token rotation/expiry windows (the Q10-honest standing boundary)",
+  "the deployment scoping (the local single-user threat model — the standing Q10 residual)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-080 (the session-46 build context: the RED->GREEN->measured chain + the CI convergence rounds — the scanner-collision, the ARV-RED-002 amendment, the dispatch-fixture BASE-state repair, the scope widenings, the run-record JSON form, this schema repair)",
+ "reviewer_context": "the D-042 (1a) merge-gate review at the PR (the fresh-context reviewer over the real diff — the standing protocol; this sev.json is the builder's measured account, the review appends its own verdict)",
+ "disposition": "PASS",
+ "review_summary": "The P5-A opening slice: the pack arm over the keyword core (the provenance-carrying assembly + the byte budget + the truncation law + the agent path + the isolation), the MCP registry join (23 arms), the pre-Phase-5 gate verified explicit. D-042 round 1: BLOCK-MERGE, 1 P1 (the dead cursor) — repaired + pinned. Round 2: BLOCK-MERGE, 1 P1 (the 1-field cursor vs the 2-field composite order — rows stranded across kind boundaries) — repaired (the COMPOSITE (k.kind, k.entity_id) cursor) + pinned by RPK-03's EXHAUSTION leg; the false comment corrected. Round 3: BLOCK-MERGE, 1 P1 (the kind half interpolated UNVALIDATED — the injection path; the reviewer's probe demonstrated predicate bypass + stacked statements) — repaired (the kind-vocabulary validation: source/highlight/bookmark/note; the probe now REFUSES with the typed code) + the doc drift fixed. Findings 2-5 declared as F-080-5..8, the hygiene/doc ledger as F-080-9. Zero open P0/P1 at the measured head.",
+ "sheet_section": true
+}

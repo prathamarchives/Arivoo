@@ -117,7 +117,7 @@ TEXT = ("The MCP-wrapper corpus: the persistent anchor phrase lives here.\n"
         "Second paragraph: the measurable span lives here instead.\n"
         "Third paragraph closes the corpus.\n")
 
-# The 22 landed READ arms — the tool registry's exact, closed membership (the
+# The 23 landed READ arms — the tool registry's exact, closed membership (the
 # same API, zero translation; the tool names ARE the arm names)
 READ_ARMS = sorted([
     "get-capture", "get-source", "get-history",
@@ -127,6 +127,8 @@ READ_ARMS = sorted([
     "list-captures", "list-bookmarks", "list-notes", "list-library",
     "get-reading-state", "list-session-events", "list-journal", "list-lists",
     "get-list", "get-position", "resolve-anchor", "resolve-reference", "search",
+    # P5-A (CLAIM-080): the pack arm joined the closed membership (23 arms)
+    "pack",
 ])
 
 
@@ -451,7 +453,7 @@ def main() -> int:
                and isinstance(r_ok, dict) and r_ok.get("id") == 33)
         sA2.close()
         check("MCPW-04", ok4,
-              "the read-only registry: tools/list = EXACTLY the 22 landed read arms (the closed membership — no write tool, no extra arm, the tool names ARE the arm names); a hostile tools/call naming a write command (record_session), another (import_source), or a path-shaped non-arm refuses the typed ARV-MCP-001 in the JSON-RPC -32602 form — never a passthrough, and the server answers the next ping",
+              "the read-only registry: tools/list = EXACTLY the 23 landed read arms (the closed membership — no write tool, no extra arm, the tool names ARE the arm names); a hostile tools/call naming a write command (record_session), another (import_source), or a path-shaped non-arm refuses the typed ARV-MCP-001 in the JSON-RPC -32602 form — never a passthrough, and the server answers the next ping",
               "READ-ONLY structural at the registry: the wrapper exposes the retrieval surface and NOTHING else — no command execution, no shell, no arbitrary access")
 
         # ---- MCPW-05 — the no-oracle through the wrapper

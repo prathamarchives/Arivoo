@@ -92,6 +92,14 @@ def fixture_clone(tmp: str, name: str) -> pathlib.Path:
             break
     if not base:
         raise AssertionError("fixture cannot derive the origin/main base for the clone")
+    # the fixture tree is the BASE state: the scenarios exercise the gate's
+    # dispatch logic on a main-equal tree (an empty origin/main..HEAD diff),
+    # never some live slice's diff — a slice branch as HEAD would trip the
+    # scope checks on files the fabricated declarations never name (the
+    # session-46 repair: the suite ran RED on the CLAIM-080 branch because
+    # the clone checked out the slice head)
+    subprocess.run(["git", "checkout", "-q", base], cwd=d,
+                   check=True, capture_output=True, timeout=60)
     # the gate diffs against the literal ref 'origin/main' — set it explicitly
     subprocess.run(["git", "update-ref", "refs/remotes/origin/main", base], cwd=d,
                    check=True, capture_output=True, timeout=60)

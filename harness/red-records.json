@@ -1363,7 +1363,7 @@
     "red_exit": 1,
     "red_code": "RPK-01,RPK-02,RPK-03,RPK-04,RPK-06,RPK-07,RPK-08,RPK-09",
     "red_evidence": "the P5-A RED observed at dc2c343 (tests-only; machinery-absent: query.py's pack arm) \u2014 red-01.txt",
-    "current_sha256": "84b06689d986acbf762c5760a35961b3a25e08d18da1fc15744674d442ef26f8",
+    "current_sha256": "88fbda47101e1a6e0b806780c950c85c618aa5a8db07c0d5d5cc152c745af4ae",
     "amendments": [
       {
         "prior_sha256": "462923cbaf244d16a4b3a7aef8b4e19356eb2a752283449bf730ac6c24d1249b",
@@ -1376,6 +1376,12 @@
         "new_sha256": "84b06689d986acbf762c5760a35961b3a25e08d18da1fc15744674d442ef26f8",
         "note": "the CI-isolation repairs at the 606d2c8 head: (1) the scanner-collision repair \u2014 the ack's credential-bearing field name composed at runtime (_ACK_KEY) + the local variable renamed (token\u2192agent_cred) so the generic secret-assignment pattern never matches the suite's source (the CLAIM-077/078 standing lesson, now observed by the CI isolation check); (2) no assertion changed \u2014 the RPK-01..10 condition set identical, 10/10 GREEN locally before this commit. Assertions corrected forward in FORM only, none weakened",
         "observed_at": "2026-11-14T13:42:18.256198+00:00"
+      },
+      {
+        "prior_sha256": "84b06689d986acbf762c5760a35961b3a25e08d18da1fc15744674d442ef26f8",
+        "new_sha256": "88fbda47101e1a6e0b806780c950c85c618aa5a8db07c0d5d5cc152c745af4ae",
+        "note": "the D-042 round-1 repair: test_retrieval_packs.py's RPK-03 gained the advancing-page leg (the advertised cursor fed back MUST yield a different page with the next entity id \u2014 the P1 finding's pin; the dead-cursor form was repaired in harness/query.py the same commit). Assertions only grew: the leg adds 5 conjuncts to ok3; no prior assertion touched",
+        "observed_at": "2026-11-14T16:18:52.395674+00:00"
       }
     ]
   }

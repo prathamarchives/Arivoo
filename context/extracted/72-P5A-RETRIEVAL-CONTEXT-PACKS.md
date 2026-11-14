@@ -97,11 +97,34 @@ provenance."
 
 ## §3 The executed chain
 
-(In flight — appended at the rounds.)
+The branch `slice/claim-080-p5a-retrieval-context-packs`, opened at main
+`bf8be3a` (the #114 merge). Commit A `46daccd`: the staged CLAIM-079 close
+(record 71 §3/§4/§5 + the CLAIMS rule-4 row + the STATE/AGENTS/PLAN
+navigation + the WORKLOG task 96 + the protection snapshot regenerated after
+the sandbox recycle) + this record's §1/§2 + the scope declaration + the
+INT-147 reservation (previous-max 146 + 1 per CLAIMS rule 3). The RED
+`dc2c343` (LAW-11, tests-only: `test_retrieval_packs.py` minted with the
+RPK-01..10 condition set; the 'pack' arm's absence observed; 8 failures
+recorded, red-01.txt). The binding `c2bd179` (the typed red record + the
+TESTS registration, the ARV-RED-008 class). The GREEN `f05e187`: query.py's
+`pack`query.py`'s pack arm (the PACK_SQL assembly — source/revision/anchor +
+trust status + the mechanically true why; the byte budget at the ITEM
+boundary with the explicit truncation record; the keyset cursor in the
+header; the typed ARV-QRY-004 budget/cursor refusals) + mcp.py's registry
+join (the 23-arm closed membership; the budget-bytes argv form) + the
+test-side repairs typed (the probe polarity per the CLAIM-078 form, RPK-03's
+empty-after, ack_field's pair parsing, the mint idem, RPK-06's honest write
+leg, RPK-09's mcp.TOOLS probe — the amendment bound at `f1a...` per
+red.py). The sibling-suite amendment `be45033` (test_mcp_wrapper.py's
+READ_ARMS widened to 23). The canonical-layer repairs `71d3680` (INT-147's
+formal header entry + STATE's 72 pointer + the counts 129; the
+canonicalization verifier 54 checks 0 failures). The measured set `11d396c`
+(run-01/02 + the proof sheet; make verify GREEN).
 
 ## §4 The SEV account
 
-(In flight — appended at the rounds.)
+(In flight — the SEV round(s) run before the PR; this record appends their
+account.)
 
 ## §5 The close
 

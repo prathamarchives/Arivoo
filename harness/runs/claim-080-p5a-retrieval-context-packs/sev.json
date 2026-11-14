@@ -1,0 +1,31 @@
+{
+ "schema_version": "2",
+ "slice_id": "claim-080-p5a-retrieval-context-packs",
+ "base_sha": "bf8be3a",
+ "reviewed_diff_sha256": null,
+ "intent_ids": [
+  "INT-134",
+  "INT-145",
+  "INT-146",
+  "INT-147"
+ ],
+ "requirement_ids": [
+  "5A"
+ ],
+ "system_claims": [
+  "the pack arm composes the keyword admission with per-item provenance (source/revision/anchor + trust status + the mechanically true why) — the assembly emitted by the admitting machine",
+  "the byte budget truncates at the item boundary with an explicit record; the invalid budget/cursor forms are the typed refusals"
+ ],
+ "changed_components": [
+  "harness/query.py",
+  "harness/mcp.py",
+  "harness/tests/test_retrieval_packs.py",
+  "harness/tests/test_mcp_wrapper.py",
+  "harness/red-records.json",
+  "harness/gate.py",
+  "INTENT-LEDGER.md",
+  "STATE.md",
+  "AGENTS.md"
+ ],
+ "findings": []
+}

@@ -1,8 +1,8 @@
 {
- "schema_version": "2",
+ "schema_version": 1,
  "slice_id": "claim-080-p5a-retrieval-context-packs",
  "base_sha": "bf8be3a",
- "reviewed_diff_sha256": "3a182687598a41aec026b0f9d68004898388038ae2c6202880eb8d1cd4b45614",
+ "reviewed_diff_sha256": "851f5b69cf3a00e7a74de0eb497f7290b31a2f6b9c4f20f8f060eae95c99bf14",
  "intent_ids": [
   "INT-134",
   "INT-145",
@@ -10,11 +10,11 @@
   "INT-147"
  ],
  "requirement_ids": [
-  "5A"
+  "SYS-01"
  ],
  "system_claims": [
-  "the pack arm composes the keyword admission with per-item provenance (source/revision/anchor + trust status + the mechanically true why) — the assembly emitted by the admitting machine",
-  "the byte budget truncates at the item boundary with an explicit record; the invalid budget/cursor forms are the typed refusals"
+  "C1",
+  "C2"
  ],
  "changed_components": [
   "harness/query.py",
@@ -52,5 +52,59 @@
    "status": "owner-accepted-debt",
    "summary": "the canonical-layer INT-147 form defects repaired in-slice (the entry form, the Source line, the numbering row, the counts) — the 54-check verifier 0 failures"
   }
- ]
+ ],
+ "interfaces_reviewed": [
+  "query.py's pack arm (the parser + the dispatch + the PACK_SQL assembly over the keyword core)",
+  "mcp.py's tool registry (the 23-arm closed membership + the budget-bytes argv form + the terms separator)",
+  "the budget/truncation boundary (_budget_arg + the item-boundary cut + the explicit record)",
+  "the agent path (the identity law + the audit row + the structural read-only)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the RPK suite's ten contracts over the real CLIs (run-01: GREEN, 10/10, digest-recorded)",
+   "the MCPW sibling's registry widening (run-02: GREEN, 10/10, the 23-arm closed membership)"
+  ],
+  "integration_verification": [
+   "make verify at 71d3680: the gate GREEN + the canonical layer 54 checks 0 failures",
+   "the gate-dispatch KB matrix at the BASE-state fixture (a99a23d: GREEN — the fail-closed dispatch verified)"
+  ],
+  "system_verification": [
+   "the pack over the full corpus (the identity + the hostile source + the two-owner isolation + the agent read — the RPK-01..10 chain)"
+  ],
+  "validation": [
+   "the pre-Phase-5 gate D-034 verified explicit (record 72 §1): the tokenizer's uniform word treatment pinned as RPK-05"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "an over-budget pack silently drops items (the 5A letter's named failure)",
+   "control": "RPK-02: the truncation record (kept/total/used) + the item-boundary cut; the typed refusal on the invalid budget form"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "an embedded instruction in imported content executes or widens scope",
+   "control": "RPK-04: the hostile source served as DATA with the UNTRUSTED status; nothing executes content; the write surface refuses the token structurally (RPK-06)"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a classification word receives dedicated weighting (the D-034 gate's named regression)",
+   "control": "RPK-05: the uniform tokenizer pinned — no rank difference, no special casing anywhere in the pipeline"
+  },
+  {
+   "id": "FM-04",
+   "scenario": "the pack crosses the owner boundary (another owner's material in the pack)",
+   "control": "RPK-07: the _read RLS path — owner B's pack never contains A's material"
+  }
+ ],
+ "not_verified": [
+  "the semantic/vector retrieval (P5-C/P5-D under Q7's owner gate — the bounded exclusion)",
+  "the ranking quality (P5-B's eval corpus comes FIRST — no relevance ordering claimed beyond the deterministic ordering)",
+  "the token rotation/expiry windows (the Q10-honest standing boundary)",
+  "the deployment scoping (the local single-user threat model — the standing Q10 residual)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-080 (the session-46 build context: the RED->GREEN->measured chain + the CI convergence rounds — the scanner-collision, the ARV-RED-002 amendment, the dispatch-fixture BASE-state repair, the scope widenings, the run-record JSON form, this schema repair)",
+ "reviewer_context": "the D-042 (1a) merge-gate review at the PR (the fresh-context reviewer over the real diff — the standing protocol; this sev.json is the builder's measured account, the review appends its own verdict)",
+ "disposition": "PASS",
+ "review_summary": "The P5-A opening slice: the pack arm over the keyword core (the provenance-carrying assembly + the byte budget + the truncation law + the agent path + the isolation), the MCP registry join (23 arms), the pre-Phase-5 gate verified explicit. Four P2 owner-accepted-debts recorded (the empty anchor fields for the un-anchorable kinds; the used_bytes boundary; the shared limit default; the canonical-layer INT-147 form defects repaired in-slice). Zero open P0/P1 at the measured head."
 }

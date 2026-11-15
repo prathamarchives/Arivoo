@@ -83,10 +83,22 @@
    "severity": "P2",
    "status": "owner-accepted-debt",
    "summary": "the suite appends to the tracked eval-runs.jsonl on every run (the P5-B standing form, consistent; the side effect is reverted out of the committed tree before every bind — the EVC-10 ownership law, session 49's own lesson)"
+  },
+  {
+   "id": "F-082-R2-1",
+   "severity": "P2",
+   "status": "resolved",
+   "summary": "the corpus run's D1 line carried near-miss-excluded=true — a count-equality tautology mislabeled as an exclusion fact under a deferred exclusion (the round-2 review) — repaired: the field renamed to admitted-count-matches-expectation with the deferral riding the line"
+  },
+  {
+   "id": "F-082-R2-2",
+   "severity": "P2",
+   "status": "resolved",
+   "summary": "the tp/fp/fn precision/recall values were computed but unpinned (a hardcoded 1.0/1.0 passed the round-2 mutation M8c) — repaired: tp=6 fp=0 fn=0 + the derived 1.0000/1.0000 pinned in SEM-05; the silent-pass closure verified by value-flipping mutations (M8b'/M8c' both fire SEM-05)"
   }
  ],
  "disposition": "PASS",
- "review_summary": "The D-042 round-1 BLOCK-MERGE repaired: the honest form — the local map's similarity ranking as the one real contribution, the near-miss exclusion DISCLOSED as the deferred negative result (no threshold over the token-multiset map separates the near-miss document from the corpus's own — computed 0.15 vs 0.11, named in the report arm), the pins given teeth, the corpus laws inherited (ARV-SEM-002/003). GREEN 8/8.",
+ "review_summary": "The D-042 round 2: APPROVE-WITH-P2s — the two P2s (the D1 tautology label; the unpinned tp/fp/fn values) repaired and the closure verified by value-flipping mutations. The round-1 P1s stand dead and buried. GREEN 8/8 in the honest form.",
  "reviewed_diff_sha256": "7ccce03194cb90cf62d512f3829668c9abef5dfd1ba30a2f201509ecf9105427",
  "v_model": {
   "component_verification": [

@@ -305,10 +305,7 @@ def cmd_run(a) -> int:
                              f"admitted={len(admitted)} expected={exp_n} "
                              f"admitted-count-matches-expectation="
                              f"{'true' if len(admitted) == exp_n else 'false'} "
-                             f"near-miss-judgment=deferred-to-real-backend "
-                             f"(Q7; the keyword AND law is the admitting "
-                             f"engine — the exclusion itself is the "
-                             f"disclosed negative result)")
+                             f"near-miss-judgment=deferred-to-real-backend (Q7)")
     except ArmRefused as e:
         print(f"FAIL ARV-SEM-010: {ARV_SEM['010']} — {e}")
         return 1

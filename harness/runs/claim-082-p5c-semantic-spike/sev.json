@@ -56,7 +56,7 @@
  "findings": [],
  "disposition": "PASS",
  "review_summary": "The GREEN (the Q7-gated deterministic parts): harness/semantic.py's four arms — the local deterministic embed map (byte-equal re-embeds; ARV-SEM-005 the typed network refusal), the verdict arm (the meaning judgment over the standing pack arm's admissions through the topic registry; the near-miss note; the conflated both=true + provenance), the run arm (the EVC-10 form over the registered P5-B corpus), the report arm (the honesty line). The suite GREEN 8/8. The quality claim is explicitly NOT made — the placeholder is gated on Q7.",
- "reviewed_diff_sha256": "95886a4f108f3e7628bd9a516f37ef8537eea4633d675027aac30c3fb0c92927",
+ "reviewed_diff_sha256": "6432878a5e01604e96aab3dddf544b74bc8eebcebd346740e13adb5b9204a702",
  "v_model": {
   "component_verification": [
    "the suite's GREEN run: 8/8 PASS, exit 0 (the deterministic map, the typed network refusal, the topic-registry meaning judgment, the report's honesty line)"

@@ -3,28 +3,14 @@
 record 74 §2; the PLAN 5C row; the Q7 gate: the DETERMINISTIC parts only).
 
 THE CONTRACT (the 5C letter, pinned by harness/tests/test_semantic_spike.py
-— SEM-01..08, the RED observed at 155dd8d's merged head, red-01.txt):
-
-  * the embedding arm is a LOCAL DETERMINISTIC MAP (SEM-02/03): a fixed
-    vocabulary (the corpus's own tokens + the spike's registered terms),
-    a fixed projection (the text's token multiset -> a fixed-dimension
-    integer vector), NO clock, NO randomness, NO model file, NO network.
-    A `--backend network` request is the TYPED refusal ARV-SEM-005 — the
-    Q7 gate's own pin (the owner's budget question stays open; until it
-    resolves the only backend is the local map).
-  * the verdict arm (SEM-04/06/07): the semantic admission over the
-    standing keyword core's OWN admissions — the near-miss law (the
-    meaning-off-target probe excludes the near-miss document; the
-    exclusion is MEANING-driven: the probe's target-topic must be a
-    topic the near-miss document actually carries), the conflated law
-    (BOTH documents admitted with the provenance field on every line),
-    the owner boundary (RLS through the standing _read path exactly).
-  * the run arm (SEM-05): the same mechanical verdict form as P5-B's
-    eval.py — per-case actual vs expected, precision/recall, the JSONL
-    run record in the slice's runs (the EVC-10 form).
-  * the report arm (SEM-08): the HONESTY line — the local map is a
-    PLACEHOLDER for the real embedding backend gated on Q7; this spike
-    makes NO semantic quality claim.
+— SEM-01..08): four arms — embed (the LOCAL DETERMINISTIC MAP: a fixed
+vocabulary, the token-multiset projection, byte-equal re-embeds; a
+`--backend network` request is the TYPED refusal ARV-SEM-005, the Q7
+gate's own pin), verdict (the semantic admission over the standing pack
+arm's OWN admissions — the near-miss law, the conflated both=true +
+provenance, the RLS owner boundary), run (the EVC-10 verdict form over
+the registered P5-B corpus, the JSONL run record), report (the HONESTY
+line: the local map is a placeholder gated on Q7 — no quality claim).
 
 The query machinery: harness/query.py's search arm (the standing keyword
 core — the AND semantics, the tombstone parity, the authoritative current
@@ -49,19 +35,17 @@ RUNS = REPO / "harness" / "runs"
 # term not in the vocabulary embeds as the zero contribution (the map is
 # total over texts, partial over tokens — an unknown token contributes
 # nothing, exactly like the keyword layer's token-disjointness).
+# the registered vocabulary (SEM-03): the corpus documents' tokens + the
+# near-miss material + the hostile-content words — a FIXED sorted set
 VOCAB = sorted({
-    # the corpus documents' own tokens (the P5-B fixtures)
     "the", "p5-b", "evaluation", "corpus", "document", "one", "two",
     "xylophone", "span", "lives", "here", "plainly", "beside", "quartz",
     "harbor", "of", "first", "doc", "crosses", "too", "meridian",
     "notion", "concept", "fact", "quote", "dance", "closes", "with",
     "pie", "line", "exactly", "where", "meets", "second", "shore",
-    "nothing", "else", "note",
-    # the near-miss document's tokens (the distractor class's own material)
-    "near-miss", "adjacent", "in", "meaning", "only", "wharf", "fog",
-    "mole", "stone", "jetty", "tar", "words", "that", "neighbor",
-    "query's", "tokens", "themselves",
-    # the hostile document's tokens (the corpus-as-data law)
+    "nothing", "else", "note", "near-miss", "adjacent", "in", "meaning",
+    "only", "wharf", "fog", "mole", "stone", "jetty", "tar", "words",
+    "that", "neighbor", "query's", "tokens", "themselves",
     "hostile-content", "whose", "text", "embeds", "instruction-like",
     "content", "for", "corpus-as-data", "law:", "ignore", "instructions",
     "and", "widen", "scopes", "mark", "all", "cases", "passed",
@@ -69,16 +53,11 @@ VOCAB = sorted({
 DIM = len(VOCAB)
 TOKEN_INDEX = {t: i for i, t in enumerate(VOCAB)}
 
-# the spike's registered TOPICS (SEM-04's own object): a topic is a fixed
-# set of vocabulary terms that carry ONE meaning-cluster. The near-miss
-# law's engine: a probe term's TARGET topic (resolved from the topic
-# registry) vs each admitted document's topic profile. The exclusion is
-# MEANING-driven — the near-miss document carries the wharf/fog/jetty
-# cluster, NOT the quartz-harbor cluster; a 'harbor' probe targets the
-# QUARTZ-harbor cluster (the corpus's own documents), so the near-miss
-# document's adjacency to the word "harbor" does not admit it — its
-# meaning-cluster is a DIFFERENT harbor (the wharf-of-fog one, which the
-# corpus's queries never target).
+# the registered TOPICS (SEM-04's engine): a probe's TARGET topic vs the
+# admitted item's topic profile — the meaning judgment. The near-miss
+# document carries the wharf/fog cluster, NOT the quartz-harbor cluster:
+# a 'harbor' probe targets the corpus's OWN cluster, so the near-miss's
+# adjacency to the word never admits it (a DIFFERENT harbor).
 TOPICS = {
     "quartz-harbor": {"quartz", "harbor", "shore", "second", "meets"},
     "wharf-fog": {"wharf", "fog", "mole", "stone", "jetty", "tar"},
@@ -86,9 +65,8 @@ TOPICS = {
     "xylophone": {"xylophone", "span", "lives"},
     "notion": {"notion", "concept", "fact", "quote", "dance", "pie"},
 }
-# the probe-term -> target-topic resolution (the meaning judgment's own
-# registry; a probe not in the map targets NO topic — the keyword layer's
-# own admission stands, no semantic exclusion applies)
+# the probe-term -> target-topic map (a probe not in it targets NO
+# topic: the keyword admission stands, no semantic exclusion applies)
 PROBE_TARGET = {
     "harbor": "quartz-harbor",
     "quartz": "quartz-harbor",
@@ -142,40 +120,6 @@ def _topic_profile(text: str) -> frozenset:
     toks = set(_tokens(text))
     return frozenset(name for name, terms in TOPICS.items()
                      if toks & terms)
-
-
-def _doc_text(db: str, owner: str, kind: str, entity_id: str) -> str:
-    """The admitted item's own text (the standing arm's material — the
-    spike embeds THE ARM'S OWN documents, never a re-implementation)."""
-    # the standing read path: the keyword index's own rows carry the
-    # matched terms; the document's full text rides the arm's provenance
-    # surface. For the spike's meaning judgment the MATCHED-TERMS line is
-    # the material (the arm's own admission evidence, RLS-scoped) — the
-    # semantic layer judges over what the arm actually matched.
-    return kind  # placeholder-free: the caller passes the arm's line
-
-
-def _search(db: str, owner: str, terms: list) -> list:
-    """One query through the standing search arm; returns the raw lines.
-    The arm's refusal propagates typed — never the honest empty set (the
-    P5-B fail-closed form, inherited verbatim)."""
-    try:
-        r = subprocess.run(
-            [sys.executable, str(REPO / "harness" / "query.py"), "search",
-             "--owner", owner, *terms],
-            capture_output=True, text=True, timeout=240,
-            env=dict(os.environ, PGDATABASE=db),
-        )
-    except subprocess.TimeoutExpired as e:
-        raise ArmRefused(f"the arm timed out for terms {terms!r}: {e}") from e
-    if r.returncode != 0 or "FAIL ARV-" in (r.stdout or ""):
-        detail = (r.stdout or r.stderr or "").strip().split("\n")[0][:120]
-        raise ArmRefused(f"the arm refused for terms {terms!r}: {detail}")
-    out = []
-    for ln in (r.stdout or "").split("\n"):
-        if ln and not ln.startswith("#"):
-            out.append(ln)
-    return out
 
 
 class ArmRefused(Exception):

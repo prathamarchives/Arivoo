@@ -132,7 +132,8 @@ review (due at this slice's PR). The measured set: the suite's own run
 ## §5 The close
 
 **Merged (the INT-145 single-actor path — the #116/#117 disclosed
-mechanics, exactly).** The six steps, as executed:
+mechanics, exactly): PR #118 closed at the merge commit `5f31a386eb91`
+(2026-11-15T13:37:12Z).** The six steps, as executed and verified:
 
 1. the pre-change account posted at the PR BEFORE any change
    (`harness/runs/claim-082-p5c-semantic-spike/protection-pre-merge.json`,
@@ -142,11 +143,12 @@ mechanics, exactly).** The six steps, as executed:
 2. the flip: `required_approving_review_count` 1→0 — the sole change,
    every other field byte-preserved;
 3. the merge: `merge_method=merge` on PR #118 (CLAIM-082), the recorded
-   message; `merged=true` verified at the merge commit;
+   message; `merged=true` verified at `5f31a38` (2026-11-15T13:37:12Z);
 4. the branch deleted (204);
-5. the restore: the count back to 1, every field re-PUT — and the
-   re-read compared **byte-equivalent: True** (the restore verified, not
-   assumed);
+5. the restore: the count back to 1, every field re-PUT (200) — and
+   the re-read compared **byte-equivalent: True** (count=1, the 5 strict
+   contexts, enforce_admins=true, dismiss_stale=true, force-pushes/
+   deletions false — the restore verified, not assumed);
 6. the merge commit's five checks polled to **ALL-GREEN**; the open-PR
    count is 0.
 

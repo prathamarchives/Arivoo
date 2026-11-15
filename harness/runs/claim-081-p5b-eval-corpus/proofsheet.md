@@ -1,21 +1,22 @@
 # PROOF SHEET — slice claim-081-p5b-eval-corpus (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 160c97be0e2a9f581ca30b5ae11f65e165b637d6
-- generated (last record's timestamp): 2026-11-15T06:56:22.117763+00:00
-- run records: 1
+- commit (last run record's): a9c66d1a387a06265fbc8a2c3357dae2c2a18a2e
+- generated (last record's timestamp): 2026-11-15T07:17:39.511934+00:00
+- run records: 2
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_eval_corpus.py` -> exit 0 · output sha256 258b2e22b6563473 · 2026-11-15T06:56:22.117763+00:00
+- `python3 harness/tests/test_eval_corpus.py` -> exit 0 · output sha256 258b2e22b6563473 · 2026-11-15T07:17:39.511934+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - (none stated — REPAIR: the not-verified list may not be empty; LAW-04)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: f37084f9b4cd885899295abb3ec088829b5c7a1f1701e3b3751ba74136314ed8
-- reviewed_diff_sha256: 31257f9429a08f4dd10e82b337bb67ea4b93cfe3a2215485e4442c3b07fe29a7
+- report sha256: 5c07a043fd201ec4c8fbcd81e74d2ac148c998f81df762336b6c38f2fcc057d9
+- reviewed_diff_sha256: be511eeb6cffacf0adda9dce6f249beea4d141f84a862dd66660ee0ec8d09ec8
 - disposition: PASS
-- findings: 5 (open P0/P1: 0)
+- findings: 6 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): f7d443ac71e968cb2d4a8a61a6bb06f910a09dbd2dfc0a2cfe7651d7c8c600a4
+- sheet sha256 (of the content above, excluding this line): baa8ffd34d3533ad501bc149ddc5fb3642c9504012b68f291dfc87345d604f43

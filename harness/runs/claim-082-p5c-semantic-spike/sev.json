@@ -61,27 +61,33 @@
  ],
  "findings": [
   {
-   "round": 1,
+   "id": "F-082-1",
    "severity": "P1",
-   "finding": "the meaning-exclusion branch was dead code (the topic-registry judgment unreachable by the pack's AND law — mutation M3: deletion kept the suite GREEN)",
-   "disposition": "repaired: the dead branch deleted; the embedding wired into the verdict path as the full-text cosine ranking; the near-miss deferral disclosed in the output, the report, record 74, and this sev"
+   "status": "resolved",
+   "summary": "the meaning-exclusion branch was dead code (the topic-registry judgment unreachable: the pack's AND law makes every admitted item carry the probe term; the round-1 mutation M3 deleted the branch and the suite stayed GREEN) — repaired: the branch deleted, the embedding wired into the verdict path as the full-text cosine ranking, the deferral disclosed"
   },
   {
-   "round": 1,
+   "id": "F-082-2",
    "severity": "P1",
-   "finding": "the records and the machinery's output described the dead branch as the working engine (F2)",
-   "disposition": "repaired: every claim retracted or re-based on the honest form"
+   "status": "resolved",
+   "summary": "the records and the machinery's own output described the dead branch as the working engine — repaired: every claim retracted or re-based on the honest form (the report arm, record 74 §3, this sev)"
   },
   {
-   "round": 1,
+   "id": "F-082-3",
    "severity": "P2",
-   "finding": "the pins were theater (SEM-05 header-string greps; SEM-04's id-in-exclusion-note; the embedding never consumed; the revision law absent; the run-arm owner unpinned)",
-   "disposition": "repaired: per-case VALUES, non-comment-line ids, content-sensitivity, ARV-SEM-002/003, the run-arm owner pin, the code registry"
+   "status": "resolved",
+   "summary": "the pins were theater (SEM-05 header greps; SEM-04's id-in-exclusion-note; the embedding never consumed; the revision law absent; the run-arm owner unpinned) — repaired: per-case VALUES, non-comment ids, content-sensitivity, ARV-SEM-002/003, the run-arm owner pin, the code registry"
+  },
+  {
+   "id": "F-082-4",
+   "severity": "P3",
+   "status": "owner-accepted-debt",
+   "summary": "the suite appends to the tracked eval-runs.jsonl on every run (the P5-B standing form, consistent; the side effect is reverted out of the committed tree before every bind — the EVC-10 ownership law, session 49's own lesson)"
   }
  ],
  "disposition": "PASS",
  "review_summary": "The D-042 round-1 BLOCK-MERGE repaired: the honest form — the local map's similarity ranking as the one real contribution, the near-miss exclusion DISCLOSED as the deferred negative result (no threshold over the token-multiset map separates the near-miss document from the corpus's own — computed 0.15 vs 0.11, named in the report arm), the pins given teeth, the corpus laws inherited (ARV-SEM-002/003). GREEN 8/8.",
- "reviewed_diff_sha256": "6c6f59367d567cbefa991734b2270e0a57021831ae97868f1d1ae5953caf9e47",
+ "reviewed_diff_sha256": "5e1c46cd75adb534346e09f206085ef09ef2e6d40433a7a4af8221c6232a7284",
  "v_model": {
   "component_verification": [
    "the suite's GREEN run: 8/8 PASS, exit 0 — the honest form (the similarity ranking over the full-text cosine; the disclosed deferral; the content-sensitive deterministic map; the typed network refusal ARV-SEM-005)"

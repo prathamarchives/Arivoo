@@ -3,14 +3,11 @@
 record 74 §2; the PLAN 5C row; the Q7 gate: the DETERMINISTIC parts only).
 
 THE CONTRACT (the 5C letter, pinned by harness/tests/test_semantic_spike.py
-— SEM-01..08): four arms — embed (the LOCAL DETERMINISTIC MAP: a fixed
-vocabulary, the token-multiset projection, byte-equal re-embeds; a
-`--backend network` request is the TYPED refusal ARV-SEM-005, the Q7
-gate's own pin), verdict (the semantic admission over the standing pack
-arm's OWN admissions — the near-miss law, the conflated both=true +
-provenance, the RLS owner boundary), run (the EVC-10 verdict form over
-the registered P5-B corpus, the JSONL run record), report (the HONESTY
-line: the local map is a placeholder gated on Q7 — no quality claim).
+— SEM-01..08): embed (the LOCAL DETERMINISTIC MAP; the network backend
+refuses typed, ARV-SEM-005 — the Q7 gate's pin), verdict (the admission
+over the standing pack arm's OWN admissions + the similarity ranking),
+run (the EVC-10 verdict form over the registered P5-B corpus), report
+(the HONESTY line + the NEGATIVE RESULT).
 
 The query machinery: harness/query.py's search arm (the standing keyword
 core — the AND semantics, the tombstone parity, the authoritative current
@@ -37,8 +34,8 @@ RUNS = REPO / "harness" / "runs"
 # term not in the vocabulary embeds as the zero contribution (the map is
 # total over texts, partial over tokens — an unknown token contributes
 # nothing, exactly like the keyword layer's token-disjointness).
-# the registered vocabulary (SEM-03): the corpus documents' tokens + the
-# near-miss material + the hostile-content words — a FIXED sorted set
+# the registered vocabulary (SEM-03): the corpus + near-miss + hostile
+# documents' tokens — a FIXED sorted set
 VOCAB = sorted({
     "the", "p5-b", "evaluation", "corpus", "document", "one", "two",
     "xylophone", "span", "lives", "here", "plainly", "beside", "quartz",
@@ -189,19 +186,12 @@ def _item_text(db: str, owner: str, kind: str, entity_id: str) -> str:
 
 
 def _verdict_lines(db: str, owner: str, query_terms: list) -> list:
-    """The semantic admission over the standing arm's own keyword
-    admissions (SEM-04/06/07's engine) — the honest form (the round-1
-    D-042 F1/F2 repair): the probe's embedded vector vs each admitted
-    item's embedded FULL TEXT (the RLS-scoped read through get-source +
-    the blob store); the similarity is PRINTED per item as the ranking —
-    the local map's one honest contribution over the keyword layer (a
-    deterministic similarity ordering of the admitted set). The
-    near-miss EXCLUSION is deferred to the real backend: over the
-    local token-multiset map no threshold separates the near-miss
-    document from the corpus's own (computed: 0.15 vs 0.11 — the token
-    identity IS the pack's admission; there is no meaning signal left
-    for the map to add). The verdict output DISCLOSES this, and the
-    report arm names it as the spike's own negative result."""
+    """The admission + the similarity ranking (SEM-04/06/07's engine,
+    the round-1 honest form): the probe's vector vs each admitted item's
+    embedded FULL TEXT (the RLS-scoped get-source + blob read); the
+    near-miss EXCLUSION is deferred (no threshold over the local map
+    separates — computed 0.15 vs 0.11; DISCLOSED in the output and the
+    report arm's negative result)."""
     lines = []
     pack_lines = _pack(db, owner, query_terms)
     qv = embed_text(" ".join(query_terms))
@@ -252,8 +242,7 @@ def cmd_verdict(a) -> int:
 
 
 def cmd_run(a) -> int:
-    """the run arm (SEM-05): the corpus run in the eval.py verdict form
-    (per-case, precision/recall, the JSONL run record — EVC-10 exactly)."""
+    """the run arm (SEM-05): the corpus run in the eval.py verdict form."""
     reg = REGISTRY.get(a.corpus)
     if reg is None:
         return _fail("011", f"corpus {a.corpus!r}")

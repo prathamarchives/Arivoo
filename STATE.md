@@ -6,12 +6,12 @@
 
 ## Where things stand
 
-- **Phase:** PHASE 5 OPENING (2026-11-14 — CLAIM-080 LANDED: PR #116 = merge `2e35d592b` (the P5-A pack arm + the MCP registry join); the Phase 4 exit gate had verified 18/18 at CLAIM-079's `bf8be3a`)
+- **Phase:** PHASE 5 OPENING (2026-11-15 — CLAIM-082 LANDED: PR #118 = merge `5f31a386eb91` (the P5-C semantic spike, Q7-gated: the deterministic shell + the disclosed negative result; the D-042 two-round chain — round-1 BLOCK's two P1s repaired into the honest form, round-2 APPROVE-WITH-P2s with both P2s closed; GREEN 8/8; record 74). The next rows: P5-E the hybrid ranking (waits on the corpus + the spike's shell) — Q7 gates the real embedding backend.)
 
-- **Active task:** CLAIM-082 — P5-C: the semantic spike (Q7-gated: the owner's budget question open; the slice opens with the deterministic parts only — the session record context/extracted/74-P5C-SEMANTIC-SPIKE.md)
+- **Active task:** none open — CLAIM-082 landed at `5f31a38`; the next claim opens with its tests-only RED at the merged head (the PLAN's next row, Q7-aware).
 
-- **Last completed:** CLAIM-080 (P5-A — the authorized retrieval API / context packs; PR #116 = merge `2e35d592b203f4cf2f3ee0b2a9e5fc5fc5211b4a`, 2026-11-14 under INT-145; the D-042 FOUR-round ledger each repaired + pinned; the close staged at CLAIM-081's commit A)
-- **Exact next action:** the CLAIM-082 RED (tests-only, LAW-11) at 155dd8d's merged head — the spike's own acceptance suite minted before any machinery
+- **Last completed:** CLAIM-082 (P5-C — the semantic spike; PR #118 = merge `5f31a38`, 2026-11-15 under INT-145's single-actor path: the pre-merge snapshot, the flip, the merge, the branch delete, the byte-equivalent restore, the merge-commit CI ALL-GREEN — all six steps observed live; record 74 §5)
+- **Exact next action:** the successor claim's open (the PLAN's next row) — the tests-only RED at `5f31a38`'s merged head; the CLAIM-082 LANDED row rides the successor's commit A (the #117 riding form: the open row survives the pre-merge gate, the closed row lands with the next claim's opening)
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.

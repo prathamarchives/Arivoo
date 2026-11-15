@@ -52,7 +52,7 @@ VOCAB = sorted({
 DIM = len(VOCAB)
 TOKEN_INDEX = {t: i for i, t in enumerate(VOCAB)}
 
-ARV_SEM = {
+ARV_SEM = {  # the typed codes (the standing registry form)
     "001": "the embed arm requires --text (a text to embed)",
     "002": "the corpus file's id/revision does not match the requested "
            "run (the EVC-10 form's own law, inherited from eval.py)",

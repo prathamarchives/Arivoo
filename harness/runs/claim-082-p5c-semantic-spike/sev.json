@@ -80,14 +80,14 @@
   },
   {
    "id": "F-082-4",
-   "severity": "P3",
+   "severity": "P2",
    "status": "owner-accepted-debt",
    "summary": "the suite appends to the tracked eval-runs.jsonl on every run (the P5-B standing form, consistent; the side effect is reverted out of the committed tree before every bind — the EVC-10 ownership law, session 49's own lesson)"
   }
  ],
  "disposition": "PASS",
  "review_summary": "The D-042 round-1 BLOCK-MERGE repaired: the honest form — the local map's similarity ranking as the one real contribution, the near-miss exclusion DISCLOSED as the deferred negative result (no threshold over the token-multiset map separates the near-miss document from the corpus's own — computed 0.15 vs 0.11, named in the report arm), the pins given teeth, the corpus laws inherited (ARV-SEM-002/003). GREEN 8/8.",
- "reviewed_diff_sha256": "5e1c46cd75adb534346e09f206085ef09ef2e6d40433a7a4af8221c6232a7284",
+ "reviewed_diff_sha256": "7770a65e1330972dd18f5e66bbf6ed4ecd2a7c24dc2750431a506ffd7826184b",
  "v_model": {
   "component_verification": [
    "the suite's GREEN run: 8/8 PASS, exit 0 — the honest form (the similarity ranking over the full-text cosine; the disclosed deferral; the content-sensitive deterministic map; the typed network refusal ARV-SEM-005)"

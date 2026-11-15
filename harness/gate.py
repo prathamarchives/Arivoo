@@ -121,8 +121,7 @@ TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          # P5-B (CLAIM-081; the ARV-RED-008 class: the new suite's
          # registration rides the binding commit, diff-visible)
          "harness/tests/test_eval_corpus.py",
-         # P5-C (CLAIM-082; the ARV-RED-008 class: the new suite's
-         # registration rides the binding commit, diff-visible)
+         # P5-C (CLAIM-082; ARV-RED-008: rides the binding commit)
          "harness/tests/test_semantic_spike.py",
          "harness/tests/test_gate_dispatch.py",
          "harness/tests/test_mutation_floor.py",

@@ -81,6 +81,53 @@ The four case classes (the corpus's own law):
   --diff origin/main`) — suites + red records + scope/size + lint + deps +
   known-bads + proofsheet.
 
+### The D-042 round 1 (the fresh-context review at PR #117)
+
+**BLOCK-MERGE — four findings, each real, each repaired in-slice** (the
+expected multi-round shape; the #116 lesson standing: the repair's own
+blind spot):
+
+1. **The stale digest at the head** (P0): the records commit `7fac5b1`
+   widened the reviewed path set without re-binding sev.json — the gate
+   itself refused at the head offered for merge. Repair: the digest
+   re-bound at the repair head.
+2. **The dead distractor tautology over a self-contradictory fixture**
+   (P1): the control was `clean = miss == len(actual)` (identically true)
+   over a near-miss text that CONTAINED the query token ("quartz") — the
+   committed run printed `admitted=3 near-miss-excluded=true` (the
+   distractor admitted while labeled excluded), and FM-02 (the rank-creep
+   failure the corpus exists to catch) was undetectable. Repair: the
+   tautology deleted; the fixture's near-miss rewritten disjoint (the
+   wharf/fog/jetty/tar text); the verdict compares the admitted count
+   against the recorded expectation — over-admission is fp, the shortfall
+   is fn.
+3. **The fp-blind verdict** (P1): the relevant class counted admissions as
+   tp unconditionally — precision was structurally 1.0, over-admission
+   invisible, a ranking change that admits junk shows only as tp
+   inflation. Repair: the count-based channel with the over-admission fp
+   arm (expect_count authoritative; precision can actually drop).
+4. **The fail-open** (P1): `_search` never checked the arm's return code —
+   a dead DB, a refused RLS read, or an arm-side typed refusal was
+   silently converted into "the honest empty set" with exit 0 (the
+   evaluation baseline's worst possible inversion: a broken environment
+   reporting no-result cases as honest). Repair: the arm's refusal
+   propagates typed as ARV-EVL-004.
+
+Plus the P2 strengthenings: the EVC-08 pin was vacuous (stdout never
+contains ids in any state — the pin passed with or without RLS; the real
+observation now goes through the standing arm: B's own copy admitted, A's
+id absent) and the honest expect_counts over the fixture (R1=1: only doc A
+bears xylophone; R2=2; D1=2; C1=2; H1=1).
+
+**What survived the adversarial probing untouched** (the reviewer's own
+verifications): the determinism (byte-equal re-runs, the sorted-case loop,
+no clock/randomness/dict-order dependence); the corpus-as-data law (zero
+eval/exec/compile references; hostile corpora load and run with the same
+mechanical verdict shape, no execution effects); the LAW-11 red-first
+chain (reproduced at the tests-only commit in a detached worktree; the
+digests bind exactly); the typed registration refusals; the suites 10/10;
+the proofsheet re-derivation.
+
 ## §4 The SEV account
 
 The failure modes the corpus exists to catch: FM-01 the fabricated match

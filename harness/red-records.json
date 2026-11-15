@@ -1404,13 +1404,19 @@
     "red_exit": 1,
     "red_code": "EVC-01,EVC-02,EVC-03,EVC-04,EVC-05,EVC-06,EVC-07,EVC-08,EVC-09,EVC-10",
     "red_evidence": "the P5-B GREEN's red-record binding: the suite's RED was observed at the machinery-absent tree (red-01.txt, 10 FAILs, binding at commit 1588092's predecessor form); the GREEN landed at 5305dd5 (harness/eval.py + corpus.json + the fixture seeding) with EVC-01..10 = 10/10; this record binds the suite's red evidence to the GREEN's commit (the make-red form, the amendment chaining from the trusted baseline: the suite minted at the RED, the machinery landed, the records now bound to the head)",
-    "current_sha256": "dc3df7c46b6e4b09412c22c8b8c0600388f7191ae6b1f92e4a9b4f17975e4c47",
+    "current_sha256": "81fd67c428eac7c4f3cc43e9f71b2cc38af7f72bad5790035f89aec2763ea4d3",
     "amendments": [
       {
         "prior_sha256": "cd17d69495c8fab81ab6aef9795c58fe76b0333510ab965d945235e4d85630fa",
         "new_sha256": "dc3df7c46b6e4b09412c22c8b8c0600388f7191ae6b1f92e4a9b4f17975e4c47",
         "note": "the P5-B GREEN's second binding (the make-red amendment chain, KB-RED-008's own form): the suite was edited after red-01 (the import form fixed to the sibling suite's legal pattern \u2014 'from harness.adapters import pg' + sys.path.insert(REPO), the DEP-008 root 'harness' approved; the conflated pair's same-term fix landed BEFORE the first binding). The suite re-verified 10/10 at the edit. The amendment chains from the trusted baseline; the red evidence (red-01.txt, the 10 FAILs at the machinery-absent tree) stands",
         "observed_at": "2026-11-15T06:56:04.747406+00:00"
+      },
+      {
+        "prior_sha256": "dc3df7c46b6e4b09412c22c8b8c0600388f7191ae6b1f92e4a9b4f17975e4c47",
+        "new_sha256": "81fd67c428eac7c4f3cc43e9f71b2cc38af7f72bad5790035f89aec2763ea4d3",
+        "note": "the D-042 round-1 repairs landed (all four findings + the two P2 strengthenings): (1) the fail-open CLOSED \u2014 the search arm's refusal propagates typed as ARV-EVL-004 (a dead DB / a refused RLS read is NEVER the honest empty set); (2) the distractor control made REAL \u2014 the dead tautology (clean = miss == len(actual)) deleted, the fixture's near-miss doc now shares NO query token (the wharf/fog/jetty/tar text), the verdict compares the admitted count against the recorded expectation (fp rises on over-admission); (3) the verdict arithmetic made honest \u2014 the over-admission fp channel for relevant + conflated (expect_count authoritative: precision can actually drop; a ranking change that admits junk is VISIBLE); (4) the EVC-08 pin strengthened (the real RLS observation through the standing arm \u2014 B's own copy admitted, A's id absent); the R1/R2/D1/C1/H1 expect_counts made honest over the fixture (R1=1: only doc A bears xylophone; R2=2: docs A+B under the AND terms; D1=2: the two real quartz docs, the near-miss outside; H1=1: only the hostile doc matches the AND terms). GREEN re-verified 10/10",
+        "observed_at": "2026-11-15T07:16:52.179501+00:00"
       }
     ]
   }

@@ -77,13 +77,13 @@
    "id": "F-081-1",
    "severity": "P2",
    "status": "owner-accepted-debt",
-   "summary": "the corpus's expect_ids use the symbolic forms ('*', '*AND*', '*both*') rather than concrete material ids — the honest reason: the suite's fixture seeds uuids at runtime (the fresh scratch DB), so the corpus cannot carry them statically; the evaluator compares against the run's own admissions (the deterministic shape)"
+   "summary": "the corpus's expect_ids are the symbolic descriptive forms; expect_count is the authoritative expectation (the round-1 repair's own design: the count channel is the verdict's own); the runtime-seeded uuid's consequence stands (the suite's fixture seeds fresh scratch DBs)"
   },
   {
    "id": "F-081-2",
    "severity": "P2",
    "status": "owner-accepted-debt",
-   "summary": "the evaluator's per-case verdict counts ids, not id equality (the same runtime-seeded-uuid reason); the conflated + distractor + no-result classes ARE id-exact in the suite's own pins"
+   "summary": "REPAIRED at the round-1 head: the verdict is now count-based with the fp over-admission channel (expect_count authoritative: precision can actually drop — a ranking change that admits junk is visible); the residue: the ids in the verdict lines are still counts (the runtime-seeded uuid's consequence — the deterministic shape)"
   },
   {
    "id": "F-081-3",
@@ -102,10 +102,16 @@
    "severity": "P2",
    "status": "owner-accepted-debt",
    "summary": "the hostile-as-data marker is a presence count, not a behavioral differential (the stronger form — a probe comparing the run's verdict with/without the hostile case — routed to the D-042 review's own probes)"
+  },
+  {
+   "id": "F-081-6",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the round-1 reviewer's P2 residue: the corpus load --file accepts arbitrary filesystem paths (no traversal containment; no content disclosure observed — the malformed-JSON refusal leaks no bytes; the run path is closed: the REGISTRY is a code-controlled dict literal)"
   }
  ],
  "disposition": "PASS",
- "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. GREEN: EVC-01..10 = 10/10; the standing suites never regressed (the RPK 10/10 re-verified). The honest debts ledgered (the symbolic expect_ids — the runtime-seeded-uuid consequence; the count-based verdict; the JSONL growth; the standing adapters dependency; the hostile marker's differential routed to the review probes).",
+ "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. THE D-042 ROUND-1 CHAIN: BLOCK-MERGE (four findings: the fail-open — the arm's refusal silently became the honest empty set; the dead distractor tautology over a fixture that CONTAINED the query token; the fp-blind verdict (precision structurally 1.0); the stale digest at the head) — ALL REPAIRED IN-SLICE: the fail-open closed (ARV-EVL-004); the real distractor control (the tautology deleted, the fixture's near-miss disjoint); the honest count arithmetic (the fp over-admission channel); the EVC-08 pin strengthened (the real RLS observation). GREEN re-verified 10/10; the RPK sibling 10/10. The honest debts ledgered.",
  "reviewed_diff_sha256": "31257f9429a08f4dd10e82b337bb67ea4b93cfe3a2215485e4442c3b07fe29a7",
  "system_claims": [
   "C1",

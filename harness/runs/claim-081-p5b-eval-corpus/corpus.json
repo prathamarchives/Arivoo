@@ -12,7 +12,8 @@
    "expect_ids": [
     "*"
    ],
-   "note": "every seeded xylophone-bearing item admitted (all four kinds)"
+   "note": "every seeded xylophone-bearing item admitted — the fixture's only xylophone bearer is source doc A (the honest count: 1)",
+   "expect_count": 1
   },
   {
    "case": "R2",
@@ -24,7 +25,8 @@
    "expect_ids": [
     "*AND*"
    ],
-   "note": "multi-term AND: only items bearing BOTH terms"
+   "note": "multi-term AND: only items bearing BOTH terms",
+   "expect_count": 2
   },
   {
    "case": "N1",
@@ -57,7 +59,8 @@
    "must_not_admit": [
     "harbor-only item"
    ],
-   "note": "near-miss: the harbor-only document shares NO query term — must not be admitted"
+   "note": "near-miss: the wharf/fog/jetty/tar document neighbors the query's meaning (a harbor-side document about stone and fog) but shares NO query token — the two REAL quartz documents are the expectation (2); the near-miss itself must never appear (the keyword arm's exact-token law); if it ever IS admitted the count exceeds the expectation and fp rises — the rank-creep failure the corpus exists to catch",
+   "expect_count": 2
   },
   {
    "case": "C1",
@@ -68,7 +71,8 @@
    "expect_ids": [
     "*both*"
    ],
-   "note": "the same term in two distinct documents: BOTH admitted, disambiguated by provenance never rank"
+   "note": "the same term in two distinct documents: BOTH admitted, disambiguated by provenance never rank",
+   "expect_count": 2
   },
   {
    "case": "H1",
@@ -81,7 +85,8 @@
    "expect_ids": [
     "*both-AND*"
    ],
-   "note": "the hostile class: a query embedding instruction-like words is DATA — evaluated like any other"
+   "note": "the hostile class: a query embedding instruction-like words is DATA — evaluated like any other; the AND terms match only the hostile doc",
+   "expect_count": 1
   }
  ]
 }

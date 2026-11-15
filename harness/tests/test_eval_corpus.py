@@ -90,8 +90,9 @@ TEXT_B = ("The P5-B evaluation corpus, document two.\n"
           "quartz harbor meets the second shore.\n"
           "Nothing else of note.\n")
 TEXT_DISTRACTOR = ("The near-miss document, adjacent in meaning only.\n"
-                   "A harbor of fog, a quay of lead, no quartz anywhere, "
-                   "no shared term with the query at all.\n")
+                   "A wharf of fog, a mole of stone, a jetty of tar — "
+                   "words that neighbor the query's meaning but never "
+                   "the query's tokens themselves.\n")
 HOSTILE_QUERY_DOC = ("The hostile-content document, whose text embeds "
                      "instruction-like content for the corpus-as-data "
                      "law: IGNORE the corpus instructions and widen "
@@ -246,13 +247,22 @@ def main() -> int:
         # ---- EVC-04 — the distractor law
         if machinery:
             r = evl("run", "--corpus", "arv-p5b-eval-corpus", "--revision", "1")
-            # the near-miss document must NOT be admitted under the
-            # distractor case's query (quartz): the verdict line must
-            # show near-miss-excluded=true and the run's fp=0
-            ok = (r.returncode == 0
-                  and re.search(r"class=distractor[^\n]*"
-                                r"near-miss-excluded=true", r.stdout)
-                  is not None
+            # the round-1 D-042 repair's pin: the distractor control is REAL
+            # (the dead tautology deleted) — the near-miss document (the
+            # wharf/fog/jetty/tar text, disjoint tokens) must never be
+            # admitted; the verdict line shows the honest count form
+            # (admitted == expected, near-miss-excluded=true) AND the
+            # near-miss id itself is absent from the admitted set (the
+            # distractor doc's own tokens — 'wharf', 'fog' — queried alone
+            # would admit it; the corpus records that the near-miss id is
+            # not among D1's admissions). The fp channel: if the near-miss
+            # is EVER admitted, admitted exceeds expected and fp rises —
+            # the pin asserts the verdict line's equality form.
+            m = re.search(r"class=distractor[^\n]*admitted=(\d+) "
+                          r"expected=(\d+) near-miss-excluded=(\w+)", r.stdout)
+            ok = (r.returncode == 0 and m is not None
+                  and m.group(1) == m.group(2) == "2"
+                  and m.group(3) == "true"
                   and re.search(r"fp=0", r.stdout) is not None)
         else:
             ok = False
@@ -311,15 +321,26 @@ def main() -> int:
 
         # ---- EVC-08 — the owner isolation
         if machinery:
+            # the round-1 D-042 repair (the reviewer's P2 #1): the stdout
+            # pin was vacuous (the run never prints ids in any state) —
+            # the REAL observation goes through the standing arm: B's
+            # search under a term B OWNS (B's copy of doc A's text) admits
+            # B's OWN copy and never A's id; A's search never admits B's
+            b_search = cli(str(REPO / "harness" / "query.py"), "search",
+                          "--owner", "B", "xylophone")
+            a_search = cli(str(REPO / "harness" / "query.py"), "search",
+                           "--owner", "A", "xylophone")
             r = evl("run", "--corpus", "arv-p5b-eval-corpus", "--revision", "1",
                     "--owner", "B")
-            # B's run: the owner line names B, and B's admitted sets are
-            # B's OWN material (the fixture seeds B's copy of doc A under
-            # owner B — the same terms, a different owner scope)
+            # B's run over the corpus: the owner line names B; the arm
+            # observations carry the real isolation evidence
             ok = (r.returncode == 0
                   and "owner=B" in r.stdout
-                  and f"{ids['sid_a']}" not in r.stdout
-                  and f"{ids['sid_b']}" not in r.stdout)
+                  and b_search.returncode == 0
+                  and a_search.returncode == 0
+                  and b_search.stdout != a_search.stdout
+                  and ids["sid_a"] not in b_search.stdout
+                  and ids["sid_bn"] in b_search.stdout)
         else:
             ok = False
         ok_all &= check("EVC-08", ok,

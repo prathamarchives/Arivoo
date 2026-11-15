@@ -45,7 +45,15 @@ ARV_EVL = {
            "fields (corpus_id, revision, cases)",
     "003": "the case class is not one of the four (relevant, no-result, "
            "distractor, conflated) — the corpus is data under a contract",
+    "004": "the search arm refused — an infrastructure failure is never "
+           "the honest empty set (the round-1 D-042 repair: the arm's "
+           "typed refusal propagates, the evaluator never converts a "
+           "broken environment into a passing verdict)",
 }
+
+
+class ArmRefused(Exception):
+    """The search arm's typed refusal (ARV-EVL-004's object)."""
 
 
 def _fail(code: str, detail: str) -> int:
@@ -54,13 +62,19 @@ def _fail(code: str, detail: str) -> int:
 
 
 def _search(db: str, owner: str, terms: list) -> list:
-    """One query through the standing search arm; returns the id set."""
+    """One query through the standing search arm; returns the id set.
+    The round-1 D-042 repair: the arm's refusal propagates typed — a dead
+    DB, a refused RLS read, or an arm-side typed failure is NEVER
+    converted into the honest empty set (the fail-open closed)."""
     r = subprocess.run(
         [sys.executable, str(REPO / "harness" / "query.py"), "search",
          "--owner", owner, *terms],
         capture_output=True, text=True, timeout=240,
         env=dict(os.environ, PGDATABASE=db),
     )
+    if r.returncode != 0 or "FAIL ARV-" in (r.stdout or ""):
+        detail = (r.stdout or r.stderr or "").strip().split("\n")[0][:120]
+        raise ArmRefused(f"the arm refused for terms {terms!r}: {detail}")
     ids = set()
     for ln in (r.stdout or "").split("\n"):
         if not ln or ln.startswith("#"):
@@ -126,47 +140,76 @@ def cmd_run(a) -> int:
     tp = fp = fn = 0
     lines = []
     hostile_seen = 0
-    for c in sorted(d["cases"], key=lambda x: x["case"]):
-        cls = c["class"]
-        actual = _owner_search(db, owner, c["query"])
-        # the hostile-content marker (EVC-07): the query's words are DATA;
-        # the run evaluates them exactly like any other case — no special
-        # branch exists, so the only observable is the honest comparison
-        if any(w in ("ignore", "corpus") for w in c["query"]) and cls == "conflated":
-            hostile_seen += 1
-        if cls == "relevant":
-            exp_n = len(c.get("expect_ids", []))
-            tp += len(actual)
-            fn += max(0, exp_n - len(actual)) if exp_n and actual == sorted(actual) else 0
-            lines.append(f"case={c['case']} class=relevant "
-                         f"actual={len(actual)} expected={exp_n}")
-        elif cls == "no-result":
-            empty = len(actual) == 0
-            if not empty:
-                fp += len(actual)
-            lines.append(f"case={c['case']} class=no-result "
-                         f"actual={len(actual)} expected=0 "
-                         f"empty={'true' if empty else 'false'} "
-                         f"{'the honest empty set' if empty else 'FABRICATED'}")
-        elif cls == "distractor":
-            # the distractor law: the near-miss material must not appear in
-            # the actual set — the miss is mechanically detectable
-            miss = len(actual)  # the admitted count over the query term
-            clean = miss == len(actual)
-            lines.append(f"case={c['case']} class=distractor "
-                         f"admitted={len(actual)} "
-                         f"near-miss-excluded={'true' if clean else 'false'}")
-            if not clean:
-                fp += 1
-        else:  # conflated
-            n = len(actual)
-            both = n >= 2
-            if both:
-                tp += n
-            else:
-                fn += (2 - n)
-            lines.append(f"case={c['case']} class=conflated admitted={n} "
-                         f"both={'true' if both else 'false'}")
+    try:
+        for c in sorted(d["cases"], key=lambda x: x["case"]):
+            cls = c["class"]
+            actual = _owner_search(db, owner, c["query"])
+            # the hostile-content marker (EVC-07): the query's words are DATA;
+            # the run evaluates them exactly like any other case — no special
+            # branch exists, so the only observable is the honest comparison
+            if any(w in ("ignore", "corpus") for w in c["query"]) and cls == "conflated":
+                hostile_seen += 1
+            if cls == "relevant":
+                # the round-1 D-042 repair (finding 3): the verdict is
+                # COUNT-BASED against the corpus's expected count — the
+                # over-admission channel: every admission beyond the
+                # expected count is fp (precision can actually drop; a
+                # ranking change that admits junk is visible), the
+                # shortfall is fn. expect_count is the authoritative
+                # expectation (the symbolic expect_ids are the corpus's
+                # descriptive form; the count is the verdict's own)
+                exp_n = int(c.get("expect_count",
+                                  len(c.get("expect_ids", [])) or 0))
+                tp += min(len(actual), exp_n)
+                if len(actual) > exp_n:
+                    fp += len(actual) - exp_n
+                elif len(actual) < exp_n:
+                    fn += exp_n - len(actual)
+                lines.append(f"case={c['case']} class=relevant "
+                             f"actual={len(actual)} expected={exp_n}")
+            elif cls == "no-result":
+                empty = len(actual) == 0
+                if not empty:
+                    fp += len(actual)
+                lines.append(f"case={c['case']} class=no-result "
+                             f"actual={len(actual)} expected=0 "
+                             f"empty={'true' if empty else 'false'} "
+                             f"{'the honest empty set' if empty else 'FABRICATED'}")
+            elif cls == "distractor":
+                # the round-1 D-042 repair (finding 2): the real distractor
+                # control — the expected count is 0 (the near-miss material
+                # must NOT be admitted); every admission is fp and the
+                # shortfall (an empty verdict where the corpus EXPECTS the
+                # near-miss to exist-but-not-admit... no: the distractor's
+                # expectation IS zero admissions) — the dead tautology
+                # (clean = miss == len(actual)) is deleted; the admission
+                # count over the recorded expectation is the whole verdict
+                exp_n = int(c.get("expect_count", 0))
+                if len(actual) > exp_n:
+                    fp += len(actual) - exp_n
+                elif len(actual) < exp_n:
+                    fn += exp_n - len(actual)
+                lines.append(f"case={c['case']} class=distractor "
+                             f"admitted={len(actual)} expected={exp_n} "
+                             f"near-miss-excluded="
+                             f"{'true' if len(actual) == exp_n else 'false'}")
+            else:  # conflated
+                # the round-1 D-042 repair (finding 3, the conflated half):
+                # the same count-based channel — the expected count is the
+                # recorded expect_count (the BOTH documents); the
+                # rank-suppression of the second document is fn, the
+                # over-admission beyond the pair is fp
+                exp_n = int(c.get("expect_count", 2))
+                tp += min(len(actual), exp_n)
+                if len(actual) > exp_n:
+                    fp += len(actual) - exp_n
+                elif len(actual) < exp_n:
+                    fn += exp_n - len(actual)
+                lines.append(f"case={c['case']} class=conflated "
+                             f"admitted={len(actual)} expected={exp_n} "
+                             f"both={'true' if len(actual) >= exp_n else 'false'}")
+    except ArmRefused as e:
+        return _fail("004", str(e))
     prec = (tp / (tp + fp)) if (tp + fp) else 1.0
     rec = (tp / (tp + fn)) if (tp + fn) else 1.0
     print(f"# corpus_id={a.corpus} revision={a.revision} owner={owner} "

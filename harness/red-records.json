@@ -1425,5 +1425,15 @@
         "observed_at": "2026-11-15T07:25:57.005108+00:00"
       }
     ]
+  },
+  "harness/tests/test_semantic_spike.py": {
+    "schema": 2,
+    "binding_commit": "42d58cd827e0db3732431b3e478c7cb242c64a22",
+    "binding_sha256": "2552c6660641b5e1e57030dcba8dacffdbf784d5b75d3afca9c5a05251536918",
+    "red_exit": 1,
+    "red_code": "SEM-01,SEM-02,SEM-03,SEM-04,SEM-05,SEM-06,SEM-07,SEM-08",
+    "red_evidence": "the P5-C RED at 155dd8d's merged head: the suite (SEM-01..08) observed 8 FAIL / 0 PASS, exit 1 \u2014 the machinery (harness/semantic.py) absent; red-01.txt in the slice runs is the transcript (LAW-11: committed alone, the implementation lands after)",
+    "current_sha256": "2552c6660641b5e1e57030dcba8dacffdbf784d5b75d3afca9c5a05251536918",
+    "amendments": []
   }
 }

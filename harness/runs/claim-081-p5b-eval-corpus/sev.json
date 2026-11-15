@@ -1,0 +1,43 @@
+{
+ "slice": "claim-081-p5b-eval-corpus",
+ "base_sha": "2e35d592b4a3b318a27837e775779daa834f1fa0",
+ "findings": [
+  {
+   "id": "F-081-1",
+   "severity": "P2",
+   "finding": "the corpus's expect_ids use the symbolic forms ('*', '*AND*', '*both*') rather than concrete material ids — the honest reason: the suite's fixture seeds uuids at runtime (the fresh scratch DB), so the corpus CANNOT carry them statically; the evaluator compares against the run's own admissions (the deterministic shape, not the static id)",
+   "disposition": "PASS",
+   "status": "owner-accepted-debt"
+  },
+  {
+   "id": "F-081-2",
+   "severity": "P2",
+   "finding": "the evaluator's per-case verdict counts ids, not id equality (the same honest reason: the runtime-seeded ids); the conflated + distractor + no-result classes ARE id-exact in their assertions (the suite's own pins)",
+   "disposition": "PASS",
+   "status": "owner-accepted-debt"
+  },
+  {
+   "id": "F-081-3",
+   "severity": "P3",
+   "finding": "the eval-runs.jsonl append grows unboundedly across suite runs (the scratch DB is dropped but the JSONL persists in the slice runs)",
+   "disposition": "PASS",
+   "status": "owner-accepted-debt"
+  },
+  {
+   "id": "F-081-4",
+   "severity": "P2",
+   "finding": "the suite imports harness.adapters.pg for the scratch DB (the SAME standing dependency every retrieval suite uses — the legal form 'from harness.adapters import pg' adopted)",
+   "disposition": "PASS",
+   "status": "owner-accepted-debt"
+  },
+  {
+   "id": "F-081-5",
+   "severity": "P2",
+   "finding": "the hostile-as-data marker (EVC-07's 'hostile-as-data=1' count) is a presence marker, not a behavioral differential (the corpus-as-data law's stronger form — a probe that compares the run's verdict with/without the hostile case — routed to the D-042 review's own probes)",
+   "disposition": "PASS",
+   "status": "owner-accepted-debt"
+  }
+ ],
+ "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. GREEN: EVC-01..10 = 10/10; the standing suites never regressed (the RPK 10/10 re-verified). The honest debts ledgered P2/P3 (the symbolic expect_ids — the runtime-seeded-uuid consequence; the count-based verdict; the JSONL growth; the standing adapters dependency; the hostile marker's differential routed to the review probes).",
+ "reviewed_diff_sha256": "5346c10bc6efe057711fb5ee5d96fab2d142055edd0a905544fc0458d697fbae"
+}

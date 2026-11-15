@@ -8,22 +8,26 @@ spike's deterministic machinery do not exist.
 THE CONTRACT (the 5C letter, record 74 §2 — the spike's laws):
 
   * DETERMINISM WHERE MEASURABLE: the embedding of a fixed text is
-    byte-stable across re-runs, or the spike refuses to ship it. The
-    evaluation baseline (P5-B) is worthless if the measure drifts — this
-    is the first law, before any quality claim.
+    byte-stable across re-runs AND content-sensitive (different texts,
+    different vectors), or the spike refuses to ship it. The evaluation
+    baseline (P5-B) is worthless if the measure drifts — this is the
+    first law, before any quality claim.
   * THE CORPUS AS THE GATE: every semantic admission is measured against
     harness/runs/claim-081-p5b-eval-corpus/corpus.json — the same four
     case classes, the same mechanical verdict form (expected vs actual
     id sets, precision/recall, never an LLM judgment).
-  * THE NEAR-MISS LAW: the distractor class is where the semantic layer
-    must PROVE its value. The keyword layer excludes the wharf/fog
-    document by token-disjointness. The semantic layer must exclude it
-    by MEANING, not by luck: a query whose tokens do NOT hit the
-    near-miss document (the keyword-excluded case) must still exclude it
-    semantically — AND a query whose meaning neighbors it (the semantic
-    near-miss probe: 'jetty', 'tide', 'pier') must also exclude it when
-    the meaning is off-target. A semantic layer that admits the near-miss
-    is worse than the keyword layer it would replace.
+  * THE NEAR-MISS LAW (the disclosed-negative form — the round-1 D-042
+    repair): the local token-multiset map CANNOT make the near-miss
+    exclusion (computed: no threshold separates the near-miss document
+    from the corpus's own — the token identity IS the pack's admission;
+    no meaning signal remains for the map to add). The spike's honest
+    form: the keyword-admitted near-miss doc is admitted with its
+    similarity RANKING (the map's one honest contribution — a
+    deterministic ordering of the admitted set), and the verdict output
+    itself DISCLOSES the deferral (near-miss-judgment=deferred-to-real-
+    backend, Q7). The real near-miss judgment rides the real embedding
+    backend when Q7 resolves; a spike that silently claims the
+    exclusion is the dishonest form this suite refuses.
   * THE CONFLATED LAW: the same term spanning two documents stays
     BOTH-admitted, provenance-disambiguated, never rank-suppressed.
   * THE OWNER BOUNDARY: the semantic index rides the same RLS path —
@@ -117,10 +121,12 @@ HOSTILE_QUERY_DOC = ("The hostile-content document, whose text embeds "
 CORPUS_FILE = "harness/runs/claim-081-p5b-eval-corpus/corpus.json"
 SEMANTIC_PY = "harness/semantic.py"
 
-# the near-miss probe terms (SEM-04's own objects): tokens present in the
-# distractor document (wharf, fog, mole, stone, jetty, tar) — the meaning
-# probes the semantic layer must judge
-NEAR_MISS_TERMS = ["wharf", "jetty", "fog"]
+# the near-miss probe terms (SEM-04's own objects — the round-1 F10
+# repair: the promised probes RUN): tokens present in the distractor
+# document (wharf, fog, mole, stone, jetty, tar) — the keyword layer
+# admits the near-miss doc on them; the semantic layer's honest verdict
+# admits + ranks + DISCLOSES the deferred near-miss judgment
+NEAR_MISS_TERMS = ["wharf", "jetty"]
 
 
 def check(name: str, ok: bool, statement: str, repair: str) -> bool:
@@ -224,21 +230,28 @@ def main() -> int:
                         "(the deterministic local embedding map + the "
                         "verdict arm)")
 
-        # ---- SEM-02 — the determinism law
+        # ---- SEM-02 — the determinism law (+ the round-1 F6 repair:
+        # the content-sensitivity pin — two DIFFERENT texts embed
+        # differently; the map is not the constant vector)
         if machinery:
             r1 = sem("embed", "--text", TEXT_DISTRACTOR)
             r2 = sem("embed", "--text", TEXT_DISTRACTOR)
+            rA = sem("embed", "--text", TEXT_A)
             ok = (r1.returncode == 0 and r2.returncode == 0
+                  and rA.returncode == 0
                   and r1.stdout == r2.stdout
+                  and r1.stdout != rA.stdout
                   and "embedding_sha256=" in r1.stdout)
         else:
             ok = False
         ok_all &= check("SEM-02", ok,
                         "the determinism law: the same text embeds "
                         "byte-equal across two independent calls (the "
-                        "digest form, no clock, no randomness)",
+                        "digest form) AND different texts embed "
+                        "differently (the map is content-sensitive)",
                         "the embed arm is a deterministic local map: "
-                        "same text in, same bytes out")
+                        "same text in, same bytes out; different texts, "
+                        "different vectors")
 
         # ---- SEM-03 — the vocabulary law (the Q7 gate's own pin)
         if machinery:
@@ -264,90 +277,142 @@ def main() -> int:
                         "socket; the only backend is the local "
                         "deterministic map until Q7 resolves")
 
-        # ---- SEM-04 — the near-miss law (the value proof)
+        # ---- SEM-04 — the near-miss law (the disclosed-negative form)
+        # the round-1 D-042 F1/F3/F10 repair: the promised probes RUN
+        # ('wharf' and 'jetty' — the keyword layer admits the near-miss
+        # doc on them); the admission is asserted on a NON-COMMENT line
+        # (never the exclusion note itself); and the NEGATIVE RESULT is
+        # pinned: the verdict output DISCLOSES that the local map cannot
+        # make the near-miss exclusion (the deferral to the real
+        # backend, Q7) — a spike that silently claims the exclusion is
+        # the dishonest form the round-1 review blocked
         if machinery:
-            # the direct probe: 'wharf' — a token hit AND the target
-            # meaning; both layers admit the near-miss doc
-            r_direct = sem("verdict", "--query", "wharf",
-                           "--owner", "A")
-            # the meaning-off-target probe: 'harbor' — the meaning
-            # neighbor (the wharf/fog text neighbors a HARBOR query's
-            # meaning) but NOT the target doc of a quartz-harbor query;
-            # the keyword layer admits ONLY the quartz-harbor docs (the
-            # token hit); the semantic layer must not admit the
-            # near-miss doc for this probe either — the exclusion is
-            # MEANING-driven (the near-miss is about WHARVES not about
-            # QUARTZ harbors), not luck
-            r_probe = sem("verdict", "--query", "harbor", "--owner", "A")
-            ok = (r_direct.returncode == 0 and r_probe.returncode == 0
-                  and ids["sid_d"] in r_direct.stdout
-                  and ids["sid_d"] not in r_probe.stdout
-                  and "near-miss" in r_probe.stdout)
+            r_wharf = sem("verdict", "--query", "wharf", "--owner", "A")
+            r_jetty = sem("verdict", "--query", "jetty", "--owner", "A")
+            admitted_noncomment_wharf = any(
+                ids["sid_d"] in ln for ln in r_wharf.stdout.split("\n")
+                if ln and not ln.startswith("#"))
+            ranked = any(re.search(r"similarity=0\.[0-9]+", ln)
+                         for ln in r_wharf.stdout.split("\n"))
+            disclosed = all(
+                "near-miss-judgment=deferred-to-real-backend" in r.stdout
+                for r in (r_wharf, r_jetty))
+            ok = (r_wharf.returncode == 0 and r_jetty.returncode == 0
+                  and admitted_noncomment_wharf and ranked and disclosed)
         else:
             ok = False
         ok_all &= check("SEM-04", ok,
-                        "the near-miss law: the direct probe ('wharf') "
-                        "admits the near-miss doc (both layers agree); "
-                        "the meaning-off-target probe ('harbor') "
-                        "excludes it — the exclusion is meaning-driven, "
-                        "never luck",
-                        "the verdict arm's semantic admission judges "
-                        "meaning-adjacency against the query's target, "
-                        "not token-adjacency alone")
+                        "the near-miss law (the disclosed-negative "
+                        "form): the keyword-admitted near-miss doc is "
+                        "admitted on a non-comment line with its "
+                        "similarity ranking; the verdict output itself "
+                        "DISCLOSES that the local map cannot make the "
+                        "near-miss exclusion (deferred to the real "
+                        "backend, Q7) — never a silent claim",
+                        "the verdict arm prints the deferral line on "
+                        "every query + the similarity ranking per "
+                        "admitted item")
 
-        # ---- SEM-05 — the corpus-as-gate law
+        # ---- SEM-05 — the corpus-as-gate law (the round-1 F4/F5
+        # repair: the pins bite — per-case VALUES, the tp/fp/fn line,
+        # two-run byte-equality, the wrong-revision refusal)
         if machinery:
-            r = sem("run", "--corpus", "arv-p5b-eval-corpus",
-                    "--revision", "1", "--owner", "A")
-            ok = (r.returncode == 0
-                  and "corpus_id=arv-p5b-eval-corpus" in r.stdout
-                  and "revision=1" in r.stdout
-                  and "precision=" in r.stdout and "recall=" in r.stdout
-                  and "run-record appended" in r.stdout)
+            r1 = sem("run", "--corpus", "arv-p5b-eval-corpus",
+                     "--revision", "1", "--owner", "A")
+            r2 = sem("run", "--corpus", "arv-p5b-eval-corpus",
+                     "--revision", "1", "--owner", "A")
+            wrong_rev = sem("run", "--corpus", "arv-p5b-eval-corpus",
+                            "--revision", "99")
+            ok = (r1.returncode == 0 and r2.returncode == 0
+                  and r1.stdout == r2.stdout
+                  and "corpus_id=arv-p5b-eval-corpus" in r1.stdout
+                  and "revision=1" in r1.stdout
+                  and re.search(r"case=R1 class=relevant actual=1 "
+                                r"expected=1", r1.stdout) is not None
+                  and re.search(r"case=R2 class=relevant actual=2 "
+                                r"expected=2", r1.stdout) is not None
+                  and re.search(r"case=N1 class=no-result actual=0 "
+                                r"expected=0 empty=true", r1.stdout)
+                  is not None
+                  and re.search(r"case=N2 class=no-result actual=0 "
+                                r"expected=0 empty=true", r1.stdout)
+                  is not None
+                  and re.search(r"case=D1 class=distractor admitted=2 "
+                                r"expected=2 near-miss-excluded=true",
+                                r1.stdout) is not None
+                  and re.search(r"case=C1 class=conflated actual=2 "
+                                r"expected=2", r1.stdout) is not None
+                  and re.search(r"case=H1 class=conflated actual=1 "
+                                r"expected=1", r1.stdout) is not None
+                  and re.search(r"tp=[0-9]+ fp=[0-9]+ fn=[0-9]+",
+                                r1.stdout) is not None
+                  and "run-record appended" in r1.stdout
+                  and wrong_rev.returncode != 0
+                  and "ARV-SEM-002" in wrong_rev.stdout)
         else:
             ok = False
         ok_all &= check("SEM-05", ok,
                         "the corpus-as-gate law: the semantic run over "
                         "the P5-B corpus produces the same mechanical "
-                        "verdict form (per-case, precision/recall, the "
-                        "JSONL run record — the EVC-10 form exactly)",
+                        "verdict form — the per-case VALUES pinned, the "
+                        "tp/fp/fn line, two-run byte-equality, and the "
+                        "wrong-revision refusal (ARV-SEM-002, the "
+                        "EVC-10 form's own law inherited)",
                         "the run arm reuses the eval verdict form over "
-                        "the same registered corpus")
+                        "the same registered corpus; the revision "
+                        "mismatch refuses typed")
 
-        # ---- SEM-06 — the conflated law
+        # ---- SEM-06 — the conflated law (the round-1 F3 half: the ids
+        # asserted on NON-COMMENT lines; admitted=2 exact — never the
+        # exclusion-note accident)
         if machinery:
             r = sem("verdict", "--query", "meridian", "--owner", "A")
+            admitted_lines = [ln for ln in r.stdout.split("\n")
+                              if ln and not ln.startswith("#")]
             ok = (r.returncode == 0
-                  and ids["sid_a"] in r.stdout
-                  and ids["sid_b"] in r.stdout
+                  and any(ids["sid_a"] in ln for ln in admitted_lines)
+                  and any(ids["sid_b"] in ln for ln in admitted_lines)
+                  and "admitted=2" in r.stdout
                   and "both=true" in r.stdout
-                  and re.search(r"provenance=", r.stdout) is not None)
+                  and all(re.search(r"provenance=", ln)
+                          for ln in admitted_lines)
+                  and all(re.search(r"similarity=", ln)
+                          for ln in admitted_lines))
         else:
             ok = False
         ok_all &= check("SEM-06", ok,
                         "the conflated law: 'meridian' admits BOTH "
-                        "documents with provenance-disambiguated whys "
-                        "(both=true, the provenance field on every "
-                        "line) — never a rank-based suppression",
+                        "documents (admitted=2, the ids on non-comment "
+                        "lines) with provenance + similarity on every "
+                        "admitted line — never a rank-based suppression",
                         "the verdict arm carries the doc's own "
-                        "provenance on every admitted line")
+                        "provenance + the similarity ranking on every "
+                        "admitted line")
 
-        # ---- SEM-07 — the owner boundary
+        # ---- SEM-07 — the owner boundary (the round-1 F7 repair: the
+        # run arm's owner path pinned too, not the verdict arm alone)
         if machinery:
             rA = sem("verdict", "--query", "meridian", "--owner", "A")
             rB = sem("verdict", "--query", "meridian", "--owner", "B")
+            runB = sem("run", "--corpus", "arv-p5b-eval-corpus",
+                       "--revision", "1", "--owner", "B")
             ok = (rA.returncode == 0 and rB.returncode == 0
+                  and runB.returncode == 0
                   and ids["sid_a"] in rA.stdout
                   and ids["sid_a"] not in rB.stdout
-                  and ids["sid_b"] not in rB.stdout)
+                  and ids["sid_b"] not in rB.stdout
+                  and f"owner=B" in runB.stdout
+                  and ids["sid_a"] not in runB.stdout)
         else:
             ok = False
         ok_all &= check("SEM-07", ok,
-                        "the owner boundary: B's semantic run never "
-                        "sees A's material (A's doc ids absent from B's "
-                        "verdict output; B sees only B's own)",
+                        "the owner boundary: B's semantic run (the "
+                        "verdict AND the corpus run arms) never sees "
+                        "A's material (A's doc ids absent from both "
+                        "outputs; B sees only B's own)",
                         "the semantic index rides the same RLS path — "
-                        "the owner boundary is the standing one")
+                        "the owner boundary is the standing one, on "
+                        "every arm")
 
         # ---- SEM-08 — the honesty of the unmeasured
         if machinery:

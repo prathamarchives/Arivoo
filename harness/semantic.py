@@ -27,6 +27,8 @@ import subprocess
 import sys
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))  # the adapters import's own form
+from harness.adapters import blob  # noqa: E402
 RUNS = REPO / "harness" / "runs"
 
 # the spike's registered vocabulary (SEM-03's own object): the corpus's
@@ -53,37 +55,22 @@ VOCAB = sorted({
 DIM = len(VOCAB)
 TOKEN_INDEX = {t: i for i, t in enumerate(VOCAB)}
 
-# the registered TOPICS (SEM-04's engine): a probe's TARGET topic vs the
-# admitted item's topic profile — the meaning judgment. The near-miss
-# document carries the wharf/fog cluster, NOT the quartz-harbor cluster:
-# a 'harbor' probe targets the corpus's OWN cluster, so the near-miss's
-# adjacency to the word never admits it (a DIFFERENT harbor).
-TOPICS = {
-    "quartz-harbor": {"quartz", "harbor", "shore", "second", "meets"},
-    "wharf-fog": {"wharf", "fog", "mole", "stone", "jetty", "tar"},
-    "meridian": {"meridian", "line", "crosses", "first", "doc"},
-    "xylophone": {"xylophone", "span", "lives"},
-    "notion": {"notion", "concept", "fact", "quote", "dance", "pie"},
-}
-# the probe-term -> target-topic map (a probe not in it targets NO
-# topic: the keyword admission stands, no semantic exclusion applies)
-PROBE_TARGET = {
-    "harbor": "quartz-harbor",
-    "quartz": "quartz-harbor",
-    "wharf": "wharf-fog",
-    "jetty": "wharf-fog",
-    "fog": "wharf-fog",
-    "meridian": "meridian",
-    "xylophone": "xylophone",
-}
-
 ARV_SEM = {
     "001": "the embed arm requires --text (a text to embed)",
+    "002": "the corpus file's id/revision does not match the requested "
+           "run (the EVC-10 form's own law, inherited from eval.py)",
+    "003": "a corpus case carries an unknown class (the four case "
+           "classes are the law; an unknown class refuses typed, never "
+           "a silent skip)",
     "005": "the requested backend is refused: the Q7 gate is OPEN — no "
            "network embedding, no model download, no budget; the only "
            "backend is the local deterministic map",
     "006": "the verdict arm requires --query terms (the semantic "
            "admission is judged over a query)",
+    "010": "the standing arm refused — the fail-closed form (never the "
+           "honest empty set)",
+    "011": "the corpus id is not registered (never a silent default)",
+    "012": "the corpus file is malformed or unreadable",
 }
 
 
@@ -112,14 +99,6 @@ def embed_text(text: str) -> list:
         if i is not None:
             v[i] += 1
     return v
-
-
-def _topic_profile(text: str) -> frozenset:
-    """The document's meaning-clusters: every topic whose terms the text
-    carries at least one of (the fixed registry, the fixed judgment)."""
-    toks = set(_tokens(text))
-    return frozenset(name for name, terms in TOPICS.items()
-                     if toks & terms)
 
 
 class ArmRefused(Exception):
@@ -164,45 +143,89 @@ def cmd_embed(a) -> int:
     return 0
 
 
+def _norm(v: list) -> float:
+    """The L2 norm (the cosine's denominator)."""
+    return sum(x * x for x in v) ** 0.5
+
+
+def _cos(qv: list, qn: float, iv: list) -> float:
+    """The cosine similarity between the query's and the item's embedded
+    vectors — THE meaning judgment (the spike's own map, consumed here:
+    the round-1 finding F6's repair — the embedding is the verdict path's
+    engine, not decoration)."""
+    dot = sum(a * b for a, b in zip(qv, iv))
+    inn = _norm(iv)
+    if qn == 0 or inn == 0:
+        return 0.0
+    return dot / (qn * inn)
+
+
+def _item_text(db: str, owner: str, kind: str, entity_id: str) -> str:
+    """The admitted item's own FULL text (the RLS-scoped read: the
+    get-source arm's digest -> the blob bytes; the spike never
+    re-implements retrieval — it reads through the standing arm)."""
+    r = subprocess.run(
+        [sys.executable, str(REPO / "harness" / "query.py"), "get-source",
+         "--owner", owner, "--id", entity_id],
+        capture_output=True, text=True, timeout=240,
+        env=dict(os.environ, PGDATABASE=db))
+    if r.returncode != 0 or "FAIL ARV-" in (r.stdout or ""):
+        raise ArmRefused(f"the get-source arm refused for {entity_id}: "
+                         f"{(r.stdout or r.stderr or '')[:120]}")
+    try:
+        d = json.loads((r.stdout or "").strip())
+        digest = d.get("digest") or ""
+    except json.JSONDecodeError:
+        raise ArmRefused(f"the get-source arm's output is unparseable "
+                         f"for {entity_id}")
+    if not digest:
+        raise ArmRefused(f"the get-source arm carried no digest for "
+                         f"{entity_id}")
+    try:
+        data = blob.get(digest)
+    except Exception as e:  # the blob store's own refusal, fail-closed
+        raise ArmRefused(f"the blob read refused for {digest[:16]}: {e}")
+    return data.decode("utf-8", "replace")
+
+
 def _verdict_lines(db: str, owner: str, query_terms: list) -> list:
     """The semantic admission over the standing arm's own keyword
-    admissions (SEM-04/06/07's engine). The near-miss law: the probe's
-    TARGET topic (PROBE_TARGET) vs each admitted item's topic profile
-    (over the item's matched-terms evidence from the pack arm)."""
+    admissions (SEM-04/06/07's engine) — the honest form (the round-1
+    D-042 F1/F2 repair): the probe's embedded vector vs each admitted
+    item's embedded FULL TEXT (the RLS-scoped read through get-source +
+    the blob store); the similarity is PRINTED per item as the ranking —
+    the local map's one honest contribution over the keyword layer (a
+    deterministic similarity ordering of the admitted set). The
+    near-miss EXCLUSION is deferred to the real backend: over the
+    local token-multiset map no threshold separates the near-miss
+    document from the corpus's own (computed: 0.15 vs 0.11 — the token
+    identity IS the pack's admission; there is no meaning signal left
+    for the map to add). The verdict output DISCLOSES this, and the
+    report arm names it as the spike's own negative result."""
     lines = []
     pack_lines = _pack(db, owner, query_terms)
-    # the pack line: kind|entity_id|revision|source_id|anchor_id|trust|
-    #                 matched_terms (comma-joined)
-    target = None
-    for t in query_terms:
-        if t.casefold() in PROBE_TARGET:
-            target = PROBE_TARGET[t.casefold()]
-            break
-    excluded = []
+    qv = embed_text(" ".join(query_terms))
+    qn = _norm(qv)
+    ranked = []
     for ln in pack_lines:
         parts = ln.split("|")
         if len(parts) < 7:
             continue
         kind, entity_id, rev, source_id, anchor_id, trust, matched = parts[:7]
-        matched_terms = set(m for m in matched.split(",") if m)
-        profile = frozenset(
-            name for name, terms in TOPICS.items() if matched_terms & terms)
-        # the meaning judgment: when the probe targets a topic, an item
-        # whose profile is DISJOINT from the target is a near-miss — the
-        # meaning-adjacent token hit whose meaning-cluster is a DIFFERENT
-        # one. The exclusion is MEANING-driven (the item carries no term
-        # of the target topic at all), never luck.
-        if target is not None and profile and profile.isdisjoint({target}):
-            excluded.append(f"{kind}|{entity_id}")
-            continue
+        if kind == "source":
+            doc = _item_text(db, owner, kind, entity_id)
+        else:
+            doc = matched  # a capture family's own matched terms
+        iv = embed_text(doc)
+        sim = _cos(qv, qn, iv)
+        ranked.append((sim, kind, entity_id, rev, source_id, anchor_id,
+                       trust))
+    for sim, kind, entity_id, rev, source_id, anchor_id, trust in sorted(
+            ranked, key=lambda x: (-x[0], x[1], x[2])):
         lines.append(
-            f"{kind}|{entity_id}|{rev}|provenance=source:{source_id or '-'}"
-            f",anchor:{anchor_id or '-'},trust:{trust}")
-    for k, e in ((x.split("|")[0], x.split("|")[1]) for x in excluded):
-        print(f"# near-miss excluded: {k}|{e} (target-topic={target}; "
-              f"the meaning-cluster is a different one — the exclusion is "
-              f"meaning-driven)")
-    # the re-print loop keeps the print order deterministic
+            f"{kind}|{entity_id}|{rev}|similarity={sim:.4f}|"
+            f"provenance=source:{source_id or '-'},"
+            f"anchor:{anchor_id or '-'},trust:{trust}")
     return lines
 
 
@@ -216,34 +239,13 @@ def cmd_verdict(a) -> int:
     try:
         lines = _verdict_lines(db, owner, [q for q in a.query])
     except ArmRefused as e:
-        print(f"FAIL ARV-SEM-007: the standing arm refused — {e}")
+        print(f"FAIL ARV-SEM-010: {ARV_SEM['010']} — {e}")
         return 1
     n = len(lines)
     both = "true" if n >= 2 else "false"
     print(f"# owner={owner} query={' '.join(a.query)} admitted={n} "
-          f"both={both}")
-    # the near-miss note (SEM-04's second half): when the probe targets a
-    # topic, the MEANING-NEIGHBOR cluster is named — the meaning-adjacent
-    # material the keyword layer never admitted (its tokens are disjoint
-    # from the probe) and the semantic layer refuses to fabricate into an
-    # admission. The exclusion is MEANING-driven: the neighbor cluster is
-    # a DIFFERENT meaning (the wharf-of-fog harbor, not the quartz one),
-    # so the honest verdict reports the adjacency WITHOUT admitting it.
-    target = None
-    for t in a.query:
-        if t.casefold() in PROBE_TARGET:
-            target = PROBE_TARGET[t.casefold()]
-            break
-    if target is not None:
-        for name, terms in sorted(TOPICS.items()):
-            if name != target and terms & TOPICS[target]:
-                continue  # a shared-term cluster is the same meaning
-            if name != target:
-                print(f"# near-miss: the {name} meaning-cluster "
-                      f"(terms: {','.join(sorted(terms))}) neighbors the "
-                      f"probe's target topic {target} — NOT admitted: "
-                      f"the exclusion is meaning-driven (a different "
-                      f"meaning, never luck)")
+          f"both={both} near-miss-judgment=deferred-to-real-backend "
+          f"(Q7) similarity-ranking=local-deterministic")
     for ln in lines:
         print(ln)
     return 0
@@ -254,14 +256,21 @@ def cmd_run(a) -> int:
     (per-case, precision/recall, the JSONL run record — EVC-10 exactly)."""
     reg = REGISTRY.get(a.corpus)
     if reg is None:
-        print(f"FAIL ARV-SEM-008: corpus {a.corpus!r} is not registered")
-        return 1
+        return _fail("011", f"corpus {a.corpus!r}")
     p = REPO / reg["file"]
     try:
         d = json.loads(p.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as e:
-        print(f"FAIL ARV-SEM-009: {reg['file']}: {e}")
+        print(f"FAIL ARV-SEM-012: {ARV_SEM['012']} — {reg['file']}: {e}")
         return 1
+    # F5's repair (the EVC-10 form's own law, inherited): the file's
+    # id/revision must match the requested run — never a wrong-revision
+    # record silently appended
+    if d.get("corpus_id") != a.corpus or str(d.get("revision")) != str(a.revision):
+        return _fail("002",
+                     f"the file's id/revision ({d.get('corpus_id')}/"
+                     f"{d.get('revision')}) != the requested "
+                     f"({a.corpus}/{a.revision})")
     db = os.environ.get("PGDATABASE", "postgres")
     owner = a.owner or "A"
     tp = fp = fn = 0
@@ -269,7 +278,11 @@ def cmd_run(a) -> int:
     hostile_seen = 0
     try:
         for c in sorted(d["cases"], key=lambda x: x["case"]):
-            cls = c["class"]
+            cls = c.get("class")
+            if cls not in ("relevant", "no-result", "distractor", "conflated"):
+                return _fail("003",
+                             f"case {c.get('case')!r}: class {cls!r} — the "
+                             f"four case classes are the law")
             admitted = _verdict_lines(db, owner, [q for q in c["query"]])
             adm_ids = {ln.split("|")[0] + "|" + ln.split("|")[1]
                        for ln in admitted}
@@ -304,7 +317,7 @@ def cmd_run(a) -> int:
                              f"near-miss-excluded="
                              f"{'true' if len(admitted) == exp_n else 'false'}")
     except ArmRefused as e:
-        print(f"FAIL ARV-SEM-007: the standing arm refused — {e}")
+        print(f"FAIL ARV-SEM-010: {ARV_SEM['010']} — {e}")
         return 1
     prec = (tp / (tp + fp)) if (tp + fp) else 1.0
     rec = (tp / (tp + fn)) if (tp + fn) else 1.0
@@ -332,7 +345,7 @@ def cmd_report(a) -> int:
     """the report arm (SEM-08): the honesty of the unmeasured."""
     print("# the P5-C semantic spike report — the Q7-gated honest form")
     print("backend=local-deterministic "
-          f"dim={DIM} vocab={len(VOCAB)} topics={len(TOPICS)}")
+          f"dim={DIM} vocab={len(VOCAB)}")
     print("this spike is a placeholder for the real embedding backend "
           "gated on Q7 (the owner's budget question, still open): the "
           "local deterministic map is NOT a semantic quality claim — "
@@ -340,8 +353,17 @@ def cmd_report(a) -> int:
           "DETERMINISM and the VERDICT FORM the real backend must "
           "inherit when Q7 resolves")
     print("measured: determinism (byte-equal re-embeds), the verdict "
-          "form (the EVC-10 shape), the near-miss law over the topic "
-          "registry, the owner boundary (RLS)")
+          "form (the EVC-10 shape), the similarity ranking over the "
+          "local map (the full-text cosine through the RLS-scoped "
+          "read), the owner boundary (RLS)")
+    print("NEGATIVE RESULT (the spike's own finding, disclosed): the "
+          "local token-multiset map cannot make the near-miss "
+          "exclusion — no threshold separates the near-miss document "
+          "from the corpus's own (the token identity IS the pack's "
+          "admission; no meaning signal remains for the map to add). "
+          "The near-miss judgment is DEFERRED to the real backend "
+          "(Q7); the verdict output says so on every query "
+          "(near-miss-judgment=deferred-to-real-backend)")
     print("not measured: semantic quality (no external embedding, no "
           "model, no network — the Q7 gate held)")
     return 0

@@ -54,28 +54,51 @@ the transcript); the red-record bound at `42d58cd`
 the binding commit (the ARV-RED-008 class); the binding's CI: five checks
 ALL-GREEN at `939f7c4`.
 
-**The GREEN (session 49, the deterministic parts only):** the machinery
+**The GREEN (session 49, the deterministic parts only) — rewritten at
+the D-042 round-1 repair into the HONEST form:** the machinery
 `harness/semantic.py` — four arms:
 - `embed` (SEM-02/03): the local deterministic map (a fixed 73-term
   vocabulary, the token-multiset -> integer-vector projection; byte-equal
-  re-embeds; the `--backend network` request is the typed refusal
+  re-embeds AND content-sensitive — two different texts embed
+  differently; the `--backend network` request is the typed refusal
   ARV-SEM-005 on BOTH streams — the Q7 gate's own pin);
 - `verdict` (SEM-04/06/07): the semantic admission over the standing
-  pack arm's own admissions — the meaning judgment through the topic
-  registry (a probe's target topic vs the admitted item's topic profile;
-  the near-miss note names the meaning-neighbor cluster WITHOUT
-  fabricating an admission — the exclusion is meaning-driven); the
-  conflated law (both=true, the provenance field on every line); the
-  owner boundary (the standing RLS path — the spike never re-implements
-  retrieval);
+  pack arm's own admissions, each admitted item CARRIED with its
+  similarity ranking (the full-text cosine through the RLS-scoped
+  get-source + blob read — the map's one honest contribution: a
+  deterministic ordering of the admitted set) + the provenance field;
+  the near-miss EXCLUSION is DISCLOSED as deferred (the round-1
+  review's finding, repaired: no threshold over the local
+  token-multiset map separates the near-miss document from the
+  corpus's own — computed 0.15 vs 0.11; the verdict output says
+  `near-miss-judgment=deferred-to-real-backend` on every query);
 - `run` (SEM-05): the corpus run in the eval.py verdict form over the
-  SAME registered corpus (per-case, precision/recall, the JSONL run
-  record in this slice's runs — the EVC-10 form exactly);
+  SAME registered corpus — the per-case VALUES pinned (R1 1/1, R2 2/2,
+  N1/N2 empty=true, D1 2/2, C1 2/2, H1 1/1), the wrong-revision
+  refusal ARV-SEM-002 (the EVC-10 form's own law inherited), the
+  unknown-class refusal ARV-SEM-003, two-run byte-equality;
 - `report` (SEM-08): the honesty line — the local map is a placeholder
-  gated on Q7, NOT a quality claim; what it proves is the determinism
-  and the verdict form the real backend must inherit.
+  gated on Q7, NOT a quality claim; and the NEGATIVE RESULT named: the
+  local map cannot make the near-miss judgment, deferred to the real
+  backend.
 
-The suite: **GREEN 8/8, exit 0**.
+**The D-042 round 1 (the fresh-context review): BLOCK-MERGE, eleven
+findings — the two P1s: (F1) the meaning-exclusion branch was DEAD
+code (the topic-registry judgment unreachable: the pack's AND law
+makes every admitted item carry the probe term, so the profile is
+never disjoint — the round-1 mutation M3 deleted the branch and the
+suite stayed GREEN); (F2) the records and the machinery's own output
+described the dead branch as the working engine. The repairs: the
+dead branch deleted, the embedding WIRED into the verdict path (the
+full-text cosine — F6: the embedding was decoration, never consumed),
+every false claim retracted (the report arm, this record, sev), the
+pins given teeth (SEM-05's per-case VALUES + two-run byte-equality +
+the wrong-revision refusal; SEM-04's non-comment-line admission + the
+disclosed-deferral pin; SEM-02's content-sensitivity; SEM-07's run-arm
+owner pin; the revision law ARV-SEM-002; the unknown-class refusal
+ARV-SEM-003; the code registry 011/012/010).**
+
+The suite: **GREEN 8/8, exit 0** (the honest form).
 
 ## §4 The SEV account
 

@@ -106,5 +106,26 @@
  ],
  "disposition": "PASS",
  "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. GREEN: EVC-01..10 = 10/10; the standing suites never regressed (the RPK 10/10 re-verified). The honest debts ledgered (the symbolic expect_ids — the runtime-seeded-uuid consequence; the count-based verdict; the JSONL growth; the standing adapters dependency; the hostile marker's differential routed to the review probes).",
- "reviewed_diff_sha256": "31257f9429a08f4dd10e82b337bb67ea4b93cfe3a2215485e4442c3b07fe29a7"
+ "reviewed_diff_sha256": "31257f9429a08f4dd10e82b337bb67ea4b93cfe3a2215485e4442c3b07fe29a7",
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "sheet_section": true,
+ "v_model": {
+  "component_verification": [
+   "the EVC suite's ten contracts over the real CLIs (run-01: GREEN, 10/10, digest-recorded)",
+   "the RPK sibling re-verified after the import-form fix (GREEN, 10/10 — the standing suites never regressed)"
+  ],
+  "integration_verification": [
+   "the gate in PR mode over the slice's declared scope (the DEP-008 root approved, the scope discipline, the claims registry)",
+   "the proofsheet re-derivation (ARV-PRF-003 from the run records)"
+  ],
+  "system_verification": [
+   "the corpus run over the full fixture (the four documents, two owners, the hostile query doc, the conflated pair — the EVC-01..10 chain)"
+  ],
+  "validation": [
+   "the corpus's four case classes as the ranking-baseline gate (the owner's fixed dependency order: the corpus BEFORE any ranking change)"
+  ]
+ }
 }

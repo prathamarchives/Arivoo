@@ -100,6 +100,22 @@ ARV-SEM-003; the code registry 011/012/010).**
 
 The suite: **GREEN 8/8, exit 0** (the honest form).
 
+**The D-042 round 2 (the fresh-context re-review): APPROVE-WITH-P2s.**
+All round-1 repairs verified REAL (the dead-branch hunt: no dead code
+remains anywhere in the machinery; the embedding genuinely consumed as
+the full-text cosine ranking — 12 mutations, 9 bitten; the disclosed
+deferral pinned by its own mutation). Two new P2s: (F-082-R2-1) the
+corpus run's D1 line carried `near-miss-excluded=true` — a count-
+equality tautology mislabeled as an exclusion fact under a DEFERRED
+exclusion; (F-082-R2-2) the tp/fp/fn precision/recall values were
+computed but unpinned (a hardcoded 1.0/1.0 passed). The repairs: the
+D1 field renamed to `admitted-count-matches-expectation` with the
+deferral riding the line itself; the tp=6 fp=0 fn=0 values pinned in
+SEM-05. The silent-pass closure verified by value-flipping mutations
+(the reviewer's originals were no-ops at this fixture: fp is 0
+everywhere and D1's flag is true either way — M8b' breaks the
+admitted-count arithmetic and M8c' doubles tp; both fire SEM-05).
+
 ## §4 The SEV account
 
 The GREEN's own SEV (the Q7-gated form): the failure modes are the

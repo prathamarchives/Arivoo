@@ -338,13 +338,16 @@ def main() -> int:
                                 r"expected=0 empty=true", r1.stdout)
                   is not None
                   and re.search(r"case=D1 class=distractor admitted=2 "
-                                r"expected=2 near-miss-excluded=true",
-                                r1.stdout) is not None
+                                r"expected=2 admitted-count-matches-"
+                                r"expectation=true near-miss-judgment="
+                                r"deferred-to-real-backend", r1.stdout)
+                  is not None
                   and re.search(r"case=C1 class=conflated actual=2 "
                                 r"expected=2", r1.stdout) is not None
                   and re.search(r"case=H1 class=conflated actual=1 "
                                 r"expected=1", r1.stdout) is not None
-                  and re.search(r"tp=[0-9]+ fp=[0-9]+ fn=[0-9]+",
+                  and re.search(r"tp=6 fp=0 fn=0", r1.stdout) is not None
+                  and re.search(r"precision=1\.0000 recall=1\.0000",
                                 r1.stdout) is not None
                   and "run-record appended" in r1.stdout
                   and wrong_rev.returncode != 0

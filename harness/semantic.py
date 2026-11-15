@@ -303,8 +303,12 @@ def cmd_run(a) -> int:
                     fn += exp_n - len(admitted)
                 lines.append(f"case={c['case']} class=distractor "
                              f"admitted={len(admitted)} expected={exp_n} "
-                             f"near-miss-excluded="
-                             f"{'true' if len(admitted) == exp_n else 'false'}")
+                             f"admitted-count-matches-expectation="
+                             f"{'true' if len(admitted) == exp_n else 'false'} "
+                             f"near-miss-judgment=deferred-to-real-backend "
+                             f"(Q7; the keyword AND law is the admitting "
+                             f"engine — the exclusion itself is the "
+                             f"disclosed negative result)")
     except ArmRefused as e:
         print(f"FAIL ARV-SEM-010: {ARV_SEM['010']} — {e}")
         return 1

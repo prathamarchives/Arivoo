@@ -15,7 +15,6 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-082 | 49 | Super Z (GLM host) | `slice/claim-082-p5c-semantic-spike` | `context/extracted/73-P5B-EVAL-CORPUS.md`, `context/extracted/74-P5C-SEMANTIC-SPIKE.md`, `harness/semantic.py`, `harness/tests/test_semantic_spike.py`, `harness/gate.py`, `harness/red-records.json`, `harness/runs/claim-082-p5c-semantic-spike`, `CLAIMS.md`, `STATE.md`, `AGENTS.md`, `PLAN.md`, `context/WORKLOG.md` | INT-147 (retroactive: the standing Phase 5 continuation reservation, ledgered 2026-11-14) | 2026-11-15 | the Q7-gated opening: the spike's contract (record 74 §2) + the CLAIM-081 close riding commit A; the RED follows at 155dd8d's merged head |
 
 ## Closed claims
 | CLAIM-082 | P5-C — the semantic spike (the Q7-gated deterministic shell: the local deterministic embed map + the similarity ranking over the standing arms' admissions + the EVC-10 verdict form over the registered corpus + the NEGATIVE RESULT disclosed — the local map cannot make the near-miss exclusion; deferred to the real backend, Q7) LANDED (PR #118 = merge commit at INT-145's single-actor path — the #116/#117 disclosed mechanics; the D-042 chain: round-1 BLOCK-MERGE's two P1s repaired in-slice into the honest form → round-2 APPROVE-WITH-P2s (the two P2s closed + the closure itself verified by value-flipping mutations M8b'/M8c'); GREEN 8/8; record 74) |

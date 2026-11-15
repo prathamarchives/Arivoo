@@ -55,7 +55,7 @@
  "findings": [],
  "disposition": "PASS",
  "review_summary": "The RED (LAW-11): the acceptance suite minted before any machinery — 8 pins (SEM-01..08) over the spike's contract (record 74 §2): determinism, the local-map vocabulary law (the Q7 gate's own pin ARV-SEM-005), the near-miss value proof, the corpus-as-gate form, the conflated law, the owner boundary, the honesty of the unmeasured. Observed 8 FAIL / 0 PASS at 155dd8d's merged head; red-01.txt is the transcript. No machinery exists in this change-set — tests only.",
- "reviewed_diff_sha256": "954dfed757b086622436b199ada529c393dd32e82d0da48ab51aec191e3bdf10",
+ "reviewed_diff_sha256": "7ff3fa5377ebad2ca2fea2ca1e403d04e2921b742445a1671542daf1621fc029",
  "v_model": {
   "component_verification": [
    "the RED suite's own run at the merged head: 8 FAIL / 0 PASS, exit 1 (red-01.txt — the machinery-absent transcript, LAW-11)"

@@ -31,14 +31,15 @@
   "STATE.md",
   "AGENTS.md",
   "PLAN.md",
-  "context/WORKLOG.md"
+  "context/WORKLOG.md",
+  "harness/semantic.py"
  ],
  "interfaces_reviewed": [
   "the commit-A form itself (the close + the opening record; no machinery yet)"
  ],
  "not_verified": [
-  "the semantic machinery itself (the GREEN's own object — Q7-gated: the deterministic local map only)",
-  "the D-042 review (due at the GREEN)"
+  "the semantic quality itself (the local map is a placeholder gated on Q7 — the quality claim waits for the owner's budget answer)",
+  "the D-042 review (due at this slice's PR #118)"
  ],
  "failure_modes": [
   {
@@ -54,20 +55,20 @@
  ],
  "findings": [],
  "disposition": "PASS",
- "review_summary": "The RED (LAW-11): the acceptance suite minted before any machinery — 8 pins (SEM-01..08) over the spike's contract (record 74 §2): determinism, the local-map vocabulary law (the Q7 gate's own pin ARV-SEM-005), the near-miss value proof, the corpus-as-gate form, the conflated law, the owner boundary, the honesty of the unmeasured. Observed 8 FAIL / 0 PASS at 155dd8d's merged head; red-01.txt is the transcript. No machinery exists in this change-set — tests only.",
+ "review_summary": "The GREEN (the Q7-gated deterministic parts): harness/semantic.py's four arms — the local deterministic embed map (byte-equal re-embeds; ARV-SEM-005 the typed network refusal), the verdict arm (the meaning judgment over the standing pack arm's admissions through the topic registry; the near-miss note; the conflated both=true + provenance), the run arm (the EVC-10 form over the registered P5-B corpus), the report arm (the honesty line). The suite GREEN 8/8. The quality claim is explicitly NOT made — the placeholder is gated on Q7.",
  "reviewed_diff_sha256": "95886a4f108f3e7628bd9a516f37ef8537eea4633d675027aac30c3fb0c92927",
  "v_model": {
   "component_verification": [
-   "the RED suite's own run at the merged head: 8 FAIL / 0 PASS, exit 1 (red-01.txt — the machinery-absent transcript, LAW-11)"
+   "the suite's GREEN run: 8/8 PASS, exit 0 (the deterministic map, the typed network refusal, the topic-registry meaning judgment, the report's honesty line)"
   ],
   "integration_verification": [
-   "the suite's registration in harness/gate.py rides this binding commit (the ARV-RED-008 class, diff-visible)"
+   "the verdict/run arms call the standing pack/search arms through the RLS owner boundary (no retrieval re-implementation); the run arm produces the EVC-10 form over the registered P5-B corpus"
   ],
   "system_verification": [
-   "the Q7 gate held: the pins reference the deterministic design only (SEM-03's network refusal ARV-SEM-005 is the gate's own pin)"
+   "the Q7 gate held: no external embedding service, no model download, no network — the only backend is the local deterministic map; the network backend request is the typed refusal ARV-SEM-005"
   ],
   "validation": [
-   "the standing P5-B suite re-run GREEN at this tree (the baseline unbroken by the RED's arrival)"
+   "the standing P5-B suite re-run GREEN (the baseline unbroken); the near-miss law's two-probe form (the direct probe admits, the meaning-off-target probe excludes with the near-miss note)"
   ]
  }
 }

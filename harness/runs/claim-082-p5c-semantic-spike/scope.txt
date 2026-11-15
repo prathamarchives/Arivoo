@@ -5,6 +5,7 @@
 # contract: the near-miss law measured against the P5-B corpus; the
 # deterministic parts only until the owner's budget answer lands).
 context/extracted/73-P5B-EVAL-CORPUS.md D-041
+harness/semantic.py D-041
 harness/tests/test_semantic_spike.py D-041
 harness/gate.py D-041
 harness/red-records.json D-041

@@ -46,13 +46,49 @@ spike's law (the acceptance criteria the RED will pin):
 
 ## §3 The executed chain
 
-(The next session's work: the RED at `155dd8d`'s merged head — tests-only,
-LAW-11; then the GREEN; then the measured set; then the D-042 review at
-this slice's PR.)
+**The RED (LAW-11, session 49):** the acceptance suite
+`harness/tests/test_semantic_spike.py` minted at `155dd8d`'s merged head —
+SEM-01..08 (8 pins), observed **8 FAIL / 0 PASS, exit 1** (`red-01.txt`
+the transcript); the red-record bound at `42d58cd`
+(`harness/red-records.json`, ARV-RED-005); the suite's registration rode
+the binding commit (the ARV-RED-008 class); the binding's CI: five checks
+ALL-GREEN at `939f7c4`.
+
+**The GREEN (session 49, the deterministic parts only):** the machinery
+`harness/semantic.py` — four arms:
+- `embed` (SEM-02/03): the local deterministic map (a fixed 73-term
+  vocabulary, the token-multiset -> integer-vector projection; byte-equal
+  re-embeds; the `--backend network` request is the typed refusal
+  ARV-SEM-005 on BOTH streams — the Q7 gate's own pin);
+- `verdict` (SEM-04/06/07): the semantic admission over the standing
+  pack arm's own admissions — the meaning judgment through the topic
+  registry (a probe's target topic vs the admitted item's topic profile;
+  the near-miss note names the meaning-neighbor cluster WITHOUT
+  fabricating an admission — the exclusion is meaning-driven); the
+  conflated law (both=true, the provenance field on every line); the
+  owner boundary (the standing RLS path — the spike never re-implements
+  retrieval);
+- `run` (SEM-05): the corpus run in the eval.py verdict form over the
+  SAME registered corpus (per-case, precision/recall, the JSONL run
+  record in this slice's runs — the EVC-10 form exactly);
+- `report` (SEM-08): the honesty line — the local map is a placeholder
+  gated on Q7, NOT a quality claim; what it proves is the determinism
+  and the verdict form the real backend must inherit.
+
+The suite: **GREEN 8/8, exit 0**.
 
 ## §4 The SEV account
 
-(To be written at the GREEN.)
+The GREEN's own SEV (the Q7-gated form): the failure modes are the
+5C letter's named ones — FM-01 (a semantic layer that admits the
+near-miss is worse than the keyword layer it would replace; the guard:
+SEM-04's two-probe form) and FM-02 (a drifting measure makes the
+baseline worthless; the guards: SEM-02's byte-equal re-embeds and
+SEM-03's network refusal). NOT verified: the semantic quality itself
+(no external embedding, no model, no network — the Q7 gate held; the
+quality claim waits for the owner's budget answer), and the D-042
+review (due at this slice's PR). The measured set: the suite's own run
+(GREEN 8/8), the digest-bound diff, the proofsheet re-derivation.
 
 ## §5 The close
 

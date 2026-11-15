@@ -17,14 +17,12 @@ harness/tests/test_eval_corpus.py D-041
 harness/tests/test_retrieval_packs.py D-041
 harness/gate.py D-041
 harness/red-records.json D-041
-harness/runs/claim-081-p5b-eval-corpus/red-01.txt D-041
-harness/runs/claim-081-p5b-eval-corpus/eval-runs.jsonl D-041
+harness/runs/claim-081-p5b-eval-corpus D-041
 # the staged close's residue (record 72 §5 + the protection snapshot:
 # the CLAIM-080 close carried by this slice's commit A — the
 # #113-close pattern's own declaration)
 context/extracted/72-P5A-RETRIEVAL-CONTEXT-PACKS.md D-041
 harness/runs/claim-080-p5a-retrieval-context-packs/protection-pre-merge.json D-041
-harness/runs/claim-081-p5b-eval-corpus/corpus.json D-041
 CLAIMS.md D-038
 STATE.md D-043
 AGENTS.md D-043

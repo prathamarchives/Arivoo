@@ -1396,5 +1396,15 @@
         "observed_at": "2026-11-14T17:29:22.843470+00:00"
       }
     ]
+  },
+  "harness/tests/test_eval_corpus.py": {
+    "schema": 2,
+    "binding_commit": "1588092",
+    "binding_sha256": "7de83ecf9fa8b8e94517e96c0f7afea3d3b48ca915e2e099c90e02b19143bb3f",
+    "red_exit": 1,
+    "red_code": "EVC-01,EVC-02,EVC-03,EVC-04,EVC-05,EVC-06,EVC-07,EVC-08,EVC-09,EVC-10",
+    "red_evidence": "the P5-B GREEN's red-record binding: the suite's RED was observed at the machinery-absent tree (red-01.txt, 10 FAILs, binding at commit 1588092's predecessor form); the GREEN landed at 5305dd5 (harness/eval.py + corpus.json + the fixture seeding) with EVC-01..10 = 10/10; this record binds the suite's red evidence to the GREEN's commit (the make-red form, the amendment chaining from the trusted baseline: the suite minted at the RED, the machinery landed, the records now bound to the head)",
+    "current_sha256": "cd17d69495c8fab81ab6aef9795c58fe76b0333510ab965d945235e4d85630fa",
+    "amendments": []
   }
 }

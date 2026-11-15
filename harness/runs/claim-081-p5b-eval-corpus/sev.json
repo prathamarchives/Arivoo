@@ -87,7 +87,7 @@
   },
   {
    "id": "F-081-3",
-   "severity": "P3",
+   "severity": "P2",
    "status": "owner-accepted-debt",
    "summary": "the eval-runs.jsonl append grows across suite runs (the scratch DB drops; the JSONL persists in the slice runs — bounded by the repository's own history discipline)"
   },

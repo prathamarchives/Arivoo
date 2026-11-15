@@ -112,7 +112,7 @@
  ],
  "disposition": "PASS",
  "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. THE D-042 ROUND-1 CHAIN: BLOCK-MERGE (four findings: the fail-open — the arm's refusal silently became the honest empty set; the dead distractor tautology over a fixture that CONTAINED the query token; the fp-blind verdict (precision structurally 1.0); the stale digest at the head) — ALL REPAIRED IN-SLICE: the fail-open closed (ARV-EVL-004); the real distractor control (the tautology deleted, the fixture's near-miss disjoint); the honest count arithmetic (the fp over-admission channel); the EVC-08 pin strengthened (the real RLS observation). GREEN re-verified 10/10; the RPK sibling 10/10. The honest debts ledgered.",
- "reviewed_diff_sha256": "31257f9429a08f4dd10e82b337bb67ea4b93cfe3a2215485e4442c3b07fe29a7",
+ "reviewed_diff_sha256": "be511eeb6cffacf0adda9dce6f249beea4d141f84a862dd66660ee0ec8d09ec8",
  "system_claims": [
   "C1",
   "C2"

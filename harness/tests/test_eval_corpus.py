@@ -73,7 +73,7 @@ import sys
 import tempfile
 
 REPO = pathlib.Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, str(REPO / "harness"))
+sys.path.insert(0, str(REPO))
 
 # the fixture texts: the corpus the four case classes run over. The
 # conflated pair shares the term "meridian" across two documents; the
@@ -174,7 +174,7 @@ def seed() -> dict:
 
 def main() -> int:
     global DB, ENV
-    import adapters.pg as pg
+    from harness.adapters import pg  # noqa: E402
     DB = pg.create_scratch_db("p5b")
     blob_dir = tempfile.mkdtemp(prefix="arv-blobs-")
     ENV = dict(os.environ, PGDATABASE=DB, ARV_BLOB_DIR=blob_dir)

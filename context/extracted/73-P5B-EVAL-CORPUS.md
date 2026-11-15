@@ -150,4 +150,39 @@ D-042 review). Disposition: PASS, zero open P0/P1.
 
 ## §5 The close
 
-(Appended at the merge.)
+**Merged.** PR #117 closed at the merge commit `155dd8d6c0` (2026-11-15,
+the INT-145 single-actor path — the #116 disclosed mechanics, exactly):
+
+1. the pre-change account posted at the PR BEFORE any change
+   (`harness/runs/claim-081-p5b-eval-corpus/protection-pre-merge.json`,
+   byte-snapshotted from the live GET and committed to the slice before
+   the flip: count=1, dismiss_stale=true, the 5 strict contexts,
+   enforce_admins=true, force-pushes/deletions false);
+2. the flip: `required_approving_review_count` 1→0 — the sole change,
+   every other field byte-preserved;
+3. the merge: `merge_method=merge`, the recorded message; verified
+   `merged=true` at the merge commit `155dd8d6c0`;
+4. the branch deleted (204);
+5. the restore: the count back to 1, every field re-PUT — and the
+   re-read compared **byte-equivalent: True** (the restore verified, not
+   assumed);
+6. the merge commit's five checks polled to **ALL-GREEN**; the open-PR
+   count is 0.
+
+The CI road to the merge: the records-hygiene commit `e17f081` had
+widened the reviewed path set after the `60158a7` digest bind — the
+sev digest was stale and BOTH gate-side checks refused (ARV-SEV-003's
+own repair loop working as designed). The re-bind at `4a14700` + the
+snapshot riding the merge at `71fe9c0`: ALL-GREEN, then the merge.
+
+The D-042 chain stands as the slice's own record: round 1 BLOCK-MERGE
+(four findings — the fail-open, the dead distractor tautology over a
+self-contradictory fixture, the fp-blind verdict, the stale digest), all
+repaired in-slice; round 2 APPROVE-WITH-P2s (every repair verified real /
+load-bearing / non-regressing — the mutation test and the behavioral
+precision probe), the round-2 P2 closed + pinned. **GREEN 11/11**
+(EVC-01..10 + the EVC-09b arm-failure pin).
+
+The successor: **CLAIM-082 — P5-C the semantic spike**, Q7-gated (the
+owner's budget question stays open; the slice opens with the
+deterministic parts only).

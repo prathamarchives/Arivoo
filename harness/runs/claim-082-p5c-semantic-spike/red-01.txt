@@ -1,0 +1,18 @@
+RED observed: harness/semantic.py is absent at this tree (LAW-11 — the implementation lands after this record); the spike's machinery is the GREEN's own object
+FAIL SEM-01: the machinery-absent RED: harness/semantic.py exists (at the RED head it is absent — ARV-TEST-000; red-01.txt is that transcript)
+      repair: the GREEN's own object: harness/semantic.py (the deterministic local embedding map + the verdict arm)
+FAIL SEM-02: the determinism law: the same text embeds byte-equal across two independent calls (the digest form, no clock, no randomness)
+      repair: the embed arm is a deterministic local map: same text in, same bytes out
+FAIL SEM-03: the vocabulary law: the embedding arm is a local deterministic map (backend=local-deterministic, a fixed dim + vocab); a network backend request is the typed refusal ARV-SEM-005 — the Q7 gate's own pin (no network, no model download, no budget)
+      repair: the embed arm reads no model file and opens no socket; the only backend is the local deterministic map until Q7 resolves
+FAIL SEM-04: the near-miss law: the direct probe ('wharf') admits the near-miss doc (both layers agree); the meaning-off-target probe ('harbor') excludes it — the exclusion is meaning-driven, never luck
+      repair: the verdict arm's semantic admission judges meaning-adjacency against the query's target, not token-adjacency alone
+FAIL SEM-05: the corpus-as-gate law: the semantic run over the P5-B corpus produces the same mechanical verdict form (per-case, precision/recall, the JSONL run record — the EVC-10 form exactly)
+      repair: the run arm reuses the eval verdict form over the same registered corpus
+FAIL SEM-06: the conflated law: 'meridian' admits BOTH documents with provenance-disambiguated whys (both=true, the provenance field on every line) — never a rank-based suppression
+      repair: the verdict arm carries the doc's own provenance on every admitted line
+FAIL SEM-07: the owner boundary: B's semantic run never sees A's material (A's doc ids absent from B's verdict output; B sees only B's own)
+      repair: the semantic index rides the same RLS path — the owner boundary is the standing one
+FAIL SEM-08: the honesty of the unmeasured: the spike's report states the local map is a placeholder gated on Q7 — NOT a semantic quality claim
+      repair: the report arm's header carries the honesty line; a spike that claims quality from a hash map is the dishonest form, refused
+RED — the P5-C semantic spike suite refuses (machinery-absent or a law broken)

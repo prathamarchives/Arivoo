@@ -1,0 +1,117 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-082-p5c-semantic-spike",
+ "base_sha": "155dd8d6c04b3ef8fa528ed02e8607837aafb9cd",
+ "intent_ids": [
+  "INT-134",
+  "INT-145",
+  "INT-146",
+  "INT-147"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "sheet_section": true,
+ "builder_context": "builder-zcode-slice-claim-082 (the session-49 opening context: the Q7-gated commit A — the CLAIM-081 close staged (record 73 §5) + record 74's contract letter; the RED is the NEXT session's first act at 155dd8d's merged head)",
+ "reviewer_context": "(the D-042 review is not yet due — the slice has no machinery to review; it opens at the review when the GREEN lands)",
+ "changed_components": [
+  "context/extracted/73-P5B-EVAL-CORPUS.md",
+  "context/extracted/74-P5C-SEMANTIC-SPIKE.md",
+  "harness/tests/test_semantic_spike.py",
+  "harness/gate.py",
+  "harness/red-records.json",
+  "harness/runs/claim-082-p5c-semantic-spike/scope.txt",
+  "harness/runs/claim-082-p5c-semantic-spike/red-01.txt",
+  "harness/runs/claim-082-p5c-semantic-spike/proofsheet.md",
+  "CLAIMS.md",
+  "STATE.md",
+  "AGENTS.md",
+  "PLAN.md",
+  "context/WORKLOG.md",
+  "harness/semantic.py"
+ ],
+ "interfaces_reviewed": [
+  "the commit-A form itself (the close + the opening record; no machinery yet)"
+ ],
+ "not_verified": [
+  "the near-miss exclusion itself — the NEGATIVE RESULT: the local token-multiset map cannot make it (no threshold separates; computed and disclosed); deferred to the real backend (Q7)",
+  "the semantic quality (no external embedding — the Q7 gate held)",
+  "the D-042 round 2 (the re-review of the honest form)"
+ ],
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a spike that silently claims the near-miss exclusion it cannot make (the round-1 finding: dead code described as the working engine)",
+   "control": "SEM-04's disclosed-deferral pin (the verdict output must say near-miss-judgment=deferred-to-real-backend) + the report arm's NEGATIVE RESULT line"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "a drifting measure (a nondeterministic embedding) makes the evaluation baseline worthless",
+   "control": "SEM-02 (byte-equal re-embeds + content-sensitivity) + SEM-05 (two-run byte-equality) + SEM-03 (the network refusal ARV-SEM-005)"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a wrong-revision or unknown-class corpus run silently recorded (the round-1 findings F5/F8)",
+   "control": "ARV-SEM-002 (the id/revision mismatch refusal) + ARV-SEM-003 (the unknown-class refusal) + SEM-05's pins on both"
+  }
+ ],
+ "findings": [
+  {
+   "id": "F-082-1",
+   "severity": "P1",
+   "status": "resolved",
+   "summary": "the meaning-exclusion branch was dead code (the topic-registry judgment unreachable: the pack's AND law makes every admitted item carry the probe term; the round-1 mutation M3 deleted the branch and the suite stayed GREEN) — repaired: the branch deleted, the embedding wired into the verdict path as the full-text cosine ranking, the deferral disclosed"
+  },
+  {
+   "id": "F-082-2",
+   "severity": "P1",
+   "status": "resolved",
+   "summary": "the records and the machinery's own output described the dead branch as the working engine — repaired: every claim retracted or re-based on the honest form (the report arm, record 74 §3, this sev)"
+  },
+  {
+   "id": "F-082-3",
+   "severity": "P2",
+   "status": "resolved",
+   "summary": "the pins were theater (SEM-05 header greps; SEM-04's id-in-exclusion-note; the embedding never consumed; the revision law absent; the run-arm owner unpinned) — repaired: per-case VALUES, non-comment ids, content-sensitivity, ARV-SEM-002/003, the run-arm owner pin, the code registry"
+  },
+  {
+   "id": "F-082-4",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the suite appends to the tracked eval-runs.jsonl on every run (the P5-B standing form, consistent; the side effect is reverted out of the committed tree before every bind — the EVC-10 ownership law, session 49's own lesson)"
+  },
+  {
+   "id": "F-082-R2-1",
+   "severity": "P2",
+   "status": "resolved",
+   "summary": "the corpus run's D1 line carried near-miss-excluded=true — a count-equality tautology mislabeled as an exclusion fact under a deferred exclusion (the round-2 review) — repaired: the field renamed to admitted-count-matches-expectation with the deferral riding the line"
+  },
+  {
+   "id": "F-082-R2-2",
+   "severity": "P2",
+   "status": "resolved",
+   "summary": "the tp/fp/fn precision/recall values were computed but unpinned (a hardcoded 1.0/1.0 passed the round-2 mutation M8c) — repaired: tp=6 fp=0 fn=0 + the derived 1.0000/1.0000 pinned in SEM-05; the silent-pass closure verified by value-flipping mutations (M8b'/M8c' both fire SEM-05)"
+  }
+ ],
+ "disposition": "PASS",
+ "review_summary": "The D-042 round 2: APPROVE-WITH-P2s — the two P2s (the D1 tautology label; the unpinned tp/fp/fn values) repaired and the closure verified by value-flipping mutations. The round-1 P1s stand dead and buried. GREEN 8/8 in the honest form.",
+ "reviewed_diff_sha256": "9fa9a60732dbd9a6525ac9e5c534709983aea60fad258662d9c9b4dbf5225748",
+ "v_model": {
+  "component_verification": [
+   "the suite's GREEN run: 8/8 PASS, exit 0 — the honest form (the similarity ranking over the full-text cosine; the disclosed deferral; the content-sensitive deterministic map; the typed network refusal ARV-SEM-005)"
+  ],
+  "integration_verification": [
+   "the verdict arm reads through the standing pack + get-source arms (the RLS owner boundary; no retrieval re-implementation); the run arm's revision law (ARV-SEM-002) + the unknown-class refusal (ARV-SEM-003)"
+  ],
+  "system_verification": [
+   "the Q7 gate held: no external embedding service, no model download, no network; the only backend is the local deterministic map"
+  ],
+  "validation": [
+   "the per-case VALUES pinned against the corpus's own expect_counts; two-run byte-equality; the owner boundary on BOTH arms (verdict + run)"
+  ]
+ }
+}

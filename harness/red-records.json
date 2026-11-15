@@ -1425,5 +1425,28 @@
         "observed_at": "2026-11-15T07:25:57.005108+00:00"
       }
     ]
+  },
+  "harness/tests/test_semantic_spike.py": {
+    "schema": 2,
+    "binding_commit": "42d58cd827e0db3732431b3e478c7cb242c64a22",
+    "binding_sha256": "2552c6660641b5e1e57030dcba8dacffdbf784d5b75d3afca9c5a05251536918",
+    "red_exit": 1,
+    "red_code": "SEM-01,SEM-02,SEM-03,SEM-04,SEM-05,SEM-06,SEM-07,SEM-08",
+    "red_evidence": "the P5-C RED at 155dd8d's merged head: the suite (SEM-01..08) observed 8 FAIL / 0 PASS, exit 1 \u2014 the machinery (harness/semantic.py) absent; red-01.txt in the slice runs is the transcript (LAW-11: committed alone, the implementation lands after)",
+    "current_sha256": "688bf4c3e2770636168b7511fff8e13c54ebc3d6fed6019c4d8e6365773b8e10",
+    "amendments": [
+      {
+        "prior_sha256": "2552c6660641b5e1e57030dcba8dacffdbf784d5b75d3afca9c5a05251536918",
+        "new_sha256": "2b2b5b482891e49ea72a67498764f670cd24948356aad608d3608bc5ae9f13b6",
+        "note": "the round-1 D-042 repair's pin changes (SEM-02/04/05/06/07 given teeth \u2014 the honest form); the suite re-observed GREEN 8/8 at the repair commit a88c50c",
+        "observed_at": "2026-11-15T12:22:55.727958+00:00"
+      },
+      {
+        "prior_sha256": "2b2b5b482891e49ea72a67498764f670cd24948356aad608d3608bc5ae9f13b6",
+        "new_sha256": "688bf4c3e2770636168b7511fff8e13c54ebc3d6fed6019c4d8e6365773b8e10",
+        "note": "the round-2 D-042 pin changes (SEM-05's value pins tp=6 fp=0 fn=0 + the D1 renamed form); the suite re-observed GREEN 8/8 at the repair head 4d1dd30",
+        "observed_at": "2026-11-15T13:10:46.913797+00:00"
+      }
+    ]
   }
 }

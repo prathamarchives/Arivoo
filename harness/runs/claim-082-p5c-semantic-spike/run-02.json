@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_semantic_spike.py",
+  "exit_code": 1,
+  "commit": "d28c0dfa60957c2d7ffb4de54ff4b78a9e1645e0",
+  "output_sha256": "1aa75d4a99927d5f6f49140395ec3c0ec9c1d4ec0675f93d2fe10fb3b183d844",
+  "recorded_at": "2026-11-15T11:16:20.614960+00:00"
+}

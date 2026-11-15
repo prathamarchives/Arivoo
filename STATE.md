@@ -8,10 +8,10 @@
 
 - **Phase:** PHASE 5 OPENING (2026-11-14 — CLAIM-080 LANDED: PR #116 = merge `2e35d592b` (the P5-A pack arm + the MCP registry join); the Phase 4 exit gate had verified 18/18 at CLAIM-079's `bf8be3a`)
 
-- **Active task:** CLAIM-081 — P5-B: the eval corpus (the session record context/extracted/73-P5B-EVAL-CORPUS.md; the GREEN + the measured set landed at the gate GREEN; the D-042 review at PR #117 follows)
+- **Active task:** CLAIM-082 — P5-C: the semantic spike (Q7-gated: the owner's budget question open; the slice opens with the deterministic parts only — the session record context/extracted/74-P5C-SEMANTIC-SPIKE.md)
 
 - **Last completed:** CLAIM-080 (P5-A — the authorized retrieval API / context packs; PR #116 = merge `2e35d592b203f4cf2f3ee0b2a9e5fc5fc5211b4a`, 2026-11-14 under INT-145; the D-042 FOUR-round ledger each repaired + pinned; the close staged at CLAIM-081's commit A)
-- **Exact next action:** the D-042 (1a) merge-gate review at PR #117 (fresh-context; on APPROVE the merge under INT-145's single-actor path — the #116 form)
+- **Exact next action:** the CLAIM-082 RED (tests-only, LAW-11) at 155dd8d's merged head — the spike's own acceptance suite minted before any machinery
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.

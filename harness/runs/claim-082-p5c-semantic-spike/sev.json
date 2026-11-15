@@ -39,7 +39,7 @@
  "findings": [],
  "disposition": "PASS",
  "review_summary": "The Q7-gated opening: no machinery, no code — the slice's commit A carries the CLAIM-081 close (the INT-145 merge account, record 73 §5) + the spike's contract letter (record 74: the near-miss law measured against the P5-B corpus; determinism where measurable; the owner boundary). The verdict over an empty change-set is PASS by construction; every real object arrives with the RED.",
- "reviewed_diff_sha256": "bcf5ce19b5e8cc36c87f1301a24a2a4e1415c7fa2fcd7d02b7e76b909729ac01",
+ "reviewed_diff_sha256": "e84ab257b291b1556b524c02a9d5affb5eaab4a0f31b0b17db4055120be8870c",
  "v_model": {
   "component_verification": [
    "the commit-A form's own canonical layer run (GREEN — the pointer law satisfied: record 74 on disk = the highest)"

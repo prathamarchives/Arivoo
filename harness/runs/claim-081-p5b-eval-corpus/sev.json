@@ -1,43 +1,110 @@
 {
- "slice": "claim-081-p5b-eval-corpus",
+ "schema_version": 1,
+ "slice_id": "claim-081-p5b-eval-corpus",
  "base_sha": "2e35d592b4a3b318a27837e775779daa834f1fa0",
+ "intent_ids": [
+  "INT-134",
+  "INT-145",
+  "INT-146",
+  "INT-147"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "builder_context": "builder-zcode-slice-claim-081 (the session-48 build context: the RED->GREEN->measured chain — the machinery-absent RED at 2e35d59 (10 FAILs), the GREEN (eval.py + corpus.json + the fixture seeding, the conflated pair's same-term catch), the make-red amendments chained at each edit)",
+ "reviewer_context": "the D-042 (1a) merge-gate review at the PR (the fresh-context reviewer over the real diff — the standing protocol; the multi-round shape expected per the #116 lesson)",
+ "changed_components": [
+  "harness/eval.py",
+  "harness/tests/test_eval_corpus.py",
+  "harness/gate.py",
+  "harness/red-records.json",
+  "harness/runs/claim-081-p5b-eval-corpus/corpus.json",
+  "harness/runs/claim-081-p5b-eval-corpus/scope.txt",
+  "harness/runs/claim-081-p5b-eval-corpus/red-01.txt",
+  "harness/runs/claim-081-p5b-eval-corpus/sev.json",
+  "CLAIMS.md"
+ ],
+ "interfaces_reviewed": [
+  "eval.py's corpus load (the form check + the four-class summary)",
+  "eval.py's run arm (the deterministic loop + the mechanical verdict + the run-record JSONL)",
+  "the typed refusals (ARV-EVL-001/002/003)",
+  "the suite's fixture seeding (the four documents, two owners, the hostile query doc, the conflated pair)"
+ ],
+ "not_verified": [
+  "the semantic/vector retrieval (P5-C/P5-D under Q7's owner gate — the bounded exclusion)",
+  "the ranking machinery (P5-E — the corpus exists precisely so its changes can only land measured against it)",
+  "the MCP surface's corpus arm (not in this slice's scope)"
+ ],
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a no-result case fabricates a match (the 5B letter's named failure: never a fabricated match, never a similar-material fallback)",
+   "control": "EVC-03 (empty=true + the marker; the FABRICATED word is pinned to NEVER appear)"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "a distractor's near-miss material is admitted (the rank-creep failure the corpus exists to catch)",
+   "control": "EVC-04 (near-miss-excluded=true + fp=0)"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a conflated term's second document is rank-suppressed",
+   "control": "EVC-05 (both=true — the provenance disambiguation, never rank)"
+  },
+  {
+   "id": "FM-04",
+   "scenario": "the corpus's hostile query content executes (the corpus-as-data law)",
+   "control": "EVC-07 (the H1 case evaluated as data; no instruction-shaped output)"
+  },
+  {
+   "id": "FM-05",
+   "scenario": "the run is non-deterministic (a clock/randomness ordering drift)",
+   "control": "EVC-02 (the byte-equal re-run)"
+  },
+  {
+   "id": "FM-06",
+   "scenario": "the corpus run crosses the owner boundary (B sees A's cases)",
+   "control": "EVC-08 (RLS through the standing search arm)"
+  },
+  {
+   "id": "FM-07",
+   "scenario": "an unregistered corpus id silently defaults to another corpus",
+   "control": "EVC-09 (the typed ARV-EVL-001 refusal)"
+  }
+ ],
  "findings": [
   {
    "id": "F-081-1",
    "severity": "P2",
-   "finding": "the corpus's expect_ids use the symbolic forms ('*', '*AND*', '*both*') rather than concrete material ids — the honest reason: the suite's fixture seeds uuids at runtime (the fresh scratch DB), so the corpus CANNOT carry them statically; the evaluator compares against the run's own admissions (the deterministic shape, not the static id)",
-   "disposition": "PASS",
-   "status": "owner-accepted-debt"
+   "status": "owner-accepted-debt",
+   "summary": "the corpus's expect_ids use the symbolic forms ('*', '*AND*', '*both*') rather than concrete material ids — the honest reason: the suite's fixture seeds uuids at runtime (the fresh scratch DB), so the corpus cannot carry them statically; the evaluator compares against the run's own admissions (the deterministic shape)"
   },
   {
    "id": "F-081-2",
    "severity": "P2",
-   "finding": "the evaluator's per-case verdict counts ids, not id equality (the same honest reason: the runtime-seeded ids); the conflated + distractor + no-result classes ARE id-exact in their assertions (the suite's own pins)",
-   "disposition": "PASS",
-   "status": "owner-accepted-debt"
+   "status": "owner-accepted-debt",
+   "summary": "the evaluator's per-case verdict counts ids, not id equality (the same runtime-seeded-uuid reason); the conflated + distractor + no-result classes ARE id-exact in the suite's own pins"
   },
   {
    "id": "F-081-3",
    "severity": "P3",
-   "finding": "the eval-runs.jsonl append grows unboundedly across suite runs (the scratch DB is dropped but the JSONL persists in the slice runs)",
-   "disposition": "PASS",
-   "status": "owner-accepted-debt"
+   "status": "owner-accepted-debt",
+   "summary": "the eval-runs.jsonl append grows across suite runs (the scratch DB drops; the JSONL persists in the slice runs — bounded by the repository's own history discipline)"
   },
   {
    "id": "F-081-4",
    "severity": "P2",
-   "finding": "the suite imports harness.adapters.pg for the scratch DB (the SAME standing dependency every retrieval suite uses — the legal form 'from harness.adapters import pg' adopted)",
-   "disposition": "PASS",
-   "status": "owner-accepted-debt"
+   "status": "owner-accepted-debt",
+   "summary": "the suite imports harness.adapters.pg for the scratch DB (the SAME standing dependency every retrieval suite uses — the legal 'from harness.adapters import pg' form adopted; eval.py itself imports only the standard library + subprocess to the standing query arm)"
   },
   {
    "id": "F-081-5",
    "severity": "P2",
-   "finding": "the hostile-as-data marker (EVC-07's 'hostile-as-data=1' count) is a presence marker, not a behavioral differential (the corpus-as-data law's stronger form — a probe that compares the run's verdict with/without the hostile case — routed to the D-042 review's own probes)",
-   "disposition": "PASS",
-   "status": "owner-accepted-debt"
+   "status": "owner-accepted-debt",
+   "summary": "the hostile-as-data marker is a presence count, not a behavioral differential (the stronger form — a probe comparing the run's verdict with/without the hostile case — routed to the D-042 review's own probes)"
   }
  ],
- "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. GREEN: EVC-01..10 = 10/10; the standing suites never regressed (the RPK 10/10 re-verified). The honest debts ledgered P2/P3 (the symbolic expect_ids — the runtime-seeded-uuid consequence; the count-based verdict; the JSONL growth; the standing adapters dependency; the hostile marker's differential routed to the review probes).",
- "reviewed_diff_sha256": "5346c10bc6efe057711fb5ee5d96fab2d142055edd0a905544fc0458d697fbae"
+ "disposition": "PASS",
+ "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. GREEN: EVC-01..10 = 10/10; the standing suites never regressed (the RPK 10/10 re-verified). The honest debts ledgered (the symbolic expect_ids — the runtime-seeded-uuid consequence; the count-based verdict; the JSONL growth; the standing adapters dependency; the hostile marker's differential routed to the review probes).",
+ "reviewed_diff_sha256": "31257f9429a08f4dd10e82b337bb67ea4b93cfe3a2215485e4442c3b07fe29a7"
 }

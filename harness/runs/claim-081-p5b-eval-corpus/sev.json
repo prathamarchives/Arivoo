@@ -112,7 +112,7 @@
  ],
  "disposition": "PASS",
  "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. THE D-042 CHAIN: round 1 BLOCK-MERGE (the fail-open; the dead distractor tautology over a self-contradictory fixture; the fp-blind verdict; the stale digest) — ALL REPAIRED IN-SLICE. Round 2 (the spot-check) APPROVE-WITH-P2s: every repair verified real (the mutation test reproduced the fail-open when the check was neutered), load-bearing (the behavioral corpus probe: D1's expect lowered → fp 0→1, precision 1.0→0.8571), and non-regressing (the suite GREEN, the RPK sibling 10/10, the digest recomputing, the gate GREEN). The round-2 P2 (the untyped timeout traceback) CLOSED + PINNED (the typed class; the EVC-09b pin). GREEN 11/11.",
- "reviewed_diff_sha256": "054494f4d4883431d20c329fa884e54dc37c38dd30126dd2b74173d7e115496f",
+ "reviewed_diff_sha256": "1fe9a1b95c1ac0665e1c094bbcc2000e654bcd7b407c2e2bba7b6ef4abc37dc3",
  "system_claims": [
   "C1",
   "C2"

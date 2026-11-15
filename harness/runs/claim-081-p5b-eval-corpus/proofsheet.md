@@ -13,11 +13,11 @@
 - (none stated — REPAIR: the not-verified list may not be empty; LAW-04)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: fc98ece8c8ea1cd1cd210ccccc9f1f8f107611631d15992ce8ac74ff9954c24b
-- reviewed_diff_sha256: 054494f4d4883431d20c329fa884e54dc37c38dd30126dd2b74173d7e115496f
+- report sha256: c9b783017877ce0e15ee8dfc77422f97ddb478e121236ede6f979c0431dc1be9
+- reviewed_diff_sha256: 1fe9a1b95c1ac0665e1c094bbcc2000e654bcd7b407c2e2bba7b6ef4abc37dc3
 - disposition: PASS
 - findings: 6 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 3a31c617cf6d74ef59bbf63ae086d57911043ea772997a82eb5b8b8692cb1795
+- sheet sha256 (of the content above, excluding this line): 6a10a4aed68f45073192be826d8df7f4eae16b51c4e305b327f672fe0799f2ef

@@ -1003,3 +1003,11 @@ Stage Summary:
 - Evidence: context/extracted/72-P5A-RETRIEVAL-CONTEXT-PACKS.md (§5 closed) + the CLAIMS rule-4 row + STATE/AGENTS/PLAN (the 5A LANDED / 5B NEXT rows) + the PR #116 comment chain.
 - Unresolved: none new (D-014 + Q6-Q12 scopes unchanged; Q7 gates only the 5C semantic spike — P5-B's deterministic corpus needs no budget).
 - Next: CLAIM-081 (P5-B — the eval corpus) opens with its tests-only RED at the merged head `2e35d59`: the versioned query corpus (relevant/no-result/distractor/conflated cases) BEFORE any ranking change — the dependency order the owner fixed.
+
+## Task 98 (CLAIM-081 the GREEN + the measured set, session 48) — the P5-B eval corpus
+- What: the machinery landed: harness/eval.py (the loader + the deterministic runner + the mechanical verdict + the typed ARV-EVL refusals + the run-record JSONL) + corpus.json (7 cases, the four classes) + the suite's fixture seeding (the four documents, two owners, the hostile query doc, the conflated pair). EVC-01..10 = 10/10; the RPK sibling re-verified (the standing suites never regressed).
+- The five binding repairs (each a gate failure observed + fixed in-slice): the conflated pair's same-term; the runs-directory declaration; the CLAIMS row's honest full-diff scope; the legal import form (from harness.adapters import pg); the sev.json's full 18-field schema (the P3 class does not exist — the JSONL debt honestly P2).
+- Verified: the gate GREEN in PR mode (suites + red records + scope/size + lint + deps + known-bads + proofsheet); sev.json F-081-1..5 (zero open P0/P1); the proofsheet re-derived (ARV-PRF-003).
+- Evidence: context/extracted/73-P5B-EVAL-CORPUS.md + the slice runs (red-01.txt, corpus.json, sev.json, eval-runs.jsonl, proofsheet.md).
+- Unresolved: none new (Q6-Q12 unchanged; Q7 gates only the 5C spike).
+- Next: the D-042 (1a) merge-gate review at PR #117 (fresh-context, the multi-round shape expected) -> on APPROVE the merge under INT-145 (the #116 form).

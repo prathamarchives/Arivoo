@@ -1036,6 +1036,15 @@ Stage Summary:
 
 ## RESUME checkpoint (session 49 close, 2026-11-15; rebuilt after the sandbox recycle)
 - **Position:** CLAIM-082 LANDED at main `5f31a386eb91` (PR #118, the INT-145 six-step path, all observed live; the merge-commit CI ALL-GREEN; open PRs = 0; the branch protection restored byte-equivalent). The parked branch `parked/claim-082-close-records` carries the close records (record 74 §5's verified sha + STATE's five-area + WORKLOG 100/101) — they ride the NEXT claim's commit A (the #117 hygiene form). NOTE: this branch is the REBUILD after the sandbox recycle lost the first parked branch — identical content, re-derived from main's live state.
-- **The next session opens:** the PLAN's next row's tests-only RED at `5f31a38`'s merged head (Q7-aware: the real embedding backend waits on the owner's budget answer; P5-E the hybrid ranking waits on the corpus + the spike's shell — both stand).
+- **The next session opens:** WAITING ON Q7 (the owner's budget
+  answer). The PLAN's remaining P5 rows are ALL gated: 5D/5E need the
+  real embedding backend (Q7 = review §8 Q2: (a) ~$10-30 of embedding
+  API spend for 300-500 passages × 20-30 queries, (b) self-hosted, or
+  (c) no paid semantic work); 5F+ wait on 5E. Nothing non-gated remains
+  in the P5 sequence. The next legal actions: (i) the owner answers Q7
+  -> 5D's tests-only RED opens at `5f31a38`'s merged head (the real
+  backend + the revision-lineage/index machinery), OR (ii) the owner
+  redirects (a different row, a review sweep, or any other instruction).
+  Do NOT open a new claim without one of these.
 - **The sharpened lessons this session (the digest's own law):** reviewed_diff_sha256 reads `git show HEAD` — the COMMITTED tree. The content edit and the digest bind must NEVER ride one commit; the bind commit touches only the excluded sev.json (it cannot re-stale itself). And the suite's EVC-10/SEM-05 side-effect appends to the tracked eval-runs.jsonl on every run — revert them out of the tree before every bind (the ownership law: the append is the RUN's own object, the slice's committed copy stays main's).
 - **The review chain:** D-042 round 1 BLOCK-MERGE (two P1s — the dead meaning-exclusion branch; the records describing it as the engine) repaired into the honest form; round 2 APPROVE-WITH-P2s (12 mutations, 9 bitten) with both P2s closed + the closure verified by value-flipping mutations. GREEN 8/8.

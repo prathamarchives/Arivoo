@@ -361,6 +361,28 @@ def main() -> int:
                         "is the typed refusal",
                         "never a silent default to another corpus")
 
+        # ---- EVC-09b — the arm-failure law (the round-1 fail-open +
+        # the round-2 timeout P2, both pinned): a dead DB is the TYPED
+        # ARV-EVL-004 refusal — never the honest empty set, never an
+        # untyped traceback (the evaluation baseline's own law: a broken
+        # environment may never report no-result cases as honest)
+        if machinery:
+            dead = dict(ENV, PGDATABASE="arv_no_such_db")
+            r = subprocess.run(
+                [sys.executable, str(REPO / "harness" / "eval.py"), "run",
+                 "--corpus", "arv-p5b-eval-corpus", "--revision", "1"],
+                capture_output=True, text=True, timeout=120, env=dead)
+            ok = (r.returncode == 1
+                  and "ARV-EVL-004" in r.stdout
+                  and "empty=true" not in r.stdout
+                  and "Traceback" not in r.stderr
+                  and "run-record appended" not in r.stdout)
+        ok_all &= check("EVC-09b", ok,
+                        "the arm-failure law: a dead DB is the typed "
+                        "ARV-EVL-004 refusal (never the honest empty set, "
+                        "never an untyped traceback)",
+                        "the arm's refusal propagates typed — the "
+                        "round-1 fail-open repair pinned")
         # ---- EVC-10 — the eval-gate integration
         if machinery:
             r = evl("run", "--corpus", "arv-p5b-eval-corpus", "--revision", "1")

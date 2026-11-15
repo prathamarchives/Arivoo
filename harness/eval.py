@@ -66,12 +66,17 @@ def _search(db: str, owner: str, terms: list) -> list:
     The round-1 D-042 repair: the arm's refusal propagates typed — a dead
     DB, a refused RLS read, or an arm-side typed failure is NEVER
     converted into the honest empty set (the fail-open closed)."""
-    r = subprocess.run(
-        [sys.executable, str(REPO / "harness" / "query.py"), "search",
-         "--owner", owner, *terms],
-        capture_output=True, text=True, timeout=240,
-        env=dict(os.environ, PGDATABASE=db),
-    )
+    try:
+        r = subprocess.run(
+            [sys.executable, str(REPO / "harness" / "query.py"), "search",
+             "--owner", owner, *terms],
+            capture_output=True, text=True, timeout=240,
+            env=dict(os.environ, PGDATABASE=db),
+        )
+    except subprocess.TimeoutExpired as e:
+        # the round-2 D-042 P2, closed: the timeout is the SAME typed
+        # refusal class (never an untyped traceback; still fail-closed)
+        raise ArmRefused(f"the arm timed out for terms {terms!r}: {e}") from e
     if r.returncode != 0 or "FAIL ARV-" in (r.stdout or ""):
         detail = (r.stdout or r.stderr or "").strip().split("\n")[0][:120]
         raise ArmRefused(f"the arm refused for terms {terms!r}: {detail}")

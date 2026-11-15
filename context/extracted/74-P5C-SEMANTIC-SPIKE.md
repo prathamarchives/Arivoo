@@ -131,4 +131,34 @@ review (due at this slice's PR). The measured set: the suite's own run
 
 ## §5 The close
 
-(Appended at the merge.)
+**Merged (the INT-145 single-actor path — the #116/#117 disclosed
+mechanics, exactly).** The six steps, as executed:
+
+1. the pre-change account posted at the PR BEFORE any change
+   (`harness/runs/claim-082-p5c-semantic-spike/protection-pre-merge.json`,
+   byte-snapshotted from the live GET and committed to the slice at
+   `74397d8` before the flip: count=1, dismiss_stale=true, the 5 strict
+   contexts, enforce_admins=true, force-pushes/deletions false);
+2. the flip: `required_approving_review_count` 1→0 — the sole change,
+   every other field byte-preserved;
+3. the merge: `merge_method=merge` on PR #118 (CLAIM-082), the recorded
+   message; `merged=true` verified at the merge commit;
+4. the branch deleted (204);
+5. the restore: the count back to 1, every field re-PUT — and the
+   re-read compared **byte-equivalent: True** (the restore verified, not
+   assumed);
+6. the merge commit's five checks polled to **ALL-GREEN**; the open-PR
+   count is 0.
+
+The slice's own review chain stands as its record: the D-042 round 1
+BLOCK-MERGE (two P1s — the dead meaning-exclusion branch; the records
+describing it as the working engine) — all repaired in-slice into the
+honest form (the embedding consumed as the full-text cosine ranking;
+the near-miss exclusion DISCLOSED as the computed negative result,
+deferred to Q7); round 2 APPROVE-WITH-P2s (both P1s verified real;
+12 mutations, 9 bitten) — the two P2s (the D1 tautology label; the
+unpinned tp/fp/fn values) closed + the closure itself verified by
+value-flipping mutations (M8b'/M8c' both fire SEM-05). **GREEN 8/8**
+(SEM-01..08). The successor: the PLAN's next row — Q7 (the owner's
+budget answer) gates the real embedding backend; P5-E the hybrid
+ranking waits on the corpus + this spike's shell.

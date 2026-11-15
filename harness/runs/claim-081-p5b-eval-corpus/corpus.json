@@ -1,0 +1,87 @@
+{
+ "corpus_id": "arv-p5b-eval-corpus",
+ "revision": 1,
+ "description": "P5-B the eval corpus (CLAIM-081, record 73 §2): the versioned query corpus — the evaluation baseline BEFORE any ranking change. Four case classes over the seeded scratch corpus: relevant (the expected admissions), no-result (the honest empty set), distractor (near-miss material that must NOT be admitted), conflated (one term spanning two documents, both admitted with provenance-disambiguated whys). The verdict form is mechanical: expected vs actual id sets.",
+ "cases": [
+  {
+   "case": "R1",
+   "class": "relevant",
+   "query": [
+    "xylophone"
+   ],
+   "expect_ids": [
+    "*"
+   ],
+   "note": "every seeded xylophone-bearing item admitted (all four kinds)"
+  },
+  {
+   "case": "R2",
+   "class": "relevant",
+   "query": [
+    "quartz",
+    "harbor"
+   ],
+   "expect_ids": [
+    "*AND*"
+   ],
+   "note": "multi-term AND: only items bearing BOTH terms"
+  },
+  {
+   "case": "N1",
+   "class": "no-result",
+   "query": [
+    "zzzqqq-nonexistent"
+   ],
+   "expect_ids": [],
+   "note": "the honest empty set — never a fabricated match, never a fallback"
+  },
+  {
+   "case": "N2",
+   "class": "no-result",
+   "query": [
+    "xylophone",
+    "zzzqqq-nonexistent"
+   ],
+   "expect_ids": [],
+   "note": "AND with one absent term: the intersection is empty"
+  },
+  {
+   "case": "D1",
+   "class": "distractor",
+   "query": [
+    "quartz"
+   ],
+   "expect_ids": [
+    "*AND-quartz-only*"
+   ],
+   "must_not_admit": [
+    "harbor-only item"
+   ],
+   "note": "near-miss: the harbor-only document shares NO query term — must not be admitted"
+  },
+  {
+   "case": "C1",
+   "class": "conflated",
+   "query": [
+    "meridian"
+   ],
+   "expect_ids": [
+    "*both*"
+   ],
+   "note": "the same term in two distinct documents: BOTH admitted, disambiguated by provenance never rank"
+  },
+  {
+   "case": "H1",
+   "class": "conflated",
+   "query": [
+    "ignore",
+    "the",
+    "corpus"
+   ],
+   "expect_ids": [
+    "*both-AND*"
+   ],
+   "note": "the hostile class: a query embedding instruction-like words is DATA — evaluated like any other"
+  }
+ ]
+}

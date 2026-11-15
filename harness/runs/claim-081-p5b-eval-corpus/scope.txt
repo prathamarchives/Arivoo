@@ -1,0 +1,33 @@
+# CLAIM-081 — P5-B: the eval corpus (the PLAN 5B row elaborated one phase
+# deep at the #116 landing; record 73 §2): the versioned query corpus —
+# the evaluation baseline BEFORE any ranking change (the owner's fixed
+# dependency order: the corpus lands before 5C's semantic spike and 5E's
+# hybrid ranking so they can only be measured against it). RED-first
+# (LAW-11) at CLAIM-080's merged head 2e35d59 (red-01.txt: 10 FAILs —
+# harness/eval.py absent). The GREEN: the machinery + the corpus file +
+# the suite's own fixture seeding (the four documents, two owners, the
+# hostile query doc, the conflated pair's same term in BOTH documents).
+# The dependency law's honest note: the suite imports adapters.pg for
+# the scratch DB (the SAME standing dependency every retrieval suite
+# uses — the test_retrieval_packs form); eval.py itself imports only
+# the standard library + subprocess to the standing query arm (never a
+# re-implementation of retrieval).
+harness/eval.py D-041
+harness/tests/test_eval_corpus.py D-041
+harness/tests/test_retrieval_packs.py D-041
+harness/gate.py D-041
+harness/red-records.json D-041
+harness/runs/claim-081-p5b-eval-corpus/red-01.txt D-041
+harness/runs/claim-081-p5b-eval-corpus/eval-runs.jsonl D-041
+# the staged close's residue (record 72 §5 + the protection snapshot:
+# the CLAIM-080 close carried by this slice's commit A — the
+# #113-close pattern's own declaration)
+context/extracted/72-P5A-RETRIEVAL-CONTEXT-PACKS.md D-041
+harness/runs/claim-080-p5a-retrieval-context-packs/protection-pre-merge.json D-041
+harness/runs/claim-081-p5b-eval-corpus/corpus.json D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043
+context/extracted/73-P5B-EVAL-CORPUS.md D-043

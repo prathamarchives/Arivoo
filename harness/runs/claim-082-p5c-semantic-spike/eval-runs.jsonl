@@ -44,3 +44,6 @@
 {"corpus_id": "arv-p5b-eval-corpus", "revision": "1", "owner": "A", "layer": "semantic-spike", "precision": 1.0, "recall": 1.0, "tp": 6, "fp": 0, "fn": 0, "cases": 7}
 {"corpus_id": "arv-p5b-eval-corpus", "revision": "1", "owner": "A", "layer": "semantic-spike", "precision": 1.0, "recall": 1.0, "tp": 6, "fp": 0, "fn": 0, "cases": 7}
 {"corpus_id": "arv-p5b-eval-corpus", "revision": "1", "owner": "B", "layer": "semantic-spike", "precision": 1.0, "recall": 0.4286, "tp": 3, "fp": 0, "fn": 4, "cases": 7}
+{"corpus_id": "arv-p5b-eval-corpus", "revision": "1", "owner": "A", "layer": "semantic-spike", "precision": 1.0, "recall": 1.0, "tp": 6, "fp": 0, "fn": 0, "cases": 7}
+{"corpus_id": "arv-p5b-eval-corpus", "revision": "1", "owner": "A", "layer": "semantic-spike", "precision": 1.0, "recall": 1.0, "tp": 6, "fp": 0, "fn": 0, "cases": 7}
+{"corpus_id": "arv-p5b-eval-corpus", "revision": "1", "owner": "B", "layer": "semantic-spike", "precision": 1.0, "recall": 0.4286, "tp": 3, "fp": 0, "fn": 4, "cases": 7}

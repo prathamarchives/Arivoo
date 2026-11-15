@@ -1,0 +1,137 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-081-p5b-eval-corpus",
+ "base_sha": "2e35d592b4a3b318a27837e775779daa834f1fa0",
+ "intent_ids": [
+  "INT-134",
+  "INT-145",
+  "INT-146",
+  "INT-147"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "builder_context": "builder-zcode-slice-claim-081 (the session-48 build context: the RED->GREEN->measured chain — the machinery-absent RED at 2e35d59 (10 FAILs), the GREEN (eval.py + corpus.json + the fixture seeding, the conflated pair's same-term catch), the make-red amendments chained at each edit)",
+ "reviewer_context": "the D-042 (1a) merge-gate review at the PR (the fresh-context reviewer over the real diff — the standing protocol; the multi-round shape expected per the #116 lesson)",
+ "changed_components": [
+  "harness/eval.py",
+  "harness/tests/test_eval_corpus.py",
+  "harness/gate.py",
+  "harness/red-records.json",
+  "harness/runs/claim-081-p5b-eval-corpus/corpus.json",
+  "harness/runs/claim-081-p5b-eval-corpus/scope.txt",
+  "harness/runs/claim-081-p5b-eval-corpus/red-01.txt",
+  "harness/runs/claim-081-p5b-eval-corpus/sev.json",
+  "CLAIMS.md"
+ ],
+ "interfaces_reviewed": [
+  "eval.py's corpus load (the form check + the four-class summary)",
+  "eval.py's run arm (the deterministic loop + the mechanical verdict + the run-record JSONL)",
+  "the typed refusals (ARV-EVL-001/002/003)",
+  "the suite's fixture seeding (the four documents, two owners, the hostile query doc, the conflated pair)"
+ ],
+ "not_verified": [
+  "the semantic/vector retrieval (P5-C/P5-D under Q7's owner gate — the bounded exclusion)",
+  "the ranking machinery (P5-E — the corpus exists precisely so its changes can only land measured against it)",
+  "the MCP surface's corpus arm (not in this slice's scope)"
+ ],
+ "failure_modes": [
+  {
+   "id": "FM-01",
+   "scenario": "a no-result case fabricates a match (the 5B letter's named failure: never a fabricated match, never a similar-material fallback)",
+   "control": "EVC-03 (empty=true + the marker; the FABRICATED word is pinned to NEVER appear)"
+  },
+  {
+   "id": "FM-02",
+   "scenario": "a distractor's near-miss material is admitted (the rank-creep failure the corpus exists to catch)",
+   "control": "EVC-04 (near-miss-excluded=true + fp=0)"
+  },
+  {
+   "id": "FM-03",
+   "scenario": "a conflated term's second document is rank-suppressed",
+   "control": "EVC-05 (both=true — the provenance disambiguation, never rank)"
+  },
+  {
+   "id": "FM-04",
+   "scenario": "the corpus's hostile query content executes (the corpus-as-data law)",
+   "control": "EVC-07 (the H1 case evaluated as data; no instruction-shaped output)"
+  },
+  {
+   "id": "FM-05",
+   "scenario": "the run is non-deterministic (a clock/randomness ordering drift)",
+   "control": "EVC-02 (the byte-equal re-run)"
+  },
+  {
+   "id": "FM-06",
+   "scenario": "the corpus run crosses the owner boundary (B sees A's cases)",
+   "control": "EVC-08 (RLS through the standing search arm)"
+  },
+  {
+   "id": "FM-07",
+   "scenario": "an unregistered corpus id silently defaults to another corpus",
+   "control": "EVC-09 (the typed ARV-EVL-001 refusal)"
+  }
+ ],
+ "findings": [
+  {
+   "id": "F-081-1",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the corpus's expect_ids are the symbolic descriptive forms; expect_count is the authoritative expectation (the round-1 repair's own design: the count channel is the verdict's own); the runtime-seeded uuid's consequence stands (the suite's fixture seeds fresh scratch DBs)"
+  },
+  {
+   "id": "F-081-2",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "REPAIRED at the round-1 head: the verdict is now count-based with the fp over-admission channel (expect_count authoritative: precision can actually drop — a ranking change that admits junk is visible); the residue: the ids in the verdict lines are still counts (the runtime-seeded uuid's consequence — the deterministic shape)"
+  },
+  {
+   "id": "F-081-3",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the eval-runs.jsonl append grows across suite runs (the scratch DB drops; the JSONL persists in the slice runs — bounded by the repository's own history discipline)"
+  },
+  {
+   "id": "F-081-4",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the suite imports harness.adapters.pg for the scratch DB (the SAME standing dependency every retrieval suite uses — the legal 'from harness.adapters import pg' form adopted; eval.py itself imports only the standard library + subprocess to the standing query arm)"
+  },
+  {
+   "id": "F-081-5",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the hostile-as-data marker is a presence count, not a behavioral differential (the stronger form — a probe comparing the run's verdict with/without the hostile case — routed to the D-042 review's own probes)"
+  },
+  {
+   "id": "F-081-6",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "summary": "the round-1 reviewer's P2 residue: the corpus load --file accepts arbitrary filesystem paths (no traversal containment; no content disclosure observed — the malformed-JSON refusal leaks no bytes; the run path is closed: the REGISTRY is a code-controlled dict literal)"
+  }
+ ],
+ "disposition": "PASS",
+ "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. THE D-042 CHAIN: round 1 BLOCK-MERGE (the fail-open; the dead distractor tautology over a self-contradictory fixture; the fp-blind verdict; the stale digest) — ALL REPAIRED IN-SLICE. Round 2 (the spot-check) APPROVE-WITH-P2s: every repair verified real (the mutation test reproduced the fail-open when the check was neutered), load-bearing (the behavioral corpus probe: D1's expect lowered → fp 0→1, precision 1.0→0.8571), and non-regressing (the suite GREEN, the RPK sibling 10/10, the digest recomputing, the gate GREEN). The round-2 P2 (the untyped timeout traceback) CLOSED + PINNED (the typed class; the EVC-09b pin). GREEN 11/11.",
+ "reviewed_diff_sha256": "1fe9a1b95c1ac0665e1c094bbcc2000e654bcd7b407c2e2bba7b6ef4abc37dc3",
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "sheet_section": true,
+ "v_model": {
+  "component_verification": [
+   "the EVC suite's ten contracts over the real CLIs (run-01: GREEN, 10/10, digest-recorded)",
+   "the RPK sibling re-verified after the import-form fix (GREEN, 10/10 — the standing suites never regressed)"
+  ],
+  "integration_verification": [
+   "the gate in PR mode over the slice's declared scope (the DEP-008 root approved, the scope discipline, the claims registry)",
+   "the proofsheet re-derivation (ARV-PRF-003 from the run records)"
+  ],
+  "system_verification": [
+   "the corpus run over the full fixture (the four documents, two owners, the hostile query doc, the conflated pair — the EVC-01..10 chain)"
+  ],
+  "validation": [
+   "the corpus's four case classes as the ranking-baseline gate (the owner's fixed dependency order: the corpus BEFORE any ranking change)"
+  ]
+ }
+}

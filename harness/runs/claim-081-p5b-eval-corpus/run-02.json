@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_eval_corpus.py",
+  "exit_code": 0,
+  "commit": "a9c66d1a387a06265fbc8a2c3357dae2c2a18a2e",
+  "output_sha256": "258b2e22b65634738805a5b404a786ed1c768ba4a7c6f39d4ed65cdca55dd4dc",
+  "recorded_at": "2026-11-15T07:17:39.511934+00:00"
+}

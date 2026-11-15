@@ -111,8 +111,8 @@
   }
  ],
  "disposition": "PASS",
- "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. THE D-042 ROUND-1 CHAIN: BLOCK-MERGE (four findings: the fail-open — the arm's refusal silently became the honest empty set; the dead distractor tautology over a fixture that CONTAINED the query token; the fp-blind verdict (precision structurally 1.0); the stale digest at the head) — ALL REPAIRED IN-SLICE: the fail-open closed (ARV-EVL-004); the real distractor control (the tautology deleted, the fixture's near-miss disjoint); the honest count arithmetic (the fp over-admission channel); the EVC-08 pin strengthened (the real RLS observation). GREEN re-verified 10/10; the RPK sibling 10/10. The honest debts ledgered.",
- "reviewed_diff_sha256": "be511eeb6cffacf0adda9dce6f249beea4d141f84a862dd66660ee0ec8d09ec8",
+ "review_summary": "The P5-B opening slice: the versioned query corpus (the four case classes) + the deterministic evaluator (the mechanical verdict) + the typed refusals. THE D-042 CHAIN: round 1 BLOCK-MERGE (the fail-open; the dead distractor tautology over a self-contradictory fixture; the fp-blind verdict; the stale digest) — ALL REPAIRED IN-SLICE. Round 2 (the spot-check) APPROVE-WITH-P2s: every repair verified real (the mutation test reproduced the fail-open when the check was neutered), load-bearing (the behavioral corpus probe: D1's expect lowered → fp 0→1, precision 1.0→0.8571), and non-regressing (the suite GREEN, the RPK sibling 10/10, the digest recomputing, the gate GREEN). The round-2 P2 (the untyped timeout traceback) CLOSED + PINNED (the typed class; the EVC-09b pin). GREEN 11/11.",
+ "reviewed_diff_sha256": "054494f4d4883431d20c329fa884e54dc37c38dd30126dd2b74173d7e115496f",
  "system_claims": [
   "C1",
   "C2"

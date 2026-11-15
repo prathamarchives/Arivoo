@@ -99,7 +99,7 @@
  ],
  "disposition": "PASS",
  "review_summary": "The D-042 round 2: APPROVE-WITH-P2s — the two P2s (the D1 tautology label; the unpinned tp/fp/fn values) repaired and the closure verified by value-flipping mutations. The round-1 P1s stand dead and buried. GREEN 8/8 in the honest form.",
- "reviewed_diff_sha256": "7ccce03194cb90cf62d512f3829668c9abef5dfd1ba30a2f201509ecf9105427",
+ "reviewed_diff_sha256": "782a6a4c1685e784f55eb81ce767727b94a7a5f7510d8156c30ff06047448017",
  "v_model": {
   "component_verification": [
    "the suite's GREEN run: 8/8 PASS, exit 0 — the honest form (the similarity ranking over the full-text cosine; the disclosed deferral; the content-sensitive deterministic map; the typed network refusal ARV-SEM-005)"

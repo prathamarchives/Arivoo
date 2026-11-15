@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-082-p5c-semantic-spike (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): a88c50cfb3d85eea3d8008f0b5b1a25255828f66
-- generated (last record's timestamp): 2026-11-15T12:23:40.709181+00:00
-- run records: 6
+- commit (last run record's): 835d19be5dd40f6841068ab36fe4e1e25261515a
+- generated (last record's timestamp): 2026-11-15T13:10:19.076361+00:00
+- run records: 7
 
 ## Run records (command, exit, output digest)
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 5a541a891a6566e8 · 2026-11-15T08:49:50.822648+00:00
@@ -11,16 +11,17 @@
 - `python3 harness/tests/test_semantic_spike.py` -> exit 0 · output sha256 bbfeebabd5a1eead · 2026-11-15T11:42:21.872041+00:00
 - `python3 harness/tests/test_semantic_spike.py` -> exit 0 · output sha256 7c90c1a081db2612 · 2026-11-15T12:22:22.504691+00:00
 - `python3 harness/tests/test_semantic_spike.py` -> exit 0 · output sha256 7c90c1a081db2612 · 2026-11-15T12:23:40.709181+00:00
+- `python3 harness/tests/test_semantic_spike.py` -> exit 0 · output sha256 7c90c1a081db2612 · 2026-11-15T13:10:19.076361+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - (none stated — REPAIR: the not-verified list may not be empty; LAW-04)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: b6b6f5d09edf2e497bc8a6458a9bbd39fbdcd859ca2e064cbb12dc1279319a67
-- reviewed_diff_sha256: 7ccce03194cb90cf62d512f3829668c9abef5dfd1ba30a2f201509ecf9105427
+- report sha256: f6c5dfe635176fdf9984aac24a4da0045352748f2256bf4b6641f9d54f0e5222
+- reviewed_diff_sha256: 782a6a4c1685e784f55eb81ce767727b94a7a5f7510d8156c30ff06047448017
 - disposition: PASS
-- findings: 4 (open P0/P1: 0)
+- findings: 6 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 929a48bf96fc5ffd0b8ad223e28672cd72a9635d305bb81c0210de37e447e4e5
+- sheet sha256 (of the content above, excluding this line): b2313e2aa763510838699bf8614e037e6e682b2921bf18db49b3a1d28e3764f5

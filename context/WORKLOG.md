@@ -1011,3 +1011,10 @@ Stage Summary:
 - Evidence: context/extracted/73-P5B-EVAL-CORPUS.md + the slice runs (red-01.txt, corpus.json, sev.json, eval-runs.jsonl, proofsheet.md).
 - Unresolved: none new (Q6-Q12 unchanged; Q7 gates only the 5C spike).
 - Next: the D-042 (1a) merge-gate review at PR #117 (fresh-context, the multi-round shape expected) -> on APPROVE the merge under INT-145 (the #116 form).
+
+## Task 99 (CLAIM-081 the merge + the close, session 48) — INT-145's single-actor path
+- What: the #116 disclosed mechanics, exactly: the pre-change account + the byte-snapshot committed to the slice BEFORE the flip; the flip (count 1→0, the sole change); the merge (155dd8d6c0, merge_method=merge, the recorded message); the branch deleted (204); the restore (every field re-PUT; the re-read byte-equivalent True); the merge commit's five checks ALL-GREEN; open PRs = 0.
+- The CI road: e17f081's records-hygiene commit widened the reviewed path set after the 60158a7 digest bind — ARV-SEV-003 refused BOTH gate-side checks (the repair loop working as designed); the re-bind at 4a14700 + the snapshot at 71fe9c0 → ALL-GREEN → the merge.
+- Evidence: record 73 §5 (the full merge account) + protection-pre-merge.json + the PR #117 comment thread (the pre-change account 6891608810).
+- Unresolved: Q7 (the budget gate for P5-C's semantic spike) — the owner's question open; CLAIM-082 opens with the deterministic parts only.
+- Next: CLAIM-082's RED (tests-only) at 155dd8d's merged head.

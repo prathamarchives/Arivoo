@@ -1,6 +1,6 @@
 # Record 73 — P5-B: the eval corpus (CLAIM-081, session 48)
 
-> The #116 landing's first successor slice: the versioned query corpus — the
+> STATUS: SESSION RECORD — 2026-11-15 (session 48; the banner per the standing records law). The #116 landing's first successor slice: the versioned query corpus — the
 > evaluation baseline BEFORE any ranking change (the owner's fixed dependency
 > order: the corpus lands before 5C's semantic spike and 5E's hybrid ranking
 > so they can only be measured against it). The PLAN 5B row elaborated one

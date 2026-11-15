@@ -1,12 +1,14 @@
 # STATE — Current-State and Navigation Index
 
-> **STATUS: navigation snapshot — NOT authority.** This file tells an incoming agent where things stand and what to do next. It holds pointers and current status only, never a second copy of any rule (one fact, one home: `/EXECUTION.md` §1). If this file disagrees with a canonical document, the canonical document wins and this file must be corrected in the same session (authority order: `/EXECUTION.md` §3). **Contract (D-027, INT-109/105): one screen, pointers not detail — never a second Intent Ledger, a second plan, or an architecture copy; repo-scale long-term memory, not short-term session memory (INT-101).** The PR/review section is a **snapshot at the last repository update, not live status** — a committed file cannot guarantee external state hasn't changed since (INT-104). Updated at every session exit (AGENTS.md session-exit rule); a stale record pointer is a drift finding — VER-804 checks it mechanically.
+> **STATUS: navigation snapshot — NOT authority.**
+
+> Ledger size: 129 statused intents (the Intent Ledger's own sequential count). This file tells an incoming agent where things stand and what to do next. It holds pointers and current status only, never a second copy of any rule (one fact, one home: `/EXECUTION.md` §1). If this file disagrees with a canonical document, the canonical document wins and this file must be corrected in the same session (authority order: `/EXECUTION.md` §3). **Contract (D-027, INT-109/105): one screen, pointers not detail — never a second Intent Ledger, a second plan, or an architecture copy; repo-scale long-term memory, not short-term session memory (INT-101).** The PR/review section is a **snapshot at the last repository update, not live status** — a committed file cannot guarantee external state hasn't changed since (INT-104). Updated at every session exit (AGENTS.md session-exit rule); a stale record pointer is a drift finding — VER-804 checks it mechanically.
 
 ## Where things stand
 
 - **Phase:** PHASE 5 OPENING (2026-11-14 — CLAIM-080 LANDED: PR #116 = merge `2e35d592b` (the P5-A pack arm + the MCP registry join); the Phase 4 exit gate had verified 18/18 at CLAIM-079's `bf8be3a`)
 
-- **Active task:** CLAIM-081 — P5-B: the eval corpus (record 73; the GREEN + the measured set landed at the gate GREEN; the D-042 review at PR #117 follows)
+- **Active task:** CLAIM-081 — P5-B: the eval corpus (the session record context/extracted/73-P5B-EVAL-CORPUS.md; the GREEN + the measured set landed at the gate GREEN; the D-042 review at PR #117 follows)
 
 - **Last completed:** CLAIM-080 (P5-A — the authorized retrieval API / context packs; PR #116 = merge `2e35d592b203f4cf2f3ee0b2a9e5fc5fc5211b4a`, 2026-11-14 under INT-145; the D-042 FOUR-round ledger each repaired + pinned; the close staged at CLAIM-081's commit A)
 - **Exact next action:** the D-042 (1a) merge-gate review at PR #117 (fresh-context; on APPROVE the merge under INT-145's single-actor path — the #116 form)

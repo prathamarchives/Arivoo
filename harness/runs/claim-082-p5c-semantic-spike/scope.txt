@@ -1,0 +1,14 @@
+# CLAIM-082 — P5-C: the semantic spike (the PLAN 5C row; record 74 §2; the
+# Q7-gated opening). This commit A carries the CLOSE of CLAIM-081 (the
+# staged merge account — record 73 §5 + the CLAIMS rule-4 row + the
+# navigation files) + the slice's own opening record 74 (the spike's
+# contract: the near-miss law measured against the P5-B corpus; the
+# deterministic parts only until the owner's budget answer lands).
+context/extracted/73-P5B-EVAL-CORPUS.md D-041
+context/extracted/74-P5C-SEMANTIC-SPIKE.md D-041
+harness/runs/claim-082-p5c-semantic-spike D-041
+CLAIMS.md D-038
+STATE.md D-043
+AGENTS.md D-043
+PLAN.md D-037
+context/WORKLOG.md D-043

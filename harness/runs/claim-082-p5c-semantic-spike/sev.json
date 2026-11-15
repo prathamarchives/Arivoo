@@ -1,0 +1,57 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-082-p5c-semantic-spike",
+ "base_sha": "155dd8d6c04b3ef8fa528ed02e8607837aafb9cd",
+ "intent_ids": [
+  "INT-134",
+  "INT-145",
+  "INT-146",
+  "INT-147"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1",
+  "C2"
+ ],
+ "sheet_section": true,
+ "builder_context": "builder-zcode-slice-claim-082 (the session-49 opening context: the Q7-gated commit A — the CLAIM-081 close staged (record 73 §5) + record 74's contract letter; the RED is the NEXT session's first act at 155dd8d's merged head)",
+ "reviewer_context": "(the D-042 review is not yet due — the slice has no machinery to review; it opens at the review when the GREEN lands)",
+ "changed_components": [
+  "context/extracted/73-P5B-EVAL-CORPUS.md",
+  "context/extracted/74-P5C-SEMANTIC-SPIKE.md",
+  "harness/runs/claim-082-p5c-semantic-spike/scope.txt",
+  "CLAIMS.md",
+  "STATE.md",
+  "AGENTS.md",
+  "PLAN.md",
+  "context/WORKLOG.md"
+ ],
+ "interfaces_reviewed": [
+  "the commit-A form itself (the close + the opening record; no machinery yet)"
+ ],
+ "not_verified": [
+  "the semantic machinery itself (Q7-gated: the deterministic parts only until the owner's budget answer)",
+  "the RED suite (minted at the next session's first act)"
+ ],
+ "failure_modes": [],
+ "findings": [],
+ "disposition": "PASS",
+ "review_summary": "The Q7-gated opening: no machinery, no code — the slice's commit A carries the CLAIM-081 close (the INT-145 merge account, record 73 §5) + the spike's contract letter (record 74: the near-miss law measured against the P5-B corpus; determinism where measurable; the owner boundary). The verdict over an empty change-set is PASS by construction; every real object arrives with the RED.",
+ "reviewed_diff_sha256": "bcf5ce19b5e8cc36c87f1301a24a2a4e1415c7fa2fcd7d02b7e76b909729ac01",
+ "v_model": {
+  "component_verification": [
+   "the commit-A form's own canonical layer run (GREEN — the pointer law satisfied: record 74 on disk = the highest)"
+  ],
+  "integration_verification": [
+   "the gate in PR mode at the bound commit A (the scope + the claims registry; the RED's own bindings follow)"
+  ],
+  "system_verification": [
+   "the Q7-gated contract letter (record 74 §2) — the deterministic-parts-only boundary held"
+  ],
+  "validation": [
+   "the CLAIM-081 close's own account (record 73 §5: the INT-145 sequence — the snapshot + the flip/merge/restore with the byte-equivalent re-read + the merge-commit CI green)"
+  ]
+ }
+}

@@ -403,11 +403,20 @@ def _growth_row_phantom(repo: Path) -> None:
     register), so the checker's section split sees it."""
     m = repo / "context" / "SOURCE-COVERAGE-MANIFEST.md"
     text = m.read_text(encoding="utf-8")
-    marker = "| (empty at this slice"
-    cut = text.index(marker)
-    end = text.index("\n", cut)
+    # Robust across register states (the anchored floor runs the BASE's driver
+    # copy against the CANDIDATE's tree — the helper must find the §9 table
+    # whether it holds the scaffold row, the first real row, or many rows):
+    # append after the LAST table row inside §9; if the section is absent
+    # entirely, create it at the document's end (the pre-085-tree form).
+    if "## 9. Growth register" in text:
+        head = text.index("## 9. Growth register")
+        sec = text[head:].split("\n## ", 1)[0]
+        last = sec.rindex("\n| ")
+        end = head + last
+    else:
+        end = len(text.rstrip("\n")) - 1
     row = "| `0.txt` | `" + "f" * 64 + "` | `INT-148` | `2026-11-16` |"
-    m.write_text(text[:end + 1] + row + "\n" + text[end + 1:], encoding="utf-8")
+    m.write_text(text[:end + 1] + "\n" + row + text[end + 1:], encoding="utf-8")
 
 # ------------------------------------------------------------ mutation helpers
 # (preserved verbatim from the predecessor suite — content and semantics

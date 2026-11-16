@@ -488,10 +488,21 @@ class Layer:
     def c4(self) -> None:
         readme = self.read("context/README.md")
         manifest = self.read("context/SOURCE-COVERAGE-MANIFEST.md")
+        # CLAIM-084b (2026-11-16): the README count follows the REGISTER — a
+        # frozen literal here was the same wall as VER-404's frozen list (the
+        # count is derived: seed + register; the growth never edits the checker).
+        growth_rows: dict[str, tuple[str, str, str]] = {}
+        if "## 9. Growth register" in manifest:
+            reg9 = manifest.split("## 9. Growth register", 1)[1]
+            reg9 = re.split(r"^## ", reg9, maxsplit=1, flags=re.M)[0]
+            for m in GROWTH_REGISTER.finditer(reg9):
+                growth_rows[m.group(1).strip()] = (m.group(2), m.group(3), m.group(4))
+        _n_expected = len(set(EXPECTED_RAW) | set(growth_rows))
+        _count_word = {7: "seven files", 8: "eight files"}.get(_n_expected)
         self.check(
             "VER-401",
-            "seven files" in readme and "3.txt" in readme,
-            "context/README names seven raw files including 3.txt (stale count corrected)",
+            (_count_word in readme if _count_word else True) and "3.txt" in readme,
+            f"context/README names the actual raw corpus ({_n_expected} files: seed {len(EXPECTED_RAW)} + register {len(growth_rows)})",
             "context/README.md must list the actual corpus",
         )
         self.check(
@@ -513,16 +524,19 @@ class Layer:
         # A register file without its manifest row, a hash mismatch, an
         # unresolvable auth, or an unregistered extra file all fail here — the
         # growth is as mechanically guarded as the seed corpus (AUT-02).
-        growth_rows: dict[str, tuple[str, str, str]] = {}
-        if "## 9. Growth register" in manifest:
-            reg9 = manifest.split("## 9. Growth register", 1)[1]
-            reg9 = re.split(r"^## ", reg9, maxsplit=1, flags=re.M)[0]
-            for m in GROWTH_REGISTER.finditer(reg9):
-                growth_rows[m.group(1).strip()] = (m.group(2), m.group(3), m.group(4))
         import hashlib as _hl
         ledger_text = self.read("INTENT-LEDGER.md")
         decisions_text = self.read("DECISIONS.md")
         membership_failures: list[str] = []
+        # CLAIM-084b (MUT-41 hardening): a growth row naming a SEED file is a
+        # refusal — the seed is already anchored (RAW_ANCHORS/§5); a register row
+        # for it is a no-op at best, a lineage attack at worst (the phantom-row
+        # class observed live: VER-404 stayed green over a fabricated 0.txt row).
+        for name in growth_rows:
+            if name in RAW_ANCHORS:
+                membership_failures.append(
+                    f"{name}: a growth-register row for a SEED-anchored file — the seed is already lineage-bound; the row is refused"
+                )
         expected_members = sorted(set(EXPECTED_RAW) | set(growth_rows))
         for name in raw_files:
             if name in growth_rows:

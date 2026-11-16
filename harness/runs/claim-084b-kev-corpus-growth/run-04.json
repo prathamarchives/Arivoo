@@ -1,0 +1,7 @@
+{
+ "command": "make harness-tests",
+ "exit_code": 0,
+ "commit": "123143c5b7696e57df271742f6392d1dfddca411",
+ "output_sha256": "7d90a19c91ad890aa1e3aff6a105055823d18527cf30daad5994a43d227e1bf1",
+ "recorded_at": "2026-11-16T19:34:17.076198+00:00"
+}

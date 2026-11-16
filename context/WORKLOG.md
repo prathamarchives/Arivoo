@@ -1062,3 +1062,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-085-growth-register/ (runs + sev.json + the byte-identical proofsheet).
 - Unresolved: Q16 (the growth AUTHORITY's owner answer); Q13/Q14/Q15 + D-014/Q6–Q12 unchanged.
 - Next: CLAIM-084's re-push (the parked `d592321`: the spec file + its §9 row, base = this merge), then the Kev repository's BOOT-001.
+
+## Task 105 (CLAIM-084b open, session 51) — the corpus growth through the §9 register
+- What: the verbatim Kev spec landed at context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md (SHA-256 4eceb21cc508d… — the bytes pinned in record 75 §1 since slice A) + the §9 register row (auth INT-148) + the manifest coverage row + the digest-block line + the README eight-file count + record 75's §1 landing note + §5 three-slice close. NO verifier list edit — the transition form's first use, exactly as designed.
+- Verified: the canonical layer GREEN (8-file corpus: seed 7 + register 1); the PR-mode gate at this slice's head.
+- Evidence: harness/runs/claim-084b-kev-corpus-growth/ (runs + sev.json + the byte-identical proofsheet).
+- Unresolved: Q13/Q14/Q15 + Q16 open (the growth AUTHORITY's owner answer); D-014, Q6–Q12 unchanged; the Kev repository's BOOT-001 opens after this merge.
+- Next: CLAIM-084b's merge (the INT-145 six-step path), then the Kev repository's BOOT-001.

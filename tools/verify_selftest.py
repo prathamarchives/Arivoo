@@ -403,9 +403,12 @@ def _growth_row_phantom(repo: Path) -> None:
     register), so the checker's section split sees it."""
     m = repo / "context" / "SOURCE-COVERAGE-MANIFEST.md"
     text = m.read_text(encoding="utf-8")
-    marker = "| (empty at this slice"
-    cut = text.index(marker)
-    end = text.index("\n", cut)
+    # append after the LAST table row inside §9 (robust: the scaffold row was
+    # replaced by the first real row at CLAIM-084b; the marker-era form died there)
+    head = text.index("## 9. Growth register")
+    sec = text[head:].split("\n## ", 1)[0]
+    last = sec.rindex("\n| ")
+    end = head + last
     row = "| `0.txt` | `" + "f" * 64 + "` | `INT-148` | `2026-11-16` |"
     m.write_text(text[:end + 1] + row + "\n" + text[end + 1:], encoding="utf-8")
 

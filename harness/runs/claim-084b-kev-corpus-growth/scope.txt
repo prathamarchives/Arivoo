@@ -1,0 +1,12 @@
+# CLAIM-084b — the corpus growth through the §9 register (the transition
+# form's FIRST use; base = CLAIM-085's merge 123143c). No verifier list edit:
+# the raw file + the register row + the manifest coverage + the README count
+# + record 75's §1/§5 completion. The bytes pinned by record 75 §1's hash.
+context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md INT-148
+context/SOURCE-COVERAGE-MANIFEST.md INT-148
+context/README.md INT-148
+context/extracted/75-KEV-SPEC-INTAKE.md INT-148
+STATE.md INT-148
+CLAIMS.md D-038
+context/WORKLOG.md INT-148
+harness/runs/claim-084b-kev-corpus-growth D-041

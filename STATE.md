@@ -8,10 +8,10 @@
 
 - **Phase:** PHASE 5 OPENING + THE KEV INTAKE (2026-11-16 — CLAIM-085: the growth-register transition form; the wall finding closed mechanically; CLAIM-084 re-push next, then the Kev repository)
 
-- **Active task:** CLAIM-085 — the growth-register transition (record 76 = context/extracted/76-GROWTH-REGISTER-TRANSITION.md; the checker's seed∪register membership + MUT-40/41; the corpus UNCHANGED at 7 — the base judge green over this slice)
+- **Active task:** CLAIM-084b — the corpus growth through the §9 register (records 75 §5 + 76 = context/extracted/76-GROWTH-REGISTER-TRANSITION.md; the spec file + the register row — the transition form's first use)
 
-- **Last completed:** CLAIM-083 (the Kev spec intake, slice A; PR #121 = merge `275e3f12`, 2026-11-16; the D-042 APPROVE; the five checks ALL-GREEN at the merge commit)
-- **Exact next action:** CLAIM-085's merge (the INT-145 six-step path), then CLAIM-084's re-push (the parked `d592321`: the spec file + its §9 register row, base = 085's merge), then the Kev repository's BOOT-001
+- **Last completed:** CLAIM-085 (the growth-register transition; PR #123 = merge `123143c5`, 2026-11-16; the D-042 APPROVE; five checks ALL-GREEN)
+- **Exact next action:** CLAIM-084b's merge (the INT-145 six-step path), then the Kev repository's BOOT-001 (the spec's §16 Phase 0: the governance doc set + SYSTEM-SPEC canon) — Arivoo's next row (5D's paid suffix) remains Q7-gated
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.

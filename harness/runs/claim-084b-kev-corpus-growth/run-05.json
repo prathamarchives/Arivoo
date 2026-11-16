@@ -1,0 +1,7 @@
+{
+ "command": "python3 harness/gate.py --slice claim-084b-kev-corpus-growth --diff origin/main --skip-suites",
+ "exit_code": 1,
+ "commit": "123143c5b7696e57df271742f6392d1dfddca411",
+ "output_sha256": "0b14108513d03a1347cfef895bfad2909a110cc45e093901738f7211337d36f9",
+ "recorded_at": "2026-11-16T19:34:37.266965+00:00"
+}

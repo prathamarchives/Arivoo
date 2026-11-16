@@ -1,0 +1,93 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-084b-kev-corpus-growth",
+ "base_sha": "123143c5b7696e57df271742f6392d1dfddca411",
+ "reviewed_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "intent_ids": [
+  "INT-145",
+  "INT-148"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1"
+ ],
+ "changed_components": [
+  "context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md",
+  "context/SOURCE-COVERAGE-MANIFEST.md",
+  "context/README.md",
+  "context/extracted/75-KEV-SPEC-INTAKE.md",
+  "tools/verify_canonical_layer.py",
+  "tools/verify_selftest.py",
+  "STATE.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "harness/runs/claim-084b-kev-corpus-growth/scope.txt"
+ ],
+ "interfaces_reviewed": [
+  "the \u00a79 register's FIRST real use (the KEV row: hash-bound + coverage-bound + INT-148 auth-resolving \u2014 no verifier list edit, exactly the transition form's design)",
+  "VER-401's dynamic count (register-derived; the frozen-literal wall dissolved on the count surface too)",
+  "the MUT-41 hardening discovered live: a growth row naming a SEED file now refused outright (the phantom-row class closed at the seed surface)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the landed file's SHA-256 equals record 75 \u00a71's pinned hash (4eceb21c... \u2014 the two-slice integrity held)"
+  ],
+  "integration_verification": [
+   "the canonical layer GREEN on the 8-file tree (seed 7 + register 1; VER-404's membership + VER-805 lineage + VER-801's grown count) \u2014 run-01"
+  ],
+  "system_verification": [
+   "SYS-01-class durability: the owner's spec verbatim-preserved, hash-anchored, review-gated"
+  ],
+  "validation": [
+   "MUT-41 re-proves the phantom class under the real register (and the seed-row refusal); 41/41 green \u2014 run-02"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-084B-1",
+   "scenario": "the landed file drifts from the pinned bytes",
+   "control": "the \u00a79 register row's digest + VER-404's hash equality (byte-identical landing)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-084B-2",
+   "scenario": "a growth row naming a seed file (the lineage-attack class)",
+   "control": "VER-404's seed-row refusal (MUT-41's hardened form)",
+   "proof_ids": [
+    "run-02"
+   ]
+  },
+  {
+   "id": "FM-084B-3",
+   "scenario": "the README count drifts from the actual corpus",
+   "control": "VER-401's register-derived count (the frozen literal retired)",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-084B-1",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "MUT-41's helper had two defects surfaced by this slice: a stale scaffold marker (ValueError \u2192 FLOOR-001) and a section-offset arithmetic error (the phantom row landed outside \u00a79, invisible to the parse)",
+   "disposition": "both fixed in-slice (the last-row form + the head+offset arithmetic); the case now passes and additionally exercises the new seed-row refusal"
+  }
+ ],
+ "not_verified": [
+  "the local isolation check's ZCODE_OFFICIAL_ENDPOINT_TOKEN finding (the sandbox harness's own env var \u2014 the local agent environment, never the CI runner; the tracked-file scan is clean; disclosed, not repaired)",
+  "the remote CI runs (they execute at the PR \u2014 the five checks on the branch head and the merge commit)",
+  "the D-042 review round (it runs at the PR before the merge, per the standing protocol)",
+  "Q16's owner answer (the growth AUTHORITY's semantics \u2014 open; CLAIM-084b's own row's auth is INT-148, already ledgered)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-084b (session 51: the growth slice built on CLAIM-085's merge)",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-084b (the D-042 round at the PR + the remote CI's trusted judges \u2014 declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the corpus growth through the \u00a79 register (the transition form's first use): the verbatim spec landed byte-identically (the hash pinned since slice A), the README count follows the register, the MUT-41 hardening closed the seed-row class discovered live. The three-slice growth story closes: ledger intake (083) \u2192 transition (085) \u2192 landing (084b).",
+ "sheet_section": true
+}

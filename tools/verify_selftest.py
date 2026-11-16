@@ -379,8 +379,35 @@ MUTATIONS: list[tuple[str, str, callable, str]] = [
         lambda r: _short_quote_fabrication(r),
         "VER-803",
     ),
+    (
+        "MUT-40",
+        "plant an unregistered raw file (the growth-register blind spot the CLAIM-085 transition closes): copy 0.txt's bytes to context/raw/SMUGGLED.txt — the corpus gains a file with NO seed anchor and NO §9 register row",
+        lambda r: (r / "context" / "raw" / "SMUGGLED.txt").write_bytes((r / "context" / "raw" / "0.txt").read_bytes()),
+        "VER-404",
+    ),
+    (
+        "MUT-41",
+        "register a growth row whose hash does not bind the file (the phantom-register class): append a §9 row for 0.txt with a fabricated digest and INT-148 auth — the register exists, the file hashes differently",
+        lambda r: _growth_row_phantom(r),
+        "VER-404",
+    ),
 ]
 
+
+
+
+def _growth_row_phantom(repo: Path) -> None:
+    """CLAIM-085's MUT-41: a §9 row whose digest is not the file's own — the
+    register must bind hashes, not merely exist. The row lands INSIDE the
+    existing §9 table (the realistic phantom: a row appended to the real
+    register), so the checker's section split sees it."""
+    m = repo / "context" / "SOURCE-COVERAGE-MANIFEST.md"
+    text = m.read_text(encoding="utf-8")
+    marker = "| (empty at this slice"
+    cut = text.index(marker)
+    end = text.index("\n", cut)
+    row = "| `0.txt` | `" + "f" * 64 + "` | `INT-148` | `2026-11-16` |"
+    m.write_text(text[:end + 1] + row + "\n" + text[end + 1:], encoding="utf-8")
 
 # ------------------------------------------------------------ mutation helpers
 # (preserved verbatim from the predecessor suite — content and semantics
@@ -774,7 +801,7 @@ def _select(only: str | None) -> list:
     sel = []
     for w in wanted:
         if not re.fullmatch(r"MUT-\d{2}", w) or w not in by_code:
-            raise SystemExit(f"refused: unknown case '{w}' — the expected set is fixed (MUT-01..MUT-39)")
+            raise SystemExit(f"refused: unknown case '{w}' — the expected set is fixed (MUT-01..MUT-41)")
         sel.append(by_code[w])
     return sel
 

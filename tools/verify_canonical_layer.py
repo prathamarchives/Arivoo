@@ -93,6 +93,22 @@ RAW_ANCHORS = {
 # itself. VER-205 now scans the directory dynamically; every *.md in context/extracted/
 # must carry a status banner, whatever its number.
 
+# GROWTH_REGISTER (CLAIM-085, 2026-11-16): the raw-corpus growth register — the
+# walled era's transition form. A new raw file CANNOT pass by merely appearing in
+# a candidate's EXPECTED_RAW/RAW_ANCHORS (the base-anchored judge would refuse
+# the unknown 8-file tree — the PR #120/#122 wall finding); it lands through the
+# MANIFEST's §9 growth register instead: a row (name, SHA-256, owner auth, date)
+# in the candidate's own manifest admits the file, and the register's auth must
+# resolve like a reanchor's (INT- in the ledger or D- in DECISIONS). Expected
+# membership is then SEED ∪ REGISTER with every member hash-bound: a seed file
+# keeps its RAW_ANCHORS binding; a register file must hash to its register row
+# AND appear in the manifest's per-file coverage table. One checker change
+# admits ALL future growth — no per-file verifier edit ever again.
+GROWTH_REGISTER = re.compile(
+    r"^\|\s*`([^`|]+)`\s*\|\s*`([0-9a-f]{64})`\s*\|\s*`((?:INT|D)-\d{3})`\s*\|\s*`(\d{4}-\d{2}-\d{2})`\s*\|",
+    re.M,
+)
+
 STATUSES = ("active", "clarified", "superseded", "historical")
 INT_HEADER = re.compile(r"^\*\*INT-(\d{3})\s+—\s+(.*?)\s+—\s+(.*?)\*\*\s*$", re.M)
 
@@ -471,6 +487,7 @@ class Layer:
     # ------------------------------------------------------------ C4: archive
     def c4(self) -> None:
         readme = self.read("context/README.md")
+        manifest = self.read("context/SOURCE-COVERAGE-MANIFEST.md")
         self.check(
             "VER-401",
             "seven files" in readme and "3.txt" in readme,
@@ -492,11 +509,46 @@ class Layer:
             "migration trigger = corpus closure (FX-07), not the F-band",
         )
         raw_files = sorted(p.name for p in (self.repo / "context" / "raw").glob("*") if p.is_file())
+        # CLAIM-085 (2026-11-16): membership = SEED ∪ REGISTER, both hash-bound.
+        # A register file without its manifest row, a hash mismatch, an
+        # unresolvable auth, or an unregistered extra file all fail here — the
+        # growth is as mechanically guarded as the seed corpus (AUT-02).
+        growth_rows: dict[str, tuple[str, str, str]] = {}
+        if "## 9. Growth register" in manifest:
+            reg9 = manifest.split("## 9. Growth register", 1)[1]
+            reg9 = re.split(r"^## ", reg9, maxsplit=1, flags=re.M)[0]
+            for m in GROWTH_REGISTER.finditer(reg9):
+                growth_rows[m.group(1).strip()] = (m.group(2), m.group(3), m.group(4))
+        import hashlib as _hl
+        ledger_text = self.read("INTENT-LEDGER.md")
+        decisions_text = self.read("DECISIONS.md")
+        membership_failures: list[str] = []
+        expected_members = sorted(set(EXPECTED_RAW) | set(growth_rows))
+        for name in raw_files:
+            if name in growth_rows:
+                digest = _hl.sha256((self.repo / "context" / "raw" / name).read_bytes()).hexdigest()
+                _sha, auth, _date = growth_rows[name]
+                auth_resolves = (
+                    bool(re.search(rf"^\*\*{auth}[\s\u2014-]", ledger_text, re.M))
+                    if auth.startswith("INT-")
+                    else bool(re.search(rf"^\|\s*{auth}\s*\|", decisions_text, re.M))
+                )
+                if digest != _sha:
+                    membership_failures.append(f"{name}: the file's digest disagrees with its growth-register row")
+                elif f"`{name}`" not in manifest:
+                    membership_failures.append(f"{name}: in the register but absent from the per-file coverage table")
+                elif not auth_resolves:
+                    membership_failures.append(f"{name}: the growth auth ({auth}) does not resolve")
+            elif name not in RAW_ANCHORS:
+                membership_failures.append(f"{name}: present in context/raw without a seed anchor or register row")
+        for name in expected_members:
+            if name not in raw_files:
+                membership_failures.append(f"{name}: expected (seed or registered) but missing from context/raw")
         self.check(
             "VER-404",
-            raw_files == sorted(EXPECTED_RAW),
-            f"context/raw holds exactly the 7-file verbatim corpus (unchanged: {len(raw_files)} files)",
-            "the raw corpus is immutable — AUT-02",
+            not membership_failures,
+            f"context/raw holds exactly the expected verbatim corpus (seed {len(EXPECTED_RAW)} + register {len(growth_rows)} = {len(expected_members)} files; every member hash-bound)",
+            f"raw-corpus membership failures: {'; '.join(membership_failures[:4])} — the growth register is the only admission path (AUT-02)",
         )
         self.check(
             "VER-405",
@@ -666,7 +718,7 @@ class Layer:
             and "## 2. Non-raw owner-turn provenance" in manifest
             and "## 3. Exception register" in manifest
             and "## 4. Exclusion register" in manifest
-            and len(re.findall(r"[0-9a-f]{64}", manifest)) >= len(EXPECTED_RAW),
+            and len(re.findall(r"[0-9a-f]{64}", manifest)) >= len(EXPECTED_RAW) + len(GROWTH_REGISTER.findall(manifest)),
             f"the source-coverage manifest exists with all {len(EXPECTED_RAW)} raw files classified, INT-mapped, SHA-256-anchored, with provenance/exception/exclusion registers (F-09, D-025)",
             "restore context/SOURCE-COVERAGE-MANIFEST.md per D-025 — every raw file classified and anchored; exceptions and exclusions enumerated, never silent",
         )

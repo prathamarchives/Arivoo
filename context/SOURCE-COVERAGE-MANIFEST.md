@@ -129,3 +129,17 @@ Quote fidelity at repair time: 54/58 raw-citable quotes matched on first probe; 
 **Lockstep obligation (one fact, two homes — by design):** the digest anchors live in BOTH this file's full-digest block and the verifier's `RAW_ANCHORS` map. The map is the TRUSTED copy (base-anchored in CI); this file is the human-readable register. A legitimate reanchor updates the raw file, this file's rows, a register row here, AND the map — in ONE slice, reviewed as a whole. The verifier's lockstep pattern is the `INT_HEADER` precedent (tools/verify_selftest.py: "kept in deliberate lockstep; if the verifier legitimately changes its header syntax, this copy changes in the same slice").
 
 **Honest limit:** VER-805 validates the row's FORM and the authorization reference's RESOLVABILITY — the authorization's GENUINENESS is the review layer's judgment (D-042's review-complete rule + the owner's merge authority through the walls), never a mechanical claim.
+
+## 9. Growth register (CLAIM-085, D-045 — the raw-corpus growth path)
+
+The walled era's admission path for NEW raw files (record 76): a row
+`| name | SHA-256 | owner-auth | date |` binds the file; the checker's
+membership rule is SEED ∪ REGISTER (VER-404), the register's auth must
+resolve (VER-805's form), and the file must appear in §1's per-file table.
+GUARDS: MUT-40 (the smuggled-file class) + MUT-41 (the phantom-register
+class). The seed corpus's bindings are unchanged (§5's digest block +
+§8's reanchor register keep their authority).
+
+| file | SHA-256 | owner auth | date |
+|-------|---------|------------|------|
+| (empty at this slice — CLAIM-084 lands the first row: `KEV_SYSTEM_ENGINEERING_SPEC.md` under INT-148) | | | |

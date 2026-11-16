@@ -443,6 +443,7 @@ Exit: C3 demonstrable with reasons and provenance — new inputs resurface old m
 - Q13 — Kev model provider + names (2026-11-16, the Kev spec §21.1, INT-148; free-API-first) — blocks only Kev's MDL-001 provider configuration.
 - Q14 — Kev Supabase `arivo` provisioning confirmation (2026-11-16, the Kev spec §10.1, INT-148; never delete the inactive projects without the owner) — blocks only Kev's DB-001 step.
 - Q15 — Kev external-research scope at first (2026-11-16, the Kev spec §21.1, INT-148) — blocks only Kev's discovery-phase policy.
+- Q16 — the corpus-growth AUTHORITY (2026-11-16, record 76 §4, D-045's open edge). Blocks only future growth rows' authority semantics.
 
 Q6–Q10 were registered 2026-10-16 (session 18, D-036); Q11 and Q12 added 2026-10-19 (session 19, record 19 §8/§10) to keep the Work/Source identity and source-blob persistence gaps explicit. Each blocks only its named dependents (F-07); directed work proceeds regardless. Phase 2 S1–S4 remain complete.
 

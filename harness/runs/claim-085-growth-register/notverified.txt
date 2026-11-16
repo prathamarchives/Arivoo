@@ -1,0 +1,4 @@
+the local isolation check's ZCODE_OFFICIAL_ENDPOINT_TOKEN finding (the sandbox harness's own env var — the local agent environment, never the CI runner; the tracked-file scan is clean; disclosed, not repaired)
+the remote CI runs (they execute at the PR — the five checks on the branch head and the merge commit)
+the D-042 review round (it runs at the PR before the merge, per the standing protocol)
+Q16's owner answer (the growth AUTHORITY's semantics — registered open, never silently closed)

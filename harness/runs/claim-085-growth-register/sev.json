@@ -1,0 +1,94 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-085-growth-register",
+ "base_sha": "275e3f12c99d1f18163185229500318ca60ffcb7",
+ "reviewed_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "intent_ids": [
+  "INT-145",
+  "INT-148"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1"
+ ],
+ "changed_components": [
+  "tools/verify_canonical_layer.py",
+  "tools/verify_selftest.py",
+  "context/extracted/76-GROWTH-REGISTER-TRANSITION.md",
+  "context/SOURCE-COVERAGE-MANIFEST.md",
+  "DECISIONS.md",
+  "EXECUTION.md",
+  "PLAN.md",
+  "STATE.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "harness/runs/claim-085-growth-register/scope.txt"
+ ],
+ "interfaces_reviewed": [
+  "the growth-register membership (VER-404's seed\u222aregister: hash-bound, coverage-table-bound, auth-resolving)",
+  "the selftest floor's two new guards (MUT-40 the smuggled-file class; MUT-41 the phantom-register class \u2014 41/41 green)",
+  "the CLAIMS registry-drift repair (the stale open 083 retired + the closed row added \u2014 the ARV-CLM-005/006 class, disclosed in record 76 \u00a75)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the register regex + membership logic validated by the two new mutation cases (each caught by VER-404 as required)"
+  ],
+  "integration_verification": [
+   "the canonical layer GREEN on the real 7-file tree (the register empty at this slice \u2014 the base judge's expectations all hold)"
+  ],
+  "system_verification": [
+   "the wall finding closed mechanically: after this merge, raw growth needs NO verifier edit (the register is the admission path)"
+  ],
+  "validation": [
+   "MUT-40/41 prove both attack classes fail closed; the 41-case suite proves no prior guard weakened"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-085-1",
+   "scenario": "an unregistered file smuggled into context/raw",
+   "control": "VER-404 membership (present files must be seed-anchored or register-bound)",
+   "proof_ids": [
+    "run-02"
+   ]
+  },
+  {
+   "id": "FM-085-2",
+   "scenario": "a phantom register row (hash not binding the file)",
+   "control": "VER-404 digest equality + the resolvable-auth requirement (VER-805's form)",
+   "proof_ids": [
+    "run-02"
+   ]
+  },
+  {
+   "id": "FM-085-3",
+   "scenario": "a register row without a real owner authorization",
+   "control": "the auth-resolves check (ledger headers / DECISIONS rows \u2014 MUT-36's class)",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-085-1",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the first MUT-41 form appended a SECOND \u00a79 section \u2014 the checker's split saw only the first (scaffold, empty), so the phantom row was invisible",
+   "disposition": "fixed in-slice: the helper now appends INSIDE the existing table (the realistic phantom), and the case passes (VER-404 catches it)"
+  }
+ ],
+ "not_verified": [
+  "the local isolation check's ZCODE_OFFICIAL_ENDPOINT_TOKEN finding (the sandbox harness's own env var \u2014 the local agent environment, never the CI runner; the tracked-file scan is clean; disclosed, not repaired)",
+  "the remote CI runs (they execute at the PR \u2014 the five checks on the branch head and the merge commit)",
+  "the D-042 review round (it runs at the PR before the merge, per the standing protocol)",
+  "Q16's owner answer (the growth AUTHORITY's semantics \u2014 registered open, never silently closed)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-085 (session 51: the transition form built in one context)",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-085 (the D-042 round at the PR + the remote CI's trusted judges \u2014 declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the growth-register transition: the checker's membership becomes seed\u222aregister with hash/auth/coverage bindings, two new mutation cases prove the guards (41/41 green), the CLAIMS drift from the #121 merge repaired and disclosed. The corpus is UNCHANGED \u2014 the old base judge green over this slice; the parked 084 lands next against this merge.",
+ "sheet_section": true
+}

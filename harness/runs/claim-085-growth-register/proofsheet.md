@@ -18,11 +18,11 @@
 - Q16's owner answer (the growth AUTHORITY's semantics — registered open, never silently closed)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 23b63b5adff18aa726d964d6e9a89b7d8f2f48beba94d2ef5a34ce2da1895185
-- reviewed_diff_sha256: 594373ac96db060f1b682fffdefdb669b5f81c4ef8ec091f6f86bddd9ea281d3
+- report sha256: 7b7dfdb764c9257dd820c25f4296697dc2b76fee7913d7c3bebce21fb8827d4c
+- reviewed_diff_sha256: 968f668f5bf38cc4f73c77bc449f8f15a18b1674e23c64c49f64267d91c59bee
 - disposition: PASS
 - findings: 1 (open P0/P1: 0)
 - not-verified entries: 4
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 677ad49d4ee252b4db562228d4eb321e2e2b53ddfbed64ce4de92957eecaa8b9
+- sheet sha256 (of the content above, excluding this line): e35d71f28b99e817c91b59b5502879c01a2540a88fd5213d2029c455483831f9

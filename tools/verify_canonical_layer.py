@@ -64,6 +64,10 @@ EXPECTED_RAW = [
     "Arivo Agent Execution Specification.md",
     "engineering transcript.txt",
     "upstream of engineering transcripts.txt",
+    # CLAIM-083 (2026-11-16): the owner-supplied Kev spec joins the verbatim
+    # corpus (owner turn 43, INT-148; the 3.txt intake precedent class — a raw
+    # file arrives only with its manifest row + hash anchor + README count).
+    "KEV_SYSTEM_ENGINEERING_SPEC.md",
 ]
 
 # H-01c-authority (CLAIM-036): the TRUSTED raw-digest anchors — the approved per-file
@@ -86,6 +90,10 @@ RAW_ANCHORS = {
     "Arivo Agent Execution Specification.md": "06c9f7a9162808ca9c032a3d2a9ea152390b557ec95b33cfce806927c5e2646a",
     "engineering transcript.txt": "dd133446a3e3f84ed3ecdf5157779e1d261e3299b2594b9dcd5aadb1ebcdb446",
     "upstream of engineering transcripts.txt": "29cf75295d2c81169435489642c6788aab4346dab779fcc66218f3bee7202074",
+    # CLAIM-083 (2026-11-16): the Kev spec joins the trusted anchors at intake
+    # (owner turn 43, INT-148; added lockstep with EXPECTED_RAW + the manifest
+    # digest block + the README count — the 3.txt precedent class).
+    "KEV_SYSTEM_ENGINEERING_SPEC.md": "4eceb21cc508de6f4d3886eefd5208af8c5903887ecb7bcab9aa0eb6f3a05dfc",
 }
 
 # NOTE (sub-agent finding 2, 2026-10-14): the BRIEFS list was static and went stale the
@@ -473,8 +481,8 @@ class Layer:
         readme = self.read("context/README.md")
         self.check(
             "VER-401",
-            "seven files" in readme and "3.txt" in readme,
-            "context/README names seven raw files including 3.txt (stale count corrected)",
+            "eight files" in readme and "3.txt" in readme,
+            "context/README names eight raw files including 3.txt (the CLAIM-083 count growth)",
             "context/README.md must list the actual corpus",
         )
         self.check(

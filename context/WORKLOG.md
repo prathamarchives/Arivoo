@@ -1048,3 +1048,10 @@ Stage Summary:
   Do NOT open a new claim without one of these.
 - **The sharpened lessons this session (the digest's own law):** reviewed_diff_sha256 reads `git show HEAD` — the COMMITTED tree. The content edit and the digest bind must NEVER ride one commit; the bind commit touches only the excluded sev.json (it cannot re-stale itself). And the suite's EVC-10/SEM-05 side-effect appends to the tracked eval-runs.jsonl on every run — revert them out of the tree before every bind (the ownership law: the append is the RUN's own object, the slice's committed copy stays main's).
 - **The review chain:** D-042 round 1 BLOCK-MERGE (two P1s — the dead meaning-exclusion branch; the records describing it as the engine) repaired into the honest form; round 2 APPROVE-WITH-P2s (12 mutations, 9 bitten) with both P2s closed + the closure verified by value-flipping mutations. GREEN 8/8.
+
+## Task 102 (CLAIM-083 open, session 50) — the Kev spec intake (owner turn 43, INT-148)
+- What: the owner-supplied Kev system-engineering spec (1,905 lines) preserved verbatim at context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md (SHA-256 anchored in the manifest) + record 75 (the extract: sections mapped, the §21.1 decision list verbatim, the two-track dependency shape) + INT-148 (the turn) + INT-149 (the Kev-execution chain reservation, the INT-147 precedent class) + Q13/Q14/Q15 registered in all four mirrors + STATE/AGENTS/PLAN/EXECUTION navigation updates; the parked CLAIM-082 close records ridden into this slice's commit A (the recycle-precedent RESUME form).
+- Verified: the canonical layer GREEN (the count mirrors at 131; the manifest's 8-file corpus with the new digest-block row; the lineage binding for the new raw file).
+- Evidence: record 75 + the slice's runs (the proof sheet + sev.json) + the manifest's turn-43 provenance row.
+- Unresolved: Q13/Q14/Q15 newly open (each blocks only its named Kev step); D-014, Q6–Q12 unchanged; the Kev repository itself (BOOT-001) opens after this intake merges.
+- Next: CLAIM-083's merge under INT-145's six-step path, then the Kev repository's BOOT-001 (the spec's §16 Phase 0).

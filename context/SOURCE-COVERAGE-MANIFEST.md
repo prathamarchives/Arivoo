@@ -24,6 +24,7 @@
 | `3.txt` | Owner turn 3 (the plan-mode corpus transfer): owner directives throughout, AI material interleaved | 239 | full | `5` (INT-035) · `13` (INT-036, owner-presented) · `15` (INT-037, owner-presented) · `207` (INT-042) · `230` (INT-044) · `233` (INT-043) · `235` (INT-040) · `237` (INT-041) · `239` (INT-039/045 + owner turn context) | `f24ff61d4769…151e24a` |
 | `engineering transcript.txt` | Third-party engineering material (owner-supplied transcript). NO owner intent lives here. | 84 | full — **INCOMPLETE SOURCE: ends mid-sentence (F-11); captured excerpt, not a complete transcript** | none — excluded §X-1 | `dd133446a3e3…cdb446` |
 | `upstream of engineering transcripts.txt` | Third-party upstream source of the engineering doctrine. NO owner intent here (the "I love writing / I never let agents write for me" passage is third-party — never misattributed). | 591 | full | none — excluded §X-1 | `29cf75295d2c…e2074` |
+| `KEV_SYSTEM_ENGINEERING_SPEC.md` | Owner-supplied engineering document (owner turn 43, INT-148 — the Kev system-engineering spec; the §21.1 decision list is recorded AS SPEC CONTENT, never adopted Arivoo decisions). NOT owner words. | 1905 | full (record 75 §3 extract) | none — excluded §X-3 (the spec maps to INT-148 via record 75 §1, not by inline-quote coverage) | `4eceb21cc508d…3a05dfc` |
 | `Arivo Agent Execution Specification.md` | AI-authored execution spec (Tier 0 rule families: LOOP/QST/STOP/KB/RED/PRF/RAT/WALL/UNS/MEM/FX/AFA/KER/BND/AUT/LAD). NOT owner words. | 718 | full (LAWS/EXECUTION provenance) | none — excluded §X-2 | `06c9f7a91628…e2646a` |
 
 Full SHA-256 values (the register above is abbreviated; the verifier compares the full hash):
@@ -36,6 +37,7 @@ Full SHA-256 values (the register above is abbreviated; the verifier compares th
 Arivo Agent Execution Specification.md     06c9f7a9162808ca9c032a3d2a9ea152390b557ec95b33cfce806927c5e2646a
 engineering transcript.txt                 dd133446a3e3f84ed3ecdf5157779e1d261e3299b2594b9dcd5aadb1ebcdb446
 upstream of engineering transcripts.txt    29cf75295d2c81169435489642c6788aab4346dab779fcc66218f3bee7202074
+KEV_SYSTEM_ENGINEERING_SPEC.md             4eceb21cc508de6f4d3886eefd5208af8c5903887ecb7bcab9aa0eb6f3a05dfc
 ```
 
 ## 2. Non-raw owner-turn provenance (chat turns, 2026-10-13+)
@@ -57,6 +59,7 @@ upstream of engineering transcripts.txt    29cf75295d2c81169435489642c6788aab434
 | Owner turn 17 | 2026-10-19 | `context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md` §1.a (verbatim; preserved by the session's part-1 integration BEFORE the ledger intake — the INT-046/068 class held across the agent change) + ledger | INT-122 (E-2 class; adopted via D-037) |
 | Owner turn 18 | 2026-10-19 | `context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md` §1.b (verbatim; the turn's leading access token REDACTED AT INGESTION — D-025/INT-092) + ledger | INT-123 (E-2 class) |
 | Owner turn 19 | 2026-10-19 | `context/extracted/19-PHASE3-ENTRY-AND-SYSTEMS-ENGINEERING-EXECUTION.md` §1.c (verbatim; typos preserved) + ledger | INT-124 (E-2 class; adopted via D-038) |
+| Owner turn 43 | 2026-11-16 | `context/extracted/75-KEV-SPEC-INTAKE.md` §1 + the ledger (INT-148) + the verbatim spec at `context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md` | INT-148 (the turn) + INT-149 (the session reservation) |  |
 | Reasoning-log session owner words | 2026-10-13 | `context/extracted/06-REASONING-LOG.md` | INT-053, 064–067 |
 
 **Boundary, stated honestly:** owner words that arrived in chat before this control existed are verbatim-preserved where the ledger or a session record holds them; the raw corpus never received them. From turn 8 onward, the numbered session record's §1 is the required verbatim preservation home for every owner turn, BEFORE the ledger entry is written (OPERATING-MODEL §3 session-record requirement; this closes the INT-046/068 class — a quote whose only home is the ledger itself).
@@ -83,7 +86,7 @@ upstream of engineering transcripts.txt    29cf75295d2c81169435489642c6788aab434
 
 ## 5. Mechanical validation contract (what the verifier now checks)
 
-- **VER-801 — manifest structure:** this file exists, carries all seven raw-file rows with classification, lines, reviewed range, INT coverage, SHA-256, and the required sections (§2 provenance, §E exceptions, §X exclusions).
+- **VER-801 — manifest structure:** this file exists, carries all raw-file rows with classification, lines, reviewed range, INT coverage, SHA-256, and the required sections (§2 provenance, §E exceptions, §X exclusions).
 - **VER-802 — raw immutability:** each raw file's current SHA-256 equals the anchored hash above. Any edit to `context/raw/` — even a whitespace change — fails the layer (AUT-02 at C3, was C6-prose).
 - **VER-803 — quote fidelity:** every ledger entry that cites a raw source must have its quote fragments found within the CITED LINE WINDOW (per-citation ±10/+20, sub-agent finding 7b — wrong-file and wrong-region attributions both fail) of the cited file(s), after E-1/E-5/E-6 normalizations; entries with no raw citation must name a durable home (session record / reasoning log / chat-turn label per §2/E-2). A missing Source line fails (this caught the eight real defects repaired 2026-10-14, §6).
 - **VER-804 — STATE freshness:** `/STATE.md`'s last-completed session record must be the highest-numbered record in `context/extracted/` (staleness is caught, not remembered).

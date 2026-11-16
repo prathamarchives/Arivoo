@@ -145,3 +145,4 @@ class). The seed corpus's bindings are unchanged (§5's digest block +
 | file | SHA-256 | owner auth | date |
 |-------|---------|------------|------|
 | `KEV_SYSTEM_ENGINEERING_SPEC.md` | `4eceb21cc508de6f4d3886eefd5208af8c5903887ecb7bcab9aa0eb6f3a05dfc` | `INT-148` | `2026-11-16` |
+| (empty at this slice beyond the landed rows: no pending growth — the register's first growth landed above at CLAIM-084b under INT-148; future rows land here) | | | |

@@ -6,12 +6,12 @@
 
 ## Where things stand
 
-- **Phase:** PHASE 5 OPENING + THE KEV INTAKE (2026-11-16 — CLAIM-083: the Kev spec intake; the two-track form — Arivoo's 5D–5J rows under their own gates, the Kev repository (new, spec §2.1) carrying the spec's Phases 0–9; the tracks meet at 5F under the 5H gate)
+- **Phase:** PHASE 5 OPENING + THE KEV INTAKE (2026-11-16 — CLAIM-085: the growth-register transition form; the wall finding closed mechanically; CLAIM-084 re-push next, then the Kev repository)
 
-- **Active task:** CLAIM-083 — the Kev spec intake (record 75 = context/extracted/75-KEV-SPEC-INTAKE.md; the verbatim spec at context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md + INT-148/149 + Q13/Q14/Q15 in all four mirrors)
+- **Active task:** CLAIM-085 — the growth-register transition (record 76 = context/extracted/76-GROWTH-REGISTER-TRANSITION.md; the checker's seed∪register membership + MUT-40/41; the corpus UNCHANGED at 7 — the base judge green over this slice)
 
-- **Last completed:** CLAIM-082 (P5-C — the semantic spike; PR #118 = merge `5f31a38`, 2026-11-15 under INT-145's single-actor path; the parked close-records branch ridden into CLAIM-083's commit A per the recycle-precedent form)
-- **Exact next action:** CLAIM-083's merge (the six-step INT-145 path), then CLAIM-084 (the corpus-growth slice: the verbatim spec file + the manifest anchors + the checker lockstep — the walled era's two-slice form, disclosed in record 75 §1), then the Kev repository's BOOT-001 (the spec's §16 Phase 0) — Arivoo's next row (5D's paid suffix) remains Q7-gated
+- **Last completed:** CLAIM-083 (the Kev spec intake, slice A; PR #121 = merge `275e3f12`, 2026-11-16; the D-042 APPROVE; the five checks ALL-GREEN at the merge commit)
+- **Exact next action:** CLAIM-085's merge (the INT-145 six-step path), then CLAIM-084's re-push (the parked `d592321`: the spec file + its §9 register row, base = 085's merge), then the Kev repository's BOOT-001
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.
@@ -25,6 +25,7 @@
   - Q13 — Kev model provider + names (2026-11-16, the Kev spec §21.1, INT-148; free-API-first, names never keys). Blocks only Kev's MDL-001 provider configuration. Home: DECISIONS.
   - Q14 — Kev Supabase `arivo` provisioning (2026-11-16, the Kev spec §10.1, INT-148; the inactive `meraki`/`phase 0`/`catalyst.exe` projects never deleted without the owner). Blocks only Kev's DB-001 step. Home: DECISIONS.
   - Q15 — Kev external-research scope at first (2026-11-16, the Kev spec §21.1, INT-148). Blocks only Kev's discovery-phase policy. Home: DECISIONS.
+  - Q16 — the corpus-growth AUTHORITY (2026-11-16, record 76 §4, D-045's open edge; the mechanical floor stands: a resolvable auth). Blocks only future growth rows' authority semantics. Home: DECISIONS.
   - Turns 20–37 add NO new owner question and forbid treating any open gate as a general stop-work permission; turns 35/36 (INT-140/141) direct the actual-product build (backend, database, schemas, retrieval — the compounding goal) on the frozen contracts; turn 36 adds the bookkeeping-reconciliation order (the garden rule — the merged state reconciled in the canonical form); turn 37 (INT-142) is the session-boundary resume of the same chain; the 2026-11-03 continuation directive (owner turn 40, preserved verbatim at `context/reviews/` per the D-022 class, record 48 §1) orders the read-path race repair, the STATE-thread closures, the evidence reconciliation, SEV round 5, and the merge preparation — no new owner question, no stop-work permission.
 - **Outstanding reviews (snapshot at last repository update — NOT live status, INT-104; re-observe via the API before acting):** CLAIM-056's #91 review chain COMPLETE (all SEVEN threads resolved with in-thread dispositions posted before resolution — the round-1 Major 4439710213 + the three minors, the round-2 4439931169, the round-3 STATE threads 4441233975/4441233996; CodeRabbit confirmed every fix in-thread; the merge-gate review D-042 (1a) posted as review `5766888855` at 2026-11-04T10:26:44Z; Greptile out of review credits — its pause banner noted on the PR, the host review the floor per D-042 (1c); the SEV rounds 1-5 PASS zero open P0/P1; the fresh-context test verifier PASS; the PR MERGED 2026-11-04T10:42:13Z under INT-145). The CLAIM-057 PR's review chain OPENS with its PR (the D-042 (1b) disposition discipline + the merge-gate review + the agent-performed merge after checks per INT-145). The turn-38 and turn-40 directives are preserved at `context/reviews/` (D-022 banner), fully triaged; the turn-41 merge authorization is preserved at `context/reviews/arivoo-merge-authorization-2026-11-04.md`.
 - **Verification state — each claim carries its label AND one direct evidence pointer (INT-103):**

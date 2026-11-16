@@ -1,0 +1,16 @@
+# CLAIM-085 — the growth-register transition (the walled era's corpus-growth
+# admission form; session 51, D-045, record 76). The checker's membership rule
+# (VER-401/404/801) + the two new guards (MUT-40/41) + record 76 + D-045 +
+# Q16's note + the manifest §9 scaffold + the navigation. NO raw file lands.
+tools/verify_canonical_layer.py D-045
+tools/verify_selftest.py D-045
+context/extracted/76-GROWTH-REGISTER-TRANSITION.md D-045
+context/SOURCE-COVERAGE-MANIFEST.md D-045
+DECISIONS.md D-045
+EXECUTION.md D-045
+PLAN.md D-045
+STATE.md D-045
+AGENTS.md D-045
+CLAIMS.md D-038 (the CLAIMS registry-drift repair from the #121 merge — disclosed in record 76 §5)
+context/WORKLOG.md D-045
+harness/runs/claim-085-growth-register D-041

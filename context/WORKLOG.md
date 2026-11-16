@@ -1055,3 +1055,10 @@ Stage Summary:
 - Evidence: record 75 + the slice's runs (the proof sheet + sev.json) + the manifest's turn-43 provenance row.
 - Unresolved: Q13/Q14/Q15 newly open (each blocks only its named Kev step); D-014, Q6–Q12 unchanged; the Kev repository itself (BOOT-001) opens after this intake merges.
 - Next: CLAIM-083's merge under INT-145's six-step path, then the Kev repository's BOOT-001 (the spec's §16 Phase 0).
+
+## Task 104 (CLAIM-085 open, session 51) — the growth-register transition form
+- What: the checker's raw-corpus membership becomes SEED ∪ REGISTER (the manifest §9 growth register: name+SHA-256+owner-auth+date; hash-bound, coverage-table-bound, auth-resolving) + the two selftest guards (MUT-40 the smuggled-file class, MUT-41 the phantom-register class; 41/41 green) + record 76 + D-045 + Q16's note + the manifest §9 scaffold. No raw file lands; the corpus stays 7.
+- Verified: the canonical layer GREEN on the real 7-file tree; the selftest 41/41; the PR-mode gate at this slice's head.
+- Evidence: harness/runs/claim-085-growth-register/ (runs + sev.json + the byte-identical proofsheet).
+- Unresolved: Q16 (the growth AUTHORITY's owner answer); Q13/Q14/Q15 + D-014/Q6–Q12 unchanged.
+- Next: CLAIM-084's re-push (the parked `d592321`: the spec file + its §9 row, base = this merge), then the Kev repository's BOOT-001.

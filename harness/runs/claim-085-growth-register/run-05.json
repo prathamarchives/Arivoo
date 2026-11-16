@@ -1,0 +1,7 @@
+{
+ "command": "python3 harness/gate.py --slice claim-085-growth-register --diff origin/main --skip-suites",
+ "exit_code": 1,
+ "commit": "275e3f12c99d1f18163185229500318ca60ffcb7",
+ "output_sha256": "63840cf3ea189780e990a1c401dbd0c54afb5a204d9d611f89eb5cbfaa245f8c",
+ "recorded_at": "2026-11-16T19:03:35.969538+00:00"
+}

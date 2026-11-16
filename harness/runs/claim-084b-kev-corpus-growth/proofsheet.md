@@ -18,11 +18,11 @@
 - Q16's owner answer (the growth AUTHORITY's semantics — open; CLAIM-084b's own row's auth is INT-148, already ledgered)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 93ee4979828718a33ca50824120b080d37af1b66d65d9cbdd6bac584c779eda1
-- reviewed_diff_sha256: 1006416b7e429ebd6535e70ee237150db1fbaafa3cfb616c721d34ea60c0f024
+- report sha256: fb83c241ac2972fb70d7891c54cb0967f992eb047fbb934199d98297db851fbe
+- reviewed_diff_sha256: 622965bddb2b46acb0d0488330afea096b129ae9131fbd2060f5c288dccbc0ad
 - disposition: PASS
 - findings: 1 (open P0/P1: 0)
 - not-verified entries: 4
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 139288866f28888cf9acb5d22323d650b39c7acb88fa3fd6f3572bb17fa47e54
+- sheet sha256 (of the content above, excluding this line): 66e40d3b360c362dd738c19f8b9627b69bbba58baa9b2c05c60a10a86e28fe8b

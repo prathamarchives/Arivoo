@@ -15,7 +15,7 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-084b | 52 | Super Z (GLM host) | `slice/claim-084b-kev-corpus-growth` | `context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md`, `context/SOURCE-COVERAGE-MANIFEST.md`, `context/README.md`, `context/extracted/75-KEV-SPEC-INTAKE.md`, `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `harness/runs/claim-084b-kev-corpus-growth` | D-045 · INT-148 (retroactive: ledgered at CLAIM-083's merge) | 2026-11-16 | the corpus growth through the §9 register (the transition form's first use — no verifier list edit; record 75 §5's three-slice close) |
+| CLAIM-084b | 52 | Super Z (GLM host) | `slice/claim-084b-kev-corpus-growth` | `context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md`, `context/SOURCE-COVERAGE-MANIFEST.md`, `context/README.md`, `context/extracted/75-KEV-SPEC-INTAKE.md`, `tools/verify_canonical_layer.py`, `tools/verify_selftest.py`, `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `harness/runs/claim-084b-kev-corpus-growth` | D-045 · INT-148 (retroactive: ledgered at CLAIM-083's merge) | 2026-11-16 | the corpus growth through the §9 register (the transition form's first use — no verifier LIST edit (the count + the seed-row refusal are the transition family's own hardening); record 75 §5's three-slice close) |
 
 ## Closed claims
 | CLAIM-085 | the growth-register transition (seed∪register membership + MUT-40/41; the wall finding closed mechanically; the CLAIMS drift repair from the #121 merge) LANDED (PR #123 = merge commit `123143c5b769`, merged 2026-11-16T19:17:49Z under INT-145's single-actor path; the D-042 round 1 APPROVE; five checks ALL-GREEN; record 76) |

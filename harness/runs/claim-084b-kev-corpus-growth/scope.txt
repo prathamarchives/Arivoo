@@ -6,6 +6,8 @@ context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md INT-148
 context/SOURCE-COVERAGE-MANIFEST.md INT-148
 context/README.md INT-148
 context/extracted/75-KEV-SPEC-INTAKE.md INT-148
+tools/verify_canonical_layer.py D-045 (VER-401's register-derived count + the seed-row refusal)
+tools/verify_selftest.py D-045 (the MUT-41 hardening)
 STATE.md INT-148
 CLAIMS.md D-038
 context/WORKLOG.md INT-148

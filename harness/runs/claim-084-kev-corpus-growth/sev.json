@@ -1,0 +1,84 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-084-kev-corpus-growth",
+ "base_sha": "275e3f12c99d1f18163185229500318ca60ffcb7",
+ "reviewed_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "intent_ids": [
+  "INT-145",
+  "INT-148",
+  "INT-149"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1"
+ ],
+ "changed_components": [
+  "context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md",
+  "context/SOURCE-COVERAGE-MANIFEST.md",
+  "context/README.md",
+  "context/extracted/75-KEV-SPEC-INTAKE.md",
+  "tools/verify_canonical_layer.py",
+  "STATE.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "harness/runs/claim-084-kev-corpus-growth/scope.txt"
+ ],
+ "interfaces_reviewed": [
+  "the corpus-growth lockstep (the 3.txt precedent class completed for the walled era: raw file + manifest row + digest-block anchor + README count + EXPECTED_RAW/RAW_ANCHORS \u2014 all five in one slice, against CLAIM-083's merge as base)",
+  "the anchored-judge agreement (the base now knows the eight-file expectation \u2014 the wall's own verdict green both sides)",
+  "record 75's two-slice close (\u00a71's deferral note completed + \u00a75's two-slice merge account)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the landed file's SHA-256 equals the hash pinned in record 75 \u00a71 since slice A (4eceb21cc508de6f... \u2014 byte-identical landing verified by the canonical layer's VER-802/805)"
+  ],
+  "integration_verification": [
+   "the canonical layer GREEN on the real files (8-file corpus; the lineage binding; the count mirrors at 131) \u2014 run-01.json"
+  ],
+  "system_verification": [
+   "SYS-01-class durability: the owner's spec verbatim-preserved with hash anchors (the manifest digest block + RAW_ANCHORS + the reanchor-free new-file path)"
+  ],
+  "validation": [
+   "a future agent cold-starts from STATE.md, reads record 75 (\u00a71 + \u00a75 both closed), and reaches the spec verbatim \u2014 the two-slice disclosure resolved"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-084-1",
+   "scenario": "the landed file drifts from the owner's received bytes (a substitution between the slices)",
+   "control": "the hash pinned in record 75 \u00a71 since slice A + VER-802/805's lineage binding (the landed bytes equal the pinned bytes mechanically)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-084-2",
+   "scenario": "the checker's corpus growth silently widens (a second file added without the manifest/README lockstep)",
+   "control": "the lockstep checks (VER-401/404/802/805 \u2014 every EXPECTED_RAW file hash-anchored + the README count agreeing)",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-084-1",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the growth cannot land in one slice (the base-anchored judge refuses an unknown file: PR #120's VER-401/404 refusal, closed-with-disclosure)",
+   "disposition": "the two-slice form (slice A = the ledger intake at CLAIM-083; slice B = the growth at CLAIM-084 against A's merge as base) \u2014 the wall honored, never weakened"
+  }
+ ],
+ "not_verified": [
+  "the local isolation check's ZCODE_OFFICIAL_ENDPOINT_TOKEN finding (the sandbox harness's own env var \u2014 the local agent environment, never the CI runner; the tracked-file scan is clean; disclosed, not repaired)",
+  "the remote CI runs (they execute at the PR \u2014 the five checks on the branch head and the merge commit)",
+  "the D-042 review round (it runs at the PR before the merge, per the standing protocol)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-084 (session 50: the corpus-growth slice B, built on CLAIM-083's merge as base)",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-084 (the D-042 round at the PR + the remote CI's trusted judges \u2014 declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the corpus-growth slice B: the verbatim spec landed byte-identically (the hash pinned since slice A), the manifest/README/checker lockstep complete, the two-slice close written \u2014 validated by the canonical layer's own checks + the suite battery. No Arivoo question touched; the Kev repository's BOOT-001 is the next chain step.",
+ "sheet_section": true
+}

@@ -1,0 +1,15 @@
+# CLAIM-084 — the corpus-growth slice B (the walled era's two-slice form;
+# base = CLAIM-083's merge 275e3f1). The verbatim spec file + the manifest
+# row/digest + the README count + the checker EXPECTED_RAW/RAW_ANCHORS
+# lockstep + record 75's §5 close. The 3.txt precedent completed for the
+# walled era (owner turn 43, INT-148; record 75 §1's two-slice disclosure).
+context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md INT-148
+context/SOURCE-COVERAGE-MANIFEST.md INT-148
+context/README.md INT-148
+context/extracted/75-KEV-SPEC-INTAKE.md INT-148
+tools/verify_canonical_layer.py INT-148
+STATE.md INT-148
+AGENTS.md INT-148
+CLAIMS.md D-038
+context/WORKLOG.md INT-148
+harness/runs/claim-084-kev-corpus-growth D-041

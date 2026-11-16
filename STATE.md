@@ -8,10 +8,10 @@
 
 - **Phase:** PHASE 5 OPENING + THE KEV INTAKE (2026-11-16 — CLAIM-083: the Kev spec intake; the two-track form — Arivoo's 5D–5J rows under their own gates, the Kev repository (new, spec §2.1) carrying the spec's Phases 0–9; the tracks meet at 5F under the 5H gate)
 
-- **Active task:** CLAIM-083 — the Kev spec intake (record 75 = context/extracted/75-KEV-SPEC-INTAKE.md; the verbatim spec at context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md + INT-148/149 + Q13/Q14/Q15 in all four mirrors)
+- **Active task:** CLAIM-084 — the corpus-growth slice B (record 75 = context/extracted/75-KEV-SPEC-INTAKE.md §5: the verbatim spec file + the manifest anchors + the checker lockstep; the walled era's two-slice form completed)
 
-- **Last completed:** CLAIM-082 (P5-C — the semantic spike; PR #118 = merge `5f31a38`, 2026-11-15 under INT-145's single-actor path; the parked close-records branch ridden into CLAIM-083's commit A per the recycle-precedent form)
-- **Exact next action:** CLAIM-083's merge (the six-step INT-145 path), then CLAIM-084 (the corpus-growth slice: the verbatim spec file + the manifest anchors + the checker lockstep — the walled era's two-slice form, disclosed in record 75 §1), then the Kev repository's BOOT-001 (the spec's §16 Phase 0) — Arivoo's next row (5D's paid suffix) remains Q7-gated
+- **Last completed:** CLAIM-083 (the Kev spec intake, slice A; PR #121 = merge `275e3f12`, 2026-11-16 under INT-145's single-actor path; the D-042 round APPROVE; the five checks ALL-GREEN at the merge commit)
+- **Exact next action:** CLAIM-084's merge (the six-step INT-145 path), then the Kev repository's BOOT-001 (the spec's §16 Phase 0: the governance doc set + SYSTEM-SPEC canon) — Arivoo's next row (5D's paid suffix) remains Q7-gated
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.

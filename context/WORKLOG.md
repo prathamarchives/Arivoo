@@ -1055,3 +1055,10 @@ Stage Summary:
 - Evidence: record 75 + the slice's runs (the proof sheet + sev.json) + the manifest's turn-43 provenance row.
 - Unresolved: Q13/Q14/Q15 newly open (each blocks only its named Kev step); D-014, Q6–Q12 unchanged; the Kev repository itself (BOOT-001) opens after this intake merges.
 - Next: CLAIM-083's merge under INT-145's six-step path, then the Kev repository's BOOT-001 (the spec's §16 Phase 0).
+
+## Task 103 (CLAIM-084 open, session 50) — the corpus-growth slice B
+- What: the verbatim Kev spec landed at context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md (the bytes pinned by record 75 §1's SHA-256 since slice A) + the manifest row/digest-block anchor + the README eight-file count + the checker's EXPECTED_RAW/RAW_ANCHORS lockstep + record 75's §5 two-slice close + the STATE/CLAIMS navigation.
+- Verified: the canonical layer GREEN (8-file corpus; the lineage binding; the count mirrors at 131); the PR-mode gate GREEN at this slice's head.
+- Evidence: harness/runs/claim-084-kev-corpus-growth/ (runs + sev.json + the byte-identical proofsheet).
+- Unresolved: Q13/Q14/Q15 open (Kev-side owner decisions); D-014, Q6–Q12 unchanged; the Kev repository's BOOT-001 opens after this merge.
+- Next: CLAIM-084's merge (the INT-145 six-step path), then the Kev repository's BOOT-001.

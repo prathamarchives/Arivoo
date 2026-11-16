@@ -1,0 +1,101 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-083-kev-intake",
+ "base_sha": "5f31a386eb913876738518c0dbb2651bcbf1517c",
+ "reviewed_diff_sha256": "e59214f9217e4ee064a170695d1e2f261dbba3d7a6aa035ac35f490991c4d582",
+ "intent_ids": [
+  "INT-145",
+  "INT-148",
+  "INT-149"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1"
+ ],
+ "changed_components": [
+  "context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md",
+  "context/extracted/73-P5B-EVAL-CORPUS.md",
+  "context/extracted/74-P5C-SEMANTIC-SPIKE.md",
+  "context/extracted/75-KEV-SPEC-INTAKE.md",
+  "context/SOURCE-COVERAGE-MANIFEST.md",
+  "context/README.md",
+  "INTENT-LEDGER.md",
+  "DECISIONS.md",
+  "EXECUTION.md",
+  "PLAN.md",
+  "STATE.md",
+  "AGENTS.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "tools/verify_canonical_layer.py",
+  "harness/runs/claim-083-kev-intake/scope.txt"
+ ],
+ "interfaces_reviewed": [
+  "the intake form itself (the 3.txt precedent class: raw file + manifest row + digest block + README count + checker anchors, all lockstep)",
+  "the four question-register mirrors (DECISIONS/EXECUTION \u00a76/PLAN/STATE \u2014 the VER-504 agreement)",
+  "the canonical layer's corpus-growth path (EXPECTED_RAW + RAW_ANCHORS \u2014 the deliberate raw-corpus growth commit)",
+  "the riding form (the parked CLAIM-082 close records cherry-picked onto this slice \u2014 the recycle-precedent RESUME form)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the intake record's section map validates against the spec's real section list (record 75 \u00a73; the raw file is the authority)"
+  ],
+  "integration_verification": [
+   "the canonical layer GREEN on the real files (run-01.json; 131-entry ledger, 8-file corpus, four-mirror agreement)"
+  ],
+  "system_verification": [
+   "SYS-01-class durability: the owner's turn + spec are verbatim-preserved with hash anchors (manifest digest block + RAW_ANCHORS)"
+  ],
+  "validation": [
+   "a future agent cold-starts from STATE.md, reads record 75, and reaches the spec + the Kev chain reservation without ambiguity"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-083-1",
+   "scenario": "the spec file is edited after intake (drift from the owner's received bytes)",
+   "control": "the SHA-256 anchor (manifest digest block + RAW_ANCHORS + VER-802/805 lineage binding)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-083-2",
+   "scenario": "the Kev questions silently close or silently widen an existing gate",
+   "control": "the VER-504 four-mirror agreement (Q13/Q14/Q15 registered OPEN in all four mirrors; the audit note's scope statements)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-083-3",
+   "scenario": "the count mirrors go stale (a fresh entry lands without the AGENTS/STATE count bump)",
+   "control": "VER-902 (the stated statused-intent count equals the observed ledger \u2014 131 after INT-148/149)",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-083-1",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the first checker run fired the growth-path failures (VER-212/404/504/702/804/902 \u2014 the numbering line, the corpus count, the mirrors, the record pointer, the count mirrors)",
+   "disposition": "each repaired in-slice in the established form (numbering bullet, manifest row + digest block + anchors, three mirror rows, the record-75 pointer, 129\u2192131)"
+  }
+ ],
+ "not_verified": [
+  "the battery's eval-suite append side-effect on the PRIOR slices' eval-runs.jsonl (the suites append run records at every execution; the committed slice reverts those appends \u2014 the CI's own battery run will re-append on its runner, never on the tree)",
+  "the local isolation check's ZCODE_OFFICIAL_ENDPOINT_TOKEN finding (the sandbox harness's own env var \u2014 the local agent environment, never the CI runner; the tracked-file scan is clean; disclosed, not repaired)",
+  "the remote CI runs (they execute at the PR \u2014 the five checks on the branch head and the merge commit)",
+  "the D-042 review round (it runs at the PR before the merge, per the standing protocol)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-083 (session 50: the intake built in one context \u2014 the plan session's deliverables live outside this repo per the host contract)",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-083 (the D-042 round at the PR + the remote CI's trusted judges \u2014 declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the intake slice: the spec verbatim + hash-anchored, the ledger entries (INT-148/149), the Q13\u2013Q15 registrations in all four mirrors, the navigation updates, the parked close records ridden \u2014 all validated by the canonical layer's own checks (run-01) and the 25-suite battery (run-03). No Arivoo question closed; no Arivoo phase row changed; the Kev repository work is the NEXT chain step, outside this repo's scope.",
+ "sheet_section": true
+}

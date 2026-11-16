@@ -1,0 +1,18 @@
+# CLAIM-083 — the Kev spec INTAKE (owner turn 43, INT-148; record 75). The
+# ledger-intake slice (the walled era's two-slice corpus-growth form: the
+# spec FILE itself lands at CLAIM-084 with the manifest anchors + the
+# checker lockstep — disclosed in record 75 §1). The parked CLAIM-082
+# close records ride this slice.
+context/extracted/73-P5B-EVAL-CORPUS.md D-041
+context/extracted/74-P5C-SEMANTIC-SPIKE.md D-041
+context/extracted/75-KEV-SPEC-INTAKE.md INT-148
+context/SOURCE-COVERAGE-MANIFEST.md INT-148
+INTENT-LEDGER.md INT-148
+DECISIONS.md INT-148
+EXECUTION.md INT-148
+PLAN.md INT-148
+STATE.md INT-148
+AGENTS.md INT-148
+CLAIMS.md D-038
+context/WORKLOG.md INT-148
+harness/runs/claim-083-kev-intake D-041

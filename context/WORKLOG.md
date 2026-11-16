@@ -1018,3 +1018,40 @@ Stage Summary:
 - Evidence: record 73 §5 (the full merge account) + protection-pre-merge.json + the PR #117 comment thread (the pre-change account 6891608810).
 - Unresolved: Q7 (the budget gate for P5-C's semantic spike) — the owner's question open; CLAIM-082 opens with the deterministic parts only.
 - Next: CLAIM-082's RED (tests-only) at 155dd8d's merged head.
+
+## Task 100 (CLAIM-082 the slice, session 49) — the P5-C semantic spike, Q7-gated
+- What: the RED (tests-only, LAW-11) at 155dd8d's merged head — SEM-01..08 (8 FAIL/0 PASS, red-01.txt; the red-record bound at 42d58cd, the registration riding the binding commit); the GREEN — harness/semantic.py's four arms (the local deterministic embed map; the verdict arm over the standing pack + get-source arms with the full-text cosine similarity ranking; the run arm in the EVC-10 form over the registered P5-B corpus; the report arm's honesty line + the NEGATIVE RESULT); the D-042 round 1 BLOCK-MERGE (two P1s: the dead meaning-exclusion branch — the pack's AND law made it unreachable; the records describing it as the engine) repaired in-slice into the honest form; round 2 APPROVE-WITH-P2s (both P1s verified real; 12 mutations, 9 bitten) with the two P2s (the D1 tautology label; the unpinned tp/fp/fn values) closed and the closure verified by value-flipping mutations (M8b'/M8c' both fire SEM-05).
+- Verified: the suite GREEN 8/8 at the final head 2f9d8ed; the gate GREEN in PR mode; the five CI checks ALL-GREEN at 42aa532 and at the final head.
+- Evidence: record 74 (the full account) + the slice runs (red-01.txt, sev.json, proofsheet.md, protection-pre-merge.json, eval-runs.jsonl, run-01..07.json).
+- Unresolved: Q7 unchanged (the near-miss exclusion deferred to the real backend — the spike's own disclosed negative result); Q6-Q12 unchanged.
+- Next: the merge (task 101).
+
+## Task 101 (CLAIM-082 the merge, session 49) — INT-145's single-actor path
+- What: the six steps, exactly the #116/#117 mechanics: the pre-change account (protection-pre-merge.json committed at 74397d8 BEFORE the flip); the flip (count 1→0, PUT 200); the merge (PR #118, merge_method=merge, the recorded message — merged=true at `5f31a386eb91`, 2026-11-15T13:37:12Z); the branch deleted (204); the restore (PUT 200; the re-read BYTE-EQUIVALENT True); the merge commit's five checks ALL-GREEN; open PRs = 0.
+- The CI road: the merge-account commit ed20ac1 tripped CLM-006 (the open row + the LANDED row both present — the registry-drift law) then CLM-005 (the open row is the branch's claim) — resolved by the #117 riding form (the open row survives the pre-merge gate; the LANDED row rides the successor's commit A); the SEV-003 lesson sharpened twice: the digest binds the COMMITTED tree (git show HEAD) — the content edit and the bind must never ride one commit, and the bind commit touches only the excluded sev.json.
+- Verified: merged=true at 5f31a38; the restore byte-equivalent; the merge-commit CI ALL-GREEN; open PRs = 0.
+- Evidence: record 74 §5 (the six-step account with the sha + the restore's fields) + protection-pre-merge.json in the slice runs.
+- Unresolved: Q7 unchanged (gates the real embedding backend only).
+- Next: the successor claim's open at 5f31a38's merged head (the PLAN's next row).
+
+## RESUME checkpoint (session 49 close, 2026-11-15; rebuilt after the sandbox recycle)
+- **Position:** CLAIM-082 LANDED at main `5f31a386eb91` (PR #118, the INT-145 six-step path, all observed live; the merge-commit CI ALL-GREEN; open PRs = 0; the branch protection restored byte-equivalent). The parked branch `parked/claim-082-close-records` carries the close records (record 74 §5's verified sha + STATE's five-area + WORKLOG 100/101) — they ride the NEXT claim's commit A (the #117 hygiene form). NOTE: this branch is the REBUILD after the sandbox recycle lost the first parked branch — identical content, re-derived from main's live state. BACKUP: the parked branch is PUSHED to origin at tip `812525c` — if the local sandbox is recycled again, recover it by fetch (git fetch origin parked/claim-082-close-records), do NOT rebuild.
+- **The next session opens:** WAITING ON Q7 (the owner's budget
+  answer). The PLAN's remaining P5 rows are ALL gated: 5D/5E need the
+  real embedding backend (Q7 = review §8 Q2: (a) ~$10-30 of embedding
+  API spend for 300-500 passages × 20-30 queries, (b) self-hosted, or
+  (c) no paid semantic work); 5F+ wait on 5E. Nothing non-gated remains
+  in the P5 sequence. The next legal actions: (i) the owner answers Q7
+  -> 5D's tests-only RED opens at `5f31a38`'s merged head (the real
+  backend + the revision-lineage/index machinery), OR (ii) the owner
+  redirects (a different row, a review sweep, or any other instruction).
+  Do NOT open a new claim without one of these.
+- **The sharpened lessons this session (the digest's own law):** reviewed_diff_sha256 reads `git show HEAD` — the COMMITTED tree. The content edit and the digest bind must NEVER ride one commit; the bind commit touches only the excluded sev.json (it cannot re-stale itself). And the suite's EVC-10/SEM-05 side-effect appends to the tracked eval-runs.jsonl on every run — revert them out of the tree before every bind (the ownership law: the append is the RUN's own object, the slice's committed copy stays main's).
+- **The review chain:** D-042 round 1 BLOCK-MERGE (two P1s — the dead meaning-exclusion branch; the records describing it as the engine) repaired into the honest form; round 2 APPROVE-WITH-P2s (12 mutations, 9 bitten) with both P2s closed + the closure verified by value-flipping mutations. GREEN 8/8.
+
+## Task 102 (CLAIM-083 open, session 50) — the Kev spec intake (owner turn 43, INT-148)
+- What: the owner-supplied Kev system-engineering spec (1,905 lines) preserved verbatim at context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md (SHA-256 anchored in the manifest) + record 75 (the extract: sections mapped, the §21.1 decision list verbatim, the two-track dependency shape) + INT-148 (the turn) + INT-149 (the Kev-execution chain reservation, the INT-147 precedent class) + Q13/Q14/Q15 registered in all four mirrors + STATE/AGENTS/PLAN/EXECUTION navigation updates; the parked CLAIM-082 close records ridden into this slice's commit A (the recycle-precedent RESUME form).
+- Verified: the canonical layer GREEN (the count mirrors at 131; the manifest's 8-file corpus with the new digest-block row; the lineage binding for the new raw file).
+- Evidence: record 75 + the slice's runs (the proof sheet + sev.json) + the manifest's turn-43 provenance row.
+- Unresolved: Q13/Q14/Q15 newly open (each blocks only its named Kev step); D-014, Q6–Q12 unchanged; the Kev repository itself (BOOT-001) opens after this intake merges.
+- Next: CLAIM-083's merge under INT-145's six-step path, then the Kev repository's BOOT-001 (the spec's §16 Phase 0).

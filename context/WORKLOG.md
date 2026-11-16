@@ -1035,7 +1035,7 @@ Stage Summary:
 - Next: the successor claim's open at 5f31a38's merged head (the PLAN's next row).
 
 ## RESUME checkpoint (session 49 close, 2026-11-15; rebuilt after the sandbox recycle)
-- **Position:** CLAIM-082 LANDED at main `5f31a386eb91` (PR #118, the INT-145 six-step path, all observed live; the merge-commit CI ALL-GREEN; open PRs = 0; the branch protection restored byte-equivalent). The parked branch `parked/claim-082-close-records` carries the close records (record 74 §5's verified sha + STATE's five-area + WORKLOG 100/101) — they ride the NEXT claim's commit A (the #117 hygiene form). NOTE: this branch is the REBUILD after the sandbox recycle lost the first parked branch — identical content, re-derived from main's live state.
+- **Position:** CLAIM-082 LANDED at main `5f31a386eb91` (PR #118, the INT-145 six-step path, all observed live; the merge-commit CI ALL-GREEN; open PRs = 0; the branch protection restored byte-equivalent). The parked branch `parked/claim-082-close-records` carries the close records (record 74 §5's verified sha + STATE's five-area + WORKLOG 100/101) — they ride the NEXT claim's commit A (the #117 hygiene form). NOTE: this branch is the REBUILD after the sandbox recycle lost the first parked branch — identical content, re-derived from main's live state. BACKUP: the parked branch is PUSHED to origin at tip `812525c` — if the local sandbox is recycled again, recover it by fetch (git fetch origin parked/claim-082-close-records), do NOT rebuild.
 - **The next session opens:** WAITING ON Q7 (the owner's budget
   answer). The PLAN's remaining P5 rows are ALL gated: 5D/5E need the
   real embedding backend (Q7 = review §8 Q2: (a) ~$10-30 of embedding

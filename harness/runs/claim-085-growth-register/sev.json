@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-085-growth-register",
  "base_sha": "275e3f12c99d1f18163185229500318ca60ffcb7",
- "reviewed_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "reviewed_diff_sha256": "0b74ce58770ef8a219d963a739dfca0d6e04413494189fb5b36188166c0591b1",
  "intent_ids": [
   "INT-145",
   "INT-148"

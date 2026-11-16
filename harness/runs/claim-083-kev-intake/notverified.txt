@@ -1,3 +1,4 @@
+the battery's eval-suite append side-effect on the PRIOR slices' eval-runs.jsonl (the suites append run records at every execution; the committed slice reverts those appends — the CI's own battery run will re-append on its runner, never on the tree)
 the local isolation check's ZCODE_OFFICIAL_ENDPOINT_TOKEN finding (the sandbox harness's own env var — the local agent environment, never the CI runner; the tracked-file scan is clean; disclosed, not repaired)
 the remote CI runs (they execute at the PR — the five checks on the branch head and the merge commit)
 the D-042 review round (it runs at the PR before the merge, per the standing protocol)

@@ -11,16 +11,17 @@
 - `python3 harness/gate.py --slice claim-083-kev-intake --diff origin/main --skip-suites` -> exit 1 · output sha256 82f573d3e146fa42 · 2026-11-16T14:15:08.191628+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
+- the battery's eval-suite append side-effect on the PRIOR slices' eval-runs.jsonl (the suites append run records at every execution; the committed slice reverts those appends — the CI's own battery run will re-append on its runner, never on the tree)
 - the local isolation check's ZCODE_OFFICIAL_ENDPOINT_TOKEN finding (the sandbox harness's own env var — the local agent environment, never the CI runner; the tracked-file scan is clean; disclosed, not repaired)
 - the remote CI runs (they execute at the PR — the five checks on the branch head and the merge commit)
 - the D-042 review round (it runs at the PR before the merge, per the standing protocol)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 725e03793d849accc36714cef792eefaad699d53d8a02cc21a5b5690846f73a0
-- reviewed_diff_sha256: 59d1632d4266378bae97861d2d17bf63c2d8514e747915261ce18c9a51326c15
+- report sha256: 64b071201885b8bedb2ad5fef0f1752e449045e2e79c7b91b0e0d88c2af53d5c
+- reviewed_diff_sha256: e59214f9217e4ee064a170695d1e2f261dbba3d7a6aa035ac35f490991c4d582
 - disposition: PASS
 - findings: 1 (open P0/P1: 0)
-- not-verified entries: 3
+- not-verified entries: 4
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): f84514cd0d3a1ca12e50b6978e1148d64115ccb523c50d0f9668b448e84440ef
+- sheet sha256 (of the content above, excluding this line): 9fb10c78af50026a2f593deb61675e9dc4142dd6da0056a99a65d6e8ffb8d572

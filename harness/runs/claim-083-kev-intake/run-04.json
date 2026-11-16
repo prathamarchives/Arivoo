@@ -1,0 +1,7 @@
+{
+ "command": "python3 harness/gate.py --slice claim-083-kev-intake --diff origin/main --skip-suites",
+ "exit_code": 1,
+ "commit": "e97256fe28f4ece90ddfb52fd157810abf3938d4",
+ "output_sha256": "82f573d3e146fa4250781c7d32cc639dbe4ca4105ac88a56d1a18f9ea3ea1560",
+ "recorded_at": "2026-11-16T14:15:08.191628+00:00"
+}

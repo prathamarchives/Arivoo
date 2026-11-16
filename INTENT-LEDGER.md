@@ -44,6 +44,8 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-145** — owner turn 41 (record 49 §1, 2026-11-04 the #91 merge-gate turn + the merge authorization): "resume, merge it yourself after checks. dont stop to make me merge manually. now resume and dont stop until phase 4 is ready to go" — the continuation word PLUS the D-042 element-3 amendment: the agent performs the merge AFTER the checks (the five required green at the exact head + the completed review chain + the merge-gate review), under this explicit standing owner authorization for the chain — never stopping to route the merge through the owner manually; the no-stop horizon continues (turn 41's own words: "until phase 4 is ready to go" — the Phase 3 exit gate + P4-00 minimum, the INT-144 Phase-4-completion ceiling standing). PR #91 was merged under this authorization at 2026-11-04T10:42:13Z (merge commit 36e34920, the recorded flip/merge/restore path, the protections re-read byte-equivalent, the branch deleted, the five checks green on the merge commit). (Operational adoption: the standing chain extends — INT-134..145; D-042 element 3's recorded form for this chain is the agent-performed merge after checks; the D-042 (1a)/(1b)/(1c) review obligations unchanged; the execution rides D-041/D-042/D-043 otherwise unchanged.)
 - **INT-146** — owner turn 42 (record 51 §1, 2026-11-05 the no-pause-for-updates directive, received mid-P3-08-chain): "resume, you were not supposed to stop even for update. just keep pushing, merging without stopping until pahse 4 is done" — the continuation word PLUS the cadence amendment: the standing do-not-stop chain (INT-134..145) explicitly extends to STATUS UPDATES AND PROGRESS REPORTS (the chain never pauses to report; the work products — commits, PRs, merge records — are the in-flight report), with the horizon RESTATED not changed ("until phase 4 is done" — INT-144/INT-145's standing Phase-4-completion ceiling) and INT-145's merge authorization untouched (the turn changes the CADENCE, never the gate: D-042 (1a)/(1b)/(1c) still precede every merge). The words preserved verbatim at context/reviews/arivoo-no-pause-directive-2026-11-05.md (D-022 banner). No credential travelled with this turn. (Operational adoption: the standing chain extends — INT-134..146; the execution rides D-041/D-042/D-043 unchanged.)
 - **INT-147** — session reservation (2026-11-14, CLAIM-080's commit A): the do-not-stop chain continuing into Phase 5 (P5-A first) — the executing agent's reserved horizon, superseded by any owner turn that amends it.
+- **INT-148** — owner turn 43 (record 75 §1, 2026-11-16 the Kev spec + plan-then-execute turn): "REAOSN THROUGH THIS DOC... [the plan-mode half] + start now implementing dont stop until done"
+- **INT-149** — session reservation (2026-11-16, CLAIM-083's commit A): the Kev-execution chain reservation (BOOT-001 first; the INT-147 precedent class)
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
 
 ---
@@ -1015,3 +1017,36 @@ Source: owner turn 42, chat 2026-11-05 (preservation home: context/reviews/arivo
 - **INT-146 records owner turn 42 verbatim** (the no-pause-for-updates directive, received mid-P3-08-chain) — 128 statused entries, INT-019..INT-146, contiguous and unique. Ledger discipline held (INT-075): owner words only; no credential rode this turn.
 - **The turn-42 execution context:** PR #93 (CLAIM-058 — the keyword findability machine) was already merged at 2026-11-04T14:59:28Z under INT-145's standing authorization (merge commit `67e37fa`; the five checks green on the merge commit observed live — head-tools 126654382063, harness-trusted 126654382022, harness-suites 126654381902, canonical-layer 126654381784, harness 126654381001; the merge-gate review D-042 (1a) `5770497219`; the protections re-read byte-equivalent; the branch deleted; 0 open PRs; only main on the remote). The P3-08 slice (CLAIM-059) opened at the merged head `67e37fa`; a mid-session sandbox recycle destroyed the in-flight working tree (the FACT-001 class — the rig re-provisioned from the recorded pattern, the slice rebuilt from the contracts; the discipline unchanged: RED-first at the merged head).
 - **Open owner gates (unchanged scopes):** D-014, Q6, Q7, Q8, Q9, Q10, Q11, Q12 — each blocks ONLY its named dependents; turn 42 adds none and closes none.
+
+---
+
+## Owner turn 43 — record 75 §1 (INT-148; the Kev spec + the plan-then-execute turn)
+
+**INT-148 — THE KEV SYSTEM-ENGINEERING SPEC INTAKE + THE EXECUTION DIRECTIVE — active (received 2026-11-16; the turn's two halves: the plan-mode instruction, then the execution directive)**
+
+> "REAOSN THROUGH THIS DOC AND EXTRACT THE CONTEXT AND INTENT AND REASON THROUGH IEM STEP BY STEP AND UNDERSTAND AND CLEAN UP AND ORGANIZE THE REPO AND KEEP IT UP TO DATE WITH EVERYTHING. AND PLAN MODE IS WHEN YOU DONT TAKE ACTION AND REASON PROPERLY AND PREPARE A EXECUTION PLAN AND KEEPS REFINING UNTIL MET USER EXCEPTATIONS"
+
+> "and after ruthless reaosning nd understanding the implementing it"
+
+> "start now implementing dont stop until done"
+
+Source: owner turn 43, chat 2026-11-16 (preservation home: context/extracted/75-KEV-SPEC-INTAKE.md §1, committed before this entry was written; the attached spec preserved verbatim at context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md, SHA-256 4eceb21cc508de6f4d3886eefd5208af8c5903887ecb7bcab9aa0eb6f3a05dfc).
+
+Grounds: the spec's own §21.1 decision list + the §2.1 two-repository requirement; the turn's execution half continues the INT-145/146 do-not-stop chain. The Kev-owner questions register as Q13/Q14/Q15 (DECISIONS open block, all mirrors) — each blocks ONLY its named scope (the model-provider configuration, the Supabase arivo provisioning, the external-research first scope); nothing in the intake gates Arivoo's own Phase-5 rows.
+
+---
+
+**INT-149 — THE KEV-EXECUTION CHAIN RESERVATION — active (reserved 2026-11-16, CLAIM-083's commit A: the do-not-stop chain continues into the Kev execution; the new repository first)**
+
+> the executing agent's reservation at the Kev intake (CLAIM-083's commit A): the chain continues from the spec's own §16 roadmap — the Kev repository's BOOT-001 foundation (the governance doc set + the spec as SYSTEM-SPEC canon) first, then ARCH-001 (the contract-discovery pass over THIS repository's live surfaces — the 0012 outbox tables, the P5-A pack API, the command kernel — with commit hashes), then EVT-001 (the event envelope + task state machine, RED-first). Arivoo's own Phase-5 rows proceed under their own gates unchanged (5D is Q7-gated on its paid parts); the tracks meet at 5F under the 5H gate (the PLAN's own turn-20 dependency correction).
+
+Source: context/extracted/75-KEV-SPEC-INTAKE.md §2 (the durable home — record 75; the class honestly notated: an agent session reservation, NOT owner words — the INT-147 precedent form).
+
+---
+
+## Audit note (2026-11-16, session 50 — the turn-43 intake; appends, supersedes nothing)
+
+- **INT-148 records owner turn 43 verbatim** — 131 statused entries, INT-019..INT-149, contiguous and unique. Session record 75 §1 is the verbatim-preservation home (committed before this entry was written).
+- **The spec itself is NOT owner words** — it is an owner-supplied engineering document (the Tier classification the manifest carries: pasted document / third-party material; owner intent is taken from the turn's own message; the spec's §21.1 decision list is recorded AS the spec's content, never as adopted Arivoo decisions).
+- **No Arivoo question closed and none silently widened:** Q13/Q14/Q15 registered OPEN in all four mirrors (DECISIONS/EXECUTION §6/PLAN/STATE); D-014, Q6–Q12 keep their exact scopes.
+- **Open owner gates (unchanged scopes + the three new):** D-014, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13, Q14, Q15 — each blocks ONLY its named dependents; the turn forbids treating any open gate as a general stop-work permission (the INT-101 rule holds).

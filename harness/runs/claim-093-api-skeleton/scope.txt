@@ -1,0 +1,16 @@
+# CLAIM-093 — the API skeleton + the health routes + migration 0020 (Wave D slice 4; runbook §11.1/§11.5 + §7.4).
+STATE.md INT-158
+CLAIMS.md D-051
+context/WORKLOG.md D-051
+INTENT-LEDGER.md D-051
+DECISIONS.md D-051
+harness/api/app.py D-051
+harness/api/routes_selfcheck.py D-051
+harness/tests/test_auth_boundary.py D-051
+harness/tests/test_migrations.py D-051
+harness/migrations/0020_search_path_pins.sql D-051
+harness/migrate.py D-051
+harness/gate.py D-051
+harness/red-records.json D-051
+AGENTS.md D-051
+harness/runs/claim-093-api-skeleton D-041

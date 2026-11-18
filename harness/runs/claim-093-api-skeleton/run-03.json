@@ -1,0 +1,7 @@
+{
+ "command": "/home/z/my-project/Arivoo/.venv-waved/bin/python -I harness/api/auth_selfcheck.py",
+ "exit_code": 0,
+ "commit": "368e5493f0dfdc195be3ee1b3544a519fc6f2f7e",
+ "recorded_at": "2026-11-18T21:33:24.388268+00:00",
+ "output_sha256": "6c3443cfaeecc577346d507d58c0c7466168716fc5ec8e8ef7d8cfecb3038c47"
+}

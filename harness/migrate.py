@@ -221,6 +221,12 @@ def _classify(masked: str) -> str:
             continue
         if w[0] == "ALTER" and len(w) > 1 and w[1] == "TABLE":
             continue  # ALTER TABLE x DROP is the destructive set's own case (ARV-MIG-003)
+        if w[0] == "ALTER" and len(w) > 2 and w[1] in ("SCHEMA", "FUNCTION", "ROLE"):
+            # CLAIM-093: ALTER SCHEMA/FUNCTION/ROLE are schema DDL or
+            # role-default statements (the search_path pins, 0020) — the same
+            # non-procedural/non-data safety class as ALTER TABLE; every OTHER
+            # ALTER form still fails closed
+            continue
         if w[0] == "DROP" and len(w) > 2 and w[1] in _DROP_IFEXISTS and w[2] == "IF" and "EXISTS" in w:
             continue  # the idempotent-recreate pattern the substrate migrations use
         if w[0] == "CREATE":

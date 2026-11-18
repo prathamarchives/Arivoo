@@ -818,6 +818,24 @@ def main() -> int:
               "byte-oriented identifier continuation: ALL codepoints >= U+0080 are identifier material to PG's lexer — the mask must agree exactly")
         pg.drop_scratch_db(db_ag)
 
+        # CLAIM-093 (0020): the search_path-pin invariant — the live probe found
+        # the owner schema ALREADY conformant (the advisors' 23 WARNs named
+        # Supabase's own platform schemas); 0020 makes the state a GUARANTEE:
+        # the definer pin + the runtime roles' hijack-proof default order, and
+        # THIS check keeps the invariant observable on every future migration run
+        unpinned = sql(test_db,
+            "SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON p.pronamespace=n.oid "
+            "WHERE p.prosecdef AND (p.proconfig IS NULL OR NOT EXISTS "
+            "(SELECT 1 FROM unnest(p.proconfig) c WHERE c LIKE 'search_path=%')) "
+            "AND n.nspname='arv';").stdout.strip()
+        role_defaults = sql(test_db,
+            "SELECT count(*) FROM pg_roles r WHERE r.rolname IN ('arv_app','arv_read') "
+            "AND EXISTS (SELECT 1 FROM unnest(r.rolconfig) c WHERE c LIKE 'search_path=pg_catalog%');").stdout.strip()
+        check("ARV-TEST-045", unpinned == "0" and role_defaults == "2",
+              "the search_path-pin invariant (0020): ZERO unpinned SECURITY DEFINER functions in arv "
+              "AND both runtime roles carry the hijack-proof default (pg_catalog first)",
+              "pin the function or the role default; the invariant is checked, never assumed")
+
     finally:
         pg.drop_scratch_db(test_db)
         shutil.rmtree(tmp, ignore_errors=True)

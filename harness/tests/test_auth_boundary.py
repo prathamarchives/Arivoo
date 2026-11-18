@@ -56,11 +56,30 @@ def main() -> int:
           "the auth battery exits GREEN", "the battery must pass in the venv")
 
     # the routes battery rides CLAIM-093 (the app-skeleton slice — ARV-SIZE-002's split)
+
+    # the routes battery rides THIS slice (CLAIM-093: the skeleton + the health
+    # routes + /api/v1/me) — ARV-SIZE-002's split honored: the routes moved with
+    # the app skeleton
+    r2 = subprocess.run(
+        [str(REPO / ".venv-waved/bin/python"), "-I",
+         str(REPO / "harness/api/routes_selfcheck.py")],
+        capture_output=True, text=True, timeout=180)
+    out2 = r2.stdout
+    for code, what in (("ARV-ROUTE-001", "liveness answers 200 with no dependencies"),
+                       ("ARV-ROUTE-002", "readiness is 503 until the service declares ready"),
+                       ("ARV-ROUTE-003", "readiness is 200 once declared ready (auth + db state honest)"),
+                       ("ARV-ROUTE-004", "an unauthenticated product route is 401 ARV-AUTH-001"),
+                       ("ARV-ROUTE-005", "the error body carries the named code + api_version, never a stack trace"),
+                       ("ARV-ROUTE-006", "a verified token reaches /api/v1/me and derives the owner from the sub"),
+                       ("ARV-ROUTE-007", "the OpenAPI document exists at /api/v1/openapi.json (generated from the code)")):
+        check(code, f"PASS {code}:" in out2, what, "run harness/api/routes_selfcheck.py")
+    check("ARV-ROUTE-008", "GREEN —" in out2 and r2.returncode == 0,
+          "the routes battery exits GREEN", "the routes battery must pass")
     print()
     if FAILS:
         print("RED — the auth boundary suite refuses:", ", ".join(FAILS))
         return 1
-    print("GREEN — the auth boundary suite passes")
+    print("GREEN — the auth boundary suite passes (auth + routes)")
     return 0
 
 

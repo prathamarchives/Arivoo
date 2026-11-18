@@ -80,7 +80,7 @@
  "findings": [
   {
    "id": "SEV-093-1",
-   "severity": "P3",
+   "severity": "P2",
    "status": "resolved",
    "evidence": "the CLAIM-089 advisors' 23 search_path WARNs, re-probed: they name Supabase's own platform schemas (storage/auth), not the owner's \u2014 the owner schema was already conformant",
    "disposition": "closed as a GUARANTEE: 0020 pins the definer + the roles' global default + the checked invariant; the platform schemas stay outside the one history (touching them would violate the single-migration rule)"

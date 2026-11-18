@@ -16,11 +16,11 @@
 - the Supabase project's live state at POST-INTAKE time (verified pre-slice; the next write action re-verifies before acting — the runbook §7.1's own preflight rule)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 02be2eb8f286be09f562e626273f57a09d3d6f6772f75afb3657d16f075e3b0c
-- reviewed_diff_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+- report sha256: 8eed0493d5e860639ee6e6747b9b5f5c82f418cae26858e46edca16fe1965ea2
+- reviewed_diff_sha256: d059ef0059dd83d196ec1f24673c68c07aadd952895892f309567c0eb40d45d8
 - disposition: PASS
 - findings: 2 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): e8c1d89be338a230de3ca8ffbb6f866075b29df412d4cd579884e534bee55eb3
+- sheet sha256 (of the content above, excluding this line): 0ed9a30a5736f54eabc87e2f06d1db6f23770fefb3ce1519ab83aebb93d7580d

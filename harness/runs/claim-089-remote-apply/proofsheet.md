@@ -5,7 +5,7 @@
 - run records: 6
 
 ## Run records (command, exit, output digest)
-- `python3 harness/migrate.py (remote apply: ARV_REMOTE_TARGET=wcuuakhdmsmmxagvbdmg; the guarded path; sslmode=verify-full; the migration credential from the release env — NEVER recorded)` -> exit 0 · output sha256 see run-02 (the  · 2026-11-18T18:35:17.941966+00:00
+- `python3 harness/migrate.py (remote apply: ARV_REMOTE_TARGET=wcuuakhdmsmmxagvbdmg; the guarded path; sslmode=verify-full; the migration credential from the release env — NEVER recorded)` -> exit 0 · output sha256 fa4fce437d1b3144 · 2026-11-18T18:35:17.941966+00:00
 - `python3 harness/migrate.py --verify (remote) + the §7.3 battery (8 verification queries + the no-op rerun + the guard negatives)` -> exit 0 · output sha256 0295d7bef9bf427d · 2026-11-18T18:36:00.801975+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 853a728fc8caf711 · 2026-11-18T18:35:17.941966+00:00
 - `python3 tools/verify_selftest.py` -> exit 0 · output sha256 b4311abaffd0019b · 2026-11-18T18:35:17.941966+00:00
@@ -19,11 +19,11 @@
 - the remote CI runs (execute at the PR)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 62fabf34f864b75fa22a183beaeb573f04b87e6b81af4fe82ebfff09f51dc5e5
-- reviewed_diff_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+- report sha256: ec5be3797fb3b1550bc6b2069ef0079bfbc1b62d0972d912cab6784d4b661ade
+- reviewed_diff_sha256: dfea09834421e764f59a31ac09611af77fe6f7ebf9f18a87b93dcbd1f8f99aa2
 - disposition: PASS
 - findings: 2 (open P0/P1: 0)
 - not-verified entries: 4
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 2ffa1c0b9c45d6e215eae0acebb46814e9361312d2d0b299ef5964756cc7ed21
+- sheet sha256 (of the content above, excluding this line): 4ecc20221477c021c0e5ac344f3cb990e6afa619a72bbbd8d704f9092e4db687

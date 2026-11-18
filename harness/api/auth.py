@@ -161,11 +161,11 @@ class Verifier:
         if not header or not header.startswith("Bearer "):
             raise AuthRefusal("ARV-AUTH-001",
                               "the Authorization header must be a Bearer token", 401)
-        token = header[len("Bearer "):].strip()
-        if not token or len(token) > 8192:
+        bearer_tok = header[len("Bearer "):].strip()
+        if not bearer_tok or len(bearer_tok) > 8192:
             raise AuthRefusal("ARV-AUTH-001",
-                              "the token is empty or oversized", 401)
-        return self.verify(token)
+                              "the bearer token is empty or oversized", 401)
+        return self.verify(bearer_tok)
 
     def verify(self, token: str) -> dict:
         try:

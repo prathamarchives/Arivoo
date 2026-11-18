@@ -2,8 +2,9 @@
  "schema_version": 1,
  "slice_id": "claim-092-auth-boundary",
  "base_sha": "39bbfed40066dfe5f8fb7b5c66277d9499a62f1b",
- "reviewed_diff_sha256": "8b7543bc748e10e047ed01d74765397bc28a14945ecc2d3d8199e8349340ba4e",
+ "reviewed_diff_sha256": "f8b27ea94b19789826209a0d9487d0668be6c2af72b0631bbd57ecbbe43d235d",
  "intent_ids": [
+  "INT-156",
   "INT-157"
  ],
  "requirement_ids": [
@@ -14,10 +15,8 @@
  ],
  "changed_components": [
   "harness/api/auth.py",
-  "harness/api/app.py",
   "harness/api/__init__.py",
   "harness/api/auth_selfcheck.py",
-  "harness/api/routes_selfcheck.py",
   "harness/tests/test_auth_boundary.py",
   "harness/tests/test_prod_adapter.py",
   "harness/api/requirements.lock",
@@ -37,8 +36,8 @@
   "the auth boundary (\u00a78.3): ES256 ONLY (the algorithm allow-list; an HS256 token \u2014 the retired class \u2014 refuses as alg confusion), issuer/audience exact-match, expiry with leeway 0, the required claims enforced (exp/sub/iss/aud/iat)",
   "the owner derivation (\u00a78.4): owner_scope IS the verified sub; derive_owner accepts no client-supplied value \u2014 the signature has no owner argument, so a client value cannot travel; user_metadata is never read (not even referenced in the module)",
   "the JWKS discipline: bounded fetch (10s timeout, 64KiB cap, https-only config), fail-closed (an unreachable JWKS REFUSES \u2014 never a fallback to accepting), an unknown kid gets exactly ONE refresh then refuses; TTL-bounded caching",
-  "the API skeleton (\u00a711.1/\u00a711.5): create_app's explicit composition (no env fallback), the /api/v1 namespace mapping API_VERSION=1, the verified_context dependency on every product route, GET /health/live (no dependencies \u2014 liveness is the process) + GET /health/ready (503 until the service declares ready; honest about the DB's not-open state), the centralized ARV-AUTH-* -> HTTP mapping (\u00a711.4: the named code + api_version in the body; never a stack trace)",
-  "the dependencies: cryptography 50.0.2 + cffi 2.1.1 + pycparser 3.12 join the LAW-08 approval (PyJWT's documented ES256 backend; cryptography's own C-binding closure) \u2014 wheels SHA-pinned, the boundary harness/api/ enforced by ARV-DEP-009"
+  "the dependencies: cryptography 50.0.2 + cffi 2.1.1 + pycparser 3.12 join the LAW-08 approval (PyJWT's documented ES256 backend; cryptography's own C-binding closure) \u2014 wheels SHA-pinned, the boundary harness/api/ enforced by ARV-DEP-009",
+  "ARV-SIZE-002's split: the slice IS the auth boundary; the app skeleton + the routes (drafted and verified green in-slice: live/ready/401/error-shape/OpenAPI) ride CLAIM-093 as that slice's substrate"
  ],
  "v_model": {
   "component_verification": [
@@ -102,7 +101,8 @@
  "not_verified": [
   "a live Supabase-issued access token end-to-end (issuing one needs a real user + the email flow \u2014 \u00a717.1's desktop test; the verify chain itself is fully proven with a real ES256 key pair + the six refusal classes)",
   "the module's own JWKS fetch against the real endpoint at serve time (the endpoint was verified live \u2014 ES256, the pinned kid \u2014 via direct request)",
-  "uvicorn serving over a real socket (the ASGI interface is driven directly; the serve-time deployment slice)"
+  "uvicorn serving over a real socket (the ASGI interface is driven directly; the serve-time deployment slice)",
+  "the app skeleton + the health routes (they ride CLAIM-093 \u2014 ARV-SIZE-002's split-the-slice; they were verified green in-slice before the split: the 8-check routes battery)"
  ],
  "builder_context": "builder-zcode-slice-claim-092",
  "reviewer_context": "reviewer-zcode-fresh-context-claim-092 + the trusted CI judges (declared identities, not cryptographic independence)",

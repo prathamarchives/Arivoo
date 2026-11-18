@@ -21,11 +21,11 @@
 - uvicorn serving over a real socket (the ASGI interface is driven directly — the serve-time deployment slice)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 0a74847812208b1e702cf9fc96cf537783249e8a74c85f32e96f49dd32067f32
-- reviewed_diff_sha256: 8b7543bc748e10e047ed01d74765397bc28a14945ecc2d3d8199e8349340ba4e
+- report sha256: 59e61b5e83334eb374f78d669c7c2ec81a3c1ed1e2fffe5cc37e7444d027294b
+- reviewed_diff_sha256: f8b27ea94b19789826209a0d9487d0668be6c2af72b0631bbd57ecbbe43d235d
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
-- not-verified entries: 3
+- not-verified entries: 4
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): fdf35d8c7af527f1aeaf37875305cce9637a9266172fadb8153577f73800bba2
+- sheet sha256 (of the content above, excluding this line): ccd0feb8dc30f02dad40dc598655671cac84c27f87a01108aee4125170c0e404

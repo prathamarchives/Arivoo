@@ -1,0 +1,7 @@
+{
+ "command": "python3 harness/tests/test_dep_boundaries.py",
+ "exit_code": 0,
+ "commit": "fcb4b83034aabcaa11acfb8bda7c6dbcaae44305",
+ "recorded_at": "2026-11-18T19:18:35.022059+00:00",
+ "output_sha256": "c8f4d054e2585439f677cece7e8b8ed4fe7b1efcd2eee6a0738fe08af7b05b89"
+}

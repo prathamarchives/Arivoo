@@ -1099,3 +1099,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-089-remote-apply/.
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the runtime role passwords (Wave D's credential slice), the remote two-owner behavioral test (Wave D's integration), the search_path P2's fix.
 - Next: Wave D — the dependency approval note + lockfile, then the HTTP API slices.
+
+## Task 110 (CLAIM-090, session 56) — the dependency approval (Wave D opens)
+- What: the LAW-08 approval note (harness/api/requirements.lock's header, per the runbook §3.2's exact minimum set) + the pinned SHA-verified lock (fastapi 0.164.0, uvicorn 0.54.0, psycopg 3.3.9 + pool 3.3.3, pyjwt 2.15.1, the full 18-wheel transitive closure with SHA256s) + the scoped import boundary: harness/scope.py's check_deps now enforces ARV-DEP-009 (an approved import outside its named boundary refuses — the approval is scoped, never a blanket pass) + the .env.example (§20.1, placeholders only) + the 5-check boundary suite.
+- Verified: run-01 (the boundary suite GREEN: unapproved refuses, out-of-boundary refuses, in-boundary passes, the repo tree passes, no pin drift) + the standing battery (canonical/selftest/migrations/remote-target all green).
+- Evidence: harness/runs/claim-090-dep-approval/.
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the wheel provenance beyond PyPI-served SHAs; the CI runner's wheel-fetch equality (proven at the first API slice's CI).
+- Next: CLAIM-091 — the production pooled PG adapter (psycopg-pool, verify-full, arv_app, transaction-local owner context).

@@ -1,0 +1,5 @@
+# CLAIM-090 — the LAW-08 dependency approval + the scoped boundary (Wave D's opening slice).
+STATE.md INT-154
+CLAIMS.md D-048
+context/WORKLOG.md D-048
+harness/runs/claim-090-dep-approval D-041

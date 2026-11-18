@@ -1448,5 +1448,15 @@
         "observed_at": "2026-11-15T13:10:46.913797+00:00"
       }
     ]
+  },
+  "harness/tests/test_remote_target.py": {
+    "schema": 2,
+    "binding_commit": "e140ae0a497270e6478a7d154b6be0cf5953c3a2",
+    "binding_sha256": "6fa9e8c441b534fc10930695c7b6494314a1eb91d31df9c643ac38404cb9d4b3",
+    "red_exit": 1,
+    "red_code": "ARV-RMT-002",
+    "red_evidence": "RED for CLAIM-088: 6/8 failures \u2014 the remote-target guards absent (wrong-ref/wrong-host refusals, TLS requirement, password redaction, terminal no-fallback); 01/07/08 PASS by the preserved loopback law",
+    "current_sha256": "6fa9e8c441b534fc10930695c7b6494314a1eb91d31df9c643ac38404cb9d4b3",
+    "amendments": []
   }
 }

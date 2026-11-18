@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "slice_id": "claim-087-postmerge-state",
+ "slice_id": "claim-087b-postmerge-state",
  "base_sha": "ac977c29432588e3cf2dbe57dd01ec490d24e9b1",
- "reviewed_diff_sha256": "692830b210ef98c6cbbedd12dd1cb2582717c27a89afc98f0166d41760a29a00",
+ "reviewed_diff_sha256": "33d6c0425c67e5b6648a6e1606037ad410d44da3d7dd1b60db96e056214a5806",
  "intent_ids": [
   "INT-145",
   "INT-153"

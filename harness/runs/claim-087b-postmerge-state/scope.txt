@@ -2,4 +2,4 @@
 STATE.md INT-145
 CLAIMS.md D-038
 context/WORKLOG.md D-046
-harness/runs/claim-087-postmerge-state D-041
+harness/runs/claim-087b-postmerge-state D-041

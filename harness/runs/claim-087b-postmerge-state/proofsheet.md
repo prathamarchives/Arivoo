@@ -1,4 +1,4 @@
-# PROOF SHEET — slice claim-087-postmerge-state (harness-built; never hand-edited — PRF-01, LAW-01)
+# PROOF SHEET — slice claim-087b-postmerge-state (harness-built; never hand-edited — PRF-01, LAW-01)
 
 - commit (last run record's): ac977c29432588e3cf2dbe57dd01ec490d24e9b1
 - generated (last record's timestamp): 2026-11-18T17:17:13.211570+00:00
@@ -12,11 +12,11 @@
 - the remote CI on this post-merge slice (runs at the PR)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: ef08406d5e73a613ae8911b5aacd75d32655afacf0d7f5870b8e02158621abbf
-- reviewed_diff_sha256: 692830b210ef98c6cbbedd12dd1cb2582717c27a89afc98f0166d41760a29a00
+- report sha256: dabc64367798ac84e2f046bea15f2cd0daa26dc61dc120556664714b6d00ccb5
+- reviewed_diff_sha256: 33d6c0425c67e5b6648a6e1606037ad410d44da3d7dd1b60db96e056214a5806
 - disposition: PASS
 - findings: 1 (open P0/P1: 0)
 - not-verified entries: 1
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): ba6bf13b37809c6794b8271ce57633a94f70c1a6c08a25b73d1d89f92c371ed1
+- sheet sha256 (of the content above, excluding this line): 9ca202c6967d731aa336199eb2b150cafef22618c1b312b976b80e5b24be98e1

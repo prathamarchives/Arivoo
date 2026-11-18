@@ -1,0 +1,101 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-087-runbook-intake",
+ "base_sha": "784e4e611e036ece0b727c131e6cc070b616bb66",
+ "reviewed_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "intent_ids": [
+  "INT-145",
+  "INT-152",
+  "INT-153"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1"
+ ],
+ "changed_components": [
+  "context/raw/ARIVO_FULL_STACK_BACKEND_EXECUTION_RUNBOOK.md",
+  "context/SOURCE-COVERAGE-MANIFEST.md",
+  "context/README.md",
+  "INTENT-LEDGER.md",
+  "context/extracted/78-RUNBOOK-INTAKE.md",
+  "DECISIONS.md",
+  "STATE.md",
+  "AGENTS.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "harness/runs/claim-087-runbook-intake/scope.txt"
+ ],
+ "interfaces_reviewed": [
+  "the runbook's corpus admission (the \u00a79 register's third use: hash-bound, coverage-bound, INT-152-auth-resolving \u2014 no verifier edit)",
+  "the \u00a72 provenance repair (turn-43/44 rows landed with turn-45; the manifest-table drift class disclosed in record 78 \u00a74)",
+  "the nav reconciliation (STATE/AGENTS: the runbook-execution era; the wave order + the stop conditions in D-047)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the landed runbook's SHA-256 equals the reconstructed upload's hash (2113dcfb... \u2014 byte-identical landing)"
+  ],
+  "integration_verification": [
+   "the canonical layer GREEN on the 10-file corpus (the register's third admission; the numbering note + counts in lockstep)"
+  ],
+  "system_verification": [
+   "Wave A's readiness deliverable: the execution authority in the corpus; the provider-access status recorded (PAT scoped, CLI v3.2.0, live state = \u00a71.3); no silently closed owner decision (Q17/Q18 stay open; the runbook's provider names recorded as recommendations)"
+  ],
+  "validation": [
+   "the selftest 41/41 (the register's guards exercised over the 10-file tree)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-087-1",
+   "scenario": "the runbook drifts from the received bytes",
+   "control": "the \u00a79 register row's digest + VER-404's hash equality",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-087-2",
+   "scenario": "the token enters preserved material",
+   "control": "D-025: the token is REDACTED at preservation (record 78 \u00a71); it lives only in the sandbox .secrets store; the corpus scan is clean",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-087-3",
+   "scenario": "the runbook's provider recommendations silently close Q17/Q18",
+   "control": "D-047's basis line (recommendations pending their gates) + record 78 \u00a76 + VER-504's four-mirror agreement",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-087-1",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the \u00a72 provenance registry was missing turn-43 and turn-44 rows entirely (the third drift instance of the restructure class, this time the manifest table)",
+   "disposition": "repaired in-slice (turn-43/44/45 rows in order); disclosed in record 78 \u00a74; the escalation line stands \u2014 the next instance becomes a named mutation case"
+  },
+  {
+   "id": "SEV-087-2",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the runbook's upload file was consumed by the session's early credential-sanitization sweep before the corpus landing (the file carries no secrets \u2014 the token lived only in the chat line)",
+   "disposition": "reconstructed byte-faithfully from the session's verbatim full read (1075 lines) and landed; the digest is anchored; honest note: the reconstruction is from the transmission record, disclosed here"
+  }
+ ],
+ "not_verified": [
+  "the remote CI runs (they execute at the PR \u2014 the five checks on the branch head and the merge commit)",
+  "the D-042 review round (it runs at the PR before the merge, per the standing protocol)",
+  "the Supabase project's live state at POST-INTAKE time (verified pre-slice; the next write action re-verifies before acting \u2014 the runbook \u00a77.1's own preflight rule)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-087 (session 53: the runbook intake in one context)",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-087 (the D-042 round at the PR + the remote CI's trusted judges \u2014 declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the execution authority lands: the runbook (1075 lines) enters the corpus through the register's third use; INT-152/153 (the token REDACTED per D-025; the wave order reserved); D-047 adopts the 13-phase/8-wave order, the stop conditions, the migration authority, the secret matrix and the prohibited shortcuts; the \u00a72 turn-43/44 drift repaired and disclosed; Phase 0+1 evidence recorded (PAT scoped to exactly one project; CLI v3.2.0; live state = \u00a71.3 exactly \u2014 the read-only SQL channel verified).",
+ "sheet_section": true
+}

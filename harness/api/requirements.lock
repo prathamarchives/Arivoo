@@ -24,6 +24,10 @@ Boundary rules (the runbook §3.2 + the repo's LAW-10):
   adapter boundary); jwt ONLY inside the auth boundary module. The kernel
   (commands.py / query.py) never imports any of them.
 
+pycparser==3.12  a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e
+cffi==2.1.1  c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf
+cryptography==50.0.2  9dab55f57c74c3cad24c323bacbbd04be4705ba6eb0d92e920b1fc4837ed5079
+
 ## The exact pin set (name==version  sha256-of-wheel)
 
 annotated-doc==0.0.7  6bc31bbbec6dfaaedc1676dbc11dbda96fe22a2b5c400e9ebad113fec44a9dc6

@@ -132,7 +132,8 @@ TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          # registration rides the binding commit, diff-visible)
          "harness/tests/test_remote_target.py",
          "harness/tests/test_dep_boundaries.py",
-         "harness/tests/test_prod_adapter.py")
+         "harness/tests/test_prod_adapter.py",
+         "harness/tests/test_auth_boundary.py")
 
 
 def run_cmd(cmd: list) -> subprocess.CompletedProcess:

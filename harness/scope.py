@@ -82,7 +82,7 @@ SIZE_LIMITS = {
 PROTECTED = ("harness/", ".github/", "tools/", "INTENT-LEDGER", "DECISIONS",
              "context/WORKLOG", "harness/migrations/")
 
-TEST_RE = re.compile(r"(^|/)test_[^/]+\.py$")
+TEST_RE = re.compile(r"(^|/)(test_[^/]+|\w+_selfcheck)\.py$")  # the batteries (selfchecks) are tests by role — CLAIM-092: the ES256/route batteries carry third-party imports that pin them inside the approved harness/api/ boundary, so their TEST classification cannot come from a tests/ path; the pattern names their role honestly (ARV-SIZE-002's split-the-slice answer: the ROLE splits, not the boundary)
 MIGRATION_RE = re.compile(r"^harness/migrations/\d{4}_.*\.sql$")
 SOURCE_RE = re.compile(r"\.py$")
 

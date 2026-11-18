@@ -1,0 +1,3 @@
+a LIVE Supabase-issued access token end-to-end (issuing one needs a real user + the email flow — the desktop integration's §17.1 test; the verify chain itself is proven: sign->JWKS->verify->derive + six refusal classes, and the LIVE public JWKS was fetched and pinned by kid/sha256)
+the JWKS fetch against the real endpoint through the module (the endpoint was verified live with curl — ES256, kid 55dac17b; the module's own fetch runs at serve time)
+uvicorn serving over a real socket (the ASGI interface is driven directly — the serve-time deployment slice)

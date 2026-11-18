@@ -15,7 +15,10 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-091 | 58 | Super Z (GLM host) | `slice/claim-091-prod-adapter` | `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `INTENT-LEDGER.md`, `DECISIONS.md`, `harness/adapters/pgprod.py`, `harness/adapters/pgprod_selfcheck.py`, `harness/tests/test_prod_adapter.py`, `harness/gate.py`, `harness/scope.py`, `harness/approved_deps.txt`, `tools/mutation_runner.py`, `AGENTS.md`, `harness/red-records.json`, `.gitignore`, `harness/runs/claim-091-prod-adapter` | INT-155 (retroactive: ledgered in this same slice — the note precedes the ledger entry) | 2026-11-18 | the production pooled PG adapter (§10 + §8.5): psycopg_pool with verify-full + the pinned root CA + the arv_app runtime shape + transaction-local owner context; the named guards (ARV-PRD-001..006); the §8.5 leak class found and closed (ARV-PRD-011: every lease transaction-scoped) |
+| CLAIM-092 | 59 | Super Z (GLM host) | `slice/claim-092-auth-boundary` | `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `INTENT-LEDGER.md`, `DECISIONS.md`, `AGENTS.md`, `harness/api/auth.py`, `harness/api/__init__.py`, `harness/api/auth_selfcheck.py`, `harness/tests/test_auth_boundary.py`, `harness/tests/test_prod_adapter.py`, `harness/adapters/clock.py`, `harness/scope.py`, `harness/api/requirements.lock`, `harness/approved_deps.txt`, `harness/gate.py`, `harness/red-records.json`, `harness/runs/claim-092-auth-boundary` | INT-157 (retroactive: ledgered in this same slice — the note precedes the ledger entry) | 2026-11-18 | the auth boundary (§8.3/§8.4): ES256-only verification against the pinned public JWKS (the project's in-use asymmetric key; HS256 alg-confusion refused), issuer/audience/expiry exact, owner derived from the VERIFIED sub only (client-supplied values have no signature to travel in), user_metadata never read + ARV-SIZE-002's split honored: the app skeleton + the routes move to CLAIM-093 (the slice = the auth boundary); cryptography/cffi/pycparser join the approval (PyJWT's documented ES256 backend) |
+
+
+
 
 
 
@@ -23,6 +26,7 @@
 | CLAIM-089 | 56 | Super Z (GLM host) | `slice/claim-089-remote-apply` | `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `harness/runs/claim-089-remote-apply` | INT-153 (retroactive: reserved in CLAIM-087) | 2026-11-18 | the remote application: the canonical chain 0001→0019 applied to wcuuakhdmsmmxagvbdmg through the guarded path (verify-full; the migration credential from the release env — never recorded); the §7.3 battery + the local-vs-remote ledger equivalence (19/19 identical); the evidence recorded as run records |
 
 ## Closed claims
+| CLAIM-091 | the production pooled PG adapter (pgprod.py: pool + verify-full + arv_app + transaction-local owner context; the §8.5 leak class found and closed — ARV-PRD-011) LANDED (PR #131 = merge `39bbfed`, merged 2026-11-18; five checks ALL-GREEN; protection restored) |
 | CLAIM-090 | the LAW-08 dependency approval (the pinned SHA-verified 18-wheel lock + the scoped ARV-DEP-009 boundary + the canonical-layer repairs + the isolation-wall repair) LANDED (PR #130 = merge `c9fa679`, merged 2026-11-18; five checks ALL-GREEN; protection restored) |
 | CLAIM-088 | the guarded remote-target migration path (runbook §6.2's seven rules as named pre-connection refusals; RED-first 6/8; the loopback guard preserved) LANDED (PR #128 = merge `58cb15497a47`, merged 2026-11-18; five checks ALL-GREEN; protection restored) |
 | CLAIM-087B | the post-merge state re-derivation (the §3.1 step-13 protocol; the single-actor merge path disclosed) LANDED (PR #127 = merge `48c618e39ba0`, merged 2026-11-18; five checks ALL-GREEN; protection restored) |

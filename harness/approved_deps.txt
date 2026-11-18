@@ -19,3 +19,6 @@ typing_extensions 4.16.0 harness/api/
 typing_inspection 0.4.5 harness/api/
 annotated_doc 0.0.7 harness/api/
 opentelemetry_api 1.45.2 harness/api/
+cryptography 50.0.2 harness/api/
+cffi 2.1.1 harness/api/
+pycparser 3.12 harness/api/

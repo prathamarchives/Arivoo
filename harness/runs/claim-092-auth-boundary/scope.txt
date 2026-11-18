@@ -10,6 +10,8 @@ harness/api/__init__.py D-050
 harness/api/auth_selfcheck.py D-050
 harness/api/routes_selfcheck.py D-050
 harness/tests/test_auth_boundary.py D-050
+harness/tests/test_prod_adapter.py D-050
+harness/adapters/clock.py D-050
 harness/api/requirements.lock D-050
 harness/approved_deps.txt D-050
 harness/gate.py D-050

@@ -22,3 +22,8 @@ def mono() -> float:
     ONLY sanctioned monotonic-time read (LAW-24); never a substrate value."""
     import time
     return time.monotonic()
+
+
+def now_s() -> int:
+    """Epoch seconds (the JWT battery's exp/iat — one home)."""
+    return int(datetime.now(timezone.utc).timestamp())

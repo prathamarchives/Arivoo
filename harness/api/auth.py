@@ -29,10 +29,11 @@ Config (explicit, like ProdConfig — no environment fallback): issuer, audience
 jwks_url, expected_kid. The service supplies them at startup.
 """
 import json
-import time
 import urllib.request
 
 import jwt  # pyjwt 2.15.1 — the approved pin (D-048's boundary: harness/api/)
+
+from harness.adapters import clock  # LAW-24: the ONE time home (mono for the cache TTL)
 
 ALLOWED_ALGS = ("ES256",)  # the project's in-use key; HS256 is retired and refused
 JWKS_TTL_S = 3600.0
@@ -80,7 +81,7 @@ class _JwksCache:
         self._fetched_at = 0.0
 
     def jwk_for(self, kid: str):
-        now = time.monotonic()
+        now = clock.mono()
         fresh = self._jwk is not None and (now - self._fetched_at) < JWKS_TTL_S
         if fresh and kid == self._cfg.expected_kid:
             return self._jwk
@@ -134,12 +135,12 @@ class _JwksCache:
         if jwk is None:
             jwk = keys[0] if len(keys) == 1 else None
         self._jwk = jwk
-        self._fetched_at = time.monotonic()
+        self._fetched_at = clock.mono()
 
     def prime(self, jwk: dict):
         """Seed the cache with an already-verified JWK (startup pinning)."""
         self._jwk = jwk
-        self._fetched_at = time.monotonic()
+        self._fetched_at = clock.mono()
 
 
 class Verifier:

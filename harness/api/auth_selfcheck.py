@@ -2,7 +2,10 @@
 """harness/api/auth_selfcheck.py — the ES256 battery (CLAIM-092; in-boundary:
 cryptography/pyjwt live only in harness/api/). Prints PASS/FAIL lines."""
 import sys
-import time
+
+sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
+
+from harness.adapters import clock  # LAW-24
 
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
 from harness.api import auth as _auth
@@ -32,7 +35,7 @@ def main() -> int:
     v._jwks.prime(jwk)
     mk = lambda **over: pyjwt.encode(
         {"sub": "user-abc", "iss": cfg.issuer, "aud": cfg.audience,
-         "exp": int(time.time()) + 600, "iat": int(time.time()), **over},
+         "exp": clock.now_s() + 600, "iat": clock.now_s(), **over},
         over.pop("_key", priv), algorithm="ES256", headers={"kid": "test-key-1"})
 
     claims = v.verify(mk())
@@ -45,11 +48,11 @@ def main() -> int:
         v.verify(mk(aud="other")); check("ARV-AUTH-012", False, "aud refused")
     except _auth.AuthRefusal as e: check("ARV-AUTH-012", e.code == "ARV-AUTH-003", "a wrong audience refuses")
     try:
-        v.verify(mk(exp=int(time.time()) - 10)); check("ARV-AUTH-013", False, "expired refused")
+        v.verify(mk(exp=clock.now_s() - 10)); check("ARV-AUTH-013", False, "expired refused")
     except _auth.AuthRefusal as e: check("ARV-AUTH-013", e.code == "ARV-AUTH-003", "an expired token refuses")
     try:
         t = pyjwt.encode({"sub": "u", "iss": cfg.issuer, "aud": cfg.audience,
-                         "exp": int(time.time()) + 600, "iat": int(time.time())},
+                         "exp": clock.now_s() + 600, "iat": clock.now_s()},
                         "attackers-secret-0123456789abcdef", algorithm="HS256",
                         headers={"kid": "test-key-1"})
         v.verify(t); check("ARV-AUTH-014", False, "HS256 refused")
@@ -57,7 +60,7 @@ def main() -> int:
     priv2 = ec.generate_private_key(ec.SECP256R1())
     try:
         t = pyjwt.encode({"sub": "u", "iss": cfg.issuer, "aud": cfg.audience,
-                          "exp": int(time.time()) + 600, "iat": int(time.time())},
+                          "exp": clock.now_s() + 600, "iat": clock.now_s()},
                          priv2, algorithm="ES256", headers={"kid": "attacker"})
         v.verify(t); check("ARV-AUTH-015", False, "wrong key refused")
     except _auth.AuthRefusal as e: check("ARV-AUTH-015", e.code == "ARV-AUTH-003", "a wrong-key/unknown-kid token refuses")

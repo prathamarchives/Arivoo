@@ -8,7 +8,10 @@ import base64
 import json
 import pathlib
 import sys
-import time
+
+sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
+
+from harness.adapters import clock  # LAW-24
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from harness.api.app import create_app
@@ -59,7 +62,7 @@ def main() -> int:
     orig_refresh = _auth._JwksCache._refresh
     def fake_refresh(self):
         self._jwk = jwk
-        self._fetched_at = time.monotonic()
+        self._fetched_at = clock.mono()
     _auth._JwksCache._refresh = fake_refresh
     try:
         app = create_app(health_auth_ready=True, health_db_ready=True)
@@ -85,7 +88,7 @@ def main() -> int:
               and "Traceback" not in b,
               "the error body carries the named code + api_version, never a stack trace")
         tok = pyjwt.encode({"sub": "route-user", "iss": cfg.issuer, "aud": cfg.audience,
-                            "exp": int(time.time()) + 600, "iat": int(time.time())},
+                            "exp": clock.now_s() + 600, "iat": clock.now_s()},
                            priv, algorithm="ES256", headers={"kid": "test-key-1"})
         app_t = create_app(auth_config=cfg, health_auth_ready=True, health_db_ready=True)
         s, b = asyncio.run(call(app_t, "GET", "/api/v1/me",

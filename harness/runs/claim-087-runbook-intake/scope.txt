@@ -1,0 +1,13 @@
+# CLAIM-087 — the runbook intake (the execution authority's corpus landing
+# + the Phase 0+1 pre-slice evidence + the §2 provenance repair).
+context/raw/ARIVO_FULL_STACK_BACKEND_EXECUTION_RUNBOOK.md INT-152
+context/SOURCE-COVERAGE-MANIFEST.md INT-152
+context/README.md INT-152
+INTENT-LEDGER.md INT-152
+context/extracted/78-RUNBOOK-INTAKE.md D-047
+DECISIONS.md D-047
+STATE.md D-047
+AGENTS.md D-047
+CLAIMS.md D-038
+context/WORKLOG.md D-046
+harness/runs/claim-087-runbook-intake D-041

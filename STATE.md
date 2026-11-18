@@ -2,16 +2,16 @@
 
 > **STATUS: navigation snapshot — NOT authority.**
 
-> Ledger size: 133 statused intents (the Intent Ledger's own sequential count). This file tells an incoming agent where things stand and what to do next. It holds pointers and current status only, never a second copy of any rule (one fact, one home: `/EXECUTION.md` §1). If this file disagrees with a canonical document, the canonical document wins and this file must be corrected in the same session (authority order: `/EXECUTION.md` §3). **Contract (D-027, INT-109/105): one screen, pointers not detail — never a second Intent Ledger, a second plan, or an architecture copy; repo-scale long-term memory, not short-term session memory (INT-101).** The PR/review section is a **snapshot at the last repository update, not live status** — a committed file cannot guarantee external state hasn't changed since (INT-104). Updated at every session exit (AGENTS.md session-exit rule); a stale record pointer is a drift finding — VER-804 checks it mechanically.
+> Ledger size: 135 statused intents (the Intent Ledger's own sequential count). This file tells an incoming agent where things stand and what to do next. It holds pointers and current status only, never a second copy of any rule (one fact, one home: `/EXECUTION.md` §1). If this file disagrees with a canonical document, the canonical document wins and this file must be corrected in the same session (authority order: `/EXECUTION.md` §3). **Contract (D-027, INT-109/105): one screen, pointers not detail — never a second Intent Ledger, a second plan, or an architecture copy; repo-scale long-term memory, not short-term session memory (INT-101).** The PR/review section is a **snapshot at the last repository update, not live status** — a committed file cannot guarantee external state hasn't changed since (INT-104). Updated at every session exit (AGENTS.md session-exit rule); a stale record pointer is a drift finding — VER-804 checks it mechanically.
 
 ## Where things stand
 
-- **Phase:** THE PRODUCTIONIZATION ERA (2026-11-18 — INT-150/D-046: Kev skipped, Arivo becomes the standalone production product; the report's eight-workstream §9 order adopted)
+- **Phase:** THE PRODUCTIONIZATION ERA, RUNBOOK EXECUTION (2026-11-18 — INT-152/D-047: the scoped-PAT connection live; the 13-phase/8-wave runbook is the execution authority; Wave A underway)
 
-- **Active task:** CLAIM-086 — the architecture-change intake (record 77 = context/extracted/77-ARCHITECTURE-TURN.md; the turn-44 report landed verbatim through the §9 growth register's second use; the navigation reconciled — the report's own workstream 1)
+- **Active task:** CLAIM-087 — the runbook intake (record 78 = context/extracted/78-RUNBOOK-INTAKE.md; the runbook landed verbatim through the §9 register's third use; Phase 0+1 executed pre-slice: PAT scoped-and-verified, CLI v3.2.0 installed+linked, live project state = §1.3 exactly)
 
-- **Last completed:** CLAIM-084b (the corpus growth through the register; PR #124 = merge `0c47825`, 2026-11-16; five checks ALL-GREEN; the three-slice growth story closed: 083 → 085 → 084b)
-- **Exact next action:** CLAIM-086's merge (the INT-145 six-step path), then D-046 workstream 2 — the production database adapter slice (pg_prod: the reviewed remote connection surface; the Supabase migration-chain review; RED-first against a simulated remote)
+- **Last completed:** CLAIM-086 (the architecture-change intake; PR #125 = merge `784e4e6`, 2026-11-18; five checks ALL-GREEN; the Kev chain superseded, the kev repo parked)
+- **Exact next action:** CLAIM-087's merge (the INT-145 six-step path), then Wave B — CLAIM-088: the guarded remote-target migration path (RED-first: the remote mode's own tests prove it cannot select the wrong database; the local chain green first), then CLAIM-089: the remote application of migrations 0001→0019 to wcuuakhdmsmmxagvbdmg
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.

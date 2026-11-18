@@ -1,0 +1,3 @@
+the remote CI runs (they execute at the PR — the five checks on the branch head and the merge commit)
+the D-042 review round (it runs at the PR before the merge, per the standing protocol)
+the Supabase project's live state at POST-INTAKE time (verified pre-slice; the next write action re-verifies before acting — the runbook §7.1's own preflight rule)

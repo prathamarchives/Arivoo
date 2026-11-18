@@ -1076,3 +1076,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-086-arch-turn/ (runs + sev.json + the byte-identical proofsheet).
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged; the kev repository parked (skipped, preserved).
 - Next: CLAIM-086's merge, then D-046 workstream 2 — the production database adapter slice.
+
+## Task 107 (CLAIM-087 open, session 53) — the runbook intake
+- What: the turn-45 runbook (1075 lines) landed verbatim at context/raw/ARIVO_FULL_STACK_BACKEND_EXECUTION_RUNBOOK.md through the §9 register's third use + INT-152 (the turn: token REDACTED from preservation per D-025; setup + non-stop directive) + INT-153 (the runbook-execution chain reservation) + record 78 + D-047 (the execution authority: the wave order, the stop conditions, the migration authority, the secret matrix, the prohibited shortcuts) + the §2 turn-43/44 provenance-rows repair + the nav reconciliation. Pre-slice Phase 0+1: PAT scoped (one project), CLI v3.2.0 installed+linked, live state = §1.3 exactly (no arv schema/roles; vector ABSENT; the read-only SQL channel works).
+- Verified: the canonical layer GREEN on the 10-file corpus; the selftest; the battery; the PR-mode gate at this slice's head.
+- Evidence: harness/runs/claim-087-runbook-intake/ (runs + sev.json + the byte-identical proofsheet).
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged; Wave C (Q17/Q12), Wave F (Q18 + Railway cost), Wave G (the desktop repo) gated per the runbook's own stop conditions.
+- Next: CLAIM-087's merge, then Wave B — CLAIM-088 the guarded remote-target migration path.

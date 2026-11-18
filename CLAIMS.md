@@ -15,6 +15,7 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
+| CLAIM-089 | 56 | Super Z (GLM host) | `slice/claim-089-remote-apply` | `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `harness/runs/claim-089-remote-apply` | INT-153 (retroactive: reserved in CLAIM-087) | 2026-11-18 | the remote application: the canonical chain 0001→0019 applied to wcuuakhdmsmmxagvbdmg through the guarded path (verify-full; the migration credential from the release env — never recorded); the §7.3 battery + the local-vs-remote ledger equivalence (19/19 identical); the evidence recorded as run records |
 | CLAIM-088 | 55 | Super Z (GLM host) | `slice/claim-088-remote-target` | `harness/adapters/pg.py`, `harness/migrate.py`, `harness/tests/test_remote_target.py`, `harness/gate.py`, `harness/red-records.json`, `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `harness/runs/claim-088-remote-target` | INT-153 (retroactive: reserved in CLAIM-087) · INT-145 | 2026-11-18 | the guarded remote-target migration path (runbook §6.2's seven rules as named pre-connection refusals; the migrator's explicit --remote-target; the loopback guard preserved; RED-first 6/8 observed) |
 
 ## Closed claims

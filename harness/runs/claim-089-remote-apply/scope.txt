@@ -1,0 +1,5 @@
+# CLAIM-089 — the remote application of the canonical chain (runbook §7; the guarded path's first live use).
+STATE.md INT-145
+CLAIMS.md D-038
+context/WORKLOG.md D-046
+harness/runs/claim-089-remote-apply D-041

@@ -1,0 +1,8 @@
+{
+ "command": "python3 harness/migrate.py (remote apply: ARV_REMOTE_TARGET=wcuuakhdmsmmxagvbdmg; the guarded path; sslmode=verify-full; the migration credential from the release env \u2014 NEVER recorded)",
+ "exit_code": 0,
+ "commit": "58cb15497a474a0699fc4dfd5424911c1ddf59ee",
+ "recorded_at": "2026-11-18T18:35:17.941966+00:00",
+ "evidence": "applied 0001_baseline .. 0019_agent_access (19/19); the digest of the captured apply output",
+ "output_sha256": "see run-02 (the verification battery: the post-apply state's proof)"
+}

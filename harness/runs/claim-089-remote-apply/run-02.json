@@ -1,0 +1,49 @@
+{
+ "command": "python3 harness/migrate.py --verify (remote) + the \u00a77.3 battery (8 verification queries + the no-op rerun + the guard negatives)",
+ "exit_code": 0,
+ "commit": "58cb15497a474a0699fc4dfd5424911c1ddf59ee",
+ "recorded_at": "2026-11-18T18:36:00.801975+00:00",
+ "facts": {
+  "remote_ledger": {
+   "exit": 0,
+   "out_sha256": "a222715dba2cb350921bd9660e5a79941c2974569bd9fe26bb027fde1c40cda3",
+   "rows": 19
+  },
+  "arv_tables": {
+   "exit": 0,
+   "out_sha256": "670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf",
+   "rows": 1
+  },
+  "rls_forced": {
+   "exit": 0,
+   "out_sha256": "5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e64244ca",
+   "rows": 1
+  },
+  "policies": {
+   "exit": 0,
+   "out_sha256": "5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e64244ca",
+   "rows": 1
+  },
+  "indexes": {
+   "exit": 0,
+   "out_sha256": "96061e92f58e4bdcdee73df36183fe3ac64747c81c26f6c83aada8d2aabb1864",
+   "rows": 1
+  },
+  "roles": {
+   "exit": 0,
+   "out_sha256": "983a85f3ecb4022fd0334fbcfa84bea9bde8f39be308407c07317a41dcc3bde2",
+   "rows": 2
+  },
+  "anon_grants": {
+   "exit": 0,
+   "out_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+   "rows": 1
+  },
+  "app_super": {
+   "exit": 0,
+   "out_sha256": "1d39ee4d1f7b8be13d1c768edfaf1c043aeabf89b444394c09461567af46c0ea",
+   "rows": 1
+  }
+ },
+ "output_sha256": "0295d7bef9bf427d60ed8b33e667e5d8c884d422db4525b0732d8e982b17b923"
+}

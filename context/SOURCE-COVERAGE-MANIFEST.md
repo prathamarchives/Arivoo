@@ -25,6 +25,7 @@
 | `engineering transcript.txt` | Third-party engineering material (owner-supplied transcript). NO owner intent lives here. | 84 | full — **INCOMPLETE SOURCE: ends mid-sentence (F-11); captured excerpt, not a complete transcript** | none — excluded §X-1 | `dd133446a3e3…cdb446` |
 | `upstream of engineering transcripts.txt` | Third-party upstream source of the engineering doctrine. NO owner intent here (the "I love writing / I never let agents write for me" passage is third-party — never misattributed). | 591 | full | none — excluded §X-1 | `29cf75295d2c…e2074` |
 | `KEV_SYSTEM_ENGINEERING_SPEC.md` | Owner-supplied engineering document (owner turn 43, INT-148 — the Kev system-engineering spec; the §21.1 decision list is recorded AS SPEC CONTENT, never adopted Arivoo decisions). NOT owner words. | 1905 | full (record 75 §3 extract) | none — excluded §X-3 (the spec maps to INT-148 via record 75 §1, not by inline-quote coverage) | `4eceb21cc508d…3a05dfc` |
+| `ARIVO_BACKEND_STATUS_REPORT.txt` | Owner-supplied status document (owner turn 44, INT-150 — the Arivo backend status and completion report; the eight-workstream productionization directive and the target architecture are recorded AS REPORT CONTENT, adopted via D-046; the §21.1-style decision list is recorded AS CONTENT, never auto-adopted). Owner-authored direction. | 482 | full (record 77 §3 extraction) | owner-directed whole (the executive directive + the §5 target architecture + the §6 workstreams + the §9 execution sequence; the Supabase project facts are observed state, not intent) | `a344ec6235557…fe4df1d` |
 | `Arivo Agent Execution Specification.md` | AI-authored execution spec (Tier 0 rule families: LOOP/QST/STOP/KB/RED/PRF/RAT/WALL/UNS/MEM/FX/AFA/KER/BND/AUT/LAD). NOT owner words. | 718 | full (LAWS/EXECUTION provenance) | none — excluded §X-2 | `06c9f7a91628…e2646a` |
 
 Full SHA-256 values (the register above is abbreviated; the verifier compares the full hash):
@@ -146,3 +147,4 @@ class). The seed corpus's bindings are unchanged (§5's digest block +
 |-------|---------|------------|------|
 | `KEV_SYSTEM_ENGINEERING_SPEC.md` | `4eceb21cc508de6f4d3886eefd5208af8c5903887ecb7bcab9aa0eb6f3a05dfc` | `INT-148` | `2026-11-16` |
 | (empty at this slice beyond the landed rows: no pending growth — the register's first growth landed above at CLAIM-084b under INT-148; future rows land here) | | | |
+| `ARIVO_BACKEND_STATUS_REPORT.txt` | `a344ec6235557531ceab5e0117a35b93f70f0442f735d26da7c4d10e6fe4df1d` | `INT-150` | `2026-11-18` |

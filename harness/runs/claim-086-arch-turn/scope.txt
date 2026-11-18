@@ -1,0 +1,15 @@
+# CLAIM-086 — the architecture-change intake (the report's workstream 1:
+# the reconciliation slice + the turn-44 document's corpus landing).
+context/raw/ARIVO_BACKEND_STATUS_REPORT.txt INT-150
+context/SOURCE-COVERAGE-MANIFEST.md INT-150
+context/README.md INT-150
+INTENT-LEDGER.md INT-150
+context/extracted/77-ARCHITECTURE-TURN.md D-046
+DECISIONS.md D-046
+STATE.md D-046
+AGENTS.md D-046
+PLAN.md D-046
+EXECUTION.md D-046
+CLAIMS.md D-038
+context/WORKLOG.md D-046
+harness/runs/claim-086-arch-turn D-041

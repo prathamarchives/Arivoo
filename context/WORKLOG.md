@@ -1091,3 +1091,11 @@ Stage Summary:
 - Evidence: harness/runs/claim-088-remote-target/ (runs + sev.json + the Proof Sheet).
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the live application (CLAIM-089), the CA-bundle mechanics (CLAIM-089's preflight).
 - Next: CLAIM-089 — the remote application of the canonical chain.
+
+## Task 109 (CLAIM-089, session 55) — the remote application
+- What: the canonical chain 0001→0019 applied to wcuuakhdmsmmxagvbdmg through CLAIM-088's guarded path (--remote-target; sslmode=verify-full with the root CA extracted from the live TLS chain — Supabase Root 2021 CA; the migration credential in the release environment only, never recorded). The §7.3 battery: 27 arv tables, 26 RLS-enabled + 26 FORCED, 26 policies, 73 indexes, arv_app/arv_read LOGIN (arv_read BYPASSRLS; arv_app non-super/non-bypass), 0 anon grants, the ledger 19/19 with the rerun a no-op (ARV-MIG-001), the local-vs-remote ledger equivalence IDENTICAL, the guard negatives re-proven live (wrong-ref/host/TLS each refuse).
+- Finding (P2, named): the advisors' 23 function_search_path_mutable WARN lints — the 0002-0018 functions lack the SET search_path pin (the 0019 pin exists). The repair: a future migration 0020 (the next DB-touching slice; WARN-level, the functions are schema-qualified).
+- Verified: the run records (run-01/02 the remote evidence; run-03..06 the local battery: canonical/selftest/remote-target suite/migrations suite all green).
+- Evidence: harness/runs/claim-089-remote-apply/.
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the runtime role passwords (Wave D's credential slice), the remote two-owner behavioral test (Wave D's integration), the search_path P2's fix.
+- Next: Wave D — the dependency approval note + lockfile, then the HTTP API slices.

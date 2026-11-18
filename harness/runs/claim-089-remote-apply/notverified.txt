@@ -1,0 +1,4 @@
+the runtime roles' LOGIN passwords (none exist yet: the chain creates the roles LOGIN-ready but the password grants are the Wave-D runtime-credential slice's own act — the §6.5 table's separation preserved)
+the advisors' function_search_path_mutable WARN lints (23 on the 0002-0018 functions; the 0019 pin exists — named as the P2: a future migration 0020 pins the rest; WARN-level, not a high risk, and the functions are schema-qualified internally)
+the two-owner RLS behavioral test against the REMOTE (the local rig proves the contract; the remote behavioral two-owner run belongs with the API's Wave-D integration tests where a real Auth identity drives owner scope)
+the remote CI runs (execute at the PR)

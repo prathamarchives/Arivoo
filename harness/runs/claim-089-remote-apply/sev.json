@@ -1,0 +1,97 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-089-remote-apply",
+ "base_sha": "58cb15497a474a0699fc4dfd5424911c1ddf59ee",
+ "reviewed_diff_sha256": "69a47b387822c600f0baf6596ce2e1373754fb42d6a2011a29eef1338a74db0b",
+ "intent_ids": [
+  "INT-153",
+  "INT-145"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1",
+  "C4"
+ ],
+ "changed_components": [
+  "STATE.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "harness/runs/claim-089-remote-apply"
+ ],
+ "interfaces_reviewed": [
+  "the remote application itself: the canonical chain (ONE history \u2014 \u00a76.1 preserved; no supabase/migrations copy; no db push) applied through the guarded migrator (--remote-target wcuuakhdmsmmxagvbdmg) with verify-full TLS (the root CA extracted from the live chain: Supabase Root 2021 CA, fingerprint 80:70:25:AD:\u2026) and the migration credential solely in the release environment",
+  "the \u00a77.3 verification battery: tables/RLS-FORCE/policies/indexes/roles/grants \u2014 every predicate observed on the live database, recorded as facts (run-02)",
+  "the local-vs-remote ledger equivalence: a fresh local scratch DB's post-apply ledger is byte-identical to the remote's (19/19 versions+names+checksums)",
+  "the guard negatives re-proven live: wrong ref, wrong host, weak TLS each refuse pre-connection on the live environment"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the guarded path's suite 8/8 + the migrations suite green at this tree"
+  ],
+  "integration_verification": [
+   "the application's post-state verified by independent queries (\u00a77.3's own list) + the no-op rerun + verify's checksum match"
+  ],
+  "system_verification": [
+   "Wave B's exit predicate (\u00a719): the current Arivo schema exists in the correct Supabase project and passes independent checks \u2014 the ledger equivalence is the strongest form (the same chain, the same checksums, the same 19 rows)"
+  ],
+  "validation": [
+   "the advisors read (23 WARN lints, all one class \u2014 the search_path P2, named for a migration 0020)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-089-1",
+   "scenario": "the applied remote schema drifts from the canonical chain",
+   "control": "the ledger equivalence proof (local fresh-apply == remote, 19/19 identical) + --verify's checksum match",
+   "proof_ids": [
+    "run-02"
+   ]
+  },
+  {
+   "id": "FM-089-2",
+   "scenario": "the application was not actually the canonical path (a second history)",
+   "control": "the migrator's own ledger + the \u00a76.1 rule (no supabase CLI apply was used; the single runner wrote every row)",
+   "proof_ids": [
+    "run-01",
+    "run-02"
+   ]
+  },
+  {
+   "id": "FM-089-3",
+   "scenario": "the migration credential leaked",
+   "control": "the run records carry NO credential material (facts only: exits, hashes, counts); the PGPASSWORD never entered any file (the release env only)",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-089-1",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "evidence": "the advisors' 23 function_search_path_mutable WARN lints: the 0002-0018 functions lack the SET search_path pin (0019's two functions have it)",
+   "disposition": "scheduled as migration 0020 on the next DB-touching slice (WARN-level; the functions are schema-qualified internally; no EXPOSED-level finding exists \u2014 verified 0 anon/authenticated grants on arv)"
+  },
+  {
+   "id": "SEV-089-2",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the root CA is not published at a stable URL (the docs point to the dashboard download; both official download paths 404'd)",
+   "disposition": "extracted from the pooler's OWN live TLS chain (openssl s_client -starttls postgres), pinned by fingerprint (sha256 80:70:25:AD:50:D4:\u2026), and verified: the leaf chains to it (openssl verify OK) + the live verify-full connection succeeds \u2014 the trust anchor is the server's own presented chain, not a guess"
+  }
+ ],
+ "not_verified": [
+  "the runtime roles' LOGIN passwords (none exist yet \u2014 Wave D's credential slice creates them per \u00a76.5's separation)",
+  "the remote two-owner RLS behavioral test (Wave D's integration tests drive it with real Auth identities)",
+  "the search_path P2's fix (migration 0020, scheduled)",
+  "the remote CI runs (execute at the PR)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-089",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-089 + the trusted CI judges (declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the remote application: the canonical chain 0001\u21920019 on wcuuakhdmsmmxagvbdmg through the guarded path (verify-full; the CA pinned from the live chain); the \u00a77.3 battery green; the local-vs-remote ledger equivalence identical (19/19); the guard negatives re-proven live; the one named P2 (the search_path pins) scheduled as migration 0020; no credential material in any record.",
+ "sheet_section": true
+}

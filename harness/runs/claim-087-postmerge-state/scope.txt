@@ -1,0 +1,5 @@
+# CLAIM-087 post-merge state re-derivation (the §3.1 step-13 protocol).
+STATE.md INT-145
+CLAIMS.md D-038
+context/WORKLOG.md D-046
+harness/runs/claim-087-postmerge-state D-041

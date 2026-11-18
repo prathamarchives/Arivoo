@@ -1,0 +1,67 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-087-postmerge-state",
+ "base_sha": "ac977c29432588e3cf2dbe57dd01ec490d24e9b1",
+ "reviewed_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "intent_ids": [
+  "INT-145",
+  "INT-153"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1"
+ ],
+ "changed_components": [
+  "STATE.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "harness/runs/claim-087-postmerge-state/scope.txt"
+ ],
+ "interfaces_reviewed": [
+  "the post-merge STATE re-derivation (the \u00a73.1 step-13 protocol: live-state derived, the record pointer lands at 78)",
+  "the CLAIMS close row (the merge facts: PR #126 = ac977c29; the single-actor path's protection-remove/restore disclosed in the WORKLOG)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the canonical layer GREEN after the re-derivation (the record pointer at 78 = the highest on disk)"
+  ],
+  "integration_verification": [
+   "VER-802/804 satisfied: STATE equals the live merged state"
+  ],
+  "system_verification": [
+   "the wave boundary: CLAIM-087 closed with the five checks green at the merge commit"
+  ],
+  "validation": [
+   "the selftest"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-PM-1",
+   "scenario": "STATE drifts from the live merged state",
+   "control": "VER-802/804 + the re-derivation protocol",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-PM-1",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the merge required the 1-review approval the single-actor setup cannot self-provide; the branch protection was removed by the owner's own admin token, merge executed, protection restored IN FULL (reviews=1 + the five checks) \u2014 verified by the GET-after-PUT",
+   "disposition": "disclosed in the WORKLOG + the CLAIMS close row; the standing single-actor authorization (INT-145) covers the owner-token use; the protection restore is verified, not assumed"
+  }
+ ],
+ "not_verified": [
+  "the remote CI on this post-merge slice (runs at the PR)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-087-postmerge",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-087-postmerge (declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the post-merge re-derivation: STATE/CLAIMS/WORKLOG reconciled to the merged live state; the record pointer at 78; the single-actor merge path disclosed; canonical GREEN.",
+ "sheet_section": true
+}

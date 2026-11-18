@@ -8,10 +8,11 @@
 
 - **Phase:** THE PRODUCTIONIZATION ERA, RUNBOOK EXECUTION (2026-11-18 — INT-152/D-047: the scoped-PAT connection live; the 13-phase/8-wave runbook is the execution authority; Wave A underway)
 
-- **Active task:** CLAIM-087 — the runbook intake (record 78 = context/extracted/78-RUNBOOK-INTAKE.md; the runbook landed verbatim through the §9 register's third use; Phase 0+1 executed pre-slice: PAT scoped-and-verified, CLI v3.2.0 installed+linked, live project state = §1.3 exactly)
+- **Active task:** CLAIM-088 — Wave B opens: the guarded remote-target migration path (harness/adapters/pg.py's explicit remote mode + harness/migrate.py's remote target; RED-first: the remote mode's own tests prove it cannot select the wrong database; the local chain green first)
 
-- **Last completed:** CLAIM-086 (the architecture-change intake; PR #125 = merge `784e4e6`, 2026-11-18; five checks ALL-GREEN; the Kev chain superseded, the kev repo parked)
-- **Exact next action:** CLAIM-087's merge (the INT-145 six-step path), then Wave B — CLAIM-088: the guarded remote-target migration path (RED-first: the remote mode's own tests prove it cannot select the wrong database; the local chain green first), then CLAIM-089: the remote application of migrations 0001→0019 to wcuuakhdmsmmxagvbdmg
+- **Latest session record:** context/extracted/78-RUNBOOK-INTAKE.md (the runbook intake; the corpus's third register growth)
+- **Last completed:** CLAIM-087 (the runbook intake; PR #126 = merge `ac977c29`, 2026-11-18; five checks ALL-GREEN at head AND at the merge commit; the re-upload proved the corpus copy byte-faithful: 2113dcfb; CI's ARV-SEV-003 answered by the clean-head rebind; the merge executed through the single-actor path: the review requirement was removed by the owner's own admin token, merge, then protection restored in full — reviews=1 + all five checks)
+- **Exact next action:** CLAIM-088's RED tests (the remote-mode guard's wrong-target refusals) → implement → local chain → gate → PR #127; then CLAIM-089 (the remote application of migrations 0001→0019)
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.

@@ -1512,7 +1512,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the auth boundary suite observed RED before the modules landed (harness/api/ had no application code at main \u2014 the import failure was the observed red at the pre-slice tree)",
-    "current_sha256": "65f5dc48758518ed21744d86dd575a62206654a480c84c3bd9cdf4b7e6768398",
+    "current_sha256": "09fffe936bf53d650d814c374f1beb0a64997b4b224b94ef0121b62c71aa1dce",
     "amendments": [
       {
         "prior_sha256": "3357df5976514f9fba56f8a0f79a4aaec4c1625246ceab1bb5cf144b6785304a",
@@ -1525,6 +1525,12 @@
         "new_sha256": "65f5dc48758518ed21744d86dd575a62206654a480c84c3bd9cdf4b7e6768398",
         "note": "the skeleton+0020 suite observed RED before the restore (the app skeleton departed main at 092's split; the migrations suite lacked the 045 invariant \u2014 the red was the modules-absent class at main)",
         "observed_at": "2026-11-18T21:34:18.061950+00:00"
+      },
+      {
+        "prior_sha256": "65f5dc48758518ed21744d86dd575a62206654a480c84c3bd9cdf4b7e6768398",
+        "new_sha256": "09fffe936bf53d650d814c374f1beb0a64997b4b224b94ef0121b62c71aa1dce",
+        "note": "the venv-less fallback repair (the CI runner carries no .venv-waved; the suite crashed on the missing path \u2014 exit 1 observed in CI); the batteries now ride the venv where it exists and NOTE honestly where it does not",
+        "observed_at": "2026-11-18T22:06:57.856758+00:00"
       }
     ]
   }

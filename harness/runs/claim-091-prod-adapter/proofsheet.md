@@ -1,12 +1,12 @@
 # PROOF SHEET — slice claim-091-prod-adapter (harness-built; never hand-edited — PRF-01, LAW-01)
 
 - commit (last run record's): c9fa679bf21df2603cb968389bac61f53bd89a65
-- generated (last record's timestamp): 2026-11-18T20:22:02.169043+00:00
+- generated (last record's timestamp): 2026-11-18T20:29:50.304126+00:00
 - run records: 7
 
 ## Run records (command, exit, output digest)
-- `/home/z/my-project/Arivoo/.venv-waved/bin/python harness/tests/test_prod_adapter.py` -> exit 0 · output sha256 7c2c50b010d19461 · 2026-11-18T20:22:02.169043+00:00
-- `/home/z/my-project/Arivoo/.venv-waved/bin/python harness/tests/test_prod_adapter.py ({'ARV_TEST_RIG': '1'})` -> exit 0 · output sha256 f6f032e110ed5f34 · 2026-11-18T20:22:02.169043+00:00
+- `/home/z/my-project/Arivoo/.venv-waved/bin/python harness/tests/test_prod_adapter.py` -> exit 0 · output sha256 7c2c50b010d19461 · 2026-11-18T20:29:50.304126+00:00
+- `/home/z/my-project/Arivoo/.venv-waved/bin/python harness/tests/test_prod_adapter.py ({'ARV_TEST_RIG': '1'})` -> exit 0 · output sha256 f6f032e110ed5f34 · 2026-11-18T20:29:50.304126+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 5d4f13d6d40faff4 · 2026-11-18T20:06:30.888404+00:00
 - `python3 tools/verify_selftest.py` -> exit 0 · output sha256 2d108fe4a360bfb2 · 2026-11-18T20:05:23.042443+00:00
 - `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 261410d93eb2b126 · 2026-11-18T20:02:36.960806+00:00
@@ -26,4 +26,4 @@
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): e414eb22b7134529a6d9c2ff8cc61f019544496ac4153492331ac870db0bce27
+- sheet sha256 (of the content above, excluding this line): 830ac2dc882d9f3b0a238089fa604b1e491fe9813a18f7357f611cf35330be54

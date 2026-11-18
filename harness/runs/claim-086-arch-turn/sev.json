@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-086-arch-turn",
  "base_sha": "0c478252469f3690cee61dd6caf0ad08e02dc5f3",
- "reviewed_diff_sha256": "af030dc19a4fb3c8192e127d45255ec92533e469fe40fa125c0911c067d818cc",
+ "reviewed_diff_sha256": "51c8ca36e466253995b2419f3bd87051a2dbe300eaa903ec1af9f516e63b6e35",
  "intent_ids": [
   "INT-145",
   "INT-150",

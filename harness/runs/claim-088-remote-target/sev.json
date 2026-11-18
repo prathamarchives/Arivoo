@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-088-remote-target",
  "base_sha": "48c618e39ba0f6420159010644f1e7c29b84b65c",
- "reviewed_diff_sha256": "42c5b44e834f69078f85c50e6fbc715fef83c64766a49431b45c33c71be3bf43",
+ "reviewed_diff_sha256": "d3effaeb4dd2dfedf8b67a1b159893881b26ffdda8e6c39a61a4b10fa462cf06",
  "intent_ids": [
   "INT-153",
   "INT-145"

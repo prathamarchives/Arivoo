@@ -13,3 +13,5 @@ harness/tests/test_dep_boundaries.py D-048
 harness/runs/claim-090-dep-approval D-041
 harness/gate.py D-048
 harness/red-records.json D-048
+.gitignore D-048
+harness/api/env.example.txt D-048

@@ -18,6 +18,7 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-119** — owner turn 14 (session record 17, 2026-10-15 candidate-tool-gate-and-graduation session): the owner-forwarded gates review — candidate tool changes must be merge-blocking (P1: the coordinated tool+self-test weakening class), the anchor must be fail-closed (P2), and the graduation is resequenced: gates first, then the integrated fresh-context proof at the resulting final SHA (owner-forwarded text, E-4 class, labeled; the turn's leading access token redacted at ingestion per D-025/INT-092).
 - **INT-120..INT-121** — owner turns 15–16 (session record 18, 2026-10-16 research-driven-review + Phase-2-foundation session): turn 15's eight-part research-driven architecture review directive (read-only pass; the turn's full text crossed a host context boundary — the preserved fragments and the review artifact are the durable record), and turn 16's execution directive — update the repo on the review, then execute Phase 2 foundation (the S1–S4 harness slices; D-036).
 - **INT-122..INT-124** — owner turns 17–19 (session record 19, 2026-10-19 Phase-3-entry + concurrency session; two-part: a GitHub-integration part and the GLM-host continuation): turn 17's systems-engineering execution-contract directive (Phase 3 entry; per-slice systems-engineer verification), turn 18's access-re-establishment + context-gather directive (leading access token redacted at ingestion), and turn 19's multi-agent directive — the repo must be usable by multiple agents at a time (the concurrency protocol; D-038).
+- **INT-150..INT-151** — owner turn 44 (the architecture-change turn: the Arivo backend status report — skip Kev, the standalone production direction, INT-150; + the productionization chain reservation, INT-151).
 - **INT-125** — owner turn 20 (session record 20, 2026-10-19 the systems-engineering execution directive): the ~9.6k-word directive (12 sections + the A01–A18 audit addendum) authorizing Phases 3–5 execution — H-01/H-02 defect-bound closure first, the V-model methodology, the outcome roadmap through Phase 5 (the owner-directed NG-04 exception, scope recorded in D-039), the RTM single-home requirement, and the §5 decision-gate narrowings (trailing access token redacted at ingestion).
 - **INT-126** — owner turn 21 (session record 21, 2026-10-19 the session-21 execution directive): finish the trust floor honestly, activate V-model evidence, then enter durable-capture design — the status-drift reconciliation first (CLAIM-006's merged-PR/open-claim contradiction repaired by the canonical method), the two bounded H-01a completion checks (consolidated gate refusal; exact-code/realistic-metadata tightening), the H-01b five-point trusted-floor contract, the H-01c split into coherent cards, the H-02 evidence-not-ceremony requirements with A09 repairs, and the P3-M0/P3-K0 product-entry prerequisites (operational adoption recorded in D-040). (Dedup note, session 22: this one-liner row was accidentally TRIPLECTED at its intake commit b572d3f — two byte-identical duplicates removed at the session-22 preflight, the INT-092 mechanical-repair precedent; see the session-22 audit note.)
 - **INT-127** — owner turn 22 (session record 22, 2026-10-20 the Arivoo execution directive: current state through Phase 4 completion): execute the existing roadmap — repair trust and data-integrity defects before the product inherits them (H-01b trusted candidate-tool floor with bounded fixtures; H-01c x3; H-02 meaningful evidence), complete Phase 3 (P3-00 interface freeze → P3-M0/P3-K0 prerequisites → P3-01 first real product command → P3-02..P3-09 → the Phase 3 exit gate), establish the Phase 4 foundation and implement Phase 4 (P4-00 + P4-A..P4-F + the exit gate's day-one workflow), then seven documented refinement rounds continuing until the exit gate is actually green; the 13 CodeRabbit findings and the review's six defects triaged to the existing bounded cards with recorded dispositions (operational adoption recorded in D-041).
@@ -47,6 +48,26 @@ Owner words, verbatim, statused (AUT-02/04: never reworded, never deleted; super
 - **INT-148** — owner turn 43 (record 75 §1, 2026-11-16 the Kev spec + plan-then-execute turn): "REAOSN THROUGH THIS DOC... [the plan-mode half] + start now implementing dont stop until done"
 - **INT-149** — session reservation (2026-11-16, CLAIM-083's commit A): the Kev-execution chain reservation (BOOT-001 first; the INT-147 precedent class)
 Status legend: `active` · `clarified` · `superseded` (with `superseded_by`) · `historical`.
+
+**INT-150 — THE ARCHITECTURE-CHANGE TURN (TURN 44): SKIP KEV, ARIVO BECOMES THE STANDALONE PRODUCTION PRODUCT — active (received 2026-11-18; the turn: an uploaded 482-line Arivo backend status and completion report + the directive line; preservation home: context/extracted/77-ARCHITECTURE-TURN.md §1 + the verbatim document at context/raw/ARIVO_BACKEND_STATUS_REPORT.txt)**
+
+> "theres a change in artithecuree... skipping kev."
+
+> "1. **Reconcile the architecture and execution plan** [...] The executor should first reconcile these references, update the current-state snapshot, and ensure the implementation plan contains only Arivo's actual product requirements." *(the report's workstream 1, turn 44, verbatim)*
+
+> "The right move is to extend the existing backend into this architecture, not start another backend from scratch. That is where the accumulated engineering work actually pays off." *(the report's final position, turn 44, verbatim)*
+
+Source: owner turn 44, chat 2026-11-18 (preservation home: context/extracted/77-ARCHITECTURE-TURN.md §1, committed in this slice; the uploaded document itself is verbatim at context/raw/ARIVO_BACKEND_STATUS_REPORT.txt, SHA-256-anchored through the §9 growth register — the register's second use).
+
+Grounds: the turn-44 report's executive assessment (§1), its target architecture (§5), its eight workstreams (§6), and its execution sequence (§9); the Kev direction (INT-148's execution half + INT-149's chain) is SUPERSEDED by this turn — the two-repository architecture is skipped; the kev repository (BOOT-001, prathamarchives/kev) is parked, preserved as-is, never deleted (the report's standalone rule: "Arivo has its own backend, database, file storage, workers and application retrieval. It must not depend on external ecosystem memory or agent infrastructure").
+
+**INT-151 — THE PRODUCTIONIZATION CHAIN RESERVATION — active (reserved 2026-11-18, CLAIM-086's commit)**
+
+> "I would execute the remaining backend work in this order, keeping each stage independently testable." *(the report's §9 execution sequence, turn 44, verbatim)*
+
+Source: owner turn 44, chat 2026-11-18 (preservation home: context/extracted/77-ARCHITECTURE-TURN.md §1; chat-sourced, E-2 class; the reserved scope: D-046's eight workstreams in the report's own §9 order — reconciliation, the production database adapter + the Supabase schema, object storage + import recovery, the HTTP API + authentication, workers, desktop persistence + sync, deployment + validation, advanced retrieval).
+
+Grounds: the do-not-stop chain continues — INT-146's no-pause-for-updates directive carries; the reservation exists so the next session enters with the productionization scope already claimed (no re-derivation).
 
 ---
 
@@ -1031,6 +1052,8 @@ Source: owner turn 42, chat 2026-11-05 (preservation home: context/reviews/arivo
 > "start now implementing dont stop until done"
 
 Source: owner turn 43, chat 2026-11-16 (preservation home: context/extracted/75-KEV-SPEC-INTAKE.md §1, committed before this entry was written; the attached spec preserved verbatim at context/raw/KEV_SYSTEM_ENGINEERING_SPEC.md, SHA-256 4eceb21cc508de6f4d3886eefd5208af8c5903887ecb7bcab9aa0eb6f3a05dfc).
+
+Source: owner turn 44 (the same turn's report §9 — the execution sequence the reservation chains; preservation home: context/extracted/77-ARCHITECTURE-TURN.md §1; chat-sourced, E-2 class).
 
 Grounds: the spec's own §21.1 decision list + the §2.1 two-repository requirement; the turn's execution half continues the INT-145/146 do-not-stop chain. The Kev-owner questions register as Q13/Q14/Q15 (DECISIONS open block, all mirrors) — each blocks ONLY its named scope (the model-provider configuration, the Supabase arivo provisioning, the external-research first scope); nothing in the intake gates Arivoo's own Phase-5 rows.
 

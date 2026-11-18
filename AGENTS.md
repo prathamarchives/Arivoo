@@ -1,13 +1,13 @@
 # AGENTS.md — Arivoo (product: Arivo) — v3.1
 
-> Ledger size: 131 statused intents (the Intent Ledger's own sequential count).
+> Ledger size: 133 statused intents (the Intent Ledger's own sequential count).
 
 You are an agent in this repository. This file is your map. Read it fully, then follow the read order. Host bridges (e.g. CLAUDE.md) import this file at host adoption (W-02, host-agnostic per D-026/D-028 — the Host Contract + bridge pattern; any capable agent may build, one or many; bridges instantiate at adoption and are verified on installed hosts, never assumed); this file remains canonical.
 
 ## What this is
 - **Objective (INT-093):** any capable agent can enter this repository, understand the project, identify the next correct action, work within its authority, verify its work, and leave the repository easier to continue from. Every structure below exists to make that true without the agent supplying its own assumptions.
 - **Arivo**: the owner's reading/study/reflection environment — backend only (base, foundation, mechanism; no UI/UX). Repo: **Arivoo**. Owner: prathamarchives.
--Phase: **PHASE 5 OPENING (2026-11-14 — CLAIM-080 LANDED: the authorized retrieval API / context packs, PR #116 = merge `2e35d592b`, the D-042 four-round ledger each repaired + pinned; the chain INT-134..147 continues into Phase 5 with CLAIM-081 = P5-B the eval corpus, the corpus BEFORE any ranking change)**
+-Phase: **THE PRODUCTIONIZATION ERA (2026-11-18 — INT-150/D-046: Kev skipped, Arivo becomes the STANDALONE production product; the report's §9 eight-workstream order adopted; 5A/5B complete inside the retrieval line; preceding phase: PHASE 5 OPENING (2026-11-14 — CLAIM-080 LANDED: the authorized retrieval API / context packs, PR #116 = merge `2e35d592b`, the D-042 four-round ledger each repaired + pinned; the chain INT-134..147 continues into Phase 5 with CLAIM-081 = P5-B the eval corpus, the corpus BEFORE any ranking change)**
 - Operating mode: the orchestrator runs, the owner reviews (P-13). Commit protocol: memory deltas land as a commit and a push (P-15); analysis/review/proposal artifacts land by PR, merged only with the owner's explicit authorization (D-024).
 
 ## Read order (cold start — selective: position first, authority on demand; INT-107/D-027(3))

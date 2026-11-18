@@ -1,0 +1,7 @@
+{
+ "command": "python3 harness/gate.py --slice claim-086-arch-turn --diff origin/main --skip-suites",
+ "exit_code": 1,
+ "commit": "0c478252469f3690cee61dd6caf0ad08e02dc5f3",
+ "output_sha256": "17e293dd9bda9d60f82d02c06d36292a7ce8eb5fe0a3306a06ffd4bcca3dc859",
+ "recorded_at": "2026-11-18T15:22:31.482181+00:00"
+}

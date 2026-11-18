@@ -1,0 +1,483 @@
+# **Arivo backend status and completion report**
+
+Repository and Supabase audit · 18 November 2026
+
+## **1. Executive assessment**
+
+Arivo already has a substantial backend core. The domain model, PostgreSQL schema, command execution, durable capture, revisions, extraction, keyword retrieval, synchronization logic, export and recovery, and a read-only MCP interface have been built and tested.
+
+But **the backend is not yet a complete deployed application backend**.
+
+The distinction matters: most of the product's core data behavior exists, but the production infrastructure that connects a desktop client to that behavior does not yet exist. The repository currently exposes its functionality through Python command-line interfaces and a local PostgreSQL connection. It does not yet have the production HTTP API, Supabase authentication integration, remote database adapter, cloud file storage configuration, hosted worker runtime, or deployed service.
+
+The new Supabase project is provisioned, but it is still an empty database.
+
+**Current completion by system layer**
+
+Domain and persistence core
+
+Substantially implemented
+
+Reader and journal backend contracts
+
+Phase 4 complete
+
+Keyword retrieval and context packs
+
+5A complete
+
+Retrieval evaluation baseline
+
+5B complete
+
+Supabase production database
+
+Provisioned, empty
+
+Production HTTP API and authentication
+
+Not implemented
+
+Cloud object storage and hosted workers
+
+Not implemented
+
+Desktop-to-cloud integration
+
+Not completed
+
+Semantic and hybrid retrieval
+
+Next major capability phase
+
+My assessment: we should not rebuild the backend core. We should turn the existing system into a production service, preserving its contracts and extending its infrastructure boundaries.
+
+## **2. What exists today**
+
+### **A. The core command and persistence engine**
+
+The central implementation lives in [`harness/commands.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/commands.py?utm_source=chatgpt.com).
+
+This is the backend's command kernel. It provides a single execution path for writes, rather than allowing every client or integration to implement its own database logic.
+
+The important guarantees are already present:
+
+- Writes are transactional.
+- Commands are idempotent. Repeating the same command with the same key and body returns the original result instead of creating duplicates.
+- Reusing a key with a different body is rejected.
+- Acknowledgments are emitted after the database commit is observed.
+- Every write has an explicit durability state.
+- Commands carry owner, actor and provenance information.
+- Errors have stable codes and repair information.
+- Responses carry `api_version=1`.
+
+This is one of the strongest parts of the existing implementation. We should preserve it as the single source of business behavior.
+
+### **B. The database and domain model**
+
+The database is PostgreSQL, with a versioned migration system under [`harness/migrations/`](https://github.com/prathamarchives/Arivoo/tree/main/harness/migrations?utm_source=chatgpt.com).
+
+The existing migrations go through `0019_agent_access.sql`. The schema is not just a collection of CRUD tables. It contains constraints, lifecycle rules, provenance, transaction boundaries, row-level security and append-only records.
+
+The major domain entities already implemented include Work, Source, Extraction Generation, Passage, Anchor, Highlight, Bookmark, Note, Journal Block, Reading Position, Reading Session, Reading List, Note Reference, Command Log, Outbox and Purge Ledger.
+
+The model distinguishes authoritative content from derived content. For example, authored notes and highlights are preserved as authoritative revisions, while passages and search indexes can be rebuilt.
+
+That distinction is important for future indexing and retrieval: losing an index must never mean losing the user's original material.
+
+Relevant implementation: [`harness/migrations/`](https://github.com/prathamarchives/Arivoo/tree/main/harness/migrations?utm_source=chatgpt.com), [`harness/query.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/query.py?utm_source=chatgpt.com), and [`RTM.md`](https://github.com/prathamarchives/Arivoo/blob/main/RTM.md?utm_source=chatgpt.com).
+
+### **C. Import, files and extraction**
+
+The import pipeline is already considerably more mature than a basic upload endpoint.
+
+It supports content-addressed storage using SHA-256 digests, staged imports, validation, blob verification, recoverable import states and crash-safe completion. The importer separates logical identity from physical byte reuse.
+
+The present format capabilities are:
+
+| Format             | Current capability                                               |
+| ------------------ | ---------------------------------------------------------------- |
+| TXT                | Import and text extraction                                       |
+| JSON               | Import and text extraction                                       |
+| EPUB               | ZIP/XHTML extraction into readable text                          |
+| PDF                | Binary import and preservation, but not full PDF text extraction |
+| Other binary files | Opaque byte import where accepted                                |
+
+PDF import should not be confused with PDF reading support. OCR, scanned-document extraction and fixed-layout fidelity are not yet implemented.
+
+Extraction itself creates versioned generations and passages. Anchors refer to a specific source version and resolve to typed outcomes: `resolved`, `unresolved` or `ambiguous`. The system avoids silently moving a highlight to a different passage when the original location cannot be established.
+
+Relevant code: [`harness/formats.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/formats.py?utm_source=chatgpt.com), [`harness/extract.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/extract.py?utm_source=chatgpt.com), and [`harness/adapters/blob.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/adapters/blob.py?utm_source=chatgpt.com).
+
+### **D. Reading, capture and writing**
+
+This is a substantial completed part of the product backend.
+
+Highlights support immutable revisions, lifecycle events, tombstones and restoration. Bookmarks support stable identities and version-bound locations. Notes support long-form content, revision history and references. Reading positions preserve the location needed to reopen a source. Journal Blocks preserve free-form writing without forcing it into the shorter Note structure.
+
+The library and reading-list surfaces also exist. Lists have append-only membership events, from which current membership is derived. Reading sessions and coarse dwell information have their own event surface.
+
+The system also has stable `@` reference resolution with explicit outcomes for current, historical, tombstoned, unavailable, ambiguous and purged targets.
+
+These are not merely planned interfaces. The repository's Phase 4 plan records the implementation and recovery proof as complete.
+
+### **E. Synchronization and durability**
+
+The current design has two separate outboxes.
+
+The **client outbox** records local writes that need to be delivered to the server. It has explicit states such as pending, delivered, acknowledged, retryable, failed and uncertain.
+
+The **server outbox** records the server-side post-commit handoff.
+
+The sync driver in [`harness/sync.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/sync.py?utm_source=chatgpt.com) transfers commands between two PostgreSQL databases through the same command kernel. It includes idempotent delivery, retry behavior, an identity translation mechanism and explicit conflict handling.
+
+This is a real implementation of the sync logic, but it is not yet a production desktop-to-Supabase sync service. It currently operates through the existing PostgreSQL command infrastructure and needs to be connected to the actual desktop storage and hosted database.
+
+One important detail: the server outbox is an append-only handoff record. It is **not** a general-purpose background job queue. We need to preserve that distinction when building the worker system.
+
+### **F. Search and retrieval**
+
+The existing search system provides keyword-based retrieval, bounded pagination, owner-scoped reads, context packs, provenance and trust information.
+
+The read surface is implemented through [`harness/query.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/query.py?utm_source=chatgpt.com). Phase 5A, the authorized retrieval API/context-pack capability, is recorded as complete. Phase 5B, the evaluation baseline, is also complete. Its evaluation corpus reported 11/11 cases passing.
+
+There is also a semantic spike in [`harness/semantic.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/semantic.py?utm_source=chatgpt.com). It is a deterministic local token-count representation. It is not a production embedding model or real semantic retrieval engine. The code explicitly refuses network embedding backends because the semantic budget decision remains open.
+
+Therefore, today's search is a functioning keyword and evidence-retrieval system, not yet the final hybrid retrieval system.
+
+### **G. MCP and agent access**
+
+The repository has a read-only MCP server in [`harness/mcp.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/mcp.py?utm_source=chatgpt.com).
+
+It exposes 22 read tools over the existing query layer. This is valuable because it reuses the same retrieval logic and does not create a parallel implementation of the domain.
+
+However, the transport is **stdio only**. The implementation explicitly documents that it does not provide HTTP/SSE transport or multi-user isolation. It is not the network API that the desktop application needs.
+
+The existing agent credential model is also read-only. It should not be confused with end-user authentication or a general write-access system.
+
+## **3. What has actually been verified**
+
+The repository's engineering and verification infrastructure is unusually extensive. It has protected branches, migration checks, real PostgreSQL test runs, idempotency tests, crash injection, owner-isolation tests, known-bad tests, independent verification records and CI gates.
+
+The latest repository changes visible in GitHub include PR #123 and PR #124, both merged on 16 November. PR #124's verification record reports the canonical checks green, self-test 41/41, and the 25-suite battery on the real PostgreSQL test stack.
+
+There are no currently open pull requests in the repository.
+
+The crucial qualification is that the latest backend test evidence uses the repository's PostgreSQL test rig. It does not prove that the application is already deployed against our new Supabase project.
+
+The most important completion milestone is Phase 4. The Phase 4 exit was recorded as complete in the plan on 13 November, with the recovery, export/restore, reference lifecycle, migration and independent-client contract proofs.
+
+But Phase 4 explicitly excludes the actual reader-client UI and real-user validation. The integration proof uses a clean external client that calls the backend's command-line boundaries. That is good backend contract evidence, but it is not equivalent to a deployed desktop client making authenticated HTTP requests.
+
+Sources: [`PLAN.md`](https://github.com/prathamarchives/Arivoo/blob/main/PLAN.md?utm_source=chatgpt.com), [PR #123](https://github.com/prathamarchives/Arivoo/pull/123?utm_source=chatgpt.com), [PR #124](https://github.com/prathamarchives/Arivoo/pull/124?utm_source=chatgpt.com).
+
+## **4. The actual Supabase state**
+
+**Supabase project: arivo**
+
+ACTIVE_HEALTHY
+
+# **PostgreSQL 17.12**
+
+Mumbai · ap-south-1
+
+Project ID
+
+wcuuakhdmsmmxagvbdmg
+
+Applied migrations
+
+**0**
+
+Arivo application tables
+
+**0**
+
+Application DB roles
+
+**0**
+
+Storage buckets
+
+**0**
+
+Edge Functions
+
+**0**
+
+Vector extension
+
+**Available, not installed**
+
+Database, schema, migration, role, extension, bucket and function state checked directly against the project.
+
+[Open the Arivo Supabase project](https://supabase.com/dashboard/project/wcuuakhdmsmmxagvbdmg?utm_source=chatgpt.com)
+
+The Supabase project exists and is healthy. But the application schema has not been deployed there.
+
+I also checked the database directly. The only application-relevant schema present is the default `public` schema. There is no `arv` schema, no `arv_app` or `arv_read` role, no Storage bucket and no installed `vector` extension. The default Supabase Auth infrastructure exists, but Arivo has not connected its identity model to it.
+
+That gives us a very clear integration gap.
+
+### **Why the existing code cannot simply connect to Supabase**
+
+The current PostgreSQL adapter, [`harness/adapters/pg.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/adapters/pg.py?utm_source=chatgpt.com), has an explicit loopback-only boundary. It permits `127.0.0.1`, `localhost` and `::1`, and refuses remote hosts with `ARV-DB-004`.
+
+That means it is intentionally built for the local development and test rig. It cannot connect to the remote Supabase database as currently written.
+
+Likewise, [`harness/adapters/blob.py`](https://github.com/prathamarchives/Arivoo/blob/main/harness/adapters/blob.py?utm_source=chatgpt.com) stores files on the local filesystem. It does not upload to Supabase Storage or any cloud object store.
+
+We therefore need to build production adapters around the existing contracts, not change the domain model into something unrelated.
+
+## **5. The target architecture**
+
+The architecture I recommend completing is:
+
+**Arivo desktop application**
+
+Reader · Library · Journal · Local cache · Offline operations
+
+Authenticated HTTPS requests
+
+**Supabase Auth**
+
+Login · Sessions · Access tokens · Refresh
+
+Verified user identity
+
+**Arivo backend API**
+
+Python · Existing command kernel · Query layer · Authorization
+
+**Supabase PostgreSQL**
+
+Canonical application state · RLS · Migrations · Keyword/vector indexes
+
+**Private object storage**
+
+Source files · Content-addressed objects · Upload staging
+
+Durable job records and worker execution
+
+**Arivo background workers**
+
+Extraction · Indexing · Rebuilds · Recovery · Later semantic processing
+
+**Deployment and operations**
+
+Secrets · Monitoring · Backups · Health checks · Restore drills
+
+The main rule is that the desktop client never gets privileged database access. It talks to the Arivo API. The API authenticates the user, derives the owner's identity, and invokes the existing command and query machinery. PostgreSQL remains the canonical relational store.
+
+Supabase provides our hosted PostgreSQL database and authentication services. It does not automatically host the existing Python backend or its workers. We still need a runtime for those services.
+
+## **6. What needs to be done**
+
+I would divide the remaining implementation into eight workstreams.
+
+### **1. Reconcile the architecture and execution plan**
+
+Before implementation, the repository's current navigation and execution documents need to match the decisions we are actually executing.
+
+`STATE.md` still points to an earlier active task despite the later merges. `AGENTS.md` also carries an older phase description. The Phase 5 roadmap contains legacy work that is not part of the standalone Arivo product boundary.
+
+The executor should first reconcile these references, update the current-state snapshot, and ensure the implementation plan contains only Arivo's actual product requirements.
+
+The standalone boundary must be explicit: Arivo has its own backend, database, file storage, workers and application retrieval. It must not depend on external ecosystem memory or agent infrastructure.
+
+This is documentation and governance work, not a reason to delay implementation indefinitely.
+
+### **2. Connect the existing database system to Supabase**
+
+This is the first major engineering task.
+
+We need a production PostgreSQL adapter that preserves the existing command kernel but removes the local-only connection restriction through a deliberate production connection path.
+
+That involves a proper connection strategy, secure configuration, concurrency handling, connection pooling, timeouts and transaction management. The current implementation shells out to `psql` using subprocesses. That is useful for the test rig, but a long-running HTTP service needs a well-managed connection strategy.
+
+I recommend retaining the existing local PostgreSQL adapter for testing and introducing a separate production adapter. This allows the system to keep its proven local test environment while supporting Supabase remotely.
+
+We also need to deploy the existing migration chain to Supabase, including the `arv` schema, application roles, constraints, triggers, grants and RLS policies. The current migrations should be reviewed for Supabase compatibility before application, not blindly copied into production.
+
+The existing database owner policy relies on `app.current_owner`. In production, the owner must come from the authenticated request, never from an arbitrary client-supplied `owner` field. The backend should verify the Supabase access token, derive the user's subject ID, and set the database owner context within the transaction that performs the operation.
+
+Supabase's own documentation confirms the need to combine authenticated identity with explicit row-level authorization. It also distinguishes direct connections, session pooling and transaction pooling, which matters when designing the backend's connection lifecycle.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://supabase.com\&sz=32)
+
+Supabase Docs+2
+
+
+
+### **3. Resolve file storage and staging**
+
+This is still an unresolved architectural choice in the repository.
+
+The current file adapter is local filesystem storage. Supabase Storage is available as a natural candidate because we have already selected Supabase for the hosted database, but the provider and cross-store recovery contract are not yet finalized.
+
+My recommended direction is to evaluate a **private Supabase Storage bucket** for hosted source files, retaining local staging and caching for desktop/offline operation.
+
+The important part is not the provider name. It is the persistence contract:
+
+A document is staged locally, hashed, uploaded, checked against its digest, and only then finalized as an application Source. An incomplete upload must never produce a falsely complete database record. Failed operations must be recoverable, and orphaned files must be safely identifiable and cleaned up.
+
+Private buckets can enforce access through Storage RLS policies and short-lived signed URLs.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://supabase.com\&sz=32)
+
+Supabase Docs+2
+
+
+
+The exact provider decision must be recorded before we introduce provider-specific schema or promise a particular durability guarantee.
+
+The existing Work/Source identity baseline should remain in place meanwhile: no automatic logical merging or uniqueness based on title, filename or semantic similarity. Physical reuse of identical bytes is a separate storage optimization.
+
+### **4. Build the real HTTP API**
+
+This is probably the most consequential missing piece.
+
+The existing CLI is a command interface. The existing MCP server is a stdio protocol adapter. Neither is a production network API.
+
+We need a Python HTTP service that exposes the existing domain operations through stable, versioned endpoints.
+
+The API should cover authentication-aware access to imports, extraction status, source reads, highlights, bookmarks, notes, positions, journal blocks, reading lists, references, keyword search, context packs, synchronization, export and recovery operations.
+
+The API must call the existing command registry and query layer. It must not recreate business rules in route handlers.
+
+For example, a desktop request to create a highlight should pass through the same idempotency, provenance, transaction, ownership and acknowledgment rules as the existing `create_highlight` command. The HTTP adapter should translate between HTTP requests/responses and the existing command contracts, not replace the contracts.
+
+We also need a proper HTTP error mapping, request-size limits, upload handling, version negotiation, rate limits, health endpoints and request tracing.
+
+### **5. Connect Supabase Auth to Arivo**
+
+The client needs a real end-user identity system.
+
+The flow should be:
+
+The desktop application authenticates with Supabase Auth and obtains an access token. It sends that token to the Arivo backend. The backend verifies the token, derives the user identity, applies owner scoping and executes the request. The database independently enforces the corresponding owner boundary.
+
+The desktop app should use only public client configuration. No database password, service-role key or other privileged secret should ever be embedded in the application.
+
+The backend should not trust user-editable profile metadata as an authorization source. Supabase specifically warns against using `user_metadata` for access-control decisions.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://supabase.com\&sz=32)
+
+Supabase Docs
+
+
+
+The existing agent-read credential mechanism should remain separate from the user login system.
+
+### **6. Build the hosted worker system**
+
+A production backend needs a worker process for tasks that should not block user requests.
+
+At minimum, this includes extraction, index generation, re-indexing after changes, recovery of interrupted work and later semantic indexing.
+
+We need a dedicated durable job state machine with idempotency, lease ownership, retry rules, timeouts, failure classification and recovery after worker crashes.
+
+This should be separate from both existing outboxes. The client outbox handles synchronization. The server outbox records post-commit handoffs. Neither should be turned into an improvised general job queue.
+
+The user-facing behavior should remain truthful. Import can become durable before all derived processing is complete. The desktop application should be able to show that distinction and retrieve the current processing state.
+
+### **7. Implement the actual desktop/cloud synchronization path**
+
+The sync algorithm and outbox machinery already exist. What is missing is the production integration with the actual desktop client's storage and the hosted database.
+
+The desktop needs a local persistence strategy, a durable local outbox, conflict handling, replay after lost acknowledgments, restart recovery, and clear online/offline/synced states.
+
+One decision needs to be made explicitly: how the desktop stores its local working data. The server's canonical database is PostgreSQL, but the desktop's local cache and offline store need their own implementation and contract. We should not casually replace the canonical database with SQLite, nor assume that the current two-PostgreSQL test arrangement is already a complete desktop sync architecture.
+
+The finished sync path must be tested through the real desktop client, not just through two database test fixtures.
+
+### **8. Deployment, security and operations**
+
+Finally, we need to deploy the API and worker runtime, configure secrets through a secure environment, connect the service to Supabase, and add monitoring.
+
+The deployment should include health and readiness checks, structured logs, failure visibility, resource limits, database connection limits, backup policy, recovery procedures and a tested restore process.
+
+The production environment should be close to the Supabase database region to reduce latency. We should choose a host that can reliably run the Python API and background workers. I would not assume Vercel is the right host merely because it exists in the ecosystem; we should select it only if its runtime model fits the persistent Python service and worker requirements.
+
+## **7. Remaining product capabilities after the production foundation**
+
+Completing the hosted API, database, storage, authentication, workers and desktop sync would give us a real production backend foundation.
+
+It would not finish every capability in the original Arivo roadmap.
+
+Phase 5 still has its advanced retrieval work:
+
+| Phase 5 item                              | Status             | Remaining work                                       |
+| ----------------------------------------- | ------------------ | ---------------------------------------------------- |
+| 5A Authorized retrieval and context packs | Complete           | Production HTTP exposure                             |
+| 5B Evaluation baseline                    | Complete           | Preserve as ranking regression suite                 |
+| 5C Semantic spike                         | Deterministic only | Resolve model, license, budget and corpus decision   |
+| 5D Semantic index and vector retrieval    | Not complete       | Embeddings, versioned index, jobs, rebuild           |
+| 5E Hybrid retrieval                       | Not complete       | Combine keyword, vector and filters, measure ranking |
+| 5F Grounded relationships                 | Not complete       | Evidence-backed relationship processing              |
+| 5G Concept formation                      | Not complete       | Stable identities, aliases and lifecycle             |
+| Final integration                         | Not complete       | Production validation and measured compounding       |
+
+The `vector` extension is available in the Supabase project at version 0.8.2, but it is not installed. We should only enable it as part of the approved semantic-index work, not as decorative database setup.
+
+The semantic model, cost and corpus decision remains an actual gate. We should not quietly make paid embedding calls or present the deterministic spike as semantic quality evidence.
+
+These capabilities should build on Arivo's own source library, notes, highlights, journal and retrieval infrastructure. They are not a reason to introduce an external memory dependency.
+
+## **8. The decisions that currently govern the work**
+
+There are a few important distinctions between decisions already made and questions still open.
+
+| Decision                   | Current position                       | Consequence                                                                  |
+| -------------------------- | -------------------------------------- | ---------------------------------------------------------------------------- |
+| Hosted relational database | Supabase PostgreSQL                    | Project exists in Mumbai; deploy the application schema                      |
+| Local and cloud operation  | Cloud-first with local synchronization | Desktop sync and local durability still need implementation                  |
+| Work/Source identity       | No automatic logical merge by default  | Preserve current behavior; no automatic deduplication policy                 |
+| Blob provider              | Not fully resolved                     | Choose storage and recovery contract before provider-specific implementation |
+| Semantic model and budget  | Not resolved                           | Prepare evaluation; do not make paid embedding calls yet                     |
+| Arivo system boundary      | Standalone product                     | No dependency on external ecosystem infrastructure                           |
+
+One correction is particularly important: creating the Supabase project did **not** automatically resolve the storage decision. PostgreSQL and object storage are separate systems. We still need to decide how source files are stored, verified, staged, recovered, backed up and purged.
+
+## **9. Recommended execution sequence**
+
+I would execute the remaining backend work in this order, keeping each stage independently testable.
+
+1. **Architecture and repository reconciliation**
+
+   Correct stale status documents, establish the current standalone scope, preserve existing contracts and record the remaining production decisions.
+2. **Production database adapter and Supabase schema**
+
+   Implement remote PostgreSQL connectivity, deploy the migration chain, create application roles, adapt owner scoping and verify RLS on the real Supabase project.
+3. **Object storage and import recovery**
+
+   Finalize the storage provider, implement the private bucket and local staging contract, and test upload interruption, verification, retry and cleanup.
+4. **HTTP API and authentication**
+
+   Implement the versioned API over the existing command/query kernel, connect Supabase Auth and prove that two different users cannot access each other's data.
+5. **Worker and job infrastructure**
+
+   Add durable asynchronous jobs, extraction/indexing workers, retry and recovery behavior, and production observability.
+6. **Desktop persistence and synchronization**
+
+   Connect the real client to the API, implement local offline persistence, outbox delivery, conflicts and restart recovery.
+7. **Production deployment and system validation**
+
+   Deploy the API and workers, test real client workflows, exercise backup and restore, verify security boundaries and measure performance.
+8. **Advanced retrieval and compounding**
+
+   Continue with semantic indexing, hybrid retrieval, evidence-grounded relationships and concept formation under the remaining evaluation and budget gates.
+
+## **10. What completion should mean**
+
+I would not call this backend complete just because the migrations run or the API returns HTTP 200.
+
+The actual completion gate should be a real desktop application using the production backend:
+
+A user signs in, imports a document, reads it, creates a highlight, bookmark and note, writes in the journal, and retrieves the material later. Their work survives a restart. Offline changes sync correctly. Lost acknowledgments do not create duplicates. Unauthorized users cannot access the data. File uploads recover from interruption. Extraction and indexing can resume after worker failure. Export and restore preserve the authoritative content, and purge invalidates derived copies.
+
+The API, workers, database and desktop client must all participate in that test. The existing CLI-based test client is a useful foundation, but it cannot substitute for this final integration proof.
+
+**Final position:** Arivo's core backend engineering is largely done through Phase 4, with the first two retrieval milestones also complete. What remains is primarily the productionization and integration layer: remote database connectivity, object storage, HTTP API, authentication, workers, desktop sync and deployment. After that, the advanced retrieval roadmap continues.
+
+The right move is to extend the existing backend into this architecture, not start another backend from scratch. That is where the accumulated engineering work actually pays off.

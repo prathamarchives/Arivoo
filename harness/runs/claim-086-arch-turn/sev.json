@@ -1,0 +1,104 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-086-arch-turn",
+ "base_sha": "0c478252469f3690cee61dd6caf0ad08e02dc5f3",
+ "reviewed_diff_sha256": "51c8ca36e466253995b2419f3bd87051a2dbe300eaa903ec1af9f516e63b6e35",
+ "intent_ids": [
+  "INT-145",
+  "INT-150",
+  "INT-151"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1"
+ ],
+ "changed_components": [
+  "context/raw/ARIVO_BACKEND_STATUS_REPORT.txt",
+  "context/SOURCE-COVERAGE-MANIFEST.md",
+  "context/README.md",
+  "INTENT-LEDGER.md",
+  "context/extracted/77-ARCHITECTURE-TURN.md",
+  "DECISIONS.md",
+  "STATE.md",
+  "AGENTS.md",
+  "PLAN.md",
+  "EXECUTION.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "harness/runs/claim-086-arch-turn/scope.txt"
+ ],
+ "interfaces_reviewed": [
+  "the turn-44 document's corpus admission (the \u00a79 register's second use: hash-bound, coverage-bound, INT-150-auth-resolving \u2014 no verifier edit)",
+  "the Q-set reconciliation across all four mirrors (Q13\u2013Q15 retired-with-outcome; Q17\u2013Q19 registered; VER-504 green)",
+  "the navigation reconciliation (STATE/AGENTS/PLAN/EXECUTION: the productionization era; 5H re-pointed inside Arivo; the Kev rows superseded)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the landed document's SHA-256 equals the upload's hash (a344ec62... \u2014 byte-identical landing)"
+  ],
+  "integration_verification": [
+   "the canonical layer GREEN on the 9-file corpus (the register's second admission; the numbering note + count in lockstep)"
+  ],
+  "system_verification": [
+   "the report's workstream 1 delivered: every stale navigation reference reconciled; the plan carries only Arivo's actual product requirements; the Kev rows superseded with their gates' substance preserved (5H's evaluation gate stays inside Arivo)"
+  ],
+  "validation": [
+   "the selftest 41/41 (the register's guards exercised over the 9-file tree)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-086-1",
+   "scenario": "the turn's document drifts from the received bytes",
+   "control": "the \u00a79 register row's digest + VER-404's hash equality",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-086-2",
+   "scenario": "the retired questions silently vanish (closure by removal)",
+   "control": "the retired-with-outcome block (Q13\u2013Q15 carry their answers + INT-150 basis; VER-504's four-mirror agreement)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-086-3",
+   "scenario": "the stale navigation misleads a fresh agent into Kev work",
+   "control": "STATE/AGENTS/PLAN/EXECUTION reconciled (the productionization era; the kev repo's parked disposition recorded)",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-086-1",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the CLAIMS registry drift recurred (the #124 merge dropped 084b's close row \u2014 the second instance of the rebase-era class)",
+   "disposition": "repaired in-slice with the merge facts; disclosed in record 77 \u00a74 with the escalation note (a third instance means a named mutation case, not another hand repair)"
+  },
+  {
+   "id": "SEV-086-2",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the turn's directive line is a chat fragment with typos ('artithecuree') \u2014 quoted verbatim per AUT-02, never reworded",
+   "disposition": "no-fix with the reasoning stated (the verbatim law governs; the distilled directive lives in D-046/record 77 \u00a72, always labeled as interpretation)"
+  }
+ ],
+ "not_verified": [
+  "the local isolation check's ZCODE_OFFICIAL_ENDPOINT_TOKEN finding (the sandbox harness's own env var \u2014 the local agent environment, never the CI runner; the tracked-file scan is clean; disclosed, not repaired)",
+  "the remote CI runs (they execute at the PR \u2014 the five checks on the branch head and the merge commit)",
+  "the D-042 review round (it runs at the PR before the merge, per the standing protocol)",
+  "the Supabase project's live state (the report's own audit stands as the observation; workstream 2 re-verifies against the real project)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-086 (session 52: the architecture-change intake in one context)",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-086 (the D-042 round at the PR + the remote CI's trusted judges \u2014 declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the architecture-change intake: the turn-44 report lands verbatim through the register's second use; INT-150 supersedes the Kev chain (the kev repo parked, never deleted); D-046 adopts the standalone-production direction with the report's own eight-workstream order; the Q-set reconciled across all mirrors (Q13\u201315 retired-with-outcome, Q17\u201319 registered); the navigation repaired (the report's workstream 1, exactly as its own directive orders). The CLAIMS drift's second instance repaired and disclosed with an escalation note.",
+ "sheet_section": true
+}

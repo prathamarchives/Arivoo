@@ -1069,3 +1069,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-084b-kev-corpus-growth/ (runs + sev.json + the byte-identical proofsheet).
 - Unresolved: Q13/Q14/Q15 + Q16 open (the growth AUTHORITY's owner answer); D-014, Q6–Q12 unchanged; the Kev repository's BOOT-001 opens after this merge.
 - Next: CLAIM-084b's merge (the INT-145 six-step path), then the Kev repository's BOOT-001.
+
+## Task 106 (CLAIM-086 open, session 52) — the architecture-change intake
+- What: the turn-44 owner document (482 lines) landed verbatim at context/raw/ARIVO_BACKEND_STATUS_REPORT.txt through the §9 growth register (the second use — no verifier edit) + INT-150 (the turn: skip Kev, the standalone production direction; the Kev chain superseded; the kev repo parked, never deleted) + INT-151 (the productionization chain reservation) + record 77 + D-046 (the adoption: the report's §5 target architecture + §9 eight-workstream order + §10 completion gate) + the Q-set reconciliation (Q13/14/15 retired-with-outcome per INT-150; Q17/Q18/Q19 registered — the report's own open decisions) + the navigation reconciliation (STATE/AGENTS/PLAN/EXECUTION — the report's workstream 1).
+- Verified: the canonical layer GREEN on the 9-file corpus (seed 7 + register 2); the selftest; the battery; the PR-mode gate at this slice's head.
+- Evidence: harness/runs/claim-086-arch-turn/ (runs + sev.json + the byte-identical proofsheet).
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged; the kev repository parked (skipped, preserved).
+- Next: CLAIM-086's merge, then D-046 workstream 2 — the production database adapter slice.

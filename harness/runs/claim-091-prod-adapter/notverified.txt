@@ -1,0 +1,3 @@
+the LIVE Supabase pooled run through pgprod.ProdPool itself (the pool construction against the real host needs the arv_app runtime credential — that is Wave D's credential slice, §6.5's separation; the driver/TLS/owner-context contracts are proven: TLS by CLAIM-088/089's verify-full battery, the §8.5 discipline by this suite's rig run)
+the statement timeout's enforcement live (the shape is set per-transaction; the live bound runs with the API's readiness checks)
+the psycopg pool's eviction/reconnect behaviors under fault injection (psycopg_pool's own documented behaviors; the adapter wraps, does not re-implement)

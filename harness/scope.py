@@ -354,7 +354,7 @@ def check_deps() -> list:
             parts = l.split()
             approved.add(parts[0])
             if len(parts) >= 3:
-                boundaries[parts[0]] = parts[2]
+                boundaries[parts[0]] = parts[2]  # one or more comma-separated prefixes
     for py in sorted((REPO / "harness").rglob("*.py")):
         rel = py.relative_to(REPO).as_posix()
         try:
@@ -369,7 +369,10 @@ def check_deps() -> list:
                         fails.append(f"ARV-DEP-008: {rel} imports '{a.name}' — no approved dependency (LAW-08: no approval entry in harness/approved_deps.txt)")
                     else:
                         b = boundaries.get(root)
-                        if b is not None and not rel.startswith(b.rstrip("/") + "/"):
+                        if b is not None and not any(
+                            rel == pfx.strip().rstrip("/")
+                            or rel.startswith(pfx.strip().rstrip("/") + "/")
+                            for pfx in b.split(",")):
                             fails.append(f"ARV-DEP-009: {rel} imports '{a.name}' outside its approved boundary {b} (the approval is scoped, never a blanket pass)")
             elif isinstance(node, ast.ImportFrom) and node.module:
                 root = node.module.split(".")[0]
@@ -377,7 +380,10 @@ def check_deps() -> list:
                     fails.append(f"ARV-DEP-008: {rel} imports from '{node.module}' — no approved dependency (LAW-08: no approval entry in harness/approved_deps.txt)")
                 else:
                     b = boundaries.get(root)
-                    if b is not None and not rel.startswith(b.rstrip("/") + "/"):
+                    if b is not None and not any(
+                        rel == pfx.strip().rstrip("/")
+                        or rel.startswith(pfx.strip().rstrip("/") + "/")
+                        for pfx in b.split(",")):
                         fails.append(f"ARV-DEP-009: {rel} imports from '{node.module}' outside its approved boundary {b} (the approval is scoped, never a blanket pass)")
     for f in fails:
         print("FAIL " + f)

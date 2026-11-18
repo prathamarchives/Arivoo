@@ -1,0 +1,17 @@
+# CLAIM-091 — the production pooled PG adapter (Wave D slice 2; runbook §10 + §8.5).
+STATE.md INT-155
+CLAIMS.md D-049
+context/WORKLOG.md D-049
+INTENT-LEDGER.md D-049
+DECISIONS.md D-049
+harness/adapters/pgprod.py D-049
+harness/tests/test_prod_adapter.py D-049
+harness/gate.py D-049
+harness/red-records.json D-049
+.gitignore D-049
+harness/runs/claim-091-prod-adapter D-041
+harness/scope.py D-049
+harness/approved_deps.txt D-049
+tools/mutation_runner.py D-049
+AGENTS.md D-049
+harness/adapters/pgprod_selfcheck.py D-049

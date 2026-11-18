@@ -1,0 +1,104 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-091-prod-adapter",
+ "base_sha": "c9fa679bf21df2603cb968389bac61f53bd89a65",
+ "reviewed_diff_sha256": "62f8e0f3c8ecfa04151aa2f7820772731f014d1d944284eef416711691d5cb85",
+ "intent_ids": [
+  "INT-155"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C4",
+  "C5"
+ ],
+ "changed_components": [
+  "harness/adapters/pgprod.py",
+  "harness/adapters/pgprod_selfcheck.py",
+  "harness/tests/test_prod_adapter.py",
+  "harness/scope.py",
+  "harness/approved_deps.txt",
+  "tools/mutation_runner.py",
+  "harness/gate.py",
+  ".gitignore",
+  "STATE.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "INTENT-LEDGER.md",
+  "DECISIONS.md"
+ ],
+ "interfaces_reviewed": [
+  "the \u00a710 adapter: psycopg_pool over the approved pins (D-048) \u2014 verify-full with the pinned root CA, the arv_app least-privilege runtime shape (never the migration role; the postgres/superuser runtime refuses by name), explicit ProdConfig only (no environment fallback; the loopback rig UNTOUCHED \u2014 local and production separate by construction)",
+  "the \u00a78.5 lease: SET LOCAL app.current_owner inside the transaction; after COMMIT and after ROLLBACK the connection carries NO owner context (the two-user reuse race and the rollback cleanliness, both proven on the rig through the SAME psycopg driver)",
+  "the leak class found in testing: an un-scoped read (autocommit=False) leaves an OPEN implicit transaction; the next lease's transaction() nests as a savepoint and SET LOCAL LEAKED across the inner 'commit' \u2014 an interleaved read captured the prior owner. Closed: EVERY lease is transaction-scoped; ARV-PRD-011 pins the class with a behavioral check",
+  "the named guards: ARV-PRD-001..006 (no-config, missing-CA, wrong-role, owner validation, credential-free repr) + the boundary-rule upgrades (comma-separated prefixes; file-equality \u2014 the registry's multi-file boundary)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "test_prod_adapter.py: 5 guard checks (CI shape) + 6 behavioral checks (rig shape) GREEN"
+  ],
+  "integration_verification": [
+   "the standing battery green at this tree (canonical/selftest/migrations/remote-target/dep-boundaries)"
+  ],
+  "system_verification": [
+   "the runtime DB substrate exists with its guards named; the kernel is untouched (LAW-10: no second kernel \u2014 pgprod is a transport, business SQL stays in the kernel)"
+  ],
+  "validation": [
+   "the \u00a78.5 race is TESTED, not asserted: the suite reproduces the leak class and proves the fix"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-091-1",
+   "scenario": "the API runtime accidentally connects to a non-production target (an env fallback to loopback or a stray host)",
+   "control": "ProdConfig explicit-only + the loopback rig's own ARV-DB-004 guard untouched (both directions refuse)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-091-2",
+   "scenario": "an identity-blind TLS path (sslmode weaker than verify-full, no root CA)",
+   "control": "ARV-PRD-002 (the CA must exist; verify-full is the only mode in the conninfo \u2014 there is no knob to weaken)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-091-3",
+   "scenario": "the runtime runs as a privileged role (the migration credential leaking into the API)",
+   "control": "ARV-PRD-003 (the user must be arv_app-shaped; \u00a76.5's separation is a named refusal)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-091-4",
+   "scenario": "owner context leaks across pooled leases (user A's GUC seen by user B)",
+   "control": "transaction-local SET LOCAL + every lease transaction-scoped (ARV-PRD-011) \u2014 tested in both commit and rollback directions",
+   "proof_ids": [
+    "run-02"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-091-1",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the \u00a78.5 leak class: psycopg's transaction() nests as a savepoint inside an open implicit transaction (left by an un-scoped read), so SET LOCAL persisted across the inner 'commit' \u2014 a real owner-context leak between pooled users",
+   "disposition": "closed in-slice: every lease (read AND write) opens its own transaction; ARV-PRD-011's behavioral check reproduces and refuses the class; the readonly lease's contract documents the discipline"
+  }
+ ],
+ "not_verified": [
+  "the live Supabase pooled run through ProdPool itself (the arv_app runtime credential is Wave D's credential slice \u2014 \u00a76.5's separation; TLS and the \u00a78.5 discipline are proven by CLAIM-088/089's battery and this suite's rig run)",
+  "the live statement-timeout bound (runs with the API's readiness checks)",
+  "psycopg_pool's eviction/reconnect behaviors under fault injection (the pool is wrapped, not re-implemented)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-091",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-091 + the trusted CI judges (declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the production pooled PG adapter: \u00a710's explicit-config-only pool over the approved psycopg (verify-full + pinned CA + arv_app shape) with \u00a78.5's transaction-local owner context; the leak class found in testing and closed (every lease transaction-scoped, ARV-PRD-011); the loopback rig untouched; the standing battery green.",
+ "sheet_section": true
+}

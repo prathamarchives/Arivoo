@@ -1106,3 +1106,11 @@ Stage Summary:
 - Evidence: harness/runs/claim-090-dep-approval/.
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the wheel provenance beyond PyPI-served SHAs; the CI runner's wheel-fetch equality (proven at the first API slice's CI).
 - Next: CLAIM-091 — the production pooled PG adapter (psycopg-pool, verify-full, arv_app, transaction-local owner context).
+
+## Task 111 (CLAIM-091, session 57) — the production pooled PG adapter
+- What: harness/adapters/pgprod.py (§10 + §8.5): the runtime DB path over the approved psycopg 3.3.9 + psycopg-pool 3.3.3 — ProdConfig explicit-only (ARV-PRD-001: no environment fallback; the loopback rig UNTOUCHED — local and production separate by construction), verify-full + the pinned root CA (ARV-PRD-002), the arv_app runtime shape (ARV-PRD-003: postgres/superuser runtime refuses — prohibited shortcut #7), transaction-local app.current_owner via SET LOCAL (§8.5's exact 6-step lease), the owner validation (ARV-PRD-005), credential-free repr/diagnostics (ARV-PRD-006).
+- Finding (found in testing, closed in-slice): the §8.5 leak class — with autocommit=False an un-scoped read leaves an OPEN implicit transaction; the next lease's transaction() nests as a savepoint and SET LOCAL LEAKS across the inner commit (an interleaved read captured the prior owner). Closed by scoping EVERY lease in its own transaction (ARV-PRD-011 pins the class; run-02's v1/v2/v3 all clean).
+- Verified: run-01 (the CI shape: 5 guards GREEN) + run-02 (the behavioral rig run: 007..011 + 010 GREEN — the two-user reuse race, the rollback cleanliness) + the standing battery (canonical/selftest/migrations/remote-target/dep-boundaries all green).
+- Evidence: harness/runs/claim-091-prod-adapter/.
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the live Supabase pooled run (the arv_app runtime credential is Wave D's credential slice — §6.5's separation); the live statement-timeout bound; psycopg_pool's fault-injection behaviors.
+- Next: CLAIM-092 — JWT verification (pyjwt) + owner derivation + /api/v1 health routes.

@@ -18,11 +18,11 @@
 - the Supabase project's live state (the report's own audit stands as the observation; workstream 2 re-verifies against the real project)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: e6d359dd64915c0e5c09ec0dfa4db4e2d480aafe4334f153ac6807ffecf2ffdb
-- reviewed_diff_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+- report sha256: 606c35518a39d5ab2dffb2f0dce4730490b36d08fa8fe0568899065ea473bb99
+- reviewed_diff_sha256: d0e9a292b4ba38c0474573f122f3780d7283e092cd1b468078390865098517b1
 - disposition: PASS
 - findings: 2 (open P0/P1: 0)
 - not-verified entries: 4
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 87cc2195d823726483d65bfa80ca90b02bc895e90da0fc953275b7a78f191fab
+- sheet sha256 (of the content above, excluding this line): 74e302fd8ee293239c2a1f52599b18ae836d26d77976829b0b89b51cdcb57074

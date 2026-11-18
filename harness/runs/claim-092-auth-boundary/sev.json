@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-092-auth-boundary",
  "base_sha": "39bbfed40066dfe5f8fb7b5c66277d9499a62f1b",
- "reviewed_diff_sha256": "2b6c505f7c044af66aba75036199402e8588b4f10436cd567ec4d36c50a2f5b1",
+ "reviewed_diff_sha256": "8b7543bc748e10e047ed01d74765397bc28a14945ecc2d3d8199e8349340ba4e",
  "intent_ids": [
   "INT-157"
  ],
@@ -29,7 +29,8 @@
   "context/WORKLOG.md",
   "INTENT-LEDGER.md",
   "DECISIONS.md",
-  "AGENTS.md"
+  "AGENTS.md",
+  "harness/scope.py"
  ],
  "interfaces_reviewed": [
   "the live signing state: the in-use key is ES256 (kid 55dac17b-cd6c-475d-b599-2588575f15ef; the HS256 key retired) \u2014 verified through the management API's signing-keys endpoint and the live public JWKS endpoint (both queried; names/shapes only; the JWK material is PUBLIC verification key)",

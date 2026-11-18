@@ -1,0 +1,17 @@
+# CLAIM-090 — the LAW-08 dependency approval + the scoped boundary (Wave D's opening slice).
+STATE.md INT-154
+AGENTS.md D-048
+CLAIMS.md D-048
+context/WORKLOG.md D-048
+INTENT-LEDGER.md D-048
+DECISIONS.md D-048
+harness/api/requirements.lock D-048
+harness/approved_deps.txt D-048
+harness/scope.py D-048
+harness/tests/test_dep_boundaries.py D-048
+.env.example D-048
+harness/runs/claim-090-dep-approval D-041
+harness/gate.py D-048
+harness/red-records.json D-048
+.gitignore D-048
+harness/api/env.example.txt D-048

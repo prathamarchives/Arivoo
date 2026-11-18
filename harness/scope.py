@@ -344,9 +344,17 @@ def check_deps() -> list:
     """LAW-08: no third-party imports without an approval entry (Phase 2: none exist)."""
     fails = []
     approved = set()
+    boundaries = {}
     appr = REPO / "harness" / "approved_deps.txt"
     if appr.is_file():
-        approved = {l.split()[0] for l in appr.read_text().splitlines() if l.strip() and not l.startswith("#")}
+        for l in appr.read_text().splitlines():
+            l = l.strip()
+            if not l or l.startswith("#"):
+                continue
+            parts = l.split()
+            approved.add(parts[0])
+            if len(parts) >= 3:
+                boundaries[parts[0]] = parts[2]
     for py in sorted((REPO / "harness").rglob("*.py")):
         rel = py.relative_to(REPO).as_posix()
         try:
@@ -358,11 +366,19 @@ def check_deps() -> list:
                 for a in node.names:
                     root = a.name.split(".")[0]
                     if root not in STDLIB_ALLOW and root not in approved and root not in ("harness",):
-                        fails.append(f"ARV-DEP-008: {rel} imports '{a.name}' — no approved dependency (LAW-08)")
+                        fails.append(f"ARV-DEP-008: {rel} imports '{a.name}' — no approved dependency (LAW-08: no approval entry in harness/approved_deps.txt)")
+                    else:
+                        b = boundaries.get(root)
+                        if b is not None and not rel.startswith(b.rstrip("/") + "/"):
+                            fails.append(f"ARV-DEP-009: {rel} imports '{a.name}' outside its approved boundary {b} (the approval is scoped, never a blanket pass)")
             elif isinstance(node, ast.ImportFrom) and node.module:
                 root = node.module.split(".")[0]
                 if root not in STDLIB_ALLOW and root not in approved and root != "harness":
-                    fails.append(f"ARV-DEP-008: {rel} imports from '{node.module}' — no approved dependency (LAW-08)")
+                    fails.append(f"ARV-DEP-008: {rel} imports from '{node.module}' — no approved dependency (LAW-08: no approval entry in harness/approved_deps.txt)")
+                else:
+                    b = boundaries.get(root)
+                    if b is not None and not rel.startswith(b.rstrip("/") + "/"):
+                        fails.append(f"ARV-DEP-009: {rel} imports from '{node.module}' outside its approved boundary {b} (the approval is scoped, never a blanket pass)")
     for f in fails:
         print("FAIL " + f)
         print("      repair: use the standard library, or add the dependency with an owner approval entry in harness/approved_deps.txt (LAW-08)")

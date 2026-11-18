@@ -2,17 +2,17 @@
 
 > **STATUS: navigation snapshot — NOT authority.**
 
-> Ledger size: 135 statused intents (the Intent Ledger's own sequential count). This file tells an incoming agent where things stand and what to do next. It holds pointers and current status only, never a second copy of any rule (one fact, one home: `/EXECUTION.md` §1). If this file disagrees with a canonical document, the canonical document wins and this file must be corrected in the same session (authority order: `/EXECUTION.md` §3). **Contract (D-027, INT-109/105): one screen, pointers not detail — never a second Intent Ledger, a second plan, or an architecture copy; repo-scale long-term memory, not short-term session memory (INT-101).** The PR/review section is a **snapshot at the last repository update, not live status** — a committed file cannot guarantee external state hasn't changed since (INT-104). Updated at every session exit (AGENTS.md session-exit rule); a stale record pointer is a drift finding — VER-804 checks it mechanically.
+> Ledger size: 136 statused intents (the Intent Ledger's own sequential count). This file tells an incoming agent where things stand and what to do next. It holds pointers and current status only, never a second copy of any rule (one fact, one home: `/EXECUTION.md` §1). If this file disagrees with a canonical document, the canonical document wins and this file must be corrected in the same session (authority order: `/EXECUTION.md` §3). **Contract (D-027, INT-109/105): one screen, pointers not detail — never a second Intent Ledger, a second plan, or an architecture copy; repo-scale long-term memory, not short-term session memory (INT-101).** The PR/review section is a **snapshot at the last repository update, not live status** — a committed file cannot guarantee external state hasn't changed since (INT-104). Updated at every session exit (AGENTS.md session-exit rule); a stale record pointer is a drift finding — VER-804 checks it mechanically.
 
 ## Where things stand
 
 - **Phase:** THE PRODUCTIONIZATION ERA, RUNBOOK EXECUTION (2026-11-18 — INT-152/D-047: the scoped-PAT connection live; the 13-phase/8-wave runbook is the execution authority; Wave A underway)
 
-- **Active task:** CLAIM-089 — the remote application (the canonical chain 0001→0019 applied to wcuuakhdmsmmxagvbdmg through the guarded path; §7.3 verified: 27 tables, RLS 26/26 forced, 26 policies, 73 indexes, the roles, the local==remote ledger; pending: the slice's PR + merge)
+- **Active task:** CLAIM-090 — the LAW-08 dependency approval (the pinned SHA-verified lock + the scoped ARV-DEP-009 boundary); pending: the slice's PR + merge
 
 - **Latest session record:** context/extracted/78-RUNBOOK-INTAKE.md (the runbook intake; the corpus's third register growth)
-- **Last completed:** CLAIM-088 (the guarded remote-target migration path; PR #128 = merge `58cb154`, 2026-11-18; five checks ALL-GREEN; RED-first 6/8 observed)
-- **Exact next action:** CLAIM-089's merge, then Wave D opens: the dependency-approval note + the lockfile (LAW-08) → the HTTP API's health/auth routes over the existing kernel; the search_path P2 (a migration 0020 pinning the 0002-0018 functions) rides the next DB-touching slice
+- **Last completed:** CLAIM-089 (the remote application; PR #129 = merge `fcb4b83`, 2026-11-18; five checks ALL-GREEN; Wave B complete)
+- **Exact next action:** CLAIM-090's merge, then CLAIM-091 (the production pooled PG adapter over the approved psycopg) → CLAIM-092 (JWT verification + /api/v1 health)
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.

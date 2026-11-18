@@ -1,0 +1,3 @@
+the wheels' provenance beyond their PyPI-served SHAs (the SHAs are recorded from the exact downloads; a full reproducible-build attestation is out of scope for this slice)
+the CI runner's wheel-fetch equality (CI installs from the same PyPI pins with --require-hashes; equality is proven at the first API-slice CI run)
+the API runtime itself (no harness/api/ application code exists yet — this slice is the approval + the enforcement, not the API)

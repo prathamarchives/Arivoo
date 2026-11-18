@@ -19,11 +19,11 @@
 - the psycopg pool's eviction/reconnect behaviors under fault injection (psycopg_pool's own documented behaviors; the adapter wraps, does not re-implement)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 6dfe567d89017c71575c515b2fc3db282d5e77c152aece1d65dff3c679c60fe4
-- reviewed_diff_sha256: de1ffe22e54de7fc8e913e29d934ce08a400740f332b79c7df9e6328b0eb6711
+- report sha256: 4094bc890128750190cc5cad12ebbe22f80424630e96a8a5ed873acab750c752
+- reviewed_diff_sha256: 31384304f5f25d76e4c4ed3acfe112b0f23f6720946a1c50040af005d1ff2e0f
 - disposition: PASS
 - findings: 1 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): e593b0385239f96b7ab730912fe2e5e6684a9ecd97321c0816cd375df153cb98
+- sheet sha256 (of the content above, excluding this line): 52d73f2e68bcce0c90d25e4fbe0e9bff37ffad2d6fa659360e28c421eda90a85

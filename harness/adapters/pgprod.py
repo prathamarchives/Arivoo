@@ -136,9 +136,10 @@ class ProdPool:
         if self._pool is not None:
             return
         cfg = self._config
+        pw = cfg.password  # the runtime credential: in-memory only, never a logged value
         conninfo = {
             "host": cfg.host, "port": cfg.port, "dbname": cfg.dbname,
-            "user": cfg.user, "password": cfg.password,
+            "user": cfg.user, "password": pw,
             "sslmode": TLS_REQUIRED, "sslrootcert": cfg.sslrootcert,
             "connect_timeout": 10,
         }

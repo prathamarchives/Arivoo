@@ -5,8 +5,8 @@
 fastapi 0.164.0 harness/api/
 starlette 1.10.0 harness/api/
 uvicorn 0.54.0 harness/api/
-psycopg 3.3.9 harness/tests/test_prod_adapter.py,harness/adapters/pgprod.py
-psycopg_pool 3.3.3 harness/tests/test_prod_adapter.py,harness/adapters/pgprod.py
+psycopg 3.3.9 harness/adapters/
+psycopg_pool 3.3.3 harness/adapters/
 jwt 2.15.1 harness/api/
 anyio 4.16.0 harness/api/
 click 8.5.1 harness/api/

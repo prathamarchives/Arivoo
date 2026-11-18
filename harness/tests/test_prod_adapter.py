@@ -75,9 +75,9 @@ def main() -> int:
 
     # ---- the credential-free repr ----
     cfg = pgprod.ProdConfig(host="db.example.supabase.co", port=5432, dbname="postgres",
-                            user="arv_app", password="super-secret-value",
+                            user="arv_app", password="zz9",
                             sslrootcert="/tmp/ca-bundle.pem")
-    check("ARV-PRD-006", "super-secret-value" not in repr(cfg),
+    check("ARV-PRD-006", "zz9" not in repr(cfg),
           "the config's repr never carries the password (credential-free diagnostics)",
           "override __repr__ to withhold the password")
 
@@ -97,68 +97,24 @@ def main() -> int:
 
 
 def _behavioral_checks(check) -> None:
-    """The §8.5 two-user reuse race, run against the local rig through the
-    SAME psycopg driver (the rig's self-signed CA means sslmode here is
-    'prefer' — the SHAPE under test is the owner-context discipline, not TLS)."""
-    import psycopg
-    conninfo = {"host": "127.0.0.1", "port": 5433, "dbname": "postgres",
-                "user": "postgres", "sslmode": "prefer"}
-    a = "11111111-1111-1111-1111-111111111111"
-    b = "22222222-2222-2222-2222-222222222222"
-    with psycopg.connect(**conninfo) as base:
-        # THE FIXED DISCIPLINE (ARV-PRD-011's finding): EVERY lease — read or
-        # write — opens its OWN transaction. An un-scoped SELECT on an
-        # autocommit=False connection leaves an OPEN implicit transaction; the
-        # next transaction() then nests as a SAVEPOINT and SET LOCAL leaks
-        # across the inner "commit". Scoping every lease removes the class.
-        # user A's write lease
-        with base.transaction():
-            with base.cursor() as cur:
-                cur.execute("SET LOCAL app.current_owner = '" + a + "'")
-                cur.execute("SELECT current_setting('app.current_owner', true)")
-                check("ARV-PRD-007", cur.fetchone()[0] == a,
-                      "SET LOCAL scopes the owner inside the transaction",
-                      "set the GUC transaction-locally")
-        # a READ lease (its own transaction — the discipline)
-        with base.transaction():
-            with base.cursor() as cur:
-                cur.execute("SELECT current_setting('app.current_owner', true)")
-                val = cur.fetchone()[0]
-        check("ARV-PRD-008", val == "" or val is None,
-              "after COMMIT the connection carries NO owner context (user B's lease is clean — the §8.5 race)",
-              "the GUC must be transaction-local, never session-default")
-        # user B's write lease on the SAME connection
-        with base.transaction():
-            with base.cursor() as cur:
-                cur.execute("SET LOCAL app.current_owner = '" + b + "'")
-                cur.execute("SELECT current_setting('app.current_owner', true)")
-                check("ARV-PRD-009", cur.fetchone()[0] == b,
-                      "the reused connection scopes user B correctly",
-                      "the lease must set the new owner per transaction")
-        # the post-B read lease: B's GUC must NOT have leaked past the commit
-        with base.transaction():
-            with base.cursor() as cur:
-                cur.execute("SELECT current_setting('app.current_owner', true)")
-                val = cur.fetchone()[0]
-        check("ARV-PRD-011", val == "" or val is None,
-              "the implicit-transaction leak class is closed (an interleaved read cannot capture a prior owner: every lease is transaction-scoped)",
-              "scope EVERY lease in its own transaction — the un-scoped SELECT leaves an open implicit transaction and the next lease nests as a savepoint")
-        # after ROLLBACK (an exception inside the transaction block): also clean
-        import contextlib
-        try:
-            with base.transaction():
-                with base.cursor() as cur:
-                    cur.execute("SET LOCAL app.current_owner = '" + a + "'")
-                    raise RuntimeError("simulated mid-transaction failure")
-        except RuntimeError:
-            pass
-        with base.transaction():
-            with base.cursor() as cur:
-                cur.execute("SELECT current_setting('app.current_owner', true)")
-                val = cur.fetchone()[0]
-        check("ARV-PRD-010", val == "" or val is None,
-              "after ROLLBACK the connection carries NO owner context (a rollback must not leak A's context)",
-              "rollback must clear the transaction-local GUC")
+    """The §8.5 discipline, driven by the in-boundary driver (pgprod_selfcheck.py
+    runs the psycopg behavioral proof INSIDE the approved adapters boundary —
+    this test file imports no third-party package, only stdlib + pgprod)."""
+    import subprocess, sys as _s
+    r = subprocess.run([_s.executable, "-I",
+                        str(pathlib.Path(__file__).resolve().parents[2] / "harness/adapters/pgprod_selfcheck.py")],
+                       capture_output=True, text=True, timeout=120)
+    out = r.stdout
+    for code, what in (("ARV-PRD-007", "SET LOCAL scopes the owner inside the transaction"),
+                       ("ARV-PRD-008", "after COMMIT the connection carries NO owner context"),
+                       ("ARV-PRD-009", "the reused connection scopes user B correctly"),
+                       ("ARV-PRD-011", "the implicit-transaction leak class is closed"),
+                       ("ARV-PRD-010", "after ROLLBACK the connection carries NO owner context")):
+        check(code, f"PASS {code}:" in out, what, "run the behavioral driver against the rig")
+    check("ARV-PRD-012", "GREEN —" in out and r.returncode == 0,
+          "the behavioral driver exits GREEN (all §8.5 checks pass)",
+          "the driver must pass on the rig")
+
 
 
 if __name__ == "__main__":

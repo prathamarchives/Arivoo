@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-091-prod-adapter",
  "base_sha": "c9fa679bf21df2603cb968389bac61f53bd89a65",
- "reviewed_diff_sha256": "fbb45324f83bc198fc2fa7a4304815aed70d1847caa6f4b9f0beed01b115dd3c",
+ "reviewed_diff_sha256": "de1ffe22e54de7fc8e913e29d934ce08a400740f332b79c7df9e6328b0eb6711",
  "intent_ids": [
   "INT-155"
  ],

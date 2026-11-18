@@ -1475,5 +1475,15 @@
     "red_evidence": "the boundary suite observed RED at main's scope.py (ARV-DEP-009 absent: the out-of-boundary import passes) before the scope.py upgrade landed in this slice; observed at this branch's pre-merge tree",
     "current_sha256": "543498bd140e52a9e087c09bb8565425614cac45c7851ae2a68a44d1f346e962",
     "amendments": []
+  },
+  "harness/tests/test_prod_adapter.py": {
+    "schema": 2,
+    "binding_commit": "9f2dd57a9e20bd6b26a6e38367dd2260c1eab5d7",
+    "binding_sha256": "ea46f135463f56f542eaa71f214523d95256a3bff7835659fff54139d489ad02",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the production adapter suite observed RED before pgprod.py landed (the module did not exist at main \u2014 the waiting-for-harness class: the import failure was the observed red at the pre-slice tree)",
+    "current_sha256": "ea46f135463f56f542eaa71f214523d95256a3bff7835659fff54139d489ad02",
+    "amendments": []
   }
 }

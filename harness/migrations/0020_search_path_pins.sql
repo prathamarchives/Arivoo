@@ -31,9 +31,14 @@
 ALTER FUNCTION arv.agent_token_lookup(text) SET search_path = pg_catalog, arv;
 
 -- 2) the runtime roles' GLOBAL default resolution order (pg_catalog FIRST —
---    the hijack-proof order; arv second for the unqualified object names the
---    kernel's own SQL uses). The role-level default (not IN DATABASE ...):
+--    the hijack-proof order; 'public' second, the standard shape). 'arv' stays
+--    OFF the roles' default path: the kernel's own SQL qualifies arv.X
+--    explicitly everywhere (grep-verified: commands.py/query.py carry no
+--    unqualified arv object references), and keeping 'arv' off the path keeps
+--    pg_get_constraintdef's rendering stable for every role (the JNL-06 class:
+--    an on-path schema changes how constraint defs render, breaking
+--    string-shaped audits). The role-level default (not IN DATABASE ...):
 --    it holds on EVERY database the role touches — the remote's postgres, the
 --    local rig's scratch dbs, and any future physical replica alike.
-ALTER ROLE arv_app SET search_path = pg_catalog, arv;
-ALTER ROLE arv_read SET search_path = pg_catalog, arv;
+ALTER ROLE arv_app SET search_path = pg_catalog, public;
+ALTER ROLE arv_read SET search_path = pg_catalog, public;

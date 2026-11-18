@@ -1506,7 +1506,14 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the auth boundary suite observed RED before the modules landed (harness/api/ had no application code at main \u2014 the import failure was the observed red at the pre-slice tree)",
-    "current_sha256": "3357df5976514f9fba56f8a0f79a4aaec4c1625246ceab1bb5cf144b6785304a",
-    "amendments": []
+    "current_sha256": "f2774b34db457913d3a52acb9b4ed6058286c0b43fb2ee6c3ec48e9d87903dc3",
+    "amendments": [
+      {
+        "prior_sha256": "3357df5976514f9fba56f8a0f79a4aaec4c1625246ceab1bb5cf144b6785304a",
+        "new_sha256": "f2774b34db457913d3a52acb9b4ed6058286c0b43fb2ee6c3ec48e9d87903dc3",
+        "note": "the ARV-SIZE-002 split: the suite's routes section moved to CLAIM-093 (the app skeleton departed this slice); the suite observed RED at the un-split form (the size refusal) before this edit",
+        "observed_at": "2026-11-18T21:08:13.605582+00:00"
+      }
+    ]
   }
 }

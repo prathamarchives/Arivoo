@@ -15,7 +15,7 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-087B | 54 | Super Z (GLM host) | `slice/claim-087b-postmerge-state` | `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `harness/runs/claim-087-postmerge-state` | INT-145 (retroactive: ledgered in this slice) | 2026-11-18 | the post-merge state re-derivation (the §3.1 step-13 protocol: STATE = the merged live state; the 087 close row; the single-actor merge path disclosed) |
+| CLAIM-087B | 54 | Super Z (GLM host) | `slice/claim-087b-postmerge-state` | `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `harness/runs/claim-087b-postmerge-state` | INT-145 (retroactive: ledgered in this slice) | 2026-11-18 | the post-merge state re-derivation (the §3.1 step-13 protocol: STATE = the merged live state; the 087 close row; the single-actor merge path disclosed) |
 
 ## Closed claims
 | CLAIM-087 | the runbook intake (the execution authority lands: the runbook verbatim through the §9 register's third use; INT-152/153; D-047 adopts the 8-wave order + the stop conditions + the migration authority + the secret matrix + the prohibited shortcuts; the §2 turn-43/44 rows + the 086 close row repaired — the drift class's third instance; Phase 0+1 evidence: PAT scoped to exactly one project, CLI v3.2.0, live state = §1.3) LANDED (PR #126 = merge `ac977c294325`, merged 2026-11-18; five checks ALL-GREEN at head and merge commit; merge through the single-actor path with protection fully restored after) |

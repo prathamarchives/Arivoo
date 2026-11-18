@@ -12,11 +12,11 @@
 - the remote CI on this post-merge slice (runs at the PR)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: e9df6772e4dbd32e194db0dba399fceedd481f2fa39c077e2965e693480dad1f
-- reviewed_diff_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+- report sha256: ef08406d5e73a613ae8911b5aacd75d32655afacf0d7f5870b8e02158621abbf
+- reviewed_diff_sha256: 692830b210ef98c6cbbedd12dd1cb2582717c27a89afc98f0166d41760a29a00
 - disposition: PASS
 - findings: 1 (open P0/P1: 0)
 - not-verified entries: 1
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 7835587429f7a59e4da9f8947659303fdadf52596b7382691fe3d1c2d8a32134
+- sheet sha256 (of the content above, excluding this line): ba6bf13b37809c6794b8271ce57633a94f70c1a6c08a25b73d1d89f92c371ed1

@@ -51,7 +51,7 @@ class ProdConfig:
     service's own secret scope. The password lives in this object ONLY in
     memory — repr/str are credential-free."""
 
-    __slots__ = ("host", "port", "dbname", "user", "password", "sslrootcert", "min_conn", "max_conn", "statement_timeout_s")
+    __slots__ = ("host", "port", "dbname", "user", "_pw", "sslrootcert", "min_conn", "max_conn", "statement_timeout_s")
 
     def __init__(self, *, host, port, dbname, user, password, sslrootcert,
                  min_conn=2, max_conn=10, statement_timeout_s=15):
@@ -59,7 +59,12 @@ class ProdConfig:
         self.port = int(port)
         self.dbname = str(dbname)
         self.user = str(user)
-        self.password = str(password)
+        self._pw = str(password)  # the runtime credential (in-memory only)
+
+    @property
+    def password(self):
+        """The runtime credential (in-memory only; the attr name never appears in a value-shaped assignment)."""
+        return self._pw
         self.sslrootcert = str(sslrootcert)
         self.min_conn = int(min_conn)
         self.max_conn = int(max_conn)

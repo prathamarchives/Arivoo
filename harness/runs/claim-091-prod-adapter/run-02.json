@@ -1,0 +1,7 @@
+{
+ "command": "ARV_TEST_RIG=1 .venv-waved/bin/python harness/tests/test_prod_adapter.py (the behavioral \u00a78.5 form)",
+ "exit_code": 0,
+ "commit": "c9fa679bf21df2603cb968389bac61f53bd89a65",
+ "recorded_at": "2026-11-18T20:02:30.877245+00:00",
+ "output_sha256": "1df8afc27aa9c2cf06a44d7c5dc44f604f17adf02b4948e6203cf145851ce9aa"
+}

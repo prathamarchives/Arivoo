@@ -2,17 +2,17 @@
 
 > **STATUS: navigation snapshot — NOT authority.**
 
-> Ledger size: 136 statused intents (the Intent Ledger's own sequential count). This file tells an incoming agent where things stand and what to do next. It holds pointers and current status only, never a second copy of any rule (one fact, one home: `/EXECUTION.md` §1). If this file disagrees with a canonical document, the canonical document wins and this file must be corrected in the same session (authority order: `/EXECUTION.md` §3). **Contract (D-027, INT-109/105): one screen, pointers not detail — never a second Intent Ledger, a second plan, or an architecture copy; repo-scale long-term memory, not short-term session memory (INT-101).** The PR/review section is a **snapshot at the last repository update, not live status** — a committed file cannot guarantee external state hasn't changed since (INT-104). Updated at every session exit (AGENTS.md session-exit rule); a stale record pointer is a drift finding — VER-804 checks it mechanically.
+> Ledger size: 137 statused intents (the Intent Ledger's own sequential count). This file tells an incoming agent where things stand and what to do next. It holds pointers and current status only, never a second copy of any rule (one fact, one home: `/EXECUTION.md` §1). If this file disagrees with a canonical document, the canonical document wins and this file must be corrected in the same session (authority order: `/EXECUTION.md` §3). **Contract (D-027, INT-109/105): one screen, pointers not detail — never a second Intent Ledger, a second plan, or an architecture copy; repo-scale long-term memory, not short-term session memory (INT-101).** The PR/review section is a **snapshot at the last repository update, not live status** — a committed file cannot guarantee external state hasn't changed since (INT-104). Updated at every session exit (AGENTS.md session-exit rule); a stale record pointer is a drift finding — VER-804 checks it mechanically.
 
 ## Where things stand
 
 - **Phase:** THE PRODUCTIONIZATION ERA, RUNBOOK EXECUTION (2026-11-18 — INT-152/D-047: the scoped-PAT connection live; the 13-phase/8-wave runbook is the execution authority; Wave A underway)
 
-- **Active task:** CLAIM-090 — the LAW-08 dependency approval (the pinned SHA-verified lock + the scoped ARV-DEP-009 boundary); pending: the slice's PR + merge
+- **Active task:** CLAIM-091 — the production pooled PG adapter (pgprod.py: pool + verify-full + arv_app + transaction-local owner context; the §8.5 leak class closed); pending: the slice's PR + merge
 
 - **Latest session record:** context/extracted/78-RUNBOOK-INTAKE.md (the runbook intake; the corpus's third register growth)
-- **Last completed:** CLAIM-089 (the remote application; PR #129 = merge `fcb4b83`, 2026-11-18; five checks ALL-GREEN; Wave B complete)
-- **Exact next action:** CLAIM-090's merge, then CLAIM-091 (the production pooled PG adapter over the approved psycopg) → CLAIM-092 (JWT verification + /api/v1 health)
+- **Last completed:** CLAIM-090 (the LAW-08 dependency approval; PR #130 = merge `c9fa679`, 2026-11-18; five checks ALL-GREEN)
+- **Exact next action:** CLAIM-091's merge, then CLAIM-092 (JWT verification + owner derivation + /api/v1 health routes over FastAPI)
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.

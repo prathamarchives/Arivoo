@@ -32,7 +32,7 @@ CHILD_FSIZE = 8 * 1024 * 1024          # child per-file write cap
 CHILD_AS = 512 * 1024 * 1024           # child address-space cap
 CHILD_NPROC = 256                      # child process-count cap (RLIMIT_NPROC; the whole-UID form is why the value sits well above a runner's baseline)
 DEFAULT_CASE_TIMEOUT = 120             # seconds, per case (wall clock)
-SKIP_DIRS = {".git", "__pycache__", ".pg"}  # .pg: gitignored local rig dir — never corpus
+SKIP_DIRS = {".git", "__pycache__", ".pg", ".venv-waved"}  # .pg: gitignored local rig dir — never corpus; .venv-waved: the pinned local dev venv (D-048; gitignored — its symlinks are never corpus entries, exactly the .pg class)orpus
 POSIX = os.name == "posix"
 
 BOUNDARY = (

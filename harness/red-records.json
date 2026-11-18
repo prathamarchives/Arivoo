@@ -1483,14 +1483,30 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the production adapter suite observed RED before pgprod.py landed (the module did not exist at main \u2014 the waiting-for-harness class: the import failure was the observed red at the pre-slice tree)",
-    "current_sha256": "dad42993f23fa38122f130ab7a6a6a4907fd0d852a10c1dfd5a6ffd2f934360f",
+    "current_sha256": "c883ee9f6cb277a78c582c7685aa563a503e889d1ed3f15021168a5138b15a48",
     "amendments": [
       {
         "prior_sha256": "ea46f135463f56f542eaa71f214523d95256a3bff7835659fff54139d489ad02",
         "new_sha256": "dad42993f23fa38122f130ab7a6a6a4907fd0d852a10c1dfd5a6ffd2f934360f",
         "note": "the CI-form repair: the behavioral proof moved into the in-boundary driver (pgprod_selfcheck.py) and the test became third-party-free/subprocess-driven; the suite observed RED at the pre-repair form (the TypeError exit 1) before this edit",
         "observed_at": "2026-11-18T20:23:27.526545+00:00"
+      },
+      {
+        "prior_sha256": "dad42993f23fa38122f130ab7a6a6a4907fd0d852a10c1dfd5a6ffd2f934360f",
+        "new_sha256": "c883ee9f6cb277a78c582c7685aa563a503e889d1ed3f15021168a5138b15a48",
+        "note": "the auth boundary suite observed RED before the modules landed (harness/api/ had no application code at main \u2014 the import failure was the observed red at the pre-slice tree)",
+        "observed_at": "2026-11-18T20:49:20.808583+00:00"
       }
     ]
+  },
+  "harness/tests/test_auth_boundary.py": {
+    "schema": 2,
+    "binding_commit": "ea5b091121c6395dc04fdb359f225ca3ce2ff281",
+    "binding_sha256": "3357df5976514f9fba56f8a0f79a4aaec4c1625246ceab1bb5cf144b6785304a",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-000",
+    "red_evidence": "the auth boundary suite observed RED before the modules landed (harness/api/ had no application code at main \u2014 the import failure was the observed red at the pre-slice tree)",
+    "current_sha256": "3357df5976514f9fba56f8a0f79a4aaec4c1625246ceab1bb5cf144b6785304a",
+    "amendments": []
   }
 }

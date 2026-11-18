@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-089-remote-apply",
  "base_sha": "58cb15497a474a0699fc4dfd5424911c1ddf59ee",
- "reviewed_diff_sha256": "dfea09834421e764f59a31ac09611af77fe6f7ebf9f18a87b93dcbd1f8f99aa2",
+ "reviewed_diff_sha256": "69a47b387822c600f0baf6596ce2e1373754fb42d6a2011a29eef1338a74db0b",
  "intent_ids": [
   "INT-153",
   "INT-145"

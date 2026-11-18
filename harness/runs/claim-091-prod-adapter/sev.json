@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-091-prod-adapter",
  "base_sha": "c9fa679bf21df2603cb968389bac61f53bd89a65",
- "reviewed_diff_sha256": "31384304f5f25d76e4c4ed3acfe112b0f23f6720946a1c50040af005d1ff2e0f",
+ "reviewed_diff_sha256": "732728009722c19052cbb98fb23058201111bdb72a2c86233421b34e25a7be7a",
  "intent_ids": [
   "INT-155"
  ],
@@ -15,6 +15,7 @@
  ],
  "changed_components": [
   "harness/adapters/pgprod.py",
+  "harness/adapters/pgprod_selfcheck.py",
   "harness/tests/test_prod_adapter.py",
   "harness/scope.py",
   "harness/approved_deps.txt",

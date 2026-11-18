@@ -1,14 +1,14 @@
 # PROOF SHEET — slice claim-093-api-skeleton (harness-built; never hand-edited — PRF-01, LAW-01)
 
 - commit (last run record's): 368e5493f0dfdc195be3ee1b3544a519fc6f2f7e
-- generated (last record's timestamp): 2026-11-18T21:34:09.144000+00:00
+- generated (last record's timestamp): 2026-11-18T21:51:32.998788+00:00
 - run records: 9
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_auth_boundary.py` -> exit 0 · output sha256 ac2b58d24ac61e9c · 2026-11-18T21:33:23.923030+00:00
 - `/home/z/my-project/Arivoo/.venv-waved/bin/python -I harness/api/routes_selfcheck.py` -> exit 0 · output sha256 0416535a4612bfba · 2026-11-18T21:33:24.272676+00:00
 - `/home/z/my-project/Arivoo/.venv-waved/bin/python -I harness/api/auth_selfcheck.py` -> exit 0 · output sha256 6c3443cfaeecc577 · 2026-11-18T21:33:24.388268+00:00
-- `python3 harness/tests/test_migrations.py` -> exit 0 · output sha256 5c402f23f5f63ee4 · 2026-11-18T21:33:33.589125+00:00
+- `python3 harness/tests/test_migrations.py (the JNL-06 rendering repair)` -> exit 0 · output sha256 5c402f23f5f63ee4 · 2026-11-18T21:51:32.998788+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 d5cf8c20342c430b · 2026-11-18T21:33:33.763840+00:00
 - `python3 tools/verify_selftest.py` -> exit 0 · output sha256 065edbcf2207ec9c · 2026-11-18T21:34:08.424636+00:00
 - `python3 harness/tests/test_remote_target.py` -> exit 0 · output sha256 027d587ce7d342c1 · 2026-11-18T21:34:08.473163+00:00
@@ -21,11 +21,11 @@
 - uvicorn serving over a real socket (the serve-time deployment slice — Wave F)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: c6c1c1237f7b8f642b06be2258091b29c8dc9e1839bfaa18fb6b3e75916d2550
-- reviewed_diff_sha256: c0ae3973c4f69c31df28ba079942174d7521fba32294c6148e87a03979c72491
+- report sha256: d3df658b7e06ba9f47cfab53bb94e024f8e8e6c2dabdccf7d45c392ceba14798
+- reviewed_diff_sha256: 8b31d8c9bbd86e997a1a161cdbc320bc51b3f3b897c34dfba5382ec0b8c73236
 - disposition: PASS
-- findings: 1 (open P0/P1: 0)
+- findings: 2 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): e5d2af6dad607faa762db5feb4097b908bcd4a5e60f3f968319e5907be3f72d0
+- sheet sha256 (of the content above, excluding this line): 5b9b57fc670ebd5ed3c06de46605906658f69b9c2f4a0b85d1fb88518589ec6a

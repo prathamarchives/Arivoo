@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-093-api-skeleton",
  "base_sha": "368e5493f0dfdc195be3ee1b3544a519fc6f2f7e",
- "reviewed_diff_sha256": "c0ae3973c4f69c31df28ba079942174d7521fba32294c6148e87a03979c72491",
+ "reviewed_diff_sha256": "8b31d8c9bbd86e997a1a161cdbc320bc51b3f3b897c34dfba5382ec0b8c73236",
  "intent_ids": [
   "INT-158"
  ],
@@ -32,7 +32,7 @@
   "the probe (the local rig AND the remote through the guarded pooler path, both read-only): the owner schema was ALREADY conformant \u2014 the ONLY arv SECURITY DEFINER function (agent_token_lookup) carried its pin from 0019; the advisors' 23 WARNs named Supabase's own platform schemas (storage/auth \u2014 platform-managed, already pinned by Supabase, outside the one migration history by \u00a721's rules)",
   "migration 0020 (the GUARANTEE form): the definer pin restated (a no-op today) + the runtime roles' GLOBAL default search_path (pg_catalog first, arv second \u2014 the hijack-proof order; the role-level form holds on every database the roles touch) + the invariant CHECK (ARV-TEST-045: zero unpinned definer functions in arv AND both role defaults present, on every future migration run)",
   "the grammar: ALTER SCHEMA/FUNCTION/ROLE admitted (the same non-procedural/non-data class as ALTER TABLE; every other ALTER form still fails closed \u2014 the fail-closed default preserved, not weakened)",
-  "the API skeleton (restored from the 092 draft per ARV-SIZE-002's split): create_app's explicit composition, /api/v1 (API_VERSION=1), GET /health/live (no dependencies) + GET /health/ready (503 until declared ready), the centralized named-error mapping, the verified_context dependency, /api/v1/me; the 8-check routes battery green (restored to the suite)"
+  "migration 0020 (the GUARANTEE form): the definer pin + the runtime roles' GLOBAL default search_path (pg_catalog, public \u2014 hijack-proof AND rendering-stable: keeping 'arv' off the path preserves pg_get_constraintdef's schema-qualified output; the JNL-06 lesson) + the invariant CHECK (ARV-TEST-045)"
  ],
  "v_model": {
   "component_verification": [
@@ -84,6 +84,13 @@
    "status": "resolved",
    "evidence": "the CLAIM-089 advisors' 23 search_path WARNs, re-probed: they name Supabase's own platform schemas (storage/auth), not the owner's \u2014 the owner schema was already conformant",
    "disposition": "closed as a GUARANTEE: 0020 pins the definer + the roles' global default + the checked invariant; the platform schemas stay outside the one history (touching them would violate the single-migration rule)"
+  },
+  {
+   "id": "SEV-093-2",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "0020's first form put 'arv' on the roles' default path, which changed pg_get_constraintdef's rendering for the audit role (the FK rendered unqualified) and broke JNL-06's string-shaped audit",
+   "disposition": "closed in-slice: the roles' default is (pg_catalog, public) \u2014 hijack-proof with 'arv' off the path; the kernel's SQL qualifies arv.X everywhere (grep-verified), and the journal suite is GREEN again"
   }
  ],
  "not_verified": [

@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-090-dep-approval",
  "base_sha": "fcb4b83034aabcaa11acfb8bda7c6dbcaae44305",
- "reviewed_diff_sha256": "6bf5b7bcc8f1bfdc6f4667e0cda8fdec70c5b1121c88d36017e3f8d364300ddf",
+ "reviewed_diff_sha256": "6c116b8da4e4f19ea48dc32231c8fd21a624cd2f9db76985c6621095978dea57",
  "intent_ids": [
   "INT-154"
  ],

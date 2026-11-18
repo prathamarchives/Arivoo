@@ -14,3 +14,4 @@ harness/scope.py D-049
 harness/approved_deps.txt D-049
 tools/mutation_runner.py D-049
 AGENTS.md D-049
+harness/adapters/pgprod_selfcheck.py D-049

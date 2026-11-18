@@ -15,7 +15,8 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-091 | 58 | Super Z (GLM host) | `slice/claim-091-prod-adapter` | `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `INTENT-LEDGER.md`, `DECISIONS.md`, `harness/adapters/pgprod.py`, `harness/tests/test_prod_adapter.py`, `harness/gate.py`, `harness/scope.py`, `harness/approved_deps.txt`, `tools/mutation_runner.py`, `AGENTS.md`, `harness/red-records.json`, `.gitignore`, `harness/runs/claim-091-prod-adapter` | INT-155 (retroactive: ledgered in this same slice — the note precedes the ledger entry) | 2026-11-18 | the production pooled PG adapter (§10 + §8.5): psycopg_pool with verify-full + the pinned root CA + the arv_app runtime shape + transaction-local owner context; the named guards (ARV-PRD-001..006); the §8.5 leak class found and closed (ARV-PRD-011: every lease transaction-scoped) |
+| CLAIM-091 | 58 | Super Z (GLM host) | `slice/claim-091-prod-adapter` | `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `INTENT-LEDGER.md`, `DECISIONS.md`, `harness/adapters/pgprod.py`, `harness/adapters/pgprod_selfcheck.py`, `harness/tests/test_prod_adapter.py`, `harness/gate.py`, `harness/scope.py`, `harness/approved_deps.txt`, `tools/mutation_runner.py`, `AGENTS.md`, `harness/red-records.json`, `.gitignore`, `harness/runs/claim-091-prod-adapter` | INT-155 (retroactive: ledgered in this same slice — the note precedes the ledger entry) | 2026-11-18 | the production pooled PG adapter (§10 + §8.5): psycopg_pool with verify-full + the pinned root CA + the arv_app runtime shape + transaction-local owner context; the named guards (ARV-PRD-001..006); the §8.5 leak class found and closed (ARV-PRD-011: every lease transaction-scoped) |
+
 
 
 

@@ -1465,5 +1465,15 @@
         "observed_at": "2026-11-18T17:43:00.333584+00:00"
       }
     ]
+  },
+  "harness/tests/test_dep_boundaries.py": {
+    "schema": 2,
+    "binding_commit": "05ffc2f1ffa4de190fa02c26ec08a93c7366e7b1",
+    "binding_sha256": "543498bd140e52a9e087c09bb8565425614cac45c7851ae2a68a44d1f346e962",
+    "red_exit": 1,
+    "red_code": "ARV-DEP-009",
+    "red_evidence": "the boundary suite observed RED at main's scope.py (ARV-DEP-009 absent: the out-of-boundary import passes) before the scope.py upgrade landed in this slice; observed at this branch's pre-merge tree",
+    "current_sha256": "543498bd140e52a9e087c09bb8565425614cac45c7851ae2a68a44d1f346e962",
+    "amendments": []
   }
 }

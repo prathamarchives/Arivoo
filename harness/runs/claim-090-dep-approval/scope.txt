@@ -10,3 +10,5 @@ harness/scope.py D-048
 harness/tests/test_dep_boundaries.py D-048
 .env.example D-048
 harness/runs/claim-090-dep-approval D-041
+harness/gate.py D-048
+harness/red-records.json D-048

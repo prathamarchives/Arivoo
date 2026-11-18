@@ -10,3 +10,7 @@ harness/gate.py D-049
 harness/red-records.json D-049
 .gitignore D-049
 harness/runs/claim-091-prod-adapter D-041
+harness/scope.py D-049
+harness/approved_deps.txt D-049
+tools/mutation_runner.py D-049
+AGENTS.md D-049

@@ -486,7 +486,18 @@ def main() -> int:
     ap.add_argument("--verify", action="store_true",
                     help="observation-only: report the applied/ledger state "
                          "(ARV-MIG-013: verify creates NOTHING)")
+    ap.add_argument("--remote-target", metavar="REF", default=None,
+                    help="CLAIM-088 (D-047, runbook §6.2): the guarded remote mode — apply "
+                         "the canonical chain to the pinned Supabase project. Requires the "
+                         "exact project ref (the adapter's ARV-RMT guards fire first: wrong "
+                         "ref/host/port, weak TLS and credential echoes are all refused BY "
+                         "NAME before any connection). The plain mode stays loopback-only "
+                         "(make migrate is UNCHANGED — the guard is preserved, not deleted)")
     a = ap.parse_args()
+    if a.remote_target:
+        # the guarded remote mode: the pin is the flag's value; the adapter's
+        # guard chain reads it from the environment (the ONE approved path)
+        os.environ["ARV_REMOTE_TARGET"] = a.remote_target
     cfg = pg.config()
     db = os.environ.get("PGDATABASE", "postgres")
     mdir = cfg["ARV_MIGRATIONS_DIR"]

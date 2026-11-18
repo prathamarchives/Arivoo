@@ -1,0 +1,7 @@
+{
+ "command": "python3 harness/tests/test_remote_target.py",
+ "exit_code": 0,
+ "commit": "41a7775350a0a5088901c497e0c5a452160b38d1",
+ "output_sha256": "027d587ce7d342c16b78b5590dcb10c1c2e1c69b5881fde8fbf4be5f5ccf9196",
+ "recorded_at": "2026-11-18T18:09:12.486001+00:00"
+}

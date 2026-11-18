@@ -1084,3 +1084,10 @@ Stage Summary:
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged; Wave C (Q17/Q12), Wave F (Q18 + Railway cost), Wave G (the desktop repo) gated per the runbook's own stop conditions.
 - Next: Wave B — CLAIM-088 the guarded remote-target migration path.
 - Merge path note (the single-actor instance, disclosed): the 1-review requirement blocked the self-merge; removed via the owner's admin token (the owner-supplied credential — the standing single-actor authorization), merge, then protection RESTORED IN FULL (reviews=1 + the five checks). The CI failures that preceded it are answered in-slice: ARV-SCOPE/CLM-002 (the staged-side-effect purge) + ARV-SEV-003 (the digest rebound at the clean head — stability proven by recomputation).
+
+## Task 108 (CLAIM-088, session 54) — the guarded remote-target migration path
+- What: runbook §6.2 as named pre-connection refusals — adapters/pg.py's remote mode (ARV-RMT-002 the pinned ref/host/port, ARV-RMT-003 verify-full, ARV-RMT-004 terminal, ARV-RMT-005 constants-only refusal text) + migrate.py's --remote-target flag (plain `make migrate` unchanged) + the loopback guard preserved (ARV-DB-004 untouched). RED-first: 6/8 observed at the test-only commit (the amendment: test_01 made hermetic).
+- Verified: test_remote_target 8/8; test_migrations/test_kernel/test_boundary green (additive, nothing regressed); canonical + selftest green; the PR-mode gate GREEN at the head.
+- Evidence: harness/runs/claim-088-remote-target/ (runs + sev.json + the Proof Sheet).
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the live application (CLAIM-089), the CA-bundle mechanics (CLAIM-089's preflight).
+- Next: CLAIM-089 — the remote application of the canonical chain.

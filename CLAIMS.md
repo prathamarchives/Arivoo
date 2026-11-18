@@ -15,6 +15,7 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
+| CLAIM-088 | 55 | Super Z (GLM host) | `slice/claim-088-remote-target` | `harness/adapters/pg.py`, `harness/migrate.py`, `harness/tests/test_remote_target.py`, `harness/gate.py`, `harness/red-records.json`, `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `harness/runs/claim-088-remote-target` | INT-153 (retroactive: reserved in CLAIM-087) · INT-145 | 2026-11-18 | the guarded remote-target migration path (runbook §6.2's seven rules as named pre-connection refusals; the migrator's explicit --remote-target; the loopback guard preserved; RED-first 6/8 observed) |
 | CLAIM-087B | 54 | Super Z (GLM host) | `slice/claim-087b-postmerge-state` | `STATE.md`, `CLAIMS.md`, `context/WORKLOG.md`, `harness/runs/claim-087b-postmerge-state` | INT-145 (retroactive: ledgered in this slice) | 2026-11-18 | the post-merge state re-derivation (the §3.1 step-13 protocol: STATE = the merged live state; the 087 close row; the single-actor merge path disclosed) |
 
 ## Closed claims

@@ -48,6 +48,7 @@ class TestRemoteTargetGuards(unittest.TestCase):
 
     # ARV-RMT-001: no remote target -> the adapter stays loopback-only
     def test_01_no_remote_mode_stays_loopback(self):
+        os.environ["PGHOST"] = "10.0.0.9"  # non-loopback WITHOUT remote mode
         r = pg.psql("SELECT 1;", db="postgres")
         self.assertEqual(r.returncode, 125)
         self.assertIn("ARV-DB-004", r.stderr)

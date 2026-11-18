@@ -18,3 +18,4 @@ harness/gate.py D-050
 harness/red-records.json D-050
 AGENTS.md D-050
 harness/runs/claim-092-auth-boundary D-041
+harness/scope.py D-050

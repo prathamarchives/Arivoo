@@ -19,11 +19,11 @@
 - the remote CI runs (execute at the PR)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 99ee6d96f33dfbf542d00558f6ed031b6c873e468b8ce5fda5c9c9823d3d2926
-- reviewed_diff_sha256: 380cfd0d674e1a9e98f46219ec68ebdf4ba7e55c2861ae3e800ac7e7f86c7d65
+- report sha256: 290276396b87d80a2661050f176d179f0c7cbf5669eab890bc36cde6ccd05589
+- reviewed_diff_sha256: 42c5b44e834f69078f85c50e6fbc715fef83c64766a49431b45c33c71be3bf43
 - disposition: PASS
 - findings: 1 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 76eff0e6101c702e237d1f671b61b288711b3ed87ebfff9460ee186cebd7d89a
+- sheet sha256 (of the content above, excluding this line): d614a2cfd05b57125b69f8602352759db00b62a3bc6741c64ec665614a7ed26e

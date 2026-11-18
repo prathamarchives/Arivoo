@@ -1,0 +1,10 @@
+# CLAIM-088 — the guarded remote-target migration path (runbook §6.2; RED-first).
+harness/adapters/pg.py INT-153
+harness/migrate.py INT-153
+harness/tests/test_remote_target.py D-036
+harness/gate.py D-036
+harness/red-records.json D-041
+STATE.md INT-145
+CLAIMS.md D-038
+context/WORKLOG.md D-046
+harness/runs/claim-088-remote-target D-041

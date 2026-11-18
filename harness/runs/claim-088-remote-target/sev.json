@@ -1,0 +1,110 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-088-remote-target",
+ "base_sha": "48c618e39ba0f6420159010644f1e7c29b84b65c",
+ "reviewed_diff_sha256": "d3effaeb4dd2dfedf8b67a1b159893881b26ffdda8e6c39a61a4b10fa462cf06",
+ "intent_ids": [
+  "INT-153",
+  "INT-145"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C1",
+  "C4"
+ ],
+ "changed_components": [
+  "harness/adapters/pg.py",
+  "harness/migrate.py",
+  "harness/tests/test_remote_target.py",
+  "harness/gate.py",
+  "harness/red-records.json",
+  "STATE.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "harness/runs/claim-088-remote-target"
+ ],
+ "interfaces_reviewed": [
+  "the guarded remote mode (adapters/pg.py): ARV-RMT-002 ref/host/port pinning (the exact project ref wcuuakhdmsmmxagvbdmg + the pooler host + the session-pooler port \u2014 each refused BY NAME before any connection), ARV-RMT-003 sslmode=verify-full required, ARV-RMT-004 terminal refusals (never a loopback fallback), ARV-RMT-005 refusal text derived from constants only (credential echoes impossible by construction)",
+  "the migrator's --remote-target flag: the explicit mode (ARV-RMT-006); plain `make migrate` UNCHANGED (loopback-only \u2014 the \u00a76.2 'make migrate remains local-only' rule); the flag sets ARV_REMOTE_TARGET which the adapter's guard chain validates",
+  "the loopback guard PRESERVED (ARV-RMT-001/007 + the original ARV-DB-004): the remote path is ADDITIVE, never a deletion of the check (\u00a76.2: 'do not merely delete the loopback check')"
+ ],
+ "v_model": {
+  "component_verification": [
+   "test_remote_target.py 8/8 (the named refusals: every guard fires exactly as \u00a76.2's seven rules require)"
+  ],
+  "integration_verification": [
+   "the full-chain regressions: test_migrations/test_kernel/test_boundary green (the guard is additive \u2014 nothing regressed); canonical + selftest green"
+  ],
+  "system_verification": [
+   "the wrong-database impossibility proof: a remote target is only ever the pinned ref at the pinned host/port with verified TLS \u2014 every other shape is refused BY NAME before any connection is attempted (\u00a76.2's 'tests prove it cannot silently select the wrong database')"
+  ],
+  "validation": [
+   "the red record (observed: 6/8 failures at the test-only commit \u2014 the guards absent; the GREEN amendment: test_01 made hermetic)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-088-1",
+   "scenario": "a remote run selects the wrong database (wrong ref/host/port)",
+   "control": "ARV-RMT-002's triple pinning, each refusal pre-connection",
+   "proof_ids": [
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-088-2",
+   "scenario": "a plaintext or identity-unverified remote connection",
+   "control": "ARV-RMT-003 (verify-full required; weaker modes refused)",
+   "proof_ids": [
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-088-3",
+   "scenario": "a refused remote target silently retries at loopback",
+   "control": "ARV-RMT-004 (terminal refusal \u2014 the guard returns before any cmd assembly)",
+   "proof_ids": [
+    "run-03"
+   ]
+  },
+  {
+   "id": "FM-088-4",
+   "scenario": "the local guard is weakened by the remote path's addition",
+   "control": "ARV-RMT-001/007 + ARV-DB-004 unchanged (test_01/08) + the battery's regression suites",
+   "proof_ids": [
+    "run-04",
+    "run-05",
+    "run-06"
+   ]
+  },
+  {
+   "id": "FM-088-5",
+   "scenario": "credential material in a refusal/echo",
+   "control": "ARV-RMT-005 (refusal text from constants; the test proves a planted secret never echoes)",
+   "proof_ids": [
+    "run-03"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-088-1",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the first red run's test_01 attempted a live connection (the default 5432 in this sandbox is the pgbuild rig's parent, not the CI service) \u2014 a hermeticity gap in the TEST, not the guard",
+   "disposition": "test_01 made hermetic (a non-loopback host directly, never a server dependency); the red record carries the amendment note"
+  }
+ ],
+ "not_verified": [
+  "the LIVE remote application (CLAIM-089's own slice: the guards prove the path's shape; the actual connection + application happens there with the migration credential in the release environment)",
+  "sslmode=verify-full's CA-bundle mechanics against the real pooler (needs the live connection; noted for CLAIM-089's preflight)",
+  "the remote CI runs (execute at the PR)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-088",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-088 + the trusted CI judges (declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the guarded remote-target migration path: the adapter's remote mode is pinned-by-name (ref/host/port/TLS each refused pre-connection), terminal (no fallback), credential-safe by construction; the migrator's --remote-target is the explicit single entry; the loopback guard is preserved (never deleted); 8/8 RED-first observed; the battery regresses nothing.",
+ "sheet_section": true
+}

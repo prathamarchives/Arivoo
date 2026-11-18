@@ -8,11 +8,11 @@
 
 - **Phase:** THE PRODUCTIONIZATION ERA, RUNBOOK EXECUTION (2026-11-18 — INT-152/D-047: the scoped-PAT connection live; the 13-phase/8-wave runbook is the execution authority; Wave A underway)
 
-- **Active task:** CLAIM-088 — Wave B opens: the guarded remote-target migration path (harness/adapters/pg.py's explicit remote mode + harness/migrate.py's remote target; RED-first: the remote mode's own tests prove it cannot select the wrong database; the local chain green first)
+- **Active task:** CLAIM-088 — the guarded remote-target migration path LANDED-pending-merge (the adapter's ARV-RMT guard chain: ref/host/port/TLS pinned, terminal, credential-safe; the migrator's --remote-target; the loopback guard preserved; 8/8 RED-first)
 
 - **Latest session record:** context/extracted/78-RUNBOOK-INTAKE.md (the runbook intake; the corpus's third register growth)
 - **Last completed:** CLAIM-087 (the runbook intake; PR #126 = merge `ac977c29`, 2026-11-18; five checks ALL-GREEN at head AND at the merge commit; the re-upload proved the corpus copy byte-faithful: 2113dcfb; CI's ARV-SEV-003 answered by the clean-head rebind; the merge executed through the single-actor path: the review requirement was removed by the owner's own admin token, merge, then protection restored in full — reviews=1 + all five checks)
-- **Exact next action:** CLAIM-088's RED tests (the remote-mode guard's wrong-target refusals) → implement → local chain → gate → PR #127; then CLAIM-089 (the remote application of migrations 0001→0019)
+- **Exact next action:** CLAIM-088's merge, then CLAIM-089: the remote application (roles bootstrap + migrations 0001→0019 to wcuuakhdmsmmxagvbdmg through the guarded path; the migration credential in the release environment; RLS/ledger verification evidence)
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.

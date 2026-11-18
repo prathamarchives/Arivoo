@@ -127,7 +127,10 @@ TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          "harness/tests/test_trusted_gate.py",
          "harness/tests/test_claims_paths.py",
          "harness/tests/test_record_machinery.py",
-         "harness/tests/test_sev.py")
+         "harness/tests/test_sev.py",
+         # CLAIM-088 (runbook §6.2; the ARV-RED-008 class: the new suite's
+         # registration rides the binding commit, diff-visible)
+         "harness/tests/test_remote_target.py")
 
 
 def run_cmd(cmd: list) -> subprocess.CompletedProcess:

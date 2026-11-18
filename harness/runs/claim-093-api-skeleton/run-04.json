@@ -1,0 +1,7 @@
+{
+ "command": "python3 harness/tests/test_migrations.py (the JNL-06 rendering repair)",
+ "exit_code": 0,
+ "commit": "a0a75aecef8855cfc8694eeb6c3a1ef8f70ceb97",
+ "recorded_at": "2026-11-18T21:51:32.998788+00:00",
+ "output_sha256": "5c402f23f5f63ee42ea59e61c639f4462e33074f79f7330ba970d18450877a4f"
+}

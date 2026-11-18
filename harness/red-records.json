@@ -3,7 +3,7 @@
     "red_commit": "8b17c7a99d66be35502d07c99d499ea88e53c904",
     "red_evidence": "exit 1, ARV-TEST-000/011/019 waiting-for-harness (observed at the red commit; record 18 \u00a74.1-\u00a74.3)",
     "red_sha256": "a83a4ce600e87d8dcd507d506ba6867bf1ac876220eb43fd4ea73861eb393c11",
-    "current_sha256": "8aa3f1325a1c0ee73fc3c59f7bb2641b23468e24047737ed65ebc683e0ea5e26",
+    "current_sha256": "7d9d2653d42eaabc030101ec70b0335f316285b5635131b0a90d02e5be6ca963",
     "amendments": [
       {
         "note": "test-side defect repairs documented in record 18 \u00a74.1-\u00a74.3 (S1: count made dynamic; S2: dual-layer expectations, scoped effective view; S3: content-level fingerprint) \u2014 amendments correct assertions, none removed"
@@ -49,6 +49,12 @@
         "new_sha256": "8aa3f1325a1c0ee73fc3c59f7bb2641b23468e24047737ed65ebc683e0ea5e26",
         "note": "CLAIM-049 (P3-01) \u2014 test_migrations.py's ARV-TEST-024 policy-count query scoped to its own declared two substrate tables (the case's message has always claimed 'both owner policies present' \u2014 the query counted the WHOLE arv schema, which was correct in the two-table era and silently became stale the moment the product tables carried their own policies per the same \u00a72 conventions; the trigger and RLS subqueries were already table-scoped and unchanged). The four product tables' policies are proven where they live: the capture suite's CAP-17 (RLS forced on all four) + CAP-09/CAP-11 (the behavioral scoping and the fail-closed unscoped write). The A08 nonempty oracle's semantics unchanged",
         "observed_at": "2026-10-25T15:49:08.663247+00:00"
+      },
+      {
+        "prior_sha256": "8aa3f1325a1c0ee73fc3c59f7bb2641b23468e24047737ed65ebc683e0ea5e26",
+        "new_sha256": "7d9d2653d42eaabc030101ec70b0335f316285b5635131b0a90d02e5be6ca963",
+        "note": "the skeleton+0020 suite observed RED before the restore (the app skeleton departed main at 092's split; the migrations suite lacked the 045 invariant \u2014 the red was the modules-absent class at main)",
+        "observed_at": "2026-11-18T21:34:18.060408+00:00"
       }
     ],
     "schema": 2,
@@ -1506,13 +1512,25 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "the auth boundary suite observed RED before the modules landed (harness/api/ had no application code at main \u2014 the import failure was the observed red at the pre-slice tree)",
-    "current_sha256": "f2774b34db457913d3a52acb9b4ed6058286c0b43fb2ee6c3ec48e9d87903dc3",
+    "current_sha256": "09fffe936bf53d650d814c374f1beb0a64997b4b224b94ef0121b62c71aa1dce",
     "amendments": [
       {
         "prior_sha256": "3357df5976514f9fba56f8a0f79a4aaec4c1625246ceab1bb5cf144b6785304a",
         "new_sha256": "f2774b34db457913d3a52acb9b4ed6058286c0b43fb2ee6c3ec48e9d87903dc3",
         "note": "the ARV-SIZE-002 split: the suite's routes section moved to CLAIM-093 (the app skeleton departed this slice); the suite observed RED at the un-split form (the size refusal) before this edit",
         "observed_at": "2026-11-18T21:08:13.605582+00:00"
+      },
+      {
+        "prior_sha256": "f2774b34db457913d3a52acb9b4ed6058286c0b43fb2ee6c3ec48e9d87903dc3",
+        "new_sha256": "65f5dc48758518ed21744d86dd575a62206654a480c84c3bd9cdf4b7e6768398",
+        "note": "the skeleton+0020 suite observed RED before the restore (the app skeleton departed main at 092's split; the migrations suite lacked the 045 invariant \u2014 the red was the modules-absent class at main)",
+        "observed_at": "2026-11-18T21:34:18.061950+00:00"
+      },
+      {
+        "prior_sha256": "65f5dc48758518ed21744d86dd575a62206654a480c84c3bd9cdf4b7e6768398",
+        "new_sha256": "09fffe936bf53d650d814c374f1beb0a64997b4b224b94ef0121b62c71aa1dce",
+        "note": "the venv-less fallback repair (the CI runner carries no .venv-waved; the suite crashed on the missing path \u2014 exit 1 observed in CI); the batteries now ride the venv where it exists and NOTE honestly where it does not",
+        "observed_at": "2026-11-18T22:06:57.856758+00:00"
       }
     ]
   }

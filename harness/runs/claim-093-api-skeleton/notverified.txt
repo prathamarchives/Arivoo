@@ -1,0 +1,3 @@
+the remote 0020 application (the migration is in the chain; the remote apply runs as its own act through the guarded path with its own run record — the §6.3 test-before-production rule; the local rig's application + the invariant check are this slice's proof)
+a live Supabase-issued token end-to-end (needs a real user — §17.1's desktop test; the verify chain is fully proven)
+uvicorn serving over a real socket (the serve-time deployment slice — Wave F)

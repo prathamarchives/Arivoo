@@ -1,0 +1,7 @@
+{
+ "command": "/home/z/my-project/Arivoo/.venv-waved/bin/python -I harness/api/routes_selfcheck.py",
+ "exit_code": 0,
+ "commit": "368e5493f0dfdc195be3ee1b3544a519fc6f2f7e",
+ "recorded_at": "2026-11-18T21:33:24.272676+00:00",
+ "output_sha256": "0416535a4612bfbab5c65903d9cb40fc3a7375cb611fafda467170691d5824bc"
+}

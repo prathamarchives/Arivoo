@@ -21,11 +21,11 @@
 - uvicorn serving over a real socket (the serve-time deployment slice — Wave F)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: d3df658b7e06ba9f47cfab53bb94e024f8e8e6c2dabdccf7d45c392ceba14798
-- reviewed_diff_sha256: 8b31d8c9bbd86e997a1a161cdbc320bc51b3f3b897c34dfba5382ec0b8c73236
+- report sha256: 0da67f50beada83b941c1f201a3a6af43b12465e2401e6dda7dae019fee7db3f
+- reviewed_diff_sha256: 2a2139af8ca1f924846b707a56c222752dfb6699bf6a7b416d5732c3474c4794
 - disposition: PASS
 - findings: 2 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 5b9b57fc670ebd5ed3c06de46605906658f69b9c2f4a0b85d1fb88518589ec6a
+- sheet sha256 (of the content above, excluding this line): 1d0af5f30745acb282459e25403c98935c48c79de13486ddc3f1054ed3f73ca8

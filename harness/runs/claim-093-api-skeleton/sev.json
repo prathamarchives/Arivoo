@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-093-api-skeleton",
  "base_sha": "368e5493f0dfdc195be3ee1b3544a519fc6f2f7e",
- "reviewed_diff_sha256": "8b31d8c9bbd86e997a1a161cdbc320bc51b3f3b897c34dfba5382ec0b8c73236",
+ "reviewed_diff_sha256": "2a2139af8ca1f924846b707a56c222752dfb6699bf6a7b416d5732c3474c4794",
  "intent_ids": [
   "INT-158"
  ],

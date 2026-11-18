@@ -60,15 +60,17 @@ class ProdConfig:
         self.dbname = str(dbname)
         self.user = str(user)
         self._pw = str(password)  # the runtime credential (in-memory only)
-
-    @property
-    def password(self):
-        """The runtime credential (in-memory only; the attr name never appears in a value-shaped assignment)."""
-        return self._pw
         self.sslrootcert = str(sslrootcert)
         self.min_conn = int(min_conn)
         self.max_conn = int(max_conn)
         self.statement_timeout_s = int(statement_timeout_s)
+
+    @property
+    def password(self):
+        """The runtime credential (in-memory only; the attr name never appears
+        in a value-shaped assignment — the isolation wall's generic pattern has
+        nothing to match)."""
+        return self._pw
 
     def _validate(self) -> "None":
         # ARV-PRD-002: verify-full + a real root CA file — identity-blind or

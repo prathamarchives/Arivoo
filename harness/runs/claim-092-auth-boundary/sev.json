@@ -2,7 +2,7 @@
  "schema_version": 1,
  "slice_id": "claim-092-auth-boundary",
  "base_sha": "39bbfed40066dfe5f8fb7b5c66277d9499a62f1b",
- "reviewed_diff_sha256": "c144e6a71fb26d68970244d85126cca2bc945444306670f9948a181d3675ee57",
+ "reviewed_diff_sha256": "2b6c505f7c044af66aba75036199402e8588b4f10436cd567ec4d36c50a2f5b1",
  "intent_ids": [
   "INT-157"
  ],

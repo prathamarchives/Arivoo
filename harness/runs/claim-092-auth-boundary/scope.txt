@@ -5,10 +5,8 @@ context/WORKLOG.md D-050
 INTENT-LEDGER.md D-050
 DECISIONS.md D-050
 harness/api/auth.py D-050
-harness/api/app.py D-050
 harness/api/__init__.py D-050
 harness/api/auth_selfcheck.py D-050
-harness/api/routes_selfcheck.py D-050
 harness/tests/test_auth_boundary.py D-050
 harness/tests/test_prod_adapter.py D-050
 harness/adapters/clock.py D-050

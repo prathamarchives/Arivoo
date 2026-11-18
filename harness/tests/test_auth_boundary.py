@@ -55,23 +55,7 @@ def main() -> int:
     check("ARV-AUTH-018", "GREEN —" in out and r.returncode == 0,
           "the auth battery exits GREEN", "the battery must pass in the venv")
 
-    # the app routes: driven through the raw ASGI interface (stdlib only)
-    r2 = subprocess.run(
-        [str(REPO / ".venv-waved/bin/python"), "-I",
-         str(REPO / "harness/api/routes_selfcheck.py")],
-        capture_output=True, text=True, timeout=180)
-    out2 = r2.stdout
-    for code, what in (("ARV-ROUTE-001", "liveness answers 200 with no dependencies"),
-                       ("ARV-ROUTE-002", "readiness is 503 until the service declares ready"),
-                       ("ARV-ROUTE-003", "readiness is 200 once declared ready (auth + db state honest)"),
-                       ("ARV-ROUTE-004", "an unauthenticated product route is 401 ARV-AUTH-001"),
-                       ("ARV-ROUTE-005", "the error body carries the named code + api_version, never a stack trace"),
-                       ("ARV-ROUTE-006", "a verified token reaches /api/v1/me and derives the owner from the sub"),
-                       ("ARV-ROUTE-007", "the OpenAPI document exists at /api/v1/openapi.json (generated from the code)")):
-        check(code, f"PASS {code}:" in out2, what, "run harness/api/routes_selfcheck.py")
-    check("ARV-ROUTE-008", "GREEN —" in out2 and r2.returncode == 0,
-          "the routes battery exits GREEN", "the routes battery must pass")
-
+    # the routes battery rides CLAIM-093 (the app-skeleton slice — ARV-SIZE-002's split)
     print()
     if FAILS:
         print("RED — the auth boundary suite refuses:", ", ".join(FAILS))

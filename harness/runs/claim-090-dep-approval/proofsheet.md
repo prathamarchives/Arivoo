@@ -17,11 +17,11 @@
 - the API runtime itself (no harness/api/ application code exists yet — this slice is the approval + the enforcement, not the API)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 5306ddfed36360abd84406f5392c06e2a4b6b4e75dea0ce287e6490ebd933fdb
-- reviewed_diff_sha256: 6f590036107487de8d17b73249d4448b7569be92621cd6ae4b0c72bcd647c7d3
+- report sha256: 3240b93b5517c659484dcd5e5fef0035e6ac97eb9bd6cb9044d952d562e20be4
+- reviewed_diff_sha256: f55eafffddf25a14efa7a11a77f361c2f2e4efd857d20e700e81c258755d1de8
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 94c48dad51d3bade99c38ba140ee6021b60be65704bd182a1401cbfe3f5c007b
+- sheet sha256 (of the content above, excluding this line): 7e01a73ee370c615d9e0f454616f82aa2cad8325db54b9b7d490232abe124651

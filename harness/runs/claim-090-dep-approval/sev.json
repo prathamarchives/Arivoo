@@ -1,0 +1,83 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-090-dep-approval",
+ "base_sha": "fcb4b83034aabcaa11acfb8bda7c6dbcaae44305",
+ "reviewed_diff_sha256": "6bf5b7bcc8f1bfdc6f4667e0cda8fdec70c5b1121c88d36017e3f8d364300ddf",
+ "intent_ids": [
+  "INT-154"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C5"
+ ],
+ "changed_components": [
+  "harness/api/requirements.lock",
+  "harness/approved_deps.txt",
+  "harness/scope.py",
+  "harness/tests/test_dep_boundaries.py",
+  ".env.example",
+  "STATE.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "INTENT-LEDGER.md",
+  "DECISIONS.md"
+ ],
+ "interfaces_reviewed": [
+  "the LAW-08 approval: the note (the lock's header, the runbook \u00a73.2's exact minimum set) + the pinned SHA-verified lock (18 wheels, every SHA256 recorded; --require-hashes installable)",
+  "the scoped boundary: scope.py's ARV-DEP-009 \u2014 an approved import outside its named boundary refuses; the registry (approved_deps.txt) carries name/pin/boundary; both directions verified (the real tree passes; a synthetic out-of-boundary import refuses)",
+  "the boundary suite: 5 checks (unapproved refuses, out-of-boundary refuses, in-boundary passes, the repo tree passes, no pin drift between registry and lock)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "test_dep_boundaries.py 5/5 GREEN at this tree"
+  ],
+  "integration_verification": [
+   "check_deps runs inside the standing gate (ARV-DEP-008/009 both enforced at every future slice)"
+  ],
+  "system_verification": [
+   "LAW-08's gate now enforces the approval's SCOPE, not just its existence \u2014 the constraint strengthens, never weakens (LAW-09 preserved)"
+  ],
+  "validation": [
+   "the standing battery green (canonical/selftest/migrations/remote-target)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-090-1",
+   "scenario": "a future import sneaks a dependency without approval",
+   "control": "ARV-DEP-008 unchanged (the refusal fires at the gate)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-090-2",
+   "scenario": "an approved import leaks outside its boundary (the kernel importing fastapi)",
+   "control": "ARV-DEP-009 (the new refusal \u2014 verified with a synthetic out-of-boundary tree)",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-090-3",
+   "scenario": "the lock and the registry drift (a pin added to one, not the other)",
+   "control": "the suite's no-pin-drift check (ARV-DEP-013)",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [],
+ "not_verified": [
+  "the wheels' provenance beyond their PyPI-served SHAs (a full reproducible-build attestation is out of scope)",
+  "the CI runner's wheel-fetch equality (proven at the first API-slice CI run)",
+  "the API runtime itself (no harness/api/ application code exists yet \u2014 this slice is the approval + the enforcement)"
+ ],
+ "builder_context": "builder-zcode-slice-claim-090",
+ "reviewer_context": "reviewer-zcode-fresh-context-claim-090 + the trusted CI judges (declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the LAW-08 dependency approval: the pinned SHA-verified lock (the runbook \u00a73.2's exact minimum set + the full transitive closure) + the SCOPED boundary (ARV-DEP-009: the approval carries its boundary; an out-of-boundary import refuses). Both directions verified; the standing battery green.",
+ "sheet_section": true
+}

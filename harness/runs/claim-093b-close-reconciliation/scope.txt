@@ -1,5 +1,6 @@
-# claim-093b-close-reconciliation — the CLAIM-093 drift repair (the live-state reconciliation; no product code)
-CLAIMS.md the-closed-row (D-051's own claim, closed by the live merge evidence)
+# CLAIM-093B — the CLAIM-093 drift repair (the live-state reconciliation; session 61; docs-only).
+CLAIMS.md D-051
 STATE.md D-051
 context/WORKLOG.md D-051
 harness/runs/claim-084b-kev-corpus-growth/protection-pre-merge.json D-051 (the untracked session-60 leftover removed — carried no repo state)
+harness/runs/claim-093b-close-reconciliation D-041

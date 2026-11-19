@@ -15,7 +15,7 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-093B | 61 | Super Z (GLM host) | `slice/claim-093b-close-reconciliation` | `CLAIMS.md`, `STATE.md`, `context/WORKLOG.md`, `harness/runs/claim-093b-close-reconciliation` | INT-158 (the 093 claim's own ledger entry — the reconciliation closes that claim against the live evidence) | 2026-11-19 | the CLAIM-093 drift repair: the closed-claim row + the re-derived STATE against the live merge `ca4f8006` (5/5 checks green on the merge commit; zero open PRs); the remote ledger verified live (tops at 19 — 0020 NOT remotely applied, recorded honestly); docs-only, no product code |
+| CLAIM-093B | 61 | Super Z (GLM host) | `slice/claim-093b-close-reconciliation` | `CLAIMS.md`, `STATE.md`, `context/WORKLOG.md`, `harness/runs/claim-093b-close-reconciliation` | INT-159 (minted this slice: the reconciliation intent; see the ledger) | 2026-11-19 | the CLAIM-093 drift repair: the closed-claim row + the re-derived STATE against the live merge `ca4f8006` (5/5 checks green on the merge commit; zero open PRs); the remote ledger verified live (tops at 19 — 0020 NOT remotely applied, recorded honestly); docs-only, no product code |
 
 
 

@@ -55,6 +55,13 @@ def create_app(*, auth_config: "_auth.AuthConfig | None" = None,
         redoc_url=None,
     )
 
+    # CLAIM-094: the area routers over the kernel (§11.2; the routes module
+    # composes them; the db is the SERVICE's runtime value — the deployment's
+    # own parameter, never a client one)
+    from harness.api import routes as _routes
+    _db = os.environ.get("ARIVO_API_DB", "postgres")
+    _routes.install(app, verifier, _db)
+
     # ---- the centralized named-refusal mapping (§11.4) ----
     @app.exception_handler(_auth.AuthRefusal)
     async def _auth_refusal(request: Request, exc: _auth.AuthRefusal):

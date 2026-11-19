@@ -1,0 +1,60 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-093b-close-reconciliation",
+ "base_sha": "ca4f8006ea13bd1bf50994482a1c59a88fa12441",
+ "reviewed_diff_sha256": "7477eafe6e665ad4437e1c7488357382d188369b4457a1f3daad1f135077c977",
+ "intent_ids": [
+  "INT-158",
+  "INT-159"
+ ],
+ "requirement_ids": [
+  "SYS-01"
+ ],
+ "system_claims": [
+  "C5"
+ ],
+ "changed_components": [
+  "CLAIMS.md",
+  "STATE.md",
+  "context/WORKLOG.md"
+ ],
+ "interfaces_reviewed": [
+  "the live GitHub state: PR #133 merged=true at ca4f8006 (five required checks green on the merge commit itself; zero open PRs) \u2014 read through the API, never assumed from the snapshot",
+  "the remote migration ledger: read live through the guarded pooler path (verify-full, the pinned CA): tops at version 19; the runtime roles' configs NULL \u2014 migration 0020 NOT applied remotely; the closed row records exactly that",
+  "the append-only repair: the closed-claim row appended under the closed section (the open row removed; no historical row rewritten); STATE.md re-derived; the worklog's Task 114 records the discrepancy and the repair"
+ ],
+ "v_model": {
+  "component_verification": [
+   "the live API reads (PR state, check-runs, open-PR list, branch list)",
+   "the guarded remote ledger query"
+  ],
+  "integration_verification": [
+   "the canonical layer green (0 FAIL)"
+  ],
+  "system_verification": [
+   "the repo's claim ledger now matches the live merge state"
+  ],
+  "validation": [
+   "never a silent claim: the 0020 remote state was verified independently before recording it"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-093B-1",
+   "scenario": "a drift between the repo's claim ledger and the live merge state is left unreconciled (a phantom open claim)",
+   "control": "this repair: the closed row carries the live merge evidence; the worklog records the discrepancy class (the session-boundary handoff)",
+   "proof_ids": [
+    "run-01"
+   ]
+  }
+ ],
+ "findings": [],
+ "not_verified": [
+  "nothing product-level: this slice carries NO product code (docs-only reconciliation); the 093 product surface was verified in its own slice (#133's five checks)"
+ ],
+ "builder_context": "builder-zcode-reconciliation-093b",
+ "reviewer_context": "reviewer-zcode-fresh-context-093b + the trusted CI judges (declared identities, not cryptographic independence)",
+ "disposition": "PASS",
+ "review_summary": "the docs-only drift repair: the closed-claim row + the re-derived STATE against the live merge ca4f8006; the remote 0020 state verified independently (tops at 19) and recorded honestly",
+ "sheet_section": true
+}

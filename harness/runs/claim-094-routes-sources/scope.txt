@@ -1,0 +1,14 @@
+# CLAIM-094 — the first §11.2 route slice: the sources/import area (Wave D slice 5; runbook §11.2/§11.3/§11.4).
+STATE.md INT-160
+CLAIMS.md D-053
+context/WORKLOG.md D-053
+INTENT-LEDGER.md D-053
+DECISIONS.md D-053
+AGENTS.md D-053
+harness/api/routes.py D-053
+harness/api/app.py D-053
+harness/api/routes_selfcheck.py D-053
+harness/tests/test_api_routes.py D-053
+harness/gate.py D-053
+harness/red-records.json D-053
+harness/runs/claim-094-routes-sources D-041

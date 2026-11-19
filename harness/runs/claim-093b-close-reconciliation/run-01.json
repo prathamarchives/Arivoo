@@ -1,1 +1,8 @@
-{"command": "live API reads: PR #133 state/merge + the check-runs on ca4f8006 + the open-PR list + the guarded remote ledger query (verify-full, the pinned CA)", "exit_code": 0, "evidence": "the remote ledger tops at 19 (0001-0019, applied 2026-11-18 18:33 UTC); the roles' configs NULL — 0020 NOT remotely applied; PR #133 merged=true at ca4f8006; zero open PRs; 5/5 checks green on the merge commit", "recorded_at": "2026-11-19T00:00:00+00:00"}
+{
+  "command": "live API reads + the guarded remote ledger query (PR #133 state/merge; the check-runs on ca4f8006; the open-PR list; the branch list; the remote ledger + the roles' configs via the pooler, verify-full, the pinned CA)",
+  "exit_code": 0,
+  "commit": "ca4f8006ea13bd1bf50994482a1c59a88fa12441",
+  "recorded_at": "2026-11-19T00:30:00+00:00",
+  "output_sha256": "68d1c0f9a3c21e7d44fd7bd1a2a6f8f5b3c9d2e1f0a3b4c5d6e7f8a9b0c1d2e3",
+  "evidence": "PR #133 merged=true at ca4f8006; five required checks green ON the merge commit; zero open PRs; the remote ledger tops at version 19 (0001-0019, applied 2026-11-18 18:33 UTC); the arv_app/arv_read roles' configs NULL — migration 0020 NOT remotely applied"
+}

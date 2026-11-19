@@ -8,11 +8,11 @@
 
 - **Phase:** THE PRODUCTIONIZATION ERA, RUNBOOK EXECUTION (2026-11-18 — INT-152/D-047: the scoped-PAT connection live; the 13-phase/8-wave runbook is the execution authority; Wave A underway)
 
-- **Active task:** CLAIM-093 — the API skeleton + the health routes + migration 0020 (the search_path pins as the checked invariant); pending: the slice's PR + merge
+- **Active task:** CLAIM-094 — the first §11.2 route slice (sources + import) over the kernel; the 093 drift repaired (the claim closed against the live merge `ca4f8006`)
 
 - **Latest session record:** context/extracted/78-RUNBOOK-INTAKE.md (the runbook intake; the corpus's third register growth)
-- **Last completed:** CLAIM-092 (the auth boundary; PR #132 = merge `368e549`, 2026-11-18; five checks ALL-GREEN)
-- **Exact next action:** CLAIM-093's merge, then CLAIM-094 (the §11.2 command routes over the kernel: health→sources→extraction→reading→captures→journal→lists→retrieval→sync→export, each area a bounded slice)
+- **Last completed:** CLAIM-093 (the API skeleton + migration 0020; PR #133 = merge `ca4f8006`, merged 2026-11-18; five checks ALL-GREEN; the claim closed 2026-11-19 by the drift repair)
+- **Exact next action:** CLAIM-094's PR (the sources/import routes over harness/commands.py), then the §11.2 sequence (extraction→reading→highlights→bookmarks→notes→journal→references→lists→retrieval→sync→export), then the remote 0020 application as its own act (the remote ledger tops at 19 — verified live)
 
 - **Blocking open questions — EVERY unresolved owner question, repo-wide (INT-101):**
   - D-014 — calculation engine scope. Blocks only math-workflow design (non-blocking for capture; owner reaffirmed INT-114). Home: DECISIONS D-014.

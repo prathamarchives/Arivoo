@@ -1128,3 +1128,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-093-api-skeleton/.
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the remote 0020 application (its own act, the guarded path, its own run record — §6.3); a live Supabase-issued token; uvicorn over a real socket (Wave F).
 - Next: CLAIM-094 — the §11.2 command routes over the kernel, area by area.
+
+## Task 114 (session 61, 2026-11-19) — the CLAIM-093 drift repair (the live-state reconciliation)
+- Discrepancy: the live repository shows PR #133 MERGED (state closed, merged=true, merge commit `ca4f8006ea13bd1bf50994482a1c59a88fa12441`) with zero open PRs and all five required checks green on the merge commit itself — while the repository snapshot left CLAIM-093's row open and STATE.md's active task said "pending: the slice's PR + merge". The drift came from the session-boundary handoff: the merge happened at the very end of session 60, after the docs assembly had written the open row.
+- Repair (append-only): the closed-claim row appended under the closed section (the open row removed; no historical row rewritten); STATE.md re-derived from the live state (the active task is now CLAIM-094; the last-completed cites the merge). The untracked `protection-pre-merge.json` artifact (a session-60 leftover) is recorded here and left untracked — it carries no repo state.
+- The independent verification (never a silent claim): the REMOTE migration ledger read live through the guarded pooler path (verify-full, the pinned CA) — the remote tops at version **19** (0001–0019 applied 2026-11-18 18:33 UTC), and the runtime roles' configs are NULL: **migration 0020 is NOT applied remotely**; the closed row records exactly that. No prior record claimed otherwise (the 093 not-verified list names the remote application as its own act).
+- Evidence: the live API reads above (PR #133 state/merge, the check-runs on `ca4f8006`, the open-PR list, the branch list) + the guarded remote ledger query.
+- Next: CLAIM-094 — the first §11.2 route slice (sources + import).

@@ -11,11 +11,11 @@
 - nothing product-level: this slice carries NO product code (docs-only reconciliation); the 093 product surface was verified in its own slice (#133's five checks)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 933cc456dbcc61117d48b4db446fa0aedffab55a72a4ae355923e58cb7ede8d6
+- report sha256: f2ee68b8409c50ff59d68b27e8c02d980c1b7467be1e5d878f1434ca7da5cb09
 - reviewed_diff_sha256: 7477eafe6e665ad4437e1c7488357382d188369b4457a1f3daad1f135077c977
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 1
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 558739a0f12cb83fec2f59cbbc8f55199145fd6df8d698be0d6ea89304442286
+- sheet sha256 (of the content above, excluding this line): fbb6c075c57536250814d91ea14af0c4c12a2b7ab78e6441c2ce3342ab2b8e34

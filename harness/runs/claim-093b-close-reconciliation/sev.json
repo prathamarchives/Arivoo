@@ -11,7 +11,7 @@
   "SYS-01"
  ],
  "system_claims": [
-  "C7"
+  "C5"
  ],
  "changed_components": [
   "CLAIMS.md",

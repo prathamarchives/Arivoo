@@ -242,6 +242,32 @@ def main() -> int:
                   f"health answers while a kernel write is in flight (the loop is not blocked; "
                   f"health {hl_t:.3f}s vs import {imp_t:.3f}s)")
 
+            # 15) the SEV round-1 repairs (SEV-094-1/-3): the refusal map's
+            # DEFAULT is the 500 class for named-but-unmapped kernel codes —
+            # F6's ARV-CMD-010 is the live example: a server-side failure
+            # must never wear the no-leak 404; the timeout bound stays
+            # inside the §11.4 named-error envelope
+            kr = _routes_mod._map_kernel_refusal(
+                "FAIL ARV-CMD-010: index row requires 8192 bytes, maximum size 8191")
+            check("ARV-API-019",
+                  kr.status == 500 and kr.code == "ARV-CMD-010"
+                  and "index row" not in kr.message,
+                  "a named-but-unmapped kernel refusal maps to the 500 class (the named code kept; the kernel's raw cause text never echoed — §11.4)")
+            kr2 = _routes_mod._map_kernel_refusal(
+                "FAIL ARV-QRY-001: no such object (abc) in the caller's scope")
+            check("ARV-API-020", kr2.status == 404,
+                  "the absence family (ARV-QRY-001/003) keeps the no-leak 404 class")
+            try:
+                _routes_mod._run_kernel(
+                    [sys.executable, "-c", "import time; time.sleep(5)"], db, timeout=0.2)
+                check("ARV-API-021", False,
+                      "a kernel exceeding its time bound refuses ARV-API-504 inside the envelope",
+                      "catch subprocess.TimeoutExpired in _run_kernel/_query_kernel")
+            except _routes_mod.KernelRefusal as e:
+                check("ARV-API-021",
+                      e.code == "ARV-API-504" and e.status == 504,
+                      "a kernel exceeding its time bound refuses ARV-API-504 inside the envelope")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

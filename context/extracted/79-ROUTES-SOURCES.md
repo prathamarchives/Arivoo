@@ -41,18 +41,30 @@ main `87cced7`; zero open PRs; CLAIMS max on main 093 / INTENT max INT-159 / DEC
 5. **ARV-LAW24-001 ×2** (time.monotonic in routes_selfcheck.py — the revalidation probe's elapsed measurement): repaired to `clock.mono()` (the adapters' sanctioned monotonic read, LAW-24); the battery re-run GREEN after the fix (26/26, exit 0).
 6. **ARV-PRF-001/004 + ARV-SEV-001** (no run records / sheet / SEV): the nine run records, the not-verified list, the assembled proof sheet and the SEV report — this session's §7 evidence, all harness-built.
 
-## §7 — the evidence (the nine-record battery + the sheet + the SEV)
+## §7 — the SEV round 1 and its repairs (the fresh-context verifier's chain)
 
-The nine-record set (the 2026-11-24 report's list, re-run at this session's docs head): the api-routes suite, the routes selfcheck battery, the auth-boundary suite, the migrations suite, the canonical-layer verifier, the selftest verifier, the remote-target suite, the dependency-boundaries suite, the prod-adapter suite — run through `harness/proofsheet.py --record` (exit codes + output digests in `harness/runs/claim-094-routes-sources/run-01..09.json`; the assembled sheet at `proofsheet.md`; the not-verified list at `notverified.txt`). The SEV report (`sev.json`) is authored per TEMPLATES §6 with a fresh-context review pass over the final diff, `sheet_section: true` (the base's renderer carries the section — ARV-SEV-009's requirement).
+The separately authored SEV (a fresh-context subagent verifier over the final diff) returned **BLOCKED with two P1s** — both real, both repaired RED-first in this slice:
 
-## §8 — the ledger mechanics this session executed
+- **SEV-094-1 (P1)**: `_map_kernel_refusal`'s fall-through returned 404 for ANY named-but-unmapped kernel code — so F6's ARV-CMD-010 (proven reachable through the import route) would surface a real server-side failure as the no-leak 'absent object' 404, contradicting the revalidation's F4 'OK'. REPAIRED: the kernel's absence family (ARV-QRY-001/003 — the no-leak refusals) keeps 404; every other named-but-unmapped code maps to the 500 class with the kernel's named code preserved and the raw cause text never echoed (§11.4: no SQL fragments). Pinned by ARV-API-019 (RED before the repair) + ARV-API-020 (the absence-family pin).
+- **SEV-094-2 (P1)**: test_api_routes.py never checked the battery's exit code and grepped only ARV-API-001..014 — a battery RED confined to the revalidation guards (015..018) would leave the suite-of-record GREEN. REPAIRED: ARV-SUITE-001 (the battery's own exit code is the suite's floor) + the markers extended to ARV-API-001..021; the red record's typed amendment chains the edit.
+- **SEV-094-3 (P2, in-scope by D-053's own subject)**: subprocess.TimeoutExpired escaped the §11.4 envelope (a bare Starlette 500). REPAIRED: ARV-API-504 inside the envelope, pinned by ARV-API-021 (RED before the repair).
+- **SEV-094-4 (P2, owner-accepted debt)**: the adapter re-validates kernel-owned laws at the boundary — disclosed and justified (F5's class: the kernel cannot see what the adapter would drop); kept minimal and keyed to the kernel's named codes.
+- **SEV-094-5 (P2)**: the API's acquired_via default mirrored the CLI's 'cli-import' — a provenance lie on the API path. REPAIRED: the honest 'api-import' default (free-text field, no kernel vocabulary to violate).
+
+The battery after the repairs: **29/29 GREEN** (26 carried + ARV-API-019..021), the suite exit 0 under the new floor. The round-2 SEV verification follows over the repaired diff.
+
+## §8 — the evidence (the nine-record battery + the sheet + the SEV)
+
+The nine-record set (the 2026-11-24 report's list, re-run at this session's final head after the repairs): the api-routes suite, the routes selfcheck battery, the auth-boundary suite, the migrations suite, the canonical-layer verifier, the selftest verifier, the remote-target suite, the dependency-boundaries suite, the prod-adapter suite — run through `harness/proofsheet.py --record` (exit codes + output digests in `harness/runs/claim-094-routes-sources/run-01..09.json`; the assembled sheet at `proofsheet.md`; the not-verified list at `notverified.txt`). The SEV report (`sev.json`) is authored per TEMPLATES §6 with the fresh-context review rounds over the final diff, `sheet_section: true` (the base's renderer carries the section — ARV-SEV-009's requirement).
+
+## §9 — the ledger mechanics this session executed
 
 - **INT-160 minted** (the §11.2 routes-slice intent; the claim row's reservation made retroactive-consistent); ledger count 141 → 142; the AGENTS/STATE mirrors follow.
 - **D-053 adopted** (the bounded-subprocess route-adapter architecture — revalidated 2026-11-25 with F2's measurement and F3's confirmation; F6 routed to its own kernel claim).
 - **CLAIM-093B's row closed** against the live merge (§6 item 4). **CLAIM-089's row observed as the remaining drift** (PR #129 merged, row open; non-blocking: shared-append-only scope; left for the next close work with this record as the pointer — never silently closed here, and never silently ignored).
 - The sandbox-persistence protocol honored: the secrets, the rig, the venv, the wheels and the rebuild scripts all live under `/home/z/my-project/` (the workspace's persistent root); the repo carries only its own canonical artifacts.
 
-## §9 — unverified items (LAW-04; non-empty honesty)
+## §10 — unverified items (LAW-04; non-empty honesty)
 
 - A live Supabase-issued token end-to-end (needs a real user — §17.1's desktop test; the verify chain is fully proven with a real ES256 key pair).
 - uvicorn serving over a real socket (Wave F's deployment slice).
@@ -61,14 +73,14 @@ The nine-record set (the 2026-11-24 report's list, re-run at this session's docs
 - F6's exact minimum trigger size (the long-unbroken-token kernel defect — its own follow-up claim with its own RED test).
 - The five CI checks (they run on the PR head — observed green only after the PR opens; this record is bound to the pre-PR diff).
 
-## §10 — open decisions (unchanged scopes; each blocks only what it names)
+## §11 — open decisions (unchanged scopes; each blocks only what it names)
 
 D-014, Q6–Q12, Q16–Q19 — all open at their exact scopes; none is a general stop-work. The turn adds no new owner question and closes none. The token scope observation (the GitHub PAT again carries broad admin-class scopes — the class the 2026-11-24 report §10 flagged for rotation) is recorded here as an honest residual, not a closed question: the owner's stated intent is persistence of exactly these credentials, so they are stored and used as-is; rotation remains the owner's call.
 
-## §11 — next action (one deterministic continuation point)
+## §12 — next action (one deterministic continuation point)
 
 Open the CLAIM-094 PR from the repo template at the final head; watch the five required checks (canonical-layer, head-tools, harness, harness-suites, harness-trusted) at that exact SHA; post the D-042 merge-gate review covering the diff's risk surface with every finding dispositioned; execute the standing merge protocol (protection flip → merge → restore → verify post-merge); then the append-only claim close + STATE re-derivation, then CLAIM-095 (extraction/readiness routes) and the F6 kernel claim — reserving IDs against the live maxima first.
 
-## §12 — session close
+## §13 — session close
 
 At record time: branch `slice/claim-094-routes-sources` at this session's final head (the docs + evidence commits on top of `ad24900`), the battery GREEN 26/26, the gate's refusal list answered. The merge SHAs, the post-merge CI run IDs and the final tree state land in the close work (the worklog's next entry + STATE's re-derivation) — never pre-claimed here.

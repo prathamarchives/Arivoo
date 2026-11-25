@@ -70,9 +70,16 @@ def _map_kernel_refusal(line: str) -> KernelRefusal:
     for prefix, status in _HTTP_BY_PREFIX:
         if code.startswith(prefix):
             return KernelRefusal(code, msg, status)
-    # the owner-isolation refusals (a missing object for THIS owner) must NOT
-    # leak another owner's object existence: the 404 class
-    return KernelRefusal(code, msg, 404)
+    # the absence family (the kernel's own no-leak refusals: absent or
+    # tombstone-hidden in the caller's scope) keeps the 404 class — §11.4
+    if code.startswith(("ARV-QRY-001", "ARV-QRY-003")):
+        return KernelRefusal(code, msg, 404)
+    # every OTHER named-but-unmapped kernel code is a server-side failure the
+    # client cannot act on (the live example: F6's ARV-CMD-010, proven
+    # reachable through this route): the 500 class, the kernel's named code
+    # preserved as the diagnostic surface, the raw cause text NEVER echoed
+    # (§11.4: no SQL fragments — the SEV round-1 repair, SEV-094-1)
+    return KernelRefusal(code, "the command refused with a named code", 500)
 
 
 def _kernel_env(db: str) -> dict:
@@ -88,8 +95,14 @@ def _run_kernel(argv: list, db: str, timeout: float = 120.0) -> dict:
     key=value line — the kernel's own CLI contract; commit-before-ack is ITS
     law). NEVER return raw stdout to the client (§11.4: no SQL, no stack
     traces, no internal hostnames)."""
-    r = subprocess.run(argv, capture_output=True, text=True, timeout=timeout,
-                       cwd=str(REPO), env=_kernel_env(db))
+    try:
+        r = subprocess.run(argv, capture_output=True, text=True, timeout=timeout,
+                           cwd=str(REPO), env=_kernel_env(db))
+    except subprocess.TimeoutExpired:
+        # the bound itself refuses inside the §11.4 envelope (the SEV round-1
+        # repair, SEV-094-3): never a bare Starlette 500 outside it
+        raise KernelRefusal("ARV-API-504",
+                            "the command exceeded its time bound", 504)
     out = (r.stdout or "").strip()
     if r.returncode != 0:
         for src in (out, (r.stderr or "").strip()):
@@ -121,8 +134,11 @@ def _query_kernel(argv: list, db: str, timeout: float = 60.0) -> dict:
     arm prints objects, ids where the arm prints the bare-id page) + the more
     flag + the api_version (the CLI's own page contract: a '# api_version='
     header, the rows, a '# more=' trailer)."""
-    r = subprocess.run(argv, capture_output=True, text=True, timeout=timeout,
-                       cwd=str(REPO), env=_kernel_env(db))
+    try:
+        r = subprocess.run(argv, capture_output=True, text=True, timeout=timeout,
+                           cwd=str(REPO), env=_kernel_env(db))
+    except subprocess.TimeoutExpired:
+        raise KernelRefusal("ARV-API-504", "the query exceeded its time bound", 504)
     out = (r.stdout or "").strip()
     if r.returncode != 0:
         for src in (out, (r.stderr or "").strip()):
@@ -201,7 +217,7 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
         q = request.query_params
         title, work_id = q.get("title"), q.get("work_id")
         media_type = q.get("media_type", "text/plain")
-        acquired_via = q.get("acquired_via", "cli-import")
+        acquired_via = q.get("acquired_via", "api-import")
         # F5b (the handoff revalidation): BOTH selectors together never reach
         # the kernel (it would see only --title) — the exactly-one-of law is
         # enforced HERE, where the drop would otherwise be silent

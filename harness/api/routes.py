@@ -173,17 +173,42 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
             raise KernelRefusal("ARV-API-400",
                                 "the Idempotency-Key header is required (the "
                                 "§11.3 write law: every write carries one)", 400)
-        body = await request.body()
-        if len(body) > MAX_IMPORT_BYTES:
-            raise KernelRefusal("ARV-API-413",
-                                f"the import body exceeds its {MAX_IMPORT_BYTES}-byte cap",
-                                413)
+        # F1 (the handoff revalidation): the bound is enforced BEFORE and
+        # DURING the read — a declared over-cap Content-Length is refused
+        # without reading a byte, and a lying/chunked client is cut off at
+        # the cap mid-stream (never an unbounded buffer)
+        declared = request.headers.get("content-length")
+        if declared is not None:
+            try:
+                if int(declared) > MAX_IMPORT_BYTES:
+                    raise KernelRefusal(
+                        "ARV-API-413",
+                        f"the import body exceeds its {MAX_IMPORT_BYTES}-byte cap "
+                        "(refused on the declared Content-Length before any byte was read)",
+                        413)
+            except ValueError:
+                pass  # a malformed length: the streaming cap below still bounds it
+        body = bytearray()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body) > MAX_IMPORT_BYTES:
+                raise KernelRefusal("ARV-API-413",
+                                    f"the import body exceeds its {MAX_IMPORT_BYTES}-byte cap",
+                                    413)
+        body = bytes(body)
         # the DTO: the metadata travels the query parameters (the body IS the
         # bytes — the kernel's --file contract); title XOR work_id
         q = request.query_params
         title, work_id = q.get("title"), q.get("work_id")
         media_type = q.get("media_type", "text/plain")
         acquired_via = q.get("acquired_via", "cli-import")
+        # F5b (the handoff revalidation): BOTH selectors together never reach
+        # the kernel (it would see only --title) — the exactly-one-of law is
+        # enforced HERE, where the drop would otherwise be silent
+        if title is not None and work_id is not None:
+            raise KernelRefusal("ARV-CAP-007",
+                                "exactly one of title (a new work) or work_id (an "
+                                "existing work) is required — never both", 422)
         # stage the bytes to a bounded temp file (the kernel's own path law)
         tmpdir = tempfile.mkdtemp(prefix="arv_api_import_")
         tmp = pathlib.Path(tmpdir) / "import.bin"

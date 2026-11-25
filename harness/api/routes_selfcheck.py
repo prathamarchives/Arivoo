@@ -192,6 +192,57 @@ def main() -> int:
             s, b = asyncio.run(call(app_k, "GET", "/api/v1/sources"))
             check("ARV-API-014", s == 401 and "ARV-AUTH-001" in b,
                   "the kernel-backed read routes are auth-guarded like every product route")
+
+            # 11) the handoff revalidation (F5b): BOTH selectors -> the kernel
+            # cannot see the XOR (the adapter drops work-id silently) -> the
+            # adapter must refuse ARV-CAP-007 itself
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                     dict(H, **{"Idempotency-Key": "k-094-x"}),
+                                     body=b"hello arivo",
+                                     query=b"title=Both&work_id=00000000-0000-0000-0000-000000000000"))
+            check("ARV-API-015", s == 422 and "ARV-CAP-007" in b,
+                  "title AND work_id together refuse 422 (exactly-one-of, enforced where the kernel cannot see it)")
+            # 12) the handoff revalidation (F1): an over-cap DECLARED body is
+            # refused 413 before any byte is read (the early bound)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                     dict(H, **{"Idempotency-Key": "k-094-y",
+                                                "Content-Length": "999999999"}),
+                                     body=b"hello arivo", query=b"title=Early+Bound"))
+            check("ARV-API-016", s == 413,
+                  "a declared over-cap Content-Length refuses 413 before the body is read")
+            # 13) the handoff revalidation (F1, the streaming half): the cap
+            # holds DURING the read (a lying/chunked client cannot exhaust
+            # memory) — regression guard over the streaming cap
+            from harness.api import routes as _routes_mod
+            _saved_cap = _routes_mod.MAX_IMPORT_BYTES
+            _routes_mod.MAX_IMPORT_BYTES = 100
+            try:
+                s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                        dict(H, **{"Idempotency-Key": "k-094-z"}),
+                                        body=b"x" * 200, query=b"title=Stream+Cap"))
+                check("ARV-API-017", s == 413,
+                      "the streamed body over the cap refuses 413 (the cap holds during the read)")
+            finally:
+                _routes_mod.MAX_IMPORT_BYTES = _saved_cap
+            # 14) the handoff revalidation (F2): a kernel write in flight does
+            # NOT block the loop — health answers concurrently (measured: the
+            # blocking hypothesis was DISPROVEN; this check pins it stays that way)
+            import time
+            async def _probe():
+                async def _timed(mk):
+                    t0 = time.monotonic()
+                    r = await mk()
+                    return time.monotonic() - t0, r
+                return await asyncio.gather(
+                    _timed(lambda: call(app_k, "POST", "/api/v1/imports",
+                                dict(H, **{"Idempotency-Key": "k-094-c"}),
+                                body=b"concurrency probe", query=b"title=Conc+Work")),
+                    _timed(lambda: call(app_k, "GET", "/health/live")))
+            ((imp_t, (imp_s, _ib)), (hl_t, (hl_s, _hb))) = asyncio.run(_probe())
+            check("ARV-API-018", imp_s == 200 and hl_s == 200 and hl_t < imp_t * 0.5,
+                  f"health answers while a kernel write is in flight (the loop is not blocked; "
+                  f"health {hl_t:.3f}s vs import {imp_t:.3f}s)")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

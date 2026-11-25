@@ -84,3 +84,7 @@ Open the CLAIM-094 PR from the repo template at the final head; watch the five r
 ## §13 — session close
 
 At record time: branch `slice/claim-094-routes-sources` at this session's final head (the docs + evidence commits on top of `ad24900`), the battery GREEN 26/26, the gate's refusal list answered. The merge SHAs, the post-merge CI run IDs and the final tree state land in the close work (the worklog's next entry + STATE's re-derivation) — never pre-claimed here.
+
+## §13 addendum — the session close, completed (the 094B reconciliation)
+
+The CLAIM-094 PR (#135) merged 2026-11-25 at `f38a0e13` under INT-145's standing authorization — the five required checks green at the PR head `201ae0c` (run 45570188998), the D-042 merge-gate review posted before the merge, the admin path sufficing (protection never flipped; re-read byte-equivalent). The merge-commit run (45572051354) then failed harness-suites: the suite's venv-less degradation defect (the markers checked unconditionally where CI installs no venv — the registration asymmetry: the PR-head trusted job had run the base's suite selection without the new suite). CLAIM-094B (this session's reconciliation slice) repaired it to the 093 honest form, closed the 094 and 089 rows, minted INT-161, re-derived STATE (Task 116), and carries this addendum. The post-094B merge facts land in the next close work — never pre-claimed.

@@ -1,0 +1,3 @@
+nothing product-level changed beyond the suite's own degradation form (the routes battery + its 29 checks are unchanged; their green evidence is CLAIM-094's run records at the merged heads)
+the post-094B merge-commit CI run (observed after this slice's own merge — never pre-claimed)
+a live Supabase-issued token end-to-end; uvicorn over a real socket; the route surface against the remote project database; the remote 0020 application (the same carried items, unchanged from CLAIM-094's not-verified list)

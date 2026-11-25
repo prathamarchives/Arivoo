@@ -12,3 +12,5 @@ harness/tests/test_api_routes.py D-053
 harness/gate.py D-053
 harness/red-records.json D-053
 harness/runs/claim-094-routes-sources D-041
+harness/runs/claim-094-revalidation D-053
+context/extracted/79-ROUTES-SOURCES.md INT-160

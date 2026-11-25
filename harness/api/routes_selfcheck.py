@@ -227,12 +227,11 @@ def main() -> int:
             # 14) the handoff revalidation (F2): a kernel write in flight does
             # NOT block the loop — health answers concurrently (measured: the
             # blocking hypothesis was DISPROVEN; this check pins it stays that way)
-            import time
             async def _probe():
                 async def _timed(mk):
-                    t0 = time.monotonic()
+                    t0 = clock.mono()  # LAW-24: the only sanctioned monotonic read
                     r = await mk()
-                    return time.monotonic() - t0, r
+                    return clock.mono() - t0, r
                 return await asyncio.gather(
                     _timed(lambda: call(app_k, "POST", "/api/v1/imports",
                                 dict(H, **{"Idempotency-Key": "k-094-c"}),

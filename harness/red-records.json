@@ -1533,5 +1533,15 @@
         "observed_at": "2026-11-18T22:06:57.856758+00:00"
       }
     ]
+  },
+  "harness/tests/test_api_routes.py": {
+    "schema": 2,
+    "binding_commit": "ad24900c5db74c6d61c853f87cbe9aed9c100306",
+    "binding_sha256": "63891040c176de67d52cd59399f9797c3a478b1c2d1830f2b6735caa41abd01b",
+    "red_exit": 1,
+    "red_code": "ARV-API-001..014 (the suite's refusal list at the pre-slice tree)",
+    "red_evidence": "the api routes suite observed RED at the pre-slice tree (main 87cced7, a git worktree with the pinned venv + the migrated rig): the routes battery there carried no kernel-backed route checks, so all fourteen ARV-API checks FAIL \u2014 exit 1, refusal list ARV-API-001..014 (the observed red, never an assertion)",
+    "current_sha256": "63891040c176de67d52cd59399f9797c3a478b1c2d1830f2b6735caa41abd01b",
+    "amendments": []
   }
 }

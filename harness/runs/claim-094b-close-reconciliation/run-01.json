@@ -1,0 +1,7 @@
+{
+  "command": "mv .venv-waved .venv-waved-hidden && python3 harness/tests/test_api_routes.py; rc=$?; mv .venv-waved-hidden .venv-waved; exit $rc",
+  "exit_code": 0,
+  "commit": "42aafe05cb2ec588fd8ea9203fb0eee71ccdc128",
+  "output_sha256": "b80ef019b25c9e811ad3fdefa65788e4f5b315ece5d2279bedcb9ebe253ea52a",
+  "recorded_at": "2026-11-25T08:14:16.835082+00:00"
+}

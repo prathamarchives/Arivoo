@@ -1,0 +1,118 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-094b-close-reconciliation",
+ "base_sha": "f38a0e13af82d4ca77d5198d13ca86a19299cc2c",
+ "reviewed_diff_sha256": "728a73bb184f12c1c2c06efe5038b4b116d7f7c25109ebcce50a232e05f1b30c",
+ "intent_ids": [
+  "INT-161"
+ ],
+ "requirement_ids": [
+  "SYS-11"
+ ],
+ "system_claims": [
+  "C5"
+ ],
+ "changed_components": [
+  "harness/tests/test_api_routes.py",
+  "harness/red-records.json",
+  "CLAIMS.md",
+  "STATE.md",
+  "AGENTS.md",
+  "INTENT-LEDGER.md",
+  "context/WORKLOG.md",
+  "context/extracted/79-ROUTES-SOURCES.md",
+  "harness/runs/claim-094b-close-reconciliation/scope.txt",
+  "harness/runs/claim-094b-close-reconciliation/notverified.txt"
+ ],
+ "interfaces_reviewed": [
+  "the suite's degradation contract (test_api_routes.py): the markers + ARV-SUITE-001 run only where the battery runs (the venv exists); the venv-less host carries the honest NOTE \u2014 byte-for-byte test_auth_boundary.py's proven 093 form (the ARV-AUTH-018 guard's class); a RED battery can never pass silently wherever the venv exists (the exit-code floor), and a missing venv binary surfaces as a non-zero subprocess failure, never a green",
+  "the trusted harness-suites job's contract (verify.yml): it installs no venv and runs the BASE's gate.TESTS selection \u2014 the registration asymmetry every new-suite slice faces at merge (the PR-head trusted run uses the pre-merge base's selection; the merge-commit run uses the new main's) \u2014 the suite's honest degradation is the repo's accepted answer for exactly this condition",
+  "the claim registry: CLAIM-094B the sole open row (AGENTS.md declared in both scope.txt and the row after the round's finding); the closed rows for 094 (the merge facts + the honest harness-suites-red disclosure) and 089 (the rule-4 drift riding this close)",
+  "INT-161 (the post-merge reconciliation intent): index row + full entry; the 142->143 count mirrors in AGENTS.md/STATE.md"
+ ],
+ "v_model": {
+  "component_verification": [
+   "run-01: the suite under the venv-less condition (the venv hidden, the CI shape reproduced locally) \u2014 exit 0 with the honest NOTE, never a marker-only red",
+   "run-02: the suite with the venv + the rig \u2014 exit 0 with all 21 markers + the ARV-SUITE-001 exit-code floor enforced (the battery's own green re-observed)",
+   "the red-records typed amendment chains the suite edit (prior 37cfb68a -> new hash, the observed red disclosed: the merge run's harness-suites failure on f38a0e13)"
+  ],
+  "integration_verification": [
+   "run-03: the canonical-layer verifier green at this head (the docs coherence after the ledger mint + the closed rows + the STATE re-derivation)",
+   "the merge facts verified live through the API before the rows were written (PR #135 merged at f38a0e13; the PR-head run 45570188998 green; the merge-commit run 45572051354's harness-suites red read from the job log)"
+  ],
+  "system_verification": [
+   "SYS-11: the slice closes a V-model trace for the post-merge reconciliation (the defect observed on the merged main, root-caused to the suite's degradation form, repaired with both paths re-observed, the close records appended)",
+   "main's CI returns to green once this slice merges (the trusted suites phase runs the fixed suite venv-less: NOTE + exit 0)"
+  ],
+  "validation": [
+   "a maintainer pushes to main after this slice: the verify workflow's harness-suites job runs test_api_routes.py venv-less and passes with the honest NOTE (the CI condition reproduced and verified locally as run-01)",
+   "a developer with the pinned venv runs the suite on the rig: all 21 markers + the exit-code floor are enforced exactly as before (run-02)"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-094B-1",
+   "scenario": "a RED routes battery passes the suite silently because the markers are skipped",
+   "control": "the markers + ARV-SUITE-001 run wherever the venv exists (the only condition where the battery runs); a missing venv binary is a non-zero subprocess failure; the skip applies only to the no-venv host with the honest NOTE \u2014 the ARV-AUTH-018 guard's exact class",
+   "proof_ids": [
+    "run-02"
+   ]
+  },
+  {
+   "id": "FM-094B-2",
+   "scenario": "a new-suite slice merges and main's CI goes red on the registration asymmetry again",
+   "control": "the asymmetry is now documented in INT-161's entry + this record; new suites adopt the honest-degradation form at introduction (the 093 lesson enforced at review time); the observed instance is repaired and pinned",
+   "proof_ids": [
+    "run-01"
+   ]
+  },
+  {
+   "id": "FM-094B-3",
+   "scenario": "the registry drifts again (rows left open past their merges)",
+   "control": "the rule-4 close discipline executed in the same session here (094's row closed at its merge + the 089 backlog cleared); the 094B row itself closes in this same session's close work after its merge",
+   "proof_ids": [
+    "run-03"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-094B-1",
+   "severity": "P1",
+   "status": "resolved",
+   "evidence": "the fresh-context round observed the run records untracked and the sheet/SEV absent (the review ran mid-assembly, before the evidence commit)",
+   "disposition": "resolved by the assembly itself: the three run records committed with the sheet and this report at the slice's evidence head"
+  },
+  {
+   "id": "SEV-094B-2",
+   "severity": "P1",
+   "status": "resolved",
+   "evidence": "the worklog cited proofsheet.md and sev.json before they existed (an overclaim at the observed moment)",
+   "disposition": "resolved: both artifacts now exist and are committed with the records; the worklog's evidence line is satisfied by the assembled slice"
+  },
+  {
+   "id": "SEV-094B-3",
+   "severity": "P1",
+   "status": "resolved",
+   "evidence": "AGENTS.md (the 142->143 count mirror) was modified outside the declared scope \u2014 a mechanical ARV-SCOPE-002/ARV-CLM-002 refusal at PR time",
+   "disposition": "resolved: AGENTS.md declared in scope.txt and the open row's scope globs (the review round's own finding, fixed before the PR)"
+  },
+  {
+   "id": "SEV-094B-4",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "STATE.md's observed-live snapshot still named the 2026-11-12 head (carried drift, pre-existing)",
+   "disposition": "resolved in-slice: the snapshot refreshed to the live facts (main f38a0e13, the #135 merge record, the honest merge-run disclosure, 0 open PRs at the snapshot)"
+  }
+ ],
+ "not_verified": [
+  "the post-094B merge-commit CI run (observed after this slice's own merge \u2014 never pre-claimed; the local venv-less reproduction is this slice's proof)",
+  "the GitHub-side facts rest on the session's live API reads (the PR-head green run, the merge-commit red run's job log, the byte-equivalent protection re-read) \u2014 recorded in the ledgers, not re-observed by the reviewer context",
+  "the carried items unchanged from CLAIM-094's not-verified list: a live Supabase-issued token end-to-end; uvicorn over a real socket; the route surface against the remote project database; the remote 0020 application; F6's exact minimum trigger size"
+ ],
+ "builder_context": "builder-zcode-session63-slice-claim-094b (the implementing session: the merge, the close, the repair)",
+ "reviewer_context": "reviewer-zsubagent-fresh-context-claim-094b (a distinct fresh-context subagent, agent-61d8ebd5; a declared distinct context, not cryptographic independence \u2014 the protocol's stated limit)",
+ "disposition": "PASS",
+ "review_summary": "The repair is correct and consistent with the repo's proven degradation form: the markers and the exit-code floor run wherever the battery runs, the venv-less host carries the honest NOTE, and no silent-RED path exists where the venv is present; the merge facts in the closed rows are corroborated by the API-observed runs and the job log; the registry carries one open claim with the scope completed (AGENTS.md declared after the review round's finding) and the 089 backlog cleared; the evidence set (three run records, both suite paths, the canonical verifier) is committed with the sheet and this report. The round's findings were completion-stage items (the evidence assembly and the AGENTS.md scope), each resolved in this slice before the PR.",
+ "sheet_section": true
+}

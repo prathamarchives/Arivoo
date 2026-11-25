@@ -1,0 +1,218 @@
+{
+ "schema_version": 1,
+ "slice_id": "claim-094-routes-sources",
+ "base_sha": "87cced789d473893a8c5a3d4c74e3c558b29c7bf",
+ "reviewed_diff_sha256": "465b9b2979532ad489b3d83cf22474bb4c4415a3307a6bd43f2c4b9e5bd83486",
+ "intent_ids": [
+  "INT-160"
+ ],
+ "requirement_ids": [
+  "SYS-01",
+  "SYS-09",
+  "SYS-11"
+ ],
+ "system_claims": [
+  "C1",
+  "C5"
+ ],
+ "changed_components": [
+  "harness/api/routes.py",
+  "harness/api/app.py",
+  "harness/api/routes_selfcheck.py",
+  "harness/tests/test_api_routes.py",
+  "harness/gate.py",
+  "harness/red-records.json",
+  "harness/runs/claim-094-revalidation/NOTES.md",
+  "harness/runs/claim-094-revalidation/run-battery.log",
+  "harness/runs/claim-094-revalidation/run-meta.json",
+  "STATE.md",
+  "CLAIMS.md",
+  "context/WORKLOG.md",
+  "context/extracted/79-ROUTES-SOURCES.md",
+  "INTENT-LEDGER.md",
+  "DECISIONS.md",
+  "AGENTS.md"
+ ],
+ "interfaces_reviewed": [
+  "the \u00a711.4 refusal map (routes.py _map_kernel_refusal): the seven mapped families + the ARV-QRY-001/003 absence family kept 404; every other named-but-unmapped kernel code maps to the 500 class with the named code preserved and the raw cause text never echoed (the SEV round-1 repair, pinned by the battery)",
+  "the bounded subprocess runners (_run_kernel/_query_kernel): list-argv, fixed interpreter/cwd, service-set PGDATABASE only; subprocess.TimeoutExpired refuses ARV-API-504 inside the named-error envelope (the round-1 repair, pinned)",
+  "the write route (POST /api/v1/imports): owner/actor from the verified token only, the Idempotency-Key required and length-capped, the 413 cap enforced before and during the read, title XOR work_id enforced where the kernel cannot see the drop, the honest api-import provenance default",
+  "the read routes (GET /api/v1/sources + /{id}): the CLI page contract with the bounded page 1-200, the no-leak 404 class for absent/other-owner objects",
+  "the suite-of-record (test_api_routes.py): the battery's own exit code is the floor (ARV-SUITE-001) + markers ARV-API-001..021; the red-records amendment chains the edit",
+  "the gate registration (harness/gate.py TESTS) + the red record + the claim registry row (scope widened to declare the revalidation dir; the INT-160 retroactive notation)"
+ ],
+ "v_model": {
+  "component_verification": [
+   "ARV-API-019: the refusal-map component sends named-but-unmapped kernel codes to the 500 class, preserves the named code, never echoes the raw cause text",
+   "ARV-API-020: the absence family (ARV-QRY-001) keeps the no-leak 404 class",
+   "ARV-API-021: a kernel exceeding its time bound refuses ARV-API-504/504 inside the envelope",
+   "ARV-SUITE-001: the suite-of-record asserts the battery subprocess's own exit code",
+   "ARV-API-015/016/017/018: the revalidation guards (XOR selectors, both halves of the 413 cap, the non-blocking loop) \u2014 the battery at the final head",
+   "ARV-API-002..005: the \u00a711.3 idem-key law, the ARV-CAP-007 refusal, and the kernel's honest ack (durability_rung/result_ref/api_version)"
+  ],
+  "integration_verification": [
+   "run-11: the 29-check battery drives raw ASGI against a real migrated scratch Postgres rig \u2014 the genuine adapter-to-kernel subprocess boundary",
+   "run-10: the suite-of-record executes the battery in the pinned venv under the ARV-SUITE-001 floor with markers 001..021",
+   "run-03..run-09: the adjacent suites (auth boundary, migrations, canonical layer, selftest, remote target, dep boundaries, prod adapter) all exit 0 at the repaired tree \u2014 no cross-suite regression"
+  ],
+  "system_verification": [
+   "SYS-01: writes are idempotent by key \u2014 same key+body replays the same result_ref; same key+different body conflicts 409 ARV-CMD-409 (ARV-API-006/007 on the run-11 rig)",
+   "SYS-09: the supported client path creates and retrieves a capture through the real backend boundary (POST /api/v1/imports + GET /api/v1/sources + /{id} over the kernel)",
+   "the error taxonomy is honest end-to-end: every refusal is a named code inside the \u00a711.4 envelope; a server-side kernel failure never wears the no-leak 404 (ARV-API-019/020); a bounded kernel refuses 504 (ARV-API-021)"
+  ],
+  "validation": [
+   "a user posts a titled document with an Idempotency-Key: 200 with the durable ack; the same key+bytes replays the same result_ref; different bytes get 409 ARV-CMD-409; provenance records api-import by default",
+   "a second user's token lists an empty library and gets 404 on the first user's id \u2014 no existence leak",
+   "an oversized upload is refused 413 before any byte is buffered; a hung kernel yields 504 ARV-API-504, never a bare 500 page",
+   "a document with a long unbroken token run still fails at the kernel (F6, routed to its own claim) \u2014 the user sees 500 ARV-CMD-010 with a clean message, never a misleading 404"
+  ]
+ },
+ "failure_modes": [
+  {
+   "id": "FM-094-1",
+   "scenario": "a lying or chunked client POSTs an over-cap import body to exhaust memory (F1)",
+   "control": "declared Content-Length refused 413 before any byte is read + the stream cut at MAX_IMPORT_BYTES mid-read \u2014 no await request.body() anywhere",
+   "proof_ids": [
+    "run-11"
+   ]
+  },
+  {
+   "id": "FM-094-2",
+   "scenario": "a client attempts to act as another owner via body, query params, or headers",
+   "control": "owner from the verified JWT only; --actor hardcoded; client-id from signed claims; PGDATABASE service-set; no route signature accepts identity fields",
+   "proof_ids": [
+    "run-11"
+   ]
+  },
+  {
+   "id": "FM-094-3",
+   "scenario": "owner B probes owner A's source id to learn of its existence",
+   "control": "owner-scoped argv + empty-rows 404 + the enumerated ARV-QRY-001/003 absence family; an unenumerated future absence code fails toward 500 \u2014 the safe direction",
+   "proof_ids": [
+    "run-11"
+   ]
+  },
+  {
+   "id": "FM-094-4",
+   "scenario": "the same Idempotency-Key is reused with a different body",
+   "control": "the idem state is kernel-owned via --idem-key with content-based replay across differing temp paths; ARV-CMD-409 maps to 409",
+   "proof_ids": [
+    "run-11"
+   ]
+  },
+  {
+   "id": "FM-094-5",
+   "scenario": "a kernel write fails with a named code outside the map (the live example: F6's ARV-CMD-010) and the client is told 404 'absent object'",
+   "control": "repaired: the map's fall-through is the 500 class with the named code preserved and the raw cause text never echoed; pinned at the map component and green end-to-end at the repaired head",
+   "proof_ids": [
+    "run-11"
+   ]
+  },
+  {
+   "id": "FM-094-6",
+   "scenario": "a document with a very long unbroken token run kills the import at the kernel's keyword_index btree insert (F6)",
+   "control": "routed honestly: a named follow-up kernel claim (the tokenizer token-length cap + its own RED test); the battery deliberately carries no F6 check; the adapter classifies the failure honestly (500, ARV-CMD-010, no SQL text) but the kernel defect persists",
+   "proof_ids": [
+    "run-11"
+   ]
+  },
+  {
+   "id": "FM-094-7",
+   "scenario": "synchronous subprocess.run blocks the ASGI event loop (the F2 hypothesis)",
+   "control": "disproven by measurement (the revalidation's probes) and pinned by the in-battery gather concurrency check (ARV-API-018)",
+   "proof_ids": [
+    "run-11"
+   ]
+  },
+  {
+   "id": "FM-094-8",
+   "scenario": "injection via query params/title/limit/after reaching the kernel argv or env",
+   "control": "list-argv subprocess, no shell, fixed interpreter/cwd; env is os.environ + the service-set PGDATABASE only",
+   "proof_ids": [
+    "run-11"
+   ]
+  },
+  {
+   "id": "FM-094-9",
+   "scenario": "kernel refusal messages carry internal detail (SQL fragments) into client responses",
+   "control": "the unmapped family's message is replaced with the generic named-code text; the seven mapped families carry the kernel's own curated refusal texts (no credentials, DSNs or hostnames); pinned by ARV-API-019's no-raw-text assertion",
+   "proof_ids": [
+    "run-11"
+   ]
+  },
+  {
+   "id": "FM-094-10",
+   "scenario": "a future regression confined to the revalidation or round-1 repair guards (ARV-API-015..021) passes the suite-of-record unnoticed",
+   "control": "repaired: ARV-SUITE-001 makes the battery's own exit code the suite's floor and the marker sweep covers 001..021; the venv-less path still fails loudly",
+   "proof_ids": [
+    "run-10",
+    "run-11"
+   ]
+  },
+  {
+   "id": "FM-094-11",
+   "scenario": "a slow kernel raises TimeoutExpired, escaping the \u00a711.4 error envelope as a bare 500",
+   "control": "repaired: both runners catch TimeoutExpired and refuse ARV-API-504 inside the envelope; the temp-file cleanup still runs via the route's finally",
+   "proof_ids": [
+    "run-11"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "SEV-094-1",
+   "severity": "P1",
+   "status": "resolved",
+   "evidence": "routes.py's _map_kernel_refusal fall-through returned 404 for ANY named-but-unmapped kernel code \u2014 F6's ARV-CMD-010 (proven reachable through the import route) would surface a real server-side failure as the no-leak 404, contradicting the revalidation's F4 'OK'",
+   "disposition": "fixed RED-first in-slice: the ARV-QRY-001/003 absence family keeps 404; every other named-unmapped code maps to the 500 class with the named code preserved and the raw cause text never echoed; pinned by ARV-API-019 (RED before the repair) + ARV-API-020 (the absence-family pin)"
+  },
+  {
+   "id": "SEV-094-2",
+   "severity": "P1",
+   "status": "resolved",
+   "evidence": "test_api_routes.py never checked the battery's exit code and grepped only ARV-API-001..014 \u2014 a battery RED confined to the guards 015..018 would leave the suite-of-record GREEN",
+   "disposition": "fixed in-slice: ARV-SUITE-001 (the battery's own exit code is the suite's floor) + the markers extended to ARV-API-001..021; the red record's typed amendment chains the edit; the new checks observed RED before the routes.py repair (exit 1, ARV-SUITE-001/ARV-API-019/ARV-API-021)"
+  },
+  {
+   "id": "SEV-094-3",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "subprocess.TimeoutExpired escaped the \u00a711.4 envelope (a bare Starlette 500) in both kernel runners",
+   "disposition": "fixed in-slice (in-scope by D-053's own subject, the bounded subprocess): both runners refuse ARV-API-504 inside the envelope; pinned by ARV-API-021 (RED before the repair)"
+  },
+  {
+   "id": "SEV-094-4",
+   "severity": "P2",
+   "status": "owner-accepted-debt",
+   "evidence": "the adapter re-validates kernel-owned laws at the boundary (the XOR selectors, the limit bounds, the id-shape) \u2014 disclosed and justified (F5's class: the kernel cannot see what the adapter would drop); kept minimal and keyed to the kernel's named codes",
+   "disposition": "accepted as disclosed routed debt; revisit when the kernel's laws change"
+  },
+  {
+   "id": "SEV-094-5",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "the API's acquired_via default mirrored the CLI's 'cli-import' \u2014 a provenance mislabel on the API path",
+   "disposition": "fixed in-slice: the honest 'api-import' default (a free-text field; no kernel vocabulary to violate); the battery's positive-import checks exercise the default"
+  },
+  {
+   "id": "SEV-094-6",
+   "severity": "P2",
+   "status": "resolved",
+   "evidence": "ARV-API-021's no-exception branch called check() with four positional arguments against the battery's three-argument signature \u2014 a latent TypeError in the dead-on-green branch (a regression would still fail loudly via the exit code and the missing marker)",
+   "disposition": "fixed at the final head: the stray fourth argument dropped; the battery re-run GREEN (29/29) and the records re-bound"
+  }
+ ],
+ "not_verified": [
+  "a live Supabase-issued token end-to-end (needs a real user; the verify chain is fully proven with a real ES256 key pair)",
+  "uvicorn serving over a real socket and the route surface against the remote project database (Wave F's deployment/credential slices)",
+  "the remote migration ledger re-read (last live 0001-0019 on 19 Nov; this session observed the project healthy through the management API but did not re-read the ledger \u2014 the DB route not re-probed from this sandbox)",
+  "F6's exact minimum trigger size (the long-unbroken-token kernel defect \u2014 routed to its own follow-up kernel claim with its own RED test)",
+  "the five required CI checks (they run on the PR head; these records bind the pre-PR final head)",
+  "the RED-before-repair observations for ARV-SUITE-001/ARV-API-019/ARV-API-021 rest on the session's directly observed runs and the red-records amendment's typed chain, not on re-execution by the reviewer context"
+ ],
+ "builder_context": "builder-zcode-session63-slice-claim-094 (the implementing session: revalidation, close bookkeeping, round-1 repairs)",
+ "reviewer_context": "reviewer-zsubagent-fresh-context-claim-094 (a distinct fresh-context subagent, two rounds, agent-8d7b06d1; a declared distinct context, not cryptographic independence \u2014 the protocol's stated limit)",
+ "disposition": "PASS",
+ "review_summary": "The adapter is genuinely thin over the kernels: owner/actor are token-derived with a hardcoded actor and service-set PGDATABASE; argv is list-form with real timeouts; the F1/F5 fixes and the SEV round-1 repairs (the refusal map's 500-class default with the absence family kept 404, the suite's exit-code floor, the ARV-API-504 timeout envelope, the honest api-import default) are present in code and pinned by ARV-API-019..021 + ARV-SUITE-001; the nine run records are internally consistent (all exit 0, commands matching the recorded set, bound at the repaired heads) and F6 is honestly routed to a named kernel claim. Zero open P0/P1; the two open P2s are disclosed owner-accepted debt (SEV-094-4) and the routed F6 kernel defect.",
+ "sheet_section": true
+}

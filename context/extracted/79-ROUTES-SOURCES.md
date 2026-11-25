@@ -28,7 +28,7 @@ main `87cced7`; zero open PRs; CLAIMS max on main 093 / INTENT max INT-159 / DEC
 
 ## §5 — the battery re-run (the fresh-stack proof)
 
-`.venv-waved/bin/python -I harness/api/routes_selfcheck.py` with the rig env (PGHOST=127.0.0.1 PGPORT=5433 PGUSER=postgres + the rig's psql on PATH): exit 0, **26/26 checks GREEN** at `ad24900` — reproduced independently of the prior session's log. First run was RED on the kernel-backed checks (psql absent from the subprocess PATH — an environment provisioning fact, not a code defect; the prior sandbox's global PATH had carried it); GREEN after exporting the rig PATH/LD_LIBRARY_PATH the battery's own subprocess env prescribes. No committed code was changed for this.
+`.venv-waved/bin/python -I harness/api/routes_selfcheck.py` with the rig env (PGHOST=127.0.0.1 PGPORT=5433 PGUSER=postgres + the rig's psql on PATH): exit 0, **26/26 checks GREEN** at `ad24900` — reproduced independently of the prior session's log. First run was RED on the kernel-backed checks (psql absent from the subprocess PATH — an environment provisioning fact, not a code defect; the prior sandbox's global PATH had carried it); GREEN after exporting the rig PATH/LD_LIBRARY_PATH the battery's own subprocess env prescribes. No committed code was changed for this. The same provisioning class hit run-09's first recording (the prod-adapter shape checks need a CA file at `/tmp/ca-bundle.pem` — the prior sandbox's rig artifact; a fresh self-signed test CA was generated there and the suite re-recorded GREEN; the failed pre-commit recording was superseded before any commit, no history rewritten).
 
 ## §6 — the gate's refusal list, answered one-by-one (the PR-mode discipline)
 

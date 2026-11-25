@@ -24,11 +24,11 @@
 - the five required CI checks (they run on the PR head — green only after the PR opens; this evidence set binds to the pre-PR diff)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 0cd48e40ff08cdc11a891249ddb2b1506a995f6975e710fafb37f8b580bf1cdc
-- reviewed_diff_sha256: 465b9b2979532ad489b3d83cf22474bb4c4415a3307a6bd43f2c4b9e5bd83486
+- report sha256: 8d61c7b04320a9f93f66b9d4a42574726485c2c09fa8d3b5e1dbb5fd34a186ca
+- reviewed_diff_sha256: 8068098dcf9a28dfb17bc4da07757abb7ee81086d8a34cde7e30432b04f8d1db
 - disposition: PASS
 - findings: 6 (open P0/P1: 0)
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 3de01c03d8a6fef0711673964232b076a4345bc1d8b80788165ad3582a738e8e
+- sheet sha256 (of the content above, excluding this line): bbff1a2def095cdfe0802e54860c31bb95098a7ea8373da8e2a88d898310aae1

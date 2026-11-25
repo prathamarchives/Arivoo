@@ -261,8 +261,7 @@ def main() -> int:
                 _routes_mod._run_kernel(
                     [sys.executable, "-c", "import time; time.sleep(5)"], db, timeout=0.2)
                 check("ARV-API-021", False,
-                      "a kernel exceeding its time bound refuses ARV-API-504 inside the envelope",
-                      "catch subprocess.TimeoutExpired in _run_kernel/_query_kernel")
+                      "a kernel exceeding its time bound refuses ARV-API-504 inside the envelope")
             except _routes_mod.KernelRefusal as e:
                 check("ARV-API-021",
                       e.code == "ARV-API-504" and e.status == 504,

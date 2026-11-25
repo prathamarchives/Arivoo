@@ -15,11 +15,11 @@
 - a live Supabase-issued token end-to-end; uvicorn over a real socket; the route surface against the remote project database; the remote 0020 application (the same carried items, unchanged from CLAIM-094's not-verified list)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 139da1efbff34fa29affc659ecdd84dda8784ba4c493c481c0a34d9fe3546942
-- reviewed_diff_sha256: 12bca52e4e5278548dc661c5ac682978a30ee7cd6980f83a80950aa31adef063
+- report sha256: c3e52e365cc8d665ae815058abb8b879d6b2506fa8f43ef6bf729a9fa2df122c
+- reviewed_diff_sha256: a6c797025588e30e9555192478bb0429b141f0d49d2ceddce3355418d5252f31
 - disposition: PASS
 - findings: 4 (open P0/P1: 0)
 - not-verified entries: 3
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): e47d1bbab110ea5f1ba0434785ca9afeb53a39d6627bd840906725a2db7493e8
+- sheet sha256 (of the content above, excluding this line): b2394cbb6c1bd9433c0e4d770dcb54f3c182af961a3b94122ed6e0e919c6b624

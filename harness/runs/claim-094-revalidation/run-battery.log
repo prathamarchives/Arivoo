@@ -1,0 +1,28 @@
+PASS ARV-ROUTE-001: liveness answers 200 with no dependencies
+PASS ARV-ROUTE-002: readiness is 503 until the service declares ready
+PASS ARV-ROUTE-003: readiness is 200 once declared ready (auth + db state honest)
+PASS ARV-ROUTE-004: an unauthenticated product route is 401
+PASS ARV-ROUTE-005: the error body carries the named code + api_version, never a stack trace
+PASS ARV-ROUTE-006: a verified token reaches /api/v1/me and derives the owner from the sub
+PASS ARV-ROUTE-007: the OpenAPI document exists at /api/v1/openapi.json (generated from the code)
+PASS ARV-API-001: the route battery's scratch db migrated (the kernel-backed tests run on the real stack)
+PASS ARV-API-002: the write route refuses without the idempotency key (the §11.3 law)
+PASS ARV-API-003: the import without title/work-id maps to the kernel's ARV-CAP-007 refusal (422)
+PASS ARV-API-004: the positive import returns the kernel's honest ack (durability + api_version)
+PASS ARV-API-005: the ack carries the effect's result_ref (got: '01a21140-2922-7c22-851d-e6f512114233')
+PASS ARV-API-006: the same key+body replays the SAME effect (the idempotency law through HTTP)
+PASS ARV-API-007: the same key + different body refuses ARV-CMD-409 through HTTP (the conflict law)
+PASS ARV-API-008: GET /api/v1/sources lists the owner's library (rows: 1)
+PASS ARV-API-009: the list bound 0 refuses ARV-QRY-004 (the bounded page contract)
+PASS ARV-API-009: the list bound 1001 refuses ARV-QRY-004 (the bounded page contract)
+PASS ARV-API-010: the list bound non-integer refuses ARV-QRY-004 (the bounded page contract)
+PASS ARV-API-011: owner B's list is EMPTY over owner A's rows (the isolation law through HTTP)
+PASS ARV-API-012: GET /api/v1/sources/{id} returns the owner's source detail
+PASS ARV-API-013: an absent source is a 404 (never another owner's object existence)
+PASS ARV-API-014: the kernel-backed read routes are auth-guarded like every product route
+PASS ARV-API-015: title AND work_id together refuse 422 (exactly-one-of, enforced where the kernel cannot see it)
+PASS ARV-API-016: a declared over-cap Content-Length refuses 413 before the body is read
+PASS ARV-API-017: the streamed body over the cap refuses 413 (the cap holds during the read)
+PASS ARV-API-018: health answers while a kernel write is in flight (the loop is not blocked; health 0.000s vs import 0.085s)
+
+GREEN — the routes battery passes

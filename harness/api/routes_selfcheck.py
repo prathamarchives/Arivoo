@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""harness/api/routes_selfcheck.py — the route battery (CLAIM-092; in-boundary:
-fastapi lives only in harness/api/). Drives the raw ASGI interface (stdlib
-asyncio; httpx deliberately absent). The JwksCache seam is a TEST seam (a
-patched refresh serving the test JWK) — the product module is untouched."""
+"""harness/api/routes_selfcheck.py — the route battery (CLAIM-093 + CLAIM-094;
+in-boundary: fastapi lives only in harness/api/). Drives the raw ASGI interface
+(stdlib asyncio; httpx deliberately absent). The JwksCache seam is a TEST seam
+(a patched refresh serving the test JWK) — the product module is untouched.
+
+CLAIM-094 adds the kernel-backed route checks: the sources/import area against
+a REAL migrated scratch db on the local rig (the kernel's own contracts are
+exercised end-to-end through the HTTP surface)."""
 import asyncio
 import base64
 import json
@@ -13,7 +17,6 @@ sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]
 
 from harness.adapters import clock  # LAW-24
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from harness.api.app import create_app
 from harness.api import auth as _auth
 
@@ -24,15 +27,16 @@ def check(code, ok, what):
     if not ok:
         FAILS.append(code)
 
-async def call(app, method, path, headers=None):
+async def call(app, method, path, headers=None, body=b"", query=b""):
     scope = {"type": "http", "asgi": {"version": "3.0"}, "http_version": "1.1",
              "method": method, "scheme": "http", "path": path,
-             "raw_path": path.encode(), "query_string": b"", "root_path": "",
+             "raw_path": path.encode() + (b"?" + query if query else b""),
+             "query_string": query, "root_path": "",
              "headers": [(k.lower().encode(), v.encode()) for k, v in (headers or {}).items()],
              "client": ("127.0.0.1", 0), "server": ("testserver", 80)}
     sent = []
     async def receive():
-        return {"type": "http.request", "body": b"", "more_body": False}
+        return {"type": "http.request", "body": body, "more_body": False}
     async def send(m):
         if m["type"] == "http.response.start":
             sent.append(("status", m["status"]))
@@ -40,8 +44,16 @@ async def call(app, method, path, headers=None):
             sent.append(("body", m.get("body", b"")))
     await app(scope, receive, send)
     status = [v for k, v in sent if k == "status"][0]
-    body = b"".join(v for k, v in sent if k == "body").decode()
-    return status, body
+    body_s = b"".join(v for k, v in sent if k == "body").decode()
+    return status, body_s
+
+
+def _token(priv, cfg, kid, sub="route-user"):
+    import jwt as pyjwt
+    return pyjwt.encode({"sub": sub, "iss": cfg.issuer, "aud": cfg.audience,
+                         "exp": clock.now_s() + 600, "iat": clock.now_s()},
+                        priv, algorithm="ES256", headers={"kid": kid})
+
 
 def main() -> int:
     import jwt as pyjwt
@@ -56,9 +68,6 @@ def main() -> int:
                            jwks_url="https://test-jwks/.well-known/jwks.json",
                            expected_kid="test-key-1")
 
-    # THE TEST SEAM: the JwksCache's refresh serves the test JWK (the product
-    # module itself is untouched; the seam exists so the battery can hold the
-    # pinned-key positive path without possessing Supabase's private key).
     orig_refresh = _auth._JwksCache._refresh
     def fake_refresh(self):
         self._jwk = jwk
@@ -78,18 +87,12 @@ def main() -> int:
               "readiness is 200 once declared ready (auth + db state honest)")
         s, b = asyncio.run(call(app, "GET", "/api/v1/me"))
         check("ARV-ROUTE-004", s == 401, "an unauthenticated product route is 401")
-        d = {}
-        try:
-            d = json.loads(b)
-        except Exception:
-            pass
+        d = json.loads(b)
         err = d.get("error", {})
         check("ARV-ROUTE-005", err.get("code") == "ARV-AUTH-001" and "api_version" in b
               and "Traceback" not in b,
               "the error body carries the named code + api_version, never a stack trace")
-        tok = pyjwt.encode({"sub": "route-user", "iss": cfg.issuer, "aud": cfg.audience,
-                            "exp": clock.now_s() + 600, "iat": clock.now_s()},
-                           priv, algorithm="ES256", headers={"kid": "test-key-1"})
+        tok = _token(priv, cfg, "test-key-1")
         app_t = create_app(auth_config=cfg, health_auth_ready=True, health_db_ready=True)
         s, b = asyncio.run(call(app_t, "GET", "/api/v1/me",
                                  {"Authorization": "Bearer " + tok}))
@@ -98,8 +101,178 @@ def main() -> int:
         s, b = asyncio.run(call(app, "GET", "/api/v1/openapi.json"))
         check("ARV-ROUTE-007", s == 200 and '"openapi"' in b[:200],
               "the OpenAPI document exists at /api/v1/openapi.json (generated from the code)")
+
+        # ---------------- CLAIM-094: the kernel-backed routes ----------------
+        import subprocess, os
+        env = dict(os.environ)
+        env.update({"PATH": "/home/z/my-project/pgbuild/root/usr/lib/postgresql/17/bin:/usr/local/bin:/usr/bin:/bin",
+                    "LD_LIBRARY_PATH": "/home/z/my-project/pgbuild/root/usr/lib/x86_64-linux-gnu:/home/z/my-project/pgbuild/root/usr/lib",
+                    "PGHOST": "127.0.0.1", "PGPORT": "5433", "PGUSER": "postgres"})
+        def psql(db, sql):
+            return subprocess.run(["psql", "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1",
+                                   "-h", "127.0.0.1", "-p", "5433", "-U", "postgres", "-d", db,
+                                   "-c", sql], capture_output=True, text=True, timeout=60,
+                                  env=env)
+        db = psql("postgres", "SELECT 'arv_r094_'||floor(random()*100000)::text").stdout.strip()
+        psql("postgres", f"CREATE DATABASE {db}")
+        r = subprocess.run(["python3", "harness/migrate.py"], cwd=str(pathlib.Path(__file__).resolve().parents[2]),
+                           capture_output=True, text=True, timeout=300,
+                           env=dict(env, PGDATABASE=db, ARV_MIGRATIONS_DIR="harness/migrations"))
+        check("ARV-API-001", r.returncode == 0,
+              "the route battery's scratch db migrated (the kernel-backed tests run on the real stack)")
+        try:
+            os.environ["ARIVO_API_DB"] = db
+            app_k = create_app(auth_config=cfg, health_auth_ready=True, health_db_ready=True)
+            H = {"Authorization": "Bearer " + tok}
+
+            # 1) the import write: the idem key required (§11.3)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports", H, body=b"hello arivo"))
+            check("ARV-API-002", s == 400 and "Idempotency-Key" in b,
+                  "the write route refuses without the idempotency key (the §11.3 law)")
+            # 2) the import write: title XOR work-id (the kernel's ARV-CAP-007 law)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                     dict(H, **{"Idempotency-Key": "k-094-a"}),
+                                     body=b"hello arivo"))
+            check("ARV-API-003", s == 422 and "ARV-CAP-007" in b,
+                  "the import without title/work-id maps to the kernel's ARV-CAP-007 refusal (422)")
+            # 3) the positive import: the commit-before-ack ack carries the durability
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                     dict(H, **{"Idempotency-Key": "k-094-b"}),
+                                     body=b"hello arivo", query=b"title=Test+Work"))
+            ack = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-004", s == 200 and str(ack.get("api_version")) == "1"
+                  and ack.get("durability_rung") == "local_durable",
+                  "the positive import returns the kernel's honest ack (durability + api_version)")
+            check("ARV-API-005", bool(ack.get("result_ref")),
+                  f"the ack carries the effect's result_ref (got: {ack.get('result_ref', '')[:40]!r})")
+            # 4) the idempotent replay: the same key + body -> the replayed ack
+            s2, b2 = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                      dict(H, **{"Idempotency-Key": "k-094-b"}),
+                                      body=b"hello arivo", query=b"title=Test+Work"))
+            ack2 = json.loads(b2) if b2.startswith("{") else {}
+            check("ARV-API-006", s2 == 200 and ack2.get("result_ref") == ack.get("result_ref"),
+                  "the same key+body replays the SAME effect (the idempotency law through HTTP)")
+            # 5) the conflict: the same key + a DIFFERENT body -> ARV-CMD-409
+            s3, b3 = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                      dict(H, **{"Idempotency-Key": "k-094-b"}),
+                                      body=b"different bytes", query=b"title=Test+Work"))
+            check("ARV-API-007", s3 == 409 and "ARV-CMD-409" in b3,
+                  "the same key + different body refuses ARV-CMD-409 through HTTP (the conflict law)")
+            # 6) the list route: the bounded page contract (§11.3's list laws)
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/sources", H,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-008", s == 200 and isinstance(d.get("rows"), list) and str(d.get("api_version")) == "1",
+                  f"GET /api/v1/sources lists the owner's library (rows: {len(d.get('rows', []))})")
+            # 7) the list bounds: limit=0 / limit=1001 / a non-integer -> 422
+            for q, why in ((b"limit=0", "0"), (b"limit=1001", "1001"), (b"limit=abc", "non-integer")):
+                s, b = asyncio.run(call(app_k, "GET", "/api/v1/sources", H, query=q))
+                check("ARV-API-009" if q != b"limit=abc" else "ARV-API-010",
+                      s == 422 and "ARV-QRY-004" in b,
+                      f"the list bound {why} refuses ARV-QRY-004 (the bounded page contract)")
+            # 8) the owner isolation: another owner's token sees nothing
+            tok_b = _token(priv, cfg, "test-key-1", sub="owner-b")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/sources",
+                                     {"Authorization": "Bearer " + tok_b},
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-011", s == 200 and d.get("rows") == [],
+                  "owner B's list is EMPTY over owner A's rows (the isolation law through HTTP)")
+            # 9) the detail: an existing source -> the row; an ABSENT one -> the 404
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/sources", H, query=b"limit=50"))
+            dA = json.loads(b) if b.startswith("{") else {}
+            real_id = (dA.get("rows") or [{}])[0].get("id", "")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/sources/{real_id}", H))
+            check("ARV-API-012", s == 200 and "api_version" in b,
+                  "GET /api/v1/sources/{id} returns the owner's source detail")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/sources/00000000-0000-0000-0000-000000000000", H))
+            check("ARV-API-013", s == 404,
+                  "an absent source is a 404 (never another owner's object existence)")
+            # 10) the unauthenticated GET on the kernel-backed routes
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/sources"))
+            check("ARV-API-014", s == 401 and "ARV-AUTH-001" in b,
+                  "the kernel-backed read routes are auth-guarded like every product route")
+
+            # 11) the handoff revalidation (F5b): BOTH selectors -> the kernel
+            # cannot see the XOR (the adapter drops work-id silently) -> the
+            # adapter must refuse ARV-CAP-007 itself
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                     dict(H, **{"Idempotency-Key": "k-094-x"}),
+                                     body=b"hello arivo",
+                                     query=b"title=Both&work_id=00000000-0000-0000-0000-000000000000"))
+            check("ARV-API-015", s == 422 and "ARV-CAP-007" in b,
+                  "title AND work_id together refuse 422 (exactly-one-of, enforced where the kernel cannot see it)")
+            # 12) the handoff revalidation (F1): an over-cap DECLARED body is
+            # refused 413 before any byte is read (the early bound)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                     dict(H, **{"Idempotency-Key": "k-094-y",
+                                                "Content-Length": "999999999"}),
+                                     body=b"hello arivo", query=b"title=Early+Bound"))
+            check("ARV-API-016", s == 413,
+                  "a declared over-cap Content-Length refuses 413 before the body is read")
+            # 13) the handoff revalidation (F1, the streaming half): the cap
+            # holds DURING the read (a lying/chunked client cannot exhaust
+            # memory) — regression guard over the streaming cap
+            from harness.api import routes as _routes_mod
+            _saved_cap = _routes_mod.MAX_IMPORT_BYTES
+            _routes_mod.MAX_IMPORT_BYTES = 100
+            try:
+                s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                        dict(H, **{"Idempotency-Key": "k-094-z"}),
+                                        body=b"x" * 200, query=b"title=Stream+Cap"))
+                check("ARV-API-017", s == 413,
+                      "the streamed body over the cap refuses 413 (the cap holds during the read)")
+            finally:
+                _routes_mod.MAX_IMPORT_BYTES = _saved_cap
+            # 14) the handoff revalidation (F2): a kernel write in flight does
+            # NOT block the loop — health answers concurrently (measured: the
+            # blocking hypothesis was DISPROVEN; this check pins it stays that way)
+            async def _probe():
+                async def _timed(mk):
+                    t0 = clock.mono()  # LAW-24: the only sanctioned monotonic read
+                    r = await mk()
+                    return clock.mono() - t0, r
+                return await asyncio.gather(
+                    _timed(lambda: call(app_k, "POST", "/api/v1/imports",
+                                dict(H, **{"Idempotency-Key": "k-094-c"}),
+                                body=b"concurrency probe", query=b"title=Conc+Work")),
+                    _timed(lambda: call(app_k, "GET", "/health/live")))
+            ((imp_t, (imp_s, _ib)), (hl_t, (hl_s, _hb))) = asyncio.run(_probe())
+            check("ARV-API-018", imp_s == 200 and hl_s == 200 and hl_t < imp_t * 0.5,
+                  f"health answers while a kernel write is in flight (the loop is not blocked; "
+                  f"health {hl_t:.3f}s vs import {imp_t:.3f}s)")
+
+            # 15) the SEV round-1 repairs (SEV-094-1/-3): the refusal map's
+            # DEFAULT is the 500 class for named-but-unmapped kernel codes —
+            # F6's ARV-CMD-010 is the live example: a server-side failure
+            # must never wear the no-leak 404; the timeout bound stays
+            # inside the §11.4 named-error envelope
+            kr = _routes_mod._map_kernel_refusal(
+                "FAIL ARV-CMD-010: index row requires 8192 bytes, maximum size 8191")
+            check("ARV-API-019",
+                  kr.status == 500 and kr.code == "ARV-CMD-010"
+                  and "index row" not in kr.message,
+                  "a named-but-unmapped kernel refusal maps to the 500 class (the named code kept; the kernel's raw cause text never echoed — §11.4)")
+            kr2 = _routes_mod._map_kernel_refusal(
+                "FAIL ARV-QRY-001: no such object (abc) in the caller's scope")
+            check("ARV-API-020", kr2.status == 404,
+                  "the absence family (ARV-QRY-001/003) keeps the no-leak 404 class")
+            try:
+                _routes_mod._run_kernel(
+                    [sys.executable, "-c", "import time; time.sleep(5)"], db, timeout=0.2)
+                check("ARV-API-021", False,
+                      "a kernel exceeding its time bound refuses ARV-API-504 inside the envelope")
+            except _routes_mod.KernelRefusal as e:
+                check("ARV-API-021",
+                      e.code == "ARV-API-504" and e.status == 504,
+                      "a kernel exceeding its time bound refuses ARV-API-504 inside the envelope")
+
+        finally:
+            os.environ.pop("ARIVO_API_DB", None)
+            psql("postgres", f"DROP DATABASE {db}")
     finally:
         _auth._JwksCache._refresh = orig_refresh
+
     print()
     if FAILS:
         print("RED — the routes battery refuses: " + ", ".join(FAILS))

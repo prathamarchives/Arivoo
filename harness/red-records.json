@@ -1533,5 +1533,22 @@
         "observed_at": "2026-11-18T22:06:57.856758+00:00"
       }
     ]
+  },
+  "harness/tests/test_api_routes.py": {
+    "schema": 2,
+    "binding_commit": "ad24900c5db74c6d61c853f87cbe9aed9c100306",
+    "binding_sha256": "63891040c176de67d52cd59399f9797c3a478b1c2d1830f2b6735caa41abd01b",
+    "red_exit": 1,
+    "red_code": "ARV-API-001..014 (the suite's refusal list at the pre-slice tree)",
+    "red_evidence": "the api routes suite observed RED at the pre-slice tree (main 87cced7, a git worktree with the pinned venv + the migrated rig): the routes battery there carried no kernel-backed route checks, so all fourteen ARV-API checks FAIL \u2014 exit 1, refusal list ARV-API-001..014 (the observed red, never an assertion)",
+    "current_sha256": "37cfb68af0558ae0687e7fcc59b92ae29d8baf1233b2558c669d88901f7b94e3",
+    "amendments": [
+      {
+        "prior_sha256": "63891040c176de67d52cd59399f9797c3a478b1c2d1830f2b6735caa41abd01b",
+        "new_sha256": "37cfb68af0558ae0687e7fcc59b92ae29d8baf1233b2558c669d88901f7b94e3",
+        "note": "the SEV round-1 repair (SEV-094-2, the fresh-context verifier's finding): the suite now checks the battery's OWN exit code (ARV-SUITE-001 \u2014 a battery RED confined to any check must fail the suite) and the marker coverage extends to ARV-API-001..021 (the revalidation guards 015..018 and the round-1 repairs 019..021 were previously uncovered); the new checks observed RED before the routes.py repair (exit 1, ARV-SUITE-001/ARV-API-019/ARV-API-021 refusing) and GREEN after",
+        "observed_at": "2026-11-25T07:06:37.357279+00:00"
+      }
+    ]
   }
 }

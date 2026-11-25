@@ -1,0 +1,13 @@
+{
+  "claim": "CLAIM-094",
+  "record": "handoff-pack revalidation (10 questions)",
+  "date": "2026-11-25",
+  "branch": "slice/claim-094-routes-sources",
+  "base": "467ac0e",
+  "environment": "local rig postgres 17 @127.0.0.1:5433 (fresh initdb post-rollback); python 3.12.16 venv; 21-wheel pinned closure",
+  "command": ".venv-waved/bin/python -I harness/api/routes_selfcheck.py",
+  "exit_code": 0,
+  "verdict": "GREEN — 26 checks (21 carried + ARV-API-015..018)",
+  "red_first": "ARV-API-015/016 failed against the pre-fix adapter (RED run recorded in NOTES.md); 017/018 added as pins",
+  "findings": ["F1 fixed (adapter)", "F5 fixed (adapter)", "F2 disproven by measurement", "F6 kernel defect — follow-up claim", "F3/F4/F7/F8/F9/F10 OK"]
+}

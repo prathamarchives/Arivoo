@@ -1,0 +1,7 @@
+{
+  "command": "python3 tools/verify_selftest.py",
+  "exit_code": 0,
+  "commit": "0e7866b70b705510aefbebe28d3b98e145f81a4d",
+  "output_sha256": "38f134cce44f6b3fdca9d899f2f25438ee066a6fc2758e22aff49259d88cded8",
+  "recorded_at": "2026-11-25T07:08:24.330443+00:00"
+}

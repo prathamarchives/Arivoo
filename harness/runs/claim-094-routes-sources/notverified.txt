@@ -1,0 +1,6 @@
+a live Supabase-issued token end-to-end (needs a real user — §17.1's desktop test; the verify chain is fully proven with a real ES256 key pair)
+uvicorn serving over a real socket (the serve-time deployment slice — Wave F)
+the route surface against the remote project database (runs when the API service deploys — Wave F's credential slice)
+the remote 0020 application (its own registered act through the guarded path; the remote ledger last live-verified 0001–0019 on 19 Nov; this session observed the project healthy through the management API but did not re-read the migration ledger — the DB route not re-probed from this sandbox)
+F6's exact minimum trigger size (the long-unbroken-token kernel defect against the btree index-row limit — its own follow-up kernel claim with its own RED test; the adapter's 32 MiB cap does not mask it)
+the five required CI checks (they run on the PR head — green only after the PR opens; this evidence set binds to the pre-PR diff)

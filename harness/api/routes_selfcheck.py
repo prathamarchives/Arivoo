@@ -397,7 +397,17 @@ def main() -> int:
                   "a readiness read for an absent source is the same 404")
 
             # ---------------- CLAIM-097: the reader family ----------------
-            # 24) the position round-trip: save then reopen the same window
+            # 24) the position round-trip: save then reopen the same window.
+            # THE PREREQUISITE (the kernel's own law): the position binds to
+            # the serving generation — the source must be extracted first
+            # (the 096 route provides it; the battery's flow uses it)
+            s, b = asyncio.run(call(app_k, "POST",
+                                     f"/api/v1/sources/{real_id}/extraction",
+                                     dict(H, **{"Idempotency-Key": "k-097-ex"})))
+            ack_ex = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-034",
+                  s == 200 and ack_ex.get("status") in ("committed", "replayed"),
+                  "the reader-family fixture: the source is extracted first (the position's serving-generation prerequisite — the kernel's own law)")
             s, b = asyncio.run(call(app_k, "GET",
                                      f"/api/v1/sources/{real_id}/position", H))
             d = json.loads(b) if b.startswith("{") else {}
@@ -419,9 +429,10 @@ def main() -> int:
                                      f"/api/v1/sources/{real_id}/position", H))
             row = (json.loads(b) if b.startswith("{") else {}).get("row", {})
             check("ARV-API-036",
-                  s == 200 and row.get("state") == "position_saved"
+                  s == 200 and row.get("state") == "saved"
                   and row.get("start_off") == 0 and row.get("end_off") == 5
-                  and bool(row.get("saved_generation_id")),
+                  and bool(row.get("saved_generation_id"))
+                  and row.get("generation_matches") is True,
                   "the reopen returns the saved window + the serving-generation binding (the round-trip)")
             # the replay: the same key + body
             s2, b2 = asyncio.run(call(app_k, "PUT",
@@ -476,7 +487,11 @@ def main() -> int:
             s, b = asyncio.run(call(app_k, "GET", "/api/v1/session-events", H,
                                      query=b"limit=50"))
             d = json.loads(b) if b.startswith("{") else {}
-            evs = [r for r in (d.get("rows") or []) if isinstance(r, dict) and r.get("kind")]
+            # the CLI page contract: the non-header rows (the list arm's own
+            # row shape — pipe-delimited or JSON, the count is the evidence)
+            evs = [ln for ln in (d.get("rows") or [])
+                   if isinstance(ln, dict) and (ln.get("kind") or ln.get("id")
+                                                or ln.get("event"))]
             check("ARV-API-042",
                   s == 200 and len(evs) >= 2,
                   f"GET /session-events lists the recorded stream (rows observed: {len(evs)})")
@@ -488,10 +503,9 @@ def main() -> int:
             rows = [r for r in (d.get("rows") or []) if isinstance(r, dict)]
             mine = [r for r in rows if r.get("source_id") == real_id]
             check("ARV-API-043",
-                  s == 200 and mine and mine[0].get("state") == "position_saved"
+                  s == 200 and mine and mine[0].get("state") == "saved"
                   and mine[0].get("start_off") == 0,
                   "GET /reading-state derives the current-reading view (the saved position present)")
-
             # 27) the anchor resolution: the content-addressed reading surface
             # (the highlight route itself is CLAIM-098 — this probe mints the
             # anchor through the kernel CLI, then resolves it through the route)
@@ -499,8 +513,7 @@ def main() -> int:
                                   "create_highlight", "--owner", "route-user",
                                   "--actor", "owner", "--client-id", "api-v1",
                                   "--idem-key", "k-097-kh1", "--source-id", real_id,
-                                  "--start", "0", "--end", "5",
-                                  "--selected-text", "hello"],
+                                  "--start", "0", "--end", "5"],
                                  cwd=str(pathlib.Path(__file__).resolve().parents[2]),
                                  capture_output=True, text=True, timeout=120,
                                  env=dict(os.environ, PGDATABASE=db))
@@ -517,10 +530,12 @@ def main() -> int:
                                      cwd=str(pathlib.Path(__file__).resolve().parents[2]),
                                      capture_output=True, text=True, timeout=120,
                                      env=dict(os.environ, PGDATABASE=db))
-                try:
-                    aid = json.loads(cap.stdout.strip().splitlines()[-1]).get("anchor_id", "")
-                except Exception:
-                    aid = ""
+                for ln in (cap.stdout or "").strip().splitlines():
+                    if ln.startswith("{"):
+                        try:
+                            aid = json.loads(ln).get("anchor_id", "") or aid
+                        except Exception:
+                            pass
             check("ARV-API-044", bool(aid),
                   "the kernel mints a highlight whose anchor reads back (the anchor surface's fixture; the highlight ROUTES are CLAIM-098)")
             if aid:

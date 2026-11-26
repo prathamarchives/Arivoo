@@ -1541,7 +1541,7 @@
     "red_exit": 1,
     "red_code": "ARV-API-001..014 (the suite's refusal list at the pre-slice tree)",
     "red_evidence": "the api routes suite observed RED at the pre-slice tree (main 87cced7, a git worktree with the pinned venv + the migrated rig): the routes battery there carried no kernel-backed route checks, so all fourteen ARV-API checks FAIL \u2014 exit 1, refusal list ARV-API-001..014 (the observed red, never an assertion)",
-    "current_sha256": "d279172f996d980e8faebfca8b946ec9263fe42a91b7ef45d20018ed51d50b76",
+    "current_sha256": "a8ef5d9e3d1750094418d3a3dd7841f2801fd2992c3ee5aede103364ea151c76",
     "amendments": [
       {
         "prior_sha256": "63891040c176de67d52cd59399f9797c3a478b1c2d1830f2b6735caa41abd01b",
@@ -1554,6 +1554,12 @@
         "new_sha256": "d279172f996d980e8faebfca8b946ec9263fe42a91b7ef45d20018ed51d50b76",
         "note": "the 094B post-merge repair (observed live: the merge run's harness-suites RED on f38a0e13 \u2014 the suite checked the battery markers UNCONDITIONALLY, so the venv-less CI host failed all 21 checks with out=''): the marker checks + ARV-SUITE-001 now run only where the battery runs (the venv exists), the venv-less host carrying the honest NOTE \u2014 test_auth_boundary.py's proven 093 form; both paths observed GREEN after the edit (venv-less exit 0 + NOTE; venv-present exit 0 with all markers)",
         "observed_at": "2026-11-25T08:12:36.246764+00:00"
+      },
+      {
+        "prior_sha256": "d279172f996d980e8faebfca8b946ec9263fe42a91b7ef45d20018ed51d50b76",
+        "new_sha256": "a8ef5d9e3d1750094418d3a3dd7841f2801fd2992c3ee5aede103364ea151c76",
+        "note": "the extraction/readiness battery (test_api_routes.py + routes_selfcheck.py's ARV-API-022..033) observed RED at the test-only commit 2891c50 (the pre-slice main 5062510 + the tests; the implementation stash-verified absent at the observation): exit 1, the suite floor ARV-SUITE-001 + the new checks failing \u2014 the routes and the extraction-status kernel arm do not exist",
+        "observed_at": "2026-11-26T13:09:16.853198+00:00"
       }
     ]
   },

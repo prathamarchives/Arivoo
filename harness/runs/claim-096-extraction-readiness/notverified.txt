@@ -1,0 +1,5 @@
+a live Supabase-issued token end-to-end (needs a real user — the §17.1 class)
+uvicorn over a real socket; the deployed route surface (the Workstream 10 slice)
+the battery's five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
+the remote's btree/TOAST parity for the 095 bound (carried from record 80 §9)
+arv_migrate's remote absence re-observed only through this session's pg_roles probe (consistent with the prior sessions' shape; no independent re-derivation)

@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-096-extraction-readiness",
+  "base_sha": "5062510743a14a463bced0e553e2b7ce3d36817e",
+  "reviewed_diff_sha256": "d5056b7e33846b26ca756b6cdadd2597bc1da47a1475ab654dfe90325567f3c0",
+  "intent_ids": [
+    "INT-163"
+  ],
+  "requirement_ids": [
+    "SYS-06",
+    "SYS-07",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C3",
+    "C5"
+  ],
+  "changed_components": [
+    "harness/query.py",
+    "harness/api/routes.py",
+    "harness/api/routes_selfcheck.py",
+    "harness/tests/test_api_routes.py",
+    "harness/red-records.json",
+    "AGENTS.md",
+    "CLAIMS.md",
+    "STATE.md",
+    "INTENT-LEDGER.md",
+    "DECISIONS.md",
+    "context/WORKLOG.md",
+    "context/extracted/81-EXTRACTION-READINESS.md"
+  ],
+  "interfaces_reviewed": [
+    "the kernel read arm (harness/query.py EXTSTATE_SQL + the extraction-status subparser/dispatch): ONE statement, ONE snapshot \u2014 the source row gated by s.id (RLS: another owner's source yields NO row -> _refuse family='source', the same ARV-QRY-001 no-leak as get-source, verified live by this round's cross-owner probe); the state, generation_id, ordinal and fail_reason each derived by latest-ordinal subselects over arv.extraction_generation (source_id+owner_scope scoped); COALESCE(..., 'never_requested') makes the no-generations case the honest 'unavailable', never presented as ready; the id is SQL-escaped by doubling single quotes (the literal-transport class the kernel itself carries)",
+    "the passage_count derivation (EXTSTATE_SQL's fifth subselect): count(*) over arv.passage p JOIN arv.extraction_generation g ON g.id = p.generation_id WHERE g.state = 'current' \u2014 ONLY the CURRENT generation's committed passages; a building or failed generation contributes ZERO (a partial build never reports its half-committed rows), and the still-current old generation keeps serving its count while a new-key rebuild is in flight (verified live by this round's edge probe: building+retryable with passage_count 1 from gen 1, then ready/ordinal 2 after the resume)",
+    "the derived readiness flags (harness/query.py dispatch): readiness = {current: ready, building: building, failed: failed, never_requested: never_requested} over the generation machine's 0006 vocabulary; retryable = state in (building, failed); extractable = True (the read never claims the write arm's validations). The map is TOTAL over reachable latest-ordinal states: the 0006 CHECK admits 'superseded', but extract.py's supersede UPDATE targets every OTHER current/building row while the new generation (ordinal MAX+1) lands current \u2014 the latest-by-ordinal row can never be left 'superseded', so the dict lookup cannot KeyError on any kernel-producible state (verified by reading _stage_building/_complete's ordinal derivation and the supersede WHERE clause, plus the live rebuild probe)",
+    "the \u00a711.4 route map (harness/api/routes.py _HTTP_BY_PREFIX + the absence family tuple): ARV-EXT-001 (the empty source) and ARV-EXT-005 (NUL in the text) join the content-class 422 \u2014 both kernel messages are clean prose (verified live: the empty-source and NUL extraction refusals re-executed on a scratch rig, messages carry no observed cause text); ARV-EXT-004 joins the ARV-QRY-001/003 absence family at 404 (the no-leak class); ARV-EXT-002/003/006 stay on the message-replacing 500 default (their kernel messages CAN carry observed DB cause text \u2014 the map replaces the message with 'the command refused with a named code', verified in-process for all six codes: 001->422, 002->500-replaced, 003->500-replaced, 004->404, 005->422, 006->500-replaced)",
+    "POST /api/v1/sources/{source_id}/extraction (harness/api/routes.py): the \u00a711.3 write law \u2014 the Idempotency-Key header REQUIRED (missing or >200 chars -> ARV-API-400/400); the source-id bound checked (ARV-QRY-004/422); owner and actor derived SERVER-SIDE from the verified token (ctx['owner_scope'], 'owner'), the client-id taken from the token's claims with the 'api-v1' default; the kernel invoked through the bounded argv subprocess (harness/extract.py, PGDATABASE service-controlled, timeout 300s -> ARV-API-504 inside the envelope); the kernel's own idempotency machine IS the safe-retry/safe-rebuild contract (same key resumes/replays, new key supersedes) \u2014 no kernel behavior duplicated in the adapter (D-053's adapter law)",
+    "GET /api/v1/sources/{source_id}/extraction (harness/api/routes.py): the status arm rides the same query kernel (argv 'extraction-status'); the row-shape guard (no row / not a dict / no source_id) refuses the \u00a711.4 no-leak ARV-QRY-404/404 \u2014 byte-equal in form to the existing get-source route's guard; the 200 body carries {row, api_version}",
+    "the battery interface (harness/api/routes_selfcheck.py ARV-API-022..033) and its suite-of-record (harness/tests/test_api_routes.py markers + ARV-SUITE-001): the twelve checks cover never_requested (022), the \u00a711.3 key law (023), the honest ack (024), the same-key replay (025), ready+generation (026), the new-key rebuild (027), the crashed-building truthful state (028), the same-key resume (029), the cross-owner no-leak on both arms (030/031), and the absent source on both arms (032/033); the crash injection drives the kernel's own --crash-at pre-commit point; the red-record amendment chain binds the suite at the test-only commit 2891c50 (the observed red: exit 1, ARV-SUITE-001 + 022..030 failing \u2014 031..033 pass vacuously at the red tree because 404-on-absent-route paths exist pre-slice; re-observed by this round in a detached worktree)",
+    "the bookkeeping interfaces: INT-163 in INTENT-LEDGER.md (one-liner row + full entry, the same-slice mint class); D-055 in DECISIONS.md (the remote 0020 application through the guarded canonical runner, independently verified \u2014 ledger 20/20, role defaults, definer pin, RLS 26/26); CLAIM-095's closed row in CLAIMS.md (PR #137 = merge 5062510 merged 2026-11-26, the five checks green at head a81b270 and on the merge, the D-042 review id 6074141065, branch deleted, 0 open PRs \u2014 the merge commit's parentage verified by this round from git: 5062510 = merge(a81b270, 1eab74a1)); STATE re-derived (CLAIM-096 active, Workstream 1 DONE); record 81 (context/extracted/81-EXTRACTION-READINESS.md) + WORKLOG Task 118"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01 (re-executed live by this reviewer at HEAD 58be295: exit 0, 33 route checks PASS + ARV-SUITE-001): the battery's twelve new checks ARV-API-022..033 all green on a real migrated scratch db through the raw ASGI interface",
+      "this reviewer's OWN truthfulness probe (scratch db, migrated exactly like the battery, /home/z/my-project/scripts/sev096_probe.sh): extraction-status BEFORE any extraction answers never_requested with retryable=false, passage_count=0, generation_id=null; after extract.py answers ready with generation_id equal to the ack's result_ref and passage_count>=1; the cross-owner read (--owner other-owner) refuses ARV-QRY-001 exit 1 \u2014 the no-leak class",
+      "the same probe's retry/rebuild leg: the SAME idem key replays status=replayed with the SAME result_ref; a NEW key builds ordinal 2 (generation_count=2) and the readiness answers the NEW generation \u2014 the safe-retry/safe-rebuild contract at the kernel level",
+      "this reviewer's edge probe (sev096_edge_probe.sh): a NEW-key extraction crashed pre-commit over an existing current generation answers building + retryable=true with passage_count still the OLD current generation's count (1), and the same-key resume lands ready/ordinal 2 \u2014 the truthful mid-rebuild state, never a partial presentation",
+      "the \u00a711.4 map probe (sev096_map_probe.sh, in-process through _map_kernel_refusal): ARV-EXT-001->422, ARV-EXT-005->422, ARV-EXT-004->404 (absence family), ARV-EXT-002/003/006->500 with the message REPLACED (no internals); the ARV-EXT-001 (empty source) and ARV-EXT-005 (NUL) kernel refusals re-executed live on a scratch rig \u2014 both refuse named, exit 1, clean prose",
+      "the EXTSTATE_SQL static review (harness/query.py): passage_count joins ONLY g.state='current' generations; the outer WHERE s.id = {id} with RLS yields no row for an absent/cross-owner source -> the dispatch's _refuse(a.id, family='source'); the three latest-ordinal subselects are scoped source_id+owner_scope"
+    ],
+    "integration_verification": [
+      "run-01: the twelve checks exercise the FULL stack end-to-end \u2014 the ASGI route -> the bounded argv subprocess -> the kernel's own generation machine -> the migrated scratch db, including the HTTP-mapped idempotency law (the same-key replay returns status=replayed with the same result_ref through HTTP, ARV-API-025) and the interrupted-build resume through HTTP (ARV-API-028/029, the crash point driven directly)",
+      "the cross-owner integration (ARV-API-030/031): owner B's token against owner A's source is the no-leak 404 on BOTH arms \u2014 the write arm through the kernel's ARV-EXT-004 (mapped 404) and the read arm through the row-shape guard (ARV-QRY-404); the absent source answers 404 on both arms (ARV-API-032/033)",
+      "run-02 (re-executed live: exit 0): tools/verify_canonical_layer.py green over the bookkeeping riding the slice (the 145 count, the ledger/STATE/AGENTS coherence)",
+      "the gate's own checks re-run by this reviewer at HEAD: check_red_records() [] (the 096 amendment chain binds 2891c50, its new_sha256 equal to BOTH the 2891c50 tree's file hash and the current file hash \u2014 the chain verified end-to-end); scope.check_scope(diff) []; claims.check_branch_claim('slice/claim-096-extraction-readiness', diff) []; claims.check_registry() REFUSES ARV-CLM-003 (SEV-096-1 below)",
+      "the RED form re-observed by this reviewer at the test-only commit 2891c50 (a detached worktree, removed after; the repo's pinned venv): the battery exits 1 with ARV-API-022..030 failing (ARV-SUITE-001 with them) \u2014 the implementation provably absent at the observation; ARV-API-031..033 pass at the red tree (the absent-route 404 paths exist pre-slice), honestly disclosed here"
+    ],
+    "system_verification": [
+      "the trace: INT-163 (the ledger's active entry, minted this slice per the directive's Workstream 3) -> the runbook \u00a711.2 route table's Extraction row ('request extraction, job status, safe retry/rebuild') + 'Sources: capabilities/readiness' + \u00a711.3's write law (idempotency key, server-derived owner/actor, existing command kernel, truthful durability/effect/api_version) + \u00a711.4's no-internals error contract -> the two routes over the kernel -> ARV-API-022..033 + this report",
+      "SYS-06's truthfulness contract verified: extraction failures are explicit (failed + fail_reason surfaced; ARV-EXT-001/002/005/003 named refusals), partial builds are NEVER presented as complete (passage_count counts only the CURRENT generation; a building generation reports 0-or-old-current, never its half-committed rows), and readiness never claims ready without a current generation (never_requested is the honest unavailable)",
+      "SYS-07's rebuildability contract verified: the new-key rebuild supersedes (the old generation flipped superseded, the new current, ordinal+1) while the passages carry the generation's own provenance (generation_id/ordinal in the read); no authored content exists only in derived state (the source blob and digest remain the authority \u2014 the read carries the digest)",
+      "the registry/claims coherence at HEAD: CLAIM-096's open row covers the 12 reviewed paths (the branch-claim coverage check green in the gate's own slice/ form); CLAIM-095's closed row's merge facts verified against git ground truth (the merge commit 5062510's parents are a81b270 \u2014 the 095 PR head \u2014 and 1eab74a1 \u2014 the prior main; merged 2026-11-26); D-055 and record 81 document the remote 0020 application; STATE names CLAIM-096 active with Workstream 1 DONE",
+      "SYS-11's V-model trace closed by this report: INT-163 through the kernel architecture (the read arm at the kernel's ONE home; the routes as pure adapters \u2014 no domain logic duplicated) to the run evidence (run-01/run-02) and this independently authored verification"
+    ],
+    "validation": [
+      "the slice-level acceptance per the directive's batched cadence: the targeted battery once at the implementation head (run-01, 33 checks GREEN \u2014 re-executed by this reviewer) + the canonical layer (run-02, re-executed) + this SEV round; the reviewer's own three additional probe sets (the truthfulness probe, the in-flight rebuild edge probe, the \u00a711.4 map + EXT-001/005 live probe) go beyond the battery's coverage",
+      "the red record: the amendment chain (d279172f -> a8ef5d9e) binds the suite at 2891c50 with red_exit 1 and the honest red_code note; the chain's hashes verified by this round against both the 2891c50 tree and the current tree; the RED itself re-observed live in a detached worktree (exit 1, ARV-SUITE-001 + 022..030)",
+      "the final integrated V-model acceptance campaign remains Workstream 11's act per the directive \u00a73.3/\u00a76; the deployed route surface, a live Supabase-issued token, and uvicorn over a real socket remain the named later-workstream validations (carried in not_verified)",
+      "the not-verified discipline: record 81 \u00a79's honest list and the run dir's notverified.txt are carried into this report's own list; ARV-SEV-009 (the base-side Proof-Sheet section expectation \u2014 the base 5062510 carries the sheet_section renderer) is answered by this report setting sheet_section true, with the proof-sheet assembly itself left to the builder per the protocol's division of labor"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-096-1",
+      "scenario": "a partial or interrupted extraction presented as complete: a crashed building generation (or a failed one) reports its half-committed passage rows as if the source were ready \u2014 the SYS-06 false-readiness class",
+      "control": "the truthful derivation: the state is the latest-ordinal generation's own state (building/failed answered honestly, never mapped to ready); passage_count joins ONLY g.state='current' rows, so a building generation contributes zero and the previous current generation's count is served while a rebuild is in flight; verified live by this round's edge probe (building+retryable with the old count, then ready/ordinal 2 after the resume) and by ARV-API-022/026/028",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-096-2",
+      "scenario": "the cross-owner leak: another owner's extraction request or readiness read against a foreign source reveals the object's existence (a side channel through a differently-shaped error)",
+      "control": "the write arm rides the kernel's own ARV-EXT-004 (mapped into the \u00a711.4 absence family at 404, byte-equal to the ARV-QRY-001 class); the read arm's row-shape guard refuses ARV-QRY-404/404 on no-row; the kernel read itself refuses ARV-QRY-001 under RLS; verified at both layers (ARV-API-030/031 through HTTP; this reviewer's own --owner probe at the CLI)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-096-3",
+      "scenario": "an unsafe retry: the same idempotency key building a SECOND generation (duplicate work, supersede churn) or a new key silently replaying the old one (a stale answer after a rebuild request)",
+      "control": "the route carries NO retry logic of its own \u2014 the kernel's idempotency machine is the single home: the same key resumes a crashed building generation or replays a terminal one (the ack's status distinguishes committed/replayed), a new key builds a new ordinal and supersedes; verified by ARV-API-025/027/029 and this reviewer's kernel-level probe (replayed/result_ref equal; new key ordinal 2)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-096-4",
+      "scenario": "an internals leak through the \u00a711.4 map: a kernel refusal whose message carries observed DB cause text (the ARV-EXT-002/003/006 class) echoed verbatim into an HTTP response",
+      "control": "the map's message-replacing 500 default: those three codes get the generic 'the command refused with a named code' (the code preserved as the diagnostic surface, the cause text never echoed); the two clean-prose content classes (EXT-001/005) map to 422 with their messages kept; verified in-process for all six codes by this round's map probe and live for EXT-001/005 on a scratch rig",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-096-5",
+      "scenario": "the read arm's derived flags disagreeing with the write arm's contract (e.g. retryable=true on a current generation, or extractable=false read where the write would accept) \u2014 the caller's retry question answered wrongly",
+      "control": "the flags are derived from the SAME latest-ordinal state as the readiness (one statement, one snapshot): retryable = state in (building, failed) \u2014 exactly the two states the same-key resume/new-key rebuild paths address; extractable=true is constant (the read never pre-empts the write arm's own validations, which answer ARV-EXT-001/002/005 named); verified by ARV-API-022/028 and the truthfulness probe",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-096-6",
+      "scenario": "the suite-of-record passing while the battery is red (the vacuous class), or the new checks arriving without red evidence (LAW-11's missing mechanical memory)",
+      "control": "ARV-SUITE-001 (the battery's own exit code checked by the suite) + the twelve markers ARV-API-022..033 in test_api_routes.py; the red-record amendment chain binds the suite at the test-only commit 2891c50 (red_exit 1) \u2014 the chain's hashes verified end-to-end by this round and the RED re-observed live in a detached worktree",
+      "proof_ids": [
+        "run-01",
+        "run-02"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-096-1",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "claims.check_registry() REFUSES at the reviewed head: 'FAIL ARV-CLM-003: CLAIM-096: INT-163 is already ledgered but the row does not carry the retroactive notation' (reproduced live by this round at HEAD 58be295; the gate's PR-mode run calls check_registry unconditionally, so the CI harness job will go RED at the PR head until the repair lands). The row's INT cell reads 'INT-163 (minted this slice: ... the same-slice mint class)' \u2014 the word 'retroactive' appears in neither the INT cell nor Notes, while INT-163 IS ledgered (full entry + one-liner) in the same diff. The precedent slices each answered this exact refusal with a notation: CLAIM-094's 'the in-slice mint is the CLAIM-089 retroactive-consistent class' (0c77267), CLAIM-094B's 'the CLAIM-089 retroactive-consistent class' (513c621 \u2014 the commit that closed the same ARV-CLM-003/ARV-SEV-003 cycle), CLAIM-095's row at a81b270 carrying the same wording. The honesty rule (CLAIMS.md 6) is the authority: a reservation of an already-ledgered id must be marked retroactive in Notes.",
+      "disposition": "resolved in-slice before the PR (the evidence commit): the retroactive-consistent wording restored on the INT-163 reservation cell (the 094/094B/095 precedent form) / the ledger one-liner's newline restored \u2014 this re-bind is the record's own staleness control answering the changed reviewed paths"
+    },
+    {
+      "id": "SEV-096-2",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "INTENT-LEDGER.md line 32: the INT-163 one-liner was appended WITHOUT its terminating newline \u2014 '- **INT-163** \u2014 CLAIM-096 (...). (the INT-162 chain.)- **INT-125** \u2014 owner turn 20 (...)' \u2014 two one-liner rows glued into ONE line. Reproduced by this round: exactly one line in the ledger matches the one-liner regex twice. The mechanical checks do NOT catch it (VER-213's bullet regex findall still sees both IDs; sev.py's INT resolution still resolves both; the canonical layer is green) \u2014 the same blind-spot class VER-213's own comment describes (the header regex matching, the set deduping silently). Rendered effect: the ledger's numbering section reads INT-163 and INT-125 as one bullet, drifting the ledger's own display form.",
+      "disposition": "resolved in-slice before the PR (the evidence commit): the retroactive-consistent wording restored on the INT-163 reservation cell (the 094/094B/095 precedent form) / the ledger one-liner's newline restored \u2014 this re-bind is the record's own staleness control answering the changed reviewed paths"
+    },
+    {
+      "id": "SEV-096-3",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "ARV-API-031..033 pass VACUOUSLY at the red tree (re-observed by this round in the 2891c50 worktree: the battery fails 022..030 + ARV-SUITE-001, but 031..033 pass because the pre-slice router already answers an unknown /sources/{id}/extraction path with the 404 those checks assert) \u2014 the red record's red_code note ('ARV-SUITE-001 + the new checks failing') does not name this partial-vacuity, and record 81 \u00a76 lists the red refusal set as 'ARV-SUITE-001 + ARV-API-022..030' without noting that three of the twelve new checks cannot be red-first by construction.",
+      "disposition": "resolved by this report's own disclosure: the three checks' 404 assertions are reachable pre-slice through the router's absent-route path, so their red-first form is vacuous BY CONSTRUCTION (the checks' discriminating power arrives with the implementation); the nine non-vacuous checks (022..030) carry the red-first premise. No code change; the honest statement is this record."
+    }
+  ],
+  "not_verified": [
+    "the five required CI checks at the PR head and the D-042 reasoned PR review \u2014 the PR is not yet opened at this round; never pre-claimed",
+    "the Proof Sheet assembly for this slice (run-03's record, the sheet's SEV section rendering) \u2014 the builder's own assembly act per the protocol's division of labor; this report sets sheet_section true against the base's renderer (the base 5062510 carries the sheet_section marker in harness/proofsheet.py \u2014 probed by this round)",
+    "the remote (wcuuakhdmsmmxagvbdmg) state re-observed by this round: D-055's 0020-application facts (ledger 20/20, role defaults, definer pin, RLS 26/26) are accepted on record 81's documented observation + the DECISIONS row; this round did not re-connect to the remote (no credential in this context, by design)",
+    "a live Supabase-issued token end-to-end, uvicorn over a real socket, and the deployed route surface (the Workstream 10 slice) \u2014 carried unchanged from record 81 \u00a79",
+    "the remote's btree/TOAST parity for the 095 bound (carried from record 80 \u00a79)",
+    "ARV-EXT-002 (invalid UTF-8) and ARV-EXT-003 (mid-build failure) were verified at the MAP level only (in-process class assertion: 500, message replaced); their kernel-side live refusals were not re-executed by this round (both are pre-existing 096-untouched kernel paths, exercised by the standing EXT suite)",
+    "the battery's run under the CI host's own venv-less provisioning (the 093/094B honest-degradation form): this round ran it with the repo's pinned venv (.venv-waved) per the recorded run-01 command",
+    "run-01/run-02's recorded output_sha256 digests were not re-derived from saved transcripts (outputs not preserved in the run dir); this round re-executed the underlying commands live and matched the recorded exit codes"
+  ],
+  "builder_context": "builder-zcode-session64-slice-claim-096",
+  "reviewer_context": "reviewer-zsubagent-fresh-context-claim-096 (a distinct fresh-context subagent; a declared distinct context, not cryptographic independence \u2014 the protocol's stated limit)",
+  "disposition": "PASS",
+  "review_summary": "The extraction/readiness surface is correct and truthful end-to-end, and the reviewer verified it independently at every layer: the battery's 33 checks re-executed green at HEAD; the truthful semantics re-probed on this reviewer's own scratch rig (never_requested before, ready+generation_id after, the same-key replay, the new-key rebuild at ordinal 2, the in-flight rebuild answering building+retryable while the old current generation's passage_count is served, the cross-owner ARV-QRY-001 no-leak); the EXTSTATE_SQL derivation read and confirmed (passage_count joins only state='current' generations; the absent-source path yields no row into the shared _refuse; the readiness map is total over reachable latest-ordinal states because the supersede UPDATE never leaves the MAX-ordinal row superseded); the \u00a711.4 map asserted in-process for all six ARV-EXT codes with EXT-001/005's clean-prose refusals re-executed live; the red record's chain verified hash-for-hash and its RED re-observed in a detached worktree at 2891c50; the 095 close row's merge facts verified against git ground truth. The round's material finding is SEV-096-1 (P1, resolved-by-assembly, mechanically forced \u2014 the SEV-095-1 class): the gate's registry check refuses ARV-CLM-003 at the reviewed head because CLAIM-096's row mints the already-ledgered INT-163 without the retroactive notation the honesty rule requires and the 094/094B/095 precedents carry; the one-wording repair lands with the evidence commit, and this record must be re-bound over that repaired tree (the digest moves with the CLAIMS.md edit) \u2014 the gate's registry check and the digest binding are the two controls that refuse any other outcome, and the finding reopens as BLOCKED if the assembly lands without it. SEV-096-2 (P2, resolved-by-assembly) is the INT-163 one-liner glued onto INT-125's line \u2014 invisible to every current check, repaired by one newline in the same commit. SEV-096-3 (P2, resolved) records the honest boundary that ARV-API-031..033 pass vacuously at the red tree (their 404 assertions are reachable pre-slice through the absent-route path). Zero product-code defects found: the adapter law is kept (no kernel behavior duplicated), the write law is the kernel's own idempotency machine, and the read is ONE statement at ONE snapshot.",
+  "sheet_section": true
+}

@@ -148,15 +148,29 @@ stored credentials were re-verified live — see §2).
   test_journal, test_highlight, test_bookmark, test_retrieval_packs, test_commands →
   all exit 0 GREEN at the implementation head (the exact per-suite GREEN lines in
   run-02.txt).
-- The gate (PR mode, the slice's own record): `python3 harness/gate.py --slice
-  claim-095-kwr-token-bound --diff origin/main --skip-suites` → GREEN (run-04).
+- The gate (PR mode, the slice's own record): the FIRST run (run-04, before the
+  evidence assembly) refused honestly with the three assembly-order failures —
+  ARV-RED-008 (the new suite registered nowhere: repaired by the TESTS registration
+  commit, the binding-commit precedent), ARV-PRF-002 (no proof sheet yet: the sheet
+  assembles last), ARV-SEV-001 (no SEV yet: the fresh-context round had not run).
+  The FINAL gate over the assembled evidence (the sheet + the SEV on disk) ran green
+  at the evidence head — the observation recorded here, not as a run record (the
+  sheet's byte-identity locks before the gate's own observation).
 - The canonical layer: `python3 tools/verify_canonical_layer.py` → green at the final
-  head (run-04's tail; the count line quoted there).
+  head (run-05's tail; the count line quoted there).
+- The red-record mint repair (SEV-095-1, the fresh-context round's P1 finding): the
+  first red.py invocation ran BEFORE the TESTS registration — a silent no-op (red.py
+  iterates the TESTS tuple only). The mint re-ran after the registration, binding the
+  same observed red at 385ad7b with the no-op disclosed in the record's own note.
 
 ## 7. Evidence
-- `harness/runs/claim-095-kwr-token-bound/` — run-01 (the red run at 385ad7b), run-02
-  (the green + the affected-suite batch), run-03 (the F6 spike probes), run-04 (the gate
-  + the canonical layer), proofsheet.md, notverified.txt, sev.json (the two-round chain).
+- `harness/runs/claim-095-kwr-token-bound/` — run-01 (the KBND suite's GREEN run at
+  the implementation head; the RED evidence is the red record bound at 385ad7b in
+  harness/red-records.json), run-02 (the affected-suite batch, all eight GREEN), run-03
+  (the F6 spike reproduction), run-04 (the gate's honest assembly-order RED), run-05
+  (the canonical layer green), proofsheet.md, notverified.txt, sev.json (the round-1
+  PASS + the re-bind), sev-round-1.md (the fresh-context round's report), scope.txt,
+  f6-spike.sh.
 - The live GitHub facts (§2) observed through the API this session.
 - The red record in `harness/red-records.json` (binding 385ad7b, schema 2).
 - CI: the PR's five required checks at the exact PR head (IDs recorded in §12 at close).
@@ -174,6 +188,12 @@ stored credentials were re-verified live — see §2).
   refusal; repaired to the pin-line extraction + the `--hash` conversion (the method
   record 79 §3 describes; now persisted in rebuild-env.sh for future recycles).
 - No product-code defect found in the fix itself across the affected-suite batch.
+- The fresh-context SEV round (round 1, PASS) found the assembly defects above as
+  SEV-095-1 (the red-record mint's silent no-op — repaired in this slice's evidence
+  commit, the mint re-run after the TESTS registration, the no-op disclosed) and
+  SEV-095-2 (this record's own overclaims — the gate/as-run wording above is the
+  repair) — both resolved in-slice before the PR, per the D-042 disposition
+  discipline.
 
 ## 9. Unverified items
 - The bound value's interplay with a SUPABASE-side btree (the remote's block size and

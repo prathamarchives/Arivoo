@@ -1556,5 +1556,15 @@
         "observed_at": "2026-11-25T08:12:36.246764+00:00"
       }
     ]
+  },
+  "harness/tests/test_kwr_bound.py": {
+    "schema": 2,
+    "binding_commit": "385ad7bbf386a83892d74acee30ca5af29de2eef",
+    "binding_sha256": "70233b39687326a28f813127372d00782ec7fc862875bd04b993616599400147",
+    "red_exit": 1,
+    "red_code": "ARV-TEST-KBND (KBND-01..07: the suite's refusal list at the pre-slice tree)",
+    "red_evidence": "the F6 token-bound suite (harness/tests/test_kwr_bound.py) observed RED at the test-only commit 385ad7b (the pre-slice main 1eab74a + the test + the claim row): exit 1, all seven KBND checks failing \u2014 the bound ARV-KWR-002/003 does not exist (the import of an over-bound token dies inside the metadata transaction on the INCOMPRESSIBLE class \u2014 the spike observed 'index row size 3016 exceeds btree version 4 maximum 2704' live on the 17.12 rig; the query arm accepts any term length). MINT REPAIR (SEV-095-1, the fresh-context round's P1 finding): the first red.py invocation ran BEFORE the suite's TESTS registration in gate.py \u2014 red.py iterates the TESTS tuple only (the ONE home), so it was a silent no-op; this mint ran after the registration landed (the evidence commit), binding the SAME observed red at 385ad7b",
+    "current_sha256": "b40fe7e222eb31c0144072edee18cdcca5dba71dd6172ac4a524aca75b116824",
+    "amendments": []
   }
 }

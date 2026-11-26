@@ -1,0 +1,7 @@
+{
+ "command": "python3 /home/z/my-project/scripts/sev097_probe.py P7 (the red re-observation at 0ce1be9, detached worktree)",
+ "exit_code": 0,
+ "commit": "6ebb5b3ae5cde4b5475e60a9267efdd1991efb07",
+ "output_sha256": "8be2ec6ff965ef04d5efdcf948735a5dfbd3c2f207128a33c7a482b59130948d",
+ "recorded_at": "2026-11-26T14:12:50.980811+00:00"
+}

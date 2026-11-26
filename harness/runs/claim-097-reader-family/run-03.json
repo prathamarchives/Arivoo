@@ -1,0 +1,7 @@
+{
+ "command": "python3 /home/z/my-project/scripts/sev097_probe.py (the reviewer's own kernel/ASGI probe set P1-P6)",
+ "exit_code": 0,
+ "commit": "6ebb5b3ae5cde4b5475e60a9267efdd1991efb07",
+ "output_sha256": "e6358e536068807c63e58a5370b64f7935543757c61bb2dd068828341b07dfce",
+ "recorded_at": "2026-11-26T14:12:50.980811+00:00"
+}

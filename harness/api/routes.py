@@ -60,6 +60,12 @@ _HTTP_BY_PREFIX = (
     ("ARV-FMT", 422),       # the format registry (invalid input)
     ("ARV-CAP-001", 422),  # the missing file (invalid input)
     ("ARV-CMD-409", 409),   # the idempotency conflict
+    # CLAIM-096 (the extraction area): the content-class refusals whose
+    # kernel messages are clean prose (verified — no raw cause text on these
+    # paths) surface as invalid input; ARV-EXT-002/003/006 (which CAN carry
+    # observed cause text) stay on the message-replacing 500 default below
+    ("ARV-EXT-001", 422),   # the empty source (no content block)
+    ("ARV-EXT-005", 422),   # NUL in the text (the literal-transport class)
 )
 
 
@@ -72,7 +78,7 @@ def _map_kernel_refusal(line: str) -> KernelRefusal:
             return KernelRefusal(code, msg, status)
     # the absence family (the kernel's own no-leak refusals: absent or
     # tombstone-hidden in the caller's scope) keeps the 404 class — §11.4
-    if code.startswith(("ARV-QRY-001", "ARV-QRY-003")):
+    if code.startswith(("ARV-QRY-001", "ARV-QRY-003", "ARV-EXT-004")):
         return KernelRefusal(code, msg, 404)
     # every OTHER named-but-unmapped kernel code is a server-side failure the
     # client cannot act on (the live example: F6's ARV-CMD-010, proven
@@ -280,6 +286,51 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
         page = _query_kernel(argv, db)
         rows = page.get("rows") or []
         if not rows or not isinstance(rows[0], dict) or "id" not in rows[0]:
+            # §11.4: never leak another owner's object existence
+            raise KernelRefusal("ARV-QRY-404", "no such source for this owner", 404)
+        return JSONResponse(status_code=200, content={"row": rows[0],
+                                                      "api_version": page.get("api_version", 1)})
+
+    # ---- CLAIM-096: the §11.2 'Extraction' area (request, status) ----
+    # POST /api/v1/sources/{id}/extraction — 'request extraction'. The write
+    # law (§11.3): the Idempotency-Key is required; the SAME key resumes a
+    # crashed building generation and replays a terminal one (the kernel's
+    # own idempotency machine — the safe RETRY); a NEW key builds a NEW
+    # generation (superseding the old — the safe REBUILD). The kernel argv
+    # carries ONLY server-derived identity (owner from the verified token).
+    @router.post("/api/v1/sources/{source_id}/extraction")
+    async def request_extraction(source_id: str,
+                                 ctx: dict = Depends(verified),
+                                 idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not source_id or len(source_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the source id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "extract.py"),
+                "--owner", ctx["owner_scope"],
+                "--actor", "owner",
+                "--client-id", ctx["claims"].get("client_id", "api-v1"),
+                "--idem-key", idempotency_key,
+                "--source-id", source_id]
+        ack = _run_kernel(argv, db, timeout=300.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # GET /api/v1/sources/{id}/extraction — 'job status': the truthful
+    # readiness state derived from the generation rows (ready / building /
+    # failed / never_requested; never a partial extraction presented as
+    # complete — passage_count counts only the CURRENT generation's rows)
+    @router.get("/api/v1/sources/{source_id}/extraction")
+    async def extraction_status(source_id: str, ctx: dict = Depends(verified)):
+        if not source_id or len(source_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the source id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "extraction-status", "--owner", ctx["owner_scope"],
+                "--id", source_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows or not isinstance(rows[0], dict) or "source_id" not in rows[0]:
             # §11.4: never leak another owner's object existence
             raise KernelRefusal("ARV-QRY-404", "no such source for this owner", 404)
         return JSONResponse(status_code=200, content={"row": rows[0],

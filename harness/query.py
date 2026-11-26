@@ -123,6 +123,39 @@ CAP_SQL = ("SELECT row_to_json(t)::text FROM (SELECT h.id AS id, h.revision, h.s
 SRC_SQL = ("SELECT row_to_json(t)::text FROM (SELECT s.id AS id, s.work_id, w.title, s.digest, "
            "s.media_type, s.byte_size, s.import_state, s.source_version, s.created_at "
            "FROM arv.source s JOIN arv.work w ON w.id = s.work_id WHERE s.id = {id}) t;")
+# CLAIM-096 (runbook §11.2 'Extraction: job status' + 'Sources:
+# capabilities/readiness'; the directive's Workstream 3): the truthful
+# extraction/readiness read — ONE statement, ONE snapshot, the state derived
+# from the generation rows (never a cached status column). The vocabulary is
+# the generation machine's own (0006): latest-by-ordinal ∈ {building,
+# current, failed}; NO generations at all = never_requested (the honest
+# 'unavailable' — never presented as ready; never a partial extraction
+# presented as complete). passage_count: the CURRENT generation's committed
+# passages (0 while building/failed/never — a partial build never reports
+# its half-committed rows); retryable: building/failed both answer the
+# caller's retry question (the same idem key resumes; a new key rebuilds).
+# The source row itself gates existence (RLS: another owner's source yields
+# NO row -> the same no-leak refusal as get-source).
+EXTSTATE_SQL = ("SELECT row_to_json(t)::text FROM ("
+                "SELECT s.id AS source_id, s.digest, "
+                "COALESCE((SELECT g.state FROM arv.extraction_generation g "
+                "WHERE g.source_id = s.id AND g.owner_scope = s.owner_scope "
+                "ORDER BY g.ordinal DESC LIMIT 1), 'never_requested') AS extraction_state, "
+                "(SELECT g.id::text FROM arv.extraction_generation g "
+                "WHERE g.source_id = s.id AND g.owner_scope = s.owner_scope "
+                "ORDER BY g.ordinal DESC LIMIT 1) AS generation_id, "
+                "(SELECT g.ordinal FROM arv.extraction_generation g "
+                "WHERE g.source_id = s.id AND g.owner_scope = s.owner_scope "
+                "ORDER BY g.ordinal DESC LIMIT 1) AS generation_ordinal, "
+                "(SELECT g.fail_reason FROM arv.extraction_generation g "
+                "WHERE g.source_id = s.id AND g.owner_scope = s.owner_scope "
+                "AND g.state = 'failed' ORDER BY g.ordinal DESC LIMIT 1) AS fail_reason, "
+                "(SELECT count(*) FROM arv.passage p JOIN arv.extraction_generation g "
+                "ON g.id = p.generation_id WHERE g.source_id = s.id "
+                "AND g.owner_scope = s.owner_scope AND g.state = 'current') AS passage_count, "
+                "(SELECT count(*) FROM arv.extraction_generation g "
+                "WHERE g.source_id = s.id AND g.owner_scope = s.owner_scope) AS generation_count "
+                "FROM arv.source s WHERE s.id = {id}) t;")
 # P4-A slice two (CLAIM-066; record 58 §2): the position read arm — ONE
 # statement, ONE snapshot: the source existence (the outer row — absent under
 # RLS yields NO row, the same refusal as get-source), the last-saved position
@@ -1289,6 +1322,12 @@ def main() -> int:
         p = sub.add_parser(name)
         p.add_argument("--owner", default=None)
         p.add_argument("--id", required=True)
+    # CLAIM-096 (runbook §11.2): the extraction/readiness status read — the
+    # truthful generation-derived state (never a cached status column)
+    p = sub.add_parser("extraction-status")
+    p.add_argument("--owner", default=None)
+    p.add_argument("--id", required=True,
+                   help="the source id whose extraction readiness the read answers")
     for name in ("get-bookmark", "get-bookmark-history"):
         p = sub.add_parser(name)
         p.add_argument("--owner", default=None)
@@ -1570,6 +1609,28 @@ def _dispatch(a, db) -> int:
         # P4-C slice five (CLAIM-074): one list's CURRENT membership — the
         # derived view over the membership event rows
         return _get_list(db, a.owner, a.id, a.limit, a.after)
+    if a.what == "extraction-status":
+        # CLAIM-096: the truthful readiness read — the state derived from the
+        # generation rows at ONE snapshot; the absent source refuses the same
+        # no-leak way as get-source (another owner's source does not exist)
+        rows = _read(db, a.owner, EXTSTATE_SQL.format(
+            id="'" + a.id.replace("'", "''") + "'"))
+        if rows is None:
+            return 1
+        if not rows:
+            return _refuse(a.id, family="source")
+        d = json.loads(rows[0])
+        # the derived readiness vocabulary (the API's §11.2 contract rides the
+        # SAME derivation — one home, the kernel): ready iff a CURRENT
+        # generation exists; building/failed are retryable; never_requested
+        # is extractable (never presented as ready)
+        state = d.get("extraction_state")
+        d["readiness"] = {"current": "ready", "building": "building",
+                          "failed": "failed", "never_requested": "never_requested"}[state]
+        d["retryable"] = state in ("building", "failed")
+        d["extractable"] = True  # the write arm's own validations govern; the read never claims otherwise
+        print(json.dumps(_versioned(d), ensure_ascii=False))
+        return 0
     sql = SRC_SQL
     rows = _read(db, a.owner, sql.format(id="'" + a.id.replace("'", "''") + "'"))
     if rows is None:

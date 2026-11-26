@@ -1,0 +1,17 @@
+# CLAIM-095 — the F6 kernel follow-up: the bounded tokenizer/index-input contract (the
+# long-unbroken-token / keyword-index btree row-size boundary; runbook §11.2's routed
+# defect; record 79 §6 "F6's exact minimum trigger size") + the directive intake + the
+# 094B post-merge close riding this claim (the directive's ride-with-next-bounded-claim order).
+CLAIMS.md INT-162
+STATE.md INT-162
+context/WORKLOG.md INT-162
+INTENT-LEDGER.md INT-162
+DECISIONS.md D-054
+context/SOURCE-COVERAGE-MANIFEST.md INT-162
+context/raw/ARIVOO_END_TO_END_BACKEND_EXECUTION_DIRECTIVE.md INT-162
+context/extracted/80-KWR-TOKEN-BOUND.md INT-162
+harness/commands.py D-054
+harness/query.py D-054
+harness/tests/test_kwr_bound.py D-054
+harness/red-records.json D-054
+harness/runs/claim-095-kwr-token-bound D-054

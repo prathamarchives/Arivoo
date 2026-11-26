@@ -282,7 +282,7 @@ def main() -> int:
 
             # 17) the extraction write: the idem key law + the honest ack
             s, b = asyncio.run(call(app_k, "POST",
-                                     f"/api/v1/sources/{real_id}/extraction"))
+                                     f"/api/v1/sources/{real_id}/extraction", H))
             check("ARV-API-023", s == 400 and "Idempotency-Key" in b,
                   "POST /sources/{id}/extraction refuses without the idempotency key (the §11.3 law)")
             s, b = asyncio.run(call(app_k, "POST",

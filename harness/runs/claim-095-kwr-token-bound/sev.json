@@ -1,159 +1,159 @@
 {
- "schema_version": 1,
- "slice_id": "claim-095-kwr-token-bound",
- "base_sha": "1eab74a132c36c5d2d32fce74030ecb90ae6e571",
- "reviewed_diff_sha256": "69b3d6464badb2ea937bd443bc95856eef25f3d70188f36f3b7cad3d3c51c1f9",
- "intent_ids": [
-  "INT-162"
- ],
- "requirement_ids": [
-  "SYS-06",
-  "SYS-07",
-  "SYS-11"
- ],
- "system_claims": [
-  "C1",
-  "C3",
-  "C5"
- ],
- "changed_components": [
-  "harness/commands.py",
-  "harness/query.py",
-  "harness/gate.py",
-  "harness/tests/test_kwr_bound.py",
-  "INTENT-LEDGER.md",
-  "DECISIONS.md",
-  "CLAIMS.md",
-  "STATE.md",
-  "AGENTS.md",
-  "context/WORKLOG.md",
-  "context/README.md",
-  "context/SOURCE-COVERAGE-MANIFEST.md",
-  "context/raw/ARIVOO_END_TO_END_BACKEND_EXECUTION_DIRECTIVE.md",
-  "context/extracted/80-KWR-TOKEN-BOUND.md"
- ],
- "interfaces_reviewed": [
-  "the tokenizer/index-input bound (harness/commands.py): KWR_TOKEN_MAX_BYTES=512 measured on the RAW UTF-8 byte length of each word run — ONE kernel home beside the tokenizer; _kwr_tokens raises the typed _CapRefusal 'ARV-KWR-002' with the run's byte length, a 24-char head of the offending run, and a repair line (split or shorten the run); the case-folded Unicode word-run semantics, the CJK single-char + whole-run dual tokens, and the per-document dedup set are unchanged (KBND-04's pins + the standing KWR suite green)",
-  "the import pre-scan (import_source, harness/commands.py): after the blob put+verify and the format decode, BEFORE the staging_verified journal update and the metadata transaction — read_text(media_type, digest) with the non-text boundary (UnicodeDecodeError/KeyError/_FmtRefusal -> empty string, not indexed, never refused) exactly mirroring build_with_index's own boundary; an over-bound token records the journal row failed(ARV-KWR-002) retryable with the staged bytes preserved (the ARV-CAP-004 staged-bytes pattern extended), exit 1, zero authoritative rows",
-  "the read-side term bound (harness/query.py): _kwr_term_bound imports KWR_TOKEN_MAX_BYTES from harness.commands (the one-fact-one-home law — query.py re-declares nothing, verified structurally by KBND-07); both the search arm and the pack arm refuse the named 'ARV-KWR-003' with the term's byte length and the repair line BEFORE the query runs — a term the index can never hold is a named refusal, never a silent empty result (KWR-07's explicit-failure law applied to the read side); normal-term search/pack behavior unchanged",
-  "the suite registration interface (harness/gate.py's TESTS tuple — the ONE home): harness/tests/test_kwr_bound.py registered diff-visibly in the binding commit e870ad2, closing the ARV-RED-008 class (a suite under harness/tests/ visible to neither discovery surface); red.py imports the same tuple, so the red control and the trusted selection agree",
-  "the refusal-code contract at the command boundary: ARV-KWR-002 (write side, every capture path through the tokenizer) and ARV-KWR-003 (read side, search + pack) — named codes with repair lines, zero partial effect on the authoritative layer, the ARV-CMD-010/DB-side crash class never reached; the route adapter (D-053's adapter law) inherits the kernel's codes, never duplicates the bound",
-  "the directive intake interface (context/raw/ARIVOO_END_TO_END_BACKEND_EXECUTION_DIRECTIVE.md): the verbatim 509-line owner document, SHA-256 73d9be1dba80e177efe0679091d72bc073c5ed76c3719daab41fe13892ffb8ab (recomputed by this round; matches the manifest's full-digest row and record 80's quote), admitted as the §9 register's fourth growth with the manifest row, the README's eleven-file count, INT-162 in the ledger, and D-054 in DECISIONS.md",
-  "the claims registry interface (CLAIMS.md): CLAIM-095 the sole OPEN row, its scope globs covering the 20-path diff (the branch-claim coverage check green at HEAD); CLAIM-094B's closed row appended from the live-observed merge facts (PR #136 = 1eab74a1, the five merge-commit check-runs, the branch deletion, 0 open PRs) per the directive §2.2 item 6's ride-with-next-bounded-claim order"
- ],
- "v_model": {
-  "component_verification": [
-   "run-01 (re-executed live by this reviewer at e870ad2: exit 0, KBND-01..07 GREEN): the constant exists at ONE home — this round's direct import probe printed KWR_TOKEN_MAX_BYTES=512 from harness.commands, and KBND-07 verified commands.py declares it while query.py only imports it (no second bound constant in the read kernel)",
-   "the bound's edge exactness (KBND-02, run-01): a token AT the bound (512 ASCII bytes) imports green and is searchable whole-token; one byte over (513) refuses the same named code — the boundary is exact in UTF-8 bytes, never a fuzzy clamp or silent truncation",
-   "the tokenizer's refusal contract (KBND-01/04/05, run-01): the over-bound run raises the typed ARV-KWR-002 naming the byte length; CJK single-character search, whole-run CJK tokens, accents and combining text unchanged; the unbroken-CJK byte form (171 chars = 513 bytes) refuses",
-   "the RED form re-observed live by this reviewer at the test-only commit 385ad7b (a detached worktree, removed after): exit 1 with 7/7 KBND checks FAIL — LAW-11's red-first premise holds structurally (the pre-slice commands.py and query.py contain no ARV-KWR-002/003: grep counts 0) and the red tree carries the suite's red form"
+  "schema_version": 1,
+  "slice_id": "claim-095-kwr-token-bound",
+  "base_sha": "1eab74a132c36c5d2d32fce74030ecb90ae6e571",
+  "reviewed_diff_sha256": "694cb9f7132031b0d96923c1f876fc89aa3cbaa9d0827d44084a453c6ae8daff",
+  "intent_ids": [
+    "INT-162"
   ],
-  "integration_verification": [
-   "run-03 (re-executed live: exit 0): probe 1 — a repeated-character 4000-char run INSERTS CLEANLY (TOAST-compressed before the index tuple is built); probe 2 — the incompressible 3000-char mixed run raises 'ERROR: index row size 3016 exceeds btree version 4 maximum 2704 for index bt_probe_tok'; probe 3 — the same class through import_source refuses with the NAMED ARV-KWR-002 — the spike's compressible-vs-incompressible contrast, the reason the bound sits on the RAW byte length",
-   "this reviewer's own probe through the REAL arv.keyword_index table (scratch db, the full 0020 migration chain, the arv_app role with app.current_owner exactly as the kernel's Session): the incompressible 3000-char token INSERT raises 'index row size 3048 exceeds btree version 4 maximum 2704 for index keyword_index_pkey' (the pre-fix kernel path — the fix only refuses before the INSERT); the 512-byte accepted-bound token inserts cleanly and answers whole-token search — the F6 class is real on the production table and the bound's margin is safe",
-   "the import state machine integration (KBND-01/03, run-01): the pre-scan sits after the format decode and before the metadata transaction — the journal row records failed(ARV-KWR-002) retryable, zero source/work/command_log/keyword_index rows are born, the staged bytes stay recoverable; the SAME idem key retried with corrected content ACKs created — the refusal never poisons the idempotency key (SYS-04's semantics preserved)",
-   "run-02's affected-suite batch (the two most-affected suites re-executed live by this reviewer: test_keyword_index exit 0 (KWR-01..10 GREEN), test_import exit 0 (IMP-01..22 GREEN)); the read-side parity (KBND-06, run-01): search and pack each refuse ARV-KWR-003 before the query runs while normal terms return the standing corpus results unchanged"
+  "requirement_ids": [
+    "SYS-06",
+    "SYS-07",
+    "SYS-11"
   ],
-  "system_verification": [
-   "the gate's diff-scoped checks at HEAD (re-executed live by this reviewer): check_scope [] (the 20-path diff inside CLAIM-095's declared scope), check_size [] (LAW-05's limits hold), claims.check_registry [] (one open claim; the 094B row closed from the live merge facts), claims.check_branch_claim [] — the slice is registry-coherent and inside its declared blast radius",
-   "the canonical layer at HEAD: tools/verify_canonical_layer.py exit 0 — the ledger count 144, STATE's re-derivation, the manifest's fourth growth row, the README's eleven-file count, and the 094B closed row are cross-document coherent",
-   "the directive trace: Workstream 0 satisfied (the 094B close + the STATE re-derivation + the directive intake riding this bounded claim per §2.2 item 6) and Workstream 2 satisfied (the bounded tokenizer/index-input contract; tests for normal tokens, very long unbroken runs, Unicode, adversarial size, named refusal and zero partial effect; the query and idempotency semantics preserved; the adapter kept free of kernel logic — D-053's law kept)",
-   "SYS-11's V-model trace closed by this report: INT-162 (the ledger's active entry) + D-054 (adopted) + the runbook §11.2/§11.3 contracts (the kernel's stable refusal codes are the routes' error source; the idempotency law and the bounded-list contract untouched) through the kernel architecture (the bound at the tokenizer's ONE home, adapters inherit) to the run evidence (run-01..04) and this independently authored verification"
+  "system_claims": [
+    "C1",
+    "C3",
+    "C5"
   ],
-  "validation": [
-   "the slice-level acceptance per the directive's §3.3 batched cadence: the targeted suite once (run-01, KBND-01..07 green at the implementation head), the affected standing families in one batch (run-02), the defect's reproduction preserved as f6-spike.sh (run-03) so the F6 class stays demonstrable after the fix — the reviewer re-executed the suite, the spike, and the two most-affected families live and matched every recorded exit code",
-   "the gate's own record run-04 (exit 1 at b6e5e15 — the assembly-order refusals ARV-PRF-002/ARV-SEV-001 plus the then-unfixed ARV-RED-008): the registration commit e870ad2 closed ARV-RED-008 diff-visibly; the remaining gate obligations at HEAD are the red-record mint (SEV-095-1) and the proof-sheet assembly — both land with the evidence commit that carries this report, after which the final-head gate run (run-05) is the merge-time proof",
-   "the not-verified discipline: record 80 §9's honest list (the Supabase-side btree/TOAST parity, the remote 0020 ledger re-read, a live Supabase-issued token, uvicorn over a real socket, the REL_17_STABLE-vs-Debian-patch-level source reading) is carried into this report's own list; the final integrated V-model acceptance campaign stays Workstream 11's act per the directive's §3.3/§6"
-  ]
- },
- "failure_modes": [
-  {
-   "id": "FM-095-1",
-   "scenario": "the F6 crash class: an incompressible unbroken word-run in imported/captured text becomes one keyword token whose index tuple exceeds BTMaxItemSize — the INSERT dies inside the import's metadata transaction with the DB-side 'index row size N exceeds btree version 4 maximum 2704' (the ARV-CMD-010 class, zero partial effect lost to a crash instead of a named refusal)",
-   "control": "the raw-UTF-8-byte pre-scan after format decode refuses BEFORE the metadata transaction (the journal row failed(ARV-KWR-002) retryable, the staged bytes preserved); the tokenizer's own bound guards every other capture path at build time; the reviewer reproduced the DB-side class directly on arv.keyword_index (index row size 3048 > 2704 on keyword_index_pkey) and the named refusal through the fixed kernel",
-   "proof_ids": [
-    "run-01",
-    "run-03"
-   ]
+  "changed_components": [
+    "harness/commands.py",
+    "harness/query.py",
+    "harness/gate.py",
+    "harness/tests/test_kwr_bound.py",
+    "INTENT-LEDGER.md",
+    "DECISIONS.md",
+    "CLAIMS.md",
+    "STATE.md",
+    "AGENTS.md",
+    "context/WORKLOG.md",
+    "context/README.md",
+    "context/SOURCE-COVERAGE-MANIFEST.md",
+    "context/raw/ARIVOO_END_TO_END_BACKEND_EXECUTION_DIRECTIVE.md",
+    "context/extracted/80-KWR-TOKEN-BOUND.md"
+  ],
+  "interfaces_reviewed": [
+    "the tokenizer/index-input bound (harness/commands.py): KWR_TOKEN_MAX_BYTES=512 measured on the RAW UTF-8 byte length of each word run \u2014 ONE kernel home beside the tokenizer; _kwr_tokens raises the typed _CapRefusal 'ARV-KWR-002' with the run's byte length, a 24-char head of the offending run, and a repair line (split or shorten the run); the case-folded Unicode word-run semantics, the CJK single-char + whole-run dual tokens, and the per-document dedup set are unchanged (KBND-04's pins + the standing KWR suite green)",
+    "the import pre-scan (import_source, harness/commands.py): after the blob put+verify and the format decode, BEFORE the staging_verified journal update and the metadata transaction \u2014 read_text(media_type, digest) with the non-text boundary (UnicodeDecodeError/KeyError/_FmtRefusal -> empty string, not indexed, never refused) exactly mirroring build_with_index's own boundary; an over-bound token records the journal row failed(ARV-KWR-002) retryable with the staged bytes preserved (the ARV-CAP-004 staged-bytes pattern extended), exit 1, zero authoritative rows",
+    "the read-side term bound (harness/query.py): _kwr_term_bound imports KWR_TOKEN_MAX_BYTES from harness.commands (the one-fact-one-home law \u2014 query.py re-declares nothing, verified structurally by KBND-07); both the search arm and the pack arm refuse the named 'ARV-KWR-003' with the term's byte length and the repair line BEFORE the query runs \u2014 a term the index can never hold is a named refusal, never a silent empty result (KWR-07's explicit-failure law applied to the read side); normal-term search/pack behavior unchanged",
+    "the suite registration interface (harness/gate.py's TESTS tuple \u2014 the ONE home): harness/tests/test_kwr_bound.py registered diff-visibly in the binding commit e870ad2, closing the ARV-RED-008 class (a suite under harness/tests/ visible to neither discovery surface); red.py imports the same tuple, so the red control and the trusted selection agree",
+    "the refusal-code contract at the command boundary: ARV-KWR-002 (write side, every capture path through the tokenizer) and ARV-KWR-003 (read side, search + pack) \u2014 named codes with repair lines, zero partial effect on the authoritative layer, the ARV-CMD-010/DB-side crash class never reached; the route adapter (D-053's adapter law) inherits the kernel's codes, never duplicates the bound",
+    "the directive intake interface (context/raw/ARIVOO_END_TO_END_BACKEND_EXECUTION_DIRECTIVE.md): the verbatim 509-line owner document, SHA-256 73d9be1dba80e177efe0679091d72bc073c5ed76c3719daab41fe13892ffb8ab (recomputed by this round; matches the manifest's full-digest row and record 80's quote), admitted as the \u00a79 register's fourth growth with the manifest row, the README's eleven-file count, INT-162 in the ledger, and D-054 in DECISIONS.md",
+    "the claims registry interface (CLAIMS.md): CLAIM-095 the sole OPEN row, its scope globs covering the 20-path diff (the branch-claim coverage check green at HEAD); CLAIM-094B's closed row appended from the live-observed merge facts (PR #136 = 1eab74a1, the five merge-commit check-runs, the branch deletion, 0 open PRs) per the directive \u00a72.2 item 6's ride-with-next-bounded-claim order"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01 (re-executed live by this reviewer at e870ad2: exit 0, KBND-01..07 GREEN): the constant exists at ONE home \u2014 this round's direct import probe printed KWR_TOKEN_MAX_BYTES=512 from harness.commands, and KBND-07 verified commands.py declares it while query.py only imports it (no second bound constant in the read kernel)",
+      "the bound's edge exactness (KBND-02, run-01): a token AT the bound (512 ASCII bytes) imports green and is searchable whole-token; one byte over (513) refuses the same named code \u2014 the boundary is exact in UTF-8 bytes, never a fuzzy clamp or silent truncation",
+      "the tokenizer's refusal contract (KBND-01/04/05, run-01): the over-bound run raises the typed ARV-KWR-002 naming the byte length; CJK single-character search, whole-run CJK tokens, accents and combining text unchanged; the unbroken-CJK byte form (171 chars = 513 bytes) refuses",
+      "the RED form re-observed live by this reviewer at the test-only commit 385ad7b (a detached worktree, removed after): exit 1 with 7/7 KBND checks FAIL \u2014 LAW-11's red-first premise holds structurally (the pre-slice commands.py and query.py contain no ARV-KWR-002/003: grep counts 0) and the red tree carries the suite's red form"
+    ],
+    "integration_verification": [
+      "run-03 (re-executed live: exit 0): probe 1 \u2014 a repeated-character 4000-char run INSERTS CLEANLY (TOAST-compressed before the index tuple is built); probe 2 \u2014 the incompressible 3000-char mixed run raises 'ERROR: index row size 3016 exceeds btree version 4 maximum 2704 for index bt_probe_tok'; probe 3 \u2014 the same class through import_source refuses with the NAMED ARV-KWR-002 \u2014 the spike's compressible-vs-incompressible contrast, the reason the bound sits on the RAW byte length",
+      "this reviewer's own probe through the REAL arv.keyword_index table (scratch db, the full 0020 migration chain, the arv_app role with app.current_owner exactly as the kernel's Session): the incompressible 3000-char token INSERT raises 'index row size 3048 exceeds btree version 4 maximum 2704 for index keyword_index_pkey' (the pre-fix kernel path \u2014 the fix only refuses before the INSERT); the 512-byte accepted-bound token inserts cleanly and answers whole-token search \u2014 the F6 class is real on the production table and the bound's margin is safe",
+      "the import state machine integration (KBND-01/03, run-01): the pre-scan sits after the format decode and before the metadata transaction \u2014 the journal row records failed(ARV-KWR-002) retryable, zero source/work/command_log/keyword_index rows are born, the staged bytes stay recoverable; the SAME idem key retried with corrected content ACKs created \u2014 the refusal never poisons the idempotency key (SYS-04's semantics preserved)",
+      "run-02's affected-suite batch (the two most-affected suites re-executed live by this reviewer: test_keyword_index exit 0 (KWR-01..10 GREEN), test_import exit 0 (IMP-01..22 GREEN)); the read-side parity (KBND-06, run-01): search and pack each refuse ARV-KWR-003 before the query runs while normal terms return the standing corpus results unchanged"
+    ],
+    "system_verification": [
+      "the gate's diff-scoped checks at HEAD (re-executed live by this reviewer): check_scope [] (the 20-path diff inside CLAIM-095's declared scope), check_size [] (LAW-05's limits hold), claims.check_registry [] (one open claim; the 094B row closed from the live merge facts), claims.check_branch_claim [] \u2014 the slice is registry-coherent and inside its declared blast radius",
+      "the canonical layer at HEAD: tools/verify_canonical_layer.py exit 0 \u2014 the ledger count 144, STATE's re-derivation, the manifest's fourth growth row, the README's eleven-file count, and the 094B closed row are cross-document coherent",
+      "the directive trace: Workstream 0 satisfied (the 094B close + the STATE re-derivation + the directive intake riding this bounded claim per \u00a72.2 item 6) and Workstream 2 satisfied (the bounded tokenizer/index-input contract; tests for normal tokens, very long unbroken runs, Unicode, adversarial size, named refusal and zero partial effect; the query and idempotency semantics preserved; the adapter kept free of kernel logic \u2014 D-053's law kept)",
+      "SYS-11's V-model trace closed by this report: INT-162 (the ledger's active entry) + D-054 (adopted) + the runbook \u00a711.2/\u00a711.3 contracts (the kernel's stable refusal codes are the routes' error source; the idempotency law and the bounded-list contract untouched) through the kernel architecture (the bound at the tokenizer's ONE home, adapters inherit) to the run evidence (run-01..04) and this independently authored verification"
+    ],
+    "validation": [
+      "the slice-level acceptance per the directive's \u00a73.3 batched cadence: the targeted suite once (run-01, KBND-01..07 green at the implementation head), the affected standing families in one batch (run-02), the defect's reproduction preserved as f6-spike.sh (run-03) so the F6 class stays demonstrable after the fix \u2014 the reviewer re-executed the suite, the spike, and the two most-affected families live and matched every recorded exit code",
+      "the gate's own record run-04 (exit 1 at b6e5e15 \u2014 the assembly-order refusals ARV-PRF-002/ARV-SEV-001 plus the then-unfixed ARV-RED-008): the registration commit e870ad2 closed ARV-RED-008 diff-visibly; the remaining gate obligations at HEAD are the red-record mint (SEV-095-1) and the proof-sheet assembly \u2014 both land with the evidence commit that carries this report, after which the final-head gate run (run-05) is the merge-time proof",
+      "the not-verified discipline: record 80 \u00a79's honest list (the Supabase-side btree/TOAST parity, the remote 0020 ledger re-read, a live Supabase-issued token, uvicorn over a real socket, the REL_17_STABLE-vs-Debian-patch-level source reading) is carried into this report's own list; the final integrated V-model acceptance campaign stays Workstream 11's act per the directive's \u00a73.3/\u00a76"
+    ]
   },
-  {
-   "id": "FM-095-2",
-   "scenario": "a silent empty result on the read side: an over-bound search or pack term is accepted, queries an index that can never hold it, and returns nothing — the KWR-07 explicit-failure law violated by omission",
-   "control": "ARV-KWR-003 — the named refusal on both the search and pack arms before the query runs, with the term's byte length and a repair line; the threshold imported from the kernel's single constant so both sides fire together",
-   "proof_ids": [
-    "run-01"
-   ]
-  },
-  {
-   "id": "FM-095-3",
-   "scenario": "the compressible-run false safety: repeated-character runs TOAST-compress to near-nothing and insert cleanly, so a naive bound (or no bound) looks sufficient until an incompressible run arrives — the exact trap the first KBND-05 form fell into (record 80 §8)",
-   "control": "the bound sits on the RAW UTF-8 byte length, never a predicted compressed size; f6-spike.sh preserves the two-probe contrast (a 4000-char repeated run inserting cleanly vs the 3000-char incompressible run raising the btree error) as a standing reproduction, and the suite's KBND-05 uses the deterministic incompressible LCG generator",
-   "proof_ids": [
-    "run-03"
-   ]
-  },
-  {
-   "id": "FM-095-4",
-   "scenario": "the new suite invisible to the red control: unregistered in gate.py's TESTS it fires ARV-RED-008 (invisible to both discovery surfaces); registered but unrecorded in harness/red-records.json it fires ARV-RED-001 (no red evidence — LAW-11's mechanical memory missing)",
-   "control": "the diff-visible TESTS registration in the binding commit (ARV-RED-008 closed) + the schema-2 red-record mint bound at the test-only commit 385ad7b (the ARV-RED-001 refusal — reproduced live by this round at HEAD — mechanically forces the mint before the PR can pass the gate)",
-   "proof_ids": [
-    "run-04"
-   ]
-  },
-  {
-   "id": "FM-095-5",
-   "scenario": "a refusal poisoning the idempotency key: the over-bound refusal lands AFTER the command_log write, so the same-key retry with corrected content hits a 409 and the capture path is wedged",
-   "control": "the refusal precedes the command_log write (zero command_log rows on refusal); KBND-03 proves the SAME idem key retried with clean content ACKs status=created — SYS-04's replay semantics preserved through the refusal",
-   "proof_ids": [
-    "run-01"
-   ]
-  },
-  {
-   "id": "FM-095-6",
-   "scenario": "a Unicode/CJK regression: the byte bound misread as code points (CJK runs 3 bytes per char), or the CJK single-character/whole-run dual-token semantics changed by the bound check",
-   "control": "KBND-04's pins (normal CJK text imports and searches by single character; the 171-char unbroken CJK run = 513 bytes refuses; accented/combining text unchanged) + the standing KWR suite green (run-02) over the untouched tokenizer semantics",
-   "proof_ids": [
-    "run-01",
-    "run-02"
-   ]
-  }
- ],
- "findings": [
-  {
-   "id": "SEV-095-1",
-   "severity": "P1",
-   "status": "resolved",
-   "evidence": "at the reviewed head, harness/red-records.json carries NO entry for harness/tests/test_kwr_bound.py — the gate's check_red_records() refuses ARV-RED-001 (reproduced live by this round at HEAD: fails == ['ARV-RED-001']); record 80 §5/§7 and WORKLOG Task 117 claim 'the new red record (schema 2, binding 385ad7b)' exists — an overclaim of the 094B SEV-2 class (citing an artifact before it exists); the likely root cause is ordering: the mint was invoked before the suite's registration in gate.py's TESTS (red.py iterates TESTS only — an unregistered suite is a silent no-op behind 'OK ARV-RED-005: red records updated for 45 test files')",
-   "disposition": "resolved-by-assembly, mechanically forced (the 094B round-1 precedent for completion-stage P1s): the evidence commit that lands this report must also mint the schema-2 red record via harness/red.py at HEAD (--red-commit 385ad7b, --exit 1, the KBND codes — this round re-observed the red form live at the test-only commit: exit 1, 7/7 KBND FAIL, and the binding verifies: git show 385ad7b:harness/tests/test_kwr_bound.py). Two controls refuse any other outcome: the gate's ARV-RED-001 at PR time, and this report's digest binding — the mint edits harness/red-records.json, a reviewed path, so it cannot land silently after this review without staling this record (ARV-SEV-003 forces the re-bind at the true head). If the assembly lands without the mint, this finding is OPEN and the slice is BLOCKED"
-  },
-  {
-   "id": "SEV-095-2",
-   "severity": "P2",
-   "status": "open",
-   "evidence": "record 80 §6 claims the gate '→ GREEN (run-04)' while run-04.json records exit_code 1 (the RED-at-assembly-time record at b6e5e15: the ARV-PRF-002/ARV-SEV-001 assembly-order refusals plus the then-unfixed ARV-RED-008); record 80 §7 labels run-01 'the red run at 385ad7b' while run-01.json is the GREEN run at b6e5e15 (exit 0) and no run record exists for the red run itself; WORKLOG Task 117's evidence line cites 'proofsheet + notverified + sev.json' which do not exist at the reviewed head (expected assembly artifacts, but the citation is written in the past tense as landed)",
-   "disposition": "open documentation debt repaired at the assembly (no product-code effect — the run records themselves are honest): record 80's close addendum must correct the gate line (run-04 = RED at assembly time; the green gate is the final-head run-05) and the run-01 label (the green run at b6e5e15; the red run's evidence home is the red-records entry bound at 385ad7b, per SEV-095-1's repair)"
-  },
-  {
-   "id": "SEV-095-3",
-   "severity": "P2",
-   "status": "resolved",
-   "evidence": "the directive §2.2 names 'CLAIM-095 (extraction/readiness routes)' as the latest canonical next action while the registry's CLAIM-095 is the F6 kernel slice (the routes become CLAIM-096) — a nominal numbering drift between the directive's label and the registry's allocation",
-   "disposition": "reasoned no-fix, declared at intake: the directive's own Workstream 2 orders the F6 defect into a 'separately scoped follow-up claim' (the first bounded claim after the intake, which this slice is), and the ordered work is unchanged — Workstream 0 rode this slice, Workstream 3 (the routes) is next per record 80 §11 and STATE; CLAIMS.md is the claim-ID authority (LAW-31) and the mapping is declared in the CLAIM-095 row and record 80 §3"
-  }
- ],
- "not_verified": [
-  "the exact pre-fix classification of the incompressible import inside import_source at the red tree (the ARV-CMD-010 journal row): this round re-observed the 7/7 KBND red at 385ad7b and reproduced the DB-side crash class directly on arv.keyword_index ('index row size 3048 exceeds btree version 4 maximum 2704 for index keyword_index_pkey'), but did not re-read the red run's journal row",
-  "the remaining six suites of run-02's batch (test_note, test_journal, test_highlight, test_bookmark, test_retrieval_packs, test_commands) — accepted on run-02's recorded green after this round re-executed the two most-affected suites (test_keyword_index, test_import) itself",
-  "the full gate run at HEAD: this round ran the gate's red-records check, the scope/size/claims checks and the canonical-layer verifier directly; the known-bad matrix and the proof-sheet steps were not re-run (run-04 carries the b6e5e15 form, and the sheet is not yet assembled at this stage)",
-  "the five required CI checks at the PR head and the D-042 reasoned PR review — the PR is not yet opened at this round; never pre-claimed",
-  "the Supabase-side btree/TOAST configuration parity for the 512-byte bound's margin (the remote block size and TOAST settings are provider-managed; carried to the 0020 application session's verification pass per record 80 §9)",
-  "the 0020 remote application, a live Supabase-issued token, uvicorn over a real socket, and the route surface against the remote database — the next workstreams' own acts, carried unchanged from record 80 §9",
-  "run-01..04's recorded output_sha256 digests were not re-derived from saved transcripts (the outputs were not preserved in the run dir); this round instead re-executed the underlying commands live and matched their recorded exit codes",
-  "the KBND suite's 12-line amendment between the red commit 385ad7b and the implementation commit b6e5e15 (record 80 §8's two test-bug repairs) — the red form was re-observed at the red commit itself; the amendment chain rides the red-record mint's current_sha256, which SEV-095-1 documents as absent at the reviewed head"
- ],
- "builder_context": "builder-zcode-session64-slice-claim-095",
- "reviewer_context": "reviewer-zsubagent-fresh-context-claim-095 (a distinct fresh-context subagent; a declared distinct context, not cryptographic independence — the protocol's stated limit)",
- "disposition": "PASS",
- "review_summary": "The F6 kernel fix is correct and independently reproduced end to end: this fresh-context round re-executed the KBND-01..07 suite (exit 0), the f6-spike.sh three-probe reproduction (exit 0 — the compressible/incompressible contrast and the named refusal), the RED form at the test-only commit 385ad7b (exit 1, 7/7 KBND failing), the two most-affected standing suites (test_keyword_index, test_import green), the gate's scope/size/claims checks (all green at HEAD), and the canonical layer (exit 0); it additionally reproduced the DB-side crash class directly on the real arv.keyword_index table through the kernel's own role and owner setting, confirming both the defect's reachability and the 512-byte raw-UTF-8 bound's margin. The architecture honors the repo's laws: the bound has ONE kernel home (query.py imports it), the import pre-scan keeps the crash class out of the metadata transaction with the journal row failed(ARV-KWR-002) retryable and the staged bytes preserved, the read side refuses ARV-KWR-003 before the query runs, the idempotency semantics survive the refusal, and the route adapter stays free of duplicated kernel logic. The directive intake and bookkeeping are coherent (the raw document's SHA-256 recomputed and matched, the manifest's fourth growth, the ledger count 144, the 094B closed row from the live merge facts, the STATE re-derivation). The round's material finding is SEV-095-1: the LAW-11 red record for the new suite is absent at the reviewed head (the gate refuses ARV-RED-001 — reproduced live; the session record's claim that it exists is an overclaim of the 094B SEV-2 kind), with the repair mechanically forced onto the evidence commit that lands this report by the gate refusal and this record's own digest binding. SEV-095-2 (open, P2) carries the session record's documentation overclaims to the same assembly.",
- "sheet_section": true
+  "failure_modes": [
+    {
+      "id": "FM-095-1",
+      "scenario": "the F6 crash class: an incompressible unbroken word-run in imported/captured text becomes one keyword token whose index tuple exceeds BTMaxItemSize \u2014 the INSERT dies inside the import's metadata transaction with the DB-side 'index row size N exceeds btree version 4 maximum 2704' (the ARV-CMD-010 class, zero partial effect lost to a crash instead of a named refusal)",
+      "control": "the raw-UTF-8-byte pre-scan after format decode refuses BEFORE the metadata transaction (the journal row failed(ARV-KWR-002) retryable, the staged bytes preserved); the tokenizer's own bound guards every other capture path at build time; the reviewer reproduced the DB-side class directly on arv.keyword_index (index row size 3048 > 2704 on keyword_index_pkey) and the named refusal through the fixed kernel",
+      "proof_ids": [
+        "run-01",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-095-2",
+      "scenario": "a silent empty result on the read side: an over-bound search or pack term is accepted, queries an index that can never hold it, and returns nothing \u2014 the KWR-07 explicit-failure law violated by omission",
+      "control": "ARV-KWR-003 \u2014 the named refusal on both the search and pack arms before the query runs, with the term's byte length and a repair line; the threshold imported from the kernel's single constant so both sides fire together",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-095-3",
+      "scenario": "the compressible-run false safety: repeated-character runs TOAST-compress to near-nothing and insert cleanly, so a naive bound (or no bound) looks sufficient until an incompressible run arrives \u2014 the exact trap the first KBND-05 form fell into (record 80 \u00a78)",
+      "control": "the bound sits on the RAW UTF-8 byte length, never a predicted compressed size; f6-spike.sh preserves the two-probe contrast (a 4000-char repeated run inserting cleanly vs the 3000-char incompressible run raising the btree error) as a standing reproduction, and the suite's KBND-05 uses the deterministic incompressible LCG generator",
+      "proof_ids": [
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-095-4",
+      "scenario": "the new suite invisible to the red control: unregistered in gate.py's TESTS it fires ARV-RED-008 (invisible to both discovery surfaces); registered but unrecorded in harness/red-records.json it fires ARV-RED-001 (no red evidence \u2014 LAW-11's mechanical memory missing)",
+      "control": "the diff-visible TESTS registration in the binding commit (ARV-RED-008 closed) + the schema-2 red-record mint bound at the test-only commit 385ad7b (the ARV-RED-001 refusal \u2014 reproduced live by this round at HEAD \u2014 mechanically forces the mint before the PR can pass the gate)",
+      "proof_ids": [
+        "run-04"
+      ]
+    },
+    {
+      "id": "FM-095-5",
+      "scenario": "a refusal poisoning the idempotency key: the over-bound refusal lands AFTER the command_log write, so the same-key retry with corrected content hits a 409 and the capture path is wedged",
+      "control": "the refusal precedes the command_log write (zero command_log rows on refusal); KBND-03 proves the SAME idem key retried with clean content ACKs status=created \u2014 SYS-04's replay semantics preserved through the refusal",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-095-6",
+      "scenario": "a Unicode/CJK regression: the byte bound misread as code points (CJK runs 3 bytes per char), or the CJK single-character/whole-run dual-token semantics changed by the bound check",
+      "control": "KBND-04's pins (normal CJK text imports and searches by single character; the 171-char unbroken CJK run = 513 bytes refuses; accented/combining text unchanged) + the standing KWR suite green (run-02) over the untouched tokenizer semantics",
+      "proof_ids": [
+        "run-01",
+        "run-02"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-095-1",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "at the reviewed head, harness/red-records.json carries NO entry for harness/tests/test_kwr_bound.py \u2014 the gate's check_red_records() refuses ARV-RED-001 (reproduced live by this round at HEAD: fails == ['ARV-RED-001']); record 80 \u00a75/\u00a77 and WORKLOG Task 117 claim 'the new red record (schema 2, binding 385ad7b)' exists \u2014 an overclaim of the 094B SEV-2 class (citing an artifact before it exists); the likely root cause is ordering: the mint was invoked before the suite's registration in gate.py's TESTS (red.py iterates TESTS only \u2014 an unregistered suite is a silent no-op behind 'OK ARV-RED-005: red records updated for 45 test files')",
+      "disposition": "resolved in-slice before the PR: the mint re-ran after the TESTS registration landed (evidence commit c2acbe8) \u2014 binding_commit 385ad7b, the observed red exit 1 + the KBND refusal list, the no-op disclosed in the record's own red_evidence; the gate's ARV-RED-001/002/007 checks pass over the minted record; this re-bind is the record's own staleness control answering the change"
+    },
+    {
+      "id": "SEV-095-2",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "record 80 \u00a76 claims the gate '\u2192 GREEN (run-04)' while run-04.json records exit_code 1 (the RED-at-assembly-time record at b6e5e15: the ARV-PRF-002/ARV-SEV-001 assembly-order refusals plus the then-unfixed ARV-RED-008); record 80 \u00a77 labels run-01 'the red run at 385ad7b' while run-01.json is the GREEN run at b6e5e15 (exit 0) and no run record exists for the red run itself; WORKLOG Task 117's evidence line cites 'proofsheet + notverified + sev.json' which do not exist at the reviewed head (expected assembly artifacts, but the citation is written in the past tense as landed)",
+      "disposition": "resolved in-slice before the PR: record 80 \u00a76/\u00a77/\u00a78 and the worklog now state the assembly-order gate refusal (run-04's three honest failures), the run-01 label corrected (the GREEN run; the RED evidence is the red record), and the evidence artifacts' assembly order stated"
+    },
+    {
+      "id": "SEV-095-3",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the directive \u00a72.2 names 'CLAIM-095 (extraction/readiness routes)' as the latest canonical next action while the registry's CLAIM-095 is the F6 kernel slice (the routes become CLAIM-096) \u2014 a nominal numbering drift between the directive's label and the registry's allocation",
+      "disposition": "reasoned no-fix, declared at intake: the directive's own Workstream 2 orders the F6 defect into a 'separately scoped follow-up claim' (the first bounded claim after the intake, which this slice is), and the ordered work is unchanged \u2014 Workstream 0 rode this slice, Workstream 3 (the routes) is next per record 80 \u00a711 and STATE; CLAIMS.md is the claim-ID authority (LAW-31) and the mapping is declared in the CLAIM-095 row and record 80 \u00a73"
+    }
+  ],
+  "not_verified": [
+    "the exact pre-fix classification of the incompressible import inside import_source at the red tree (the ARV-CMD-010 journal row): this round re-observed the 7/7 KBND red at 385ad7b and reproduced the DB-side crash class directly on arv.keyword_index ('index row size 3048 exceeds btree version 4 maximum 2704 for index keyword_index_pkey'), but did not re-read the red run's journal row",
+    "the remaining six suites of run-02's batch (test_note, test_journal, test_highlight, test_bookmark, test_retrieval_packs, test_commands) \u2014 accepted on run-02's recorded green after this round re-executed the two most-affected suites (test_keyword_index, test_import) itself",
+    "the full gate run at HEAD: this round ran the gate's red-records check, the scope/size/claims checks and the canonical-layer verifier directly; the known-bad matrix and the proof-sheet steps were not re-run (run-04 carries the b6e5e15 form, and the sheet is not yet assembled at this stage)",
+    "the five required CI checks at the PR head and the D-042 reasoned PR review \u2014 the PR is not yet opened at this round; never pre-claimed",
+    "the Supabase-side btree/TOAST configuration parity for the 512-byte bound's margin (the remote block size and TOAST settings are provider-managed; carried to the 0020 application session's verification pass per record 80 \u00a79)",
+    "the 0020 remote application, a live Supabase-issued token, uvicorn over a real socket, and the route surface against the remote database \u2014 the next workstreams' own acts, carried unchanged from record 80 \u00a79",
+    "run-01..04's recorded output_sha256 digests were not re-derived from saved transcripts (the outputs were not preserved in the run dir); this round instead re-executed the underlying commands live and matched their recorded exit codes",
+    "the KBND suite's 12-line amendment between the red commit 385ad7b and the implementation commit b6e5e15 (record 80 \u00a78's two test-bug repairs) \u2014 the red form was re-observed at the red commit itself; the amendment chain rides the red-record mint's current_sha256, which SEV-095-1 documents as absent at the reviewed head"
+  ],
+  "builder_context": "builder-zcode-session64-slice-claim-095",
+  "reviewer_context": "reviewer-zsubagent-fresh-context-claim-095 (a distinct fresh-context subagent; a declared distinct context, not cryptographic independence \u2014 the protocol's stated limit)",
+  "disposition": "PASS",
+  "review_summary": "The kernel fix is correct and the contract holds end-to-end: the bound is one kernel-owned constant on the RAW UTF-8 byte length (the spike's TOAST finding makes any compressed-size bound non-deterministic \u2014 the right contract), the write side refuses named with zero authoritative effect on every capture path (the import pre-scan keeps the crash class out of the metadata transaction; the tokenizer guards the build phase for every other command), the read side imports the constant and refuses over-bound terms named on both arms, and the standing suites are unaffected (the affected families re-run GREEN). The round's P1 (the red-record mint's silent no-op before the TESTS registration) is repaired in the evidence commit with the no-op disclosed and this record re-bound to the changed diff; the P2 documentation overclaims are repaired in the same commit; the numbering drift is a reasoned no-fix. Round 2 (the re-bind): reviewed_diff_sha256 recomputed at c2acbe8 over the repaired evidence; no new findings; the disposition stands.",
+  "sheet_section": true
 }

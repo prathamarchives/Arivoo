@@ -1,0 +1,7 @@
+{
+  "command": "bash harness/runs/claim-095-kwr-token-bound/f6-spike.sh",
+  "exit_code": 0,
+  "commit": "b6e5e1574b7e32d96a27042ccd4a2e3a9e1b1f9c",
+  "output_sha256": "b22e5cea8af947a7d15f6698954fa1ac63039fc7484e351c8cc2c3fbefc87d9b",
+  "recorded_at": "2026-11-26T12:08:53.533096+00:00"
+}

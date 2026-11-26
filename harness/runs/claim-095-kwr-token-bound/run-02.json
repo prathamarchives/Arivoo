@@ -1,0 +1,7 @@
+{
+  "command": "for t in test_keyword_index test_import test_note test_journal test_highlight test_bookmark test_retrieval_packs test_commands; do python3 harness/tests/$t.py > /tmp/suite-$t.out 2>&1 || { echo \"RED $t\"; cat /tmp/suite-$t.out; exit 1; }; grep -m1 '^GREEN\\|SUITE GREEN\\|GREEN \u2014' /tmp/suite-$t.out | head -1; done",
+  "exit_code": 0,
+  "commit": "b6e5e1574b7e32d96a27042ccd4a2e3a9e1b1f9c",
+  "output_sha256": "77147e6e52f950e766c9399adffc751521c382198fd8cea857b987c00045f67d",
+  "recorded_at": "2026-11-26T12:08:19.181609+00:00"
+}

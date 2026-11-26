@@ -7,10 +7,13 @@ STATE.md INT-162
 context/WORKLOG.md INT-162
 INTENT-LEDGER.md INT-162
 DECISIONS.md D-054
+AGENTS.md INT-162
+context/README.md INT-162
 context/SOURCE-COVERAGE-MANIFEST.md INT-162
 context/raw/ARIVOO_END_TO_END_BACKEND_EXECUTION_DIRECTIVE.md INT-162
 context/extracted/80-KWR-TOKEN-BOUND.md INT-162
 harness/commands.py D-054
+harness/gate.py D-054
 harness/query.py D-054
 harness/tests/test_kwr_bound.py D-054
 harness/red-records.json D-054

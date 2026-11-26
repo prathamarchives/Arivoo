@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/gate.py --slice claim-095-kwr-token-bound --diff origin/main --skip-suites",
+  "exit_code": 1,
+  "commit": "b6e5e1574b7e32d96a27042ccd4a2e3a9e1b1f9c",
+  "output_sha256": "c084ba05769545b17cba09e3fac9880de28d48b7435212d2f420a0418cdfe75d",
+  "recorded_at": "2026-11-26T12:09:13.932602+00:00"
+}

@@ -1,6 +1,6 @@
 # AGENTS.md — Arivoo (product: Arivo) — v3.1
 
-> Ledger size: 143 statused intents (the Intent Ledger's own sequential count).
+> Ledger size: 144 statused intents (the Intent Ledger's own sequential count).
 
 You are an agent in this repository. This file is your map. Read it fully, then follow the read order. Host bridges (e.g. CLAUDE.md) import this file at host adoption (W-02, host-agnostic per D-026/D-028 — the Host Contract + bridge pattern; any capable agent may build, one or many; bridges instantiate at adoption and are verified on installed hosts, never assumed); this file remains canonical.
 

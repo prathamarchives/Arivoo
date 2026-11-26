@@ -267,6 +267,135 @@ def main() -> int:
                       e.code == "ARV-API-504" and e.status == 504,
                       "a kernel exceeding its time bound refuses ARV-API-504 inside the envelope")
 
+            # ---------------- CLAIM-096: the extraction/readiness area ----------------
+            # 16) the truthful readiness BEFORE any extraction: never_requested
+            s, b = asyncio.run(call(app_k, "GET",
+                                     f"/api/v1/sources/{real_id}/extraction", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            row = d.get("row", {})
+            check("ARV-API-022",
+                  s == 200 and row.get("readiness") == "never_requested"
+                  and row.get("retryable") is False
+                  and row.get("passage_count") == 0
+                  and row.get("generation_id") is None,
+                  "GET /sources/{id}/extraction answers never_requested before any extraction (never presented as ready)")
+
+            # 17) the extraction write: the idem key law + the honest ack
+            s, b = asyncio.run(call(app_k, "POST",
+                                     f"/api/v1/sources/{real_id}/extraction"))
+            check("ARV-API-023", s == 400 and "Idempotency-Key" in b,
+                  "POST /sources/{id}/extraction refuses without the idempotency key (the §11.3 law)")
+            s, b = asyncio.run(call(app_k, "POST",
+                                     f"/api/v1/sources/{real_id}/extraction",
+                                     dict(H, **{"Idempotency-Key": "k-096-e1"})))
+            ack_x = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-024",
+                  s == 200 and ack_x.get("status") == "committed"
+                  and bool(ack_x.get("result_ref"))
+                  and ack_x.get("durability_rung") == "local_durable"
+                  and str(ack_x.get("api_version")) == "1",
+                  "POST /sources/{id}/extraction returns the kernel's honest ack (committed, durability, result_ref=generation)")
+
+            # 18) the safe retry: the same key replays the SAME generation
+            s2, b2 = asyncio.run(call(app_k, "POST",
+                                       f"/api/v1/sources/{real_id}/extraction",
+                                       dict(H, **{"Idempotency-Key": "k-096-e1"})))
+            ack_x2 = json.loads(b2) if b2.startswith("{") else {}
+            check("ARV-API-025",
+                  s2 == 200 and ack_x2.get("status") == "replayed"
+                  and ack_x2.get("result_ref") == ack_x.get("result_ref"),
+                  "the same idempotency key replays the SAME generation (the safe retry through HTTP)")
+
+            # 19) the truthful readiness AFTER extraction: ready + the generation
+            s, b = asyncio.run(call(app_k, "GET",
+                                     f"/api/v1/sources/{real_id}/extraction", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            row = d.get("row", {})
+            check("ARV-API-026",
+                  s == 200 and row.get("readiness") == "ready"
+                  and row.get("generation_id") == ack_x.get("result_ref")
+                  and row.get("passage_count", 0) >= 1
+                  and row.get("generation_ordinal") == 1,
+                  "GET /sources/{id}/extraction answers ready with the serving generation (passage_count from the CURRENT generation only)")
+
+            # 20) the safe rebuild: a NEW key builds a NEW generation
+            s, b = asyncio.run(call(app_k, "POST",
+                                     f"/api/v1/sources/{real_id}/extraction",
+                                     dict(H, **{"Idempotency-Key": "k-096-e2"})))
+            ack_r = json.loads(b) if b.startswith("{") else {}
+            s, b = asyncio.run(call(app_k, "GET",
+                                     f"/api/v1/sources/{real_id}/extraction", H))
+            row = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-027",
+                  s == 200 and ack_r.get("status") == "committed"
+                  and ack_r.get("result_ref") != ack_x.get("result_ref")
+                  and row.get("generation_id") == ack_r.get("result_ref")
+                  and row.get("generation_count") == 2
+                  and row.get("generation_ordinal") == 2
+                  and row.get("readiness") == "ready",
+                  "a NEW idempotency key builds a NEW generation (the safe rebuild: the old superseded, the readiness answers the new)")
+
+            # 21) the interrupted extraction + the resume: a crashed building
+            # row (the kernel's own crash point, driven directly) is answered
+            # 'building + retryable', and the SAME key resumes it to current
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                     dict(H, **{"Idempotency-Key": "k-096-c2"}),
+                                     body=b"crash class corpus for the interrupted extraction\nsecond passage line\n",
+                                     query=b"title=Crash+Class"))
+            ack_c = json.loads(b) if b.startswith("{") else {}
+            crash_sid = ack_c.get("result_ref", "")
+            subprocess.run([sys.executable, "harness/extract.py",
+                            "--owner", "route-user", "--actor", "owner",
+                            "--client-id", "api-v1", "--idem-key", "k-096-x1",
+                            "--source-id", crash_sid, "--crash-at", "pre-commit"],
+                           cwd=str(pathlib.Path(__file__).resolve().parents[2]),
+                           capture_output=True, text=True, timeout=120,
+                           env=dict(os.environ, PGDATABASE=db))
+            s, b = asyncio.run(call(app_k, "GET",
+                                     f"/api/v1/sources/{crash_sid}/extraction", H))
+            row = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-028",
+                  s == 200 and row.get("readiness") == "building"
+                  and row.get("retryable") is True,
+                  "a crashed building generation answers 'building + retryable' (never failed, never ready — the truthful interrupted state)")
+            s, b = asyncio.run(call(app_k, "POST",
+                                     f"/api/v1/sources/{crash_sid}/extraction",
+                                     dict(H, **{"Idempotency-Key": "k-096-x1"})))
+            ack_z = json.loads(b) if b.startswith("{") else {}
+            s, b = asyncio.run(call(app_k, "GET",
+                                     f"/api/v1/sources/{crash_sid}/extraction", H))
+            row = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-029",
+                  s == 200 and ack_z.get("status") in ("committed", "replayed")
+                  and row.get("readiness") == "ready"
+                  and row.get("generation_id") == (ack_z.get("result_ref") or row.get("generation_id")),
+                  "the SAME key resumes the crashed building generation to current (the interrupted-extraction recovery through HTTP)")
+
+            # 22) the cross-owner no-leak: owner B's token against A's source
+            s, b = asyncio.run(call(app_k, "POST",
+                                     f"/api/v1/sources/{real_id}/extraction",
+                                     {"Authorization": "Bearer " + tok_b,
+                                      "Idempotency-Key": "k-096-b"}))
+            check("ARV-API-030",
+                  s == 404 and "ARV-EXT-004" in b,
+                  "owner B's extraction request against A's source is the no-leak 404 (ARV-EXT-004 mapped)")
+            s, b = asyncio.run(call(app_k, "GET",
+                                     f"/api/v1/sources/{real_id}/extraction",
+                                     {"Authorization": "Bearer " + tok_b}))
+            check("ARV-API-031", s == 404,
+                  "owner B's readiness read against A's source is the same no-leak 404")
+
+            # 23) the absent source: 404 on both arms
+            s, b = asyncio.run(call(app_k, "POST",
+                                     "/api/v1/sources/00000000-0000-0000-0000-000000000000/extraction",
+                                     dict(H, **{"Idempotency-Key": "k-096-no"})))
+            check("ARV-API-032", s == 404,
+                  "an extraction request for an absent source is a 404 (never another owner's object existence)")
+            s, b = asyncio.run(call(app_k, "GET",
+                                     "/api/v1/sources/00000000-0000-0000-0000-000000000000/extraction", H))
+            check("ARV-API-033", s == 404,
+                  "a readiness read for an absent source is the same 404")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

@@ -1,0 +1,15 @@
+# CLAIM-096 — the §11.2 extraction/readiness area (the directive's Workstream 3) + the Workstream 1
+# evidence record + the 095 close riding (the directive's ride-with-next-bounded-claim order).
+CLAIMS.md INT-163
+STATE.md INT-163
+context/WORKLOG.md INT-163
+INTENT-LEDGER.md INT-163
+DECISIONS.md INT-163
+AGENTS.md INT-163
+harness/api/routes.py INT-163
+harness/api/routes_selfcheck.py INT-163
+harness/query.py INT-163
+harness/tests/test_api_routes.py INT-163
+harness/red-records.json INT-163
+harness/runs/claim-096-extraction-readiness INT-163
+context/extracted/81-EXTRACTION-READINESS.md INT-163

@@ -1156,3 +1156,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-095-kwr-token-bound/ (run-01..04 + proofsheet + notverified + sev.json).
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the remote ledger re-read (0020 still unapplied — the next workstream's own act); the bound's remote-config parity; a live Supabase token; uvicorn on a real socket.
 - Next: Workstream 1 — the 0020 remote application through the guarded canonical act; then CLAIM-096 (the §11.2 extraction/readiness routes), maxima first.
+
+## Task 118 (CLAIM-096, session 64, 2026-11-26) — the extraction/readiness area + the remote 0020 application
+- What: the directive's Workstream 1 executed (migration 0020 applied to wcuuakhdmsmmxagvbdmg through the guarded canonical runner after the release-env credential was re-established via the management API's password reset — the value only in the session's secret store; independently verified: ledger 20/20, role defaults, definer pin, RLS 26/26, grants; D-055); Workstream 3 (the kernel's extraction-status read arm — the truthful generation-derived readiness with passage_count from the CURRENT generation only; POST/GET /api/v1/sources/{id}/extraction — the safe retry via the same idem key, the safe rebuild via a new one, the interrupted resume, ARV-EXT-004 no-leak); the 095 close row + the STATE re-derivation riding (INT-163).
+- Verified: ARV-API-022..033 RED at the test-only commit 2891c50 (exit 1; the red record bound) → the full 33-check battery GREEN at the implementation head (one check's own bug repaired: the idem-key-less probe now rides an authenticated request); the extraction-status smoke (never_requested → ready, the cross-owner no-leak).
+- Evidence: harness/runs/claim-096-extraction-readiness/.
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: a live Supabase-issued token; uvicorn over a real socket; the deployed route surface (the Workstream 10 slice).
+- Next: Workstream 4 — the reader/capture route families (position+content first), grouped per §3.4.

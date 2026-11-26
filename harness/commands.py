@@ -636,6 +636,30 @@ def import_source(*, db, owner, actor, client_id, idem_key, title=None, work_id=
             print(f"FAIL {r.code}: {r}")
             print(f"      repair: {r.repair} [digest={r.digest}]")
             return 1
+        # CLAIM-095 (F6): the keyword-input bound check BEFORE the metadata
+        # transaction — the same staged-bytes contract as the format class
+        # (the ARV-CAP-004 pattern: the refusal NAMES the code, the bytes
+        # stay staged and recoverable, the journal row failed-retryable).
+        # The tokenizer's own bound (inside _kwr_tokens) guards every other
+        # capture path at build time; this pre-scan keeps the import's
+        # refusal OUT of the transaction (the F6 crash class never reaches
+        # the INSERT). The non-text boundary mirrors build_with_index's: a
+        # non-decodable source is not indexed, never refused here.
+        try:
+            _kwr_pre_scan_text = read_text(media_type, digest)
+        except (UnicodeDecodeError, KeyError, _FmtRefusal):
+            _kwr_pre_scan_text = ""  # the non-text boundary: not indexed, never refused
+        if _kwr_pre_scan_text:
+            try:
+                _kwr_tokens(_kwr_pre_scan_text)
+            except _CapRefusal as r:
+                _journal_txn(sess, f"UPDATE arv.import_journal SET state='failed', "
+                              f"fail_reason={_q(r.code)}, updated_at={_q(clock.now())} "
+                              f"WHERE owner_scope={_q(owner)} AND idempotency_key={_q(idem_key)};",
+                             idem_key=idem_key)
+                print(f"FAIL {r.code}: {r}")
+                print(f"      repair: {r.repair} [digest={digest}]")
+                return 1
         if not _journal_txn(sess, f"UPDATE arv.import_journal SET state='staging_verified', "
                             f"updated_at={_q(clock.now())} WHERE owner_scope={_q(owner)} "
                             f"AND idempotency_key={_q(idem_key)};", idem_key=idem_key):
@@ -1409,6 +1433,23 @@ def revoke_agent_credential(*, db, owner, actor, client_id, idem_key, id_,
 
 _KWR_CJK = re.compile(r"[\u4e00-\u9fff]")
 
+# CLAIM-095 (the F6 kernel follow-up — record 79 §6's routed defect): the
+# keyword-index INPUT bound. PostgreSQL's btree leaf insert refuses a single
+# index row over ~2704 bytes (BTMaxItemSize, 8k block default: "index row
+# size X exceeds btree version 4 maximum 2704") and both keyword_index
+# indexes (the composite PK + keyword_index_token) carry the token column.
+# THE SPIKE FINDING (observed live on the 17.12 rig, this slice's red work):
+# the limit fires on the TOAST-COMPRESSED datum — a repeated-character run
+# compresses to near-nothing and inserts fine; the actual crash class needs
+# an INCOMPRESSIBLE unbroken run (~3000 mixed chars observed crashing). The
+# kernel cannot predict the server's compression outcome, so the bound is on
+# the RAW UTF-8 byte length of the token: 512 bytes sits far under the
+# ~2620 effective floor (2704 minus the composite key's fixed members)
+# with margin for any production owner identifier length. ONE home for the
+# constant — query.py imports it (never re-declares) so the read side fires
+# at the same threshold (the one-fact-one-home law).
+KWR_TOKEN_MAX_BYTES = 512
+
 
 def _kwr_tokens(text: str) -> list:
     """P3-07: the tokenizer — case-folded UNICODE word tokens ([not-word-chars-excluded] under
@@ -1417,9 +1458,24 @@ def _kwr_tokens(text: str) -> list:
     single-character token AND the containing CJK run as its own token (a
     single-character or a whole-run CJK query both find the text); the
     word-boundary law: whole tokens only, never a prefix match. DEDUPLICATED
-    per document (the index is a set)."""
+    per document (the index is a set).
+    CLAIM-095: a run whose UTF-8 byte length exceeds KWR_TOKEN_MAX_BYTES
+    raises the typed ARV-KWR-002 refusal (the bounded index-input contract) —
+    a named refusal at the command boundary with zero partial effect, never
+    the DB-side btree crash F6 proved reachable through the import route."""
     out: set = set()
     for run in re.findall(r"[^\W_]+", (text or "").casefold(), re.UNICODE):
+        if len(run.encode("utf-8")) > KWR_TOKEN_MAX_BYTES:
+            raise _CapRefusal(
+                "ARV-KWR-002",
+                f"a keyword token exceeds the index input bound ({len(run.encode('utf-8'))} "
+                f"UTF-8 bytes > {KWR_TOKEN_MAX_BYTES}; the whole run {run[:24]!r}... is one "
+                "unbroken token — the keyword_index btree cannot carry it (the F6 class: "
+                "index row size exceeds the btree maximum)",
+                "the indexed text must not contain an unbroken run longer than "
+                f"{KWR_TOKEN_MAX_BYTES} UTF-8 bytes — split the run (any separator: space, "
+                "punctuation, a line break) or shorten it; the capture is refused as a whole "
+                "(never a silent partial index)")
         out.add(run)
         out.update(_KWR_CJK.findall(run))
     return sorted(out)

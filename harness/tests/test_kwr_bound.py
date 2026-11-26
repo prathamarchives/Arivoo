@@ -265,21 +265,23 @@ def main() -> int:
         # incompressible 4000-char run is the proven crash class
         crash_tok = _incompressible(4000)
         p5 = import_src("kbnd-5", "The Crash Class", _src_file("lead " + crash_tok + " tail"))
-        # the only committed source so far is kbnd-2a's ("edge " + at_bound + " end"):
-        # its token set {edge, b*512, end} is exactly the whole index; nothing else
+        # the index bound holds GLOBALLY (no over-bound token anywhere, any kind);
+        # the only committed source remains kbnd-2a's with its exact 3-token set
         ok5 = (p5.returncode == 1 and "FAIL ARV-KWR-002" in p5.stdout
                and "ARV-CMD-010" not in p5.stdout
                and "error" not in (p5.stderr or "").lower()
                and audit("SELECT count(*) FROM arv.source;") == "1"
-               and audit("SELECT count(*) FROM arv.keyword_index;") == "3"
-               and audit("SELECT count(DISTINCT entity_id) FROM arv.keyword_index;") == "1")
+               and audit("SELECT count(*) FROM arv.keyword_index WHERE "
+                         "octet_length(token) > 512;") == "0"
+               and audit("SELECT count(*) FROM arv.keyword_index WHERE kind='source';") == "3")
         check("KBND-05", ok5,
               "the adversarial class: an INCOMPRESSIBLE 4000-char unbroken run (the btree "
               "row-size exceeding class — F6's exact trigger: the spike observed 'index row "
               "size 3016 exceeds btree version 4 maximum 2704' live on the 17.12 rig for a "
               "3000-char incompressible token, proven reachable through the import route) "
               "refuses with the NAMED ARV-KWR-002, never ARV-CMD-010, never a DB-side crash; "
-              "the index holds exactly the one committed source's token set",
+              "no token over the bound exists anywhere in the index and the one committed "
+              "source keeps its exact 3-token set",
               "the bound must fire at validation time on the RAW byte length — the INSERT "
               "must never be reached with an over-bound token (the pre-slice tree dies "
               "inside the metadata transaction on the incompressible class)")

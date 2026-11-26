@@ -89,7 +89,20 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from harness.adapters import pg  # noqa: E402
-from harness.commands import API_VERSION  # noqa: E402  # P4-00b: the version's ONE home (commands.py) — the read surface reports the same value as every write ack
+from harness.commands import API_VERSION, KWR_TOKEN_MAX_BYTES  # noqa: E402  # P4-00b: the version's ONE home (commands.py) — the read surface reports the same value as every write ack; CLAIM-095: the keyword input bound's ONE home too (the read side imports the kernel constant, never re-declares — both sides fire at the same threshold)
+
+
+def _kwr_term_bound(terms: list) -> str:
+    """CLAIM-095 (F6): the read-side term bound — a term whose UTF-8 byte
+    length exceeds the kernel's keyword input bound is refused with the
+    named ARV-KWR-003 code (the KWR-07 explicit-failure law applied to the
+    read side: a term the index can never hold is a named refusal, never a
+    silent empty result). The bound value itself lives in commands.py
+    (the tokenizer's home); this arm only enforces it."""
+    for tm in terms:
+        if len(tm.encode("utf-8")) > KWR_TOKEN_MAX_BYTES:
+            return tm
+    return ""
 
 # P4-00b (CLAIM-063): the LIST CONTRACT's bounds — every list response is
 # BOUNDED (the default page), the client pages with the --after keyset cursor,
@@ -400,6 +413,18 @@ def _pack(db: str, owner: str, terms_u: list, budget: int,
         else:
             after_pred = f"AND k.entity_id > '{after_id}' "
     terms_u = sorted({tm.casefold() for tm in terms_u})  # deduplicated
+    # CLAIM-095 (F6): the read-side term bound — the same named refusal the
+    # search arm carries (the pack admits the same documents search admits,
+    # so the term boundary is the same law)
+    bad = _kwr_term_bound(terms_u)
+    if bad:
+        print(f"FAIL ARV-KWR-003: the pack term exceeds the keyword input bound "
+              f"({len(bad.encode('utf-8'))} UTF-8 bytes > {KWR_TOKEN_MAX_BYTES}; the term "
+              f"{bad[:24]!r}... can never exist in the index — the write side refuses "
+              "such tokens at capture time)")
+        print("      repair: use whole keyword terms within the index input bound "
+              f"(split the term or shorten it to at most {KWR_TOKEN_MAX_BYTES} UTF-8 bytes)")
+        return 1
     qterms = ", ".join("'" + tm.replace("'", "''") + "'" for tm in terms_u)
     rows = _read(db, owner, PACK_SQL.format(terms="ARRAY[" + qterms + "]",
                                             nterms=len(terms_u),
@@ -1399,6 +1424,17 @@ def _dispatch(a, db) -> int:
         # multi-term AND intersection, the tombstone parity joined at query
         # time (the index never governs visibility), RLS the owner boundary
         terms_u = sorted({tm.casefold() for tm in a.terms})  # deduplicated (a repeated term is one term)
+        # CLAIM-095 (F6): the read-side term bound — the named refusal before
+        # the query runs (a term the index can never hold; never a silent miss)
+        bad = _kwr_term_bound(terms_u)
+        if bad:
+            print(f"FAIL ARV-KWR-003: the search term exceeds the keyword input bound "
+                  f"({len(bad.encode('utf-8'))} UTF-8 bytes > {KWR_TOKEN_MAX_BYTES}; the term "
+                  f"{bad[:24]!r}... can never exist in the index — the write side refuses "
+                  "such tokens at capture time)")
+            print("      repair: use whole keyword terms within the index input bound "
+                  f"(split the term or shorten it to at most {KWR_TOKEN_MAX_BYTES} UTF-8 bytes)")
+            return 1
         qterms = ", ".join("'" + tm.replace("'", "''") + "'" for tm in terms_u)
         rows = _read(db, a.owner, SEARCH_SQL.format(terms="ARRAY[" + qterms + "]",
                                                     nterms=len(terms_u)))

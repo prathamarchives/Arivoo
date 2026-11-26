@@ -396,6 +396,146 @@ def main() -> int:
             check("ARV-API-033", s == 404,
                   "a readiness read for an absent source is the same 404")
 
+            # ---------------- CLAIM-097: the reader family ----------------
+            # 24) the position round-trip: save then reopen the same window
+            s, b = asyncio.run(call(app_k, "GET",
+                                     f"/api/v1/sources/{real_id}/position", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            row = d.get("row", {})
+            check("ARV-API-034",
+                  s == 200 and row.get("state") == "no_position_saved",
+                  "GET /sources/{id}/position answers the honest no_position_saved state (a 200 ANSWER, never a failure)")
+            s, b = asyncio.run(call(app_k, "PUT",
+                                     f"/api/v1/sources/{real_id}/position",
+                                     dict(H, **{"Idempotency-Key": "k-097-p1",
+                                                "Content-Type": "application/json"}),
+                                     body=json.dumps({"start": 0, "end": 5}).encode()))
+            ack_p = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-035",
+                  s == 200 and ack_p.get("status") == "committed"
+                  and ack_p.get("durability_rung") == "local_durable",
+                  "PUT /sources/{id}/position returns the kernel's honest ack (the serialized save)")
+            s, b = asyncio.run(call(app_k, "GET",
+                                     f"/api/v1/sources/{real_id}/position", H))
+            row = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-036",
+                  s == 200 and row.get("state") == "position_saved"
+                  and row.get("start_off") == 0 and row.get("end_off") == 5
+                  and bool(row.get("saved_generation_id")),
+                  "the reopen returns the saved window + the serving-generation binding (the round-trip)")
+            # the replay: the same key + body
+            s2, b2 = asyncio.run(call(app_k, "PUT",
+                                       f"/api/v1/sources/{real_id}/position",
+                                       dict(H, **{"Idempotency-Key": "k-097-p1",
+                                                  "Content-Type": "application/json"}),
+                                       body=json.dumps({"start": 0, "end": 5}).encode()))
+            ack_p2 = json.loads(b2) if b2.startswith("{") else {}
+            check("ARV-API-037",
+                  s2 == 200 and ack_p2.get("status") == "replayed"
+                  and ack_p2.get("result_ref") == ack_p.get("result_ref"),
+                  "the same position key replays the same save (the idempotency law)")
+            # the malformed body: a non-integer offset
+            s, b = asyncio.run(call(app_k, "PUT",
+                                     f"/api/v1/sources/{real_id}/position",
+                                     dict(H, **{"Idempotency-Key": "k-097-p2",
+                                                "Content-Type": "application/json"}),
+                                     body=json.dumps({"start": "zero", "end": 5}).encode()))
+            check("ARV-API-038", s == 422 and "ARV-QRY-004" in b,
+                  "a malformed position body (non-integer offsets) refuses 422")
+
+            # 25) the session events: the closed vocabulary + the round-trip
+            s, b = asyncio.run(call(app_k, "POST",
+                                     f"/api/v1/sources/{real_id}/session-events",
+                                     dict(H, **{"Idempotency-Key": "k-097-s1",
+                                                "Content-Type": "application/json"}),
+                                     body=json.dumps({"event": "nonsense",
+                                                      "start": 0, "end": 3}).encode()))
+            check("ARV-API-039", s == 422 and "ARV-SES-004" in b,
+                  "a session event outside the closed vocabulary refuses ARV-SES-004 (422)")
+            s, b = asyncio.run(call(app_k, "POST",
+                                     f"/api/v1/sources/{real_id}/session-events",
+                                     dict(H, **{"Idempotency-Key": "k-097-s2",
+                                                "Content-Type": "application/json"}),
+                                     body=json.dumps({"event": "session_start",
+                                                      "start": 0, "end": 3}).encode()))
+            ack_s = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-040",
+                  s == 200 and ack_s.get("status") == "committed",
+                  "POST /sources/{id}/session-events records a session_start (the D-010 vocabulary)")
+            s, b = asyncio.run(call(app_k, "POST",
+                                     f"/api/v1/sources/{real_id}/session-events",
+                                     dict(H, **{"Idempotency-Key": "k-097-s3",
+                                                "Content-Type": "application/json"}),
+                                     body=json.dumps({"event": "dwell",
+                                                      "start": 0, "end": 3,
+                                                      "dwell_ms": 1500}).encode()))
+            ack_d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-041",
+                  s == 200 and ack_d.get("status") == "committed",
+                  "a dwell event with dwell_ms records (the coarse dwell)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/session-events", H,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            evs = [r for r in (d.get("rows") or []) if isinstance(r, dict) and r.get("kind")]
+            check("ARV-API-042",
+                  s == 200 and len(evs) >= 2,
+                  f"GET /session-events lists the recorded stream (rows observed: {len(evs)})")
+
+            # 26) the reading state: the derived view carries the saved position
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/reading-state", H,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            rows = [r for r in (d.get("rows") or []) if isinstance(r, dict)]
+            mine = [r for r in rows if r.get("source_id") == real_id]
+            check("ARV-API-043",
+                  s == 200 and mine and mine[0].get("state") == "position_saved"
+                  and mine[0].get("start_off") == 0,
+                  "GET /reading-state derives the current-reading view (the saved position present)")
+
+            # 27) the anchor resolution: the content-addressed reading surface
+            # (the highlight route itself is CLAIM-098 — this probe mints the
+            # anchor through the kernel CLI, then resolves it through the route)
+            out = subprocess.run([sys.executable, "harness/commands.py",
+                                  "create_highlight", "--owner", "route-user",
+                                  "--actor", "owner", "--client-id", "api-v1",
+                                  "--idem-key", "k-097-kh1", "--source-id", real_id,
+                                  "--start", "0", "--end", "5",
+                                  "--selected-text", "hello"],
+                                 cwd=str(pathlib.Path(__file__).resolve().parents[2]),
+                                 capture_output=True, text=True, timeout=120,
+                                 env=dict(os.environ, PGDATABASE=db))
+            hl_ref, aid = "", ""
+            for ln in out.stdout.splitlines():
+                if ln.startswith("ACK "):
+                    for tok in ln.split():
+                        if tok.startswith("result_ref="):
+                            hl_ref = tok.split("=", 1)[1]
+            if hl_ref:
+                cap = subprocess.run([sys.executable, "harness/query.py",
+                                      "get-capture", "--owner", "route-user",
+                                      "--id", hl_ref],
+                                     cwd=str(pathlib.Path(__file__).resolve().parents[2]),
+                                     capture_output=True, text=True, timeout=120,
+                                     env=dict(os.environ, PGDATABASE=db))
+                try:
+                    aid = json.loads(cap.stdout.strip().splitlines()[-1]).get("anchor_id", "")
+                except Exception:
+                    aid = ""
+            check("ARV-API-044", bool(aid),
+                  "the kernel mints a highlight whose anchor reads back (the anchor surface's fixture; the highlight ROUTES are CLAIM-098)")
+            if aid:
+                s, b = asyncio.run(call(app_k, "GET", f"/api/v1/anchors/{aid}", H))
+                row = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+                check("ARV-API-044",
+                      s == 200 and row.get("anchor_id") == aid
+                      and "start_off" in json.dumps(row),
+                      "GET /anchors/{id} resolves the content-addressed reading surface (the offsets + the digests + the generation binding)")
+            # the no-leak: an absent anchor
+            s, b = asyncio.run(call(app_k, "GET",
+                                     "/api/v1/anchors/00000000-0000-0000-0000-000000000000", H))
+            check("ARV-API-045", s == 404,
+                  "an absent anchor is the no-leak 404")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

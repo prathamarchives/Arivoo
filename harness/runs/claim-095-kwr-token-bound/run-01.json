@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_kwr_bound.py",
+  "exit_code": 0,
+  "commit": "b6e5e1574b7e32d96a27042ccd4a2e3a9e1b1f9c",
+  "output_sha256": "5e3ce88509fbc8a202fbd68baaa96187cfb0f9e8c24f45ecaf553ab779958546",
+  "recorded_at": "2026-11-26T12:07:25.140380+00:00"
+}

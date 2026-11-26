@@ -134,7 +134,10 @@ TESTS = ("harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          "harness/tests/test_dep_boundaries.py",
          "harness/tests/test_prod_adapter.py",
          "harness/tests/test_auth_boundary.py",
-         "harness/tests/test_api_routes.py")
+         "harness/tests/test_api_routes.py",
+         # CLAIM-095 (the F6 kernel follow-up; the ARV-RED-008 class: the new
+         # suite's registration rides the binding commit, diff-visible)
+         "harness/tests/test_kwr_bound.py")
 
 
 def run_cmd(cmd: list) -> subprocess.CompletedProcess:

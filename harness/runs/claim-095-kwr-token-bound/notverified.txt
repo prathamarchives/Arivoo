@@ -1,0 +1,6 @@
+the bound value's interplay with a SUPABASE-side btree (the remote's block size and TOAST settings are Supabase-managed; the local 17.12 rig is engine-parity, not config-parity — the 512-byte raw bound sits far enough under any 8k-block ceiling that the margin covers it, but the remote observation rides the 0020 application session's verification pass)
+the remote migration ledger re-read (0020 still unapplied remotely as of the directive's own §2.3 check — the remote application is the next workstream's own act)
+a live Supabase-issued token end-to-end (carried: needs a real user — §17.1's class)
+uvicorn over a real socket; the route surface against the remote db (the deployment slice's own acts)
+the btree-limit source reading was verified against REL_17_STABLE (the stable branch), not the exact Debian patch level's source tree (17.12-0+deb13u1) — the Debian delta is packaging, but this is stated rather than assumed
+the five required PR-head CI checks and the D-042 merge-gate review (observed after the PR opens — never pre-claimed)

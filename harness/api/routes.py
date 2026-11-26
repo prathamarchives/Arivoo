@@ -96,6 +96,38 @@ def _kernel_env(db: str) -> dict:
     return env
 
 
+async def _json_body(request: Request, max_bytes: int) -> dict:
+    """Read one bounded JSON object body (the write DTOs' shared reader).
+    A declared over-cap Content-Length is refused before any byte is read;
+    a lying/chunked client is cut at the cap mid-stream (the import route's
+    own F1 law, applied to every JSON body)."""
+    declared = request.headers.get("content-length")
+    if declared is not None:
+        try:
+            if int(declared) > max_bytes:
+                raise KernelRefusal("ARV-API-413",
+                                    f"the request body exceeds its {max_bytes}-byte cap",
+                                    413)
+        except ValueError:
+            pass
+    buf = bytearray()
+    async for chunk in request.stream():
+        buf.extend(chunk)
+        if len(buf) > max_bytes:
+            raise KernelRefusal("ARV-API-413",
+                                f"the request body exceeds its {max_bytes}-byte cap",
+                                413)
+    if not buf:
+        raise KernelRefusal("ARV-QRY-004", "a JSON body is required", 422)
+    try:
+        obj = json.loads(bytes(buf))
+    except Exception:
+        raise KernelRefusal("ARV-QRY-004", "the body is not valid JSON", 422)
+    if not isinstance(obj, dict):
+        raise KernelRefusal("ARV-QRY-004", "the body must be a JSON object", 422)
+    return obj
+
+
 def _run_kernel(argv: list, db: str, timeout: float = 120.0) -> dict:
     """Run the kernel as a bounded subprocess; parse its ack (the ACK
     key=value line — the kernel's own CLI contract; commit-before-ack is ITS
@@ -333,6 +365,163 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
         if not rows or not isinstance(rows[0], dict) or "source_id" not in rows[0]:
             # §11.4: never leak another owner's object existence
             raise KernelRefusal("ARV-QRY-404", "no such source for this owner", 404)
+        return JSONResponse(status_code=200, content={"row": rows[0],
+                                                      "api_version": page.get("api_version", 1)})
+
+    # ---- CLAIM-097: the §11.2 'Reading' area (the directive's Workstream 4,
+    # family 1 — content + reading position/session state) ----
+    # GET /api/v1/sources/{id}/position — 'get position': the reopen answer
+    # (the last-saved window + the serving-generation binding; the honest
+    # no_position_saved state is a 200 ANSWER, never a failure — the kernel's
+    # own contract)
+    @router.get("/api/v1/sources/{source_id}/position")
+    async def get_position(source_id: str, ctx: dict = Depends(verified)):
+        if not source_id or len(source_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the source id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-position", "--owner", ctx["owner_scope"],
+                "--source", source_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows or not isinstance(rows[0], dict):
+            # §11.4: never leak another owner's object existence
+            raise KernelRefusal("ARV-QRY-404", "no such source for this owner", 404)
+        return JSONResponse(status_code=200, content={"row": rows[0],
+                                                      "api_version": page.get("api_version", 1)})
+
+    # PUT /api/v1/sources/{id}/position — 'save position': the §11.3 write
+    # law (idempotency required); the serialized save rides the kernel's own
+    # advisory-lock transaction (competing savers serialize; the ordinal law
+    # holds by construction). start/end are decoded-text offsets.
+    @router.put("/api/v1/sources/{source_id}/position")
+    async def save_position(source_id: str, request: Request,
+                            ctx: dict = Depends(verified),
+                            idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not source_id or len(source_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the source id is malformed", 422)
+        body = await _json_body(request, max_bytes=64 * 1024)
+        try:
+            start, end = int(body["start"]), int(body["end"])
+        except (KeyError, TypeError, ValueError):
+            raise KernelRefusal("ARV-QRY-004",
+                                "the body must carry integer start/end offsets "
+                                "(decoded-text coordinates)", 422)
+        argv = [sys.executable, str(REPO / "harness" / "commands.py"),
+                "save_position",
+                "--owner", ctx["owner_scope"],
+                "--actor", "owner",
+                "--client-id", ctx["claims"].get("client_id", "api-v1"),
+                "--idem-key", idempotency_key,
+                "--source-id", source_id,
+                "--start", str(start),
+                "--end", str(end)]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # POST /api/v1/sources/{id}/session-events — the session/dwell surface
+    # (D-010's closed vocabulary; the coarse span + dwell in the body)
+    @router.post("/api/v1/sources/{source_id}/session-events")
+    async def record_session_event(source_id: str, request: Request,
+                                   ctx: dict = Depends(verified),
+                                   idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not source_id or len(source_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the source id is malformed", 422)
+        body = await _json_body(request, max_bytes=64 * 1024)
+        ev = body.get("event")
+        if ev not in ("session_start", "checkpoint", "dwell", "session_end"):
+            raise KernelRefusal("ARV-SES-004",
+                                "the event kind must be one of the closed "
+                                "vocabulary (session_start|checkpoint|dwell|session_end)", 422)
+        try:
+            start, end = int(body["start"]), int(body["end"])
+        except (KeyError, TypeError, ValueError):
+            raise KernelRefusal("ARV-QRY-004",
+                                "the body must carry integer start/end offsets "
+                                "(decoded-text coordinates)", 422)
+        argv = [sys.executable, str(REPO / "harness" / "commands.py"),
+                "record_session",
+                "--owner", ctx["owner_scope"],
+                "--actor", "owner",
+                "--client-id", ctx["claims"].get("client_id", "api-v1"),
+                "--idem-key", idempotency_key,
+                "--source-id", source_id,
+                "--event", ev,
+                "--start", str(start),
+                "--end", str(end)]
+        if ev == "dwell":
+            try:
+                argv += ["--dwell-ms", str(int(body["dwell_ms"]))]
+            except (KeyError, TypeError, ValueError):
+                raise KernelRefusal("ARV-QRY-004",
+                                    "a dwell event requires an integer dwell_ms", 422)
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # GET /api/v1/reading-state — the derived current-reading view (every
+    # source of the page with its last-saved position or the honest
+    # no_position_saved state); bounded + paginated (§11.3)
+    @router.get("/api/v1/reading-state")
+    async def reading_state(ctx: dict = Depends(verified),
+                            limit: str = "50", after: str = ""):
+        try:
+            limit_i = int(limit)
+        except ValueError:
+            raise KernelRefusal("ARV-QRY-004", "limit must be an integer", 422)
+        if not (LIST_LIMIT_BOUNDS[0] <= limit_i <= LIST_LIMIT_BOUNDS[1]):
+            raise KernelRefusal("ARV-QRY-004",
+                                f"limit {limit} outside [{LIST_LIMIT_BOUNDS[0]}, "
+                                f"{LIST_LIMIT_BOUNDS[1]}]", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-reading-state", "--owner", ctx["owner_scope"],
+                "--limit", str(limit_i)]
+        if after:
+            argv += ["--after", after]
+        page = _query_kernel(argv, db)
+        return JSONResponse(status_code=200, content=page)
+
+    # GET /api/v1/session-events — the owner's session/dwell event stream
+    # (bounded + paginated; the recorded rows only, never retargeted)
+    @router.get("/api/v1/session-events")
+    async def list_session_events(ctx: dict = Depends(verified),
+                                  limit: str = "50", after: str = ""):
+        try:
+            limit_i = int(limit)
+        except ValueError:
+            raise KernelRefusal("ARV-QRY-004", "limit must be an integer", 422)
+        if not (LIST_LIMIT_BOUNDS[0] <= limit_i <= LIST_LIMIT_BOUNDS[1]):
+            raise KernelRefusal("ARV-QRY-004",
+                                f"limit {limit} outside [{LIST_LIMIT_BOUNDS[0]}, "
+                                f"{LIST_LIMIT_BOUNDS[1]}]", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "list-session-events", "--owner", ctx["owner_scope"],
+                "--limit", str(limit_i)]
+        if after:
+            argv += ["--after", after]
+        page = _query_kernel(argv, db)
+        return JSONResponse(status_code=200, content=page)
+
+    # GET /api/v1/anchors/{id} — 'source/read data': the typed anchor
+    # resolution (the offsets, the digests, the context windows, the current
+    # generation binding — the content-addressed reading surface)
+    @router.get("/api/v1/anchors/{anchor_id}")
+    async def resolve_anchor(anchor_id: str, ctx: dict = Depends(verified)):
+        if not anchor_id or len(anchor_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the anchor id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "resolve-anchor", "--owner", ctx["owner_scope"],
+                "--id", anchor_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows or not isinstance(rows[0], dict):
+            raise KernelRefusal("ARV-QRY-404", "no such anchor for this owner", 404)
         return JSONResponse(status_code=200, content={"row": rows[0],
                                                       "api_version": page.get("api_version", 1)})
 

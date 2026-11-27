@@ -1541,7 +1541,7 @@
   "red_exit": 1,
   "red_code": "ARV-API-001..014 (the suite's refusal list at the pre-slice tree)",
   "red_evidence": "the api routes suite observed RED at the pre-slice tree (main 87cced7, a git worktree with the pinned venv + the migrated rig): the routes battery there carried no kernel-backed route checks, so all fourteen ARV-API checks FAIL — exit 1, refusal list ARV-API-001..014 (the observed red, never an assertion)",
-  "current_sha256": "f00c47d4ab94c76d2c534c4f0063a8c1490d0426be6423fb89e6607cad1838fe",
+  "current_sha256": "5c94c594e49623361ba6d03a9ba4c1684d880aafa528fb7847e196483bc1ac31",
   "amendments": [
    {
     "prior_sha256": "63891040c176de67d52cd59399f9797c3a478b1c2d1830f2b6735caa41abd01b",
@@ -1592,16 +1592,16 @@
     "observed_at": "2026-11-27T10:23:27.802360+00:00"
    },
    {
-    "prior_sha256": "f00c47d4ab94c76d2c534c4f0063a8c1490d0426be6423fb89e6607cad1838fe",
-    "new_sha256": "a128e211425302e89b235edf74a0fffcddaf4983456ded34959e45cc8b5ebb6e",
-    "note": "the sync/export/purge battery (ARV-API-165..202) observed RED at the test-only commit 368eb8d (the pre-slice main a17f0b5 + the battery + the markers): exit 1, 32 checks failing — the routes and the 0021 erasure machine do not exist (the corpus-import hand 165 lands vacuously through the §11.4 envelope; the rest substantive); GREEN at the implementation head after four real repairs (the missing erasure machine — the substrate refused every content DELETE; the uuid-vs-text keyword_index cast; the ledger-first check order; the guard-message drift the SYN-11 assertion caught)",
-    "observed_at": "2026-11-27T11:49:35.499972+00:00"
-   },
-   {
     "prior_sha256": "a128e211425302e89b235edf74a0fffcddaf4983456ded34959e45cc8b5ebb6e",
     "new_sha256": "5c94c594e49623361ba6d03a9ba4c1684d880aafa528fb7847e196483bc1ac31",
     "note": "the SEV round-1 repair guards extend the markers to ARV-API-165..207 (the sync/export/purge battery + the three repair checks 203..207: the uuid law at the boundary, the cursor's literal home + uuid half, the journal_block vocabulary repair) — additions only, the observed RED chain unchanged (165..202 at 368eb8d, exit 1, 32 failures)",
     "observed_at": "2026-11-27T13:24:43.854762+00:00"
+   },
+   {
+    "prior_sha256": "f00c47d4ab94c76d2c534c4f0063a8c1490d0426be6423fb89e6607cad1838fe",
+    "new_sha256": "5c94c594e49623361ba6d03a9ba4c1684d880aafa528fb7847e196483bc1ac31",
+    "note": "the SEV round-1 repair guards extend the api-routes markers to ARV-API-165..207 (the sync/export/purge battery + the three repair checks: the uuid law at the boundary, the cursor's literal home + uuid half, the journal_block vocabulary repair) — additions only, the observed RED chain unchanged (165..202 at 368eb8d, exit 1, 32 failures)",
+    "observed_at": "2026-11-27T13:27:48.923745+00:00"
    }
   ]
  },

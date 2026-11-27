@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-102-sync-export-purge",
   "base_sha": "a17f0b5e36a1520f757a3a302a4d7345c28dfbe3",
-  "reviewed_diff_sha256": "926c012df77900f103b56032ca21ebfb05867797dbb81ba5ed041082f7bbd177",
+  "reviewed_diff_sha256": "a0f7c96962a29b4fd8d75ff4b689a68b1a99b8ea485254b83fd5d8cb500d1aad",
   "intent_ids": [
     "INT-169"
   ],

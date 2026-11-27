@@ -1,0 +1,12 @@
+# CLAIM-101 — the §11.2 Retrieval API (the directive's Workstream 5) + the 100 close riding.
+CLAIMS.md INT-168
+STATE.md INT-168
+context/WORKLOG.md INT-168
+INTENT-LEDGER.md INT-168
+AGENTS.md INT-168
+harness/api/routes.py INT-168
+harness/api/routes_selfcheck.py INT-168
+harness/tests/test_api_routes.py INT-168
+harness/red-records.json INT-168
+harness/runs/claim-101-retrieval-api INT-168
+context/extracted/86-RETRIEVAL-API.md INT-168

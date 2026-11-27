@@ -1195,6 +1195,83 @@ def main() -> int:
             check("ARV-API-152", s == 404,
                   "owner B's membership read of A's list is the no-leak 404")
 
+            # ---------------- CLAIM-101: the retrieval API (Workstream 5) ----------------
+            # (§11.2 Retrieval: keyword search + bounded context packs with
+            # provenance/trust labels — the query kernel's own search/pack
+            # arms; deterministic, no semantic/model work per Q7)
+            # 67) the search: the term law
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/search", H))
+            check("ARV-API-153", s == 422 and "ARV-QRY-004" in b,
+                  "GET /search without terms refuses (at least one term required)")
+            # the fixture: an extracted, indexed source exists from the earlier
+            # families (real_id carries 'hello arivo')
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/search", H,
+                                     query=b"terms=hello&terms=arivo"))
+            d = json.loads(b) if b.startswith("{") else {}
+            rows = [r for r in (d.get("rows") or []) if isinstance(r, dict)]
+            src_rows = [r for r in rows if r.get("entity_id") == real_id]
+            check("ARV-API-154", s == 200 and src_rows
+                  and src_rows[0].get("kind") == "source"
+                  and src_rows[0].get("matched_terms"),
+                  "GET /search with AND terms admits the source (both terms matched — the corpus's captures admitted alongside, the admission list's own order)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/search", H,
+                                     query=b"terms=hello&terms=nonexistentterm"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-155", s == 200 and (d.get("rows") or []) == [],
+                  "the AND semantics: one missing term empties the result (a 200 empty page)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/search", H,
+                                     query=b"terms=" + b"x" * 600))
+            check("ARV-API-156", s == 422 and "ARV-KWR-003" in b,
+                  "the over-long term refuses ARV-KWR-003 (the read-side token bound)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/search"))
+            check("ARV-API-157", s == 401,
+                  "GET /search is auth-guarded like every product route")
+            # 68) the context packs: the provenance-carrying assembly
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/context-packs", H,
+                                     query=b"terms=hello&budget-bytes=4096"))
+            d = json.loads(b) if b.startswith("{") else {}
+            rows = [r for r in (d.get("rows") or []) if isinstance(r, dict)]
+            meta = d.get("page_meta", {}) or {}
+            src_pack = [r for r in rows if r.get("entity_id") == real_id]
+            check("ARV-API-158", s == 200 and rows and src_pack
+                  and src_pack[0].get("trust") == "untrusted"
+                  and "hello" in json.dumps(src_pack[0].get("matched_terms", "")),
+                  "GET /context-packs admits the source with its trust label + matched terms (the corpus's captures admitted alongside)")
+            check("ARV-API-159", s == 200 and meta
+                  and isinstance(meta.get("kept"), int) and meta.get("kept", 0) >= 1
+                  and isinstance(meta.get("total"), int) and meta.get("total", 0) >= 1
+                  and meta.get("truncated") is False
+                  and isinstance(meta.get("budget_bytes"), int)
+                  and isinstance(meta.get("used_bytes"), int) and "after" in meta,
+                  "the pack's truncation metadata serves typed (kept/total/truncated/budget/used/after)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/context-packs", H,
+                                     query=b"terms=hello&budget-bytes=0"))
+            check("ARV-API-160", s == 422 and "ARV-QRY-004" in b,
+                  "the out-of-bounds budget refuses ARV-QRY-004")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/context-packs", H,
+                                     query=b"terms=hello&budget-bytes=4096&limit=0"))
+            check("ARV-API-161", s == 422 and "ARV-QRY-004" in b,
+                  "the pack's list bound refuses ARV-QRY-004")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/search", H,
+                                     query=b"terms=hello&terms=arivo&limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-162", s == 200 and isinstance(d.get("rows"), list)
+                  and d.get("api_version") == 1,
+                  "the search page serves on the shared page contract")
+            # 69) the cross-owner legs
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/search", HB,
+                                     query=b"terms=hello"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-163", s == 200 and (d.get("rows") or []) == [],
+                  "owner B's search over A's corpus is EMPTY")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/context-packs", HB,
+                                     query=b"terms=hello&budget-bytes=4096"))
+            d = json.loads(b) if b.startswith("{") else {}
+            meta = d.get("page_meta", {}) or {}
+            check("ARV-API-164", s == 200 and (d.get("rows") or []) == []
+                  and meta.get("total") == 0,
+                  "owner B's context pack over A's corpus is EMPTY (total=0)")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

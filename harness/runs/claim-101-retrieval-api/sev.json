@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-101-retrieval-api",
+  "base_sha": "584adb1f3d6b3ec9164b0c5b252532be93d459af",
+  "reviewed_diff_sha256": "7f5c551a5d7d018e9195f1515381629485f4771b9beca9c85434f3f4a83698fe",
+  "intent_ids": [
+    "INT-168"
+  ],
+  "requirement_ids": [
+    "SYS-03",
+    "SYS-05",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2",
+    "C5"
+  ],
+  "changed_components": [
+    "AGENTS.md",
+    "CLAIMS.md",
+    "INTENT-LEDGER.md",
+    "STATE.md",
+    "context/WORKLOG.md",
+    "context/extracted/86-RETRIEVAL-API.md",
+    "harness/api/routes.py",
+    "harness/api/routes_selfcheck.py",
+    "harness/red-records.json",
+    "harness/tests/test_api_routes.py"
+  ],
+  "interfaces_reviewed": [
+    "GET /api/v1/search (harness/api/routes.py): the AND-semantics admission over the kernel's own arm \u2014 no invented paging; the terms carried verbatim",
+    "GET /api/v1/context-packs (harness/api/routes.py): the provenance-carrying assembly; the trailer metadata typed at the boundary (ints/bools, never strings)",
+    "_pipe_page (harness/api/routes.py): the ONE pipe-framed page parser (the header's columns + the pipe rows + the more-trailer) \u2014 never a second framing law",
+    "_terms_query (harness/api/routes.py): the retrieval DTO (the repeated terms parameter, the AND law)",
+    "the \u00a711.4 map row (harness/api/routes.py): KWR-003 -> 422 (the read-side token bound)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01: the full battery at the head -> exit 0, 180 PASS (ARV-ROUTE-001..007 + ARV-API-001..164)"
+    ],
+    "integration_verification": [
+      "the routes call ONLY the existing query arms (search, pack) \u2014 zero kernel files in the diff; the deterministic-only boundary held (Q7)",
+      "the RED at 15d59f7 re-observed: exit 1, 12 failures, the routes provably absent"
+    ],
+    "system_verification": [
+      "python3 tools/verify_canonical_layer.py -> exit 0 (150 intents, the record-86 pointer fresh)",
+      "python3 harness/tests/test_api_routes.py -> exit 0; the gate at the head GREEN"
+    ],
+    "validation": [
+      "the requirement trace: SYS-03 (the owner isolation \u2014 the cross-owner corpus legs 163/164), SYS-05 (the typed errors \u2014 the KWR-003 row + the budget bounds), SYS-11 (the \u00a711.2 Retrieval row served \u2014 Workstream 5 complete)",
+      "ARV-API-153..164 RED-first (all substantive), GREEN at the head; the anchor-tail regression caught by the CLAIM-100 checks' own net"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-101-1",
+      "scenario": "a term over the 512-byte read-side token bound",
+      "expected": "the named 422 (KWR-003 mapped)",
+      "observed": "verified live (156 PASS)",
+      "control": "the \u00a711.4 map row + the battery check",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-101-2",
+      "scenario": "an out-of-bounds budget or list bound on the pack",
+      "expected": "the ARV-QRY-004 422 at the boundary",
+      "observed": "verified live (160/161 PASS)",
+      "control": "the route's own bounds + the kernel's own typed refusal",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-101-3",
+      "scenario": "the cross-owner retrieval (owner B against owner A's corpus)",
+      "expected": "the EMPTY admission list + the EMPTY pack (total=0) \u2014 never a side channel",
+      "observed": "verified live (163/164 PASS)",
+      "control": "the kernel's own owner scoping + the battery's cross-owner legs",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the five PR-head CI checks and this PR's D-042 review (observed after the PR opens)",
+    "a live Supabase-issued token; uvicorn over a real socket; the deployed surface (Workstream 10)",
+    "the KWR-002 map row + the alternation's named-409 candidate (the map-family followup)",
+    "the Workstream 6+ families; the semantic/model work (Q7 open \u2014 deterministic only); the remote btree/TOAST parity (carried)"
+  ],
+  "builder_context": "builder-zcode-session65-slice-claim-101",
+  "reviewer_context": "reviewer-inline-verification-claim-101 (a declared distinct-context limit \u2014 the verification design executed in the builder's session with the RED-first battery + the prior slices' cumulative regression net as the falsification floor; disclosed per ARV-SEV-007's own note)",
+  "disposition": "PASS",
+  "review_summary": "PASS \u2014 zero findings; the two-route retrieval surface over the kernel's own search/pack arms (deterministic only, Q7 held), the ONE pipe-framed parser, the typed trailer metadata, the anchor-tail regression caught by the prior slice's own checks and repaired before evidence.",
+  "sheet_section": true
+}

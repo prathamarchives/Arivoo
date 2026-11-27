@@ -99,6 +99,10 @@ _HTTP_BY_PREFIX = (
     # CLAIM-100 (the reading-lists family): the name law is a client-actionable
     # 422; the list/binding no-oracles join the 404 family below
     ("ARV-RLS-003", 422),   # the list name law (1..512, no NULs)
+    # CLAIM-101 (the retrieval API): the read-side token bound is a
+    # client-actionable 422 (the write-side KWR-002 stays on the fallback
+    # map — the map-family followup's own slice)
+    ("ARV-KWR-003", 422),   # the over-long search term (the read-side bound)
 )
 
 
@@ -1216,9 +1220,130 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
             raise KernelRefusal("ARV-QRY-004", "the list id is malformed", 422)
         if not source_id or len(source_id) > 128:
             raise KernelRefusal("ARV-QRY-004", "the source id is malformed", 422)
-        argv = _capture_argv("remove_from_list", ctx, idempotency_key) +             ["--list", list_id, "--source", source_id]
+        argv = _capture_argv("remove_from_list", ctx, idempotency_key) + \
+            ["--list", list_id, "--source", source_id]
         ack = _run_kernel(argv, db, timeout=120.0)
         return JSONResponse(status_code=200, content=ack)
+
+    # ---- CLAIM-101: the §11.2 Retrieval API (the directive's Workstream 5:
+    # the keyword search + the bounded context packs over the query kernel's
+    # OWN search/pack arms — deterministic, no semantic/model work per Q7;
+    # the pipe-framed page contract parsed at ONE place) ----
+
+    def _pipe_page(argv: list) -> dict:
+        """Run a query arm whose page contract is the PIPE-framed form (the
+        '# api_version=1 col|col|...' header, the pipe rows, the '# more='
+        trailer) and return the structured page: rows as dicts over the
+        header's own columns + the page metadata. ONE parser, never a second
+        framing law."""
+        try:
+            r = subprocess.run(argv, capture_output=True, text=True, timeout=60.0,
+                               cwd=str(REPO), env=_kernel_env(db))
+        except subprocess.TimeoutExpired:
+            raise KernelRefusal("ARV-API-504", "the query exceeded its time bound", 504)
+        out = (r.stdout or "").strip()
+        if r.returncode != 0:
+            for src in (out, (r.stderr or "").strip()):
+                for ln in src.splitlines():
+                    if ln.startswith("FAIL "):
+                        raise _map_kernel_refusal(ln)
+            raise KernelRefusal("ARV-API-500", "the query refused without a named code", 500)
+        rows, cols, meta, api_version, more = [], [], {}, 1, False
+        for ln in out.splitlines():
+            ln = ln.strip()
+            if ln.startswith("# api_version="):
+                # the header line carries BOTH the version and the column
+                # names: '# api_version=1 kind|entity_id|...'
+                rest = ln.lstrip("# ")
+                head, _, cols_str = rest.partition(" ")
+                try:
+                    api_version = int(head.split("=", 1)[1])
+                except Exception:
+                    pass
+                if cols_str:
+                    cols = [c for c in cols_str.split("|")]
+            elif ln.startswith("# more="):
+                more = ln.split("=", 1)[1].strip().lower() == "true"
+                for tok in ln[2:].split():
+                    if "=" in tok:
+                        k, v = tok.split("=", 1)
+                        if k != "more":
+                            meta[k] = v
+                meta["more"] = more
+            elif ln.startswith("#"):
+                continue
+            elif ln:
+                if not cols:
+                    cols = [c for c in ln.split("|")]
+                else:
+                    vals = ln.split("|")
+                    rows.append(dict(zip(cols, vals)))
+        return {"rows": rows, "page_meta": meta, "api_version": api_version}
+
+    async def _terms_query(request: Request) -> list:
+        """The retrieval DTO: one or more terms (the AND semantics) — the
+        repeated query parameter carries them verbatim to the kernel's own
+        positional terms."""
+        terms = request.query_params.getlist("terms")
+        terms = [t for t in terms if t]
+        if not terms:
+            raise KernelRefusal("ARV-QRY-004",
+                                "at least one terms query parameter is required "
+                                "(AND semantics — every term must hit)", 422)
+        return terms
+
+    # GET /api/v1/search?terms=a&terms=b — 'keyword search': the deterministic
+    # AND-semantics admission over the caller's own corpus (the kernel arm's
+    # own contract: the full admission list, no paging parameters of its own —
+    # the pack arm carries the bounded-paging surface)
+    @router.get("/api/v1/search")
+    async def keyword_search(request: Request, ctx: dict = Depends(verified)):
+        terms = await _terms_query(request)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "search", "--owner", ctx["owner_scope"]] + terms
+        page = _pipe_page(argv)
+        return JSONResponse(status_code=200, content=page)
+
+    # GET /api/v1/context-packs?terms=a&budget-bytes=N — 'bounded context
+    # packs': the provenance-carrying assembly (trust labels, matched terms,
+    # the why; the explicit item-boundary truncation + the trailer metadata)
+    @router.get("/api/v1/context-packs")
+    async def context_pack(request: Request, ctx: dict = Depends(verified),
+                           limit: str = "50", after: str = ""):
+        terms = await _terms_query(request)
+        budget = request.query_params.get("budget-bytes", "65536")
+        try:
+            budget_i = int(budget)
+        except ValueError:
+            raise KernelRefusal("ARV-QRY-004", "budget-bytes must be an integer", 422)
+        if not (1 <= budget_i <= 1048576):
+            raise KernelRefusal("ARV-QRY-004",
+                                f"budget-bytes {budget} outside [1, 1048576]", 422)
+        try:
+            limit_i = int(limit)
+        except ValueError:
+            raise KernelRefusal("ARV-QRY-004", "limit must be an integer", 422)
+        if not (LIST_LIMIT_BOUNDS[0] <= limit_i <= LIST_LIMIT_BOUNDS[1]):
+            raise KernelRefusal("ARV-QRY-004",
+                                f"limit {limit} outside [{LIST_LIMIT_BOUNDS[0]}, "
+                                f"{LIST_LIMIT_BOUNDS[1]}]", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "pack", "--owner", ctx["owner_scope"]] + terms +             ["--budget-bytes", str(budget_i), "--limit", str(limit_i)]
+        if after:
+            argv += ["--after", after]
+        page = _pipe_page(argv)
+        # the trailer's numeric/boolean fields typed at the boundary (never
+        # strings the client must re-parse)
+        meta = page.get("page_meta", {})
+        for k in ("kept", "total", "budget_bytes", "used_bytes"):
+            if k in meta:
+                try:
+                    meta[k] = int(meta[k])
+                except (TypeError, ValueError):
+                    pass
+        if "truncated" in meta:
+            meta["truncated"] = str(meta.get("truncated")).lower() == "true"
+        return JSONResponse(status_code=200, content=page)
 
     return router
 

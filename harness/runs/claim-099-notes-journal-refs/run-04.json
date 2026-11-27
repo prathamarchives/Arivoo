@@ -1,0 +1,7 @@
+{
+  "command": ".venv-waved/bin/python -I /home/z/my-project/scripts/sev099_probe.py",
+  "exit_code": 0,
+  "commit": "79ccb4beafe0c81d4c2bb550026c69cb7bc9cf07",
+  "output_sha256": "350d46fdce6735b8dbea97c0db245ee2eeee8d6c375f84e8b7598ef4e7c9c039",
+  "recorded_at": "2026-11-27T09:32:06.067289+00:00"
+}

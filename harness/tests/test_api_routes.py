@@ -71,7 +71,18 @@ def main() -> int:
                      "ARV-API-073", "ARV-API-074", "ARV-API-075", "ARV-API-076",
                      "ARV-API-077", "ARV-API-078", "ARV-API-079", "ARV-API-080",
                      "ARV-API-081", "ARV-API-082", "ARV-API-083", "ARV-API-084",
-                     "ARV-API-085", "ARV-API-086", "ARV-API-087", "ARV-API-088"):
+                     "ARV-API-085", "ARV-API-086", "ARV-API-087", "ARV-API-088",
+                     "ARV-API-089", "ARV-API-090", "ARV-API-091", "ARV-API-092",
+                     "ARV-API-093", "ARV-API-094", "ARV-API-095", "ARV-API-096",
+                     "ARV-API-097", "ARV-API-098", "ARV-API-099", "ARV-API-100",
+                     "ARV-API-101", "ARV-API-102", "ARV-API-103", "ARV-API-104",
+                     "ARV-API-105", "ARV-API-106", "ARV-API-107", "ARV-API-108",
+                     "ARV-API-109", "ARV-API-110", "ARV-API-111", "ARV-API-112",
+                     "ARV-API-113", "ARV-API-114", "ARV-API-115", "ARV-API-116",
+                     "ARV-API-117", "ARV-API-118", "ARV-API-119", "ARV-API-120",
+                     "ARV-API-121", "ARV-API-122", "ARV-API-123", "ARV-API-124",
+                     "ARV-API-125", "ARV-API-126", "ARV-API-127", "ARV-API-128",
+                     "ARV-API-129", "ARV-API-130", "ARV-API-131"):
             check(code, f"PASS {code}:" in out, f"the kernel-backed route check {code}",
                   "run harness/api/routes_selfcheck.py in the pinned venv")
     print()

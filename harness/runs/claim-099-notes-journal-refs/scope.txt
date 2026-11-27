@@ -1,0 +1,12 @@
+# CLAIM-099 — the §11.2 Notes + Journal + References families (the directive's Workstream 4 families 4-6) + the 098 SEV named followups riding.
+CLAIMS.md INT-166
+STATE.md INT-166
+context/WORKLOG.md INT-166
+INTENT-LEDGER.md INT-166
+AGENTS.md INT-166
+harness/api/routes.py INT-166
+harness/api/routes_selfcheck.py INT-166
+harness/tests/test_api_routes.py INT-166
+harness/red-records.json INT-166
+harness/runs/claim-099-notes-journal-refs INT-166
+context/extracted/84-NOTES-JOURNAL-REFS.md INT-166

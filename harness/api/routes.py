@@ -81,6 +81,21 @@ _HTTP_BY_PREFIX = (
     ("ARV-POS-003", 422),   # the position offsets (the same law)
     ("ARV-SES-003", 422),   # the session-event offsets (the same law)
     ("ARV-CAP-008", 422),   # the content class (not valid UTF-8 / underivable view)
+    # CLAIM-099 (the notes/journal/references families): the authored-content
+    # channel/grammar/vocabulary refusals are client-actionable 422s; the note
+    # lifecycle alternation joins the 409 family; the absence codes join the
+    # no-leak 404 family below
+    ("ARV-NTE-006", 422),   # the reference grammar (kind/id/@rev)
+    ("ARV-NTE-008", 422),   # the duplicate reference target (a set, not a list)
+    ("ARV-NTE-009", 422),   # NUL in the authored content (the lossless law)
+    ("ARV-NTE-010", 422),   # the content channel law
+    ("ARV-JNL-002", 422),   # the writing lab's kind vocabulary (raw | creative)
+    ("ARV-JNL-003", 422),   # the journal content channel law
+    ("ARV-JNL-004", 422),   # the empty/NUL journal body (a block is writing)
+    ("ARV-REF-002", 422),   # the reference grammar at the resolution boundary
+    ("ARV-NTE-002", 409),   # the note revise on tombstoned (restore first)
+    ("ARV-NTE-004", 409),   # the note tombstone alternation
+    ("ARV-NTE-005", 409),   # the note restore alternation
 )
 
 
@@ -98,7 +113,9 @@ def _map_kernel_refusal(line: str) -> KernelRefusal:
     # owner's are the SAME refusal everywhere, never a 403 existence oracle)
     if code.startswith(("ARV-QRY-001", "ARV-QRY-003", "ARV-EXT-004",
                         "ARV-HLC-001", "ARV-BMK-001", "ARV-CAP-002",
-                        "ARV-POS-001", "ARV-SES-001")):
+                        "ARV-POS-001", "ARV-SES-001", "ARV-NTE-001",
+                        "ARV-JNL-001", "ARV-NTE-003", "ARV-JNL-005",
+                        "ARV-REF-001")):
         return KernelRefusal(code, msg, 404)
     # every OTHER named-but-unmapped kernel code is a server-side failure the
     # client cannot act on (the live example: F6's ARV-CMD-010, proven
@@ -814,6 +831,295 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
             ["--id", bookmark_id]
         ack = _run_kernel(argv, db, timeout=120.0)
         return JSONResponse(status_code=200, content=ack)
+
+    # ---- CLAIM-099: the §11.2 Notes + Journal + References families (the
+    # directive's Workstream 4, families 4-6: the authored-content surfaces
+    # over the kernel's note/journal machines — the content STAGED to a
+    # bounded temp file and passed through the kernel's own --content-file/
+    # --file channel (the import route's staging pattern; the long-form
+    # authoring surface, never an argv-sized body), the reference set the
+    # kernel's own KIND:ID[@REV] grammar; the typed stable-reference
+    # resolution over the query kernel's six-state verdict) ----
+    MAX_AUTHOR_BYTES = 4 * 1024 * 1024  # the authored-content body cap (F1)
+
+    def _stage_author_body(body: dict):
+        """Decode + stage the authored-content DTO: the content string (one
+        channel, lossless) + the optional reference list (the kernel's own
+        grammar, validated at the kernel). Returns (tmpdir, file, refs)."""
+        content = body.get("content")
+        if not isinstance(content, str) or not content:
+            raise KernelRefusal("ARV-QRY-004",
+                                "the body must carry a non-empty content string "
+                                "(the authored body)", 422)
+        refs = body.get("refs", [])
+        if not isinstance(refs, list) or any(not isinstance(r, str) or not r or len(r) > 256
+                                             for r in refs):
+            raise KernelRefusal("ARV-QRY-004",
+                                "refs must be a list of reference strings "
+                                "(KIND:ID[@REV])", 422)
+        tmpdir = tempfile.mkdtemp(prefix="arv_api_author_")
+        tmp = pathlib.Path(tmpdir) / "content.txt"
+        try:
+            tmp.write_bytes(content.encode("utf-8"))
+        except UnicodeEncodeError:
+            # SEV9-171 (the SEV round's live finding): a lone surrogate is
+            # valid JSON but unencodable as UTF-8 — the refusal lands INSIDE
+            # the §11.4 envelope (a named 422), never a bare crash outside it
+            shutil.rmtree(tmpdir, ignore_errors=True)
+            raise KernelRefusal("ARV-QRY-004",
+                                "the content carries an unpaired surrogate — it "
+                                "cannot be encoded as UTF-8 (the lossless authoring "
+                                "surface refuses it, never a lossy interpretation)", 422)
+        return tmpdir, tmp, refs
+
+    # POST /api/v1/notes — 'create': the authored note + its version-aware
+    # reference set (highlight/note/bookmark/journal_block refs pin the target
+    # revision; work/source/anchor refs are bare — the kernel's own grammar)
+    @router.post("/api/v1/notes")
+    async def create_note(request: Request, ctx: dict = Depends(verified),
+                          idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        body = await _json_body(request, max_bytes=MAX_AUTHOR_BYTES)
+        tmpdir, tmp, refs = _stage_author_body(body)
+        try:
+            argv = _capture_argv("create_note", ctx, idempotency_key) + \
+                ["--content-file", str(tmp)]
+            for r in refs:
+                argv += ["--ref", r]
+            ack = _run_kernel(argv, db, timeout=120.0)
+            return JSONResponse(status_code=200, content=ack)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    # GET /api/v1/notes — 'list': the bounded page (tombstoned hidden)
+    @router.get("/api/v1/notes")
+    async def list_notes(ctx: dict = Depends(verified),
+                         limit: str = "50", after: str = ""):
+        return await _bounded_list(ctx, "list-notes", limit, after)
+
+    # GET /api/v1/notes/{id} — 'read': the current revision + the reference
+    # set; tombstoned is the hidden 404 (the governed history retains it)
+    @router.get("/api/v1/notes/{note_id}")
+    async def get_note(note_id: str, ctx: dict = Depends(verified)):
+        if not note_id or len(note_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the note id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-note", "--owner", ctx["owner_scope"],
+                "--id", note_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows or not isinstance(rows[0], dict):
+            raise KernelRefusal("ARV-QRY-404", "no such note for this owner", 404)
+        return JSONResponse(status_code=200, content={"row": rows[0],
+                                                      "api_version": page.get("api_version", 1)})
+
+    # GET /api/v1/notes/{id}/history — 'history': the governed view
+    @router.get("/api/v1/notes/{note_id}/history")
+    async def note_history(note_id: str, ctx: dict = Depends(verified)):
+        if not note_id or len(note_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the note id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-note-history", "--owner", ctx["owner_scope"],
+                "--id", note_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows:
+            raise KernelRefusal("ARV-QRY-404", "no such note for this owner", 404)
+        return JSONResponse(status_code=200, content=page)
+
+    # PUT /api/v1/notes/{id} — 'revise': the FULL replacement (the new
+    # revision carries its OWN complete content AND reference set)
+    @router.put("/api/v1/notes/{note_id}")
+    async def revise_note(note_id: str, request: Request,
+                          ctx: dict = Depends(verified),
+                          idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not note_id or len(note_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the note id is malformed", 422)
+        body = await _json_body(request, max_bytes=MAX_AUTHOR_BYTES)
+        tmpdir, tmp, refs = _stage_author_body(body)
+        try:
+            argv = _capture_argv("revise_note", ctx, idempotency_key) + \
+                ["--id", note_id, "--content-file", str(tmp)]
+            for r in refs:
+                argv += ["--ref", r]
+            ack = _run_kernel(argv, db, timeout=120.0)
+            return JSONResponse(status_code=200, content=ack)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    # DELETE /api/v1/notes/{id} — 'tombstone': hidden from ordinary
+    # retrieval; the governed history keeps every revision and event
+    @router.delete("/api/v1/notes/{note_id}")
+    async def tombstone_note(note_id: str, ctx: dict = Depends(verified),
+                             idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not note_id or len(note_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the note id is malformed", 422)
+        argv = _capture_argv("tombstone_note", ctx, idempotency_key) + \
+            ["--id", note_id]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # POST /api/v1/notes/{id}/restore — 'restore'
+    @router.post("/api/v1/notes/{note_id}/restore")
+    async def restore_note(note_id: str, ctx: dict = Depends(verified),
+                           idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not note_id or len(note_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the note id is malformed", 422)
+        argv = _capture_argv("restore_note", ctx, idempotency_key) + \
+            ["--id", note_id]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # POST /api/v1/journal — 'create': the writing lab's block (the closed
+    # kind vocabulary raw|creative; the OPTIONAL source binding — a sourceless
+    # block is a first-class journal row)
+    @router.post("/api/v1/journal")
+    async def create_journal_block(request: Request, ctx: dict = Depends(verified),
+                                   idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        body = await _json_body(request, max_bytes=MAX_AUTHOR_BYTES)
+        kind = body.get("kind")
+        if kind not in ("raw", "creative"):
+            raise KernelRefusal("ARV-JNL-002",
+                                "the journal block kind must be one of the closed "
+                                "vocabulary (raw | creative)", 422)
+        content = body.get("content")
+        if not isinstance(content, str) or not content:
+            raise KernelRefusal("ARV-QRY-004",
+                                "the body must carry a non-empty content string "
+                                "(the journal body)", 422)
+        source_id = body.get("source_id")
+        if source_id is not None and (not isinstance(source_id, str) or len(source_id) > 128):
+            raise KernelRefusal("ARV-QRY-004", "the source_id is malformed", 422)
+        tmpdir = tempfile.mkdtemp(prefix="arv_api_jnl_")
+        tmp = pathlib.Path(tmpdir) / "content.txt"
+        tmp.write_bytes(content.encode("utf-8"))
+        try:
+            argv = _capture_argv("journal_block", ctx, idempotency_key) + \
+                ["--kind", kind, "--file", str(tmp)]
+            if source_id is not None:
+                argv += ["--source-id", source_id]
+            ack = _run_kernel(argv, db, timeout=120.0)
+            return JSONResponse(status_code=200, content=ack)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    # GET /api/v1/journal — 'list': the owner's blocks (bounded page)
+    @router.get("/api/v1/journal")
+    async def list_journal(ctx: dict = Depends(verified),
+                           limit: str = "50", after: str = ""):
+        return await _bounded_list(ctx, "list-journal", limit, after)
+
+    # GET /api/v1/journal/{id} — 'read': the current revision, the content
+    # WHOLE (the long raw thinking, never truncated)
+    @router.get("/api/v1/journal/{journal_id}")
+    async def get_journal_block(journal_id: str, ctx: dict = Depends(verified)):
+        if not journal_id or len(journal_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the journal id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-journal", "--owner", ctx["owner_scope"],
+                "--id", journal_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows or not isinstance(rows[0], dict):
+            raise KernelRefusal("ARV-QRY-404", "no such journal block for this owner", 404)
+        return JSONResponse(status_code=200, content={"row": rows[0],
+                                                      "api_version": page.get("api_version", 1)})
+
+    # GET /api/v1/journal/{id}/history — 'full history': every revision in order
+    @router.get("/api/v1/journal/{journal_id}/history")
+    async def journal_history(journal_id: str, ctx: dict = Depends(verified)):
+        if not journal_id or len(journal_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the journal id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-journal-history", "--owner", ctx["owner_scope"],
+                "--id", journal_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows:
+            raise KernelRefusal("ARV-QRY-404", "no such journal block for this owner", 404)
+        return JSONResponse(status_code=200, content=page)
+
+    # PUT /api/v1/journal/{id} — 'revise': the writing lab's edit transition
+    @router.put("/api/v1/journal/{journal_id}")
+    async def revise_journal_block(journal_id: str, request: Request,
+                                   ctx: dict = Depends(verified),
+                                   idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not journal_id or len(journal_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the journal id is malformed", 422)
+        body = await _json_body(request, max_bytes=MAX_AUTHOR_BYTES)
+        if "kind" in body:
+            # SEV9-123k (the SEV round's live finding): the kind is the
+            # block's immutable identity — the kernel's own revise carries
+            # the prior revision's kind. A kind in the revise DTO would be a
+            # SILENT drop (the F5b class) — refused HERE, named, instead
+            raise KernelRefusal("ARV-QRY-004",
+                                "the journal block's kind is immutable identity "
+                                "(the kernel's revise carries the prior revision's "
+                                "kind); the revise body carries the content only", 422)
+        content = body.get("content")
+        if not isinstance(content, str) or not content:
+            raise KernelRefusal("ARV-QRY-004",
+                                "the body must carry a non-empty content string "
+                                "(the journal body)", 422)
+        tmpdir = tempfile.mkdtemp(prefix="arv_api_jnl_")
+        tmp = pathlib.Path(tmpdir) / "content.txt"
+        try:
+            tmp.write_bytes(content.encode("utf-8"))
+        except UnicodeEncodeError:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+            raise KernelRefusal("ARV-QRY-004",
+                                "the content carries an unpaired surrogate — it "
+                                "cannot be encoded as UTF-8 (the lossless surface "
+                                "refuses it, never a lossy interpretation)", 422)
+        try:
+            argv = _capture_argv("revise_journal_block", ctx, idempotency_key) + \
+                ["--id", journal_id, "--file", str(tmp)]
+            ack = _run_kernel(argv, db, timeout=120.0)
+            return JSONResponse(status_code=200, content=ack)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    # GET /api/v1/references?ref=KIND:ID[@REV] — the typed stable-reference
+    # resolution (the six-state verdict; the kernel's OWN canonical grammar —
+    # the query parameter carries it verbatim, never a re-invented path form)
+    @router.get("/api/v1/references")
+    async def resolve_reference(ctx: dict = Depends(verified), ref: str = ""):
+        if not ref or len(ref) > 256:
+            raise KernelRefusal("ARV-QRY-004",
+                                "the ref query parameter is required "
+                                "(KIND:ID[@REV])", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "resolve-reference", "--owner", ctx["owner_scope"],
+                "--ref", ref]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows or not isinstance(rows[0], dict):
+            raise KernelRefusal("ARV-QRY-404", "the reference did not resolve", 404)
+        return JSONResponse(status_code=200, content={"row": rows[0],
+                                                      "api_version": page.get("api_version", 1)})
 
     return router
 

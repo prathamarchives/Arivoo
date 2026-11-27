@@ -33,6 +33,10 @@ def main() -> int:
     psql("postgres", f"CREATE DATABASE {db}", user="postgres")
     r = subprocess.run(["python3", "harness/migrate.py"], cwd=str(REPO), capture_output=True,
                        text=True, timeout=300, env=dict(ENV, PGDATABASE=db, ARV_MIGRATIONS_DIR="harness/migrations"))
+    import tempfile
+    _corp = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+    _corp.write("the worker suite corpus\n")
+    _corp.close()
     try:
         check("WRK-01", r.returncode == 0, "the scratch db migrated through 0022")
         def enqueue(key, jtype="recovery_walk", payload="{}"):
@@ -87,7 +91,7 @@ def main() -> int:
         # WRK-10: the end-to-end loop (the worker over a real extract job)
         src = subprocess.run([sys.executable, "-I", str(REPO / "harness/commands.py"),
                               "import_source", "--owner", "A", "--client-id", "t104", "--idem-key", "t104-i",
-                              "--title", "T104", "--file", "/tmp/w9.txt"],
+                              "--title", "T104", "--file", _corp.name],
                              capture_output=True, text=True, timeout=120, env=dict(ENV, PGDATABASE=db))
         sid = src.stdout.split("result_ref=")[1].split()[0] if src.returncode == 0 else ""
         check("WRK-10a", bool(sid), "the extract job's source imports")
@@ -103,6 +107,7 @@ def main() -> int:
               and "outcome=succeeded" in w.stdout and "fence=ok" in w.stdout,
               "the end-to-end loop: claim -> the SAME extract arm -> the fenced completion -> the generation")
     finally:
+        os.unlink(_corp.name)
         psql("postgres", f"DROP DATABASE {db}", user="postgres")
     print()
     if FAILS:

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-106-acceptance",
   "base_sha": "8536e0637e292a30c14d88b40cee762c33b4fa49",
-  "reviewed_diff_sha256": "7be498a8c740f0f5e1aa8e98b0e24b4b1c60cb71ac79a03e4c1e88968fb0e46e",
+  "reviewed_diff_sha256": "ec91e78d32191f544f58124bb1769c29dc29bf615f3e558718ada3ed1b714b68",
   "intent_ids": [
     "INT-173"
   ],
@@ -28,6 +28,8 @@
     "STATE.md",
     "context/WORKLOG.md",
     "context/extracted/91-ACCEPTANCE.md",
+    "harness/approved_deps.txt",
+    "harness/gate.py",
     "harness/tests/test_acceptance_campaign.py"
   ],
   "interfaces_reviewed": [

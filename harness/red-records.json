@@ -1241,7 +1241,7 @@
     "red_exit": 1,
     "red_code": "ARV-TEST-000",
     "red_evidence": "red run at the test-only commit -- record where it was observed",
-    "current_sha256": "8363ccd0a5259bf915855c1549efc77010c4c334006f098496660cfab4f55e9b",
+    "current_sha256": "a8b1bb3420b997531985651d290f7c82b3b9f555babb8b9c15d0359a7984f027",
     "amendments": [
       {
         "prior_sha256": "9ad1de2978bbb8c2e2aac7947dfb984d1d337e46c753b2d07e9ae07ff7342aa4",
@@ -1260,6 +1260,12 @@
         "new_sha256": "8363ccd0a5259bf915855c1549efc77010c4c334006f098496660cfab4f55e9b",
         "note": "red run at the test-only commit -- record where it was observed",
         "observed_at": "2026-11-11T10:02:35.461666+00:00"
+      },
+      {
+        "prior_sha256": "8363ccd0a5259bf915855c1549efc77010c4c334006f098496660cfab4f55e9b",
+        "new_sha256": "a8b1bb3420b997531985651d290f7c82b3b9f555babb8b9c15d0359a7984f027",
+        "note": "the REF-05 substrate-law update (CLAIM-102's 0021 amendment, the SEV round-1 P1 repair): the ledger's kind vocabulary now admits journal_block/reading_list \u2014 the suite's stale 0013 six-kind pin inverted to the eight-family CHECK; the reference surface's precedence law unchanged (additions only: the expectation follows the amended substrate)",
+        "observed_at": "2026-11-27T13:35:44.317961+00:00"
       }
     ]
   },
@@ -1541,7 +1547,7 @@
     "red_exit": 1,
     "red_code": "ARV-API-001..014 (the suite's refusal list at the pre-slice tree)",
     "red_evidence": "the api routes suite observed RED at the pre-slice tree (main 87cced7, a git worktree with the pinned venv + the migrated rig): the routes battery there carried no kernel-backed route checks, so all fourteen ARV-API checks FAIL \u2014 exit 1, refusal list ARV-API-001..014 (the observed red, never an assertion)",
-    "current_sha256": "f00c47d4ab94c76d2c534c4f0063a8c1490d0426be6423fb89e6607cad1838fe",
+    "current_sha256": "5c94c594e49623361ba6d03a9ba4c1684d880aafa528fb7847e196483bc1ac31",
     "amendments": [
       {
         "prior_sha256": "63891040c176de67d52cd59399f9797c3a478b1c2d1830f2b6735caa41abd01b",
@@ -1590,6 +1596,18 @@
         "new_sha256": "f00c47d4ab94c76d2c534c4f0063a8c1490d0426be6423fb89e6607cad1838fe",
         "note": "the retrieval battery (ARV-API-153..164) observed RED at the test-only commit 15d59f7 (the pre-slice main 584adb1 + the battery + the markers): exit 1, 12 checks failing \u2014 the search/context-pack routes do not exist (all 12 substantive; no 404-shaped vacuity in this family)",
         "observed_at": "2026-11-27T10:23:27.802360+00:00"
+      },
+      {
+        "prior_sha256": "a128e211425302e89b235edf74a0fffcddaf4983456ded34959e45cc8b5ebb6e",
+        "new_sha256": "5c94c594e49623361ba6d03a9ba4c1684d880aafa528fb7847e196483bc1ac31",
+        "note": "the SEV round-1 repair guards extend the markers to ARV-API-165..207 (the sync/export/purge battery + the three repair checks 203..207: the uuid law at the boundary, the cursor's literal home + uuid half, the journal_block vocabulary repair) \u2014 additions only, the observed RED chain unchanged (165..202 at 368eb8d, exit 1, 32 failures)",
+        "observed_at": "2026-11-27T13:24:43.854762+00:00"
+      },
+      {
+        "prior_sha256": "f00c47d4ab94c76d2c534c4f0063a8c1490d0426be6423fb89e6607cad1838fe",
+        "new_sha256": "5c94c594e49623361ba6d03a9ba4c1684d880aafa528fb7847e196483bc1ac31",
+        "note": "the SEV round-1 repair guards extend the api-routes markers to ARV-API-165..207 (the sync/export/purge battery + the three repair checks: the uuid law at the boundary, the cursor's literal home + uuid half, the journal_block vocabulary repair) \u2014 additions only, the observed RED chain unchanged (165..202 at 368eb8d, exit 1, 32 failures)",
+        "observed_at": "2026-11-27T13:27:48.923745+00:00"
       }
     ]
   },

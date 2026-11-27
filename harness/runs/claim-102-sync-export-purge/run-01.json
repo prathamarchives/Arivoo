@@ -1,0 +1,7 @@
+{
+  "command": ".venv-waved/bin/python -I harness/api/routes_selfcheck.py",
+  "exit_code": 0,
+  "commit": "2596cb445267bae338daa9aeac9d2bce6981d0aa",
+  "output_sha256": "00df697c545293cdc414baa7bf91020b41ee8b0fc75e31a5e0c582efdbd11ab1",
+  "recorded_at": "2026-11-27T11:48:31.913720+00:00"
+}

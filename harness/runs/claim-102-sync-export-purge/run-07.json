@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_api_routes.py",
+  "exit_code": 0,
+  "commit": "c93b742567c9ba7d21bad21f5f44e0d5cffdbee6",
+  "output_sha256": "7f8b2ce5f5586110f463f1be63a9ca69d0bb2dbd4695df70617370a0d4c87636",
+  "recorded_at": "2026-11-27T13:21:56.984392+00:00"
+}

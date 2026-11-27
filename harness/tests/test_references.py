@@ -102,8 +102,8 @@ Cases (the REF registry; each pin's full statement lives at its check()):
          pinned — the governed purge invalidates the access); purged WINS
          over tombstoned (the precedence: the permanence record is the
          stronger invalidation); the purged answer carries NO revision and
-         NO resolved_ref; the 0013 ledger's kind CHECK refuses a
-         journal_block row (the closed vocabulary — the substrate pin, never
+         NO resolved_ref; the ledger's kind vocabulary admits the
+         journal_block row (the 0021 eight-family amendment — never
          a second vocabulary)
   REF-06 the typed refusals + the no-oracle + the hostile-string law + the
          state machine's laws: for EVERY family the absent id and another
@@ -593,22 +593,24 @@ def main() -> int:
                and g_pt and g_pt.get("state") == "purged"
                and all("revision" not in d and "resolved_ref" not in d
                        for d in (g_np, g_npp, g_pt))
-               and v_jb.returncode != 0
-               and "purge_ledger_kind_check" in (v_jb.stderr or ""))
+               and v_jb.returncode == 0)  # the 0021 amendment (CLAIM-102's SEV
+               # round-1 P1 repair): the ledger's kind vocabulary covers EVERY
+               # authored family — the journal_block ledger row now INSERTS (the
+               # 0013 six-kind pin superseded by 0021's eight-kind CHECK; the
+               # reference surface's precedence law unchanged)
         check("REF-05", ok5,
               "the purged state + the precedence: a purge-ledger row makes the "
               "reference answer purged for BOTH the unpinned and the PINNED forms "
               "(the governed purge invalidates the access — the 0013 permanence "
               "record); purged WINS over tombstoned (the tombstoned+purged highlight "
               "answers purged — the purge is the stronger invalidation); the purged "
-              "answer carries NO revision and NO resolved_ref; the ledger's own kind "
-              "CHECK refuses a journal_block row (the 0013 closed vocabulary — the "
-              "substrate pin, this surface never widens it)",
+              "answer carries NO revision and NO resolved_ref; the ledger's kind "
+              "vocabulary admits the journal_block row (the 0021 amendment — "
+              "CLAIM-102's SEV round-1 P1 repair: the eight-family CHECK, D-011's "
+              "erasure contract over every authored family)",
               "the purge-ledger lookup must precede every other state derivation "
               "(the precedence: purged > tombstoned > current/historical); the "
-              "journal_block refusal is the 0013 substrate's own CHECK — widening "
-              "the ledger vocabulary is a substrate change, never this surface's "
-              "choice")
+              "ledger vocabulary is the 0021 substrate's own law")
 
         # ---- REF-06 — the refusals + the no-oracle + the hostile-string law
         before = audit("SELECT count(*) FROM arv.command_log;")

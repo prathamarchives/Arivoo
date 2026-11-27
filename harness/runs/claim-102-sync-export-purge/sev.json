@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-102-sync-export-purge",
+  "base_sha": "a17f0b5e36a1520f757a3a302a4d7345c28dfbe3",
+  "reviewed_diff_sha256": "12f4d6c3b25a01520ecb16a3308150df5423ea1285562b9fdc845811363f677b",
+  "intent_ids": [
+    "INT-169"
+  ],
+  "requirement_ids": [
+    "SYS-02",
+    "SYS-08",
+    "SYS-10"
+  ],
+  "system_claims": [
+    "C1",
+    "C5"
+  ],
+  "changed_components": [
+    "AGENTS.md",
+    "CLAIMS.md",
+    "INTENT-LEDGER.md",
+    "STATE.md",
+    "context/WORKLOG.md",
+    "context/extracted/87-SYNC-EXPORT-PURGE.md",
+    "harness/api/routes.py",
+    "harness/api/routes_selfcheck.py",
+    "harness/migrations/0021_governed_purge.sql",
+    "harness/red-records.json",
+    "harness/tests/test_api_routes.py",
+    "harness/tests/test_references.py"
+  ],
+  "interfaces_reviewed": [
+    "GET /api/v1/sync/outbox + POST /api/v1/sync/deliver (harness/api/routes.py): the kernel's own status/walk arms through the adapter; the delivery TARGET a service parameter (ARIVO_SYNC_TARGET_DB) — an unconfigured service refuses the named ARV-SYN-014 503, never a guess",
+    "GET /api/v1/export + POST /api/v1/restore (harness/api/routes.py): the versioned manifest under the service root; the recovery path serves the OWNER-MATCHED staged archives only (a cross-owner archive the same 404 as an absent one)",
+    "GET /api/v1/purge-ledger (harness/api/routes.py): the owner's erasure record, bounded + paginated; the keyset cursor rides the ONE _q() literal home with its uuid half validated at the boundary",
+    "POST /api/v1/purge (harness/api/routes.py): the DTO laws (the eight-kind vocabulary, the uuid regex, the reason bounds) over the substrate's machine",
+    "arv.governed_purge (harness/migrations/0021_governed_purge.sql): the SECURITY DEFINER erasure procedure — the ledger-first check order, the no-oracle existence check, the capture precedence, the family cascades (incl. the inbound-reference cleanup and the work recursion's ledgered-source skip), the definer-scoped arv.purge_in_progress marker (no epilogue — transaction-scoped), the amended rejectors keeping the original named codes byte-for-byte, the ledger CHECK amendment to the eight-family vocabulary",
+    "the §11.4 map rows (harness/api/routes.py): SYN-013/EXP-002..005/PRG-001..005"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01: the routes battery at the head -> exit 0, 223 PASS (ARV-ROUTE-001..007 + ARV-API-001..207)",
+      "the SEV probe battery at the head -> 50/50 PASS (the fresh-context probes: the rejectors' byte-for-byte codes, the no-oracle law, the authority wall, the cascades, the route DTO laws)"
+    ],
+    "integration_verification": [
+      "the routes call ONLY the existing kernel machines (sync.py, export.py) + the substrate's own procedure; zero kernel file changes",
+      "the substrate suites re-observed GREEN after every 0021 amendment: migrations, substrate, kernel, sync (SYN-01..23), export (EXP-01..15), highlight, bookmark, note, note-reference, journal, reading-list, agent-access, recovery-contract (RCW-01..08)",
+      "the RED at 368eb8d re-observed: exit 1, 32 failures, the routes and the erasure machine provably absent"
+    ],
+    "system_verification": [
+      "python3 tools/verify_canonical_layer.py -> exit 0 (151 intents, the record-87 pointer fresh)",
+      "python3 harness/tests/test_api_routes.py -> exit 0; the §11.2 route table COMPLETE (the Workstream 6 rows served)"
+    ],
+    "validation": [
+      "the requirement trace: SYS-02 (the governed purge — the erasure machine + the minimal audit row + the append-only laws holding everywhere else), SYS-08 (the sync delivery over the outbox contract — the typed per-row states, the terminal hold), SYS-10 (the export/restore — the versioned manifest, the ledger reconciliation FIRST, the ledgered source never resurrects, the ledger row SURVIVES the restore)",
+      "six findings repaired in-slice (one P1, five P2/defect-class), every repair re-probed live: the ledger kind vocabulary (the P1 — journal_block/reading_list purges complete), the uuid law at the boundary, the cursor's literal home + uuid half, the RLS-006/007 purge window, the work recursion's ledgered-source skip, the marker's no-epilogue law"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-102-1",
+      "scenario": "the governed purge of any object family (note/capture/journal_block/reading_list/anchor/source/work)",
+      "expected": "the ledger row records + the whole content tree drops in ONE transaction (all-or-nothing); the second purge refuses ARV-PRG-004",
+      "observed": "verified live (probes C1..C8, A3; battery 179/181/186/206)",
+      "control": "the 0021 procedure + the trigger amendments + the battery/probe regression guards",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-102-2",
+      "scenario": "the cross-owner purge/restore/ledger-read (owner B against owner A's objects and archives)",
+      "expected": "the SAME no-oracle 404 everywhere (never 403, never an existence signal); B's own ledger read empty of A's rows",
+      "observed": "verified live (probes A1/A2/A2-SAMEMESSAGE, D2; battery 185/184/196)",
+      "control": "the procedure's scope checks + the route's owner-match law + RLS",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-102-3",
+      "scenario": "the authority escalation: a plain session (even the superuser) attempting a content DELETE outside the procedure",
+      "expected": "refused — the grants wall for arv_app, the ARMED triggers for everyone else (the marker is definer-frame only)",
+      "observed": "verified live (probes B1/B2/B3)",
+      "control": "the table grants (no content DELETE) + the amended rejectors + the SECURITY DEFINER frame",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-102-4",
+      "scenario": "the restore into a ledgered destination (the archive holds what the destination purged)",
+      "expected": "the reconciliation FIRST — the ledgered entity does not resurrect; the ledger row SURVIVES (ON CONFLICT DO NOTHING); the archive's non-ledgered content restores",
+      "observed": "verified live (battery 188..192 over the kernel's own machine)",
+      "control": "the locked reconciliation inside the restore transaction + the battery's reconciliation legs",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the five PR-head CI checks and this PR's D-042 review (observed after the PR opens)",
+    "a live Supabase-issued token; uvicorn over a real socket; the deployed surface (Workstream 10)",
+    "the multi-database restore topology through the route (the battery drives the kernel on a second scratch db; the deployment composes the topology); the desktop-over-HTTP client side (Q19)",
+    "the 0021 machine on the REMOTE project (the guarded migration act — the Supabase migration credential never provided to this session)",
+    "the blob erasure sweep (recover.py's own machine — the unreferenced-blob sweep is the existing walk's surface); the KWR-002 map row (the map-family followup); the semantic/model work (Q7 open)"
+  ],
+  "builder_context": "builder-zcode-session65-slice-claim-102",
+  "reviewer_context": "reviewer-fresh-context-probe-claim-102 (the subagent round-1's 50-probe battery + the builder's round-2 re-probe at the repair head — the verification design executed against the repaired tree with every finding re-probed live; a declared distinct-context limit per ARV-SEV-007's own note)",
+  "disposition": "PASS",
+  "review_summary": "PASS — zero open findings; the sync/export/purge surface over the kernel's own machines + the substrate's first erasure procedure (0021: the SECURITY DEFINER governed_purge, the ledger-first order, the definer-scoped marker, the original trigger codes byte-for-byte); six findings repaired in-slice and re-probed live (the ledger kind vocabulary P1 among them); the authority wall proven (no content DELETE grants, the armed triggers, the definer-frame marker); the §11.2 route table COMPLETE.",
+  "sheet_section": true
+}

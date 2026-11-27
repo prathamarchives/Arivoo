@@ -1,0 +1,6 @@
+the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
+a live Supabase-issued token end-to-end; uvicorn over a real socket; the deployed route surface (the Workstream 10 slice)
+the multi-database restore TOPOLOGY through the route (the route restores into the SERVICE's db; the battery's reconciliation leg drives the kernel directly on a second scratch db — the deployment's topology composes the two)
+the sync delivery's desktop-over-HTTP transport client (Q19's local-store contract open — the backend surface complete; the client side is the desktop repo's own work)
+the 0021 machine on the REMOTE project (applies locally; the remote application is the guarded migration act's own slice — the Supabase migration credential never provided to this session)
+the KWR-002 map row (the map-family followup, unchanged); the semantic/model work (Q7 open — deterministic only)

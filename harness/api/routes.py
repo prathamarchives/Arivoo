@@ -41,6 +41,11 @@ MAX_IMPORT_BYTES = 32 * 1024 * 1024  # the bounded import body (the kernel's own
 LIST_LIMIT_BOUNDS = (1, 200)          # the bounded list page (the ARV-QRY-004 contract)
 
 
+def _q(s: str) -> str:
+    """One SQL single-quoted literal (the adapters' own rule: '' doubling)."""
+    return "'" + str(s).replace("'", "''") + "'"
+
+
 class KernelRefusal(Exception):
     """A named kernel refusal (ARV-*) mapped to its §11.4 HTTP class."""
 
@@ -103,6 +108,20 @@ _HTTP_BY_PREFIX = (
     # client-actionable 422 (the write-side KWR-002 stays on the fallback
     # map — the map-family followup's own slice)
     ("ARV-KWR-003", 422),   # the over-long search term (the read-side bound)
+    # CLAIM-102 (the sync/export/purge families): the delivery/manifest/DTO
+    # classes are client-actionable 422s; the state conflicts (the non-clean
+    # destination, the append-only ledger law, the purge alternations) are
+    # the 409 class — each names the CURRENT state, never an oracle
+    ("ARV-SYN-013", 422),   # the undeliverable payload class (invalid input)
+    ("ARV-EXP-002", 409),   # the non-clean destination (the current state)
+    ("ARV-EXP-003", 422),   # the malformed/tampered manifest (invalid input)
+    ("ARV-EXP-004", 422),   # the missing/corrupt archive blob (invalid input)
+    ("ARV-EXP-005", 422),   # the unknown manifest format (invalid input)
+    ("ARV-PRG-001", 409),   # the append-only ledger law (the current state)
+    ("ARV-PRG-002", 422),   # the governed-purge DTO (invalid input)
+    ("ARV-PRG-003", 422),   # the purge-target refusal (invalid input)
+    ("ARV-PRG-004", 409),   # the already-purged alternation (the current state)
+    ("ARV-PRG-005", 409),   # the purge of a purged source's capture (the state)
 )
 
 
@@ -1344,6 +1363,347 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
         if "truncated" in meta:
             meta["truncated"] = str(meta.get("truncated")).lower() == "true"
         return JSONResponse(status_code=200, content=page)
+
+    # ---- CLAIM-102: the §11.2 'Sync' + 'Export/restore' rows + the
+    # governed-purge surface (the directive's Workstream 6) — the routes
+    # call the kernel's OWN machines: harness/sync.py's two-database outbox
+    # delivery (one pass, the typed per-row states), harness/export.py's
+    # export/restore (the versioned manifest + the purge-ledger
+    # reconciliation), and the substrate's purge ledger (the owner-scoped
+    # append-only erasure record, RTM §3.3/SYS-10/D-011/D-029) ----
+
+    def _ws6_kernel(module: str, argv: list, timeout: float = 300.0) -> "tuple[int, str]":
+        """Run one Workstream-6 kernel module (sync.py/export.py) as a
+        bounded subprocess on the SERVICE's db. Returns (rc, output); never
+        raises — the exit code is the machine's own answer, the classification
+        happens at the caller."""
+        env = dict(os.environ)
+        env["PGDATABASE"] = db
+        try:
+            r = subprocess.run([sys.executable, str(REPO / "harness" / module)] + argv,
+                               capture_output=True, text=True, timeout=timeout,
+                               cwd=str(REPO), env=env)
+        except subprocess.TimeoutExpired:
+            raise KernelRefusal("ARV-API-504",
+                                "the command exceeded its time bound", 504)
+        return r.returncode, (r.stdout or "") + (r.stderr or "")
+
+    def _fail_of(out: str) -> str:
+        """The kernel's first named FAIL line (the §11.4 envelope's input)."""
+        return next((ln for ln in out.splitlines() if ln.startswith("FAIL ")), "")
+
+    def _map_ws6_failure(out: str, fallback_code: str, fallback_msg: str,
+                         fallback_status: int = 500) -> KernelRefusal:
+        """One WS6 kernel failure output -> the §11.4 envelope (the SAME
+        centralized map; the named code preserved, the raw cause never
+        echoed)."""
+        line = _fail_of(out)
+        if line:
+            return _map_kernel_refusal(line)
+        return KernelRefusal(fallback_code, fallback_msg, fallback_status)
+
+    # GET /api/v1/sync/outbox — 'the delivery state': the owner's outbox
+    # counts by state + the non-terminal rows (the kernel's own status arm;
+    # queued rows carry key/state/attempts only — never the payload)
+    @router.get("/api/v1/sync/outbox")
+    async def sync_outbox_status(ctx: dict = Depends(verified)):
+        rc, out = _ws6_kernel("sync.py", ["status", "--owner", ctx["owner_scope"]])
+        if rc != 0:
+            raise _map_ws6_failure(out, "ARV-API-500",
+                                   "the sync status refused without a named code")
+        counts, queued = {}, []
+        for ln in out.splitlines():
+            if ln.startswith("SYNC-STATUS "):
+                for tok in ln.split()[2:]:
+                    if "=" in tok:
+                        k, v = tok.split("=", 1)
+                        try:
+                            counts[k] = int(v)
+                        except ValueError:
+                            counts[k] = v
+            elif ln.startswith("SYNC-QUEUED "):
+                # 'key state=pending attempts=0' — the queued row's OWN shape
+                q = ln[len("SYNC-QUEUED "):]
+                key, rest = (q.split(" ", 1) + [""])[:2]
+                row = {"idempotency_key": key}
+                for tok in rest.split():
+                    if "=" in tok:
+                        k, v = tok.split("=", 1)
+                        try:
+                            row[k] = int(v)
+                        except ValueError:
+                            row[k] = v
+                queued.append(row)
+        return JSONResponse(status_code=200, content={"counts": counts,
+                                                      "queued": queued,
+                                                      "api_version": 1})
+
+    # POST /api/v1/sync/deliver — 'the delivery pass': ONE walk over the
+    # owner's non-terminal outbox rows (mark-delivered → apply on the target
+    # → classify; the typed per-row outcome). The TARGET database is a
+    # service-configured value (the deployment's own parameter — the
+    # desktop-over-HTTP transport's server side; the kernel's own
+    # --server-db contract), NEVER a client value; a service without a
+    # configured target refuses named (503) — never a guess.
+    @router.post("/api/v1/sync/deliver")
+    async def sync_deliver(ctx: dict = Depends(verified)):
+        target_db = os.environ.get("ARIVO_SYNC_TARGET_DB", "")
+        if not target_db:
+            raise KernelRefusal("ARV-SYN-014",
+                                "the sync target database is not configured on "
+                                "this service (the delivery pass needs the "
+                                "deployment's own target parameter)", 503)
+        rc, out = _ws6_kernel("sync.py",
+                              ["sync", "--owner", ctx["owner_scope"],
+                               "--server-db", target_db], timeout=600.0)
+        if rc != 0:
+            raise _map_ws6_failure(out, "ARV-API-500",
+                                   "the delivery pass refused without a named code")
+        states, done = {}, 0
+        for ln in out.splitlines():
+            if ln.startswith("SYNC key="):
+                key = ln.split("key=", 1)[1].split()[0]
+                state = ln.split(" state=", 1)[1].split()[0] if " state=" in ln else ""
+                states[key] = state
+            elif ln.startswith("SYNC-DONE "):
+                try:
+                    done = int(ln.rsplit("rows=", 1)[1])
+                except (IndexError, ValueError):
+                    done = 0
+        return JSONResponse(status_code=200, content={"walked": done,
+                                                      "states": states,
+                                                      "api_version": 1})
+
+    # GET /api/v1/export — 'the owner-authorized export': the authoritative
+    # set + the blob references under the versioned manifest, staged in the
+    # service's own export root. The route RETURNS the manifest (the
+    # archive's own truth — the client reads it; the blobs stay staged
+    # server-side under their digests, fetched by the reference).
+    @router.get("/api/v1/export")
+    async def export_library(ctx: dict = Depends(verified)):
+        export_root = os.environ.get("ARIVO_EXPORT_ROOT", "")
+        if not export_root:
+            raise KernelRefusal("ARV-EXP-008",
+                                "the export root is not configured on this "
+                                "service (the archive staging needs the "
+                                "deployment's own root parameter)", 503)
+        out_dir = os.path.join(export_root, ctx["owner_scope"].replace("/", "_"))
+        rc, out = _ws6_kernel("export.py",
+                              ["export", "--owner", ctx["owner_scope"],
+                               "--out", out_dir], timeout=600.0)
+        if rc != 0:
+            raise _map_ws6_failure(out, "ARV-API-500",
+                                   "the export refused without a named code")
+        ack = {}
+        for ln in out.splitlines():
+            if ln.startswith("EXPORTED "):
+                for tok in ln.split():
+                    if "=" in tok:
+                        k, v = tok.split("=", 1)
+                        ack[k] = v
+        manifest_path = pathlib.Path(out_dir) / "manifest.json"
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            raise KernelRefusal("ARV-EXP-003",
+                                "the staged manifest is unreadable — the export "
+                                "refuses to serve an unverified archive", 500)
+        return JSONResponse(status_code=200, content={
+            "state": "manifest_complete",
+            "manifest": manifest,
+            "api_version": 1})
+
+    # POST /api/v1/restore — 'the recovery path': restore a staged archive
+    # into THIS service's database (the owner's own recovery surface; the
+    # destination's purge ledger wins over older archive content — SYS-10;
+    # the once-per-clean-destination law; the typed completion names the
+    # adopted ledger's as-of time). The manifest_name addresses an archive
+    # ALREADY staged under the service's export root (the export route's own
+    # staging): a client never uploads an archive body — the recovery path
+    # is server-staged, never an unvalidated client file.
+    @router.post("/api/v1/restore")
+    async def restore_library(request: Request, ctx: dict = Depends(verified),
+                              idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        export_root = os.environ.get("ARIVO_EXPORT_ROOT", "")
+        if not export_root:
+            raise KernelRefusal("ARV-EXP-008",
+                                "the export root is not configured on this "
+                                "service (the recovery path needs the "
+                                "deployment's own root parameter)", 503)
+        body = await _json_body(request, max_bytes=16 * 1024)
+        name = body.get("manifest_name")
+        if not isinstance(name, str) or not name or len(name) > 128 \
+                or "/" in name or "\\" in name or ".." in name:
+            raise KernelRefusal("ARV-PRG-002",
+                                "the body must carry a manifest_name (a staged "
+                                "archive's name under the service's export "
+                                "root — no paths, no traversal)", 422)
+        arch = pathlib.Path(export_root) / name
+        if not (arch / "manifest.json").is_file():
+            raise KernelRefusal("ARV-EXP-004",
+                                "no staged archive carries that manifest name "
+                                "(the recovery path serves the service's own "
+                                "staged archives only)", 404)
+        # the archive's owner must MATCH the verified caller (the recovery
+        # path is the owner's own surface; a cross-owner archive is the
+        # same 404 as an absent one — never an existence oracle)
+        try:
+            staged_owner = json.loads(
+                (arch / "manifest.json").read_text(encoding="utf-8")).get("owner")
+        except (OSError, json.JSONDecodeError):
+            staged_owner = None
+        if staged_owner != ctx["owner_scope"]:
+            raise KernelRefusal("ARV-EXP-004",
+                                "no staged archive carries that manifest name "
+                                "for this owner", 404)
+        rc, out = _ws6_kernel("export.py",
+                              ["restore", "--archive", str(arch)], timeout=600.0)
+        if rc != 0:
+            raise _map_ws6_failure(out, "ARV-API-500",
+                                   "the restore refused without a named code")
+        ack = {}
+        for ln in out.splitlines():
+            if ln.startswith("RESTORED "):
+                for tok in ln.split():
+                    if "=" in tok:
+                        k, v = tok.split("=", 1)
+                        ack[k] = v
+        return JSONResponse(status_code=200, content=ack)
+
+    # GET /api/v1/purge-ledger — 'the erasure record': the owner's own
+    # purge ledger rows (the minimal audit surface D-011 leaves; bounded +
+    # paginated like every list — the ledger is owner-scoped authoritative
+    # state, readable by its owner)
+    @router.get("/api/v1/purge-ledger")
+    async def list_purge_ledger(ctx: dict = Depends(verified),
+                                limit: str = "50", after: str = ""):
+        try:
+            limit_i = int(limit)
+        except ValueError:
+            raise KernelRefusal("ARV-QRY-004", "limit must be an integer", 422)
+        if not (LIST_LIMIT_BOUNDS[0] <= limit_i <= LIST_LIMIT_BOUNDS[1]):
+            raise KernelRefusal("ARV-QRY-004",
+                                f"limit {limit} outside [{LIST_LIMIT_BOUNDS[0]}, "
+                                f"{LIST_LIMIT_BOUNDS[1]}]", 422)
+        after_clause = ""
+        if after:
+            # the keyset cursor: (kind, entity_id) — strictly after the named
+            # pair; a malformed cursor is the same 422 class as the bounds.
+            # THE LITERAL LAW (the SEV round-1 P2 repair, SEV102-E5): the pair
+            # rides _q() — ONE home for SQL string literals (repr() changes
+            # its quoting shape on embedded quotes and crashes the statement;
+            # _q() doubles them, always safe); the owner scope too — every
+            # value in this statement goes through the same home. THE UUID
+            # HALF: entity_id is a UUID column — the comparison itself casts,
+            # so a non-uuid entity half is a typed 422 at the boundary, never
+            # the cast's 500 (the E3 class, applied to the cursor)
+            parts = after.split("|", 1)
+            _UUID_RE = __import__("re").compile(
+                r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+            if len(parts) != 2 or not all(parts) \
+                    or not _UUID_RE.match(parts[1].strip()):
+                raise KernelRefusal("ARV-QRY-004",
+                                    "the after cursor must be KIND|ENTITY_ID "
+                                    "(the entity a uuid)", 422)
+            after_clause = (" AND (kind, entity_id) > (" + _q(parts[0]) + ", "
+                            + _q(parts[1]) + ")")
+        sql = ("SELECT kind || '|' || entity_id || '|' || "
+               "to_char(created_at, 'YYYY-MM-DD\"T\"HH24:MI:SS') "
+               "FROM arv.purge_ledger WHERE owner_scope = "
+               + _q(ctx["owner_scope"]) + after_clause +
+               " ORDER BY kind, entity_id LIMIT " + str(limit_i + 1) + ";")
+        from harness.adapters import pg as _pg
+        r = _pg.psql("SET app.current_owner=" +
+                     _q(ctx["owner_scope"]) + "; " + sql, db=db, user="arv_app")
+        if r.returncode != 0:
+            raise KernelRefusal("ARV-API-500",
+                                "the purge ledger read refused at the boundary", 500)
+        lines = [ln for ln in (r.stdout or "").splitlines() if ln.strip()]
+        more = len(lines) > limit_i
+        rows = []
+        for ln in lines[:limit_i]:
+            kind, entity_id, created_at = (ln.split("|", 2) + ["", "", ""])[:3]
+            rows.append({"kind": kind, "entity_id": entity_id,
+                         "created_at": created_at})
+        return JSONResponse(status_code=200, content={
+            "rows": rows, "more": more,
+            "after": f"{rows[-1]['kind']}|{rows[-1]['entity_id']}" if rows else "",
+            "api_version": 1})
+
+    # POST /api/v1/purge — 'the governed purge' (D-011: deliberate,
+    # owner-only; ordinary delete stays the tombstone). The erasure itself
+    # rides the SUBSTRATE's own machine — migration 0021's
+    # arv.governed_purge: ONE SECURITY DEFINER procedure that owns the only
+    # authorized content-DELETE path (the ledger write + the content drop +
+    # the derived-index drop in ONE transaction — all-or-nothing; the
+    # append-only triggers stay armed everywhere else). The route's argv is
+    # the verified owner (never a client value); the named refusals surface
+    # through the §11.4 map.
+    @router.post("/api/v1/purge")
+    async def governed_purge(request: Request, ctx: dict = Depends(verified),
+                             idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        body = await _json_body(request, max_bytes=16 * 1024)
+        kind = body.get("kind")
+        entity_id = body.get("entity_id")
+        reason = body.get("reason")
+        if kind not in ("work", "source", "anchor", "highlight", "bookmark",
+                        "note", "journal_block", "reading_list"):
+            raise KernelRefusal("ARV-PRG-002",
+                                "the kind must be one of the governed-purge "
+                                "vocabulary (work|source|anchor|highlight|"
+                                "bookmark|note|journal_block|reading_list)", 422)
+        # the uuid law (the SEV round-1 P2 repair, SEV102-E3): the SHAPE alone
+        # (36 chars, 4 dashes) admits hex-invalid strings ('gggggggg-...') that
+        # would die at the ::uuid CAST inside the adapter call — the typed 422
+        # at the boundary, never a crash-class 500
+        _UUID_RE = __import__("re").compile(
+            r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+            r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+        if not isinstance(entity_id, str) or not _UUID_RE.match(entity_id):
+            raise KernelRefusal("ARV-PRG-002",
+                                "the entity_id must be a uuid", 422)
+        if not isinstance(reason, str) or not reason.strip() or len(reason) > 512:
+            raise KernelRefusal("ARV-PRG-002",
+                                "the reason is required (1..512 chars — the "
+                                "owner's own erasure record)", 422)
+        owner = ctx["owner_scope"]
+        from harness.adapters import pg as _pg
+        r = _pg.psql("SET app.current_owner=" + _q(owner) + "; "
+                     "CALL arv.governed_purge(" + _q(owner) + ", " + _q(kind)
+                     + ", " + _q(entity_id) + "::uuid, " + _q(reason) + ");",
+                     db=db, user="arv_app")
+        if r.returncode != 0:
+            err = (r.stderr or "")
+            for code, status in (("ARV-PRG-003", 404), ("ARV-PRG-004", 409),
+                                 ("ARV-PRG-005", 409), ("ARV-PRG-001", 409)):
+                if code in err:
+                    msg = err.split(":", 1)[1].strip()[:200] if ":" in err else code
+                    # the no-oracle class: absent and another owner's are the
+                    # SAME 404; the message carries no other-owner signal
+                    if code == "ARV-PRG-003":
+                        msg = "no such object for this owner (the purge is " \
+                              "the owner's own erasure surface)"
+                    raise KernelRefusal(code, msg, status)
+            raise KernelRefusal("ARV-API-500",
+                                "the governed purge refused without a named "
+                                "code", 500)
+        return JSONResponse(status_code=200, content={
+            "state": "purged",
+            "kind": kind,
+            "entity_id": entity_id,
+            "ledger_recorded": True,
+            "content_dropped": True,
+            "durability_rung": "local_durable",
+            "api_version": 1})
 
     return router
 

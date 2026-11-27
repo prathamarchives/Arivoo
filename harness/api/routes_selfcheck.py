@@ -1272,6 +1272,362 @@ def main() -> int:
                   and meta.get("total") == 0,
                   "owner B's context pack over A's corpus is EMPTY (total=0)")
 
+            # ---------------- CLAIM-102: the sync/export/purge family ----------------
+            # the corpus hand: owner A's own rows for the family's legs (a
+            # fresh import + extraction so the capture legs carry a live
+            # source; the notes for the authored-content purge legs)
+            import tempfile as _tf, os as _os
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                     dict(H, **{"Idempotency-Key": "k-102-src"}),
+                                     body=b"the sync export purge corpus text",
+                                     query=b"title=WS6+Corpus"))
+            ack_src = json.loads(b) if b.startswith("{") else {}
+            src_id = ack_src.get("result_ref", "")
+            check("ARV-API-165", s == 200 and bool(src_id),
+                  "the WS6 corpus import acks (the family's legs run on live rows)")
+
+            # 1) the outbox status: the kernel's own status arm through HTTP
+            # (the counts by state + the queued rows; a fresh owner's outbox
+            # may be empty — the ANSWER is the shape, the counts object)
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/sync/outbox", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-166", s == 200 and isinstance(d.get("counts"), dict)
+                  and isinstance(d.get("queued"), list)
+                  and d.get("api_version") == 1,
+                  "GET /api/v1/sync/outbox serves the kernel's own status shape (counts + queued)")
+            # the import rode the outbox (the outbox-carrying set) — the
+            # counts carry pending=1 (the import's own sync intent)
+            check("ARV-API-167", s == 200 and d.get("counts", {}).get("pending", 0) >= 1,
+                  "the import's outbox row shows pending (the sync-intent record through HTTP)")
+
+            # 2) the delivery pass without a configured target refuses named
+            # (503 — never a guess; the service's own parameter)
+            os.environ.pop("ARIVO_SYNC_TARGET_DB", None)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/sync/deliver", H))
+            check("ARV-API-168", s == 503 and "ARV-SYN-014" in b,
+                  "POST /api/v1/sync/deliver without a configured target refuses ARV-SYN-014 (503)")
+
+            # 3) the delivery pass WITH a target: the kernel's own walk over
+            # the two-database contract (the local rig's scratch target —
+            # migrated, the typed per-row outcomes)
+            tgt = psql("postgres", "SELECT 'arv_t102_'||floor(random()*100000)::text").stdout.strip()
+            psql("postgres", f"CREATE DATABASE {tgt}")
+            r_m = subprocess.run(["python3", "harness/migrate.py"], cwd=str(pathlib.Path(__file__).resolve().parents[2]),
+                                 capture_output=True, text=True, timeout=300,
+                                 env=dict(env, PGDATABASE=tgt, ARV_MIGRATIONS_DIR="harness/migrations"))
+            try:
+                check("ARV-API-169", r_m.returncode == 0,
+                      "the delivery target's scratch db migrated (the walk's server side)")
+                os.environ["ARIVO_SYNC_TARGET_DB"] = tgt
+                s, b = asyncio.run(call(app_k, "POST", "/api/v1/sync/deliver", H))
+                d = json.loads(b) if b.startswith("{") else {}
+                st = d.get("states", {}) or {}
+                check("ARV-API-170", s == 200 and d.get("walked", 0) >= 1
+                      and isinstance(st, dict) and st.get("k-102-src") == "acknowledged",
+                      "POST /api/v1/sync/deliver walks the outbox and acks the import (the kernel's own delivery machine)")
+                # the second pass: the earlier corpus's rows (the battery's
+                # own accumulated outbox — every prior family's writes ride
+                # it too) may hold non-terminal rows; the LAW under test is
+                # the TERMINAL HOLD: the just-acked row never re-walks. The
+                # walked count of the second pass must be strictly LESS than
+                # the first's when the first consumed everything, and the
+                # acked row's state must persist.
+                s, b = asyncio.run(call(app_k, "POST", "/api/v1/sync/deliver", H))
+                d2 = json.loads(b) if b.startswith("{") else {}
+                st2 = d2.get("states", {}) or {}
+                check("ARV-API-171", s == 200 and "k-102-src" not in st2
+                      and d2.get("walked", 0) < d.get("walked", 0) + 1,
+                      "the second delivery pass never re-walks a terminal row (the acked import stays acked)")
+                # the outbox status now: pending=0, acknowledged>=1
+                s, b = asyncio.run(call(app_k, "GET", "/api/v1/sync/outbox", H))
+                d = json.loads(b) if b.startswith("{") else {}
+                check("ARV-API-172", s == 200 and d.get("counts", {}).get("acknowledged", 0) >= 1,
+                      "the outbox status reflects the acknowledged delivery (acknowledged>=1)")
+            finally:
+                os.environ.pop("ARIVO_SYNC_TARGET_DB", None)
+                psql("postgres", f"DROP DATABASE {tgt}")
+
+            # 4) the export: the versioned manifest serves (the service's
+            # own staging root; the manifest carries the owner + the hash)
+            exp_root = _tf.mkdtemp(prefix="arv_exp_102_")
+            try:
+                os.environ["ARIVO_EXPORT_ROOT"] = exp_root
+                s, b = asyncio.run(call(app_k, "GET", "/api/v1/export", H))
+                d = json.loads(b) if b.startswith("{") else {}
+                man = d.get("manifest", {}) or {}
+                check("ARV-API-173", s == 200 and d.get("state") == "manifest_complete"
+                      and man.get("owner") == "route-user"
+                      and bool(man.get("state_hash")),
+                      "GET /api/v1/export serves the versioned manifest (owner + the canonical state hash)")
+                check("ARV-API-174", s == 200 and isinstance(man.get("tables"), dict)
+                      and "source" in man.get("tables", {})
+                      and isinstance(man["tables"].get("source"), list)
+                      and len(man["tables"]["source"]) >= 1,
+                      "the manifest's authoritative table set carries the owner's rows (the source table)")
+                # the export root NOT configured refuses named (503)
+                os.environ.pop("ARIVO_EXPORT_ROOT", None)
+                s, b = asyncio.run(call(app_k, "GET", "/api/v1/export", H))
+                check("ARV-API-175", s == 503 and "ARV-EXP-008" in b,
+                      "GET /api/v1/export without the staging root refuses ARV-EXP-008 (503)")
+                os.environ["ARIVO_EXPORT_ROOT"] = exp_root
+            finally:
+                os.environ.pop("ARIVO_EXPORT_ROOT", None)
+
+            # 5) the governed purge: the DTO law (the kind vocabulary)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge",
+                                     dict(H, **{"Idempotency-Key": "k-102-p1"}),
+                                     body=json.dumps({"kind": "chapter",
+                                                      "entity_id": "00000000-0000-0000-0000-000000000000",
+                                                      "reason": "x"}).encode()))
+            check("ARV-API-176", s == 422 and "ARV-PRG-002" in b,
+                  "the purge with an unknown kind refuses ARV-PRG-002 (the vocabulary)")
+            # the absent target: the no-oracle 404
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge",
+                                     dict(H, **{"Idempotency-Key": "k-102-p2"}),
+                                     body=json.dumps({"kind": "note",
+                                                      "entity_id": "00000000-0000-0000-0000-000000000000",
+                                                      "reason": "absent"}).encode()))
+            check("ARV-API-177", s == 404 and "ARV-PRG-003" in b,
+                  "the purge of an absent object is the no-oracle 404 (absent and another owner's are the SAME)")
+
+            # the live purge: a note create -> the purge -> the ledger row
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/notes",
+                                     dict(H, **{"Idempotency-Key": "k-102-n1"}),
+                                     body=json.dumps({"content": "the purge corpus note"}).encode()))
+            ack_n = json.loads(b) if b.startswith("{") else {}
+            note_id = ack_n.get("result_ref", "")
+            check("ARV-API-178", s == 200 and bool(note_id),
+                  "the purge-leg note creates (the family's live purge target)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge",
+                                     dict(H, **{"Idempotency-Key": "k-102-p3"}),
+                                     body=json.dumps({"kind": "note",
+                                                      "entity_id": note_id,
+                                                      "reason": "the governed purge (the route battery)"}).encode()))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-179", s == 200 and d.get("state") == "purged"
+                  and d.get("ledger_recorded") is True
+                  and d.get("content_dropped") is True
+                  and d.get("durability_rung") == "local_durable",
+                  "the governed purge acks (the ledger recorded + the content dropped + the honest rung)")
+            # the note is GONE from the reads (the no-resurrection law)
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/notes/{note_id}", H))
+            check("ARV-API-180", s == 404,
+                  "the purged note 404s on the read (the content is gone, never resurrected)")
+            # the SECOND purge of the same object: the alternation 409
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge",
+                                     dict(H, **{"Idempotency-Key": "k-102-p4"}),
+                                     body=json.dumps({"kind": "note",
+                                                      "entity_id": note_id,
+                                                      "reason": "again"}).encode()))
+            check("ARV-API-181", s == 409 and "ARV-PRG-004" in b,
+                  "the second purge of the same object refuses ARV-PRG-004 (the ledger is the permanence record)")
+
+            # the ledger read: the row serves, bounded + paginated
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/purge-ledger", H,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            rows_pl = [r for r in (d.get("rows") or [])
+                       if isinstance(r, dict) and r.get("entity_id") == note_id]
+            check("ARV-API-182", s == 200 and rows_pl
+                  and rows_pl[0].get("kind") == "note"
+                  and bool(rows_pl[0].get("created_at")),
+                  "GET /api/v1/purge-ledger serves the erasure record (the minimal audit row)")
+            # the ledger bounds: limit=0 -> 422
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/purge-ledger", H,
+                                     query=b"limit=0"))
+            check("ARV-API-183", s == 422 and "ARV-QRY-004" in b,
+                  "the purge-ledger list bound refuses ARV-QRY-004")
+            # the cross-owner ledger: owner B sees NONE of A's rows
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/purge-ledger", HB,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-184", s == 200 and (d.get("rows") or []) == [],
+                  "owner B's purge-ledger read over A's rows is EMPTY (the isolation law)")
+            # owner B's purge of A's note: the no-oracle 404 (never 403)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge",
+                                     dict(HB, **{"Idempotency-Key": "k-102-p5"}),
+                                     body=json.dumps({"kind": "source",
+                                                      "entity_id": src_id,
+                                                      "reason": "cross-owner"}).encode()))
+            check("ARV-API-185", s == 404 and "ARV-PRG-003" in b,
+                  "owner B's purge of A's source is the SAME no-oracle 404 (never an existence leak)")
+
+            # the source purge (the cascade): the source + its tree drop,
+            # the ledger registers; then the restore legs run on the CLEAN
+            # post-purge state (the reconciliation family's own substrate)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge",
+                                     dict(H, **{"Idempotency-Key": "k-102-p6"}),
+                                     body=json.dumps({"kind": "source",
+                                                      "entity_id": src_id,
+                                                      "reason": "the source purge (the cascade leg)"}).encode()))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-186", s == 200 and d.get("state") == "purged"
+                  and d.get("content_dropped") is True,
+                  "the source purge acks with the cascade (the tree drops with the ledger row)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/sources/{src_id}", H))
+            check("ARV-API-187", s == 404,
+                  "the purged source 404s on the detail read")
+
+            # the restore: the export-before-purge archive into a CLEAN
+            # second scratch db (the kernel's own machine through the
+            # route's staging contract) — the reconciliation drops the
+            # purged source (the destination ledger carries it: written
+            # through the substrate's own ledger INSERT — the test-substrate
+            # pattern the prior suites use, RCW-02/EXP-07's own class; the
+            # destination stays CLEAN for the restore law, the ledger row
+            # the reconciliation's authority)
+            exp_root2 = _tf.mkdtemp(prefix="arv_exp_102b_")
+            dst = psql("postgres", "SELECT 'arv_d102_'||floor(random()*100000)::text").stdout.strip()
+            psql("postgres", f"CREATE DATABASE {dst}")
+            r_md = subprocess.run(["python3", "harness/migrate.py"], cwd=str(pathlib.Path(__file__).resolve().parents[2]),
+                                  capture_output=True, text=True, timeout=300,
+                                  env=dict(env, PGDATABASE=dst, ARV_MIGRATIONS_DIR="harness/migrations"))
+            try:
+                # the export runs on the LIVE db: re-import (the earlier
+                # source was purged — the ledger holds it), so the archive
+                # HOLDS a source the destination will carry as ledgered
+                s, b = asyncio.run(call(app_k, "POST", "/api/v1/imports",
+                                         dict(H, **{"Idempotency-Key": "k-102-src2"}),
+                                         body=b"the restore reconciliation corpus",
+                                         query=b"title=WS6+Restore"))
+                ack_src2 = json.loads(b) if b.startswith("{") else {}
+                src2 = ack_src2.get("result_ref", "")
+                os.environ["ARIVO_EXPORT_ROOT"] = exp_root2
+                s, b = asyncio.run(call(app_k, "GET", "/api/v1/export", H))
+                d = json.loads(b) if b.startswith("{") else {}
+                check("ARV-API-188", s == 200 and d.get("state") == "manifest_complete",
+                      "the restore leg's export acks (the archive staged under the service root)")
+                # the destination's ledger names the ARCHIVE's source (the
+                # reconciliation keys on (kind, entity) — the same logical
+                # object the archive carries; the write is the ledger's own
+                # INSERT, legal on the clean destination)
+                r_led_w = psql(dst, "SET app.current_owner='route-user'; "
+                               "INSERT INTO arv.purge_ledger (owner_scope, kind, "
+                               "entity_id, reason, actor, created_at) VALUES "
+                               f"('route-user', 'source', '{src2}', 'the destination "
+                               f"ledger (the reconciliation leg)', 'owner', now());")
+                check("ARV-API-189", r_led_w.returncode == 0,
+                      "the destination's ledger row registers (the reconciliation's authority)")
+                # the restore through the kernel on the destination db (the
+                # route's restore restores into the SERVICE's db; the
+                # multi-db topology is the deployment's own — disclosed in
+                # the not-verified lines)
+                r_rs = subprocess.run(
+                    [str(pathlib.Path(__file__).resolve().parents[2] / ".venv-waved/bin/python"), "-I",
+                     str(pathlib.Path(__file__).resolve().parents[2]) + "/harness/export.py",
+                     "restore", "--archive", str(pathlib.Path(exp_root2) / "route-user")],
+                    capture_output=True, text=True, timeout=600,
+                    env=dict(env, PGDATABASE=dst,
+                             ARV_BLOB_DIR=str(pathlib.Path(exp_root2) / "route-user" / "blobs")))
+                check("ARV-API-190", r_rs.returncode == 0
+                      and "state=restored" in r_rs.stdout,
+                      "the restore completes on the ledgered destination (the kernel's own machine, the reconciliation ran FIRST)")
+                # the LEDGERED source does NOT resurrect (SYS-10: the
+                # destination's ledger wins over the older archive content)
+                r_cnt = psql(dst, f"SELECT count(*) FROM arv.source WHERE id='{src2}';")
+                check("ARV-API-191", (r_cnt.stdout or "").strip() == "0",
+                      "the ledgered source does NOT resurrect from the archive (SYS-10: the destination's ledger wins)")
+                # the ledger row SURVIVED the restore (ON CONFLICT DO NOTHING)
+                r_led = psql(dst, f"SELECT count(*) FROM arv.purge_ledger WHERE kind='source' AND entity_id='{src2}';")
+                check("ARV-API-192", (r_led.stdout or "").strip() == "1",
+                      "the destination's ledger row SURVIVES the restore (the permanence record)")
+            finally:
+                os.environ.pop("ARIVO_EXPORT_ROOT", None)
+                os.environ.pop("ARIVO_API_DB", None)
+                psql("postgres", f"DROP DATABASE {dst}")
+
+            # the restore route's own guards: no staging root -> 503; the
+            # absent manifest_name -> 404; the traversal-shaped name -> 422
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/restore",
+                                     dict(H, **{"Idempotency-Key": "k-102-r1"}),
+                                     body=json.dumps({"manifest_name": "route-user"}).encode()))
+            check("ARV-API-193", s == 503 and "ARV-EXP-008" in b,
+                  "POST /api/v1/restore without the staging root refuses ARV-EXP-008 (503)")
+            os.environ["ARIVO_EXPORT_ROOT"] = exp_root2
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/restore",
+                                     dict(H, **{"Idempotency-Key": "k-102-r2"}),
+                                     body=json.dumps({"manifest_name": "no-such"}).encode()))
+            check("ARV-API-194", s == 404 and "ARV-EXP-004" in b,
+                  "the restore of an absent manifest name is the 404")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/restore",
+                                     dict(H, **{"Idempotency-Key": "k-102-r3"}),
+                                     body=json.dumps({"manifest_name": "../etc"}).encode()))
+            check("ARV-API-195", s == 422 and "ARV-PRG-002" in b,
+                  "the traversal-shaped manifest name refuses ARV-PRG-002 (no paths)")
+            # the cross-owner archive: owner B restoring A's staged archive
+            # is the same 404 (never an existence oracle)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/restore",
+                                     dict(HB, **{"Idempotency-Key": "k-102-r4"}),
+                                     body=json.dumps({"manifest_name": "route-user"}).encode()))
+            check("ARV-API-196", s == 404 and "ARV-EXP-004" in b,
+                  "owner B's restore of A's staged archive is the SAME 404 (the owner match law)")
+            # the idem-key law on the restore write
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/restore", H,
+                                     body=json.dumps({"manifest_name": "route-user"}).encode()))
+            check("ARV-API-197", s == 400 and "Idempotency-Key" in b,
+                  "POST /api/v1/restore without the idempotency key refuses 400 (the §11.3 write law)")
+            os.environ.pop("ARIVO_EXPORT_ROOT", None)
+
+            # the unauthenticated legs: every WS6 route is auth-guarded
+            for path, code in (("/api/v1/sync/outbox", "ARV-API-198"),
+                               ("/api/v1/export", "ARV-API-199"),
+                               ("/api/v1/purge-ledger", "ARV-API-200")):
+                s, b = asyncio.run(call(app_k, "GET", path))
+                check(code, s == 401 and "ARV-AUTH-001" in b,
+                      f"the unauthenticated GET {path} refuses 401 (the auth guard)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/sync/deliver"))
+            check("ARV-API-201", s == 401 and "ARV-AUTH-001" in b,
+                  "the unauthenticated POST /api/v1/sync/deliver refuses 401")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge"))
+            check("ARV-API-202", s == 401 and "ARV-AUTH-001" in b,
+                  "the unauthenticated POST /api/v1/purge refuses 401")
+
+            # ---------------- the SEV round-1 repairs (regression guards) ----------------
+            # SEV102-E3 (P2): a hex-invalid uuid-SHAPED entity_id refuses the
+            # typed 422 at the boundary, never a crash-class 500 at the cast
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge",
+                                     dict(H, **{"Idempotency-Key": "k-102-p7"}),
+                                     body=json.dumps({"kind": "note",
+                                                      "entity_id": "gggggggg-gggg-gggg-gggg-gggggggggggg",
+                                                      "reason": "hex-invalid"}).encode()))
+            check("ARV-API-203", s == 422 and "ARV-PRG-002" in b,
+                  "the hex-invalid uuid-shaped entity_id refuses ARV-PRG-002 (the typed 422, never the cast's 500)")
+
+            # SEV102-E5 (P2): the cursor rides the ONE _q() literal home AND
+            # its uuid half validates at the boundary (entity_id is a UUID
+            # column — the row comparison casts) — a quote-bearing or
+            # non-uuid cursor is the typed 422, never a 500 from either the
+            # quoting shape or the cast
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/purge-ledger", H,
+                                     query=b"after=note%7Cabc%27def&limit=50"))
+            check("ARV-API-204", s == 422 and "ARV-QRY-004" in b,
+                  "the non-uuid keyset cursor refuses ARV-QRY-004 at the boundary (never repr()'s 500, never the cast's)")
+
+            # SEV102-C6/C7 (P1): the ledger's kind vocabulary admits EVERY
+            # authored family — a journal_block purge COMPLETES (0013's CHECK
+            # amended by 0021; before the repair the ledger INSERT violated it
+            # and the whole erasure rolled back)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/journal",
+                                     dict(H, **{"Idempotency-Key": "k-102-jb1"}),
+                                     body=json.dumps({"kind": "raw",
+                                                      "content": "the jb purge corpus"}).encode()))
+            ack_jb = json.loads(b) if b.startswith("{") else {}
+            jb_id = (ack_jb.get("result_ref", "") or "").split("@")[0]
+            check("ARV-API-205", s == 200 and bool(jb_id),
+                  "the journal block creates (the vocabulary-repair leg's target)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge",
+                                     dict(H, **{"Idempotency-Key": "k-102-p8"}),
+                                     body=json.dumps({"kind": "journal_block",
+                                                      "entity_id": jb_id,
+                                                      "reason": "the vocabulary repair (the SEV round-1 P1)"}).encode()))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-206", s == 200 and d.get("state") == "purged"
+                  and d.get("ledger_recorded") is True,
+                  "the journal_block purge COMPLETES (the 0021 CHECK amendment — the kind vocabulary covers every authored family)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/journal/{jb_id}", H))
+            check("ARV-API-207", s == 404,
+                  "the purged journal block 404s on the read (the erasure held)")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

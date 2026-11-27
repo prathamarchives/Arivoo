@@ -1669,13 +1669,19 @@
     "red_exit": 1,
     "red_code": "ACC-03/ACC-04/ACC-12/ACC-13/ACC-14/ACC-18 (the campaign's refusal list at the pre-102 tree)",
     "red_evidence": "the acceptance-campaign suite's record opened with the OBSERVED red at the pre-102 tree a17f0b5e (worktree probe): exit 1, 6 failing checks (ACC-03/04/12/13/14/18 \u2014 the worker/export/purge/MCP surfaces absent there); GREEN at the head (ACC-01..18)",
-    "current_sha256": "80a7020dfffbb982cadc1c53cfc0a5830824c53b4071eb1a0194e80431c06e3e",
+    "current_sha256": "c08b2ba6bb817413eb9ad7bd7a7b7b02be98c92504844cb76bcf363f1e010385",
     "amendments": [
       {
         "prior_sha256": "452e6bfae537569a6ca1c60d652875b208115a13653e02daace218d235ccef5a",
         "new_sha256": "80a7020dfffbb982cadc1c53cfc0a5830824c53b4071eb1a0194e80431c06e3e",
         "note": "the campaign's CI honest-degradation form (the 093/094 lesson: the deps-absent host degrades with the NOTE, never a false red; the green evidence the slice's run records) \u2014 additions only, the RED chain unchanged",
         "observed_at": "2026-11-27T15:58:44.007002+00:00"
+      },
+      {
+        "prior_sha256": "80a7020dfffbb982cadc1c53cfc0a5830824c53b4071eb1a0194e80431c06e3e",
+        "new_sha256": "c08b2ba6bb817413eb9ad7bd7a7b7b02be98c92504844cb76bcf363f1e010385",
+        "note": "the find_spec form (the deps probe without import statements \u2014 the boundary scanner's letter honored; the degradation behavior identical) \u2014 additions only, the RED chain unchanged",
+        "observed_at": "2026-11-27T16:00:51.892389+00:00"
       }
     ]
   }

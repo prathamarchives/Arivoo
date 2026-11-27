@@ -58,12 +58,8 @@ def _deps_available() -> bool:
     REAL ASGI app (fastapi/cryptography) — on a host without those deps the suite
     degrades honestly (the NOTE + the SKIP), never a false red; the green evidence
     is the slice's run records on the rig."""
-    try:
-        import fastapi  # noqa: F401
-        import jwt  # noqa: F401
-        return True
-    except ImportError:
-        return False
+    import importlib.util as _u
+    return all(_u.find_spec(m) is not None for m in ("fastapi", "jwt"))
 
 
 def main() -> int:

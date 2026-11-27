@@ -1,4 +1,6 @@
 # claim-106b-declaration — the completion declaration
 context/completion-declaration-2026-11-27.md INT-173
 CLAIMS.md INT-173
+harness/tests/test_acceptance_campaign.py INT-173 (the CI honest-degradation repair — the 093/094 lesson)
+harness/red-records.json INT-173
 harness/runs/claim-106b-declaration INT-173

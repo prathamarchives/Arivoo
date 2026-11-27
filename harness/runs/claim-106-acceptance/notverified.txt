@@ -1,0 +1,6 @@
+the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
+§6.1(1) the real Supabase Auth test user + §6.4's Cloudflare-proxy stream legs (the DEPLOYED-surface halves — the Q18 gate + the database credential pending; the local form exercises the SAME contract surfaces with the ES256 contract)
+the reader repository inspection (WS11's frontend-contract half — the canonical link never provided to this session; the thin contract client's UI-facing legs ride it)
+the desktop offline/outbox behavior (Q19 — the local-store choice the owner's; the backend sync/API contract complete and observed)
+the storage fault-injection legs over a real object store (the WS8 gate — the provider adapter pending; the digest/staging/orphan laws covered on the local blob surface)
+the deployed surface end-to-end (the tunnel/DNS/TLS/CORS/rate-limits — all post-Q18)

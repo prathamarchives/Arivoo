@@ -1,0 +1,7 @@
+{
+  "command": ".venv-waved/bin/python -I harness/tests/test_acceptance_campaign.py",
+  "exit_code": 0,
+  "commit": "da782e8092cc8b59c9ecabdcb118ead80da1a5c0",
+  "output_sha256": "5a666053ca900f3f5b2a3f5d68511bfa1b49609733cd8427193f4bb54ae40175",
+  "recorded_at": "2026-11-27T15:29:17.970374+00:00"
+}

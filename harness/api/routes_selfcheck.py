@@ -1073,6 +1073,128 @@ def main() -> int:
             check("ARV-API-131", s == 404 and "ARV-REF-001" in b,
                   "owner B's reference resolution against A's note is ARV-REF-001 404")
 
+            # ---------------- CLAIM-100: the reading-lists family ----------------
+            # (§11.2 family 7: create/list/member add/remove/current
+            # membership — the last Workstream 4 row)
+            # 58) the create: the §11.3 write law + the name law
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/reading-lists", JSON_H,
+                                     body=json.dumps({"name": "The Stack"}).encode()))
+            check("ARV-API-132", s == 400 and "Idempotency-Key" in b,
+                  "POST /reading-lists refuses without the idempotency key (the §11.3 law)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/reading-lists", _J("k-100-l0"),
+                                     body=json.dumps({"name": ""}).encode()))
+            check("ARV-API-133", s == 422 and "ARV-RLS-003" in b,
+                  "the empty list name refuses ARV-RLS-003 (the name law)")
+            # 59) the positive create: the identity is the uuid (names may duplicate)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/reading-lists", _J("k-100-l1"),
+                                     body=json.dumps({"name": "The Stack"}).encode()))
+            ack_l = json.loads(b) if b.startswith("{") else {}
+            rl_id = ack_l.get("result_ref", "")
+            check("ARV-API-134", s == 200 and ack_l.get("status") == "committed"
+                  and rl_id and "@" not in rl_id,
+                  "POST /reading-lists creates the list (the ack's ref is the bare uuid — the identity)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/reading-lists", _J("k-100-l1"),
+                                     body=json.dumps({"name": "The Stack"}).encode()))
+            ack_l2 = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-135", s == 200 and ack_l2.get("status") == "replayed"
+                  and ack_l2.get("result_ref") == rl_id,
+                  "the same key replays the SAME list (the idempotency law)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/reading-lists", _J("k-100-l1"),
+                                     body=json.dumps({"name": "A Different Name"}).encode()))
+            check("ARV-API-136", s == 409 and "ARV-CMD-409" in b,
+                  "the same key + different name refuses ARV-CMD-409")
+            # 60) the listing: the derived member count
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/reading-lists", H,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            rows = [r for r in (d.get("rows") or []) if isinstance(r, dict)
+                    and r.get("id") == rl_id]
+            check("ARV-API-137", s == 200 and rows and rows[0].get("name") == "The Stack"
+                  and rows[0].get("member_count") == 0,
+                  "GET /reading-lists lists the list with its DERIVED member count")
+            # 61) the member add + the current membership
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/reading-lists/{rl_id}/members",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-100-m1"}),
+                                     body=json.dumps({"source_id": real_id}).encode()))
+            ack_m = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-138", s == 200 and ack_m.get("status") == "committed",
+                  "POST /reading-lists/{id}/members adds the source (the append-only event)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/reading-lists/{rl_id}", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            rows = [r for r in (d.get("rows") or []) if isinstance(r, dict)]
+            check("ARV-API-139", s == 200 and len(rows) == 1
+                  and rows[0].get("source_id") == real_id,
+                  "GET /reading-lists/{id} serves the CURRENT membership (the derived view)")
+            # 62) the duplicate add: the alternation at the substrate — the
+            # honest unknown through the §11.4 no-internals answer
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/reading-lists/{rl_id}/members",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-100-m2"}),
+                                     body=json.dumps({"source_id": real_id}).encode()))
+            check("ARV-API-140", s == 500 and "ARV-CMD-010" in b
+                  and "ARV-RLS-008" not in b,
+                  "the duplicate add refuses the honest unknown (ARV-CMD-010 500 — the raw substrate cause never echoed, §11.4)")
+            # 63) the remove + the empty membership + the re-add
+            s, b = asyncio.run(call(app_k, "DELETE",
+                                     f"/api/v1/reading-lists/{rl_id}/members/{real_id}",
+                                     dict(H, **{"Idempotency-Key": "k-100-m3"})))
+            check("ARV-API-141", s == 200,
+                  "DELETE /reading-lists/{id}/members/{source_id} removes (the event)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/reading-lists/{rl_id}", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-142", s == 200 and (d.get("rows") or []) == [],
+                  "the membership page is EMPTY after the remove")
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/reading-lists/{rl_id}/members",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-100-m4"}),
+                                     body=json.dumps({"source_id": real_id}).encode()))
+            check("ARV-API-143", s == 200,
+                  "the re-add after the remove commits (the alternation, both directions)")
+            # 64) the no-oracles: absent list / absent member source
+            s, b = asyncio.run(call(app_k, "POST",
+                                     "/api/v1/reading-lists/00000000-0000-0000-0000-000000000000/members",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-100-x1"}),
+                                     body=json.dumps({"source_id": real_id}).encode()))
+            check("ARV-API-144", s == 404 and "ARV-RLS-001" in b,
+                  "the add to an absent list is the no-oracle ARV-RLS-001 404")
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/reading-lists/{rl_id}/members",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-100-x2"}),
+                                     body=json.dumps({"source_id":
+                                                      "00000000-0000-0000-0000-000000000000"}).encode()))
+            check("ARV-API-145", s == 404 and "ARV-RLS-002" in b,
+                  "the add of an absent source is the no-oracle ARV-RLS-002 404")
+            s, b = asyncio.run(call(app_k, "GET",
+                                     "/api/v1/reading-lists/00000000-0000-0000-0000-000000000000", H))
+            check("ARV-API-146", s == 404 and "ARV-QRY-001" in b,
+                  "the absent list read is the no-leak ARV-QRY-001 404")
+            # 65) the idem-key law on the member writes + the list bounds
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/reading-lists/{rl_id}/members",
+                                     JSON_H,
+                                     body=json.dumps({"source_id": real_id}).encode()))
+            check("ARV-API-147", s == 400 and "Idempotency-Key" in b,
+                  "POST .../members requires the idempotency key")
+            s, b = asyncio.run(call(app_k, "DELETE",
+                                     f"/api/v1/reading-lists/{rl_id}/members/{real_id}", H))
+            check("ARV-API-148", s == 400 and "Idempotency-Key" in b,
+                  "DELETE .../members/{source_id} requires the idempotency key")
+            for q in (b"limit=0", b"limit=1001"):
+                s, b = asyncio.run(call(app_k, "GET", "/api/v1/reading-lists", H, query=q))
+                check("ARV-API-149", s == 422 and "ARV-QRY-004" in b,
+                      f"the reading-lists bound {q.decode()} refuses ARV-QRY-004")
+            # 66) the cross-owner legs
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/reading-lists/{rl_id}/members",
+                                     dict(HB, **{"Idempotency-Key": "k-100-xb1",
+                                                 "Content-Type": "application/json"}),
+                                     body=json.dumps({"source_id": real_id}).encode()))
+            check("ARV-API-150", s == 404 and "ARV-RLS-001" in b,
+                  "owner B's member add to A's list is the no-oracle ARV-RLS-001 404")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/reading-lists", HB,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-151", s == 200 and d.get("rows") == [],
+                  "owner B's reading-lists page is EMPTY over owner A's lists")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/reading-lists/{rl_id}", HB))
+            check("ARV-API-152", s == 404,
+                  "owner B's membership read of A's list is the no-leak 404")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

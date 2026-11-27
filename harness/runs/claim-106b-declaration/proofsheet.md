@@ -13,11 +13,11 @@
 - this slice is a DOCUMENTATION ARTIFACT (the completion declaration's repo copy — no code, no schema, no kernel): the not-verified lines are the declaration's OWN (the owner's three gates: Q18, the database credential, the WS8 ratification; the reader-repo link; Q19) — see context/completion-declaration-2026-11-27.md
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: b2b9fdc180aea6e0697f637e7e6dae882e6601f31ed215b58ae2d820002db581
-- reviewed_diff_sha256: f079da1e7cc1af10b9848d29dc53e78ba860ad442eb4d80aaed005fceea8fa4b
+- report sha256: c4f52c3f295b4f060229c468236f2a528b9d0d1141dbf10e7c555c52edeeed00
+- reviewed_diff_sha256: aee053b7e05ba285bdda278e9becb658bdeb33c8e2c362b546b959198b4b296f
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 1
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 480bdda1c7b16de3cd716d4ebc5f67e5a434af131bf169d90abf4328c0193bc0
+- sheet sha256 (of the content above, excluding this line): 52cd0c3693605c4bcc22461616d927ad20aa4a514c866ff2a5d7b25e2c86e1ad

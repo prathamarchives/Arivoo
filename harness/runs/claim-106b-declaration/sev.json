@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-106b-declaration",
   "base_sha": "45194da0728267682f7b75cce3c05b26d94d3831",
-  "reviewed_diff_sha256": "f079da1e7cc1af10b9848d29dc53e78ba860ad442eb4d80aaed005fceea8fa4b",
+  "reviewed_diff_sha256": "aee053b7e05ba285bdda278e9becb658bdeb33c8e2c362b546b959198b4b296f",
   "intent_ids": [
     "INT-173"
   ],

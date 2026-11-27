@@ -17,11 +17,11 @@
 - the semantic/model work (Q7 open — deterministic only); the remote btree/TOAST parity (carried)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 22261d796233ac7e5183e6588f002515960d3e90402c1984d45244819ec6093f
-- reviewed_diff_sha256: 05c49978d46a97dd84f23381789f8a18cd9fe82aecc2f591fc4c3fadf2ce7ba3
+- report sha256: e5ac21fe8f01b2a2f96c18f27e90dff28cdc90b5ccfb0bc66ab37bef14fdcf17
+- reviewed_diff_sha256: 51c02e8766f7be1dd440a9881c7db4236ca8a01305b7b29bf0d9cc88e75a9f93
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 5
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 4aa7c99c659e7fb62bf5d784a14be0f6a1ee10ee54e323eb064692081143a053
+- sheet sha256 (of the content above, excluding this line): cdf8be8b0f3dee807a6e5051a085fda4be13e214b61ea51e4969b420c455d4df

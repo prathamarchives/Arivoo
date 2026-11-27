@@ -9,5 +9,6 @@ harness/api/routes_selfcheck.py INT-169
 harness/tests/test_api_routes.py INT-169
 harness/migrations/0021_governed_purge.sql INT-169
 harness/red-records.json INT-169
+harness/tests/test_references.py INT-169 (the 0021 substrate amendment: REF-05's stale six-kind pin)
 harness/runs/claim-102-sync-export-purge INT-169
 context/extracted/87-SYNC-EXPORT-PURGE.md INT-169

@@ -551,6 +551,263 @@ def main() -> int:
             check("ARV-API-045", s == 404,
                   "an absent anchor is the no-leak 404")
 
+            # ---------------- CLAIM-098: the highlights/bookmarks family ----------------
+            # (§11.2 families 2-3: create/read/revise|move/tombstone/restore/
+            # list/history over the kernel's capture + bookmark machines; plus
+            # the 097 review's NAMED FOLLOWUP — the cross-owner legs the 097
+            # battery lacked, landed here for BOTH the capture families and
+            # the reader family's write surfaces)
+            JSON_H = dict(H, **{"Content-Type": "application/json"})
+
+            def _J(idem):
+                return dict(JSON_H, **{"Idempotency-Key": idem})
+
+            # 28) the highlight create: the §11.3 write law
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/highlights", JSON_H,
+                                     body=json.dumps({"source_id": real_id,
+                                                      "start": 0, "end": 5}).encode()))
+            check("ARV-API-046", s == 400 and "Idempotency-Key" in b,
+                  "POST /highlights refuses without the idempotency key (the §11.3 law)")
+            # 29) the create against an absent source: the no-leak absence
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/highlights", _J("k-098-x1"),
+                                     body=json.dumps({"source_id":
+                                                      "00000000-0000-0000-0000-000000000000",
+                                                      "start": 0, "end": 5}).encode()))
+            check("ARV-API-047", s == 404 and "ARV-CAP-002" in b,
+                  "the create against an absent source is the kernel's ARV-CAP-002 404 (absent and another owner's are the SAME refusal)")
+            # 30) the invalid offsets: never clamped, never guessed
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/highlights", _J("k-098-x2"),
+                                     body=json.dumps({"source_id": real_id,
+                                                      "start": 5, "end": 5}).encode()))
+            check("ARV-API-048", s == 422 and "ARV-CAP-003" in b,
+                  "the create with start >= end refuses ARV-CAP-003 (the offset law)")
+            # 31) the positive create: the commit-before-ack + the derived text
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/highlights", _J("k-098-h1"),
+                                     body=json.dumps({"source_id": real_id,
+                                                      "start": 0, "end": 5}).encode()))
+            ack_h = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-049", s == 200 and ack_h.get("status") == "committed"
+                  and bool(ack_h.get("result_ref"))
+                  and ack_h.get("durability_rung") == "local_durable",
+                  "POST /highlights returns the kernel's honest ack (the selected text DERIVED server-side)")
+            hl_id = ack_h.get("result_ref", "")
+            # 32) the replay: the same key + body -> the SAME effect
+            s2, b2 = asyncio.run(call(app_k, "POST", "/api/v1/highlights", _J("k-098-h1"),
+                                       body=json.dumps({"source_id": real_id,
+                                                        "start": 0, "end": 5}).encode()))
+            ack_h2 = json.loads(b2) if b2.startswith("{") else {}
+            check("ARV-API-050", s2 == 200 and ack_h2.get("result_ref") == hl_id
+                  and ack_h2.get("status") == "replayed",
+                  "the same key replays the SAME highlight (the idempotency law)")
+            # 33) the conflict: the same key + a different body
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/highlights", _J("k-098-h1"),
+                                     body=json.dumps({"source_id": real_id,
+                                                      "start": 1, "end": 5}).encode()))
+            check("ARV-API-051", s == 409 and "ARV-CMD-409" in b,
+                  "the same key + different body refuses ARV-CMD-409 (the conflict law)")
+            # 34) the list: the bounded page over the caller's captures
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/highlights", H,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-052", s == 200 and hl_id in json.dumps(d.get("rows", [])),
+                  "GET /highlights lists the caller's captures (the new id present)")
+            # 35) the read: the current revision + the anchor binding
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/highlights/{hl_id}", H))
+            row_h = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-053", s == 200 and row_h.get("selected_text") == "hello"
+                  and row_h.get("revision") == 1 and row_h.get("anchor_id"),
+                  "GET /highlights/{id} reads back the derived selection + the anchor binding")
+            # 36) the history: the governed view (revisions + lifecycle events)
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/highlights/{hl_id}/history", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-054", s == 200 and len(d.get("rows") or []) >= 1
+                  and all("revision" in r for r in d.get("rows", []) if isinstance(r, dict)),
+                  "GET /highlights/{id}/history serves the governed history")
+            # 37) the revise: a NEW immutable revision at the new offsets
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/highlights/{hl_id}",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-098-h1r"}),
+                                     body=json.dumps({"start": 6, "end": 11}).encode()))
+            ack_r = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-055", s == 200 and ack_r.get("status") == "committed"
+                  and "revision=2" in json.dumps(ack_r),
+                  "PUT /highlights/{id} revises (a new revision at the new offsets)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/highlights/{hl_id}", H))
+            row_h = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-056", s == 200 and row_h.get("selected_text") == "arivo"
+                  and row_h.get("revision") == 2,
+                  "the revised highlight reads back the NEW selection at revision 2")
+            # 38) the tombstone: hidden from ordinary retrieval, history kept
+            s, b = asyncio.run(call(app_k, "DELETE", f"/api/v1/highlights/{hl_id}",
+                                     dict(H, **{"Idempotency-Key": "k-098-h1t"})))
+            ack_t = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-057", s == 200 and ack_t.get("status") == "committed",
+                  "DELETE /highlights/{id} tombstones (the §3.3 delete transition)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/highlights/{hl_id}", H))
+            check("ARV-API-058", s == 404,
+                  "the tombstoned highlight is hidden from the ordinary read (ARV-QRY-003 -> 404)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/highlights/{hl_id}/history", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-059", s == 200 and len(d.get("rows") or []) >= 2,
+                  "the governed history still serves the tombstoned id (never erased)")
+            # 39) the alternation: a second tombstone refuses its named code
+            s, b = asyncio.run(call(app_k, "DELETE", f"/api/v1/highlights/{hl_id}",
+                                     dict(H, **{"Idempotency-Key": "k-098-h1t2"})))
+            check("ARV-API-060", s == 409 and "ARV-HLC-003" in b,
+                  "the second tombstone refuses ARV-HLC-003 (the §3.3 alternation)")
+            # 40) the restore: back to ordinary retrieval, revisions untouched
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/highlights/{hl_id}/restore",
+                                     dict(H, **{"Idempotency-Key": "k-098-h1rr"})))
+            ack_rr = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-061", s == 200 and ack_rr.get("status") == "committed",
+                  "POST /highlights/{id}/restore returns it to ordinary retrieval")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/highlights/{hl_id}", H))
+            row_h = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-062", s == 200 and row_h.get("selected_text") == "arivo",
+                  "the restored highlight serves the SAME revised content (the revisions were never touched)")
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/highlights/{hl_id}/restore",
+                                     dict(H, **{"Idempotency-Key": "k-098-h1rr2"})))
+            check("ARV-API-063", s == 409 and "ARV-HLC-004" in b,
+                  "the restore from active refuses ARV-HLC-004 (the alternation, both directions)")
+            # 41) the revise on a tombstoned id: restore first
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/highlights", _J("k-098-h2"),
+                                     body=json.dumps({"source_id": real_id,
+                                                      "start": 0, "end": 4}).encode()))
+            hl2 = (json.loads(b) if b.startswith("{") else {}).get("result_ref", "")
+            asyncio.run(call(app_k, "DELETE", f"/api/v1/highlights/{hl2}",
+                             dict(H, **{"Idempotency-Key": "k-098-h2t"})))
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/highlights/{hl2}",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-098-h2r"}),
+                                     body=json.dumps({"start": 1, "end": 4}).encode()))
+            check("ARV-API-064", s == 409 and "ARV-HLC-002" in b,
+                  "the revise on a tombstoned highlight refuses ARV-HLC-002 (restore precedes edit)")
+            # 42) the list bounds (the shared bounded-page law)
+            for q, why in ((b"limit=0", "0"), (b"limit=1001", "1001")):
+                s, b = asyncio.run(call(app_k, "GET", "/api/v1/highlights", H, query=q))
+                check("ARV-API-065", s == 422 and "ARV-QRY-004" in b,
+                      f"the highlights list bound {why} refuses ARV-QRY-004")
+
+            # 43) the bookmark family: the same lifecycle over the move machine
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/bookmarks", _J("k-098-b1"),
+                                     body=json.dumps({"source_id": real_id,
+                                                      "start": 0, "end": 3}).encode()))
+            ack_b = json.loads(b) if b.startswith("{") else {}
+            bm_id = ack_b.get("result_ref", "")
+            check("ARV-API-066", s == 200 and ack_b.get("status") == "committed" and bm_id,
+                  "POST /bookmarks creates the stable return location (identity + the versioned anchor)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/bookmarks/{bm_id}", H))
+            row_b = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-067", s == 200 and row_b.get("source_id") == real_id
+                  and row_b.get("revision") == 1,
+                  "GET /bookmarks/{id} reads back the location row (NO content copy — the structural law)")
+            # 44) the move: the serialized edit transition
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/bookmarks/{bm_id}",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-098-b1m"}),
+                                     body=json.dumps({"start": 2, "end": 6}).encode()))
+            ack_m = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-068", s == 200 and "revision=2" in json.dumps(ack_m),
+                  "PUT /bookmarks/{id} moves (the serialized edit transition, a new revision)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/bookmarks/{bm_id}/history", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-069", s == 200 and len(d.get("rows") or []) >= 2,
+                  "GET /bookmarks/{id}/history serves every revision in order")
+            # 45) the bookmark tombstone/restore lifecycle
+            s, b = asyncio.run(call(app_k, "DELETE", f"/api/v1/bookmarks/{bm_id}",
+                                     dict(H, **{"Idempotency-Key": "k-098-b1t"})))
+            check("ARV-API-070", s == 200,
+                  "DELETE /bookmarks/{id} tombstones the bookmark")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/bookmarks/{bm_id}", H))
+            check("ARV-API-071", s == 404,
+                  "the tombstoned bookmark is hidden from the ordinary read")
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/bookmarks/{bm_id}",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-098-b1m2"}),
+                                     body=json.dumps({"start": 1, "end": 4}).encode()))
+            check("ARV-API-072", s == 409 and "ARV-BMK-002" in b,
+                  "the move on a tombstoned bookmark refuses ARV-BMK-002 (restore first)")
+            s, b = asyncio.run(call(app_k, "DELETE", f"/api/v1/bookmarks/{bm_id}",
+                                     dict(H, **{"Idempotency-Key": "k-098-b1t2"})))
+            check("ARV-API-073", s == 409 and "ARV-BMK-003" in b,
+                  "the second tombstone refuses ARV-BMK-003 (the alternation)")
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/bookmarks/{bm_id}/restore",
+                                     dict(H, **{"Idempotency-Key": "k-098-b1rr"})))
+            check("ARV-API-074", s == 200,
+                  "POST /bookmarks/{id}/restore returns it to ordinary use")
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/bookmarks/{bm_id}/restore",
+                                     dict(H, **{"Idempotency-Key": "k-098-b1rr2"})))
+            check("ARV-API-075", s == 409 and "ARV-BMK-004" in b,
+                  "the restore from active refuses ARV-BMK-004 (the alternation)")
+            s, b = asyncio.run(call(app_k, "GET",
+                                     "/api/v1/bookmarks/00000000-0000-0000-0000-000000000000", H))
+            check("ARV-API-076", s == 404,
+                  "an absent bookmark is the no-leak 404 (ARV-BMK-001)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/bookmarks", H,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-077", s == 200 and bm_id in json.dumps(d.get("rows", [])),
+                  "GET /bookmarks lists the caller's bookmarks")
+
+            # 46) THE 097 NAMED FOLLOWUP: the cross-owner legs — owner B's
+            # token against owner A's objects, both families + the reader
+            # family's write surfaces (no existence oracle anywhere)
+            HB = {"Authorization": "Bearer " + tok_b}
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/highlights", HB,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-078", s == 200 and d.get("rows") == [],
+                  "owner B's highlights list is EMPTY over owner A's captures")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/highlights/{hl_id}", HB))
+            check("ARV-API-079", s == 404 and "ARV-HLC-001" in b,
+                  "owner B's highlight read is the no-leak 404 (absent and another owner's are the SAME refusal)")
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/highlights/{hl_id}",
+                                     dict(HB, **{"Idempotency-Key": "k-098-xb1",
+                                                 "Content-Type": "application/json"}),
+                                     body=json.dumps({"start": 0, "end": 3}).encode()))
+            check("ARV-API-080", s == 404,
+                  "owner B's highlight revise is the no-leak 404 (never a 403 existence oracle)")
+            s, b = asyncio.run(call(app_k, "DELETE", f"/api/v1/highlights/{hl_id}",
+                                     dict(HB, **{"Idempotency-Key": "k-098-xb2"})))
+            check("ARV-API-081", s == 404,
+                  "owner B's highlight tombstone is the no-leak 404")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/bookmarks",
+                                     dict(HB, **{"Idempotency-Key": "k-098-xb3",
+                                                 "Content-Type": "application/json"}),
+                                     body=json.dumps({"source_id": real_id,
+                                                      "start": 0, "end": 3}).encode()))
+            check("ARV-API-082", s == 404 and "ARV-CAP-002" in b,
+                  "owner B's bookmark create against A's source is ARV-CAP-002 404 (the anchor-target no-oracle)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/bookmarks", HB,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-083", s == 200 and d.get("rows") == [],
+                  "owner B's bookmarks list is EMPTY over owner A's bookmarks")
+            # the reader family's cross-owner write legs (the 097 battery's gap)
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/sources/{real_id}/position",
+                                     dict(HB, **{"Idempotency-Key": "k-098-xb4",
+                                                 "Content-Type": "application/json"}),
+                                     body=json.dumps({"start": 0, "end": 3}).encode()))
+            check("ARV-API-084", s == 404 and "ARV-POS-001" in b,
+                  "owner B's position save against A's source is ARV-POS-001 404 (the no-oracle)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/sources/{real_id}/position", HB))
+            check("ARV-API-085", s == 404,
+                  "owner B's position read against A's source is the no-leak 404")
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/sources/{real_id}/session-events",
+                                     dict(HB, **{"Idempotency-Key": "k-098-xb5",
+                                                 "Content-Type": "application/json"}),
+                                     body=json.dumps({"event": "session_start",
+                                                      "start": 0, "end": 3}).encode()))
+            check("ARV-API-086", s == 404 and "ARV-SES-001" in b,
+                  "owner B's session event against A's source is ARV-SES-001 404")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/reading-state", HB,
+                                     query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            rows = [r for r in (d.get("rows") or []) if isinstance(r, dict)]
+            check("ARV-API-087", s == 200 and not [r for r in rows
+                                                   if r.get("source_id") == real_id],
+                  "owner B's reading-state carries NONE of owner A's sources")
+            if aid:
+                s, b = asyncio.run(call(app_k, "GET", f"/api/v1/anchors/{aid}", HB))
+                check("ARV-API-088", s == 404,
+                      "owner B's anchor resolution against A's anchor is the no-leak 404")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

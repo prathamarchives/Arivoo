@@ -1209,10 +1209,11 @@ def main() -> int:
                                      query=b"terms=hello&terms=arivo"))
             d = json.loads(b) if b.startswith("{") else {}
             rows = [r for r in (d.get("rows") or []) if isinstance(r, dict)]
-            check("ARV-API-154", s == 200 and rows
-                  and rows[0].get("kind") == "source"
-                  and rows[0].get("entity_id") == real_id,
-                  "GET /search with AND terms hits the source (both terms matched)")
+            src_rows = [r for r in rows if r.get("entity_id") == real_id]
+            check("ARV-API-154", s == 200 and src_rows
+                  and src_rows[0].get("kind") == "source"
+                  and src_rows[0].get("matched_terms"),
+                  "GET /search with AND terms admits the source (both terms matched — the corpus's captures admitted alongside, the admission list's own order)")
             s, b = asyncio.run(call(app_k, "GET", "/api/v1/search", H,
                                      query=b"terms=hello&terms=nonexistentterm"))
             d = json.loads(b) if b.startswith("{") else {}
@@ -1231,15 +1232,18 @@ def main() -> int:
             d = json.loads(b) if b.startswith("{") else {}
             rows = [r for r in (d.get("rows") or []) if isinstance(r, dict)]
             meta = d.get("page_meta", {}) or {}
-            check("ARV-API-158", s == 200 and rows
-                  and rows[0].get("trust") == "untrusted"
-                  and "hello" in json.dumps(rows[0].get("matched_terms", "")),
-                  "GET /context-packs admits the document with its trust label + matched terms")
+            src_pack = [r for r in rows if r.get("entity_id") == real_id]
+            check("ARV-API-158", s == 200 and rows and src_pack
+                  and src_pack[0].get("trust") == "untrusted"
+                  and "hello" in json.dumps(src_pack[0].get("matched_terms", "")),
+                  "GET /context-packs admits the source with its trust label + matched terms (the corpus's captures admitted alongside)")
             check("ARV-API-159", s == 200 and meta
-                  and meta.get("kept") == 1 and meta.get("total") == 1
+                  and isinstance(meta.get("kept"), int) and meta.get("kept", 0) >= 1
+                  and isinstance(meta.get("total"), int) and meta.get("total", 0) >= 1
                   and meta.get("truncated") is False
-                  and "budget_bytes" in meta and "used_bytes" in meta and "after" in meta,
-                  "the pack's truncation metadata serves (kept/total/truncated/budget/used/after)")
+                  and isinstance(meta.get("budget_bytes"), int)
+                  and isinstance(meta.get("used_bytes"), int) and "after" in meta,
+                  "the pack's truncation metadata serves typed (kept/total/truncated/budget/used/after)")
             s, b = asyncio.run(call(app_k, "GET", "/api/v1/context-packs", H,
                                      query=b"terms=hello&budget-bytes=0"))
             check("ARV-API-160", s == 422 and "ARV-QRY-004" in b,

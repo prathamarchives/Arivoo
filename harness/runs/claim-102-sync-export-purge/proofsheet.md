@@ -23,11 +23,11 @@
 - the KWR-002 map row (the map-family followup, unchanged); the semantic/model work (Q7 open — deterministic only)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 9f63688866af6138cabb7e76074f0adc72434f8fc3d1382517651ba9cad0a769
-- reviewed_diff_sha256: 0094ec5f9dc4f83000def293fe91739cc8a6e717b98a9620be1648b78c26bcb2
+- report sha256: abf271dc893df04bf56f174ad23db977c73642a957b634dd8256989b01332ed2
+- reviewed_diff_sha256: 12f4d6c3b25a01520ecb16a3308150df5423ea1285562b9fdc845811363f677b
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 5
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 9543224cd7108ad99653de80b3447ce5d5a7177cc673c4a08d367c4ad30311ae
+- sheet sha256 (of the content above, excluding this line): cf3c5fcacc52550442c7ed45b890120c2c191514c262335136dc6760c66f729d

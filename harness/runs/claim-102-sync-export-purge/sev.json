@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-102-sync-export-purge",
   "base_sha": "a17f0b5e36a1520f757a3a302a4d7345c28dfbe3",
-  "reviewed_diff_sha256": "0094ec5f9dc4f83000def293fe91739cc8a6e717b98a9620be1648b78c26bcb2",
+  "reviewed_diff_sha256": "12f4d6c3b25a01520ecb16a3308150df5423ea1285562b9fdc845811363f677b",
   "intent_ids": [
     "INT-169"
   ],
@@ -26,7 +26,8 @@
     "harness/api/routes_selfcheck.py",
     "harness/migrations/0021_governed_purge.sql",
     "harness/red-records.json",
-    "harness/tests/test_api_routes.py"
+    "harness/tests/test_api_routes.py",
+    "harness/tests/test_references.py"
   ],
   "interfaces_reviewed": [
     "GET /api/v1/sync/outbox + POST /api/v1/sync/deliver (harness/api/routes.py): the kernel's own status/walk arms through the adapter; the delivery TARGET a service parameter (ARIVO_SYNC_TARGET_DB) — an unconfigured service refuses the named ARV-SYN-014 503, never a guess",

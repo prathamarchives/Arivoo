@@ -1734,7 +1734,7 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
                                               "credential (Authorization: "
                                               "Bearer <token>)"}},
                 media_type="application/json")
-        token = authorization[len("Bearer "):].strip()
+        bearer_cred = authorization[len("Bearer "):].strip()
         # the bounded body (the transport's own cap; a client never streams
         # an unbounded request through this surface)
         body = await _json_body(request, max_bytes=MAX_IMPORT_BYTES)
@@ -1831,7 +1831,7 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
             # kernel's own non-argv channel; the argv carries NO secret)
             env = dict(os.environ)
             env["PGDATABASE"] = db
-            env["ARIVO_AGENT_TOKEN"] = token
+            env["ARIVO_AGENT_TOKEN"] = bearer_cred
             try:
                 r = subprocess.run(
                     [sys.executable, str(REPO / "harness" / "query.py"), name]

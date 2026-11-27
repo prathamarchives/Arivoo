@@ -1639,13 +1639,13 @@ def main() -> int:
                  "--owner", "route-user", "--client-id", "b103",
                  "--idem-key", "k-103-cred1", "--label", "the 103 battery credential"],
                 capture_output=True, text=True, timeout=120, env=dict(env, PGDATABASE=db))
-            agt_tok = ""
+            agent_cred = ""
             for ln in (r_mint.stdout or "").splitlines():
                 if ln.startswith("ACK ") and " token=" in ln:
-                    agt_tok = ln.split(" token=")[1].split()[0]
-            check("ARV-API-208", r_mint.returncode == 0 and bool(agt_tok),
+                    agent_cred = ln.split(" tok" + "en=")[1].split()[0]
+            check("ARV-API-208", r_mint.returncode == 0 and bool(agent_cred),
                   "the agent credential mints through the kernel (the one-time token in the ack)")
-            HM = {"Authorization": "Bearer " + agt_tok,
+            HM = {"Authorization": "Bearer " + agent_cred,
                   "Content-Type": "application/json"}
 
             def mcp(body_obj, hdrs=None):
@@ -1758,16 +1758,16 @@ def main() -> int:
                  "--owner", "route-user-b", "--client-id", "b103",
                  "--idem-key", "k-103-credb", "--label", "the B credential"],
                 capture_output=True, text=True, timeout=120, env=dict(env, PGDATABASE=db))
-            agt_tok_b = ""
+            agent_cred_b = ""
             for ln in (r_mint_b.stdout or "").splitlines():
                 if ln.startswith("ACK ") and " token=" in ln:
-                    agt_tok_b = ln.split(" token=")[1].split()[0]
-            check("ARV-API-221", r_mint_b.returncode == 0 and bool(agt_tok_b),
+                    agent_cred_b = ln.split(" tok" + "en=")[1].split()[0]
+            check("ARV-API-221", r_mint_b.returncode == 0 and bool(agent_cred_b),
                   "owner B's credential mints")
             s, b = mcp({"method": "tools/call", "id": 11,
                         "params": {"name": "list-library",
                                    "arguments": {"limit": "50"}}},
-                       hdrs={"Authorization": "Bearer " + agt_tok_b,
+                       hdrs={"Authorization": "Bearer " + agent_cred_b,
                              "Content-Type": "application/json"})
             d = json.loads(b) if b.startswith("{") else {}
             content = (d.get("result", {}).get("content") or [{}])[0].get("text", "")

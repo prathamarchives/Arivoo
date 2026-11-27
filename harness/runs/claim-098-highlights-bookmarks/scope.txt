@@ -1,0 +1,12 @@
+# CLAIM-098 — the §11.2 Highlights + Bookmarks families (the directive's Workstream 4 families 2-3) + the 097 named followup riding.
+CLAIMS.md INT-165
+STATE.md INT-165
+context/WORKLOG.md INT-165
+INTENT-LEDGER.md INT-165
+AGENTS.md INT-165
+harness/api/routes.py INT-165
+harness/api/routes_selfcheck.py INT-165
+harness/tests/test_api_routes.py INT-165
+harness/red-records.json INT-165
+harness/runs/claim-098-highlights-bookmarks INT-165
+context/extracted/83-CAPTURE-BOOKMARKS.md INT-165

@@ -1,0 +1,5 @@
+the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
+a live Supabase-issued token end-to-end; uvicorn over a real socket; the deployed route surface (the Workstream 10 slice)
+the passage-text serving route (the §11.2 'source/read data' body arm — rides the notes/journal slice's content decision; the anchor resolution serves the content-addressed form here)
+the notes/journal/references/reading-lists families (CLAIM-099+ — the §11.2 rows that remain)
+the remote btree/TOAST parity (carried from record 80 §9)

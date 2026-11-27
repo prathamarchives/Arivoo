@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-098-highlights-bookmarks",
+  "base_sha": "0d4b861fd80fc8621b80a430b7ac6ff56d57f5b7",
+  "reviewed_diff_sha256": "acba09ba2b033880c40c9eca44fd2cc421a6bf44a0e370eae6b8b1c170a17ced",
+  "intent_ids": [
+    "INT-165"
+  ],
+  "requirement_ids": [
+    "SYS-01",
+    "SYS-02",
+    "SYS-03",
+    "SYS-04",
+    "SYS-05",
+    "SYS-09",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2",
+    "C5"
+  ],
+  "changed_components": [
+    "AGENTS.md",
+    "CLAIMS.md",
+    "INTENT-LEDGER.md",
+    "STATE.md",
+    "context/WORKLOG.md",
+    "context/extracted/83-CAPTURE-BOOKMARKS.md",
+    "harness/api/routes.py",
+    "harness/api/routes_selfcheck.py",
+    "harness/red-records.json",
+    "harness/tests/test_api_routes.py"
+  ],
+  "interfaces_reviewed": [
+    "POST /api/v1/highlights (harness/api/routes.py): the \u00a711.3 write law \u2014 Idempotency-Key required (missing/over-200 -> ARV-API-400/400); owner/actor derived server-side from the verified token, client-id from the claims with the api-v1 default; the DTO decoded to source_id (string, <=128) + integer start/end (ARV-QRY-004/422); the write delegated WHOLESALE to commands.py create_highlight \u2014 the source-existence no-oracle (ARV-CAP-002), the offset law (ARV-CAP-003), the UTF-8/content class (ARV-CAP-008) and the server-side selected-text derivation are ALL the kernel's own (verified live by run-04 P1/P4/P5: the derived texts, the CAP-002 both directions, the boundary matrix)",
+    "GET /api/v1/highlights (harness/api/routes.py): the bounded page over the caller's own captures through the shared _bounded_list (limit int-checked and bounded by LIST_LIMIT_BOUNDS at the adapter -> ARV-QRY-004/422; --after passed through to the kernel's keyset cursor); tombstoned hidden by the kernel's own LIST_SQL parity convention (verified live by run-04 P8: limit=1 + after paginates strictly after; an invalid cursor and a non-integer limit both refuse 422)",
+    "GET /api/v1/highlights/{id} (harness/api/routes.py): the current revision + the anchor binding \u2014 rides query.py get-capture; the absent/tombstone-hidden id maps through the kernel's own ARV-QRY-001/ARV-QRY-003 to the no-leak 404 (verified live by run-04 P3-4: the TYPED ARV-QRY-003 surfaces through HTTP on the tombstoned ordinary read; P4-3: the cross-owner read is the ARV-QRY-001 404)",
+    "GET /api/v1/highlights/{id}/history (harness/api/routes.py): the governed view \u2014 every revision + every lifecycle event, tombstoned ids included; rides query.py get-history; no row -> the no-leak 404 (verified live by run-04 P1-5: revisions 1,2,3 in order with their own texts; P4-7: the cross-owner history read is the 404; P3: the tombstoned id still serves)",
+    "PUT /api/v1/highlights/{id} (harness/api/routes.py): 'revise' \u2014 the \u00a711.3 write law + the shared _offset_body (the 64KiB bounded JSON reader, integer start/end); the serialized edit transition, the NEW immutable revision, the NEW anchor and the identity-fix to the SAME Source version are commands.py revise_highlight's own (verified live by run-04 P1/P2/P3: revision 3 served, three distinct per-revision anchors each resolving at its own offsets, the replay/conflict laws, ARV-HLC-002 on tombstoned)",
+    "DELETE /api/v1/highlights/{id} and POST /api/v1/highlights/{id}/restore (harness/api/routes.py): the \u00a73.3 tombstone/restore transitions \u2014 idem-key law at the adapter, the alternation machine entirely the kernel's (ARV-HLC-003/004; the derived event-parity state, never a state column); restore returns the SAME revision content (verified live by run-04 P3-2/P3-5..P3-7: double-tombstone 409, restore-from-active 409, the post-restore byte-identical revision-2 content)",
+    "POST /api/v1/bookmarks, GET /api/v1/bookmarks, GET /api/v1/bookmarks/{id}, GET /api/v1/bookmarks/{id}/history, PUT /api/v1/bookmarks/{id} (move), DELETE + /restore (harness/api/routes.py): the same seven-route lifecycle over the bookmark machine \u2014 the structural law verified live (the row carries NO content column: identity + the version-tied anchor only, run-04 P8-8); the move rides the kernel's serialized advisory-xact-lock transition (ARV-BMK-002/003/004 verified live by run-04 P3/P7: move-on-tombstoned 409, the alternations, the governed history serving 2 revisions + the tombstone event while the ordinary read is the hidden 404)",
+    "the \u00a711.4 map extensions (harness/api/routes.py _HTTP_BY_PREFIX + the absence family): the lifecycle 409s (HLC-002/003/004, BMK-002/003/004), the offset/content 422s (CAP-003/008, POS-003, SES-003), and the absence 404s (HLC-001, BMK-001, CAP-002, POS-001, SES-001) \u2014 every class exercised live through the routes by run-04 P3/P4/P5 and the battery 046..088; the envelope shape verified on a genuine 409/404/422/400/413 quintet (code + message + api_version, never internals)",
+    "_offset_body and _json_body on the capture writes (harness/api/routes.py): the shared bounded JSON-body reader \u2014 a DECLARED over-cap Content-Length refused 413 BEFORE any byte is read; a lying/chunked client cut MID-STREAM at the 64KiB cap (verified live by run-04 P6: a 70,086-byte body in five frames -> 413 ARV-API-413); non-JSON / JSON-array / missing-offsets / non-integer-offsets each refuse 422 with distinct honest messages",
+    "harness/api/routes_selfcheck.py ARV-API-046..088 (the slice's battery): read hunk by hunk \u2014 the 43 checks assert the \u00a711.3 laws, the lifecycle, the derived text, the idempotency replay/conflict, the no-leak absences and the 097 named followup's cross-owner legs (the capture families + the reader family's write surfaces); three coverage gaps found and closed live by run-04 (SEV-098-2)",
+    "harness/tests/test_api_routes.py + harness/red-records.json (the suite markers + the red record): the marker list extended to ARV-API-088; the amendment chain 24f0d667 -> 8d07a0ef binds the battery at the test-only commit 12bcbbf, hash-verified against the current tree (the enumeration slip in the note's prose is SEV-098-1)",
+    "the called kernel arms, reviewed as contracts NOT changed by the diff (harness/commands.py create/revise/tombstone/restore_highlight + create/move/tombstone/restore_bookmark; harness/query.py get-capture/list-captures/get-history/get-bookmark/get-bookmark-history/list-bookmarks): zero kernel files in the reviewed diff (git-diff verified); the arms' owner scoping rides the arv_app RLS session (SET app.current_owner), the lifecycle state is the derived event parity, and the offsets/selected-text/context windows derive from the stored bytes \u2014 all confirmed by the live probes' observable behavior through the routes"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the slice's own battery re-executed by this reviewer at HEAD: .venv-waved/bin/python -I harness/api/routes_selfcheck.py -> exit 0, 99 PASS lines / 95 distinct codes (ARV-ROUTE-001..007 + ARV-API-001..088), recorded as run-06",
+      "the reviewer's own 85-probe battery on a scratch db migrated exactly like the battery (run-04, exit 0): the revision chain with per-revision anchor immutability, the idempotency laws on all eight write commands, the lifecycle alternation matrix, the offset boundary matrix, the _json_body bounds, the \u00a711.4 envelope quintet, the structural bookmark law",
+      "python3 harness/tests/test_api_routes.py -> exit 0 (ARV-SUITE-001 + the 88 ARV-API markers found)"
+    ],
+    "integration_verification": [
+      "the cross-owner matrix with a real second owner's token (run-04 P4): owner B imports its own source and builds its own objects; owner A's read/revise/tombstone/restore/history legs against B's highlight and bookmark are all the no-leak 404 with the family's own codes (ARV-QRY-001 / ARV-HLC-001 / ARV-BMK-001), never a 403; the cross-owner creates refuse ARV-CAP-002 both directions; the lists carry only their own owner's objects",
+      "the 097 named followup verified as landed: the battery's ARV-API-078..088 (the capture families + the reader family's write surfaces) all green at HEAD, and the reviewer's own reader-family cross-owner probes re-confirm the POS-001/SES-001 no-oracle through this slice's battery context",
+      "the adapter law verified structurally: git diff origin/main...HEAD touches no kernel file; the fourteen routes call only the pre-existing kernel arms through the bounded argv subprocess; no domain logic in a handler (DTO decoding only)"
+    ],
+    "system_verification": [
+      "SYS-01: every write ack carries durability_rung=local_durable and api_version (run-04 P1-1, the battery 049/066)",
+      "SYS-02: the revision chain is immutable and append-only (three revisions, three distinct anchors, the history never erased across tombstone/restore \u2014 run-04 P1/P3/P7)",
+      "SYS-03: the owner scoping and the no-leak refusal families (run-04 P4; the battery 078..088)",
+      "SYS-04: the idempotency machine through HTTP on all eight write commands (run-04 P2: replay + conflict, no phantom revision, replay precedes the state check)",
+      "SYS-05: the highlight identity + the version-tied anchor with server-derived truth (run-04 P1: the derived texts, context windows, per-revision anchors resolving at their own offsets)",
+      "SYS-09: the client path creates and retrieves a capture through the real backend boundary (POST + GET /api/v1/highlights over the ASGI app on the migrated rig, run-04 P1)"
+    ],
+    "validation": [
+      "the RED re-observed at the test-only commit 12bcbbf through the recorded red-observation.sh (run-05, exit 1): the substantive reds 046..057, 059..070, 072..075, 077..079, 082..084, 086 and the vacuous 404-shaped passes 058/071/076/080/081/085/087/088 \u2014 the recorded enumeration's one-code slip is finding SEV-098-1",
+      "the gate's own checks in-process at HEAD: gate.check_red_records() -> [] and claims.check_registry() -> [] (clean); tools/verify_canonical_layer.py -> exit 0",
+      "the bookkeeping verified against git ground truth: the open row CLAIM-098 only; the 097 closed row with PR #139 = 0d4b861 merged 2026-11-27; INT-165 minted with clean newline hygiene (the 096/097 glue class does not recur); STATE's active task CLAIM-098; WORKLOG Task 120; record 83 present",
+      "harness/sev.py claim-098-highlights-bookmarks origin/main refused ARV-SEV-001 before this report was written (the fail-closed form observed), and validates GREEN after (the binding digest recomputed through sev.merge_base_of / reviewed_paths / reviewed_diff_sha256)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-098-1",
+      "scenario": "a phantom revision appended on an idempotent replay: the same key + the same body re-executes the edit transition instead of answering the recorded effect (SYS-04)",
+      "expected": "same key + same body -> status=replayed with the SAME result_ref and NO new revision; same key + different body -> ARV-CMD-409",
+      "observed": "verified on ALL EIGHT write commands through the routes (run-04 P2): every replay answered replayed with the identical result_ref; the conflict refused 409 ARV-CMD-409 on create/revise/create-bookmark/move; the replayed revise pair left exactly 2 revisions; the replayed tombstone/restore answered replayed, not the alternation 409",
+      "control": "the kernel's command_log replay check precedes the state read (commands.py _spine); the route passes the client's idem key through verbatim and never re-derives it",
+      "proof_ids": [
+        "run-04",
+        "run-06"
+      ]
+    },
+    {
+      "id": "FM-098-2",
+      "scenario": "a lifecycle alternation violation: a second tombstone, a restore from active, or an edit on a tombstoned object silently succeeding (or crashing) instead of refusing with its named code (SYS-02)",
+      "expected": "double-tombstone 409 ARV-HLC-003/ARV-BMK-003; restore-from-active 409 ARV-HLC-004/ARV-BMK-004; revise/move-on-tombstoned 409 ARV-HLC-002/ARV-BMK-002; after restore the SAME revision content serves",
+      "observed": "the full matrix on fresh objects (run-04 P3): every refusal with its exact named code through the \u00a711.4 map; the post-restore highlight served revision 2's text and the bookmark revision 2's location, byte-identical to pre-tombstone",
+      "control": "the kernel's derived event-parity state machine (tombstones > restores = tombstoned; never a state column) + the named command-boundary refusals + the 0007/0008 advisory-lock backstop",
+      "proof_ids": [
+        "run-04",
+        "run-06"
+      ]
+    },
+    {
+      "id": "FM-098-3",
+      "scenario": "a cross-owner existence oracle: another owner's token receives a 403, a distinct error, or another owner's object/row through any of the fourteen routes (SYS-03)",
+      "expected": "absent and another owner's are the SAME refusal everywhere: the 404 family (ARV-QRY-001 read/history, ARV-HLC-001/ARV-BMK-001 write, ARV-CAP-002 create-against-foreign-source), the empty lists, never a 403",
+      "observed": "the full matrix with a real second owner (run-04 P4): every leg the no-leak 404 with the family's own code; the lists carried only their own owner's objects; the cross-owner create refused ARV-CAP-002 in both directions; no cross-owner un-delete of a tombstoned foreign object",
+      "control": "the arv_app RLS session scoping (SET app.current_owner, one batch) + the kernel's same-refusal refusal families + the routes' owner derived only from the verified token",
+      "proof_ids": [
+        "run-04",
+        "run-06"
+      ]
+    },
+    {
+      "id": "FM-098-4",
+      "scenario": "client-supplied anchor truth: the selected text (or the anchor itself) accepted from the request body, so a client could forge what a highlight says the source says (SYS-05)",
+      "expected": "the DTO carries only source_id + offsets; the selected text, the context windows and the anchor row derive server-side from the stored bytes at those offsets",
+      "observed": "run-04 P1: the three revisions' texts derived exactly from the stored source ('hello'/'arivo'/'hello arivo'); a [0,5) highlight's context_after was the derived window ' arivo'; the boundary [0,11) windows were empty; each revision's anchor resolved at its own offsets through /api/v1/anchors/{id}",
+      "control": "the kernel's derivation (commands.py create_highlight/revise_highlight/_derive_anchor read the source's digest+media_type and derive through read_text); the routes never accept a text or anchor field",
+      "proof_ids": [
+        "run-04",
+        "run-06"
+      ]
+    },
+    {
+      "id": "FM-098-5",
+      "scenario": "offset clamping or guessing: out-of-range, negative, empty, or inverted offsets silently clamped to the text instead of refusing (SYS-05/CAP-003)",
+      "expected": "0 <= start < end <= len(text) enforced exactly: the boundary at the text length accepted; one past the end, negative, start==end, start>end all refuse 422 ARV-CAP-003",
+      "observed": "run-04 P5 on a 20-character source through the routes: [0,20] accepted deriving the full text; [0,21], [-1,5], [5,5], [7,3] all refused 422 ARV-CAP-003; the same law held on the bookmark create, the bookmark move and the highlight revise",
+      "control": "the kernel's offset law at the command boundary (never clamped, never guessed), surfaced through the \u00a711.4 CAP-003 422 mapping",
+      "proof_ids": [
+        "run-04",
+        "run-06"
+      ]
+    },
+    {
+      "id": "FM-098-6",
+      "scenario": "unbounded body buffering on a capture write: an over-cap declared length read in full, or a lying/chunked client exhausting memory (the F1 class)",
+      "expected": "a declared over-cap Content-Length refused 413 before any byte is read; a lying/chunked stream cut mid-stream at the 64KiB cap; malformed bodies refuse 422",
+      "observed": "run-04 P6 through the real ASGI surface: declared 99999999 -> 413 ARV-API-413 pre-read; a 70,086-byte JSON in five 16,384-byte frames with no Content-Length -> 413 at the cut; non-JSON, JSON-array, missing-offsets and non-integer-offsets each refused 422 with distinct messages",
+      "control": "the shared _json_body reader (the import route's F1 law applied to every write DTO): the declared-length check before the stream, the running buffer bound during it",
+      "proof_ids": [
+        "run-04",
+        "run-06"
+      ]
+    },
+    {
+      "id": "FM-098-7",
+      "scenario": "tombstone-as-erasure: a tombstoned object's data destroyed (or its governed history hidden) instead of hidden-from-ordinary-retrieval and recoverable (SYS-02)",
+      "expected": "the ordinary read is the typed hidden 404 (ARV-QRY-003); the history serves every revision + the lifecycle events; restore returns the SAME revision content",
+      "observed": "run-04 P3/P7: the tombstoned bookmark's history served both revisions in order plus the tombstone event while the ordinary read was the 404; the restored objects served byte-identical revision content; the battery 058/059/071 confirm the same shape",
+      "control": "the kernel's LIST_SQL/parity conventions (tombstoned hidden from list/get, the governed history unfiltered) + the restore transition that never touches revisions",
+      "proof_ids": [
+        "run-04",
+        "run-06"
+      ]
+    },
+    {
+      "id": "FM-098-8",
+      "scenario": "a vacuous green: the battery passing at a tree where the implementation is absent (the 404-shaped checks pass through the absent-route path)",
+      "expected": "the RED-first record binds the battery's failing form at the test-only commit; the red is re-observable and materially red (the substantive checks fail, not just the shape)",
+      "observed": "run-05 (red-observation.sh, twice): exit 1 at 12bcbbf with the substantive reds 046..057, 059..070, 072..075, 077..079, 082..084, 086 failing and the 404-shaped checks 058/071/076/080/081/085/087/088 passing vacuously (disclosed; the recorded note's one-code enumeration slip is SEV-098-1)",
+      "control": "the red-record amendment chain (hash-bound to the test file) + this round's independent re-observation through a detached worktree",
+      "proof_ids": [
+        "run-05",
+        "red-observation.sh"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-098-1",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the red evidence's enumeration listed ARV-API-080 among the substantive reds ('077..080'); the live red re-observation shows 080 in the VACUOUS set (the absent-route 404 passes it) \u2014 the substantive reds end at 079, the vacuous set is 058/071/076/080/081/085/087/088",
+      "repair": "record 83 (\u00a76 + \u00a78's superseding correction) and WORKLOG Task 120 re-worded in-slice; the minted red-records.json note stays as history, superseded by reference \u2014 this re-bind covers the changed diff"
+    },
+    {
+      "id": "SEV-098-2",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "three battery coverage gaps: the idem-key law checked on only one of the eight write routes; no cross-owner history legs; the tombstoned read asserts the status not the typed ARV-QRY-003",
+      "repair": "closed live by the SEV round's own 85-probe battery (all PASS); named as CLAIM-099 battery candidates"
+    }
+  ],
+  "not_verified": [
+    "the five PR-head CI checks and this PR's D-042 review (the PR is not yet opened at this round \u2014 observed after, never pre-claimed)",
+    "a live Supabase-issued token end-to-end; uvicorn over a real socket; the deployed route surface (the Workstream 10 slice)",
+    "the passage-text serving route (the \u00a711.2 'source/read data' body arm \u2014 rides the notes/journal slice's content decision; the anchor resolution serves the content-addressed form here)",
+    "the concurrent lifecycle-writer race (single-writer alternation, replay and conflict legs verified live; the serialization itself rests on the kernel's own 0007/0008/#90 fault evidence \u2014 move_bookmark's advisory-xact lock was read, not raced)",
+    "the epub media-type path (the probes exercise text/plain sources only; the derived-view offset domain rests on the kernel's P4-A read_text contract)",
+    "the notes/journal/references/reading-lists families (CLAIM-099+ \u2014 the \u00a711.2 rows that remain)",
+    "the remote btree/TOAST parity (carried from record 80 \u00a79)"
+  ],
+  "builder_context": "builder-zcode-session65-slice-claim-098",
+  "reviewer_context": "reviewer-zsubagent-fresh-context-claim-098 (a distinct fresh-context subagent with no prior involvement in building this slice; a declared distinct context, not cryptographic independence \u2014 the protocol's stated limit)",
+  "disposition": "PASS",
+  "review_summary": "PASS \u2014 zero open P0/P1; two P2s resolved (SEV-098-1 the red enumeration's off-by-one, repaired in-slice and re-bound; SEV-098-2 three battery coverage gaps, closed live by the round's own probes with named CLAIM-099 candidates); zero product-code defects. The adapter law kept: fourteen routes over the existing kernel arms, zero kernel files in the diff, DTO decoding only in the handlers; the alternation/idempotency/no-leak contracts verified live through the routes on a real migrated scratch db.",
+  "sheet_section": true
+}

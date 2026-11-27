@@ -66,6 +66,21 @@ _HTTP_BY_PREFIX = (
     # observed cause text) stay on the message-replacing 500 default below
     ("ARV-EXT-001", 422),   # the empty source (no content block)
     ("ARV-EXT-005", 422),   # NUL in the text (the literal-transport class)
+    # CLAIM-098 (the capture/bookmark families + the 097 named followup's
+    # reader-family write legs): the lifecycle alternation and edit-on-
+    # tombstoned refusals are conflicts with the object's CURRENT state —
+    # the 409 class; the offset/content classes are client-actionable 422s;
+    # the absence codes join the no-leak 404 family below
+    ("ARV-HLC-002", 409),   # revise on tombstoned (restore first)
+    ("ARV-HLC-003", 409),   # the tombstone alternation
+    ("ARV-HLC-004", 409),   # the restore alternation
+    ("ARV-BMK-002", 409),   # move on tombstoned (restore first)
+    ("ARV-BMK-003", 409),   # the bookmark tombstone alternation
+    ("ARV-BMK-004", 409),   # the bookmark restore alternation
+    ("ARV-CAP-003", 422),   # the capture offsets (never clamped, never guessed)
+    ("ARV-POS-003", 422),   # the position offsets (the same law)
+    ("ARV-SES-003", 422),   # the session-event offsets (the same law)
+    ("ARV-CAP-008", 422),   # the content class (not valid UTF-8 / underivable view)
 )
 
 
@@ -78,7 +93,12 @@ def _map_kernel_refusal(line: str) -> KernelRefusal:
             return KernelRefusal(code, msg, status)
     # the absence family (the kernel's own no-leak refusals: absent or
     # tombstone-hidden in the caller's scope) keeps the 404 class — §11.4
-    if code.startswith(("ARV-QRY-001", "ARV-QRY-003", "ARV-EXT-004")):
+    # (CLAIM-098 extends the family: the capture/bookmark absence codes + the
+    # reader-family write legs' source-absence codes — absent and another
+    # owner's are the SAME refusal everywhere, never a 403 existence oracle)
+    if code.startswith(("ARV-QRY-001", "ARV-QRY-003", "ARV-EXT-004",
+                        "ARV-HLC-001", "ARV-BMK-001", "ARV-CAP-002",
+                        "ARV-POS-001", "ARV-SES-001")):
         return KernelRefusal(code, msg, 404)
     # every OTHER named-but-unmapped kernel code is a server-side failure the
     # client cannot act on (the live example: F6's ARV-CMD-010, proven
@@ -217,6 +237,26 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
         claims = verifier.verify_bearer(authorization)
         owner = verifier.derive_owner(claims)
         return {"owner_scope": owner, "claims": claims}
+
+    # the shared bounded-list read (the §11.3 list laws: the integer bound,
+    # the ARV-QRY-004 refusal, the keyset cursor) over the kernel's own
+    # list arms — one implementation, every family
+    async def _bounded_list(ctx: dict, arm: str, limit: str, after: str):
+        try:
+            limit_i = int(limit)
+        except ValueError:
+            raise KernelRefusal("ARV-QRY-004", "limit must be an integer", 422)
+        if not (LIST_LIMIT_BOUNDS[0] <= limit_i <= LIST_LIMIT_BOUNDS[1]):
+            raise KernelRefusal("ARV-QRY-004",
+                                f"limit {limit} outside [{LIST_LIMIT_BOUNDS[0]}, "
+                                f"{LIST_LIMIT_BOUNDS[1]}]", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                arm, "--owner", ctx["owner_scope"],
+                "--limit", str(limit_i)]
+        if after:
+            argv += ["--after", after]
+        page = _query_kernel(argv, db)
+        return JSONResponse(status_code=200, content=page)
 
     # ---- POST /api/v1/imports: the §11.2 'begin import' ----
     @router.post("/api/v1/imports")
@@ -524,6 +564,256 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
             raise KernelRefusal("ARV-QRY-404", "no such anchor for this owner", 404)
         return JSONResponse(status_code=200, content={"row": rows[0],
                                                       "api_version": page.get("api_version", 1)})
+
+    # ---- CLAIM-098: the §11.2 Highlights + Bookmarks families (the
+    # directive's Workstream 4, families 2-3: the capture lifecycle over the
+    # kernel's own machines — create/revise|move/tombstone/restore/list/
+    # history; the selected text and anchors are DERIVED server-side, never
+    # client-supplied; the lifecycle alternation rides the kernel's own
+    # advisory-lock state machine) ----
+
+    async def _offset_body(request: Request) -> tuple:
+        """The shared capture write DTO: integer start/end offsets (the
+        decoded-text coordinate law — never clamped, never guessed)."""
+        body = await _json_body(request, max_bytes=64 * 1024)
+        try:
+            return int(body["start"]), int(body["end"])
+        except (KeyError, TypeError, ValueError):
+            raise KernelRefusal("ARV-QRY-004",
+                                "the body must carry integer start/end offsets "
+                                "(decoded-text coordinates)", 422)
+
+    def _capture_argv(command: str, ctx: dict, idem_key: str) -> list:
+        return [sys.executable, str(REPO / "harness" / "commands.py"),
+                command,
+                "--owner", ctx["owner_scope"],
+                "--actor", "owner",
+                "--client-id", ctx["claims"].get("client_id", "api-v1"),
+                "--idem-key", idem_key]
+
+    # POST /api/v1/highlights — 'create': the §11.3 write law; the selected
+    # text is DERIVED from the source's stored bytes at the given offsets
+    # (a client never supplies anchor truth — the kernel's own §6 law)
+    @router.post("/api/v1/highlights")
+    async def create_highlight(request: Request, ctx: dict = Depends(verified),
+                               idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        body = await _json_body(request, max_bytes=64 * 1024)
+        source_id = body.get("source_id")
+        if not source_id or not isinstance(source_id, str) or len(source_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the body must carry a source_id", 422)
+        try:
+            start, end = int(body["start"]), int(body["end"])
+        except (KeyError, TypeError, ValueError):
+            raise KernelRefusal("ARV-QRY-004",
+                                "the body must carry integer start/end offsets "
+                                "(decoded-text coordinates)", 422)
+        argv = _capture_argv("create_highlight", ctx, idempotency_key) + \
+            ["--source-id", source_id, "--start", str(start), "--end", str(end)]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # GET /api/v1/highlights — 'list': the bounded page over the caller's
+    # own captures (tombstoned hidden — the kernel's own LIST_SQL convention)
+    @router.get("/api/v1/highlights")
+    async def list_highlights(ctx: dict = Depends(verified),
+                              limit: str = "50", after: str = ""):
+        return await _bounded_list(ctx, "list-captures", limit, after)
+
+    # GET /api/v1/highlights/{id} — 'read': the current revision + the anchor
+    # binding; tombstoned is the hidden 404 (the governed history retains it)
+    @router.get("/api/v1/highlights/{highlight_id}")
+    async def get_highlight(highlight_id: str, ctx: dict = Depends(verified)):
+        if not highlight_id or len(highlight_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the highlight id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-capture", "--owner", ctx["owner_scope"],
+                "--id", highlight_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows or not isinstance(rows[0], dict):
+            raise KernelRefusal("ARV-QRY-404", "no such highlight for this owner", 404)
+        return JSONResponse(status_code=200, content={"row": rows[0],
+                                                      "api_version": page.get("api_version", 1)})
+
+    # GET /api/v1/highlights/{id}/history — 'history': the governed view
+    # (every revision + every lifecycle event, tombstoned ids included)
+    @router.get("/api/v1/highlights/{highlight_id}/history")
+    async def highlight_history(highlight_id: str, ctx: dict = Depends(verified)):
+        if not highlight_id or len(highlight_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the highlight id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-history", "--owner", ctx["owner_scope"],
+                "--id", highlight_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows:
+            raise KernelRefusal("ARV-QRY-404", "no such highlight for this owner", 404)
+        return JSONResponse(status_code=200, content=page)
+
+    # PUT /api/v1/highlights/{id} — 'revise': the §11.3 write law; a NEW
+    # immutable revision at the new offsets (the kernel's serialized edit
+    # transition; tombstoned refuses — restore first)
+    @router.put("/api/v1/highlights/{highlight_id}")
+    async def revise_highlight(highlight_id: str, request: Request,
+                               ctx: dict = Depends(verified),
+                               idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not highlight_id or len(highlight_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the highlight id is malformed", 422)
+        start, end = await _offset_body(request)
+        argv = _capture_argv("revise_highlight", ctx, idempotency_key) + \
+            ["--id", highlight_id, "--start", str(start), "--end", str(end)]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # DELETE /api/v1/highlights/{id} — 'tombstone': the §3.3 delete
+    # transition (hidden from ordinary retrieval; the governed history keeps
+    # everything; the alternation is the kernel's own advisory-lock machine)
+    @router.delete("/api/v1/highlights/{highlight_id}")
+    async def tombstone_highlight(highlight_id: str, ctx: dict = Depends(verified),
+                                  idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not highlight_id or len(highlight_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the highlight id is malformed", 422)
+        argv = _capture_argv("tombstone_highlight", ctx, idempotency_key) + \
+            ["--id", highlight_id]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # POST /api/v1/highlights/{id}/restore — 'restore': back to ordinary
+    # retrieval; the revisions were never touched
+    @router.post("/api/v1/highlights/{highlight_id}/restore")
+    async def restore_highlight(highlight_id: str, ctx: dict = Depends(verified),
+                                idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not highlight_id or len(highlight_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the highlight id is malformed", 422)
+        argv = _capture_argv("restore_highlight", ctx, idempotency_key) + \
+            ["--id", highlight_id]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # POST /api/v1/bookmarks — 'create': the stable return location (identity
+    # + the version-tied anchor; NO copy of source content — the row carries
+    # no text; the structural law)
+    @router.post("/api/v1/bookmarks")
+    async def create_bookmark(request: Request, ctx: dict = Depends(verified),
+                              idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        body = await _json_body(request, max_bytes=64 * 1024)
+        source_id = body.get("source_id")
+        if not source_id or not isinstance(source_id, str) or len(source_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the body must carry a source_id", 422)
+        try:
+            start, end = int(body["start"]), int(body["end"])
+        except (KeyError, TypeError, ValueError):
+            raise KernelRefusal("ARV-QRY-004",
+                                "the body must carry integer start/end offsets "
+                                "(decoded-text coordinates)", 422)
+        argv = _capture_argv("create_bookmark", ctx, idempotency_key) + \
+            ["--source-id", source_id, "--start", str(start), "--end", str(end)]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # GET /api/v1/bookmarks — 'list': the bounded page (tombstoned hidden)
+    @router.get("/api/v1/bookmarks")
+    async def list_bookmarks(ctx: dict = Depends(verified),
+                             limit: str = "50", after: str = ""):
+        return await _bounded_list(ctx, "list-bookmarks", limit, after)
+
+    # GET /api/v1/bookmarks/{id} — 'read': the current location row
+    @router.get("/api/v1/bookmarks/{bookmark_id}")
+    async def get_bookmark(bookmark_id: str, ctx: dict = Depends(verified)):
+        if not bookmark_id or len(bookmark_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the bookmark id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-bookmark", "--owner", ctx["owner_scope"],
+                "--id", bookmark_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows or not isinstance(rows[0], dict):
+            raise KernelRefusal("ARV-QRY-404", "no such bookmark for this owner", 404)
+        return JSONResponse(status_code=200, content={"row": rows[0],
+                                                      "api_version": page.get("api_version", 1)})
+
+    # GET /api/v1/bookmarks/{id}/history — 'history': every revision in order
+    @router.get("/api/v1/bookmarks/{bookmark_id}/history")
+    async def bookmark_history(bookmark_id: str, ctx: dict = Depends(verified)):
+        if not bookmark_id or len(bookmark_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the bookmark id is malformed", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-bookmark-history", "--owner", ctx["owner_scope"],
+                "--id", bookmark_id]
+        page = _query_kernel(argv, db)
+        rows = page.get("rows") or []
+        if not rows:
+            raise KernelRefusal("ARV-QRY-404", "no such bookmark for this owner", 404)
+        return JSONResponse(status_code=200, content=page)
+
+    # PUT /api/v1/bookmarks/{id} — 'move': the serialized edit transition (a
+    # NEW revision with a NEW anchor at the new offsets, identity-fixed to
+    # the SAME Source version; tombstoned refuses — restore first)
+    @router.put("/api/v1/bookmarks/{bookmark_id}")
+    async def move_bookmark(bookmark_id: str, request: Request,
+                            ctx: dict = Depends(verified),
+                            idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not bookmark_id or len(bookmark_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the bookmark id is malformed", 422)
+        start, end = await _offset_body(request)
+        argv = _capture_argv("move_bookmark", ctx, idempotency_key) + \
+            ["--id", bookmark_id, "--start", str(start), "--end", str(end)]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # DELETE /api/v1/bookmarks/{id} — 'tombstone'
+    @router.delete("/api/v1/bookmarks/{bookmark_id}")
+    async def tombstone_bookmark(bookmark_id: str, ctx: dict = Depends(verified),
+                                 idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not bookmark_id or len(bookmark_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the bookmark id is malformed", 422)
+        argv = _capture_argv("tombstone_bookmark", ctx, idempotency_key) + \
+            ["--id", bookmark_id]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # POST /api/v1/bookmarks/{id}/restore — 'restore'
+    @router.post("/api/v1/bookmarks/{bookmark_id}/restore")
+    async def restore_bookmark(bookmark_id: str, ctx: dict = Depends(verified),
+                               idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not bookmark_id or len(bookmark_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the bookmark id is malformed", 422)
+        argv = _capture_argv("restore_bookmark", ctx, idempotency_key) + \
+            ["--id", bookmark_id]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
 
     return router
 

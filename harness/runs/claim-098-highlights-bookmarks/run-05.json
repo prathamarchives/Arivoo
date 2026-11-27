@@ -1,0 +1,7 @@
+{
+  "command": "bash harness/runs/claim-098-highlights-bookmarks/red-observation.sh",
+  "exit_code": 1,
+  "commit": "ab56883eda262e745ac37bf2bdabcf348832081b",
+  "output_sha256": "460b41e4835e85a6dca5e5eab3770daea76f7bcfad662aa12e4c653df5d4f48b",
+  "recorded_at": "2026-11-27T06:49:37.105330+00:00"
+}

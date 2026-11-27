@@ -30,7 +30,7 @@
 - this record — INT-165
 
 ## 6. Commands and external actions (ACTUAL — never reconstructed)
-- `.venv-waved/bin/python -I harness/api/routes_selfcheck.py` @ `12bcbbf` (the test-only commit) → exit 1 → 36 failures: ARV-API-046..057, 059..065, 066..070, 072..075, 077..080, 082..084, 086 (the routes absent); the 404-shaped checks 058/071/076/081/085/087/088 pass vacuously through the absent-route path (the ARV-API-031..033 class, disclosed in the red record's note)
+- `.venv-waved/bin/python -I harness/api/routes_selfcheck.py` @ `12bcbbf` (the test-only commit) → exit 1 → 36 failures: ARV-API-046..057, 059..065, 066..070, 072..075, 077..079, 082..084, 086 (the routes absent); the 404-shaped checks 058/071/076/080/081/085/087/088 pass vacuously through the absent-route path (the ARV-API-031..033 class, disclosed in the red record's note)
 - `python3 harness/red.py --red-commit 12bcbbf --exit 1 --code "ARV-TEST-API-ROUTES (the 098 family reds...)"` → OK ARV-RED-005 (the record bound; test_api_routes.py already in TESTS — no new suite this slice, the 096 registration asymmetry class does not arise)
 - `.venv-waved/bin/python -I harness/api/routes_selfcheck.py` @ `acc54ef` → exit 0 → 89 checks GREEN (99 PASS lines: the revalidation guards count the codes twice)
 - `python3 tools/verify_canonical_layer.py` @ `acc54ef` → exit 0 (the checker green BEFORE the bookkeeping edits — the pre-edit tree is self-consistent)
@@ -47,7 +47,7 @@
 ## 8. Honest accounting
 - The battery's cross-owner READ leg first asserted the WRONG absence code (ARV-HLC-001 — the write path's code) against the read path's own ARV-QRY-001; the check's bug, repaired in-slice before any evidence run was recorded.
 - The ack-shape assertion first used the raw ACK-line form (`revision=2`) against the adapter's PARSED dict; the check's bug, repaired in-slice (the 097 battery-repairs precedent class).
-- The 404-shaped vacuity class at the red tree (058/071/076/081/085/087/088) is disclosed in the red record's note — the class is inherent to 404-shaped checks (the 096 review's reasoned-accept precedent).
+- The red enumeration's off-by-one (SEV-098-1, the SEV round's P2): the minted red-record note and the first draft of this record said '077..080' — the live fail list carries 080 in the VACUOUS set (the absent-route 404 passes it), so the substantive reds end at 079 and the vacuous set is 058/071/076/080/081/085/087/088; the red-records.json note stays as minted history (the typed chain's own law) and THIS record supersedes it by reference — the correction observed live by the SEV round's own red re-observation — the class is inherent to 404-shaped checks (the 096 review's reasoned-accept precedent).
 
 ## 9. What remains open (the §11.2 rows)
 - Notes (create/read/revise/tombstone/restore/list/history), Journal (create/read/revise/list/history), References (the typed stable resolution), Reading lists (create/list/member add/remove/current membership) — CLAIM-099/100.

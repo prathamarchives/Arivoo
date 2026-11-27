@@ -954,13 +954,36 @@ def main() -> int:
                   and row_j.get("content") == "the raw thinking"
                   and row_j.get("source_id") == real_id,
                   "GET /journal/{id} reads back the block whole (the lossless round-trip)")
+            # the revise: the body carries the content ONLY — the kind is the
+            # block's immutable identity (the kernel's own revise carries the
+            # prior revision's kind; a kind in the DTO is the F5b silent-drop
+            # class — refused named, SEV9-123k's honest contract)
             s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/journal/{jn_id}",
                                      dict(JSON_H, **{"Idempotency-Key": "k-099-j1r"}),
                                      body=json.dumps({"kind": "creative",
                                                       "content": "the creative rewrite"}).encode()))
+            check("ARV-API-114", s == 422 and "immutable identity" in b,
+                  "PUT /journal/{id} refuses a kind in the revise DTO (the F5b silent-drop class — the kind is immutable identity)")
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/journal/{jn_id}",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-099-j1r"}),
+                                     body=json.dumps({"content": "the revised thinking"}).encode()))
             ack_jr = json.loads(b) if b.startswith("{") else {}
-            check("ARV-API-114", s == 200 and ack_jr.get("revision") == "2",
-                  "PUT /journal/{id} revises (the writing lab's edit transition)")
+            check("ARV-API-114",
+                  s == 200 and ack_jr.get("revision") == "2",
+                  "PUT /journal/{id} revises (the body-only DTO, a new revision)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/journal/{jn_id}", H))
+            row_j = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-114",
+                  s == 200 and row_j.get("kind") == "raw"
+                  and row_j.get("content") == "the revised thinking",
+                  "the revised block keeps its kind (immutable identity) and serves the NEW content")
+            # the lone-surrogate content: valid JSON, unencodable as UTF-8 —
+            # the refusal INSIDE the §11.4 envelope (SEV9-171's contract)
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/journal/{jn_id}",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-099-j1s"}),
+                                     body=b'{"content": "lone \\ud800 surrogate"}'))
+            check("ARV-API-114", s == 422 and "surrogate" in b,
+                  "the lone-surrogate content refuses INSIDE the envelope (a named 422, never a bare crash — SEV9-171)")
             s, b = asyncio.run(call(app_k, "GET", f"/api/v1/journal/{jn_id}/history", H))
             d = json.loads(b) if b.startswith("{") else {}
             check("ARV-API-115", s == 200 and len(d.get("rows") or []) >= 2,

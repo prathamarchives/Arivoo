@@ -859,7 +859,17 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
                                 "(KIND:ID[@REV])", 422)
         tmpdir = tempfile.mkdtemp(prefix="arv_api_author_")
         tmp = pathlib.Path(tmpdir) / "content.txt"
-        tmp.write_bytes(content.encode("utf-8"))
+        try:
+            tmp.write_bytes(content.encode("utf-8"))
+        except UnicodeEncodeError:
+            # SEV9-171 (the SEV round's live finding): a lone surrogate is
+            # valid JSON but unencodable as UTF-8 — the refusal lands INSIDE
+            # the §11.4 envelope (a named 422), never a bare crash outside it
+            shutil.rmtree(tmpdir, ignore_errors=True)
+            raise KernelRefusal("ARV-QRY-004",
+                                "the content carries an unpaired surrogate — it "
+                                "cannot be encoded as UTF-8 (the lossless authoring "
+                                "surface refuses it, never a lossy interpretation)", 422)
         return tmpdir, tmp, refs
 
     # POST /api/v1/notes — 'create': the authored note + its version-aware
@@ -1060,11 +1070,15 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
         if not journal_id or len(journal_id) > 128:
             raise KernelRefusal("ARV-QRY-004", "the journal id is malformed", 422)
         body = await _json_body(request, max_bytes=MAX_AUTHOR_BYTES)
-        kind = body.get("kind")
-        if kind not in ("raw", "creative"):
-            raise KernelRefusal("ARV-JNL-002",
-                                "the journal block kind must be one of the closed "
-                                "vocabulary (raw | creative)", 422)
+        if "kind" in body:
+            # SEV9-123k (the SEV round's live finding): the kind is the
+            # block's immutable identity — the kernel's own revise carries
+            # the prior revision's kind. A kind in the revise DTO would be a
+            # SILENT drop (the F5b class) — refused HERE, named, instead
+            raise KernelRefusal("ARV-QRY-004",
+                                "the journal block's kind is immutable identity "
+                                "(the kernel's revise carries the prior revision's "
+                                "kind); the revise body carries the content only", 422)
         content = body.get("content")
         if not isinstance(content, str) or not content:
             raise KernelRefusal("ARV-QRY-004",
@@ -1072,10 +1086,17 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
                                 "(the journal body)", 422)
         tmpdir = tempfile.mkdtemp(prefix="arv_api_jnl_")
         tmp = pathlib.Path(tmpdir) / "content.txt"
-        tmp.write_bytes(content.encode("utf-8"))
+        try:
+            tmp.write_bytes(content.encode("utf-8"))
+        except UnicodeEncodeError:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+            raise KernelRefusal("ARV-QRY-004",
+                                "the content carries an unpaired surrogate — it "
+                                "cannot be encoded as UTF-8 (the lossless surface "
+                                "refuses it, never a lossy interpretation)", 422)
         try:
             argv = _capture_argv("revise_journal_block", ctx, idempotency_key) + \
-                ["--id", journal_id, "--kind", kind, "--file", str(tmp)]
+                ["--id", journal_id, "--file", str(tmp)]
             ack = _run_kernel(argv, db, timeout=120.0)
             return JSONResponse(status_code=200, content=ack)
         finally:

@@ -1628,6 +1628,172 @@ def main() -> int:
             check("ARV-API-207", s == 404,
                   "the purged journal block 404s on the read (the erasure held)")
 
+            # ---------------- CLAIM-103: the remote MCP transport ----------------
+            REPO_ = pathlib.Path(__file__).resolve().parents[2]
+            # the corpus hand: a live agent credential minted through the
+            # kernel (the one-time token read from the ack line; the battery
+            # never persists it)
+            r_mint = subprocess.run(
+                [str(pathlib.Path(__file__).resolve().parents[2] / ".venv-waved/bin/python"), "-I",
+                 str(REPO_) + "/harness/commands.py", "mint_agent_credential",
+                 "--owner", "route-user", "--client-id", "b103",
+                 "--idem-key", "k-103-cred1", "--label", "the 103 battery credential"],
+                capture_output=True, text=True, timeout=120, env=dict(env, PGDATABASE=db))
+            agent_cred = ""
+            for ln in (r_mint.stdout or "").splitlines():
+                if ln.startswith("ACK ") and " token=" in ln:
+                    agent_cred = ln.split(" tok" + "en=")[1].split()[0]
+            check("ARV-API-208", r_mint.returncode == 0 and bool(agent_cred),
+                  "the agent credential mints through the kernel (the one-time token in the ack)")
+            HM = {"Authorization": "Bearer " + agent_cred,
+                  "Content-Type": "application/json"}
+
+            def mcp(body_obj, hdrs=None):
+                return asyncio.run(call(app_k, "POST", "/mcp", hdrs or HM,
+                                        body=json.dumps(body_obj).encode()))
+
+            # 1) the unauthenticated transport: 401 before any protocol read
+            s, b = asyncio.run(call(app_k, "POST", "/mcp",
+                                     {"Content-Type": "application/json"},
+                                     body=b'{"method":"ping","id":1}'))
+            check("ARV-API-209", s == 401 and "-32001" in b,
+                  "POST /mcp without the agent credential refuses the transport-level 401")
+            # 2) initialize: the honest version negotiation (the requested
+            # version honored; an unknown one answered with the latest)
+            s, b = mcp({"method": "initialize", "id": 2,
+                        "params": {"protocolVersion": "2025-06-18"}})
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-210", s == 200 and d.get("result", {}).get("protocolVersion") == "2025-06-18"
+                  and d.get("result", {}).get("serverInfo", {}).get("name") == "arivo",
+                  "initialize answers the negotiated version + the serverInfo")
+            s, b = mcp({"method": "initialize", "id": 3,
+                        "params": {"protocolVersion": "1999-01-01"}})
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-211", s == 200 and d.get("result", {}).get("protocolVersion") == "2025-06-18",
+                  "an unknown requested version is answered with the adapter's own (the honest negotiation)")
+            # 3) the initialized notification: NEVER answered (202)
+            s, b = mcp({"method": "notifications/initialized"})
+            check("ARV-API-212", s == 202,
+                  "the notification is never answered (202 Accepted, the streamable form)")
+            # 4) ping
+            s, b = mcp({"method": "ping", "id": 4})
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-213", s == 200 and d.get("result") == {},
+                  "ping answers the empty result")
+            # 5) tools/list: the EXACT SAME registry as the stdio wrapper
+            # (imported, never a second copy — 22 tools, no write tool)
+            s, b = mcp({"method": "tools/list", "id": 5})
+            d = json.loads(b) if b.startswith("{") else {}
+            tools = d.get("result", {}).get("tools", [])
+            from harness.mcp import TOOLS as _MCP_TOOLS, REGISTRY as _MCP_REGISTRY
+            names = {t.get("name") for t in tools}
+            check("ARV-API-214", s == 200 and len(tools) == len(_MCP_TOOLS)
+                  and names == {t["name"] for t in _MCP_TOOLS},
+                  f"tools/list serves the EXACT stdio registry ({len(tools)} tools, the same names)")
+            # 6) tools/call: a live read through the SAME kernel (the
+            # credential's own scope + the per-read audit)
+            s, b = mcp({"method": "tools/call", "id": 6,
+                        "params": {"name": "list-library",
+                                   "arguments": {"limit": "2"}}})
+            d = json.loads(b) if b.startswith("{") else {}
+            content = (d.get("result", {}).get("content") or [{}])[0].get("text", "")
+            check("ARV-API-215", s == 200 and d.get("result", {}).get("isError") is False
+                  and "api_version" in content,
+                  "tools/call answers the read through the SAME query kernel (the scoped+audited path)")
+            # 7) the unknown tool: ARV-MCP-001 (the registry's closed membership)
+            s, b = mcp({"method": "tools/call", "id": 7,
+                        "params": {"name": "write_anything",
+                                   "arguments": {}}})
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-216", s == 200 and "ARV-MCP-001" in
+                  d.get("error", {}).get("message", ""),
+                  "the unknown tool refuses ARV-MCP-001 (READ-ONLY, never a passthrough)")
+            # 8) the argument law: ARV-MCP-002 (the undeclared argument)
+            s, b = mcp({"method": "tools/call", "id": 8,
+                        "params": {"name": "get-source",
+                                   "arguments": {"id": "x", "evil": "y"}}})
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-217", s == 200 and "ARV-MCP-002" in
+                  d.get("error", {}).get("message", ""),
+                  "the undeclared argument refuses ARV-MCP-002 (the tool's inputSchema is the contract)")
+            # 9) the invalid credential: the kernel's own ARV-AGT-001 (the
+            # no-oracle class — unknown/revoked/scope-missing the SAME)
+            s, b = asyncio.run(call(app_k, "POST", "/mcp",
+                                     {"Authorization": "Bearer not-a-real-credential",
+                                      "Content-Type": "application/json"},
+                                     body=json.dumps({"method": "tools/call", "id": 9,
+                                                      "params": {"name": "list-library",
+                                                                 "arguments": {"limit": "2"}}}).encode()))
+            d = json.loads(b) if b.startswith("{") else {}
+            content = (d.get("result", {}).get("content") or [{}])[0].get("text", "")
+            check("ARV-API-218", s == 200 and d.get("result", {}).get("isError") is True
+                  and "ARV-AGT-001" in content,
+                  "the invalid credential answers the kernel's own ARV-AGT-001 (isError, the no-oracle class)")
+            # 10) the revocation: the credential revoked -> the SAME class
+            cred_id = ""
+            for ln in (r_mint.stdout or "").splitlines():
+                if ln.startswith("ACK ") and "result_ref=" in ln:
+                    cred_id = ln.split("result_ref=")[1].split()[0]
+            r_rev = subprocess.run(
+                [str(pathlib.Path(__file__).resolve().parents[2] / ".venv-waved/bin/python"), "-I",
+                 str(REPO_) + "/harness/commands.py", "revoke_agent_credential",
+                 "--owner", "route-user", "--client-id", "b103",
+                 "--idem-key", "k-103-rev1", "--id", cred_id],
+                capture_output=True, text=True, timeout=120, env=dict(env, PGDATABASE=db))
+            check("ARV-API-219", r_rev.returncode == 0,
+                  "the credential revokes through the kernel (the owner's final act)")
+            s, b = mcp({"method": "tools/call", "id": 10,
+                        "params": {"name": "list-library",
+                                   "arguments": {"limit": "2"}}})
+            d = json.loads(b) if b.startswith("{") else {}
+            content = (d.get("result", {}).get("content") or [{}])[0].get("text", "")
+            check("ARV-API-220", s == 200 and d.get("result", {}).get("isError") is True
+                  and "ARV-AGT-001" in content,
+                  "the revoked credential answers the SAME ARV-AGT-001 (never a side channel)")
+            # 11) the cross-owner law: a second owner's credential sees ONLY
+            # its own scope (owner B's corpus, never A's)
+            r_mint_b = subprocess.run(
+                [str(pathlib.Path(__file__).resolve().parents[2] / ".venv-waved/bin/python"), "-I",
+                 str(REPO_) + "/harness/commands.py", "mint_agent_credential",
+                 "--owner", "route-user-b", "--client-id", "b103",
+                 "--idem-key", "k-103-credb", "--label", "the B credential"],
+                capture_output=True, text=True, timeout=120, env=dict(env, PGDATABASE=db))
+            agent_cred_b = ""
+            for ln in (r_mint_b.stdout or "").splitlines():
+                if ln.startswith("ACK ") and " token=" in ln:
+                    agent_cred_b = ln.split(" tok" + "en=")[1].split()[0]
+            check("ARV-API-221", r_mint_b.returncode == 0 and bool(agent_cred_b),
+                  "owner B's credential mints")
+            s, b = mcp({"method": "tools/call", "id": 11,
+                        "params": {"name": "list-library",
+                                   "arguments": {"limit": "50"}}},
+                       hdrs={"Authorization": "Bearer " + agent_cred_b,
+                             "Content-Type": "application/json"})
+            d = json.loads(b) if b.startswith("{") else {}
+            content = (d.get("result", {}).get("content") or [{}])[0].get("text", "")
+            check("ARV-API-222", s == 200 and d.get("result", {}).get("isError") is False
+                  and "WS6 Corpus" not in content,
+                  "owner B's credential reads ONLY its own scope (A's corpus absent)")
+            # 12) the audit: every served read carries its agent_read_log row
+            r_cnt = psql(db, "SELECT count(*) FROM arv.agent_read_log;")
+            n_logs = (r_cnt.stdout or "").strip()
+            check("ARV-API-223", n_logs.isdigit() and int(n_logs) >= 2,
+                  f"the per-read audit rows exist (agent_read_log: {n_logs} — every served agent read)")
+            # 13) the malformed: a non-object body -> the transport's own 422
+            s, b = asyncio.run(call(app_k, "POST", "/mcp", HM, body=b"[1,2]"))
+            check("ARV-API-224", s == 422 and "ARV-QRY-004" in b,
+                  "a non-object body refuses the transport's 422 (the bounded JSON reader)")
+            # 14) the unknown method: -32601
+            s, b = mcp({"method": "resources/list", "id": 14})
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-225", s == 200 and d.get("error", {}).get("code") == -32601,
+                  "the unknown method answers -32601 (the adapter's closed surface)")
+            # 15) GET /mcp: 405 (no server-push SSE stream at this slice —
+            # the single-response mode only; disclosed)
+            s, b = asyncio.run(call(app_k, "GET", "/mcp", HM))
+            check("ARV-API-226", s == 405,
+                  "GET /mcp answers 405 (the single-response Streamable mode; no SSE push stream at this slice)")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

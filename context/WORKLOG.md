@@ -1205,3 +1205,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-102-sync-export-purge/.
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the five PR-head checks + the D-042 review; a live Supabase token; uvicorn on a real socket; the deployed surface; the multi-db restore topology through the route; the remote 0021 application (the migration credential never provided); the desktop-over-HTTP client side (Q19).
 - Next: Workstream 7 — the remote MCP Streamable HTTP transport on /mcp.
+
+## Task 125 (CLAIM-103, session 65, 2026-11-27) — the remote MCP transport (Workstream 7)
+- What: POST /mcp — the Streamable HTTP transport over the EXACT SAME read-only registry/query kernel as the stdio wrapper (mcp.py UNTOUCHED; the route IMPORTS TOOLS/REGISTRY/_assemble — zero duplication, NO write tool); the owner-minted agent credential as the Bearer (the ARIVO_AGENT_TOKEN channel — the kernel's own resolution + the per-read audit; the route never parses or echoes the token); the protocol surface: initialize/ping/tools-list/tools-call/notifications-202/-32601/-32602 + the transport-level 401; GET /mcp 405 (the single-response mode, disclosed); INT-170 minted; the 102 close + STATE re-derivation riding.
+- Verified: ARV-API-208..226 RED at the test-only commit d161480 (exit 1, 16 failures; 208/219/221 vacuous — the mint legs run through the kernel, disclosed) → GREEN at the implementation head (the battery 242 PASS); the stdio wrapper suite MCPW-01..10 GREEN (the preserved law); the agent-access suite AGT-01..09 GREEN.
+- Evidence: harness/runs/claim-103-remote-mcp/.
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the five PR-head checks + the D-042 review; a live Supabase token; the deployed surface; the SSE stream form; the MCP session management.
+- Next: Workstream 8 — the storage provider ratification (Q12/Q17 owner-gated: the recommendation prepared, the ratification the owner's).

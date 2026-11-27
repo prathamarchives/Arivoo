@@ -8,10 +8,15 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from harness.adapters import ids
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-ENV = dict(os.environ)
-ENV.update({"PATH": "/home/z/my-project/pgbuild/root/usr/lib/postgresql/17/bin:" + ENV.get("PATH", ""),
-            "LD_LIBRARY_PATH": "/home/z/my-project/pgbuild/root/usr/lib/x86_64-linux-gnu:/home/z/my-project/pgbuild/root/usr/lib",
-            "PGHOST": "127.0.0.1", "PGPORT": "5433", "PGUSER": "postgres"})
+ENV = dict(os.environ)  # the runner env INHERITED (its PGHOST/PGPORT point at its own postgres)
+ENV.setdefault("PGHOST", "127.0.0.1")
+ENV.setdefault("PGUSER", "postgres")
+ENV.setdefault("PGPORT", "5433")  # the local rig port; the CI runner's own PGPORT (5432) wins through inheritance
+import pathlib as _pl
+_pgbin = "/home/z/my-project/pgbuild/root/usr/lib/postgresql/17/bin"
+if _pl.Path(_pgbin).exists():  # the sandbox's psql prepends only when present (portable)
+    ENV["PATH"] = _pgbin + ":" + ENV.get("PATH", "")
+    ENV["LD_LIBRARY_PATH"] = "/home/z/my-project/pgbuild/root/usr/lib/x86_64-linux-gnu:/home/z/my-project/pgbuild/root/usr/lib"
 FAILS = []
 
 def check(code, ok, what):
@@ -20,7 +25,7 @@ def check(code, ok, what):
 
 def psql(db, sql, user="arv_app"):
     return subprocess.run(["psql", "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1",
-                           "-h", "127.0.0.1", "-p", "5433", "-U", user, "-d", db, "-c", sql],
+                           "-h", ENV["PGHOST"], "-p", ENV["PGPORT"], "-U", user, "-d", db, "-c", sql],
                           capture_output=True, text=True, timeout=120, env=ENV)
 
 def main() -> int:

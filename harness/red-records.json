@@ -1634,7 +1634,7 @@
     "red_exit": 1,
     "red_code": "WRK-02..10 (the suite's refusal list at the pre-machine tree)",
     "red_evidence": "the durable-workers suite observed RED at the test-only commit 88a1b5c (the pre-machine tree: the suite without migration 0022 + worker.py): exit 1, 9 checks failing \u2014 WRK-01 passes (the migration's absence is caught by the migrate step) and WRK-02..10 refuse (the machine absent; the observed red, never an assertion)",
-    "current_sha256": "4ae3781ff19f20dee8eea248edfdd930b3dd77c96fce8e667dd53a5263ca952e",
+    "current_sha256": "3b799d3377880ff9c1ac3e1dc8f723c48829a636edf90584aa487ba8d90e0769",
     "amendments": [
       {
         "prior_sha256": "37ac9d51752fe75b040bb58fbebb438ffdc7655c78e6c6bb67aaf0a5f13d512f",
@@ -1647,6 +1647,12 @@
         "new_sha256": "4ae3781ff19f20dee8eea248edfdd930b3dd77c96fce8e667dd53a5263ca952e",
         "note": "the CI portability repair in the workers suite (sys.executable instead of the sandbox's .venv-waved path \u2014 the CI runner has no such venv; the suite's own interpreter is the portable form) \u2014 additions only, the RED chain unchanged",
         "observed_at": "2026-11-27T15:05:04.092176+00:00"
+      },
+      {
+        "prior_sha256": "4ae3781ff19f20dee8eea248edfdd930b3dd77c96fce8e667dd53a5263ca952e",
+        "new_sha256": "3b799d3377880ff9c1ac3e1dc8f723c48829a636edf90584aa487ba8d90e0769",
+        "note": "the CI portability repair round 2: the suite INHERITS the runner environment (its own PGHOST/PGPORT point at its postgres; the local rig's 5433 only a setdefault) + the sandbox's psql path prepends only when present \u2014 additions only, the RED chain unchanged",
+        "observed_at": "2026-11-27T15:10:32.364636+00:00"
       }
     ]
   }

@@ -1,0 +1,3 @@
+# session65-declaration — the completion declaration (the documentation artifact class; no code)
+context/completion-declaration-2026-11-27.md INT-173 (the artifact copy of the session's declaration)
+harness/runs/session65-declaration INT-173

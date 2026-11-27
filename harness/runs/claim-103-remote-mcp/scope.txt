@@ -1,0 +1,12 @@
+# CLAIM-103 — the remote MCP Streamable HTTP transport (the directive's Workstream 7) + the 102 close riding.
+CLAIMS.md INT-170
+STATE.md INT-170
+context/WORKLOG.md INT-170
+INTENT-LEDGER.md INT-170
+AGENTS.md INT-170
+harness/api/routes.py INT-170
+harness/api/routes_selfcheck.py INT-170
+harness/tests/test_api_routes.py INT-170
+harness/red-records.json INT-170
+harness/runs/claim-103-remote-mcp INT-170
+context/extracted/88-REMOTE-MCP.md INT-170

@@ -1,0 +1,5 @@
+the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
+a live Supabase-issued token; uvicorn over a real socket; the deployed /mcp surface (the Workstream 10 slice)
+the server-push SSE stream form of the Streamable transport (this slice serves the single-response JSON mode; the 405 on GET /mcp is the honest answer)
+the MCP session management (Mcp-Session-Id headers, resumability) — the stateless per-POST form only at this slice
+the semantic/model work (Q7 open — deterministic only); the remote btree/TOAST parity (carried)

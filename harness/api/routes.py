@@ -1705,6 +1705,168 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
             "durability_rung": "local_durable",
             "api_version": 1})
 
+    # ---- CLAIM-103: the §11.2-adjacent remote MCP transport (the directive's
+    # Workstream 7) — the Streamable HTTP form on /mcp over the EXACT SAME
+    # read-only registry/query kernel as the stdio wrapper (harness/mcp.py
+    # UNTOUCHED — its stdio behavior is the preserved law; this route IMPORTS
+    # its registry and its argv assembler, never a second copy). The auth: the
+    # owner-minted agent read credential (D-055's P4-E surface) — the Bearer
+    # token rides the ARIVO_AGENT_TOKEN environment to the query.py child (the
+    # credential's OWN resolution + the per-read audit live in the kernel; the
+    # route never parses, stores, or echoes the token) ----
+
+    @router.post("/mcp")
+    async def mcp_streamable_http(request: Request,
+                                  authorization: str = Header(default="")):
+        # the transport's OWN auth envelope (the §11.4 law): the agent
+        # credential is REQUIRED before any protocol message is read — the
+        # MCP-transport-level 401, distinct from the kernel's own
+        # ARV-AGT-001 no-oracle refusal (an invalid token reaches the kernel
+        # and answers the SAME class as unknown, never a side channel)
+        if not authorization.startswith("Bearer ") or \
+                not authorization[len("Bearer "):].strip():
+            return JSONResponse(
+                status_code=401,
+                content={"jsonrpc": "2.0", "id": None,
+                         "error": {"code": -32001,
+                                   "message": "the MCP transport requires "
+                                              "the owner-minted agent read "
+                                              "credential (Authorization: "
+                                              "Bearer <token>)"}},
+                media_type="application/json")
+        token = authorization[len("Bearer "):].strip()
+        # the bounded body (the transport's own cap; a client never streams
+        # an unbounded request through this surface)
+        body = await _json_body(request, max_bytes=MAX_IMPORT_BYTES)
+        # ONE JSON-RPC message per POST (MCP has no batching — mcp.py's own
+        # law); the id presence decides response vs notification-completion
+        method = body.get("method")
+        if not isinstance(method, str):
+            return JSONResponse(
+                status_code=200,
+                content={"jsonrpc": "2.0", "id": body.get("id"),
+                         "error": {"code": -32600,
+                                   "message": "Invalid Request: the method "
+                                              "is missing or not a string"}},
+                media_type="application/json")
+        # the protocol arms this transport serves: initialize (the honest
+        # version negotiation), ping, tools/list, tools/call — the SAME
+        # surface as the stdio wrapper; a notification (no id) is NEVER
+        # answered (202 Accepted, the streamable form's completion)
+        if "id" not in body:
+            return JSONResponse(status_code=202, content={})
+        msg_id = body.get("id")
+        params = body.get("params")
+        if not isinstance(params, dict):
+            params = {}
+        if method == "initialize":
+            from harness.mcp import LATEST_VERSION, SUPPORTED_VERSIONS
+            requested = params.get("protocolVersion")
+            version = requested if requested in SUPPORTED_VERSIONS \
+                else LATEST_VERSION
+            return JSONResponse(
+                status_code=200,
+                content={"jsonrpc": "2.0", "id": msg_id,
+                         "result": {
+                             "protocolVersion": version,
+                             "capabilities": {"tools": {}},
+                             "serverInfo": {
+                                 "name": "arivo",
+                                 "title": "Arivo — the owner's reading and "
+                                          "reflection context",
+                                 "version": "1"},
+                             "instructions": "READ-ONLY scoped agent access "
+                                             "to the owner's Arivo context "
+                                             "over the remote transport. "
+                                             "Every read is "
+                                             "credential-scoped and "
+                                             "audited; the page bounds are "
+                                             "the read budget."}},
+                media_type="application/json")
+        if method == "ping":
+            return JSONResponse(
+                status_code=200,
+                content={"jsonrpc": "2.0", "id": msg_id, "result": {}},
+                media_type="application/json")
+        if method == "tools/list":
+            from harness.mcp import TOOLS
+            return JSONResponse(
+                status_code=200,
+                content={"jsonrpc": "2.0", "id": msg_id,
+                         "result": {"tools": TOOLS}},
+                media_type="application/json")
+        if method == "tools/call":
+            from harness.mcp import REGISTRY, Refusal as _McpRefusal, _assemble
+            name = params.get("name")
+            if not isinstance(name, str) or name not in REGISTRY:
+                # ARV-MCP-001 — the read-only registry refusal (the stdio
+                # wrapper's own law, verbatim: the registry's closed
+                # membership is public through tools/list, the requested
+                # name never echoed)
+                return JSONResponse(
+                    status_code=200,
+                    content={"jsonrpc": "2.0", "id": msg_id,
+                             "error": {"code": -32602,
+                                       "message": "ARV-MCP-001: unknown tool "
+                                                  "— the registry is EXACTLY "
+                                                  "the landed READ arms "
+                                                  "(READ-ONLY structural: no "
+                                                  "write tool, no arbitrary "
+                                                  "command, never a "
+                                                  "passthrough); call "
+                                                  "tools/list for the closed "
+                                                  "membership"}},
+                    media_type="application/json")
+            try:
+                argv = _assemble(name, params.get("arguments"))
+            except _McpRefusal as r:
+                return JSONResponse(
+                    status_code=200,
+                    content={"jsonrpc": "2.0", "id": msg_id,
+                             "error": {"code": -32602,
+                                       "message": str(r)}},
+                    media_type="application/json")
+            # THE SAME RETRIEVAL CORE: query.py with the arm's arguments; the
+            # credential rides the environment (ARIVO_AGENT_TOKEN — the
+            # kernel's own non-argv channel; the argv carries NO secret)
+            env = dict(os.environ)
+            env["PGDATABASE"] = db
+            env["ARIVO_AGENT_TOKEN"] = token
+            try:
+                r = subprocess.run(
+                    [sys.executable, str(REPO / "harness" / "query.py"), name]
+                    + argv,
+                    capture_output=True, text=True, timeout=240, cwd=str(REPO),
+                    env=env)
+            except subprocess.TimeoutExpired:
+                return JSONResponse(
+                    status_code=200,
+                    content={"jsonrpc": "2.0", "id": msg_id,
+                             "error": {"code": -32603,
+                                       "message": "the read did not complete "
+                                                  "within the adapter's "
+                                                  "bound (240s) — no result "
+                                                  "is claimed"}},
+                    media_type="application/json")
+            # byte-preserving (the stdio wrapper's own law): the CLI's stdout
+            # VERBATIM; the stderr only when stdout is empty
+            text = r.stdout if r.stdout.strip() else r.stderr
+            return JSONResponse(
+                status_code=200,
+                content={"jsonrpc": "2.0", "id": msg_id,
+                         "result": {"content": [{"type": "text", "text": text}],
+                                    "isError": r.returncode != 0}},
+                media_type="application/json")
+        # the unknown method — the stdio wrapper's own -32601 answer
+        return JSONResponse(
+            status_code=200,
+            content={"jsonrpc": "2.0", "id": msg_id,
+                     "error": {"code": -32601,
+                               "message": f"Method not found: {method} (the "
+                                          "adapter's surface is initialize/"
+                                          "ping/tools/list/tools/call)"}},
+            media_type="application/json")
+
     return router
 
 

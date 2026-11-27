@@ -1,0 +1,6 @@
+the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
+a live Supabase-issued token end-to-end; uvicorn over a real socket; the deployed route surface (the Workstream 10 slice)
+the KWR-002 map row (an over-bound unbroken token in authored content surfaces 500 via the fallback map — byte-parity with the pre-existing imports family; a named followup candidate for a §11.4 map-family slice)
+the ARV-QRY-002 malformed-id 500 (the pre-existing F-072-1 class — byte-parity recorded, not charged)
+the reading-lists family (CLAIM-100) and the retrieval/sync/export families (Workstreams 5-6)
+the remote btree/TOAST parity (carried from record 80 §9)

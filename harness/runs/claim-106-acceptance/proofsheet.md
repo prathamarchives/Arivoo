@@ -17,11 +17,11 @@
 - the deployed surface end-to-end (the tunnel/DNS/TLS/CORS/rate-limits — all post-Q18)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: b0fa1211137f41ac624367a131e96f0e078f90b1351dc7abcbaf1fb6ef2efa9b
-- reviewed_diff_sha256: ec91e78d32191f544f58124bb1769c29dc29bf615f3e558718ada3ed1b714b68
+- report sha256: de76c56d1e386006f01dc09e4fcec6278f1d766553c8bcbbe4d544f52f4b8b1a
+- reviewed_diff_sha256: 61a18846b2939d6686c3a85522cb9a63cbfe855e09d24497a7a978be26007731
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 5
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 9ae62d2861ce09257f98f5af690209aaf904a1a938dcfb5cfe0e9a32c7fecad3
+- sheet sha256 (of the content above, excluding this line): 41a4b969e7ce913bc1f145d90c1e056663c2ecc7330e3c6b3df7e7678fe7517f

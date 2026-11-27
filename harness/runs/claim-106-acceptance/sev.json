@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-106-acceptance",
   "base_sha": "8536e0637e292a30c14d88b40cee762c33b4fa49",
-  "reviewed_diff_sha256": "ec91e78d32191f544f58124bb1769c29dc29bf615f3e558718ada3ed1b714b68",
+  "reviewed_diff_sha256": "61a18846b2939d6686c3a85522cb9a63cbfe855e09d24497a7a978be26007731",
   "intent_ids": [
     "INT-173"
   ],
@@ -28,14 +28,15 @@
     "STATE.md",
     "context/WORKLOG.md",
     "context/extracted/91-ACCEPTANCE.md",
-    "harness/approved_deps.txt",
+    "harness/api/testkeys.py",
     "harness/gate.py",
+    "harness/red-records.json",
     "harness/tests/test_acceptance_campaign.py"
   ],
   "interfaces_reviewed": [
-    "harness/tests/test_acceptance_campaign.py: the §6.1 lifecycle legs (the import + the verified digest, the worker extraction, the checkpoint/resume, the authoring families, the list membership + the reference resolution, the search + the pack, the restart-reread, the export, the purge + the ledger)",
-    "the §6.2 legs (the no-oracle 404, the idem convergence, the malformed token)",
-    "the §6.4 registry parity (the stdio import = the HTTP serve)"
+    "harness/tests/test_acceptance_campaign.py: the §6.1 lifecycle + the §6.2 laws + the §6.4 parity (the token legs through harness/api/testkeys.py)",
+    "harness/api/testkeys.py: the ES256 forging helper INSIDE the approved boundary (mint_key/bind_jwks/mint_token — the JWKS injection form)",
+    "harness/gate.py: the trusted TESTS registration"
   ],
   "v_model": {
     "component_verification": [

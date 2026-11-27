@@ -105,6 +105,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SET search_path = pg_catalog, arv;
 
+CREATE OR REPLACE FUNCTION arv.reject_reading_list_mutation() RETURNS trigger AS $$
+BEGIN
+    IF arv.purge_authorized() THEN
+        RETURN OLD;
+    END IF;
+    RAISE EXCEPTION 'ARV-RLS-006: % on %.% is refused — the reading-list header is append-only (the name immutable at this slice; the governed purge is the only authorized erasure, D-011)', TG_OP, TG_TABLE_SCHEMA, TG_TABLE_NAME;
+END;
+$$ LANGUAGE plpgsql SET search_path = pg_catalog, arv;
+
+CREATE OR REPLACE FUNCTION arv.reject_reading_list_member_mutation() RETURNS trigger AS $$
+BEGIN
+    IF arv.purge_authorized() THEN
+        RETURN OLD;
+    END IF;
+    RAISE EXCEPTION 'ARV-RLS-007: % on %.% is refused — the membership event history is append-only authoritative state (the current view is DERIVED, never a state column; the governed purge is the only erasure, D-011)', TG_OP, TG_TABLE_SCHEMA, TG_TABLE_NAME;
+END;
+$$ LANGUAGE plpgsql SET search_path = pg_catalog, arv;
+
 -- 3) THE ERASURE PROCEDURE (the sole authorized path)
 CREATE OR REPLACE PROCEDURE arv.governed_purge(
     p_owner TEXT, p_kind TEXT, p_entity_id UUID, p_reason TEXT)
@@ -231,18 +249,79 @@ BEGIN
         DELETE FROM arv.keyword_index WHERE kind = 'source' AND entity_id = p_entity_id AND owner_scope = p_owner;
         DELETE FROM arv.source WHERE id = p_entity_id AND owner_scope = p_owner;
     ELSIF p_kind = 'work' THEN
-        -- every source of the work (each one's own cascade), then the work
+        -- every source of the work (each one's own cascade), then the work.
+        -- THE LEDGERED-SOURCE SKIP (the SEV round-1 C5 repair): a source whose
+        -- ledger row already exists is FINAL — its erasure is done (any residue
+        -- rows are the recovery walk's own surface); recursing into it would
+        -- refuse ARV-PRG-004 and abort the whole work purge on an object that
+        -- is ALREADY purged. The skip is not a bypass: the ledger row is the
+        -- authority, and the recursion continues with the LIVE sources only.
         DELETE FROM arv.note_reference WHERE owner_scope = p_owner AND ref_kind = 'work' AND ref_id = p_entity_id;
-        FOR v_src IN SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner LOOP
+        FOR v_src IN SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner
+                     AND NOT EXISTS (SELECT 1 FROM arv.purge_ledger l
+                                     WHERE l.owner_scope = p_owner AND l.kind = 'source'
+                                     AND l.entity_id = arv.source.id) LOOP
             CALL arv.governed_purge(p_owner, 'source', v_src, p_reason);
         END LOOP;
+        -- the ledgered sources' RESIDUE rows drop here (the skip left them;
+        -- the work purge is the owner's final act over the whole tree)
+        DELETE FROM arv.keyword_index WHERE owner_scope = p_owner AND entity_id IN
+            (SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner)
+            AND kind IN ('highlight','bookmark');
+        DELETE FROM arv.highlight_lifecycle WHERE highlight_id IN
+            (SELECT h.id FROM arv.highlight h JOIN arv.source s ON s.id = h.source_id
+             WHERE s.work_id = p_entity_id AND s.owner_scope = p_owner);
+        DELETE FROM arv.bookmark_lifecycle WHERE bookmark_id IN
+            (SELECT bm.id FROM arv.bookmark bm JOIN arv.source s ON s.id = bm.source_id
+             WHERE s.work_id = p_entity_id AND s.owner_scope = p_owner);
+        DELETE FROM arv.highlight WHERE source_id IN
+            (SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner);
+        DELETE FROM arv.bookmark WHERE source_id IN
+            (SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner);
+        DELETE FROM arv.anchor WHERE source_id IN
+            (SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner);
+        DELETE FROM arv.reading_position WHERE source_id IN
+            (SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner);
+        DELETE FROM arv.reading_session WHERE source_id IN
+            (SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner);
+        DELETE FROM arv.journal_block WHERE source_id IN
+            (SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner);
+        DELETE FROM arv.reading_list_member WHERE source_id IN
+            (SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner);
+        DELETE FROM arv.passage WHERE generation_id IN
+            (SELECT g.id FROM arv.extraction_generation g JOIN arv.source s ON s.id = g.source_id
+             WHERE s.work_id = p_entity_id AND s.owner_scope = p_owner);
+        DELETE FROM arv.extraction_generation WHERE source_id IN
+            (SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner);
+        DELETE FROM arv.note_reference WHERE owner_scope = p_owner AND (
+            (ref_kind = 'source' AND ref_id IN (SELECT id FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner))
+            OR (ref_kind = 'anchor' AND ref_id IN (SELECT a.id FROM arv.anchor a JOIN arv.source s ON s.id = a.source_id WHERE s.work_id = p_entity_id AND s.owner_scope = p_owner))
+            OR (ref_kind = 'highlight' AND ref_id IN (SELECT h.id FROM arv.highlight h JOIN arv.source s ON s.id = h.source_id WHERE s.work_id = p_entity_id AND s.owner_scope = p_owner))
+            OR (ref_kind = 'bookmark' AND ref_id IN (SELECT bm.id FROM arv.bookmark bm JOIN arv.source s ON s.id = bm.source_id WHERE s.work_id = p_entity_id AND s.owner_scope = p_owner)));
+        DELETE FROM arv.source WHERE work_id = p_entity_id AND owner_scope = p_owner;
         DELETE FROM arv.keyword_index WHERE kind = 'work' AND entity_id = p_entity_id AND owner_scope = p_owner;
         DELETE FROM arv.work WHERE id = p_entity_id AND owner_scope = p_owner;
     END IF;
-    SET LOCAL arv.purge_in_progress = 'off';
+    -- NO epilogue: the marker is SET LOCAL — transaction-scoped, expiring at
+    -- the COMMIT/ROLLBACK itself. Turning it 'off' here would CLOBBER an
+    -- enclosing frame's marker (the work purge's recursive source calls: the
+    -- nested epilogue switched the marker off and the outer work DELETE met
+    -- the armed CAP-005 — the SEV round-1 C5-WORKFRESH finding). On means on
+    -- for the whole transaction; the transaction's end is the only off.
 END;
 $$;
 
--- 4) THE EXECUTE GRANT (arv_app may CALL the procedure; nobody else may)
+-- 4) THE LEDGER'S KIND VOCABULARY (the SEV round-1 P1 repair, SEV102-C6/C7):
+--    0013's CHECK admitted only the six families that existed at P3-09; the
+--    governed-purge surface (D-011's erasure contract) covers EVERY authored
+--    family — the journal blocks (0016) and the reading lists (0017) included.
+--    Without this amendment their ledger INSERT violates the CHECK and the
+--    whole erasure rolls back: two advertised purge kinds could never succeed.
+ALTER TABLE arv.purge_ledger DROP CONSTRAINT IF EXISTS purge_ledger_kind_check;
+ALTER TABLE arv.purge_ledger ADD CONSTRAINT purge_ledger_kind_check
+    CHECK (kind IN ('work','source','anchor','highlight','bookmark','note',
+                    'journal_block','reading_list'));
+
+-- 5) THE EXECUTE GRANT (arv_app may CALL the procedure; nobody else may)
 REVOKE EXECUTE ON PROCEDURE arv.governed_purge(TEXT, TEXT, UUID, TEXT) FROM PUBLIC;
 GRANT EXECUTE ON PROCEDURE arv.governed_purge(TEXT, TEXT, UUID, TEXT) TO arv_app;

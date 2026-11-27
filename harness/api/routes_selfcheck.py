@@ -1582,6 +1582,52 @@ def main() -> int:
             check("ARV-API-202", s == 401 and "ARV-AUTH-001" in b,
                   "the unauthenticated POST /api/v1/purge refuses 401")
 
+            # ---------------- the SEV round-1 repairs (regression guards) ----------------
+            # SEV102-E3 (P2): a hex-invalid uuid-SHAPED entity_id refuses the
+            # typed 422 at the boundary, never a crash-class 500 at the cast
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge",
+                                     dict(H, **{"Idempotency-Key": "k-102-p7"}),
+                                     body=json.dumps({"kind": "note",
+                                                      "entity_id": "gggggggg-gggg-gggg-gggg-gggggggggggg",
+                                                      "reason": "hex-invalid"}).encode()))
+            check("ARV-API-203", s == 422 and "ARV-PRG-002" in b,
+                  "the hex-invalid uuid-shaped entity_id refuses ARV-PRG-002 (the typed 422, never the cast's 500)")
+
+            # SEV102-E5 (P2): the cursor rides the ONE _q() literal home AND
+            # its uuid half validates at the boundary (entity_id is a UUID
+            # column — the row comparison casts) — a quote-bearing or
+            # non-uuid cursor is the typed 422, never a 500 from either the
+            # quoting shape or the cast
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/purge-ledger", H,
+                                     query=b"after=note%7Cabc%27def&limit=50"))
+            check("ARV-API-204", s == 422 and "ARV-QRY-004" in b,
+                  "the non-uuid keyset cursor refuses ARV-QRY-004 at the boundary (never repr()'s 500, never the cast's)")
+
+            # SEV102-C6/C7 (P1): the ledger's kind vocabulary admits EVERY
+            # authored family — a journal_block purge COMPLETES (0013's CHECK
+            # amended by 0021; before the repair the ledger INSERT violated it
+            # and the whole erasure rolled back)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/journal",
+                                     dict(H, **{"Idempotency-Key": "k-102-jb1"}),
+                                     body=json.dumps({"kind": "raw",
+                                                      "content": "the jb purge corpus"}).encode()))
+            ack_jb = json.loads(b) if b.startswith("{") else {}
+            jb_id = (ack_jb.get("result_ref", "") or "").split("@")[0]
+            check("ARV-API-205", s == 200 and bool(jb_id),
+                  "the journal block creates (the vocabulary-repair leg's target)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/purge",
+                                     dict(H, **{"Idempotency-Key": "k-102-p8"}),
+                                     body=json.dumps({"kind": "journal_block",
+                                                      "entity_id": jb_id,
+                                                      "reason": "the vocabulary repair (the SEV round-1 P1)"}).encode()))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-206", s == 200 and d.get("state") == "purged"
+                  and d.get("ledger_recorded") is True,
+                  "the journal_block purge COMPLETES (the 0021 CHECK amendment — the kind vocabulary covers every authored family)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/journal/{jb_id}", H))
+            check("ARV-API-207", s == 404,
+                  "the purged journal block 404s on the read (the erasure held)")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

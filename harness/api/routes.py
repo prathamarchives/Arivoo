@@ -1592,17 +1592,31 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
         after_clause = ""
         if after:
             # the keyset cursor: (kind, entity_id) — strictly after the named
-            # pair; a malformed cursor is the same 422 class as the bounds
+            # pair; a malformed cursor is the same 422 class as the bounds.
+            # THE LITERAL LAW (the SEV round-1 P2 repair, SEV102-E5): the pair
+            # rides _q() — ONE home for SQL string literals (repr() changes
+            # its quoting shape on embedded quotes and crashes the statement;
+            # _q() doubles them, always safe); the owner scope too — every
+            # value in this statement goes through the same home. THE UUID
+            # HALF: entity_id is a UUID column — the comparison itself casts,
+            # so a non-uuid entity half is a typed 422 at the boundary, never
+            # the cast's 500 (the E3 class, applied to the cursor)
             parts = after.split("|", 1)
-            if len(parts) != 2 or not all(parts):
+            _UUID_RE = __import__("re").compile(
+                r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+            if len(parts) != 2 or not all(parts) \
+                    or not _UUID_RE.match(parts[1].strip()):
                 raise KernelRefusal("ARV-QRY-004",
-                                    "the after cursor must be KIND|ENTITY_ID", 422)
-            after_clause = f" AND (kind, entity_id) > ({parts[0]!r}, {parts[1]!r})"
+                                    "the after cursor must be KIND|ENTITY_ID "
+                                    "(the entity a uuid)", 422)
+            after_clause = (" AND (kind, entity_id) > (" + _q(parts[0]) + ", "
+                            + _q(parts[1]) + ")")
         sql = ("SELECT kind || '|' || entity_id || '|' || "
                "to_char(created_at, 'YYYY-MM-DD\"T\"HH24:MI:SS') "
                "FROM arv.purge_ledger WHERE owner_scope = "
-               f"{ctx['owner_scope']!r}{after_clause} "
-               "ORDER BY kind, entity_id LIMIT " + str(limit_i + 1) + ";")
+               + _q(ctx["owner_scope"]) + after_clause +
+               " ORDER BY kind, entity_id LIMIT " + str(limit_i + 1) + ";")
         from harness.adapters import pg as _pg
         r = _pg.psql("SET app.current_owner=" +
                      _q(ctx["owner_scope"]) + "; " + sql, db=db, user="arv_app")
@@ -1647,8 +1661,14 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
                                 "the kind must be one of the governed-purge "
                                 "vocabulary (work|source|anchor|highlight|"
                                 "bookmark|note|journal_block|reading_list)", 422)
-        if not isinstance(entity_id, str) or len(entity_id) != 36 \
-                or entity_id.count("-") != 4:
+        # the uuid law (the SEV round-1 P2 repair, SEV102-E3): the SHAPE alone
+        # (36 chars, 4 dashes) admits hex-invalid strings ('gggggggg-...') that
+        # would die at the ::uuid CAST inside the adapter call — the typed 422
+        # at the boundary, never a crash-class 500
+        _UUID_RE = __import__("re").compile(
+            r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+            r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+        if not isinstance(entity_id, str) or not _UUID_RE.match(entity_id):
             raise KernelRefusal("ARV-PRG-002",
                                 "the entity_id must be a uuid", 422)
         if not isinstance(reason, str) or not reason.strip() or len(reason) > 512:

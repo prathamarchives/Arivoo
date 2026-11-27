@@ -56,7 +56,7 @@ BEGIN
     IF arv.purge_authorized() THEN
         RETURN OLD;
     END IF;
-    RAISE EXCEPTION 'ARV-EV-001: % on %.% is refused — evidence rows are append-only (LAW-06)', TG_OP, TG_TABLE_SCHEMA, TG_TABLE_NAME;
+    RAISE EXCEPTION 'ARV-EV-001: evidence rows are immutable (LAW-19 analog) — % on arv.evidence_event id=% rejected; revisions and tombstones are NEW rows; the owner-run purge is the only authorized erasure (D-011)', TG_OP, OLD.id;
 END;
 $$ LANGUAGE plpgsql SET search_path = pg_catalog, arv;
 
@@ -65,7 +65,7 @@ BEGIN
     IF arv.purge_authorized() THEN
         RETURN OLD;
     END IF;
-    RAISE EXCEPTION 'ARV-CMD-005: % on arv.command_log is refused — the idempotency ledger is append-only (exactly-once is a contract)', TG_OP;
+    RAISE EXCEPTION 'ARV-EV-002: the command log is immutable (LAW-23 substrate) — % on arv.command_log key=% rejected; the log IS the exactly-once record', TG_OP, OLD.idempotency_key;
 END;
 $$ LANGUAGE plpgsql SET search_path = pg_catalog, arv;
 
@@ -74,7 +74,7 @@ BEGIN
     IF arv.purge_authorized() THEN
         RETURN OLD;
     END IF;
-    RAISE EXCEPTION 'ARV-SYN-010: DELETE on arv.outbox is refused — the sync-intent audit trail is authoritative state';
+    RAISE EXCEPTION 'ARV-SYN-007: DELETE on arv.outbox is refused — the sync-intent audit trail is authoritative state (RTM §4.4; the governed purge is the only erasure, D-011) — key=%', OLD.idempotency_key;
 END;
 $$ LANGUAGE plpgsql SET search_path = pg_catalog, arv;
 
@@ -83,7 +83,7 @@ BEGIN
     IF arv.purge_authorized() THEN
         RETURN OLD;
     END IF;
-    RAISE EXCEPTION 'ARV-POS-004: % on arv.reading_position is refused — position rows are append-only (the derived current is max-ordinal)', TG_OP;
+    RAISE EXCEPTION 'ARV-POS-005: arv.reading_position is append-only (id=%) — the reading-position history is authoritative state (the governed purge is the only erasure, D-011); the last-saved position is DERIVED (max ordinal), never a state column', OLD.id;
 END;
 $$ LANGUAGE plpgsql SET search_path = pg_catalog, arv;
 
@@ -92,7 +92,7 @@ BEGIN
     IF arv.purge_authorized() THEN
         RETURN OLD;
     END IF;
-    RAISE EXCEPTION 'ARV-SES-005: % on arv.reading_session is refused — session events are append-only', TG_OP;
+    RAISE EXCEPTION 'ARV-SES-006: arv.reading_session is append-only (id=%) — the behavior-event history is authoritative state (the governed purge is the only erasure, D-011); the listing is DERIVED, never a state column', OLD.id;
 END;
 $$ LANGUAGE plpgsql SET search_path = pg_catalog, arv;
 
@@ -101,7 +101,7 @@ BEGIN
     IF arv.purge_authorized() THEN
         RETURN OLD;
     END IF;
-    RAISE EXCEPTION 'ARV-JNL-006: % on arv.journal_block is refused — the writing lab is append-only (revisions are NEW rows)', TG_OP;
+    RAISE EXCEPTION 'ARV-JNL-006: % on %.% is refused — journal blocks are append-only (revisions are NEW rows; the governed purge is the only authorized erasure, D-011)', TG_OP, TG_TABLE_SCHEMA, TG_TABLE_NAME;
 END;
 $$ LANGUAGE plpgsql SET search_path = pg_catalog, arv;
 

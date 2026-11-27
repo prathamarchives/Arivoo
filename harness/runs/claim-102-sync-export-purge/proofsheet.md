@@ -1,14 +1,17 @@
 # PROOF SHEET — slice claim-102-sync-export-purge (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): 2596cb445267bae338daa9aeac9d2bce6981d0aa
-- generated (last record's timestamp): 2026-11-27T11:49:52.751691+00:00
-- run records: 4
+- commit (last run record's): c93b742567c9ba7d21bad21f5f44e0d5cffdbee6
+- generated (last record's timestamp): 2026-11-27T13:21:56.984392+00:00
+- run records: 7
 
 ## Run records (command, exit, output digest)
 - `.venv-waved/bin/python -I harness/api/routes_selfcheck.py` -> exit 0 · output sha256 00df697c545293cd · 2026-11-27T11:48:31.913720+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 1 · output sha256 4836e059e808e8e1 · 2026-11-27T11:48:36.793206+00:00
 - `python3 harness/tests/test_api_routes.py` -> exit 0 · output sha256 25fb44631a0938a6 · 2026-11-27T11:48:53.101008+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 266e48f6c41f7697 · 2026-11-27T11:49:52.751691+00:00
+- `.venv-waved/bin/python -I harness/api/routes_selfcheck.py` -> exit 0 · output sha256 4125e78ee1fad064 · 2026-11-27T13:21:36.158822+00:00
+- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 266e48f6c41f7697 · 2026-11-27T13:21:40.576148+00:00
+- `python3 harness/tests/test_api_routes.py` -> exit 0 · output sha256 7f8b2ce5f5586110 · 2026-11-27T13:21:56.984392+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
@@ -19,4 +22,4 @@
 - the KWR-002 map row (the map-family followup, unchanged); the semantic/model work (Q7 open — deterministic only)
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 75498c21b8e6949b398857ad739da523ddab99285a38616fecf244ab4a93c363
+- sheet sha256 (of the content above, excluding this line): 4f9fe38080bef5af7aba22c7387ee9be8cad82037060045df80af25cd1cb417b

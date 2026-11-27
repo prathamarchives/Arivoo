@@ -1212,3 +1212,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-103-remote-mcp/.
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the five PR-head checks + the D-042 review; a live Supabase token; the deployed surface; the SSE stream form; the MCP session management.
 - Next: Workstream 8 — the storage provider ratification (Q12/Q17 owner-gated: the recommendation prepared, the ratification the owner's).
+
+## Task 126 (CLAIM-104, session 65, 2026-11-27) — the durable workers (Workstream 9) + the WS8 decision request
+- What: MIGRATION 0022 (arv.job + the SKIP LOCKED claim with the fencing token + the fenced completion + the poison guard; RLS; the SECURITY DEFINER claim/complete per the 0019 precedent) + harness/worker.py (the private loop over the SAME kernel arms; the bounded payload law; the idempotent re-run; the CMD-409 dead class) + the WS8 storage decision request (R2 recommended — the owner's ONE consolidated gate, blocking only the provider adapter slice); INT-171 minted; the 103 close + STATE re-derivation riding.
+- Verified: WRK-01..10 RED at 88a1b5c (9 failures) → GREEN at the head (the §12.2 laws + the end-to-end loop: claim → the SAME extract arm → the fenced completion → the generation).
+- Evidence: harness/runs/claim-104-durable-workers/.
+- Unresolved: Q6–Q12, Q16–Q19 open; the WS8 ratification pending (the owner's). Not-verified: the five PR-head checks; the deployed surface; the persistent polling form under a supervisor; the remote 0021/0022 application.
+- Next: Workstream 10 — the runtime eval + the container + the Cloudflare domain (Q18 owner-gated at the deploy decision).

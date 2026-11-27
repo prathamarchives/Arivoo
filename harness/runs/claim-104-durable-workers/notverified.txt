@@ -1,0 +1,6 @@
+the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
+a live Supabase-issued token; uvicorn over a real socket; the deployed surface (the Workstream 10 slice)
+the persistent (polling) worker form under a supervisor — the --once batch form proven; the service deployment is Workstream 10's own slice
+the remote 0021/0022 application (the Supabase migration credential never provided to this session)
+the storage provider adapter (the WS8 gate: the owner's ratification pending — the decision request prepared)
+the semantic/model work (Q7 open — deterministic only)

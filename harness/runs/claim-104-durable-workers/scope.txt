@@ -1,0 +1,14 @@
+# CLAIM-104 — the durable workers (the directive's Workstream 9) + the 103 close + the WS8 decision request riding.
+CLAIMS.md INT-171
+STATE.md INT-171
+context/WORKLOG.md INT-171
+INTENT-LEDGER.md INT-171
+AGENTS.md INT-171
+harness/migrations/0022_durable_jobs.sql INT-171
+harness/worker.py INT-171
+harness/tests/test_workers.py INT-171
+harness/gate.py INT-171 (the trusted TESTS registration — the RED-008 repair)
+harness/red-records.json INT-171
+harness/runs/claim-104-durable-workers INT-171
+context/extracted/89-DURABLE-WORKERS.md INT-171
+context/storage-decision-request-2026-11-27.md INT-171 (the WS8 deliverable: the owner's ONE consolidated gate)

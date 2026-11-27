@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-098-highlights-bookmarks",
   "base_sha": "0d4b861fd80fc8621b80a430b7ac6ff56d57f5b7",
-  "reviewed_diff_sha256": "31fd22a3d68a6ff68849ae971a454fe7cbd81b9e68dfbb55bf1ab25ff4b35c08",
+  "reviewed_diff_sha256": "acba09ba2b033880c40c9eca44fd2cc421a6bf44a0e370eae6b8b1c170a17ced",
   "intent_ids": [
     "INT-165"
   ],

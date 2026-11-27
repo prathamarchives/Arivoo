@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-104-durable-workers",
   "base_sha": "c7c8495d9f84ac3d381d88eff8348290f1878da2",
-  "reviewed_diff_sha256": "2ffcf2067d8577250183648c7b55a3fc256a9dcba87fc6af4ed7f7be4c14ef5a",
+  "reviewed_diff_sha256": "e623698de2bb80620648e68927864273a09ea7c5d9eed1a8be434d96733cf149",
   "intent_ids": [
     "INT-171"
   ],
@@ -24,6 +24,7 @@
     "context/storage-decision-request-2026-11-27.md",
     "harness/gate.py",
     "harness/migrations/0022_durable_jobs.sql",
+    "harness/red-records.json",
     "harness/tests/test_workers.py",
     "harness/worker.py"
   ],

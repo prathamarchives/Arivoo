@@ -1630,11 +1630,18 @@
  "harness/tests/test_workers.py": {
   "schema": 2,
   "binding_commit": "88a1b5c",
-  "binding_sha256": "7597fda990b467bfc1ada7d0ca09f88fb703359436811e3724f35221ad968b33",
+  "binding_sha256": "37ac9d51752fe75b040bb58fbebb438ffdc7655c78e6c6bb67aaf0a5f13d512f",
   "red_exit": 1,
   "red_code": "WRK-02..10 (the suite's refusal list at the pre-machine tree)",
   "red_evidence": "the durable-workers suite observed RED at the test-only commit 88a1b5c (the pre-machine tree: the suite without migration 0022 + worker.py): exit 1, 9 checks failing — WRK-01 passes (the migration's absence is caught by the migrate step) and WRK-02..10 refuse (the machine absent; the observed red, never an assertion)",
   "current_sha256": "7597fda990b467bfc1ada7d0ca09f88fb703359436811e3724f35221ad968b33",
-  "amendments": []
+  "amendments": [
+   {
+    "prior_sha256": "37ac9d51752fe75b040bb58fbebb438ffdc7655c78e6c6bb67aaf0a5f13d512f",
+    "new_sha256": "7597fda990b467bfc1ada7d0ca09f88fb703359436811e3724f35221ad968b33",
+    "note": "the LAW-24 repair (the adapters' ids) after the RED observation — additions only",
+    "observed_at": "2026-11-27T15:30:00+00:00"
+   }
+  ]
  }
 }

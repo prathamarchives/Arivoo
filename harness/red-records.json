@@ -1541,7 +1541,7 @@
     "red_exit": 1,
     "red_code": "ARV-API-001..014 (the suite's refusal list at the pre-slice tree)",
     "red_evidence": "the api routes suite observed RED at the pre-slice tree (main 87cced7, a git worktree with the pinned venv + the migrated rig): the routes battery there carried no kernel-backed route checks, so all fourteen ARV-API checks FAIL \u2014 exit 1, refusal list ARV-API-001..014 (the observed red, never an assertion)",
-    "current_sha256": "70310470f629ff647f798a53e8ccedab280e866895d39bd7a6b07cd17809db68",
+    "current_sha256": "ac2d1dd6652219c154187a7cab6dc2c51a51ad1fd18fbefe8d4c7a95ed953685",
     "amendments": [
       {
         "prior_sha256": "63891040c176de67d52cd59399f9797c3a478b1c2d1830f2b6735caa41abd01b",
@@ -1578,6 +1578,12 @@
         "new_sha256": "70310470f629ff647f798a53e8ccedab280e866895d39bd7a6b07cd17809db68",
         "note": "the notes/journal/references battery (ARV-API-089..131) observed RED at the test-only commit 83fa734 (the pre-slice main 1e11cce + the battery + the markers): exit 1, 42 checks failing \u2014 the family routes do not exist; the substantive reds 089..125, 128..131; the 404-shaped checks 126/127 pass vacuously through the absent-route path (the disclosed class)",
         "observed_at": "2026-11-27T09:27:18.193188+00:00"
+      },
+      {
+        "prior_sha256": "70310470f629ff647f798a53e8ccedab280e866895d39bd7a6b07cd17809db68",
+        "new_sha256": "ac2d1dd6652219c154187a7cab6dc2c51a51ad1fd18fbefe8d4c7a95ed953685",
+        "note": "the reading-lists battery (ARV-API-132..152) observed RED at the test-only commit fd49144 (the pre-slice main ad1c1bb + the battery + the markers): exit 1, 21 checks failing \u2014 the family routes do not exist; the substantive reds 132..151; the 404-shaped check 152 passes vacuously through the absent-route path (the disclosed class)",
+        "observed_at": "2026-11-27T09:59:36.356755+00:00"
       }
     ]
   },

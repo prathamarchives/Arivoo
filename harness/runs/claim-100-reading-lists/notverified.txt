@@ -1,0 +1,5 @@
+the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
+a live Supabase-issued token end-to-end; uvicorn over a real socket; the deployed route surface (the Workstream 10 slice)
+the KWR-002 map row (the named followup from the 099 SEV — byte-parity with the imports family)
+the retrieval/sync/export families (Workstreams 5-6)
+the remote btree/TOAST parity (carried from record 80 §9)

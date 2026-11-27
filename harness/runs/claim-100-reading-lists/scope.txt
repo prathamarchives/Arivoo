@@ -1,0 +1,12 @@
+# CLAIM-100 — the §11.2 Reading lists family (the directive's Workstream 4 family 7 — the last row) + the 099 close riding.
+CLAIMS.md INT-167
+STATE.md INT-167
+context/WORKLOG.md INT-167
+INTENT-LEDGER.md INT-167
+AGENTS.md INT-167
+harness/api/routes.py INT-167
+harness/api/routes_selfcheck.py INT-167
+harness/tests/test_api_routes.py INT-167
+harness/red-records.json INT-167
+harness/runs/claim-100-reading-lists INT-167
+context/extracted/85-READING-LISTS.md INT-167

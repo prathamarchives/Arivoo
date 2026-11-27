@@ -96,6 +96,9 @@ _HTTP_BY_PREFIX = (
     ("ARV-NTE-002", 409),   # the note revise on tombstoned (restore first)
     ("ARV-NTE-004", 409),   # the note tombstone alternation
     ("ARV-NTE-005", 409),   # the note restore alternation
+    # CLAIM-100 (the reading-lists family): the name law is a client-actionable
+    # 422; the list/binding no-oracles join the 404 family below
+    ("ARV-RLS-003", 422),   # the list name law (1..512, no NULs)
 )
 
 
@@ -115,7 +118,7 @@ def _map_kernel_refusal(line: str) -> KernelRefusal:
                         "ARV-HLC-001", "ARV-BMK-001", "ARV-CAP-002",
                         "ARV-POS-001", "ARV-SES-001", "ARV-NTE-001",
                         "ARV-JNL-001", "ARV-NTE-003", "ARV-JNL-005",
-                        "ARV-REF-001")):
+                        "ARV-REF-001", "ARV-RLS-001", "ARV-RLS-002")):
         return KernelRefusal(code, msg, 404)
     # every OTHER named-but-unmapped kernel code is a server-side failure the
     # client cannot act on (the live example: F6's ARV-CMD-010, proven
@@ -1120,6 +1123,102 @@ def build_router(verifier: "_auth.Verifier", db: str) -> APIRouter:
             raise KernelRefusal("ARV-QRY-404", "the reference did not resolve", 404)
         return JSONResponse(status_code=200, content={"row": rows[0],
                                                       "api_version": page.get("api_version", 1)})
+
+    # ---- CLAIM-100: the §11.2 Reading lists family (the directive's
+    # Workstream 4, family 7 — the last row: create/list/member add/remove/
+    # current membership over the kernel's own event machine; the identity
+    # is the uuid, NEVER the name — two lists may share one; the current
+    # membership is DERIVED from the append-only event rows) ----
+
+    # POST /api/v1/reading-lists — 'create': the owner's own label
+    @router.post("/api/v1/reading-lists")
+    async def create_reading_list(request: Request, ctx: dict = Depends(verified),
+                                  idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        body = await _json_body(request, max_bytes=64 * 1024)
+        name = body.get("name")
+        if not isinstance(name, str):
+            raise KernelRefusal("ARV-QRY-004", "the body must carry a name string", 422)
+        argv = _capture_argv("create_reading_list", ctx, idempotency_key) +             ["--name", name]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # GET /api/v1/reading-lists — 'list': the owner's lists with the DERIVED
+    # member count (bounded page; NO name uniqueness implied — the identity
+    # is the uuid)
+    @router.get("/api/v1/reading-lists")
+    async def list_reading_lists(ctx: dict = Depends(verified),
+                                 limit: str = "50", after: str = ""):
+        return await _bounded_list(ctx, "list-lists", limit, after)
+
+    # GET /api/v1/reading-lists/{id} — 'current membership': the derived view
+    # over the membership event rows (the last op per pair wins)
+    @router.get("/api/v1/reading-lists/{list_id}")
+    async def get_reading_list(list_id: str, ctx: dict = Depends(verified),
+                               limit: str = "50", after: str = ""):
+        if not list_id or len(list_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the list id is malformed", 422)
+        try:
+            limit_i = int(limit)
+        except ValueError:
+            raise KernelRefusal("ARV-QRY-004", "limit must be an integer", 422)
+        if not (LIST_LIMIT_BOUNDS[0] <= limit_i <= LIST_LIMIT_BOUNDS[1]):
+            raise KernelRefusal("ARV-QRY-004",
+                                f"limit {limit} outside [{LIST_LIMIT_BOUNDS[0]}, "
+                                f"{LIST_LIMIT_BOUNDS[1]}]", 422)
+        argv = [sys.executable, str(REPO / "harness" / "query.py"),
+                "get-list", "--owner", ctx["owner_scope"],
+                "--id", list_id, "--limit", str(limit_i)]
+        if after:
+            argv += ["--after", after]
+        # an EMPTY membership is a legitimate 200 answer (the kernel's exit-0
+        # header + more=false page); the ABSENT list is the kernel's own
+        # exit-1 ARV-QRY-001 refusal — _query_kernel raises it before here,
+        # mapped to the no-leak 404 by the §11.4 family. The two shapes never
+        # conflated: empty rows serve the empty page.
+        page = _query_kernel(argv, db)
+        return JSONResponse(status_code=200, content=page)
+
+    # POST /api/v1/reading-lists/{id}/members — 'member add': ONE append-only
+    # event; the alternation law lives at the substrate (the honest unknown
+    # through §11.4 when it fires)
+    @router.post("/api/v1/reading-lists/{list_id}/members")
+    async def add_list_member(list_id: str, request: Request,
+                              ctx: dict = Depends(verified),
+                              idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not list_id or len(list_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the list id is malformed", 422)
+        body = await _json_body(request, max_bytes=64 * 1024)
+        source_id = body.get("source_id")
+        if not source_id or not isinstance(source_id, str) or len(source_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the body must carry a source_id", 422)
+        argv = _capture_argv("add_to_list", ctx, idempotency_key) +             ["--list", list_id, "--source", source_id]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
+
+    # DELETE /api/v1/reading-lists/{id}/members/{source_id} — 'member remove'
+    @router.delete("/api/v1/reading-lists/{list_id}/members/{source_id}")
+    async def remove_list_member(list_id: str, source_id: str,
+                                 ctx: dict = Depends(verified),
+                                 idempotency_key: str = Header(default="")):
+        if not idempotency_key or len(idempotency_key) > 200:
+            raise KernelRefusal("ARV-API-400",
+                                "the Idempotency-Key header is required (the "
+                                "§11.3 write law: every write carries one)", 400)
+        if not list_id or len(list_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the list id is malformed", 422)
+        if not source_id or len(source_id) > 128:
+            raise KernelRefusal("ARV-QRY-004", "the source id is malformed", 422)
+        argv = _capture_argv("remove_from_list", ctx, idempotency_key) +             ["--list", list_id, "--source", source_id]
+        ack = _run_kernel(argv, db, timeout=120.0)
+        return JSONResponse(status_code=200, content=ack)
 
     return router
 

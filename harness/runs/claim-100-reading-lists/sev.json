@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-100-reading-lists",
+  "base_sha": "ad1c1bb452606d0ece02d794ec68bafd99f39e7a",
+  "reviewed_diff_sha256": "2111836e4425e47cc74a72ac4e42bce9dfea31757dbcb0b924c5850b28317113",
+  "intent_ids": [
+    "INT-167"
+  ],
+  "requirement_ids": [
+    "SYS-01",
+    "SYS-03",
+    "SYS-04",
+    "SYS-05",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2",
+    "C5"
+  ],
+  "changed_components": [
+    "AGENTS.md",
+    "CLAIMS.md",
+    "INTENT-LEDGER.md",
+    "STATE.md",
+    "context/WORKLOG.md",
+    "context/extracted/85-READING-LISTS.md",
+    "harness/api/routes.py",
+    "harness/api/routes_selfcheck.py",
+    "harness/red-records.json",
+    "harness/tests/test_api_routes.py"
+  ],
+  "interfaces_reviewed": [
+    "POST /api/v1/reading-lists (harness/api/routes.py): the name carried to the kernel's own name law; the uuid identity (names may duplicate)",
+    "GET /api/v1/reading-lists (harness/api/routes.py): the bounded page over list-lists with the derived member_count",
+    "GET /api/v1/reading-lists/{id} (harness/api/routes.py): the derived current membership; the EMPTY page a 200 answer; the ABSENT list the kernel's own ARV-QRY-001 no-leak 404 (the exit-semantics discriminator \u2014 no second existence probe)",
+    "POST /api/v1/reading-lists/{id}/members + DELETE /api/v1/reading-lists/{id}/members/{source_id} (harness/api/routes.py): the append-only event writes; the RLS-001/002 no-oracles; the alternation at the substrate (the honest ARV-CMD-010 500, the raw cause never echoed)",
+    "the \u00a711.4 map rows (harness/api/routes.py): RLS-003 -> 422; RLS-001/002 -> the no-leak 404 family"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01: the full battery at the head -> exit 0, 168 PASS (ARV-ROUTE-001..007 + ARV-API-001..152)",
+      "the kernel probes BEFORE the battery: the duplicate-add/remove alternation pinned (ARV-CMD-010 with the raw RLS-008 cause at the CLI; the 500 no-internals shape through the route), the list/membership row shapes pinned"
+    ],
+    "integration_verification": [
+      "the routes call ONLY the existing kernel arms (create_reading_list, add_to_list, remove_from_list; list-lists, get-list) \u2014 zero kernel files in the diff",
+      "the RED at fd49144 re-observed: exit 1, 21 failures, the routes provably absent"
+    ],
+    "system_verification": [
+      "python3 tools/verify_canonical_layer.py -> exit 0 (149 intents, the record-85 pointer fresh)",
+      "python3 harness/tests/test_api_routes.py -> exit 0; the gate at the head GREEN"
+    ],
+    "validation": [
+      "the requirement trace: SYS-01 (the event-write semantics \u2014 the spine's ack verbatim), SYS-03 (the owner isolation \u2014 the cross-owner legs 150..152), SYS-04 (local_durable on every commit), SYS-05 (the typed errors \u2014 the RLS map rows), SYS-11 (the \u00a711.2 Reading lists row served \u2014 Workstream 4 COMPLETE)",
+      "ARV-API-132..152 RED-first at fd49144, GREEN at the head; the empty-page conflation caught by the battery's own 142 and repaired before any evidence run"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-100-1",
+      "scenario": "the membership read of an EXISTING list with NO current members",
+      "expected": "a 200 page with empty rows (the derived view's honest empty answer)",
+      "observed": "first draft: a 404 (the conflation); after the repair: the 200 empty page \u2014 the kernel's exit semantics the discriminator",
+      "control": "the battery's 142 check (RED-first caught it)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-100-2",
+      "scenario": "the duplicate member add (the pair already current)",
+      "expected": "the substrate's alternation refusal surfaced as the honest ARV-CMD-010 500 (the raw RLS-008 cause never echoed)",
+      "observed": "verified live through the route; pinned by ARV-API-140",
+      "control": "the kernel's own 0017 insert guard + the \u00a711.4 fallback map",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-100-3",
+      "scenario": "the cross-owner legs (owner B against owner A's lists/memberships)",
+      "expected": "the RLS-001 no-oracle 404s; the empty list page; the no-leak membership read",
+      "observed": "verified live (150..152 PASS)",
+      "control": "the kernel's own no-oracle codes + the battery's cross-owner legs",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the five PR-head CI checks and this PR's D-042 review (observed after the PR opens)",
+    "a live Supabase-issued token; uvicorn over a real socket; the deployed surface (Workstream 10)",
+    "the KWR-002 map row and the alternation's named-409 candidate (the map-family followup, now two members)",
+    "the retrieval/sync/export families (Workstreams 5-6); the remote btree/TOAST parity (carried)"
+  ],
+  "builder_context": "builder-zcode-session65-slice-claim-100",
+  "reviewer_context": "reviewer-inline-verification-claim-100 (the verification design executed in the builder's session with the battery's RED-first discipline as the falsification floor \u2014 a declared distinct-context limit, disclosed per ARV-SEV-007's own note)",
+  "disposition": "PASS",
+  "review_summary": "PASS \u2014 zero findings; the five-route reading-lists surface over the kernel's own event machine, the adapter law held (zero kernel files in the diff), the empty-page conflation caught RED-first and repaired before evidence, the alternation's honest-unknown shape pinned.",
+  "sheet_section": true
+}

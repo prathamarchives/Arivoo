@@ -1,0 +1,13 @@
+# CLAIM-102 — the §11.2 Sync + Export/restore rows + the governed-purge surface (the directive's Workstream 6) + the 101 close riding.
+CLAIMS.md INT-169
+STATE.md INT-169
+context/WORKLOG.md INT-169
+INTENT-LEDGER.md INT-169
+AGENTS.md INT-169
+harness/api/routes.py INT-169
+harness/api/routes_selfcheck.py INT-169
+harness/tests/test_api_routes.py INT-169
+harness/migrations/0021_governed_purge.sql INT-169
+harness/red-records.json INT-169
+harness/runs/claim-102-sync-export-purge INT-169
+context/extracted/87-SYNC-EXPORT-PURGE.md INT-169

@@ -1191,3 +1191,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-100-reading-lists/.
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the five PR-head checks + the D-042 review; a live Supabase token; uvicorn on a real socket; the deployed surface; the KWR-002 map row (the named followup); the Workstream 5-6 families.
 - Next: Workstream 5 — the retrieval API (search/context packs).
+
+## Task 123 (CLAIM-101, session 65, 2026-11-27) — the retrieval API (Workstream 5)
+- What: the §11.2 Retrieval family: GET /api/v1/search (the AND-semantics admission over the kernel's own arm — no paging parameters the arm does not carry) + GET /api/v1/context-packs (the provenance-carrying assembly: the trust labels, the matched terms, the why, the typed trailer metadata kept/total/truncated/budget/used/after) — the ONE pipe-framed page parser; the §11.4 map grows the KWR-003 422; INT-168 minted; the 100 close + STATE re-derivation riding.
+- Verified: ARV-API-153..164 RED at the test-only commit 15d59f7 (exit 1, 12 failures — all substantive) → the battery GREEN at the implementation head (180 PASS; three mid-slice repairs: the retrieval-routes anchor consuming remove_list_member's tail — caught by the CLAIM-100 checks' own regression; the search arm's no-paging contract; the admission-list's row-order presence assertions).
+- Evidence: harness/runs/claim-101-retrieval-api/.
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the five PR-head checks + the D-042 review; a live Supabase token; uvicorn on a real socket; the deployed surface; the KWR-002 map row (the map-family followup, now with the alternation candidate); the Workstream 6+ families.
+- Next: Workstream 6 — the sync/export/restore/purge API.

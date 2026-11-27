@@ -1,0 +1,5 @@
+the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
+a live Supabase-issued token end-to-end; uvicorn over a real socket; the deployed route surface (the Workstream 10 slice)
+the KWR-002 map row + the alternation's named-409 candidate (the map-family followup, two members)
+the sync/export/restore/purge families (Workstream 6), the remote MCP transport (7), storage/workers (8-9), runtime+domain (10)
+the semantic/model work (Q7 open — deterministic only); the remote btree/TOAST parity (carried from record 80 §9)

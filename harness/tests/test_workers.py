@@ -80,7 +80,7 @@ def main() -> int:
         check("WRK-09", r.returncode == 0 and r.stdout.strip() not in ("", "0"),
               "the next job claims fine after the poison (the queue unblocked)")
         # WRK-10: the end-to-end loop (the worker over a real extract job)
-        src = subprocess.run([str(REPO / ".venv-waved/bin/python"), "-I", str(REPO / "harness/commands.py"),
+        src = subprocess.run([sys.executable, "-I", str(REPO / "harness/commands.py"),
                               "import_source", "--owner", "A", "--client-id", "t104", "--idem-key", "t104-i",
                               "--title", "T104", "--file", "/tmp/w9.txt"],
                              capture_output=True, text=True, timeout=120, env=dict(ENV, PGDATABASE=db))
@@ -89,7 +89,7 @@ def main() -> int:
         psql(db, "SET app.current_owner='A'; INSERT INTO arv.job (id, owner_scope, job_type, payload_version, "
                  f"payload, idem_key, state, created_at, updated_at) VALUES (gen_random_uuid(), 'A', "
                  f"'extract_source', 1, '{{\"source_id\": \"{sid}\"}}', 't104-e1', 'queued', now(), now());")
-        w = subprocess.run([str(REPO / ".venv-waved/bin/python"), "-I", str(REPO / "harness/worker.py"),
+        w = subprocess.run([sys.executable, "-I", str(REPO / "harness/worker.py"),
                             "--name", "t104w", "--once"],
                            capture_output=True, text=True, timeout=300, env=dict(ENV, PGDATABASE=db))
         st = psql(db, "SELECT state FROM arv.job WHERE idem_key='t104-e1';", user="postgres").stdout.strip()

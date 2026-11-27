@@ -1,12 +1,13 @@
 # PROOF SHEET — slice claim-105-runtime (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): cbb1ca91de19dfd1c374bfe49e010ff7335df80c
-- generated (last record's timestamp): 2026-11-27T15:01:48.173298+00:00
-- run records: 2
+- commit (last run record's): 18a9bc40c96a2bfcf1eeff4f0424c0a42b412a37
+- generated (last record's timestamp): 2026-11-27T15:05:04.939742+00:00
+- run records: 3
 
 ## Run records (command, exit, output digest)
 - `python3 tools/verify_canonical_layer.py` -> exit 1 · output sha256 d36e83583fac7753 · 2026-11-27T15:00:19.990930+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 a4a7b9994c5cc275 · 2026-11-27T15:01:48.173298+00:00
+- `.venv-waved/bin/python -I harness/tests/test_workers.py` -> exit 0 · output sha256 2171699afad38e18 · 2026-11-27T15:05:04.939742+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
@@ -17,11 +18,11 @@
 - the storage provider adapter (the WS8 gate — the owner's ratification pending)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: afa540c4e39c249bc9bdd4bfc5ea7b72367e109bc6e22b206b72b3f7a5c8d478
-- reviewed_diff_sha256: 09e38e16ec0b799b03d67ef09a21f332498651990a853ced8fd00002e9061836
+- report sha256: ab744c5660b4665dd5aca2dcad3bf98c426daf9c9af8cb362f8419fad0463dda
+- reviewed_diff_sha256: d306235bcb00f3b15ef1b7d5cf09cf5a26eebd355cee3c19cf26266f35c43af3
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 5
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 5332be01c1f3c6d373c5422269f6b0b37e14da4d4c510d4414943cce8c625ca9
+- sheet sha256 (of the content above, excluding this line): bc1dabace32748c14e2322e863f904168d5dea6ca250bca9f1a0f0901245fd70

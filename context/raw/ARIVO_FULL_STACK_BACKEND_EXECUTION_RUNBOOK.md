@@ -1073,3 +1073,23 @@ The Arivo full-stack backend is ready only when:
 - Remaining advanced retrieval capabilities stay explicitly separated by their own phase and approval gates.
 
 The target is a working Arivo product, not a collection of deployed services that do not yet form one usable system.
+
+## §17 Deployment (Workstream 10 — the runtime-neutral container + the tunnel front)
+
+1. **The image**: `docker build -t arivo:<sha> .` — python:3.12-slim, the locked
+   requirements, the pg client, a non-root user; the three start commands: `api`
+   (`python3 -m harness.api`, :8080, the fail-closed secret matrix), `worker`
+   (`python3 harness/worker.py --name <id>`, the durable loop), `migrate`
+   (`python3 harness/migrate.py`, the release oracle — run before api/worker).
+2. **The front** (the Q18-ratified form): the Cloudflare Tunnel — `cloudflared`
+   with outbound-only 443; the ingress hostname `arivo.itscatalyst.com` ->
+   `http://localhost:8080`; the edge cert + the tunnel's origin cert (no inbound
+   ports, no origin IP exposure). DNS: the tunnel's CNAME, proxied.
+3. **The release order**: migrate -> api -> worker (the health gate between:
+   `/health/ready` green before the worker starts).
+4. **The verification** (§16's own list): public HTTPS valid; origin TLS; the
+   database `verify-full`; CORS matrix; the rate limits; the host validation;
+   the MCP `/mcp` surface answering initialize.
+5. **The secrets**: the matrix at `harness/api/env.example.txt` — every name,
+   its consumer, its class; the tunnel token and the database password are the
+   two secrets the runtime holds; nothing else.

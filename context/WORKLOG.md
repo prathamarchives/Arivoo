@@ -1184,3 +1184,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-099-notes-journal-refs/.
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: a live Supabase-issued token; uvicorn over a real socket; the deployed route surface (Workstream 10); the KWR-002 map row (byte-parity with the imports family — a named followup candidate for a map-family slice); the ARV-QRY-002 malformed-id 500 (the pre-existing F-072-1 class, parity recorded).
 - Next: CLAIM-100 — the reading-lists family (the last Workstream 4 row).
+
+## Task 122 (CLAIM-100, session 65, 2026-11-27) — the reading-lists family (the Workstream 4 capture wave complete)
+- What: the §11.2 Reading lists family (the directive's Workstream 4 family 7 — the LAST row): five routes over the kernel's own event machine (create with the name law + the uuid identity; the bounded listing with the derived member count; the derived current membership — the EMPTY page a legitimate 200, the ABSENT list the kernel's own no-leak refusal; the member add/remove append-only events with the no-oracles; the alternation at the substrate surfacing the honest ARV-CMD-010 unknown through §11.4); INT-167 minted; the 099 close + STATE re-derivation riding.
+- Verified: ARV-API-132..152 RED at the test-only commit fd49144 (exit 1, 21 failures; 152 vacuous — disclosed) → the battery GREEN at the implementation head (168 PASS; one route-side repair: the empty-membership page conflation — the first draft 404'd the empty page, the kernel's own exit-0/exit-1 distinction is the correct discriminator).
+- Evidence: harness/runs/claim-100-reading-lists/.
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: the five PR-head checks + the D-042 review; a live Supabase token; uvicorn on a real socket; the deployed surface; the KWR-002 map row (the named followup); the Workstream 5-6 families.
+- Next: Workstream 5 — the retrieval API (search/context packs).

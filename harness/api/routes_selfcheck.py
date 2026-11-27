@@ -808,6 +808,248 @@ def main() -> int:
                 check("ARV-API-088", s == 404,
                       "owner B's anchor resolution against A's anchor is the no-leak 404")
 
+            # ---------------- CLAIM-099: the notes/journal/@-reference ----------------
+            # families (§11.2 families 4-6: the authored-content surfaces +
+            # the typed stable-reference resolution; plus the 098 SEV's
+            # NAMED FOLLOWUPS — the idem-key law on every write route, the
+            # cross-owner history legs, the typed ARV-QRY-003 on tombstoned
+            # reads)
+            # the capture-family fixture: a live highlight to reference
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/highlights", _J("k-099-h1"),
+                                     body=json.dumps({"source_id": real_id,
+                                                      "start": 0, "end": 5}).encode()))
+            hl99 = (json.loads(b) if b.startswith("{") else {}).get("result_ref", "")
+            # 47) the note create: the §11.3 write law + the ref grammar
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/notes", JSON_H,
+                                     body=json.dumps({"content": "first thought"}).encode()))
+            check("ARV-API-089", s == 400 and "Idempotency-Key" in b,
+                  "POST /notes refuses without the idempotency key (the §11.3 law)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/notes", _J("k-099-n1"),
+                                     body=json.dumps({"content": "first thought",
+                                                      "refs": ["bogus:xyz"]}).encode()))
+            check("ARV-API-090", s == 422 and "ARV-NTE-006" in b,
+                  "the note create with an unknown ref kind refuses ARV-NTE-006 (the grammar law)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/notes", _J("k-099-n2"),
+                                     body=json.dumps({"content": "x",
+                                                      "refs": ["highlight:00000000-0000-0000-0000-000000000000@1"]}).encode()))
+            check("ARV-API-091", s == 404 and "ARV-NTE-003" in b,
+                  "the note create with a dangling ref target is the no-oracle ARV-NTE-003 404")
+            # 48) the positive create: content + the version-aware ref set
+            refs99 = [f"highlight:{hl99}@1", f"source:{real_id}"]
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/notes", _J("k-099-n3"),
+                                     body=json.dumps({"content": "the margin thought",
+                                                      "refs": refs99}).encode()))
+            ack_n = json.loads(b) if b.startswith("{") else {}
+            nt_id = ack_n.get("result_ref", "")
+            check("ARV-API-092", s == 200 and ack_n.get("status") == "committed" and nt_id,
+                  "POST /notes creates the authored note with its version-aware reference set")
+            # 49) the read: the content + the refs round-trip
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/notes/{nt_id}", H))
+            row_n = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            got_refs = json.dumps(row_n.get("refs", row_n.get("references", "")))
+            check("ARV-API-093", s == 200 and row_n.get("content") == "the margin thought"
+                  and hl99 in got_refs and real_id in got_refs,
+                  "GET /notes/{id} reads back the content + the reference set")
+            # 50) the replay + conflict (the idem-key law on THIS route)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/notes", _J("k-099-n3"),
+                                     body=json.dumps({"content": "the margin thought",
+                                                      "refs": refs99}).encode()))
+            ack_n2 = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-094", s == 200 and ack_n2.get("status") == "replayed"
+                  and ack_n2.get("result_ref") == nt_id,
+                  "the same key replays the SAME note (the idempotency law)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/notes", _J("k-099-n3"),
+                                     body=json.dumps({"content": "different"}).encode()))
+            check("ARV-API-095", s == 409 and "ARV-CMD-409" in b,
+                  "the same key + different body refuses ARV-CMD-409")
+            # 51) the revise: the full replacement (content AND ref set)
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/notes/{nt_id}",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-099-n3r"}),
+                                     body=json.dumps({"content": "the revised thought",
+                                                      "refs": [f"source:{real_id}"]}).encode()))
+            ack_nr = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-096", s == 200 and ack_nr.get("revision") == "2",
+                  "PUT /notes/{id} revises (the full replacement, a new revision)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/notes/{nt_id}", H))
+            row_n = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-097", s == 200 and row_n.get("content") == "the revised thought",
+                  "the revised note serves the NEW content")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/notes/{nt_id}/history", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-098", s == 200 and len(d.get("rows") or []) >= 2,
+                  "GET /notes/{id}/history serves every revision in order")
+            # 52) the tombstone lifecycle + the TYPED hidden code (the 098 named followup)
+            s, b = asyncio.run(call(app_k, "DELETE", f"/api/v1/notes/{nt_id}",
+                                     dict(H, **{"Idempotency-Key": "k-099-n3t"})))
+            check("ARV-API-099", s == 200,
+                  "DELETE /notes/{id} tombstones the note")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/notes/{nt_id}", H))
+            check("ARV-API-100", s == 404 and "ARV-QRY-003" in b,
+                  "the tombstoned note read carries the TYPED ARV-QRY-003 (the 098 named followup — the status AND the code)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/notes/{nt_id}/history", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-101", s == 200 and len(d.get("rows") or []) >= 2,
+                  "the governed history still serves the tombstoned note")
+            s, b = asyncio.run(call(app_k, "DELETE", f"/api/v1/notes/{nt_id}",
+                                     dict(H, **{"Idempotency-Key": "k-099-n3t2"})))
+            check("ARV-API-102", s == 409 and "ARV-NTE-004" in b,
+                  "the second tombstone refuses ARV-NTE-004 (the alternation)")
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/notes/{nt_id}/restore",
+                                     dict(H, **{"Idempotency-Key": "k-099-n3rr"})))
+            check("ARV-API-103", s == 200,
+                  "POST /notes/{id}/restore returns it to ordinary retrieval")
+            s, b = asyncio.run(call(app_k, "POST", f"/api/v1/notes/{nt_id}/restore",
+                                     dict(H, **{"Idempotency-Key": "k-099-n3rr2"})))
+            check("ARV-API-104", s == 409 and "ARV-NTE-005" in b,
+                  "the restore from active refuses ARV-NTE-005 (the alternation)")
+            # 53) the revise on tombstoned + the idem-key law on PUT/DELETE (the 098 followup)
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/notes", _J("k-099-n4"),
+                                     body=json.dumps({"content": "second"}).encode()))
+            nt2 = (json.loads(b) if b.startswith("{") else {}).get("result_ref", "")
+            asyncio.run(call(app_k, "DELETE", f"/api/v1/notes/{nt2}",
+                             dict(H, **{"Idempotency-Key": "k-099-n4t"})))
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/notes/{nt2}",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-099-n4r"}),
+                                     body=json.dumps({"content": "y"}).encode()))
+            check("ARV-API-105", s == 409 and "ARV-NTE-002" in b,
+                  "the revise on a tombstoned note refuses ARV-NTE-002 (restore first)")
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/notes/{nt_id}", JSON_H,
+                                     body=json.dumps({"content": "z"}).encode()))
+            check("ARV-API-106", s == 400 and "Idempotency-Key" in b,
+                  "PUT /notes requires the idempotency key (the §11.3 law on EVERY write route — the 098 followup)")
+            s, b = asyncio.run(call(app_k, "DELETE", f"/api/v1/notes/{nt_id}", H))
+            check("ARV-API-107", s == 400 and "Idempotency-Key" in b,
+                  "DELETE /notes requires the idempotency key (the §11.3 law on EVERY write route)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/notes", H, query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-108", s == 200 and nt_id in json.dumps(d.get("rows", [])),
+                  "GET /notes lists the caller's notes")
+            for q in (b"limit=0", b"limit=1001"):
+                s, b = asyncio.run(call(app_k, "GET", "/api/v1/notes", H, query=q))
+                check("ARV-API-109", s == 422 and "ARV-QRY-004" in b,
+                      f"the notes list bound {q.decode()} refuses ARV-QRY-004")
+
+            # 54) the journal family: the writing lab
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/journal", JSON_H,
+                                     body=json.dumps({"kind": "raw",
+                                                      "content": "the raw thinking"}).encode()))
+            check("ARV-API-110", s == 400 and "Idempotency-Key" in b,
+                  "POST /journal refuses without the idempotency key")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/journal", _J("k-099-j0"),
+                                     body=json.dumps({"kind": "summary",
+                                                      "content": "x"}).encode()))
+            check("ARV-API-111", s == 422 and "ARV-JNL-002" in b,
+                  "the journal kind outside the closed vocabulary refuses ARV-JNL-002")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/journal", _J("k-099-j1"),
+                                     body=json.dumps({"kind": "raw",
+                                                      "content": "the raw thinking",
+                                                      "source_id": real_id}).encode()))
+            ack_j = json.loads(b) if b.startswith("{") else {}
+            jn_id = ack_j.get("result_ref", "").split("@")[0]  # the journal ack's ref carries @rev (the revision pin) — the BLOCK identity is the bare uuid
+            check("ARV-API-112", s == 200 and ack_j.get("status") == "committed" and jn_id,
+                  "POST /journal creates the source-bound raw block")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/journal/{jn_id}", H))
+            row_j = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-113", s == 200 and row_j.get("kind") == "raw"
+                  and row_j.get("content") == "the raw thinking"
+                  and row_j.get("source_id") == real_id,
+                  "GET /journal/{id} reads back the block whole (the lossless round-trip)")
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/journal/{jn_id}",
+                                     dict(JSON_H, **{"Idempotency-Key": "k-099-j1r"}),
+                                     body=json.dumps({"kind": "creative",
+                                                      "content": "the creative rewrite"}).encode()))
+            ack_jr = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-114", s == 200 and ack_jr.get("revision") == "2",
+                  "PUT /journal/{id} revises (the writing lab's edit transition)")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/journal/{jn_id}/history", H))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-115", s == 200 and len(d.get("rows") or []) >= 2,
+                  "GET /journal/{id}/history serves the full history")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/journal", H, query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-116", s == 200 and jn_id in json.dumps(d.get("rows", [])),
+                  "GET /journal lists the caller's blocks")
+            # 55) the sourceless block + the bound-block no-oracle
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/journal", _J("k-099-j2"),
+                                     body=json.dumps({"kind": "creative",
+                                                      "content": "free writing"}).encode()))
+            check("ARV-API-117", s == 200,
+                  "the sourceless journal block creates (a first-class row — the binding is OPTIONAL)")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/journal", _J("k-099-j3"),
+                                     body=json.dumps({"kind": "raw", "content": "x",
+                                                      "source_id":
+                                                      "00000000-0000-0000-0000-000000000000"}).encode()))
+            check("ARV-API-118", s == 404 and "ARV-JNL-005" in b,
+                  "the bound block against an absent source is the no-oracle ARV-JNL-005 404")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/journal", _J("k-099-j1"),
+                                     body=json.dumps({"kind": "raw",
+                                                      "content": "the raw thinking",
+                                                      "source_id": real_id}).encode()))
+            ack_j2 = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-119", s == 200 and ack_j2.get("status") == "replayed"
+                  and ack_j2.get("result_ref", "").split("@")[0] == jn_id,
+                  "the journal idempotent replay (the same key + body — the ack's ref carries the @rev pin)")
+
+            # 56) the typed stable-reference resolution
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/references", H,
+                                     query=f"ref=source:{real_id}".encode()))
+            row_rf = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-120", s == 200 and row_rf.get("state") == "current",
+                  "GET /references resolves the bare source reference (the typed verdict — the resolution's own 'current' state)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/references", H,
+                                     query=f"ref=highlight:{hl99}@1".encode()))
+            row_rf = (json.loads(b) if b.startswith("{") else {}).get("row", {})
+            check("ARV-API-121", s == 200 and row_rf.get("state") == "current"
+                  and row_rf.get("revision") == 1,
+                  "the pinned highlight reference resolves exactly as pinned (the revision carried)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/references", H,
+                                     query=b"ref=note:00000000-0000-0000-0000-000000000000@1"))
+            check("ARV-API-122", s == 404 and "ARV-REF-001" in b,
+                  "the dangling reference is the no-oracle ARV-REF-001 404")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/references", H,
+                                     query=b"ref=notakind:xyz"))
+            check("ARV-API-123", s == 422 and "ARV-REF-002" in b,
+                  "the malformed reference grammar refuses ARV-REF-002")
+
+            # 57) the cross-owner legs (the 098 named followup: the history
+            # legs included; owner B's token against owner A's objects)
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/notes", HB, query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            check("ARV-API-124", s == 200 and d.get("rows") == [],
+                  "owner B's notes list is EMPTY over owner A's notes")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/notes/{nt_id}", HB))
+            check("ARV-API-125", s == 404 and "ARV-QRY-001" in b,
+                  "owner B's note read is the no-leak ARV-QRY-001 404")
+            s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/notes/{nt_id}",
+                                     dict(HB, **{"Idempotency-Key": "k-099-xb1",
+                                                 "Content-Type": "application/json"}),
+                                     body=json.dumps({"content": "steal"}).encode()))
+            check("ARV-API-126", s == 404,
+                  "owner B's note revise is the no-leak 404")
+            s, b = asyncio.run(call(app_k, "DELETE", f"/api/v1/notes/{nt_id}",
+                                     dict(HB, **{"Idempotency-Key": "k-099-xb2"})))
+            check("ARV-API-127", s == 404,
+                  "owner B's note tombstone is the no-leak 404")
+            s, b = asyncio.run(call(app_k, "GET", f"/api/v1/notes/{nt_id}/history", HB))
+            check("ARV-API-128", s == 404 and "ARV-QRY-001" in b,
+                  "owner B's note HISTORY read is the no-leak 404 (the 098 named followup's history leg)")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/journal", HB, query=b"limit=50"))
+            d = json.loads(b) if b.startswith("{") else {}
+            s2, b2 = asyncio.run(call(app_k, "GET", f"/api/v1/journal/{jn_id}", HB))
+            check("ARV-API-129", s == 200 and d.get("rows") == [] and s2 == 404,
+                  "owner B's journal list is EMPTY and the block read is the no-leak 404")
+            s, b = asyncio.run(call(app_k, "POST", "/api/v1/journal",
+                                     dict(HB, **{"Idempotency-Key": "k-099-xb3",
+                                                 "Content-Type": "application/json"}),
+                                     body=json.dumps({"kind": "raw", "content": "x",
+                                                      "source_id": real_id}).encode()))
+            check("ARV-API-130", s == 404 and "ARV-JNL-005" in b,
+                  "owner B's journal block bound to A's source is ARV-JNL-005 404")
+            s, b = asyncio.run(call(app_k, "GET", "/api/v1/references", HB,
+                                     query=f"ref=note:{nt_id}@1".encode()))
+            check("ARV-API-131", s == 404 and "ARV-REF-001" in b,
+                  "owner B's reference resolution against A's note is ARV-REF-001 404")
+
         finally:
             os.environ.pop("ARIVO_API_DB", None)
             psql("postgres", f"DROP DATABASE {db}")

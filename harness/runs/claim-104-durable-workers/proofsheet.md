@@ -18,11 +18,11 @@
 - the semantic/model work (Q7 open — deterministic only)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 3c471641456aff528ee076a33a57da979d7917834bbf3268429bfd856b05e434
-- reviewed_diff_sha256: e623698de2bb80620648e68927864273a09ea7c5d9eed1a8be434d96733cf149
+- report sha256: fed17744006812ead8f68d76b37c2bc851a9dfb017afd5072e6acedd6ed82a6b
+- reviewed_diff_sha256: 29288bcea2812776a26eba2ab784e9d419b32eb5161f60457d429dfa2f624dac
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 4
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 0ea75b0e10105123786e0d76a9558af9c4a577e4f862094a3def67f0a0fb2a2c
+- sheet sha256 (of the content above, excluding this line): 345119cce17355d194e1a7c21ee7848987d41719ff53b253875209391df0f3ee

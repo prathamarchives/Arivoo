@@ -7,7 +7,7 @@ starlette 1.10.0 harness/api/
 uvicorn 0.54.0 harness/api/
 psycopg 3.3.9 harness/adapters/
 psycopg_pool 3.3.3 harness/adapters/
-jwt 2.15.1 harness/api/ harness/api/routes_selfcheck.py harness/tests/test_acceptance_campaign.py
+jwt 2.15.1 harness/api/
 anyio 4.16.0 harness/api/
 click 8.5.1 harness/api/
 h11 0.16.0 harness/api/
@@ -19,6 +19,6 @@ typing_extensions 4.16.0 harness/api/
 typing_inspection 0.4.5 harness/api/
 annotated_doc 0.0.7 harness/api/
 opentelemetry_api 1.45.2 harness/api/
-cryptography 50.0.2 harness/api/ harness/api/routes_selfcheck.py harness/tests/test_acceptance_campaign.py
+cryptography 50.0.2 harness/api/
 cffi 2.1.1 harness/api/
 pycparser 3.12 harness/api/

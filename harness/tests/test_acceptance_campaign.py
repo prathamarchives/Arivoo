@@ -9,7 +9,6 @@ MCP transports).
 the not-verified; the local form exercises the SAME contract surfaces).
 """
 import asyncio
-import base64
 import json
 import os
 import pathlib
@@ -68,27 +67,17 @@ def main() -> int:
         _exp_root = tempfile.mkdtemp(prefix="acc-export-")
         os.environ["ARIVO_EXPORT_ROOT"] = _exp_root
         from harness.api.app import create_app
-        from harness.api import auth as _auth
-        import jwt as pyjwt
-        from cryptography.hazmat.primitives.asymmetric import ec
-        from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
-        b64 = lambda b: base64.urlsafe_b64encode(b).rstrip(b"=").decode()
-        priv = ec.generate_private_key(ec.SECP256R1())
-        raw = priv.public_key().public_bytes(Encoding.X962, PublicFormat.UncompressedPoint)
-        jwk = {"kty": "EC", "crv": "P-256", "kid": "acc-key-1", "alg": "ES256",
-               "x": b64(raw[1:33]), "y": b64(raw[33:65])}
-        cfg = _auth.AuthConfig(issuer="https://acc-issuer/auth/v1", audience="acc-aud",
-                               jwks_url="https://acc-jwks/.well-known/jwks.json",
-                               expected_kid="acc-key-1")
-        _orig = _auth._JwksCache._refresh
-        _auth._JwksCache._refresh = lambda self: (setattr(self, "_jwk", jwk),
-                                                  setattr(self, "_fetched_at", 1))
+        from harness.api import testkeys
+        priv, jwk = testkeys.mint_key("acc-key-1")
+        cfg = testkeys.auth_config(issuer="https://acc-issuer/auth/v1",
+                                   audience="acc-aud",
+                                   jwks_url="https://acc-jwks/.well-known/jwks.json",
+                                   kid="acc-key-1")
+        _orig = testkeys.bind_jwks(jwk)
         app = create_app(auth_config=cfg, health_auth_ready=True, health_db_ready=True)
 
         def tok(sub):
-            return pyjwt.encode({"sub": sub, "iss": cfg.issuer, "aud": cfg.audience,
-                                 "exp": 9999999999, "iat": 1}, priv,
-                                algorithm="ES256", headers={"kid": "acc-key-1"})
+            return testkeys.mint_token(priv, cfg, sub, kid="acc-key-1")
 
         HA = {"Authorization": "Bearer " + tok("acc-owner-a")}
         HB = {"Authorization": "Bearer " + tok("acc-owner-b")}
@@ -250,6 +239,7 @@ def main() -> int:
         check("ACC-18", s == 200 and len(d.get("result", {}).get("tools", [])) == len(_T),
               "§6.4 both transports expose the SAME registry (the stdio import = the HTTP serve)")
 
+        from harness.api import auth as _auth
         _auth._JwksCache._refresh = _orig
     finally:
         os.environ.pop("ARIVO_API_DB", None)

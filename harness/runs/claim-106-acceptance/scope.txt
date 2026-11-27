@@ -5,7 +5,7 @@ context/WORKLOG.md INT-173
 INTENT-LEDGER.md INT-173
 AGENTS.md INT-173
 harness/tests/test_acceptance_campaign.py INT-173
-harness/approved_deps.txt INT-173 (the campaign suite's token-forging boundary — the battery's own precedent)
+harness/api/testkeys.py INT-173 (the ES256 test-token forging helper — the boundary's own surface; the campaign mints through it)
 harness/gate.py INT-173 (the trusted TESTS registration)
 harness/red-records.json INT-173
 harness/runs/claim-106-acceptance INT-173

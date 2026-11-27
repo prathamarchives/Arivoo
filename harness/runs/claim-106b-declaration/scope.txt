@@ -1,4 +1,4 @@
-# session65-declaration — the completion declaration (the documentation artifact class; no code)
-context/completion-declaration-2026-11-27.md INT-173 (the artifact copy of the session's declaration)
-CLAIMS.md INT-173 (the 106b row — the documentation class)
+# session65-declaration — the completion declaration
+context/completion-declaration-2026-11-27.md INT-173
+CLAIMS.md INT-173
 harness/runs/claim-106b-declaration INT-173

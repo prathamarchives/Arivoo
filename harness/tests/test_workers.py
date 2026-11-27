@@ -3,7 +3,9 @@
 
 The §12.2 laws over migration 0022's machine, each probed on a REAL migrated
 scratch db (the runbook's own named test paths)."""
-import os, pathlib, subprocess, sys, uuid
+import os, pathlib, subprocess, sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+from harness.adapters import ids
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 ENV = dict(os.environ)
@@ -22,7 +24,7 @@ def psql(db, sql, user="arv_app"):
                           capture_output=True, text=True, timeout=120, env=ENV)
 
 def main() -> int:
-    db = "arv_t104_" + uuid.uuid4().hex[:8]
+    db = "arv_t104_" + ids.new_id().replace("-", "")[:8]
     psql("postgres", f"CREATE DATABASE {db}", user="postgres")
     r = subprocess.run(["python3", "harness/migrate.py"], cwd=str(REPO), capture_output=True,
                        text=True, timeout=300, env=dict(ENV, PGDATABASE=db, ARV_MIGRATIONS_DIR="harness/migrations"))

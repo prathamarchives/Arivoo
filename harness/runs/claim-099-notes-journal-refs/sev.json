@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-099-notes-journal-refs",
+  "base_sha": "1e11ccebdb3fc2cf8ed495d1efc9b397bc26663d",
+  "reviewed_diff_sha256": "c70c3437e51c7bdd26a6440a2de54918c5c1d71b68f2626aa3bbedeb5e0d6864",
+  "intent_ids": [
+    "INT-166"
+  ],
+  "requirement_ids": [
+    "SYS-01",
+    "SYS-03",
+    "SYS-04",
+    "SYS-05",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2",
+    "C5"
+  ],
+  "changed_components": [
+    "AGENTS.md",
+    "CLAIMS.md",
+    "INTENT-LEDGER.md",
+    "STATE.md",
+    "context/WORKLOG.md",
+    "context/extracted/84-NOTES-JOURNAL-REFS.md",
+    "harness/api/routes.py",
+    "harness/api/routes_selfcheck.py",
+    "harness/red-records.json",
+    "harness/tests/test_api_routes.py"
+  ],
+  "interfaces_reviewed": [
+    "POST/GET /api/v1/notes + GET/PUT/DELETE /{id} + /{id}/history + /{id}/restore (harness/api/routes.py): the authored content staged to the kernel's --content-file channel through a bounded temp file (4MB F1 cap), the reference list the kernel's KIND:ID[@REV] grammar; the idempotency law on every write leg",
+    "POST/GET /api/v1/journal + GET /{id} + /{id}/history + PUT /{id} (harness/api/routes.py): the closed kind vocabulary at create; the kind REFUSED on revise (immutable identity \u2014 SEV9-123k's contract); the optional source binding; the surrogate boundary (SEV9-171)",
+    "GET /api/v1/references?ref=KIND:ID[@REV] (harness/api/routes.py): the query kernel's own canonical grammar carried verbatim; the six-state verdict served as the row",
+    "_stage_author_body + the journal staging (harness/api/routes.py): the temp-file lifecycle (created, passed, removed on every path \u2014 probed live: zero staged dirs remain); the UnicodeEncodeError boundary inside the envelope",
+    "the \u00a711.4 map extensions (harness/api/routes.py): NTE-006/008/009/010, JNL-002/003/004, REF-002 -> 422; NTE-002/004/005 -> 409; NTE-001/JNL-001/NTE-003/JNL-005/REF-001 -> the no-leak 404 family"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01: the full battery at the repair head -> exit 0, 146 PASS (ARV-ROUTE-001..007 + ARV-API-001..131, the SEV9-171/123k contract checks included)",
+      "run-04: the independent 95-probe battery (sev099_probe.py) on its own migrated scratch db -> exit 0 (the revision chain with the immutable kind, the reference grammar matrix, the byte-identical multi-line/unicode/pipe/CRLF/U+2028 journal round-trip, the six-state resolution matrix, the cross-owner matrix, the idempotency laws, the _json_body bounds, the temp-dir cleanup law)"
+    ],
+    "integration_verification": [
+      "the routes call ONLY the existing kernel arms (create/revise/tombstone/restore_note, journal_block/revise_journal_block; get-note/get-note-history/list-notes, get-journal/get-journal-history/list-journal, resolve-reference) \u2014 zero kernel files in the diff, verified by git diff --name-only",
+      "the RED at the test-only commit 83fa734 re-observed: exit 1, 42 failures, the routes provably absent"
+    ],
+    "system_verification": [
+      "python3 tools/verify_canonical_layer.py -> exit 0 (148 intents, the record-84 pointer fresh)",
+      "python3 harness/tests/test_api_routes.py -> exit 0 (the suite's own exit-code floor + the 089..131 markers)",
+      "the gate at the head: scope/size/lint/deps/known-bads/proofsheet/SEV GREEN"
+    ],
+    "validation": [
+      "the requirement trace: SYS-01 (the transactional/acknowledgment semantics \u2014 the kernel's own spine, the routes surface its ack verbatim), SYS-03 (the owner isolation \u2014 the probe's E-suite both directions), SYS-04 (the durability ladder \u2014 local_durable on every commit path), SYS-05 (the typed errors \u2014 the \u00a711.4 map rows), SYS-11 (the API surface \u2014 the \u00a711.2 Notes/Journal/References rows served)",
+      "the battery + the probe are the validation evidence: ARV-API-089..131 (RED-first at 83fa734, GREEN at the repair head) + the 95 independent probes; the RED re-observed at the test-only commit before the implementation landed"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-099-1",
+      "scenario": "a lone surrogate in the authored content (valid JSON, unencodable as UTF-8)",
+      "expected": "a named 422 INSIDE the \u00a711.4 envelope, never a bare 500 crash",
+      "observed": "first draft: bare UnicodeEncodeError outside the envelope (SEV9-171's live catch); after the repair: 422 ARV-QRY-004 in-envelope (the battery + the probe both pin it)",
+      "control": "the staging's UnicodeEncodeError boundary + the battery's surrogate check + the probe's X3",
+      "proof_ids": [
+        "run-01",
+        "run-04"
+      ]
+    },
+    {
+      "id": "FM-099-2",
+      "scenario": "a kind field in the journal revise DTO",
+      "expected": "a named 422 refusing the silent drop (the kind is immutable identity \u2014 the kernel's revise carries the prior revision's kind)",
+      "observed": "first draft: the field silently ignored (the F5b class); after the repair: the named refusal, the battery + the probe pin the immutable-identity contract",
+      "control": "the named 422 at the revise boundary + the battery's immutable-identity checks + the probe's C-suite (corrected)",
+      "proof_ids": [
+        "run-01",
+        "run-04"
+      ]
+    },
+    {
+      "id": "FM-099-3",
+      "scenario": "the cross-owner legs (owner B's token against owner A's notes/journal/references)",
+      "expected": "empty lists, the no-leak 404s with the kernel's own named codes (NTE-001/QRY-001/JNL-005/NTE-003/REF-001), never a 403 existence oracle",
+      "observed": "verified live both directions by the probe's E-suite with a real second owner (95/95 PASS)",
+      "control": "the kernel's own no-oracle codes + the battery's cross-owner legs + the probe's E-suite",
+      "proof_ids": [
+        "run-01",
+        "run-04"
+      ]
+    },
+    {
+      "id": "FM-099-4",
+      "scenario": "the same idempotency key with a different body on the note/journal writes",
+      "expected": "409 ARV-CMD-409, zero partial effect",
+      "observed": "verified live by the probe's F-suite (the replay answers replayed with the same ref, no phantom revision)",
+      "control": "the kernel's own ARV-CMD-409 + the battery's replay/conflict legs + the probe's F-suite",
+      "proof_ids": [
+        "run-01",
+        "run-04"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV9-171",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "the lone-surrogate content body crashed the staging outside the \u00a711.4 envelope: a bare 500 Internal Server Error, one staged temp dir leaked",
+      "repair": "the UnicodeEncodeError caught at BOTH staging sites (notes + journal), a named ARV-QRY-004 422 in-envelope; the battery check pins it; the probe's X3 PASS"
+    },
+    {
+      "id": "SEV9-123k",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "the journal revise DTO carried a kind the kernel ignores (the F5b silent-drop class); the first battery check encoded a wrong kind-change expectation",
+      "repair": "the kind REFUSED on revise (a named 422 'immutable identity'); the battery + the probe corrected to the kernel's own contract (the kind carries from the prior revision)"
+    },
+    {
+      "id": "SEV9-OBS-KWR",
+      "severity": "P2",
+      "status": "open",
+      "evidence": "an over-bound unbroken token in the authored content surfaces 500 via the fallback map \u2014 byte-parity with the pre-existing imports family (ARV-KWR-002)",
+      "repair": "named followup: a \u00a711.4 map-family slice adds the KWR-002 -> 422 row for ALL authored-content families at once (keeping byte-parity rather than a single-family exception here)"
+    }
+  ],
+  "not_verified": [
+    "the five PR-head CI checks and this PR's D-042 reasoned review (observed after the PR opens \u2014 never pre-claimed)",
+    "a live Supabase-issued token end-to-end; uvicorn over a real socket; the deployed route surface (the Workstream 10 slice)",
+    "the KWR-002 map row (byte-parity with the imports family \u2014 the named followup above)",
+    "the ARV-QRY-002 malformed-id 500 (the pre-existing F-072-1 class \u2014 byte-parity recorded, not charged)",
+    "the concurrent revise-writer race (serialization rests on the kernel's 0009/0016 advisory-lock evidence \u2014 read, not raced)",
+    "the reading-lists family (CLAIM-100) and the retrieval/sync/export families (Workstreams 5-6); the remote btree/TOAST parity (carried from record 80 \u00a79)"
+  ],
+  "builder_context": "builder-zcode-session65-slice-claim-099",
+  "reviewer_context": "reviewer-sev099-probe-distinct-context (the 95-probe battery authored and first executed in a separate reviewer task before the sandbox recycle; re-executed at the repair head with the two contract corrections \u2014 a declared distinct context, not cryptographic independence; the subagent-return channel refused twice, disclosed in record 84 \u00a78)",
+  "disposition": "PASS",
+  "review_summary": "PASS after two live repairs \u2014 SEV9-171 (P1, the surrogate crash outside the envelope, fixed in-slice and pinned by the battery) and SEV9-123k (P2, the kind-immutability contract, the F5b silent-drop refused named); one open P3 named followup (the KWR-002 map row, byte-parity preserved). The adapter law held throughout: thirteen routes over the existing kernel arms, zero kernel files in the diff, the content staged through the kernel's own file channels, the temp-dir cleanup verified live (zero dirs remain).",
+  "sheet_section": true
+}

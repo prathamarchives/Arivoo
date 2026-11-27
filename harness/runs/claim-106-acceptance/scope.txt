@@ -1,0 +1,12 @@
+# CLAIM-106 — the §6 acceptance campaign (the directive's Workstream 11, the backend half) + the 105 close riding.
+CLAIMS.md INT-173
+STATE.md INT-173
+context/WORKLOG.md INT-173
+INTENT-LEDGER.md INT-173
+AGENTS.md INT-173
+harness/tests/test_acceptance_campaign.py INT-173
+harness/api/testkeys.py INT-173 (the ES256 test-token forging helper — the boundary's own surface; the campaign mints through it)
+harness/gate.py INT-173 (the trusted TESTS registration)
+harness/red-records.json INT-173
+harness/runs/claim-106-acceptance INT-173
+context/extracted/91-ACCEPTANCE.md INT-173

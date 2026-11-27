@@ -80,7 +80,7 @@ REPO = _repo_root()
 # predecessor DUPLICATED it (red.py's own docstring named the one-fact-two-
 # homes defect; the unification is this card's named work). Every file under
 # harness/tests/test_*.py MUST appear here (ARV-RED-008 refuses the gap).
-TESTS = ("harness/tests/test_workers.py", "harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
+TESTS = ("harness/tests/test_workers.py", "harness/tests/test_acceptance_campaign.py", "harness/tests/test_migrations.py", "harness/tests/test_substrate.py",
          "harness/tests/test_commands.py", "harness/tests/test_kernel.py",
          "harness/tests/test_capture.py",
          "harness/tests/test_client_acceptance.py",

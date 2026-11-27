@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-106-acceptance",
+  "base_sha": "8536e0637e292a30c14d88b40cee762c33b4fa49",
+  "reviewed_diff_sha256": "61a18846b2939d6686c3a85522cb9a63cbfe855e09d24497a7a978be26007731",
+  "intent_ids": [
+    "INT-173"
+  ],
+  "requirement_ids": [
+    "SYS-01",
+    "SYS-02",
+    "SYS-03",
+    "SYS-04",
+    "SYS-05",
+    "SYS-08",
+    "SYS-10",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2",
+    "C5"
+  ],
+  "changed_components": [
+    "AGENTS.md",
+    "CLAIMS.md",
+    "INTENT-LEDGER.md",
+    "STATE.md",
+    "context/WORKLOG.md",
+    "context/extracted/91-ACCEPTANCE.md",
+    "harness/api/testkeys.py",
+    "harness/gate.py",
+    "harness/red-records.json",
+    "harness/tests/test_acceptance_campaign.py"
+  ],
+  "interfaces_reviewed": [
+    "harness/tests/test_acceptance_campaign.py: the §6.1 lifecycle + the §6.2 laws + the §6.4 parity (the token legs through harness/api/testkeys.py)",
+    "harness/api/testkeys.py: the ES256 forging helper INSIDE the approved boundary (mint_key/bind_jwks/mint_token — the JWKS injection form)",
+    "harness/gate.py: the trusted TESTS registration"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01: ACC-01..18 GREEN (the campaign at the head)"
+    ],
+    "integration_verification": [
+      "the campaign drives the REAL ASGI app + the durable worker + both MCP transports over a REAL migrated db (never mocks)",
+      "the RED at the pre-102 tree (a17f0b5e worktree): 6 failures — the worker/export/purge/MCP surfaces absent there"
+    ],
+    "system_verification": [
+      "run-02: verify_canonical_layer GREEN (155 intents)",
+      "the gate at the head GREEN"
+    ],
+    "validation": [
+      "the full SYS trace observed as ONE lifecycle (SYS-01..05, 08, 10, 11 each exercised in situ)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-106-1",
+      "scenario": "the purged content reappearing through any read",
+      "expected": "the 404 forever + the ledger row records the erasure",
+      "observed": "verified live (ACC-13/14)",
+      "control": "the 0021 machine + the ledger",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-106-2",
+      "scenario": "the cross-owner read through REST",
+      "expected": "the no-oracle 404 (never 403)",
+      "observed": "verified live (ACC-15)",
+      "control": "the owner scoping + RLS",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-106-3",
+      "scenario": "the duplicate submission (the same idem key)",
+      "expected": "the SAME result_ref — one effect",
+      "observed": "verified live (ACC-16)",
+      "control": "the spine's replay path",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the five PR-head checks + the D-042 review",
+    "§6.1(1) the real Supabase test user + §6.4's Cloudflare-proxy legs (the deployed halves — Q18 + the database credential pending)",
+    "the reader-repo inspection (the canonical link never provided)",
+    "Q19's desktop offline legs",
+    "the storage fault-injection over a real object store (the WS8 gate)"
+  ],
+  "builder_context": "builder-zcode-session65-slice-claim-106",
+  "reviewer_context": "reviewer-inline-verification-claim-106 (a declared distinct-context limit; per ARV-SEV-007)",
+  "disposition": "PASS",
+  "review_summary": "PASS — zero findings; the directive's §6 campaign machine-observed over the landed surface (the lifecycle + the multi-user + the parity); the deployed halves honestly disclosed as the owner's gates.",
+  "sheet_section": true
+}

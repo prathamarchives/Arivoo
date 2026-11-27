@@ -1226,3 +1226,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-105-runtime/.
 - Unresolved: Q6–Q12, Q16–Q19 open; the WS8 + Q18 ratifications the owner's. Not-verified: the docker build (no docker in the sandbox); the deployed surface.
 - Next: the owner's Q18 + the database credential -> the deploy slice (the tunnel + the DNS + the verification list); then Workstream 11 (the acceptance campaign).
+
+## Task 128 (CLAIM-106, session 65, 2026-11-27) — the §6 acceptance campaign (Workstream 11, the backend half)
+- What: the directive's §6 final-verification as ONE integrated suite (ACC-01..18): the §6.1 lifecycle end-to-end through the real API + the durable worker + both MCP transports; the §6.2 multi-user/convergence/token legs; the §6.4 registry parity; INT-173 minted; the 105 close riding.
+- Verified: RED at the pre-102 tree (6 failures — the worker/export/purge/MCP surfaces absent) → GREEN at the head (ACC-01..18).
+- Evidence: harness/runs/claim-106-acceptance/.
+- Unresolved: Q6–Q12, Q16–Q19 open; Q18 + the database credential + the WS8 ratification the owner's. Not-verified: the deployed-surface halves (the real Supabase user, the Cloudflare-proxy stream); the reader-repo inspection (the canonical link never provided); Q19's desktop legs.
+- Next: the owner's three gates (Q18, the database credential, the WS8 ratification) → the deploy slice; the reader-repo link → the frontend-contract half.

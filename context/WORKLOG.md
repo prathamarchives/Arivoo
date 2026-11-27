@@ -1219,3 +1219,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-104-durable-workers/.
 - Unresolved: Q6–Q12, Q16–Q19 open; the WS8 ratification pending (the owner's). Not-verified: the five PR-head checks; the deployed surface; the persistent polling form under a supervisor; the remote 0021/0022 application.
 - Next: Workstream 10 — the runtime eval + the container + the Cloudflare domain (Q18 owner-gated at the deploy decision).
+
+## Task 127 (CLAIM-105, session 65, 2026-11-27) — the runtime substrate (Workstream 10, the pre-gate half)
+- What: the measured runtime compatibility report + the Q18 decision request (Tunnel RECOMMENDED; the Containers beta; Workers incompatible — the subprocess worker); the Dockerfile (three start commands: api/worker/migrate); harness/api/__main__.py (the fail-closed secret matrix, ARV-SVC-001); the secret matrix; the runbook §17; INT-172 minted; the 104 close riding.
+- Verified: the image's CONTENT contracts in a fresh venv (the locked install; the served health/mcp/auth surfaces; the fail-closed refusal; the 22-migration release oracle); the CF token's live reach verified (zone/account/tunnels); the Q18 gate untouched — the deploy awaits the owner's ONE decision + a working database credential.
+- Evidence: harness/runs/claim-105-runtime/.
+- Unresolved: Q6–Q12, Q16–Q19 open; the WS8 + Q18 ratifications the owner's. Not-verified: the docker build (no docker in the sandbox); the deployed surface.
+- Next: the owner's Q18 + the database credential -> the deploy slice (the tunnel + the DNS + the verification list); then Workstream 11 (the acceptance campaign).

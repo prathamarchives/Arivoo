@@ -8,10 +8,15 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from harness.adapters import ids
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-ENV = dict(os.environ)
-ENV.update({"PATH": "/home/z/my-project/pgbuild/root/usr/lib/postgresql/17/bin:" + ENV.get("PATH", ""),
-            "LD_LIBRARY_PATH": "/home/z/my-project/pgbuild/root/usr/lib/x86_64-linux-gnu:/home/z/my-project/pgbuild/root/usr/lib",
-            "PGHOST": "127.0.0.1", "PGPORT": "5433", "PGUSER": "postgres"})
+ENV = dict(os.environ)  # the runner env INHERITED (its PGHOST/PGPORT point at its own postgres)
+ENV.setdefault("PGHOST", "127.0.0.1")
+ENV.setdefault("PGUSER", "postgres")
+ENV.setdefault("PGPORT", "5433")  # the local rig port; the CI runner's own PGPORT (5432) wins through inheritance
+import pathlib as _pl
+_pgbin = "/home/z/my-project/pgbuild/root/usr/lib/postgresql/17/bin"
+if _pl.Path(_pgbin).exists():  # the sandbox's psql prepends only when present (portable)
+    ENV["PATH"] = _pgbin + ":" + ENV.get("PATH", "")
+    ENV["LD_LIBRARY_PATH"] = "/home/z/my-project/pgbuild/root/usr/lib/x86_64-linux-gnu:/home/z/my-project/pgbuild/root/usr/lib"
 FAILS = []
 
 def check(code, ok, what):
@@ -20,7 +25,7 @@ def check(code, ok, what):
 
 def psql(db, sql, user="arv_app"):
     return subprocess.run(["psql", "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1",
-                           "-h", "127.0.0.1", "-p", "5433", "-U", user, "-d", db, "-c", sql],
+                           "-h", ENV["PGHOST"], "-p", ENV["PGPORT"], "-U", user, "-d", db, "-c", sql],
                           capture_output=True, text=True, timeout=120, env=ENV)
 
 def main() -> int:
@@ -28,6 +33,10 @@ def main() -> int:
     psql("postgres", f"CREATE DATABASE {db}", user="postgres")
     r = subprocess.run(["python3", "harness/migrate.py"], cwd=str(REPO), capture_output=True,
                        text=True, timeout=300, env=dict(ENV, PGDATABASE=db, ARV_MIGRATIONS_DIR="harness/migrations"))
+    import tempfile
+    _corp = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+    _corp.write("the worker suite corpus\n")
+    _corp.close()
     try:
         check("WRK-01", r.returncode == 0, "the scratch db migrated through 0022")
         def enqueue(key, jtype="recovery_walk", payload="{}"):
@@ -80,16 +89,16 @@ def main() -> int:
         check("WRK-09", r.returncode == 0 and r.stdout.strip() not in ("", "0"),
               "the next job claims fine after the poison (the queue unblocked)")
         # WRK-10: the end-to-end loop (the worker over a real extract job)
-        src = subprocess.run([str(REPO / ".venv-waved/bin/python"), "-I", str(REPO / "harness/commands.py"),
+        src = subprocess.run([sys.executable, "-I", str(REPO / "harness/commands.py"),
                               "import_source", "--owner", "A", "--client-id", "t104", "--idem-key", "t104-i",
-                              "--title", "T104", "--file", "/tmp/w9.txt"],
+                              "--title", "T104", "--file", _corp.name],
                              capture_output=True, text=True, timeout=120, env=dict(ENV, PGDATABASE=db))
         sid = src.stdout.split("result_ref=")[1].split()[0] if src.returncode == 0 else ""
         check("WRK-10a", bool(sid), "the extract job's source imports")
         psql(db, "SET app.current_owner='A'; INSERT INTO arv.job (id, owner_scope, job_type, payload_version, "
                  f"payload, idem_key, state, created_at, updated_at) VALUES (gen_random_uuid(), 'A', "
                  f"'extract_source', 1, '{{\"source_id\": \"{sid}\"}}', 't104-e1', 'queued', now(), now());")
-        w = subprocess.run([str(REPO / ".venv-waved/bin/python"), "-I", str(REPO / "harness/worker.py"),
+        w = subprocess.run([sys.executable, "-I", str(REPO / "harness/worker.py"),
                             "--name", "t104w", "--once"],
                            capture_output=True, text=True, timeout=300, env=dict(ENV, PGDATABASE=db))
         st = psql(db, "SELECT state FROM arv.job WHERE idem_key='t104-e1';", user="postgres").stdout.strip()
@@ -98,6 +107,7 @@ def main() -> int:
               and "outcome=succeeded" in w.stdout and "fence=ok" in w.stdout,
               "the end-to-end loop: claim -> the SAME extract arm -> the fenced completion -> the generation")
     finally:
+        os.unlink(_corp.name)
         psql("postgres", f"DROP DATABASE {db}", user="postgres")
     print()
     if FAILS:

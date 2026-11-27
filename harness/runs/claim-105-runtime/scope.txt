@@ -1,0 +1,16 @@
+# CLAIM-105 — the runtime-neutral deployment substrate (the directive's Workstream 10, the pre-gate half) + the 104 close riding.
+CLAIMS.md INT-172
+STATE.md INT-172
+context/WORKLOG.md INT-172
+INTENT-LEDGER.md INT-172
+AGENTS.md INT-172
+Dockerfile INT-172
+harness/api/__main__.py INT-172
+harness/api/env.example.txt INT-172
+context/runtime-decision-request-2026-11-27.md INT-172
+context/SOURCE-COVERAGE-MANIFEST.md INT-172 (the growth-register row-split repair)
+deploy/DEPLOYMENT.md INT-172 (the deployment section — the raw corpus stays verbatim)
+harness/tests/test_workers.py INT-172 (the CI portability repair — sys.executable, the suite's own interpreter; the sandbox-venv path does not exist on the runner)
+harness/red-records.json INT-172 (the amendment)
+harness/runs/claim-105-runtime INT-172
+context/extracted/90-RUNTIME.md INT-172

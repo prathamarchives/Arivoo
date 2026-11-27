@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-105-runtime",
+  "base_sha": "438367f413111cd988881ecdc7e6c2c4b3f3bdd2",
+  "reviewed_diff_sha256": "944c959e1b33257ce3416a2bf216ca243cf4b687f6438e7b69a2d591f3730c27",
+  "intent_ids": [
+    "INT-172"
+  ],
+  "requirement_ids": [
+    "SYS-01",
+    "SYS-05"
+  ],
+  "system_claims": [
+    "C1",
+    "C5"
+  ],
+  "changed_components": [
+    "AGENTS.md",
+    "CLAIMS.md",
+    "Dockerfile",
+    "INTENT-LEDGER.md",
+    "STATE.md",
+    "context/WORKLOG.md",
+    "context/extracted/90-RUNTIME.md",
+    "context/runtime-decision-request-2026-11-27.md",
+    "deploy/DEPLOYMENT.md",
+    "harness/api/__main__.py",
+    "harness/api/env.example.txt",
+    "harness/red-records.json",
+    "harness/tests/test_workers.py"
+  ],
+  "interfaces_reviewed": [
+    "Dockerfile: the reproducible image + the three start commands + the healthcheck",
+    "harness/api/__main__.py: the fail-closed secret matrix (ARV-SVC-001 names the missing variable — verified live)",
+    "harness/api/env.example.txt: the secret matrix (every variable, its consumer, its class)",
+    "deploy/DEPLOYMENT.md §17: the release order + the tunnel front + the verification list (the raw corpus untouched — the growth-register law held)",
+    "context/runtime-decision-request-2026-11-27.md: the measured comparison + the Q18 gate"
+  ],
+  "v_model": {
+    "component_verification": [
+      "the fresh-venv install of the locked requirements (7 pins) exit 0; the api start serving /health/live 200, /health/ready 200, POST /mcp unauth 401, /api/v1/me 401; the fail-closed refusal exit 1"
+    ],
+    "integration_verification": [
+      "the release oracle: the 22 migrations apply on a fresh db; the CF token's live reach verified (zone + account + the 3 tunnels)"
+    ],
+    "system_verification": [
+      "run-01: verify_canonical_layer GREEN (154 intents) — after the corpus-law repair (the raw runbook restored verbatim; VER-404's own catch)",
+      "the gate at the head GREEN"
+    ],
+    "validation": [
+      "SYS-01 (the fail-closed service boundary), SYS-05 (the typed ARV-SVC-001 refusal)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-105-1",
+      "scenario": "the unconfigured service start",
+      "expected": "ARV-SVC-001 names the missing variable, exit 1 — never a silent default",
+      "observed": "verified live",
+      "control": "the _require gate in __main__",
+      "proof_ids": [
+        "run-02"
+      ]
+    },
+    {
+      "id": "FM-105-2",
+      "scenario": "a verbatim-corpus edit (the raw runbook)",
+      "expected": "VER-404 refuses — the growth register is the only admission path",
+      "observed": "caught LIVE (my own §17 append refused; repaired by relocation + the byte-exact restore)",
+      "control": "VER-404 + the register",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the five PR-head checks + the D-042 review",
+    "the Q18 OWNER GATE (the runtime selection)",
+    "the production database credential (the Supabase PAT is a dead placeholder)",
+    "the docker BUILD (no docker in the sandbox — the content contracts verified instead)",
+    "the deployed surface (post-gate)"
+  ],
+  "builder_context": "builder-zcode-session65-slice-claim-105",
+  "reviewer_context": "reviewer-inline-verification-claim-105 (a declared distinct-context limit; per ARV-SEV-007)",
+  "disposition": "PASS",
+  "review_summary": "PASS — zero findings; the runtime-neutral substrate (the image + the start commands + the secret matrix + the deployment doc) with the image's CONTENT contracts verified live; the Q18 gate untouched; the corpus law held (VER-404's own catch repaired).",
+  "sheet_section": true
+}

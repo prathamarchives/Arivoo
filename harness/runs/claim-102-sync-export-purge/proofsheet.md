@@ -21,5 +21,12 @@
 - the 0021 machine on the REMOTE project (applies locally; the remote application is the guarded migration act's own slice — the Supabase migration credential never provided to this session)
 - the KWR-002 map row (the map-family followup, unchanged); the semantic/model work (Q7 open — deterministic only)
 
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 7982cebf11fb082c7f688dd3b5e4df5b12d9c780a97aa2e8467edceae607c1ff
+- reviewed_diff_sha256: aa115ebeed6092e7f139bdf3ca315f86c705ac21c04e7a75393d1b39637fb8a1
+- disposition: PASS
+- findings: 0 (open P0/P1: 0)
+- not-verified entries: 5
+
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 4f9fe38080bef5af7aba22c7387ee9be8cad82037060045df80af25cd1cb417b
+- sheet sha256 (of the content above, excluding this line): c06e83b591e53a72e599d63bce10253ae82016ff73b6abc9225aa8cd8ae2671f

@@ -1596,6 +1596,12 @@
     "new_sha256": "a128e211425302e89b235edf74a0fffcddaf4983456ded34959e45cc8b5ebb6e",
     "note": "the sync/export/purge battery (ARV-API-165..202) observed RED at the test-only commit 368eb8d (the pre-slice main a17f0b5 + the battery + the markers): exit 1, 32 checks failing — the routes and the 0021 erasure machine do not exist (the corpus-import hand 165 lands vacuously through the §11.4 envelope; the rest substantive); GREEN at the implementation head after four real repairs (the missing erasure machine — the substrate refused every content DELETE; the uuid-vs-text keyword_index cast; the ledger-first check order; the guard-message drift the SYN-11 assertion caught)",
     "observed_at": "2026-11-27T11:49:35.499972+00:00"
+   },
+   {
+    "prior_sha256": "a128e211425302e89b235edf74a0fffcddaf4983456ded34959e45cc8b5ebb6e",
+    "new_sha256": "5c94c594e49623361ba6d03a9ba4c1684d880aafa528fb7847e196483bc1ac31",
+    "note": "the SEV round-1 repair guards extend the markers to ARV-API-165..207 (the sync/export/purge battery + the three repair checks 203..207: the uuid law at the boundary, the cursor's literal home + uuid half, the journal_block vocabulary repair) — additions only, the observed RED chain unchanged (165..202 at 368eb8d, exit 1, 32 failures)",
+    "observed_at": "2026-11-27T13:24:43.854762+00:00"
    }
   ]
  },

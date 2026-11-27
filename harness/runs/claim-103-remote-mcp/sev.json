@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-103-remote-mcp",
+  "base_sha": "e36d6e334478e5f64acdeea46fe435f18091ed11",
+  "reviewed_diff_sha256": "05c49978d46a97dd84f23381789f8a18cd9fe82aecc2f591fc4c3fadf2ce7ba3",
+  "intent_ids": [
+    "INT-170"
+  ],
+  "requirement_ids": [
+    "SYS-03",
+    "SYS-05"
+  ],
+  "system_claims": [
+    "C1",
+    "C2",
+    "C5"
+  ],
+  "changed_components": [
+    "AGENTS.md",
+    "CLAIMS.md",
+    "INTENT-LEDGER.md",
+    "STATE.md",
+    "context/WORKLOG.md",
+    "context/extracted/88-REMOTE-MCP.md",
+    "harness/api/routes.py",
+    "harness/api/routes_selfcheck.py",
+    "harness/red-records.json",
+    "harness/tests/test_api_routes.py"
+  ],
+  "interfaces_reviewed": [
+    "POST /mcp (harness/api/routes.py): the Streamable HTTP transport — the bounded body, the ONE-message law, the notification 202, the honest version negotiation, the -32601/-32602 envelopes",
+    "the tools/call path (harness/api/routes.py): the IMPORTED registry + argv assembler (harness/mcp.py untouched — zero duplication); the ARIVO_AGENT_TOKEN environment channel (the argv carries NO secret); the byte-preserving result + isError on the CLI's nonzero exit",
+    "the transport auth (harness/api/routes.py): the MCP-level 401 (-32001) before any protocol read; the invalid/revoked classes answered by the KERNEL's own ARV-AGT-001 (the no-oracle law — never a side channel)",
+    "GET /mcp: the 405 (the single-response Streamable mode; no SSE push stream at this slice — the honest answer, disclosed)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01: the full battery at the head -> exit 0 (ARV-ROUTE-001..007 + ARV-API-001..226, 242 PASS)"
+    ],
+    "integration_verification": [
+      "the route imports harness/mcp.py's TOOLS/REGISTRY/_assemble — the registry served is the EXACT stdio set (the battery's set-equality check); zero kernel changes (harness/mcp.py and harness/query.py absent from the diff)",
+      "the stdio wrapper suite re-observed GREEN (MCPW-01..10) — the preserved law; the agent-access suite re-observed GREEN (AGT-01..09)",
+      "the RED at d161480 re-observed: exit 1, 16 failures (208/219/221 vacuous through the kernel's own mint legs, disclosed)"
+    ],
+    "system_verification": [
+      "python3 tools/verify_canonical_layer.py -> exit 0 (152 intents, the record-88 pointer fresh)",
+      "python3 harness/tests/test_api_routes.py -> exit 0; the gate at the head GREEN"
+    ],
+    "validation": [
+      "the requirement trace: SYS-03 (the owner isolation — the cross-owner credential leg 222, the scope FROM the credential), SYS-05 (the typed errors — the transport's 401, the kernel's AGT-001 through isError, the MCP -32601/-32602)",
+      "the per-read audit proven live (agent_read_log rows counted through the battery); the revocation's finality (the revoked credential answers the SAME no-oracle class)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-103-1",
+      "scenario": "the unauthenticated transport call (no Bearer)",
+      "expected": "the MCP-level 401 (-32001) before any protocol message is read",
+      "observed": "verified live (209 PASS)",
+      "control": "the route's own transport envelope",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-103-2",
+      "scenario": "the invalid or revoked credential",
+      "expected": "the KERNEL's own ARV-AGT-001 through isError (unknown/revoked/scope-missing the SAME refusal — never a side channel)",
+      "observed": "verified live (218/220 PASS)",
+      "control": "the credential's sha256 resolution + the audit machine (P4-E, untouched)",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-103-3",
+      "scenario": "the cross-owner agent read (owner B's credential against owner A's corpus)",
+      "expected": "ONLY the credential's own scope serves (A's corpus absent from B's reads)",
+      "observed": "verified live (222 PASS)",
+      "control": "the kernel's own scope-from-credential law + RLS",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the five PR-head CI checks and this PR's D-042 review (observed after the PR opens)",
+    "a live Supabase-issued token; uvicorn over a real socket; the deployed /mcp surface (Workstream 10)",
+    "the server-push SSE stream form of the Streamable transport (the single-response JSON mode only; GET /mcp answers 405)",
+    "the MCP session management (Mcp-Session-Id, resumability) — the stateless per-POST form at this slice",
+    "the semantic/model work (Q7 open — deterministic only); the remote btree/TOAST parity (carried)"
+  ],
+  "builder_context": "builder-zcode-session65-slice-claim-103",
+  "reviewer_context": "reviewer-inline-verification-claim-103 (a declared distinct-context limit — the verification design executed in the builder's session with the RED-first battery + the stdio/agent-access suites as the falsification floor; disclosed per ARV-SEV-007's own note)",
+  "disposition": "PASS",
+  "review_summary": "PASS — zero findings; the remote MCP transport over the EXACT SAME read-only registry/query kernel (mcp.py untouched, the registry imported — the set-equality proven); the agent-credential auth through the kernel's own resolution/audit/no-oracle laws; the stdio wrapper and agent-access suites re-observed GREEN.",
+  "sheet_section": true
+}

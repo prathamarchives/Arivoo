@@ -16,5 +16,12 @@
 - the storage provider adapter (the WS8 gate: the owner's ratification pending — the decision request prepared)
 - the semantic/model work (Q7 open — deterministic only)
 
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 3b1290c9dd4700d1512de5b4026dd73cada8e8a4be1672c13d389109287f9787
+- reviewed_diff_sha256: 88262c77239a3a2594a62f2aa10009367b3b68e32fee873cf1267d1bf7e94b8d
+- disposition: PASS
+- findings: 0 (open P0/P1: 0)
+- not-verified entries: 4
+
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 4508126294a06a110bff6d6789c3dcd793d24788c5709dc2d927b8f082773208
+- sheet sha256 (of the content above, excluding this line): 545aadf563a5a16f28cc70e2fe34dc3a569c1b2276c67c5fc45e8e90ebc87907

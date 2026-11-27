@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-104-durable-workers",
+  "base_sha": "c7c8495d9f84ac3d381d88eff8348290f1878da2",
+  "reviewed_diff_sha256": "88262c77239a3a2594a62f2aa10009367b3b68e32fee873cf1267d1bf7e94b8d",
+  "intent_ids": [
+    "INT-171"
+  ],
+  "requirement_ids": [
+    "SYS-04",
+    "SYS-08"
+  ],
+  "system_claims": [
+    "C1",
+    "C5"
+  ],
+  "changed_components": [
+    "AGENTS.md",
+    "CLAIMS.md",
+    "INTENT-LEDGER.md",
+    "STATE.md",
+    "context/WORKLOG.md",
+    "context/extracted/89-DURABLE-WORKERS.md",
+    "context/storage-decision-request-2026-11-27.md",
+    "harness/migrations/0022_durable_jobs.sql",
+    "harness/tests/test_workers.py",
+    "harness/worker.py"
+  ],
+  "interfaces_reviewed": [
+    "arv.job_claim (migrations/0022): the SKIP LOCKED claim + the fencing token + the expired-lease reclaim (SECURITY DEFINER per 0019)",
+    "arv.job_complete (migrations/0022): the fenced completion — the stale worker's zero-row write answers 'lost'",
+    "the poison guard (migrations/0022): retryable at 8 attempts goes dead through the trigger's own path",
+    "harness/worker.py: the loop over the SAME kernel arms; the bounded payload law; the idempotent re-run; the code-only logging"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01: WRK-01..10 GREEN (the §12.2 laws + the end-to-end loop)"
+    ],
+    "integration_verification": [
+      "the worker executes the SAME kernel arms (extract/commands/recover) — zero kernel changes; RED at 88a1b5c (9 failures) re-observed"
+    ],
+    "system_verification": [
+      "run-02: verify_canonical_layer GREEN (153 intents)",
+      "the gate at the head GREEN"
+    ],
+    "validation": [
+      "SYS-04 (the durable substrate — the job machine's zero-effects/crash classes), SYS-08 (the idempotent re-run convergence)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-104-1",
+      "scenario": "a stale worker completing a reclaimed job",
+      "expected": "the fenced write matches ZERO rows — 'lost', never a double-complete",
+      "observed": "verified live (WRK-03/WRK-05)",
+      "control": "the fencing token + lease_owner predicate",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-104-2",
+      "scenario": "a poison job",
+      "expected": "dead at the retry limit; the queue unblocked",
+      "observed": "verified live (WRK-08/WRK-09)",
+      "control": "the poison guard trigger",
+      "proof_ids": [
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-104-3",
+      "scenario": "a duplicate submission",
+      "expected": "the UNIQUE refusal — one logical job (the convergence)",
+      "observed": "verified live (WRK-07)",
+      "control": "the dedupe key",
+      "proof_ids": [
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [],
+  "not_verified": [
+    "the five PR-head checks + the D-042 review",
+    "the deployed surface + the persistent polling form under a supervisor (Workstream 10)",
+    "the remote 0021/0022 application (the Supabase credential)",
+    "the storage provider adapter (the WS8 gate — the owner's ratification pending)"
+  ],
+  "builder_context": "builder-zcode-session65-slice-claim-104",
+  "reviewer_context": "reviewer-inline-verification-claim-104 (a declared distinct-context limit — the WRK suite's live probes as the falsification floor; per ARV-SEV-007)",
+  "disposition": "PASS",
+  "review_summary": "PASS — zero findings; the §12.2 job machine (SKIP LOCKED + fencing + the poison guard) + the worker loop over the SAME kernel arms; the end-to-end loop proven live.",
+  "sheet_section": true
+}

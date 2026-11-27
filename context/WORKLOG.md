@@ -1163,3 +1163,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-096-extraction-readiness/.
 - Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: a live Supabase-issued token; uvicorn over a real socket; the deployed route surface (the Workstream 10 slice).
 - Next: Workstream 4 — the reader/capture route families (position+content first), grouped per §3.4.
+
+## Task 119 (CLAIM-097, session 64, 2026-11-26) — the reader family (state + content serving)
+- What: the §11.2 Reading family 1 (the directive's Workstream 4): GET/PUT /api/v1/sources/{id}/position (the honest no_position_saved/saved answers, the serving-generation binding + the derived generation_matches, the serialized save over the kernel's advisory-lock transaction), POST /api/v1/sources/{id}/session-events (the D-010 closed vocabulary + dwell) + GET /api/v1/session-events, GET /api/v1/reading-state (the derived view over the SAME _position_row builder — the no-second-path law), GET /api/v1/anchors/{id} (the typed content-addressed resolution); the shared bounded JSON-body reader (the F1 cap law on every write DTO); INT-164 minted; the 096 close + STATE re-derivation riding.
+- Verified: ARV-API-034..045 RED at the test-only commit 0ce1be9 (exit 1; the red record bound) → the 45-check battery GREEN at the implementation head (three battery-shape repairs: the extraction prerequisite — the position's serving-generation law; the kernel's own 'saved' state vocabulary; the session-events JSON row shape).
+- Evidence: harness/runs/claim-097-reader-family/.
+- Unresolved: Q6–Q12, Q16–Q19 open; D-014 unchanged. Not-verified: a live Supabase token; uvicorn on a real socket; the deployed surface; the passage-content route (the §11.2 'source/read data' serving arm — the anchor resolution carries the offsets+digests; the passage text serving rides the reader-content decision in the capture families' slice).
+- Next: CLAIM-098 — the highlights + bookmarks capture families.

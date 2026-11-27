@@ -1,0 +1,12 @@
+# CLAIM-097 — the §11.2 Reading area family 1 (the directive's Workstream 4 family 1) + the 096 close riding.
+CLAIMS.md INT-164
+STATE.md INT-164
+context/WORKLOG.md INT-164
+INTENT-LEDGER.md INT-164
+AGENTS.md INT-164
+harness/api/routes.py INT-164
+harness/api/routes_selfcheck.py INT-164
+harness/tests/test_api_routes.py INT-164
+harness/red-records.json INT-164
+harness/runs/claim-097-reader-family INT-164
+context/extracted/82-READER-FAMILY.md INT-164

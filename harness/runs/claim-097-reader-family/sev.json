@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-097-reader-family",
+  "base_sha": "e14fea1663ab71026d9b33a272c2410b19f34eac",
+  "reviewed_diff_sha256": "c089dda41e517a26d27d31a447282e47b6b945f3f8e336f1f20e115ed1e98ed2",
+  "intent_ids": [
+    "INT-164"
+  ],
+  "requirement_ids": [
+    "SYS-01",
+    "SYS-03",
+    "SYS-04",
+    "SYS-05",
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C1",
+    "C2",
+    "C5"
+  ],
+  "changed_components": [
+    "harness/api/routes.py",
+    "harness/api/routes_selfcheck.py",
+    "harness/tests/test_api_routes.py",
+    "harness/red-records.json",
+    "AGENTS.md",
+    "CLAIMS.md",
+    "STATE.md",
+    "INTENT-LEDGER.md",
+    "context/WORKLOG.md",
+    "context/extracted/82-READER-FAMILY.md"
+  ],
+  "interfaces_reviewed": [
+    "_json_body (harness/api/routes.py, the shared bounded JSON-body reader): a DECLARED Content-Length over the cap is refused BEFORE any byte is read (int(declared) > max_bytes -> ARV-API-413/413; a non-integer declared value falls through to the stream bound, never a crash); the streamed accumulation cuts MID-STREAM the moment the buffer crosses the cap (async for + len(buf) check -> the same ARV-API-413), so a lying or chunked client cannot bypass it \u2014 both legs verified live through the real ASGI surface by this round (run-03 P3: declared 69KB over a 64KB cap -> 413 pre-read; a two-chunk 70KB body with NO Content-Length -> 413 at the cut; a declared '10' with a 70KB stream -> 413); empty body / non-JSON / a JSON non-object each refuse ARV-QRY-004/422 with distinct honest messages ('a JSON body is required' / 'not valid JSON' / 'must be a JSON object')",
+    "GET /api/v1/sources/{source_id}/position (harness/api/routes.py): the reopen answer \u2014 rides query.py get-position; the row-shape guard (no row / not a dict -> ARV-QRY-404/404, the \u00a711.4 no-leak class, byte-equal in form to the existing get-source/extraction guards); the kernel's own two-state contract surfaced verbatim: the honest no_position_saved is a 200 ANSWER (battery 034's second leg), the saved state carries start_off/end_off/save_ordinal/saved_generation_id/current_generation_id/generation_matches (verified live by run-03 P1: state=saved, generation_matches=true, saved_generation_id present)",
+    "PUT /api/v1/sources/{source_id}/position (harness/api/routes.py): the \u00a711.3 write law \u2014 Idempotency-Key REQUIRED (missing or >200 chars -> ARV-API-400/400, verified live by run-03 P5); owner and actor derived SERVER-SIDE from the verified token, the client-id from the token's claims with the 'api-v1' default; the body read through _json_body (64KB cap) with integer start/end enforced at the adapter (ARV-QRY-004/422, battery 038); the write itself delegated WHOLESALE to commands.py save_position through the bounded argv subprocess \u2014 the serving-generation prerequisite (ARV-POS-002), the offset validation (ARV-POS-003), the serialized advisory-lock save and the idempotency machine are ALL the kernel's own (verified live by run-03 P1/P2: ARV-POS-002 before extraction, ARV-POS-003 out-of-range, same-key replay status=replayed with the SAME result_ref, same-key-different-body ARV-CMD-409)",
+    "POST /api/v1/sources/{source_id}/session-events (harness/api/routes.py): D-010's closed vocabulary enforced AT THE ADAPTER (event not in session_start|checkpoint|dwell|session_end -> ARV-SES-004/422, verified live both at the route \u2014 run-03 P5, event='keystroke' \u2014 and at the kernel \u2014 run-03 P4, event='nonsense' \u2014 a two-layer defense); dwell_ms required for dwell events (ARV-QRY-004/422 when absent or non-integer); the same \u00a711.3 idem-key law and server-side owner/actor derivation; the write delegated to commands.py record_session (the serving-generation binding ARV-SES-002 and the no-oracle ARV-SES-001 are the kernel's own \u2014 verified live by run-03 P5: cross-owner and absent writes surface the SAME code, never a side channel)",
+    "GET /api/v1/reading-state and GET /api/v1/session-events (harness/api/routes.py): the two list arms ride query.py get-reading-state / list-session-events with the \u00a711.3 bounded+paginated contract (limit int-checked and bounded by LIST_LIMIT_BOUNDS at the adapter, --after passed through); get-reading-state derives every row through the SAME _position_row builder get-position uses (query.py's own no-drift construction home), so the derived view can never disagree with the arm it derives from \u2014 verified live by run-03 P4 (src2's row state=saved start_off=0 in the derived view, matching the arm's own answer); the owner scope is the kernel's own --owner binding (run-03 P5: owner B's reading-state and session-events return 200 with ZERO of owner A's rows \u2014 the empty-scope answer, never a leak, the battery-011 pattern)",
+    "GET /api/v1/anchors/{anchor_id} (harness/api/routes.py): the typed resolution \u2014 rides query.py resolve-anchor (P3-03b's typed verdict: anchor_id, source_id, start_off/end_off, the digests, passage_ids, generation_id, state \u2014 verified live by run-03 P6); the same row-shape no-leak guard (absent or another owner's anchor -> ARV-QRY-404/404 at the route; the kernel itself refuses ARV-QRY-001 exit 1 cross-owner \u2014 run-03 P6); the anchor is minted through the kernel's create_highlight + get-capture (the highlight ROUTES themselves are CLAIM-098, correctly not pulled into this slice \u2014 the battery mints through the kernel CLI and discloses it)",
+    "the battery interface (harness/api/routes_selfcheck.py ARV-API-034..045) and its suite-of-record (harness/tests/test_api_routes.py markers + ARV-SUITE-001): the twelve checks cover the extraction prerequisite fixture (034 leg 1), the honest no_position_saved 200 (034 leg 2), the committed ack with durability_rung=local_durable (035), the saved reopen with the generation binding (036), the same-key replay with the same result_ref (037), the malformed offsets 422 (038), the closed-vocabulary refusal (039), session_start commit (040), the dwell commit (041), the event stream list (042), the derived reading state (043), the anchor mint+resolve (044, both legs), and the absent-anchor no-leak 404 (045); the marker list grew by exactly the twelve ids (the diff is the one list edit); NOTE (SEV-097-2): unlike the 096 battery (030/031), the reader-family checks carry NO cross-owner probes \u2014 the no-leak contract for the new arms is verified by THIS round's own probe set instead (run-03 P5)",
+    "the red-record interface (harness/red-records.json): the amendment chain a8ef5d9e -> 24f0d667 binds the suite at the test-only commit 0ce1be9 with the honest red note (exit 1, the routes do not exist); the chain verified end-to-end by this round: 24f0d667 equals BOTH the 0ce1be9 tree's test_api_routes.py hash and the current file hash; gate.check_red_records() at HEAD returns [] (run-03 P8); the RED itself re-observed live by this round in a detached worktree at 0ce1be9 (run-04: exit 1, ARV-API-034..044 failing; 045 passes at the red tree \u2014 the absent-route 404 path exists pre-slice, the vacuous-pass class, disclosed here)",
+    "the route adapter law (the diff's whole product-code surface): every new handler calls ONLY pre-existing kernel arms \u2014 query.py get-position/get-reading-state/list-session-events/resolve-anchor and commands.py save_position/record_session (grep-verified: the only kernel invocations in the new code are those six, all present at the base e14fea1); no domain logic lives in a handler (the offset validation and the vocabulary check are DTO decoding, the \u00a711.3 law's own adapter duties; the prerequisite, the serialization, the idempotency, the no-oracle, the generation binding are all the kernel's); NO new kernel code: harness/query.py and harness/commands.py are untouched by this diff (the reviewed set proves it) \u2014 the pure-adapter form of D-053's law",
+    "the bookkeeping interfaces: INT-164 in INTENT-LEDGER.md (the same-slice mint class \u2014 the one-liner row plus the full active entry, whose wording mirrors the 094/094B/095/096 precedent); CLAIM-097's open row in CLAIMS.md covering all ten reviewed paths (scope.check_scope + claims.check_branch_claim both [] at HEAD \u2014 run-03 P8); CLAIM-096's closed row verified against git ground truth (e14fea1's parents are 50625107 (the 095 merge, the prior main) and 68209b1 (the 096 PR head) \u2014 exactly the merge facts the closed row states); STATE re-derived (active task = CLAIM-097, the exact next action its PR); record 82 (context/extracted/82-READER-FAMILY.md) + WORKLOG Task 119; tools/verify_canonical_layer.py re-executed green at HEAD by this round (54 checks, 0 failures)"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01 (re-executed live by this reviewer at HEAD 6ebb5b3: exit 0, 45 route checks PASS + ARV-SUITE-001): the battery's twelve new checks ARV-API-034..045 all green on a real migrated scratch db through the raw ASGI interface",
+      "run-03 (this reviewer's OWN probe set, scratch db migrated exactly like the battery): the prerequisite law at the kernel level \u2014 save_position BEFORE extraction refuses ARV-POS-002 exit 1; after extract.py the save commits (durability_rung=local_durable) and the reopen answers state=saved with saved_generation_id present and generation_matches=true; the offsets validate (0 <= start < end <= len) with out-of-range refusing ARV-POS-003; the same key replays the SAME result_ref, a different body under the same key refuses ARV-CMD-409",
+      "run-03 P4: the D-010 vocabulary at the kernel level \u2014 'nonsense' refuses ARV-SES-004 exit 1; a dwell event with dwell_ms commits and replays; list-session-events returns the recorded row carrying event/event_id/event_ordinal/generation_id/dwell_ms/source_id/start_off/end_off/created_at",
+      "run-03 P3: _json_body's bounds through the real ASGI PUT route \u2014 declared-over-cap refused pre-read (413), a lying declared length with an over-cap stream cut mid-stream (413), a chunked over-cap body with no Content-Length cut mid-stream (413), empty body / non-JSON / JSON non-object each 422 with distinct honest messages",
+      "the static adapter review (harness/api/routes.py diff, read line by line by this round): the six routes call only the six pre-existing kernel arms; owner/actor derived server-side; the idem-key law at both write arms; no kernel file touched by the diff"
+    ],
+    "integration_verification": [
+      "run-01: the twelve checks exercise the FULL stack end-to-end \u2014 the ASGI route -> the bounded argv subprocess -> the kernel's own position/session machines -> the migrated scratch db, including the HTTP-mapped idempotency law (the same-key replay returns status=replayed with the same result_ref through HTTP, ARV-API-037) and the anchor chain minted through the kernel CLI then resolved through the route (ARV-API-044)",
+      "run-03 P5: the owner isolation through the real ASGI surface with owner B's verified token \u2014 the cross-owner position read 404 ARV-QRY-001, the cross-owner anchor read 404 ARV-QRY-001, the cross-owner reading-state/session-events 200 with ZERO of owner A's rows, the cross-owner WRITES surfacing the SAME codes as absent-source writes (ARV-POS-001 / ARV-SES-001 \u2014 the no-side-channel law), and the missing Idempotency-Key refusing ARV-API-400/400",
+      "run-02 (re-executed live at HEAD by this reviewer: exit 0): tools/verify_canonical_layer.py green over the bookkeeping riding the slice (the 146-intent ledger count, the STATE/AGENTS/CLAIMS coherence)",
+      "the gate's own checks re-run in-process by this reviewer at HEAD (run-03 P8): check_red_records() [], check_scope() [], check_branch_claim() [], check_registry() [] \u2014 all four green at the reviewed head (the ARV-CLM-003 wording class that blocked 096's first round is correctly pre-empted here: the row carries the reservation wording)",
+      "the binding recomputed: reviewed_diff_sha256 over the ten reviewed paths = 4b7ba0c0... (this report's own field, recomputed by run-03 P8 through harness.sev's own public function); base_sha e14fea1 equals the observed merge-base (parents verified from git: 50625107 + 68209b1)"
+    ],
+    "system_verification": [
+      "the trace: INT-164 (the ledger's active entry, minted this slice per the directive's Workstream 4 family 1) -> the runbook \u00a711.2 'Reading' route rows (position save/reopen, session events, reading state, anchor resolution) + \u00a711.3's write law (idempotency key, server-derived owner/actor, existing command kernel, truthful durability ack) + \u00a711.4's no-internals error contract -> the six routes over the six existing kernel arms -> ARV-API-034..045 + this report",
+      "SYS-01's durability contract: every acknowledged save/event carries the kernel's own durability_rung (local_durable observed live at both the kernel and HTTP surfaces \u2014 run-03 P1, battery 035); the ack never overstates persistence",
+      "SYS-03's ownership contract: owner scope and actor on every write are server-derived and kernel-enforced; cross-owner reads leak nothing (run-03 P5's full matrix) and cross-owner writes are the same refusal as absent ones (ARV-POS-001/ARV-SES-001 \u2014 never an existence oracle)",
+      "SYS-04's idempotency contract: same key + same body replays the same result_ref (position AND session events \u2014 run-03 P2/P4), same key + different body refuses ARV-CMD-409; the law is the kernel's single home, the route adds none of its own",
+      "SYS-05's anchor contract: the anchor's stable identity and its generation binding are served by resolve-anchor's typed verdict (anchor_id/source_id/offsets/digests/passage_ids/generation_id/state \u2014 run-03 P6), read-only, never retargeted by this surface",
+      "SYS-11's V-model trace closed by this report: INT-164 through the pure-adapter architecture (no new kernel code; the routes as thin DTO decoders over the six existing arms) to the run evidence (run-01..run-04) and this independently authored verification",
+      "the bookkeeping coherence at HEAD: CLAIM-097's open row covers the ten reviewed paths; CLAIM-096's closed row's merge facts verified against git (e14fea1 = merge(68209b1, 50625107), merged 2026-11-26); INT-164 minted with the reservation wording; STATE's active task is CLAIM-097 with the PR as the exact next action; record 82 and WORKLOG Task 119 present"
+    ],
+    "validation": [
+      "the slice-level acceptance per the directive's batched cadence: the targeted battery once at the implementation head (run-01, 45 checks GREEN \u2014 re-executed by this reviewer) + the canonical layer (run-02, re-executed) + this SEV round; the reviewer's own probe set (run-03: the prerequisite, the bounds, the isolation, the vocabulary, the anchor chain) and the red re-observation (run-04) go beyond the battery's coverage",
+      "the red record: the amendment chain (a8ef5d9e -> 24f0d667) binds the suite at 0ce1be9 with red_exit 1 and the honest red note; the chain's hashes verified by this round against both the 0ce1be9 tree and the current tree; the RED itself re-observed live in a detached worktree (exit 1, ARV-API-034..044 failing; 045 passing vacuously at the red tree \u2014 the absent-route 404 class, honestly disclosed)",
+      "the not-verified discipline: record 82's honest list and the run dir's notverified.txt are carried into this report's own list, extended by this round's own limits",
+      "the final integrated V-model acceptance campaign remains Workstream 11's act per the directive's \u00a73.3/\u00a76; the deployed route surface, a live Supabase-issued token, and uvicorn over a real socket remain the named later-workstream validations (carried in not_verified)",
+      "ARV-SEV-009 (the base-side Proof-Sheet section expectation \u2014 the base e14fea1 carries the sheet_section renderer, verified by this round's own git probe) is answered by this report setting sheet_section true"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-097-1",
+      "scenario": "a position saved against a source with no serving extraction generation (or silently retargeted to a different generation than the reader was reading) \u2014 the position floats free of any readable derived view, or a re-extraction makes the saved window address different text without the reader knowing",
+      "control": "the kernel's serving-generation law: save_position refuses ARV-POS-002 when no current generation exists (the prerequisite), binds the row to the CURRENT generation's id, and the reopen answer carries saved_generation_id + current_generation_id + generation_matches so a stale position is honest about its mismatch \u2014 verified live by run-03 P1 (ARV-POS-002 before extraction; state=saved generation_matches=true after) and battery 034/036",
+      "proof_ids": [
+        "run-01",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-097-2",
+      "scenario": "a retried or racing save double-applies: the same client request creates two position rows (or the same event records twice), corrupting the last-saved derivation",
+      "control": "the kernel's own idempotency machine (the \u00a711.3 law): same key + same body replays the SAME result_ref; same key + different body refuses ARV-CMD-409; the serialized advisory-lock save makes competing savers commit in order with the ordinal law holding by construction \u2014 the replay/conflict legs verified live by run-03 P2/P4 and through HTTP by battery 037",
+      "proof_ids": [
+        "run-01",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-097-3",
+      "scenario": "an unbounded request body (a declared huge Content-Length, a lying client, or an endless chunked stream) exhausts the service's memory at any JSON write arm",
+      "control": "_json_body's two-sided bound: the declared length refused BEFORE any byte is read (ARV-API-413), the streamed buffer cut the moment it crosses the 64KB cap regardless of what was declared (ARV-API-413), and the non-object/non-JSON shapes refused 422 \u2014 all three legs verified live through the real ASGI surface by run-03 P3",
+      "proof_ids": [
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-097-4",
+      "scenario": "a session event outside D-010's approved vocabulary (the excluded keystroke/mouse-shaped or prompt-shaped classes) is recorded, violating the closed-vocabulary law at the behavior-history surface",
+      "control": "a two-layer defense: the ADAPTER refuses ARV-SES-004/422 before the kernel is ever invoked (the event whitelist session_start|checkpoint|dwell|session_end), and the KERNEL itself refuses ARV-SES-004 for anything else \u2014 both layers verified live by run-03 (P5 route-level 'keystroke', P4 kernel-level 'nonsense') and battery 039",
+      "proof_ids": [
+        "run-01",
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-097-5",
+      "scenario": "another owner's reading history leaks: a cross-owner position/anchor read, or a reading-state/session-events list that includes another owner's rows, or a cross-owner write whose refusal differs from the absent-source refusal (an existence oracle)",
+      "control": "the owner scope is the kernel's own --owner binding (derived from the verified token, never client-supplied): cross-owner reads refuse ARV-QRY-001 (404 at the route through the row-shape guard), the list arms return the empty scope, and cross-owner writes surface the SAME codes as absent-source writes (ARV-POS-001/ARV-SES-001) \u2014 the full matrix verified live by run-03 P5/P6 (the battery itself carries no cross-owner reader probes \u2014 SEV-097-2)",
+      "proof_ids": [
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-097-6",
+      "scenario": "the SEV certifies code that changed after the review (a stale report riding a moved diff), or a transplant report from a sibling slice",
+      "control": "the reviewed-diff digest: sha256 over the ten reviewed paths' HEAD content, recomputed by this round through harness.sev's own public function (4b7ba0c0...) and bound into this report; base_sha checked against the observed merge-base (e14fea1, parents verified from git); the slice's own run-dir artifacts excluded so this report cannot move its own binding \u2014 the validator's ARV-SEV-003 stale check enforces it mechanically",
+      "proof_ids": [
+        "run-03"
+      ]
+    },
+    {
+      "id": "FM-097-7",
+      "scenario": "the battery was written after (or alongside) the implementation \u2014 a false red record certifying a test-first discipline that never happened",
+      "control": "the red-record chain bound at the test-only commit 0ce1be9 (the tests exist, the routes provably absent: grep of the 0ce1be9 routes.py finds zero reader-family routes), re-observed live by this round in a detached worktree at 0ce1be9: exit 1 with ARV-API-034..044 failing; the chain's current hash 24f0d667 equals both the 0ce1be9 tree's and the current tree's test-file hash",
+      "proof_ids": [
+        "run-04",
+        "run-03"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-097-1",
+      "severity": "P2",
+      "status": "resolved",
+      "evidence": "INTENT-LEDGER.md line 33: the INT-164 one-liner was appended WITHOUT its terminating newline \u2014 the row reads '... (the INT-162 chain.)- **INT-125** \u2014 ...', gluing INT-125's row onto line 33 (grep -c '^- \\*\\*INT-125\\*\\*' is 1 on origin/main, 0 at HEAD; the ledger's own diff hunk shows the one-liner added without a trailing newline). The identical class was found and repaired in slice 096 (SEV-096-2, the INT-163 one-liner, fixed in 11588b3) \u2014 this is a RECURRENCE of a repaired class in the immediately following slice, which is exactly the repeat-mistake signal LAD-03 names. No machine check is weakened (the canonical layer is green at HEAD, this validator resolves INT-164 through its substring probe), but the ledger's one-row-per-line readability contract is broken and the recurrence shows the class is not yet habit-held.",
+      "disposition": "resolved in-slice before the PR (the evidence commit): the newline restored; the mint script's insertion form corrected (the one-liner template now carries its terminating newline \u2014 the repeat class closed at the source); this re-bind answers the changed reviewed path"
+    },
+    {
+      "id": "SEV-097-2",
+      "status": "resolved",
+      "severity": "P2",
+      "evidence": "the battery's twelve reader-family checks (ARV-API-034..045) include NO cross-owner probes \u2014 unlike the 096 battery, whose own arms carried 030/031 (owner B's token against owner A's source) and the 094 battery's 011 (owner B's empty list). The owner-isolation contract for the new arms (position read, anchor read, reading-state, session-events, and the two writes' no-oracle law) is therefore NOT covered by the slice's own suite; only the absent-id legs (045's absent anchor) touch the no-leak class.",
+      "disposition": "resolved by disclosure plus this round's own live evidence: run-03 P5/P6 exercised the full cross-owner matrix through the real ASGI surface (cross-owner position/anchor reads 404 ARV-QRY-001; reading-state/session-events empty for owner B; cross-owner writes surfacing the SAME codes as absent writes \u2014 ARV-POS-001/ARV-SES-001, no side channel; the missing-idem-key 400). The isolation itself is VERIFIED; the gap is suite coverage only. Named followup: the CLAIM-098 capture-family battery (highlights/bookmarks) touches the same arms \u2014 its checks should carry the cross-owner legs for the reader surface, the 030/031 pattern."
+    }
+  ],
+  "not_verified": [
+    "the five required CI checks at the PR head and this PR's D-042 reasoned review \u2014 the PR is not yet opened at this round; never pre-claimed",
+    "a live Supabase-issued token end-to-end, uvicorn over a real socket, and the deployed route surface \u2014 the Workstream 10 slice's validations",
+    "the passage-text serving route (the \u00a711.2 'source/read data' body arm) \u2014 it rides the capture families' slice; this slice's anchor resolution serves the content-addressed form only",
+    "the stale-generation reopen presentation (a NEW extraction superseding the saved generation -> generation_matches false at the reopen) was not probed by this round \u2014 the true state was verified (generation_matches=true under the current generation); the honest-mismatch presentation rests on the kernel's own contract and code read, not a live observation",
+    "the competing-saver serialization (two concurrent save_position calls under the advisory xact lock) was not re-raced by this round \u2014 the single-saver path, the replay and the conflict legs were verified live; the serialization itself rests on the kernel's own 0009/#90 fault-test evidence",
+    "the ARV-POS-001/ARV-SES-001 500-mapped response bodies were verified at the code level only (the named codes surface; whether the replaced message text is byte-identical to the map's constant was not asserted by this round's probes)",
+    "run-01/run-02's recorded output_sha256 digests were not re-derived from saved transcripts (the outputs are not preserved in the run dir); the commands themselves were re-executed green by this round at HEAD",
+    "the Proof-Sheet assembly for this slice (the sheet's SEV section rendering) \u2014 the builder's own assembly act per the protocol's division of labor; this report sets sheet_section true because the base e14fea1 carries the renderer (verified by this round's git probe)",
+    "the remote btree/TOAST parity (carried from record 80 \u00a79)"
+  ],
+  "builder_context": "builder-zcode-session64-slice-claim-097",
+  "reviewer_context": "reviewer-zsubagent-fresh-context-claim-097 (a distinct fresh-context subagent; a declared distinct context, not cryptographic independence \u2014 the protocol's stated limit)",
+  "disposition": "PASS",
+  "review_summary": "PASS \u2014 zero open P0/P1; one open P2 (SEV-097-1: the INT-164 ledger one-liner's missing terminating newline, the SEV-096-2 class recurring in the immediately following slice \u2014 a one-character repair with a digest re-bind, flagged for the ratchet's attention) and one P2 resolved by disclosure plus this round's own live probes (SEV-097-2: the battery carries no cross-owner reader probes; the isolation itself was verified live). The \u00a711.2 Reading family 1 surface is correct at every layer this round reached: the serving-generation prerequisite law (ARV-POS-002 before extraction; the saved reopen with saved_generation_id and generation_matches=true), the idempotency law (same-key replay of the same result_ref, different-body ARV-CMD-409, at both the position and session arms), the bounded JSON-body reader (declared-over-cap refused pre-read, lying and chunked clients cut mid-stream at the 64KB cap, non-object bodies 422), the D-010 vocabulary enforced at BOTH the adapter and the kernel, the owner isolation on every new arm (the full cross-owner matrix verified by this reviewer's own probes \u2014 reads 404, lists empty, writes the same code as absent, no existence oracle), and the adapter law kept strictly (only the six pre-existing kernel arms called; no domain logic in handlers; no kernel file touched). The red record binds at the test-only commit 0ce1be9 and was re-observed live in a detached worktree (exit 1, ARV-API-034..044 failing; 045's vacuous pass disclosed). The gate's own red-records/scope/branch-claim/registry checks all return green at the reviewed head \u2014 the ARV-CLM-003 wording class that blocked 096's first round is correctly pre-empted. The bookkeeping is coherent against git ground truth (e14fea1's parentage, INT-164 minted, STATE re-derived, record 82, Task 119). The SEV re-binds if and when the SEV-097-1 newline repair lands.",
+  "sheet_section": true
+}

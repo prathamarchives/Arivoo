@@ -18,11 +18,11 @@
 - the storage provider adapter (the WS8 gate — the owner's ratification pending)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: ab744c5660b4665dd5aca2dcad3bf98c426daf9c9af8cb362f8419fad0463dda
-- reviewed_diff_sha256: d306235bcb00f3b15ef1b7d5cf09cf5a26eebd355cee3c19cf26266f35c43af3
+- report sha256: fba4edb89da1fc2008235ce0c4c146b3642f9597c3dbfb4b65a07412137ae50f
+- reviewed_diff_sha256: 04d41102aeb6a4be45d33f0178133f9200814ecd3e142ef1ca8ce27fee0b442c
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 5
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): bc1dabace32748c14e2322e863f904168d5dea6ca250bca9f1a0f0901245fd70
+- sheet sha256 (of the content above, excluding this line): 62a8ee5f366266188767451ac1656ac43a7a0e956acf91ac7b513d16982c003a

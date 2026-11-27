@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-105-runtime",
   "base_sha": "438367f413111cd988881ecdc7e6c2c4b3f3bdd2",
-  "reviewed_diff_sha256": "d306235bcb00f3b15ef1b7d5cf09cf5a26eebd355cee3c19cf26266f35c43af3",
+  "reviewed_diff_sha256": "04d41102aeb6a4be45d33f0178133f9200814ecd3e142ef1ca8ce27fee0b442c",
   "intent_ids": [
     "INT-172"
   ],
@@ -25,7 +25,9 @@
     "context/runtime-decision-request-2026-11-27.md",
     "deploy/DEPLOYMENT.md",
     "harness/api/__main__.py",
-    "harness/api/env.example.txt"
+    "harness/api/env.example.txt",
+    "harness/red-records.json",
+    "harness/tests/test_workers.py"
   ],
   "interfaces_reviewed": [
     "Dockerfile: the reproducible image + the three start commands + the healthcheck",

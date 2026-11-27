@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-103-remote-mcp",
   "base_sha": "e36d6e334478e5f64acdeea46fe435f18091ed11",
-  "reviewed_diff_sha256": "51c02e8766f7be1dd440a9881c7db4236ca8a01305b7b29bf0d9cc88e75a9f93",
+  "reviewed_diff_sha256": "5597cdbf885797d56c6573bf0762e2421caa95b8fa7cea8840e0c51f4a3acffe",
   "intent_ids": [
     "INT-170"
   ],

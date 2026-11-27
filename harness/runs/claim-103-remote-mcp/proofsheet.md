@@ -16,5 +16,12 @@
 - the MCP session management (Mcp-Session-Id headers, resumability) — the stateless per-POST form only at this slice
 - the semantic/model work (Q7 open — deterministic only); the remote btree/TOAST parity (carried)
 
+## Systems-engineering verification (LAW-30; harness/sev.py)
+- report sha256: 22261d796233ac7e5183e6588f002515960d3e90402c1984d45244819ec6093f
+- reviewed_diff_sha256: 05c49978d46a97dd84f23381789f8a18cd9fe82aecc2f591fc4c3fadf2ce7ba3
+- disposition: PASS
+- findings: 0 (open P0/P1: 0)
+- not-verified entries: 5
+
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): ed07d2af9c53a5180caecbf5f8d110353e3aad18ae1a0e4e64d3e27f4303792d
+- sheet sha256 (of the content above, excluding this line): 4aa7c99c659e7fb62bf5d784a14be0f6a1ee10ee54e323eb064692081143a053

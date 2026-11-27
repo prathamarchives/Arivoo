@@ -1,8 +1,8 @@
 # PROOF SHEET — slice claim-102-sync-export-purge (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): c93b742567c9ba7d21bad21f5f44e0d5cffdbee6
-- generated (last record's timestamp): 2026-11-27T13:21:56.984392+00:00
-- run records: 7
+- commit (last run record's): 89c30e8c6afb5a23424045142daca5afd2196513
+- generated (last record's timestamp): 2026-11-27T13:36:09.203039+00:00
+- run records: 8
 
 ## Run records (command, exit, output digest)
 - `.venv-waved/bin/python -I harness/api/routes_selfcheck.py` -> exit 0 · output sha256 00df697c545293cd · 2026-11-27T11:48:31.913720+00:00
@@ -12,6 +12,7 @@
 - `.venv-waved/bin/python -I harness/api/routes_selfcheck.py` -> exit 0 · output sha256 4125e78ee1fad064 · 2026-11-27T13:21:36.158822+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 266e48f6c41f7697 · 2026-11-27T13:21:40.576148+00:00
 - `python3 harness/tests/test_api_routes.py` -> exit 0 · output sha256 7f8b2ce5f5586110 · 2026-11-27T13:21:56.984392+00:00
+- `.venv-waved/bin/python -I harness/api/routes_selfcheck.py` -> exit 0 · output sha256 025a07f7f432ef16 · 2026-11-27T13:36:09.203039+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - the five PR-head CI checks and this PR's D-042 review (observed after the PR opens — never pre-claimed)
@@ -22,11 +23,11 @@
 - the KWR-002 map row (the map-family followup, unchanged); the semantic/model work (Q7 open — deterministic only)
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: 4015b073cd32db7a2fcfa7c3bccf945045653e84872e331cc68cb831aa6167f9
-- reviewed_diff_sha256: a0f7c96962a29b4fd8d75ff4b689a68b1a99b8ea485254b83fd5d8cb500d1aad
+- report sha256: 9f63688866af6138cabb7e76074f0adc72434f8fc3d1382517651ba9cad0a769
+- reviewed_diff_sha256: 0094ec5f9dc4f83000def293fe91739cc8a6e717b98a9620be1648b78c26bcb2
 - disposition: PASS
 - findings: 0 (open P0/P1: 0)
 - not-verified entries: 5
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): f2291d2c08ba11567dad2e3073e16066ac15a119510bbe87bfa08a35cc7cd487
+- sheet sha256 (of the content above, excluding this line): 9543224cd7108ad99653de80b3447ce5d5a7177cc673c4a08d367c4ad30311ae

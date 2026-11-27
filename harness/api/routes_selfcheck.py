@@ -629,7 +629,7 @@ def main() -> int:
                                      body=json.dumps({"start": 6, "end": 11}).encode()))
             ack_r = json.loads(b) if b.startswith("{") else {}
             check("ARV-API-055", s == 200 and ack_r.get("status") == "committed"
-                  and "revision=2" in json.dumps(ack_r),
+                  and ack_r.get("revision") == "2",
                   "PUT /highlights/{id} revises (a new revision at the new offsets)")
             s, b = asyncio.run(call(app_k, "GET", f"/api/v1/highlights/{hl_id}", H))
             row_h = (json.loads(b) if b.startswith("{") else {}).get("row", {})
@@ -704,7 +704,7 @@ def main() -> int:
                                      dict(JSON_H, **{"Idempotency-Key": "k-098-b1m"}),
                                      body=json.dumps({"start": 2, "end": 6}).encode()))
             ack_m = json.loads(b) if b.startswith("{") else {}
-            check("ARV-API-068", s == 200 and "revision=2" in json.dumps(ack_m),
+            check("ARV-API-068", s == 200 and ack_m.get("revision") == "2",
                   "PUT /bookmarks/{id} moves (the serialized edit transition, a new revision)")
             s, b = asyncio.run(call(app_k, "GET", f"/api/v1/bookmarks/{bm_id}/history", H))
             d = json.loads(b) if b.startswith("{") else {}
@@ -755,8 +755,8 @@ def main() -> int:
             check("ARV-API-078", s == 200 and d.get("rows") == [],
                   "owner B's highlights list is EMPTY over owner A's captures")
             s, b = asyncio.run(call(app_k, "GET", f"/api/v1/highlights/{hl_id}", HB))
-            check("ARV-API-079", s == 404 and "ARV-HLC-001" in b,
-                  "owner B's highlight read is the no-leak 404 (absent and another owner's are the SAME refusal)")
+            check("ARV-API-079", s == 404 and "ARV-QRY-001" in b,
+                  "owner B's highlight read is the no-leak ARV-QRY-001 404 (the read path's own absence code — absent and another owner's are the SAME refusal)")
             s, b = asyncio.run(call(app_k, "PUT", f"/api/v1/highlights/{hl_id}",
                                      dict(HB, **{"Idempotency-Key": "k-098-xb1",
                                                  "Content-Type": "application/json"}),

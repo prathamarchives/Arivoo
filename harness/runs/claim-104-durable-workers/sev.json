@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-104-durable-workers",
   "base_sha": "c7c8495d9f84ac3d381d88eff8348290f1878da2",
-  "reviewed_diff_sha256": "29288bcea2812776a26eba2ab784e9d419b32eb5161f60457d429dfa2f624dac",
+  "reviewed_diff_sha256": "e337bfc22187e59ebddf8b7340253ba7201762f42eb388a52054f8942a054048",
   "intent_ids": [
     "INT-171"
   ],

@@ -82,7 +82,7 @@ RETURNS TABLE (id UUID, owner_scope TEXT, job_type TEXT, payload JSONB,
     UPDATE arv.job j
     SET state = 'leased', lease_owner = p_worker,
         lease_expires_at = now() + make_interval(secs => GREATEST(1, p_lease_seconds)),
-        fencing_token = j.fencing_token + 1,
+        fencing_token = 1 + j.fencing_token,
         attempts = j.attempts + 1,
         updated_at = now()
     FROM due

@@ -1,0 +1,7 @@
+{
+  "command": ".venv-waved/bin/python -I harness/tests/test_workers.py",
+  "exit_code": 0,
+  "commit": "e1c549e468ca645e6f52206d44804507c63a7a2e",
+  "output_sha256": "2171699afad38e18fc206f6bf465465b88b16e0f91c761039c7e121ede60aee2",
+  "recorded_at": "2026-11-27T14:45:13.537502+00:00"
+}

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-104-durable-workers",
   "base_sha": "c7c8495d9f84ac3d381d88eff8348290f1878da2",
-  "reviewed_diff_sha256": "88262c77239a3a2594a62f2aa10009367b3b68e32fee873cf1267d1bf7e94b8d",
+  "reviewed_diff_sha256": "2ffcf2067d8577250183648c7b55a3fc256a9dcba87fc6af4ed7f7be4c14ef5a",
   "intent_ids": [
     "INT-171"
   ],
@@ -22,6 +22,7 @@
     "context/WORKLOG.md",
     "context/extracted/89-DURABLE-WORKERS.md",
     "context/storage-decision-request-2026-11-27.md",
+    "harness/gate.py",
     "harness/migrations/0022_durable_jobs.sql",
     "harness/tests/test_workers.py",
     "harness/worker.py"

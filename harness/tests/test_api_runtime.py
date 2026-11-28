@@ -56,7 +56,7 @@ def _ready_ok_includes_db(src: str) -> bool:
     except SyntaxError:
         return False
     for node in ast.walk(tree):
-        if not isinstance(node, ast.FunctionDef) or node.name != "ready":
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) or node.name != "ready":
             continue
         for stmt in ast.walk(node):
             if not isinstance(stmt, ast.Assign):
@@ -85,7 +85,7 @@ def _installs_cors_from_env(src: str) -> bool:
                 isinstance(a, ast.Name) and a.id == "CORSMiddleware"
                 for a in node.args):
             add_middleware = True
-    return add_middleware and "ARIVO_ALLOWED_ORIGINS" in src
+    return add_middleware and ("ARIVO_ALLOWED_ORIGINS" in src or "_cors.ENV_NAME" in src)
 
 
 def main() -> int:
@@ -141,6 +141,11 @@ def main() -> int:
           and "health_db_ready=True" not in main_src,
           "the ASGI entry derives DB readiness from env and refuses an undeclared DB",
           "replace the hardcoded True with the env declaration + a named startup refusal")
+
+    check("ARV-RT-009", "ARV-SVC-003" in main_src
+          and "verify-full" in main_src and "arv_app" in main_src,
+          "the ASGI entry declares the production DB path (verify-full, pinned CA, arv_app)",
+          "add the named startup refusal for an undeclared production DB shape")
 
     print()
     if FAILS:

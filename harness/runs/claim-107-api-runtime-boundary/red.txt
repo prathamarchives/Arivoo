@@ -1,0 +1,18 @@
+FAIL ARV-RT-001: a stdlib-only CORS origin parser exists at harness/api/cors.py
+      repair: add harness/api/cors.py with a strict parse_allowed_origins()
+FAIL ARV-RT-002: CORS behavior (parser absent)
+      repair: add harness/api/cors.py first
+FAIL ARV-RT-003: CORS behavior (parser absent)
+      repair: add harness/api/cors.py first
+FAIL ARV-RT-004: CORS behavior (parser absent)
+      repair: add harness/api/cors.py first
+FAIL ARV-RT-005: CORS behavior (parser absent)
+      repair: add harness/api/cors.py first
+FAIL ARV-RT-006: /health/ready's ok predicate includes health_db_ready
+      repair: include the DB declaration in the readiness predicate
+FAIL ARV-RT-007: the app installs CORSMiddleware from ARIVO_ALLOWED_ORIGINS
+      repair: wire the parsed matrix into starlette's CORSMiddleware in harness/api/app.py
+FAIL ARV-RT-008: the ASGI entry derives DB readiness from env and refuses an undeclared DB
+      repair: replace the hardcoded True with the env declaration + a named startup refusal
+
+RED — the API runtime boundary is not honest: 8 check(s) failed (ARV-RT-001, ARV-RT-002, ARV-RT-003, ARV-RT-004, ARV-RT-005, ARV-RT-006, ARV-RT-007, ARV-RT-008).

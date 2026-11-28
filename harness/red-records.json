@@ -1690,5 +1690,28 @@
     "observed_at": "2026-11-28T05:32:15.529091+00:00"
    }
   ]
+ },
+ "harness/tests/test_api_runtime.py": {
+  "schema": 2,
+  "binding_commit": "dbe512c",
+  "binding_sha256": "ab0519ecf7c0b41df450bb31513a83873ea4a4bd7036f81f1615a4a8c36f46c7",
+  "red_exit": 1,
+  "red_code": "ARV-RT-001..008 (the unimplemented API runtime boundary)",
+  "red_evidence": "observed at the test-only commit dbe512c: exit 1, 8 named failures — the CORS parser absent, /health/ready's predicate missing health_db_ready, no middleware wired from ARIVO_ALLOWED_ORIGINS, and the ASGI entry hardcoding health_db_ready=True",
+  "current_sha256": "f689c190ffb50f0770e1a94cd3a8f591b98ce43797eddd6245b70ad361f9b80c",
+  "amendments": [
+   {
+    "prior_sha256": "ab0519ecf7c0b41df450bb31513a83873ea4a4bd7036f81f1615a4a8c36f46c7",
+    "new_sha256": "b07225656cb99529320a3bc6a3b14e907fd54510d8909fc327db9b28e275163b",
+    "note": "test-side defect repair (the same class as record 18 §4.1): the AST probe looked only for FunctionDef, so it never saw the async /health/ready handler (ARV-RT-006 false RED); the CORS probe required the literal env name in app.py while app.py correctly uses the one-home alias _cors.ENV_NAME (ARV-RT-007 false RED). No assertion removed; the RED at dbe512c was real for the four unimplemented behaviors.",
+    "observed_at": "2026-11-28T06:20:00+00:00"
+   },
+   {
+    "prior_sha256": "b07225656cb99529320a3bc6a3b14e907fd54510d8909fc327db9b28e275163b",
+    "new_sha256": "f689c190ffb50f0770e1a94cd3a8f591b98ce43797eddd6245b70ad361f9b80c",
+    "note": "the suite gains ARV-RT-009: the ASGI entry must declare the production DB path (verify-full, pinned CA, arv_app least privilege) with a named startup refusal; assertion added, none removed",
+    "observed_at": "2026-11-28T06:26:00+00:00"
+   }
+  ]
  }
 }

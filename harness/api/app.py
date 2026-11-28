@@ -28,8 +28,10 @@ import os
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from starlette.middleware.cors import CORSMiddleware
 
 from harness.api import auth as _auth  # the auth boundary module (this dir)
+from harness.api import cors as _cors  # strict origin matrix (stdlib)
 
 API_VERSION = 1  # commands.py's API_VERSION (P4-00b): the versioned namespace maps it
 
@@ -54,6 +56,21 @@ def create_app(*, auth_config: "_auth.AuthConfig | None" = None,
         docs_url=None,   # no interactive docs on the product surface (§11: generate OpenAPI from the code)
         redoc_url=None,
     )
+
+    # W-2 (CLAIM-107): REAL CORS from the service's own declared matrix.
+    # An unset matrix means CORS OFF (no wildcard, no reflected origin); a
+    # malformed matrix refuses at composition with ARV-CORS-001. Credentials
+    # are NEVER allowed — the auth boundary is a Bearer token, not a cookie.
+    _origins = _cors.parse_allowed_origins(
+        os.environ.get(_cors.ENV_NAME))
+    if _origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=list(_origins),
+            allow_methods=["GET", "POST", "OPTIONS"],
+            allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
+            allow_credentials=False,
+        )
 
     # CLAIM-094: the area routers over the kernel (§11.2; the routes module
     # composes them; the db is the SERVICE's runtime value — the deployment's
@@ -84,12 +101,17 @@ def create_app(*, auth_config: "_auth.AuthConfig | None" = None,
         """Readiness proves the process can do its job (§11.5): the auth
         verifier is composed (config + the pinned JWK primed at startup) and
         the DB runtime path is declared ready by the service."""
-        ok = verifier is not None and health_auth_ready
+        # W-2 (CLAIM-107): the DB declaration is PART OF THE PREDICATE, not a
+        # decorative field. The old form reported 200 "ready" with
+        # "database": "not-open" — a service that cannot reach its runtime DB
+        # must NOT be routed production traffic.
+        ok = verifier is not None and health_auth_ready and health_db_ready
         return JSONResponse(
             status_code=200 if ok else 503,
             content={"status": "ready" if ok else "not-ready",
                      "auth": "configured" if verifier is not None else "absent",
                      "auth_primed": bool(health_auth_ready),
+                     "db_ready": bool(health_db_ready),
                      "database": "declared-ready" if health_db_ready else "not-open",
                      "api_version": API_VERSION},
         )

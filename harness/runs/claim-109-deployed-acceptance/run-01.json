@@ -1,0 +1,7 @@
+{
+  "command": "curl -s --max-time 20 https://arivo.itscatalyst.com/health/ready",
+  "exit_code": 0,
+  "commit": "c47f6aaea9f3d5c8dff74378c293b1bcbd5b51f5",
+  "output_sha256": "e603fe7d63cf53bc780e81f4b87e91c30ca1758e1375ea643f8bf1d60fbc794e",
+  "recorded_at": "2026-11-28T10:35:59.807736+00:00"
+}

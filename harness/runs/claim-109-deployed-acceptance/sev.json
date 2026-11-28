@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-109-deployed-acceptance",
+  "base_sha": "1d3da935731b7a4b15a34b16c161f67c399187d2",
+  "reviewed_diff_sha256": "d70775da5405d93f8ca2778b25e830dfdf72fb7542a6617dae35b3a26cb6ba94",
+  "intent_ids": ["INT-162"],
+  "requirement_ids": ["SYS-11"],
+  "system_claims": ["C5"],
+  "changed_components": ["context/extracted/93-DEPLOYED-ACCEPTANCE.md", "STATE.md", "context/WORKLOG.md", "CLAIMS.md"],
+  "interfaces_reviewed": [
+    "the public edge: a dedicated `arivo` tunnel created through the Cloudflare API with a proxied CNAME for arivo.itscatalyst.com and an ingress to arivo-api:8080 — the three pre-existing tunnels were explicitly untouched",
+    "the origin: three containers on arivo-net (api / worker / tunnel connector), no published ports, non-root image, arv_app least-privilege credential with verify-full; all credential values stay outside Git",
+    "the public contract probes: /health/live 200, /health/ready 200 with db_ready=true, /api/v1/me 401 without a Bearer token, /api/v1/openapi.json 200, /mcp initialize -32001 requiring the owner-minted agent credential, and CORS echoing only https://arivo.itscatalyst.com",
+    "CLAIMS.md: CLAIM-108 retires under rule 4 after PR #153 merged; CLAIM-109 opens with a scope covering this evidence-only diff"
+  ],
+  "v_model": {
+    "component_verification": ["run-01..03: the public readiness and auth-boundary probes (200 / 401 / 200)", "run-04: canonical layer GREEN (155 intents)"],
+    "integration_verification": ["the tunnel's own prechecks passed (DNS, QUIC, TCP, Cloudflare API); all three containers are up with restart-unless-stopped"],
+    "system_verification": ["context/extracted/93-DEPLOYED-ACCEPTANCE.md records the observed public responses and the CORS/MCP contract legs"],
+    "validation": ["the remote five required checks on this PR's head remain authoritative; these are deployed-surface observations, not a new code path"]
+  },
+  "failure_modes": [
+    {"id": "FM-109-1", "scenario": "the public edge routes to an unready or unauthenticated origin", "expected": "readiness reflects the DB declaration and protected routes refuse without a Bearer token", "observed": "/health/ready 200 with db_ready=true and /api/v1/me 401", "control": "the W-2 readiness boundary + the auth dependency; the tunnel ingress reaches only the API container", "proof_ids": ["run-01", "run-02"]},
+    {"id": "FM-109-2", "scenario": "an arbitrary browser origin or an uncredentialed MCP client is served", "expected": "exact CORS origin only; MCP refuses with -32001", "observed": "CORS echoed only https://arivo.itscatalyst.com; MCP initialize refused without the agent token", "control": "the strict origin matrix and the kernel's agent-credential gate", "proof_ids": ["run-03"]}
+  ],
+  "findings": [],
+  "not_verified": [
+    "no real Supabase-authenticated REST call (no test user was provided or created)",
+    "no owner-minted agent credential was available, so only the MCP refusal leg was exercised",
+    "no deployed end-to-end import/retrieval/worker campaign (the rig records remain the campaign evidence)",
+    "no R2 object-store I/O; the provider adapter is a separate slice",
+    "the owner chose the local machine as origin; if it sleeps the public API goes down",
+    "the remote five checks on the PR head are authoritative"
+  ],
+  "builder_context": "builder-local-agent-session66 (opencode, the owner's local machine)",
+  "reviewer_context": "reviewer-inline-verification on this PR (the same account; a declared distinct-context limit per ARV-SEV-007 — the D-042 review comment is the floor)",
+  "disposition": "PASS",
+  "review_summary": "PASS — evidence-only slice: the dedicated tunnel, DNS and the three-container origin are live, and the public API/MCP boundary behaves as contracted. No code, credential value or infrastructure definition entered the repository; every remaining gap (live auth, agent token, R2 adapter, a true always-on host) is stated as not-verified rather than claimed.",
+  "sheet_section": true
+}

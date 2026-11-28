@@ -1,0 +1,6 @@
+# claim-109-deployed-acceptance — the public-surface evidence artifact
+context/extracted/93-DEPLOYED-ACCEPTANCE.md INT-162/D-047
+STATE.md INT-162/D-047
+context/WORKLOG.md INT-162/D-047
+harness/runs/claim-109-deployed-acceptance INT-162/D-047
+CLAIMS.md INT-162/D-047 (claim opens; CLAIM-108 closes under rule 4)

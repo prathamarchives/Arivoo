@@ -1,0 +1,2 @@
+This slice records the public surface; it changes no code or infrastructure definition.
+Not verified: no real Supabase-authenticated REST call (no test user); no agent credential, so only the MCP refusal leg was exercised; no deployed end-to-end import/retrieval/worker campaign; no R2 object-store I/O; no always-on remote host (the owner chose the local machine, which goes down when it sleeps). The five required checks on the PR head are the authoritative confirmation; the local probes are preflight.

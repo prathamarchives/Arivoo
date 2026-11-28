@@ -56,6 +56,17 @@ def config() -> dict:
 LOOPBACK = {"127.0.0.1", "localhost", "::1"}  # the rig + CI's service: the ONLY approved targets
 
 
+def remote_user(user: str | None) -> str:
+    """The pooler identifies a tenant from '<role>.<project-ref>' (or SNI).
+    The rig uses the bare role; ONLY the guarded remote mode qualifies it.
+    A caller that already supplies the qualified spelling is left alone (the
+    migration/admin credential arrives that way)."""
+    u = user or config()["PGUSER"]
+    if os.environ.get("ARV_REMOTE_TARGET") and "." not in u:
+        return f"{u}.{REMOTE_PINNED_REF}"
+    return u
+
+
 def _remote_guard(cfg: dict) -> "PsqlResult | None":
     """CLAIM-088 (D-047, runbook §6.2): the remote-target guard chain — every
     refusal fires BEFORE any connection is attempted, each BY NAME, none
@@ -118,7 +129,7 @@ def psql(sql: str, *, db: str = "postgres", user: str = None, timeout: int = 60)
                           "direct connection path may select a different database than the migrations")
     cmd = ["psql", "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1",
            "-h", cfg["PGHOST"], "-p", cfg["PGPORT"],
-           "-U", user or cfg["PGUSER"], "-d", db, "-c", sql]
+           "-U", remote_user(user), "-d", db, "-c", sql]
     if os.environ.get("ARV_REMOTE_TARGET"):
         # the approved remote mode: TLS verification travels WITH the command
         cmd += ["--set=sslmode=" + _REMOTE_TLS_REQUIRED]

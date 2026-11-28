@@ -48,6 +48,7 @@ def main() -> int:
                            "PGPORT": pg.REMOTE_PINNED_PORT,
                            "PGUSER": "arv_app." + pg.REMOTE_PINNED_REF,
                            "PGSSLMODE": "verify-full",
+                           "ARV_REMOTE_SSLMODE": "verify-full",
                            "PGSSLROOTCERT": "/tmp/nonexistent-ca.pem"})
         r = pg.psql("SELECT 1;", user="arv_app")
         cmd = captured.get("cmd", [])

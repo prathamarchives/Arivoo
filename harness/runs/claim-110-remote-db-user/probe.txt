@@ -1,0 +1,6 @@
+# deployed authenticated read probe (token redacted)
+$ POST /auth/v1/token (password grant) -> access_token
+$ GET https://arivo.itscatalyst.com/api/v1/me (Bearer) -> 200
+$ GET https://arivo.itscatalyst.com/api/v1/sources (Bearer)
+{"rows":[],"more":false,"api_version":1}
+# before the fix: {"error":{"code":"ARV-QRY-002"}} with ENOIDENTIFIER in the kernel stderr

@@ -1723,5 +1723,22 @@
   "red_evidence": "observed at the test-only commit: the Docker build failed at pip install -r requirements.lock on the un-commented LAW-08 approval note (line 3); the suite recorded 2 failures (ARV-LOCK-001/003)",
   "current_sha256": "4229e973d32b8a94026fa5d0176bcfdd96456feb721c5904cc97ac8593db99d8",
   "amendments": []
+ },
+ "harness/tests/test_remote_db_user.py": {
+  "schema": 2,
+  "binding_commit": "38c1935e5e07456b5dee372b43ca194d41d12df4",
+  "binding_sha256": "259a6bc41d33c2279a43be52e093d5af98a3fd54468bf1dceb369d80255dd4f6",
+  "red_exit": 1,
+  "red_code": "ARV-RMT-006 (the bare arv_app reaches the pooler)",
+  "red_evidence": "observed at the test-only commit: the deployed /api/v1/sources returned ARV-QRY-002; the kernel's psql reported ENOIDENTIFIER because -U arv_app had no tenant identifier",
+  "current_sha256": "40a037ff07b5be14b7088d545feeae975ca2b5a0a6dfdadfcffd880e81508605",
+  "amendments": [
+   {
+    "prior_sha256": "259a6bc41d33c2279a43be52e093d5af98a3fd54468bf1dceb369d80255dd4f6",
+    "new_sha256": "40a037ff07b5be14b7088d545feeae975ca2b5a0a6dfdadfcffd880e81508605",
+    "note": "test-side setup repair: the remote guard reads ARV_REMOTE_SSLMODE (not PGSSLMODE); the fixture now sets the guarded form so the RED isolates the actual user-mapping defect (ARV-RMT-006 only)",
+    "observed_at": "2026-11-28T11:10:00+00:00"
+   }
+  ]
  }
 }

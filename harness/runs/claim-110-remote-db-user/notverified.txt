@@ -1,0 +1,1 @@
+Not verified: no write/import/export/purge lifecycle was re-run against the deployed surface (the rig campaign remains its evidence); no MCP agent credential was available; no R2 I/O; the image was rebuilt and the containers restarted locally, but no new tunnel/DNS change was made. The five required checks on the PR head are authoritative.

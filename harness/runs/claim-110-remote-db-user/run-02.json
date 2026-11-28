@@ -1,0 +1,7 @@
+{
+  "command": "docker build -t arivo:verify-local .",
+  "exit_code": 0,
+  "commit": "ed6f7685baa8695ddee57149421bbff565a7a39c",
+  "output_sha256": "91b4546a7ef0a698f86b6149580550bccc6095fcdaada47697799461506b9946",
+  "recorded_at": "2026-11-28T10:53:24.555345+00:00"
+}

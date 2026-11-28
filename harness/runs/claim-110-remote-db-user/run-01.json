@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_remote_db_user.py",
+  "exit_code": 0,
+  "commit": "ed6f7685baa8695ddee57149421bbff565a7a39c",
+  "output_sha256": "bab9976b186f2e2fbf8eb6635877b4dfa5c4574dff3ea4203f56bc740f48b9a1",
+  "recorded_at": "2026-11-28T10:53:13.686534+00:00"
+}

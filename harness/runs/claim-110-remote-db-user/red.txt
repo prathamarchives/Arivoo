@@ -1,0 +1,6 @@
+FAIL ARV-RMT-006: the guarded remote path pooler-qualifies the runtime user (arv_app.<ref>)
+      repair: map a bare role to '<role>.<pinned ref>' when ARV_REMOTE_TARGET is set
+PASS ARV-RMT-007: the remote path still carries verify-full with the command
+PASS ARV-RMT-008: the local rig path keeps the bare arv_app user
+
+RED — the production DB user contract is broken: 1 check(s) failed.

@@ -1,0 +1,7 @@
+FAIL ARV-LOCK-001: every effective line (43) is a pinned requirement with sha256 hashes
+      repair: comment out the prose ([(3, "LAW-08 approval note (the owner's execution authority D-047 — the runbook's §3.2"), (4, 'names this exact minimum set; this note IS the required approval record):')]) and use 'name==version --hash=sha256:<digest>' lines
+PASS ARV-LOCK-002: the approved minimum set is pinned
+FAIL ARV-LOCK-003: no unpinned or duplicate requirement
+      repair: one pinned line per requirement; hashes on every line
+
+RED — the runtime lock is not pip-installable: 2 check(s) failed.

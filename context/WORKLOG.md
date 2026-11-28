@@ -1254,3 +1254,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-107-api-runtime-boundary/; context/extracted/92-API-RUNTIME.md.
 - Unresolved: Q18, the DB credential, WS8, Q19, the reader-repo link. Not-verified: no live auth/DB, no ASGI CORS client, no deployed surface.
 - Next: PR #152's five checks + D-042 review + INT-145 merge; then the owner's gates.
+
+## Task 132 (CLAIM-108, session 66, 2026-11-28) — the runtime dependency lock
+- What: the Docker image build failed at `pip install -r harness/api/requirements.lock` because the LAW-08 approval prose was not commented and wheel digests were not in pip's --hash form. Converted all prose to comments and all 21 pins to `name==version --hash=sha256:...` (no pin changed); registered a stdlib lock suite.
+- Verified: RED at 29de1d2 (ARV-LOCK-001/003, plus the real build failure) -> GREEN; the image now builds through STEP 12; the built container answered /health/live 200 and /health/ready 200 with db_ready=true against the live Supabase DB over verify-full using the arv_app credential, and the CORS preflight echoed only https://arivo.itscatalyst.com.
+- Evidence: harness/runs/claim-108-runtime-lock/ (red.txt, health.txt, four run records, SEV, proof sheet).
+- Unresolved: Q18 host access, the always-on deployment, a live authenticated call. Not-verified: no tunnel/DNS/deployed endpoint; no worker process.
+- Next: PR #153's five checks + D-042 review + INT-145 merge; then the production host/tunnel slice.

@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_runtime_lock.py",
+  "exit_code": 0,
+  "commit": "073a059dcf1a902150ecd71dda4e9e76ef7a7da1",
+  "output_sha256": "574defe639149a4c5845296da75d8c788cf65ddda44a04154a943dcd5c7cc57c",
+  "recorded_at": "2026-11-28T09:51:18.509070+00:00"
+}

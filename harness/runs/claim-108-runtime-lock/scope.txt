@@ -1,0 +1,8 @@
+# claim-108-runtime-lock — the pip-parseable runtime lock
+harness/api/requirements.lock INT-162/D-047 (the approved pins as pip-parseable --hash lines; prose approval note kept as comments)
+harness/tests/test_runtime_lock.py INT-162/D-047 (RED-first lock contract)
+harness/gate.py INT-162/D-047 (the new suite's registration — the ARV-RED-008 class)
+harness/red-records.json INT-162/D-047
+harness/runs/claim-108-runtime-lock INT-162/D-047
+CLAIMS.md INT-162/D-047 (CLAIM-108 opens)
+context/WORKLOG.md INT-162/D-047 (session append)

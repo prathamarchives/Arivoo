@@ -1713,5 +1713,15 @@
     "observed_at": "2026-11-28T06:26:00+00:00"
    }
   ]
+ },
+ "harness/tests/test_runtime_lock.py": {
+  "schema": 2,
+  "binding_commit": "29de1d2fc8736a5c31b4cf0e5a4fcebe1d1f6afb",
+  "binding_sha256": "4229e973d32b8a94026fa5d0176bcfdd96456feb721c5904cc97ac8593db99d8",
+  "red_exit": 1,
+  "red_code": "ARV-LOCK-001/003 (the lock is prose, not pip-parseable)",
+  "red_evidence": "observed at the test-only commit: the Docker build failed at pip install -r requirements.lock on the un-commented LAW-08 approval note (line 3); the suite recorded 2 failures (ARV-LOCK-001/003)",
+  "current_sha256": "4229e973d32b8a94026fa5d0176bcfdd96456feb721c5904cc97ac8593db99d8",
+  "amendments": []
  }
 }

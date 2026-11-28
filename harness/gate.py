@@ -138,6 +138,8 @@ TESTS = ("harness/tests/test_workers.py", "harness/tests/test_acceptance_campaig
          # CLAIM-107 (W-2 runtime boundary): the stdlib-only API-runtime suite —
          # strict CORS origins + DB-aware readiness + fail-closed startup
          "harness/tests/test_api_runtime.py",
+         # CLAIM-108 (runtime lock): the pip-parseable lock contract
+         "harness/tests/test_runtime_lock.py",
          # CLAIM-095 (the F6 kernel follow-up; the ARV-RED-008 class: the new
          # suite's registration rides the binding commit, diff-visible)
          "harness/tests/test_kwr_bound.py")

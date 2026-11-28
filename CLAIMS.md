@@ -16,6 +16,7 @@
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
 | CLAIM-107 | 66 | local agent (opencode takeover) | `slice/claim-107-api-runtime-boundary` | `harness/api/cors.py`, `harness/api/app.py`, `harness/api/__main__.py`, `harness/api/env.example.txt`, `harness/tests/test_api_runtime.py`, `harness/gate.py`, `harness/red-records.json`, `harness/runs/claim-107-api-runtime-boundary`, `CLAIMS.md`, `STATE.md`, `context/WORKLOG.md`, `context/extracted/92-API-RUNTIME.md` | (no new reservation — Workstream 2 rides INT-162/D-047's adopted wave order; no new intent) | 2026-11-28 | the production-runtime boundary: strict CORS matrices, a DB-aware readiness predicate, and fail-closed startup declaration; the API's per-request DB executor path (pg.psql vs pgprod) is audited and named as a follow-up, NOT silently changed. Rides the rule-4 closes of CLAIM-106b/106c. |
+| CLAIM-108 | 66 | local agent (opencode takeover) | `slice/claim-108-runtime-lock` | `harness/api/requirements.lock`, `harness/tests/test_runtime_lock.py`, `harness/gate.py`, `harness/red-records.json`, `harness/runs/claim-108-runtime-lock`, `CLAIMS.md` | (no new reservation — the runtime substrate rides INT-162/D-047) | 2026-11-28 | the image build caught a prose lock file that pip cannot parse; this slice makes the approved pins pip-installable with hashes, RED-first. |
 
 
 

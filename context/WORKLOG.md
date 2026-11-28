@@ -1233,3 +1233,24 @@ Stage Summary:
 - Evidence: harness/runs/claim-106-acceptance/.
 - Unresolved: Q6–Q12, Q16–Q19 open; Q18 + the database credential + the WS8 ratification the owner's. Not-verified: the deployed-surface halves (the real Supabase user, the Cloudflare-proxy stream); the reader-repo inspection (the canonical link never provided); Q19's desktop legs.
 - Next: the owner's three gates (Q18, the database credential, the WS8 ratification) → the deploy slice; the reader-repo link → the frontend-contract half.
+
+## Task 129 (CLAIM-106c, session 66, 2026-11-28) — the base-anchored canonical-layer repair (Batch 0)
+- What: `tools/isolation_check.py`'s count budget 2000 -> 8000 (byte caps untouched) + the acceptance campaign's explicit `SKIPPED ARV-ACC-000` (no false GREEN). Opened as its own slice after the live discovery that the canonical-layer required job anchors MAIN's checker, so a candidate-side change cannot take effect in the same PR.
+- Verified: RED at the pre-repair tree (the 5 positive self-test cases + the campaign's ModuleNotFoundError from CI run 46027167150) -> GREEN; PR #151 all five checks green at `7fd531d`, merged to `aaf48aa` under INT-145.
+- Evidence: harness/runs/claim-106c-isolation-budget/.
+- Unresolved: Q6-Q12, Q16-Q19 open; Q18, the DB credential and WS8 remain the owner's. Not-verified: the campaign did not execute; the 8000 cap is sized against today's corpus.
+- Next: re-bind PR #150 to the new base and merge it.
+
+## Task 130 (CLAIM-106b, session 66, 2026-11-28) — the declaration re-bind
+- What: merged main into the declaration branch, narrowed CLAIM-106b's scope, reconciled CLAIM-106's duplicate close row, corrected the overclaiming WS11/suite-floor lines, re-authored the SEV twice (first for the new base, then for the committed head after CI caught a stale digest with ARV-SEV-003).
+- Verified: gate PR-mode GREEN; PR #150 all five checks green at `34464b5`; merged to `03c58ee` under INT-145.
+- Evidence: harness/runs/claim-106b-declaration/.
+- Unresolved: same owner gates. Not-verified: ACC-01..18 not executed locally.
+- Next: Workstream 2 — the API runtime boundary.
+
+## Task 131 (CLAIM-107, session 66, 2026-11-28) — the API runtime boundary (Workstream 2)
+- What: strict stdlib CORS matrix (no wildcard/reflection/paths), a DB-aware `/health/ready` predicate, and fail-closed startup declarations (ARV-SVC-002/003) that pin verify-full, the pinned CA and the `arv_app` role; a new stdlib-only suite registered in the gate.
+- Verified: ARV-RT-001..009 RED at dbe512c (8 failures) -> GREEN (11 PASS); canonical layer + isolation self-test green; gate PR-mode green. The pgprod per-request executor migration is named as a follow-up, not claimed.
+- Evidence: harness/runs/claim-107-api-runtime-boundary/; context/extracted/92-API-RUNTIME.md.
+- Unresolved: Q18, the DB credential, WS8, Q19, the reader-repo link. Not-verified: no live auth/DB, no ASGI CORS client, no deployed surface.
+- Next: PR #152's five checks + D-042 review + INT-145 merge; then the owner's gates.

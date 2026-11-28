@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-107-api-runtime-boundary",
+  "base_sha": "03c58ee2c6cfa3edcae4eaec6c4f278dc38cefe8",
+  "reviewed_diff_sha256": "e6fd43e5fb3ebae6882c8770f6f5b3f647028c41029654330887bca5e8562bf6",
+  "intent_ids": [
+    "INT-162"
+  ],
+  "requirement_ids": [
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C5"
+  ],
+  "changed_components": [
+    "harness/api/cors.py",
+    "harness/api/app.py",
+    "harness/api/__main__.py",
+    "harness/api/env.example.txt",
+    "harness/tests/test_api_runtime.py",
+    "harness/gate.py",
+    "harness/red-records.json",
+    "CLAIMS.md",
+    "STATE.md",
+    "context/WORKLOG.md",
+    "context/extracted/92-API-RUNTIME.md"
+  ],
+  "interfaces_reviewed": [
+    "harness/api/cors.py: parse_allowed_origins() accepts ONLY exact scheme://host[:port] entries (<=16), an unset matrix means CORS off, and wildcard/path/userinfo/duplicate/empty/out-of-range-port refuse with ARV-CORS-001; is_allowed() is whole-string membership with no origin reflection",
+    "harness/api/app.py: /health/ready's ok predicate now READS health_db_ready (the earlier form could return 200 with 'database': 'not-open'); CORSMiddleware is installed from the parsed matrix with allow_credentials=False and a bounded method/header set",
+    "harness/api/__main__.py: ARIVO_DB_READY drives health_db_ready (ARV-SVC-002 on an undeclared DB); the production DB shape (PGHOST, arv_app PGUSER, PGSSLMODE=verify-full, a readable PGSSLROOTCERT) is required with ARV-SVC-003 — the recorded decision is pgprod for production, pg.psql for the rig/migrations, with the pooled per-request executor migration named as a follow-up",
+    "harness/gate.py + harness/red-records.json: the new stdlib-only suite is registered in TESTS (the ARV-RED-008 class) with a typed red record bound to dbe512c and three chained amendments (two test-probe repairs, one added check); no assertion removed",
+    "CLAIMS.md: CLAIM-107 opens with a scope covering the full diff; CLAIM-106b/106c retire here under rule 4 after their PRs merged, removing the red-records.json overlap"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01: `python3 harness/tests/test_api_runtime.py` exit 0 — ARV-RT-001..009 (11 PASS lines; the malformed-origin family split into four cases)"
+    ],
+    "integration_verification": [
+      "run-02: `python3 tools/verify_canonical_layer.py` exit 0 (155 intents; the new extracted record and the shared-append edits are coherent)",
+      "run-03: `python3 -I tools/isolation_selftest.py` exit 0 (no secret-pattern regression from the new env documentation)",
+      "the gate's red-record check GREEN: the typed binding and all three amendments chain correctly against the trusted origin/main baseline"
+    ],
+    "system_verification": [
+      "red.txt: the test-only commit dbe512c OBSERVED exit 1 with 8 named failures (ARV-RT-001..008) — the parser absent, the predicate missing the DB leg, no middleware wired, hardcoded startup readiness",
+      "the production DB decision is enforced at startup by named refusals, not by an accidental libpq fallback; the live credential remains owner-gated and is not claimed here"
+    ],
+    "validation": [
+      "the remote five required checks on this PR's head are the authoritative confirmation (D-009); the local runs are preflight"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-107-1",
+      "scenario": "a configured wildcard or path-bearing origin is accepted and reflected into CORS headers",
+      "expected": "ARV-CORS-001 refusal at composition; no wildcard, no reflection",
+      "observed": "RED (no parser, no middleware) -> GREEN (strict parser + middleware wired)",
+      "control": "parse_allowed_origins() exact-entry grammar + CORSMiddleware allow_origins with allow_credentials=False",
+      "proof_ids": [
+        "red.txt",
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-107-2",
+      "scenario": "the service answers /health/ready 200 while the DB declaration is not-open",
+      "expected": "503 not-ready whenever any leg (auth or DB) is missing",
+      "observed": "RED (the predicate omitted health_db_ready) -> GREEN (DB leg in the predicate and in the body)",
+      "control": "the readiness predicate plus the fail-closed ARV-SVC-002 startup declaration",
+      "proof_ids": [
+        "red.txt",
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-107-3",
+      "scenario": "the API starts with an incomplete or identity-blind production DB configuration",
+      "expected": "a named refusal (ARV-SVC-003), never a local fallback or a plaintext connection",
+      "observed": "RED (health_db_ready hardcoded True and no DB-path guard) -> GREEN (verify-full + pinned CA + arv_app required)",
+      "control": "the startup guard in harness/api/__main__.py and the pgprod boundary's own ARV-PRD-002/003 contracts",
+      "proof_ids": [
+        "red.txt",
+        "run-01"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "harness/api/app.py at the base: ok = verifier is not None and health_auth_ready, while the same response printed 'database': 'not-open' when ARIVO_DB_READY was unset — a 200 ready over a service with no DB path (ARV-RT-006 RED at dbe512c)",
+      "disposition": "fixed in PR: the DB declaration is part of the predicate and the startup refuses an undeclared DB (ARV-SVC-002)"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "ARIVO_ALLOWED_ORIGINS was documented in the secret matrix but no CORS middleware existed; a wildcard or reflected origin would have been an unguarded browser surface (ARV-RT-001/007 RED)",
+      "disposition": "fixed in PR: a strict stdlib parser plus CORSMiddleware on exact origins, credentials off; no wildcard, no reflection"
+    },
+    {
+      "id": "SEV-3",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "harness/api/__main__.py hardcoded health_db_ready=True and declared no production DB shape — the readiness lie was structural, not a missing env value (ARV-RT-008/009 RED)",
+      "disposition": "fixed in PR: env-derived declaration + the ARV-SVC-003 production-shape guard; the per-request pgprod executor migration remains a NAMED FOLLOW-UP needing a live credential"
+    }
+  ],
+  "not_verified": [
+    "no live Supabase authentication was exercised (fresh credential owner-gated)",
+    "the /health/ready DB leg is a service declaration, not a live connection probe",
+    "the per-request DB executor still uses pg.psql in two routes; the pooled pgprod migration is a named follow-up",
+    "starlette CORS behavior was not driven through an ASGI client on this venv-less host",
+    "no Docker build, tunnel, DNS, storage provider or deployed endpoint was touched",
+    "the remote five checks on this PR's head are the authoritative confirmation"
+  ],
+  "builder_context": "builder-local-agent-session66 (opencode, the owner's local machine)",
+  "reviewer_context": "reviewer-inline-verification on this PR (the same account; a declared distinct-context limit per ARV-SEV-007 — the D-042 reasoned review comment is the floor, not independent-model evidence)",
+  "disposition": "PASS",
+  "review_summary": "PASS — three P1 runtime-boundary defects were proven RED at a test-only commit and repaired in this diff: a readiness predicate that could report healthy without a DB, a documented-but-absent CORS matrix, and an ASGI entry that hardcoded readiness. The fixes add a strict stdlib origin parser, wire real middleware, and make both readiness and the production DB shape explicit with named startup refusals. No gate or guard was weakened; the new suite is registered with a typed red-chain, and the claim registry/close rows reconcile cleanly. Live authentication, a live DB probe, the pooled per-request executor, and the deployed surface remain owner-gated and are stated, not claimed.",
+  "sheet_section": true
+}

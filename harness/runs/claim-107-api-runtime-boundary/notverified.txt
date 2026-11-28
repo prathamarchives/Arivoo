@@ -1,0 +1,7 @@
+This is a runtime-boundary slice, not a deployed-service slice. Not verified:
+- No live Supabase authentication was exercised: no fresh arv_app credential and no JWKS fetch on this host (the owner gates the credential).
+- The production DB executor's per-request path still uses pg.psql in the two remaining routes; the pgprod pooled-executor migration is a NAMED FOLLOW-UP, not silently claimed. This slice only declares and validates the production shape at startup.
+- /health/ready's DB leg is a service declaration (ARIVO_DB_READY), not a live probe: a genuine connection check needs a live credential and is named as a follow-up.
+- The new suite's CORS checks are stdlib/structural; the actual starlette middleware behavior was not driven through an ASGI client (no fastapi on this host). The pinned-venv route battery remains the place that exercises the app.
+- No Docker image build, Cloudflare tunnel, DNS, storage provider or deployed endpoint was touched (Q18/Q12/Q17 owner-gated).
+- The five required checks are the authoritative confirmation of this PR; the local runs are preflight.

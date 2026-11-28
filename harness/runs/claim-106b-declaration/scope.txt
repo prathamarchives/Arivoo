@@ -1,6 +1,7 @@
 # claim-106b-declaration — the completion declaration
 context/completion-declaration-2026-11-27.md INT-173
 CLAIMS.md INT-173
-harness/tests/test_acceptance_campaign.py INT-173 (the CI honest-degradation repair — the 093/094 lesson)
+harness/tests/test_acceptance_campaign.py INT-173 (the CI honest-degradation repair — the 093/094 lesson; session 66: the false-GREEN skip replaced by the explicit ARV-ACC-000 SKIP)
+tools/isolation_check.py INT-173 (session 66: the canonical-layer scan-count re-base — the self-test fixture's 2001-entry tree against a 2000 cap; the PR #150 canonical-layer repair, owner-directed in the local-agent runbook's Batch 1)
 harness/red-records.json INT-173
 harness/runs/claim-106b-declaration INT-173

@@ -55,17 +55,29 @@ def one(db, sql, user="arv_app"):
 
 def _deps_available() -> bool:
     """The honest-degradation probe (the 093/094 lesson): the campaign drives the
-    REAL ASGI app (fastapi/cryptography) — on a host without those deps the suite
-    degrades honestly (the NOTE + the SKIP), never a false red; the green evidence
-    is the slice's run records on the rig."""
+    REAL ASGI app (fastapi/jwt) against a live PostgreSQL (psql). On a host
+    without them the campaign CANNOT execute — it must say so explicitly and
+    must never report the campaign as green."""
     import importlib.util as _u
+    import shutil as _sh
+    if _sh.which("psql") is None:
+        return False
     return all(_u.find_spec(m) is not None for m in ("fastapi", "jwt"))
 
 
 def main() -> int:
     if not _deps_available():
-        print("NOTE: no fastapi/jwt on this host — the acceptance campaign (the REAL ASGI app) runs where the pinned venv exists; CI's harness job exercises the same surface through its own provisioning; the campaign's green evidence is the slice's run records on the local rig (the 093 honest-degradation form)")
-        print("GREEN — the §6 campaign degrades honestly on this host (the deps absent; never a false red)")
+        # ARV-ACC-000 (session 66 repair): the explicit SKIP. The trusted
+        # harness-suites runner is venv-less and installs no psql client, so
+        # the campaign cannot execute there. The predecessor form printed
+        # "GREEN" here, which a reader (or the trusted gate's exit-0 floor)
+        # could mistake for executed acceptance evidence — the false-green
+        # class. This form never claims GREEN: it names the skip, names the
+        # checks that did not run, and points at where the real evidence is.
+        print("SKIPPED ARV-ACC-000: the §6 acceptance campaign did NOT execute on this host "
+              "(psql / fastapi / jwt absent) — ACC-01..18 were not run and this is NOT "
+              "acceptance evidence; the campaign's green evidence is the slice's rig run "
+              "records (harness/runs/), never this line")
         return 0
     db = "arv_acc_" + ids.new_id().replace("-", "")[:10]
     psql("postgres", f"CREATE DATABASE {db}", user="postgres")

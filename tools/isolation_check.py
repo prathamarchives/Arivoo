@@ -55,7 +55,8 @@ to a non-terminating stream cannot hang the checker, and a credential hidden
 in link text is caught — a NEW covered leak class); a non-regular entry is
 refused to the unscannable class without being opened; a regular file is
 opened O_NOFOLLOW, re-verified ISREG on the open fd (race-resistant), and read
-under per-file/total/count budgets with ~25x headroom over the live corpus.
+under per-file/total/count budgets with documented headroom over the live corpus
+(re-based session 66 against the measured 1997-file corpus; see the constants).
 A breach is a NAMED fail-closed refusal: the over-budget READ is skipped and
 the rest of the scan continues bounded (coverage under the bound — a break
 that silently unsweeps later files would be its own defect), and the run is
@@ -123,13 +124,28 @@ SECRET_ENV_NAMES = re.compile(
 CI_EXPECTED_ENV = {"GITHUB_TOKEN"}
 CI_EXPECTED_PREFIXES = ("GITHUB_", "ACTIONS_", "RUNNER_")
 
-# H-01b-F (F-002, session 23): the tracked-file scan budgets. Headroom over
-# the live corpus (208 files, ~2.3 MB, largest 243 KB) is ~25x; a breach is an
+# H-01b-F (F-002, session 23): the tracked-file scan budgets. A breach is an
 # anomaly to REFUSE, never a normal state to swallow. Editing these down under
 # the real corpus is a constraint-weakening change (LAW-09).
+#
+# RE-BASE (session 66, 2026-11-28 — the canonical-layer starvation repair):
+# the original comment sized these against a 208-file / ~2.3 MB corpus. The
+# corpus has since grown ~10x (measured at the repair: 1997 tracked files,
+# 9,713,754 bytes, largest 263,577 bytes) and the 2000-file COUNT cap had
+# ZERO headroom: the self-test fixture (which reconstructs a repo from the
+# working tree and therefore also stages CI's untracked *_anchored judge
+# copies) reached 2001 entries and every positive case went RED on a
+# legitimate tree (canonical-layer cases 12/14/17/18/19). A budget whose
+# normal state is a breach refuses the real corpus, so it no longer guards an
+# anomaly. Re-based to the measured corpus with the same anomaly-guard intent:
+# the BYTE budget remains the dominant runtime bound (64 MiB ≈ 6.7x the
+# corpus) and the count cap is a secondary sanity bound at ~4x (8000) —
+# lstat-ing 8000 paths is negligible next to the byte cap, so this is not a
+# loosening of the scan's cost bound. The per-file cap (8 MiB ≈ 31x the
+# largest file) is unchanged.
 SCAN_PER_FILE_BUDGET = 8 * 1024 * 1024
 SCAN_TOTAL_BUDGET = 64 * 1024 * 1024
-SCAN_COUNT_BUDGET = 2000
+SCAN_COUNT_BUDGET = 8000
 
 
 def _open_regular_nofollow(path: Path) -> int:

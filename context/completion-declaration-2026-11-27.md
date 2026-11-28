@@ -12,7 +12,7 @@
 | 8 | the storage comparison + the ONE consolidated decision request | **PREPARED — the owner's ratification** | STORAGE-DECISION-REQUEST.md (R2 recommended); blocks ONLY the provider adapter slice |
 | 9 | the durable workers (0022 job machine + the worker loop) | **COMPLETE** | PR #146 (merge 438367f) — WRK-01..10 |
 | 10 | the runtime substrate + the Q18 decision request | **PRE-GATE COMPLETE; the deploy awaits the owner** | PR #147 (merge 8536e06) — the Dockerfile, the fail-closed api entry, the secret matrix, deploy/DEPLOYMENT.md; RUNTIME-DECISION-REQUEST.md (Tunnel recommended) |
-| 11 | the §6 acceptance campaign (the backend half) | **COMPLETE** | PR #148 (merge 45194da) — ACC-01..18 over the landed surface |
+| 11 | the §6 acceptance campaign (the backend half) | **COMPLETE — with a session-66 evidence correction** | PR #148 (merge 45194da) — ACC-01..18 over the landed surface, evidenced by the slice's rig run records; the campaign does NOT execute in CI (the trusted runner is venv-less). The session-65 line "COMPLETE" read the merged campaign as executed acceptance evidence; see the correction below. |
 
 ## The acceptance state (the §6 contract)
 
@@ -24,9 +24,41 @@
 - **§6.2**: the no-oracle cross-owner 404, the idempotency convergence, the token
   laws — machine-observed (ACC-15..17).
 - **§6.4**: the registry parity (stdio = HTTP) — machine-observed (ACC-18).
-- **The full suite floor**: 48 test suites + the 242-check battery GREEN on main;
-  the canonical layer GREEN (155 intents); every slice merged under the protocol
+- **The full suite floor**: the 48 suites and the 242-check battery are GREEN on
+  the local rig, where every run record lives (`harness/runs/`); the canonical
+  layer is GREEN (155 intents); every slice merged under the protocol
   (RED-first → SEV → gate → five checks → D-042 → INT-145's authorization).
+  **Correction (session 66):** the earlier wording ("48 test suites + the
+  242-check battery GREEN on main") overstated what CI proves. CI's
+  `harness-suites` job is venv-less: it never executes the acceptance campaign
+  (ACC-01..18 need `fastapi`/`jwt`/`psql`) and, at `45194da`, it was RED on that
+  very suite (`ModuleNotFoundError: No module named 'fastapi'`, run
+  46027167150). The campaign's evidence is the rig records, never CI; the
+  false-GREEN skip is repaired on PR #150 to an explicit `SKIPPED ARV-ACC-000`.
+
+## The session-66 correction (PR #150 — the takeover repairs)
+
+Two defects were proven RED before repair, both on the branch
+`slice/claim-106b-declaration`:
+
+1. **canonical-layer starvation (the merge blocker).** The isolation self-test
+   reconstructs a repository from the working tree; in CI that tree also carries
+   the workflow's untracked `*_anchored` judge copies, so the fixture reached
+   2001 tracked entries against `SCAN_COUNT_BUDGET = 2000` and every positive
+   case (12/14/17/18/19) went RED on a legitimate tree. Measured corpus at the
+   repair: 1997 tracked files, 9,713,754 bytes, largest 263,577 bytes. The count
+   cap is re-based to 8000 (~4x the corpus) while the 64 MiB byte budget stays
+   the dominant runtime bound and the 8 MiB per-file cap is unchanged — an
+   anomaly guard, not a scan-cost loosening.
+2. **the false GREEN in CI.** `harness/tests/test_acceptance_campaign.py`
+   printed "GREEN — the §6 campaign degrades honestly on this host" when the
+   campaign had not run at all. The trusted runner's contract (exit 0 +
+   non-empty output) can read that as executed acceptance. It now prints
+   `SKIPPED ARV-ACC-000` and never claims GREEN.
+
+Evidence: RED transcripts in `harness/runs/claim-106b-declaration/red-02.txt`
+(the five failing self-test cases at the pre-repair tree) and `red-03.txt` (the
+campaign's `ModuleNotFoundError`), plus the green run records beside them.
 
 ## What remains — and whose it is
 

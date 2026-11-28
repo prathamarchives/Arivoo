@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-108-runtime-lock",
+  "base_sha": "0953b24b72992b83e142b526d923bf55f28f61f9",
+  "reviewed_diff_sha256": "d5ba5f95259235b50c4d377730cdbc5be8d6677ce7312fbab1f8bde2efd96ec4",
+  "intent_ids": ["INT-162"],
+  "requirement_ids": ["SYS-11"],
+  "system_claims": ["C5"],
+  "changed_components": ["harness/api/requirements.lock", "harness/tests/test_runtime_lock.py", "harness/gate.py", "harness/red-records.json", "CLAIMS.md"],
+  "interfaces_reviewed": [
+    "harness/api/requirements.lock: the LAW-08 approval note and all prose are '#' comments; the 21 approved pins are 'name==version --hash=sha256:<digest>' lines — pip-parseable, with the approval record preserved verbatim as comments",
+    "the Dockerfile's pip step (RUN pip install --no-cache-dir -r harness/api/requirements.lock): the failure was at line 3 (the un-commented approval note); after the repair the image builds through STEP 12",
+    "the container's runtime boundary: a non-root process using the arv_app least-privilege credential, PGSSLMODE=verify-full against the pinned pooler host, with a system-CA bundle — /health/live 200, /health/ready 200 with db_ready=true, and a CORS preflight echoing exactly https://arivo.itscatalyst.com",
+    "harness/gate.py + harness/red-records.json: the new stdlib suite is registered in TESTS (ARV-RED-008 class) with a typed red record bound to 29de1d2; no assertion removed"
+  ],
+  "v_model": {
+    "component_verification": ["run-01: `python3 harness/tests/test_runtime_lock.py` exit 0 — ARV-LOCK-001/002/003 GREEN (21 pinned requirements)", "run-02: `docker build -t arivo:verify-local .` exit 0 — the locked wheels install and the image commits"],
+    "integration_verification": ["run-03: canonical layer GREEN (155 intents)", "run-04: isolation self-test GREEN (no credential-pattern regression from the lock comments)"],
+    "system_verification": ["red.txt: the test-only commit 29de1d2 OBSERVED exit 1 (ARV-LOCK-001/003) — the same prose line that broke the Docker build", "health.txt: the built container answered /health/live 200, /health/ready 200 with db_ready=true against the live Supabase DB over verify-full, and CORS preflight returned only the configured origin"],
+    "validation": ["the remote five required checks on this PR's head are authoritative (D-009); local runs and the container probe are preflight"]
+  },
+  "failure_modes": [
+    {"id": "FM-108-1", "scenario": "a prose approval note in the lock file reaches pip as a requirement", "expected": "a named RED at the lock contract and a failed image build, never a silently skipped dependency", "observed": "RED at 29de1d2 (ARV-LOCK-001/003); the Docker build failed at line 3", "control": "every non-comment line must be 'name==version --hash=sha256:...'; prose kept as '#' comments", "proof_ids": ["red.txt", "run-01", "run-02"]},
+    {"id": "FM-108-2", "scenario": "the built service reports ready without a working DB, or reflects an arbitrary CORS origin", "expected": "ready only with ARIVO_DB_READY=1 and a valid auth config; CORS only for the exact configured origin", "observed": "the container returned db_ready=true with the real remote DB and echoed only https://arivo.itscatalyst.com", "control": "the W-2 readiness/CORS boundary (PR #152) plus the verify-full arv_app runtime credential", "proof_ids": ["health.txt"]}
+  ],
+  "findings": [
+    {"id": "SEV-1", "severity": "P1", "status": "resolved", "evidence": "docker build failed at STEP 5: pip install -r harness/api/requirements.lock -> Invalid requirement 'LAW-08 approval note...' (line 3); the suite independently caught it as ARV-LOCK-001/003 at 29de1d2", "disposition": "fixed in PR: all prose converted to comments and every pin given a --hash=sha256 line; the image now builds through STEP 12"},
+    {"id": "SEV-2", "severity": "P2", "status": "resolved", "evidence": "the approved wheel digests were recorded in a non-pip format (name==version  <hex>), so --require-hashes installs could not consume them", "disposition": "fixed in PR: converted to pip's --hash=sha256:<digest> form; 21 pins verified by the suite and the successful image build"}
+  ],
+  "not_verified": [
+    "no always-on production host or deployed service was available",
+    "no Cloudflare tunnel/DNS/public HTTPS was created",
+    "no live authenticated API call (no Supabase test user)",
+    "no worker process was run; the job machine was checked at SQL level only",
+    "wheel hashes were not re-downloaded from PyPI in this session",
+    "the remote five checks on the PR head are authoritative"
+  ],
+  "builder_context": "builder-local-agent-session66 (opencode, the owner's local machine)",
+  "reviewer_context": "reviewer-inline-verification on this PR (the same account; a declared distinct-context limit per ARV-SEV-007 — the D-042 review comment is the floor)",
+  "disposition": "PASS",
+  "review_summary": "PASS — a deployment-blocking defect in the approved dependency lock was proven RED at a test-only commit and by a real Docker build failure, then repaired without changing any pin or approval content. The image now builds and, run with the arv_app least-privilege credential over verify-full, answers live and ready against the real Supabase project with the exact CORS origin. The container was local; no tunnel, DNS or deployed endpoint is claimed.",
+  "sheet_section": true
+}

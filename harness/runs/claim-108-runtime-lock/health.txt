@@ -1,0 +1,25 @@
+# containerised API against the remote Supabase DB (verify-full)
+$ curl -s http://127.0.0.1:8080/health/live
+{"status":"live","api_version":1}
+$ curl -s -i http://127.0.0.1:8080/health/ready
+HTTP/1.1 200 OK
+date: Sat, 28 Nov 2026 09:51:17 GMT
+server: uvicorn
+content-length: 117
+content-type: application/json
+vary: Origin
+
+{"status":"ready","auth":"configured","auth_primed":true,"db_ready":true,"database":"declared-ready","api_version":1}
+$ curl -s -i -X OPTIONS /api/v1/me -H Origin:https://arivo.itscatalyst.com ...
+HTTP/1.1 200 OK
+date: Sat, 28 Nov 2026 09:51:17 GMT
+server: uvicorn
+vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Access-Control-Request-Private-Network
+access-control-allow-methods: GET, POST, OPTIONS
+access-control-max-age: 600
+access-control-allow-headers: Accept, Accept-Language, Authorization, Content-Language, Content-Type, Idempotency-Key
+access-control-allow-origin: https://arivo.itscatalyst.com
+content-length: 2
+content-type: text/plain; charset=utf-8
+
+OK

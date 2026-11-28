@@ -1,0 +1,7 @@
+{
+  "command": "python3 harness/tests/test_acceptance_campaign.py",
+  "exit_code": 0,
+  "commit": "23f1b63ef4a993461d6a0323210f326f2aab4f64",
+  "output_sha256": "97483947a90c95b8cbacfe8f314f36e9d5784d36fc6992c2e1e4f0cd806c874a",
+  "recorded_at": "2026-11-28T05:43:01.682384+00:00"
+}

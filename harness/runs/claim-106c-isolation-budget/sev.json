@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-106c-isolation-budget",
+  "base_sha": "45194da0728267682f7b75cce3c05b26d94d3831",
+  "reviewed_diff_sha256": "f492e9ec4627650cbbb43109556b9805ade36b74bf4b343d369331c7f52cb574",
+  "intent_ids": [
+    "INT-173"
+  ],
+  "requirement_ids": [
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C5"
+  ],
+  "changed_components": [
+    "CLAIMS.md",
+    "harness/red-records.json",
+    "harness/tests/test_acceptance_campaign.py",
+    "tools/isolation_check.py"
+  ],
+  "interfaces_reviewed": [
+    "tools/isolation_check.py: the scan-budget triple — only SCAN_COUNT_BUDGET changes (2000 -> 8000); SCAN_TOTAL_BUDGET (64 MiB) remains the dominant runtime bound and SCAN_PER_FILE_BUDGET (8 MiB) is untouched, so no read is less bounded than before",
+    "harness/tests/test_acceptance_campaign.py: the not-available branch — psql added to the availability probe (the campaign's transport) and the explicit SKIPPED ARV-ACC-000 line replaces the false GREEN; no assertion, request, DB statement or executed path changed",
+    "tools/trusted_gate.py's contract (exit 0 + non-empty output, no skip semantics): the reason the GREEN-labelled skip was a false-green class; this diff makes the skip unambiguous rather than changing the runner",
+    "the canonical-layer job's anchoring (.github/workflows/verify.yml): the judge is MAIN's isolation_check.py, sha256-verified and copied under an anchored name — the central reason this repair must land on main before a PR carrying extra evidence files can be judged green",
+    "harness/red-records.json: three typed amendments for the campaign file, chained exactly from the trusted origin/main baseline (ARV-RED-006); no record removed, no red_exit/red_code altered"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-01: `python3 -I tools/isolation_selftest.py` exit 0 — all 22 checker cases and 6 builder/tool-contract cases; positive cases green, negative cases RED with attributable redaction"
+    ],
+    "integration_verification": [
+      "the red-record check GREEN over all 48 registered suites: the campaign's three typed amendments chain from the trusted baseline; no ARV-RED-001/002/006/008",
+      "the gate's diff-scoped checks GREEN over this bounded diff (scope, size, claim coverage, LAW-24, LAW-08, known-bad matrix, proof sheet, SEV)"
+    ],
+    "system_verification": [
+      "red.txt (1): the pre-repair CI-shaped self-test RED — cases 12/14/17/18/19 fail with 'ISOLATION GREEN missing' because the fixture tree reached 2001 entries against the 2000 cap",
+      "red.txt (2): the pre-repair campaign RED — ModuleNotFoundError: No module named 'fastapi', the same failure main 45194da recorded in CI run 46027167150 (FAIL ARV-TG-003)",
+      "run-02: the repaired campaign prints SKIPPED ARV-ACC-000 and exits 0"
+    ],
+    "validation": [
+      "the authoritative confirmation is the remote canonical-layer and harness-suites jobs on this PR's head (D-009); the run records here are preflight"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-106c-1",
+      "scenario": "a legitimate tree whose entry count exceeds the scan COUNT cap (the CI fixture stages anchored judge copies into the tree it reconstructs)",
+      "expected": "positive self-test cases stay green on a legitimate tree; a genuinely anomalous tree still refuses",
+      "observed": "RED before the repair (5 positive cases), GREEN after",
+      "control": "the count cap re-based to 8000 (~4x the measured corpus), with the 64 MiB byte budget retained as the dominant bound and the 8 MiB per-file cap unchanged",
+      "proof_ids": [
+        "red.txt",
+        "run-01"
+      ]
+    },
+    {
+      "id": "FM-106c-2",
+      "scenario": "a required suite that cannot execute reporting a GREEN line the trusted exit-0 floor can read as executed evidence",
+      "expected": "an explicit SKIP naming the checks that did not run, never GREEN",
+      "observed": "RED before the repair (CI FAIL ARV-TG-003 / ModuleNotFoundError), the explicit SKIPPED ARV-ACC-000 line after",
+      "control": "the psql/fastapi/jwt availability probe plus the explicitly SKIPPED text; the campaign's executed evidence stays in the session-65 rig records",
+      "proof_ids": [
+        "red.txt",
+        "run-02"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "canonical-layer RED on PR #150's head 81ea10c: the CI-shaped isolation self-test's positive cases 12/14/17/18/19 failed with 'ISOLATION GREEN missing' on a legitimate tree (red.txt part 1)",
+      "disposition": "fixed in PR: SCAN_COUNT_BUDGET re-based 2000 -> 8000; byte caps untouched; verified green in-tree (run-01) and CI-shaped. Because the job anchors MAIN's checker, this repair must land on main first — hence this separate, narrowly scoped slice"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "main 45194da harness-suites RED (CI run 46027167150: FAIL ARV-TG-003, ModuleNotFoundError: No module named 'fastapi') while the venv-less path printed 'GREEN — degrades honestly' (red.txt part 2)",
+      "disposition": "fixed in PR: the skip prints SKIPPED ARV-ACC-000 and never claims GREEN (run-02); executed path and assertions unchanged; runner-level skip semantics remain a named follow-up with its own claim"
+    }
+  ],
+  "not_verified": [
+    "ACC-01..18 did NOT execute in this session; the SKIPPED line is not acceptance evidence",
+    "the remote canonical-layer and harness-suites jobs are the authoritative confirmation; local runs are preflight",
+    "the 8000 cap is sized against today's measured corpus, not a proof about future trees",
+    "provisioning fastapi/psql in the venv-less runner is not in this diff",
+    "PR #150's SEV base must be re-bound after this repair lands on main",
+    "no production database, storage, host, tunnel or deployed service was touched"
+  ],
+  "builder_context": "builder-local-agent-session66 (opencode, the owner's local machine)",
+  "reviewer_context": "reviewer-inline-verification on this PR (the same account; a declared distinct-context limit per ARV-SEV-007 — the D-042 review comment is the floor, not independent-model evidence)",
+  "disposition": "PASS",
+  "review_summary": "PASS — two merge-enabling repairs, both proven RED before and green after. The count-budget re-base restores an anomaly guard whose normal state had become a breach while leaving the dominant byte bound intact; the campaign's SKIP branch is made honest without touching the executed path. Evidence is confined to this claim's run dir so the candidate tree stays below the base judge's 2000-file cap — the key constraint discovered in CI: the canonical-layer job uses MAIN's checker, so this slice must land on main before PR #150's additional evidence files can be judged.",
+  "sheet_section": true
+}

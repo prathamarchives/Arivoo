@@ -1,0 +1,6 @@
+# claim-106c-isolation-budget — the base-anchored merge-enablement repair
+tools/isolation_check.py INT-173 (the count-budget re-base; owner-directed in the local-agent runbook Batch 1; the canonical-layer job judges with MAIN's checker, so this must land first)
+harness/tests/test_acceptance_campaign.py INT-173 (the explicit ARV-ACC-000 skip — the false-GREEN repair)
+harness/red-records.json INT-173 (three typed amendments chained from the trusted origin/main baseline)
+CLAIMS.md INT-173 (CLAIM-106c opens; CLAIM-106 retires per rule 4)
+harness/runs/claim-106c-isolation-budget INT-173

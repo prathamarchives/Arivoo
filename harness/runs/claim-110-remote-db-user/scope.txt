@@ -1,0 +1,7 @@
+# claim-110-remote-db-user — the production DB path
+harness/adapters/pg.py INT-162/D-047 (the guarded remote user mapping)
+harness/tests/test_remote_db_user.py INT-162/D-047 (RED-first contract)
+harness/gate.py INT-162/D-047 (registration)
+harness/red-records.json INT-162/D-047
+harness/runs/claim-110-remote-db-user INT-162/D-047
+CLAIMS.md INT-162/D-047

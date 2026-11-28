@@ -15,7 +15,6 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-109 | 66 | local agent (opencode takeover) | `slice/claim-109-deployed-acceptance` | `context/extracted/93-DEPLOYED-ACCEPTANCE.md`, `STATE.md`, `context/WORKLOG.md`, `harness/runs/claim-109-deployed-acceptance`, `CLAIMS.md` | (no new reservation — the deployment evidence rides INT-162/D-047) | 2026-11-28 | the public HTTPS/tunnel/API/MCP acceptance evidence as a repo artifact (no code); the rule-4 close of CLAIM-108. |
 | CLAIM-110 | 66 | local agent (opencode takeover) | `slice/claim-110-remote-db-user` | `harness/adapters/pg.py`, `harness/tests/test_remote_db_user.py`, `harness/gate.py`, `harness/red-records.json`, `harness/runs/claim-110-remote-db-user`, `CLAIMS.md` | (no new reservation — the production DB path rides INT-162/D-047) | 2026-11-28 | the pooler tenant-qualified runtime user: the deployed read path refused with ENOIDENTIFIER because routes pass the bare arv_app; RED-first. |
 
 
@@ -170,3 +169,4 @@ Pre-registry history (PRs #1–#35, sessions 1–19 part 1) is NOT backfilled as
 
 | CLAIM-107 | the API runtime boundary (strict CORS, DB-aware /health/ready, fail-closed production DB declaration) LANDED (PR #152 = merge `0953b24b72992b83e142b526d923bf55f28f61f9`, merged 2026-11-28 under INT-145; the five checks ALL-GREEN at head `64da60603f888a3dc847b85dfc1576fb9b25558a`; the D-042 reasoned review posted; the branch deleted) — Workstream 2's boundary half COMPLETE; the pooled per-request executor migration named as a follow-up |
 | CLAIM-108 | the runtime dependency lock made pip-installable (21 approved pins with sha256 hashes; the image builds) LANDED (PR #153 = merge `1d3da935731b7a4b15a34b16c161f67c399187d2`, merged 2026-11-28 under INT-145; the five checks ALL-GREEN at head `8bad751d809d4609ccd4090a6133d2a7c65d26b5`; the D-042 reasoned review posted; the branch deleted) — the container image is deployable |
+| CLAIM-109 | the deployed acceptance evidence (the arivo tunnel/DNS, the three-container origin, and the public health/auth/openapi/MCP/CORS probes) LANDED (PR #154 = merge `745b011fb6d454eba86689d7d2138a591f28eba0`, merged 2026-11-28 under INT-145; the five checks ALL-GREEN at head `c11a7c242b34755f76fe3e350e79c1d808ec298d`; the D-042 review posted; the branch deleted) — the public surface is live on the owner-chosen local origin |

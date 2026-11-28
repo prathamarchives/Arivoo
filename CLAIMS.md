@@ -15,7 +15,7 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-108 | 66 | local agent (opencode takeover) | `slice/claim-108-runtime-lock` | `harness/api/requirements.lock`, `harness/tests/test_runtime_lock.py`, `harness/gate.py`, `harness/red-records.json`, `harness/runs/claim-108-runtime-lock`, `CLAIMS.md` | (no new reservation — the runtime substrate rides INT-162/D-047) | 2026-11-28 | the image build caught a prose lock file that pip cannot parse; this slice makes the approved pins pip-installable with hashes, RED-first. |
+| CLAIM-108 | 66 | local agent (opencode takeover) | `slice/claim-108-runtime-lock` | `harness/api/requirements.lock`, `harness/tests/test_runtime_lock.py`, `harness/gate.py`, `harness/red-records.json`, `harness/runs/claim-108-runtime-lock`, `CLAIMS.md`, `context/WORKLOG.md` | (no new reservation — the runtime substrate rides INT-162/D-047) | 2026-11-28 | the image build caught a prose lock file that pip cannot parse; this slice makes the approved pins pip-installable with hashes, RED-first. |
 
 
 

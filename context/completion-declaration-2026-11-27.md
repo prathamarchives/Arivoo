@@ -34,12 +34,16 @@
   (ACC-01..18 need `fastapi`/`jwt`/`psql`) and, at `45194da`, it was RED on that
   very suite (`ModuleNotFoundError: No module named 'fastapi'`, run
   46027167150). The campaign's evidence is the rig records, never CI; the
-  false-GREEN skip is repaired on PR #150 to an explicit `SKIPPED ARV-ACC-000`.
+  false-GREEN skip is repaired on PR #151 to an explicit `SKIPPED ARV-ACC-000`.
 
-## The session-66 correction (PR #150 — the takeover repairs)
+## The session-66 correction (PR #151 — the base-anchored takeover repairs)
 
-Two defects were proven RED before repair, both on the branch
-`slice/claim-106b-declaration`:
+Two defects were proven RED before repair. The repairs landed on main in
+PR #151 (`CLAIM-106c`), not here: the canonical-layer required job anchors
+**main's** `isolation_check.py`, so a candidate-side change (PR #150's original
+form) could never make that job green — the live CI head `65cb85d` still
+reported `count budget (2000)` after the candidate change. This branch keeps
+the RED/green transcripts and the declaration corrections:
 
 1. **canonical-layer starvation (the merge blocker).** The isolation self-test
    reconstructs a repository from the working tree; in CI that tree also carries

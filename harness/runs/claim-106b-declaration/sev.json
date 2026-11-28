@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "slice_id": "claim-106b-declaration",
-  "base_sha": "45194da0728267682f7b75cce3c05b26d94d3831",
-  "reviewed_diff_sha256": "3135eef632d8d9c49a6d248dd06a86c4855583310c2c2abe13a29587490ffcde",
+  "base_sha": "aaf48aa206fcddebf9b0d0c2178b69337e610722",
+  "reviewed_diff_sha256": "65db181fc1f9a65ed0524ed1df5e6446aa211c9d873805abbe51615879932ebc",
   "intent_ids": [
     "INT-173"
   ],
@@ -15,32 +15,26 @@
   "changed_components": [
     "CLAIMS.md",
     "context/completion-declaration-2026-11-27.md",
-    "harness/red-records.json",
-    "harness/tests/test_acceptance_campaign.py",
-    "tools/isolation_check.py"
+    "harness/runs/claim-106b-declaration (evidence dir; excluded from the binding digest by design)"
   ],
   "interfaces_reviewed": [
-    "tools/isolation_check.py: the tracked-scan budget triple (SCAN_PER_FILE_BUDGET / SCAN_TOTAL_BUDGET / SCAN_COUNT_BUDGET) \u2014 the COUNT cap is the only value changed (2000 -> 8000); the per-file and total byte caps are untouched, so the scan's runtime bound (the dominant one) is unchanged and the count cap remains a secondary anomaly guard at ~4x the measured 1997-file corpus",
-    "harness/tests/test_acceptance_campaign.py: the honest-degradation boundary \u2014 _deps_available() now also requires psql (the campaign's transport), and the not-available path prints SKIPPED ARV-ACC-000 and returns 0; no ACC assertion, request, or DB statement changed",
-    "the trusted runner's contract (tools/trusted_gate.py: exit 0 + non-empty output): the reason a GREEN-labelled skip was dangerous \u2014 this diff makes the skip text unambiguous rather than changing the runner",
-    "harness/red-records.json: one typed amendment for harness/tests/test_acceptance_campaign.py chaining from the trusted origin/main baseline (ARV-RED-006); no record removed, no red_exit/red_code altered"
+    "context/completion-declaration-2026-11-27.md: the WS11 row and the suite-floor bullet are corrected to stop claiming CI executes ACC-01..18; the session-66 section now names PR #151 as the home of the code repairs (the canonical-layer job anchors MAIN's checker, so a candidate-side change could not take effect here)",
+    "harness/runs/claim-106b-declaration/: the RED transcripts (red-02/red-03) and six run records remain the evidence for the two defects; their bindings were recorded at commit 184cffa and are historical, not re-executed in this re-bound slice",
+    "CLAIMS.md: CLAIM-106b's scope narrowed to the declaration + its own run dir after main advanced; CLAIM-106's duplicate close row reconciled into one (ARV-CLM-007 green); CLAIM-106c remains open on main for the landed repairs"
   ],
   "v_model": {
     "component_verification": [
-      "run-05: the isolation self-test GREEN in-tree (22 checker cases + 6 builder/tool-contract cases, every positive case green)",
-      "the same self-test GREEN in its CI shape: the *_anchored copy inside a clean clone of this branch, where the fixture tree carries the untracked anchored judges (the exact 2001-entry condition that was RED pre-repair)"
+      "run-05: the isolation self-test GREEN in-tree when authored (22 checker + 6 tool-contract cases); the CI-shaped variant was green in a clean clone with the anchored judges staged"
     ],
     "integration_verification": [
-      "run-04: verify_canonical_layer GREEN on the repaired tree (155 intents)",
-      "the gate's red-record check GREEN over all 48 registered test files (the typed amendment accepted, no ARV-RED-001/002/008)"
+      "run-04: verify_canonical_layer GREEN (155 intents); the red-record check GREEN over 48 test files with the typed amendment chain"
     ],
     "system_verification": [
-      "red-02.txt: the pre-repair CI-shaped self-test RED \u2014 cases 12/14/17/18/19 failing with 'ISOLATION GREEN missing' (the count-budget starvation, reproduced)",
-      "red-03.txt: the pre-repair campaign RED \u2014 ModuleNotFoundError: No module named 'fastapi' (the same failure CI recorded on main at 45194da, run 46027167150)",
-      "run-06: the repaired campaign prints SKIPPED ARV-ACC-000 and exits 0 on the venv-less host"
+      "red-02.txt: the pre-repair CI-shaped self-test RED — cases 12/14/17/18/19; red-03.txt: the campaign's ModuleNotFoundError (CI run 46027167150)",
+      "PR #151 landed both repairs on main with all five required checks green at 7fd531d (observed live); this PR then merged main to re-bind its base"
     ],
     "validation": [
-      "the owner's local-agent runbook Batch 1 requires PR #150 to pass the five required checks and merge; the authoritative confirmation of these two repairs is the remote canonical-layer and harness-suites jobs on this PR's head (local green is preflight, D-009)"
+      "the authoritative confirmation of THIS PR is the remote canonical-layer/harness-suites/other three jobs on the final head; local green is preflight (D-009)"
     ]
   },
   "failure_modes": [
@@ -49,7 +43,7 @@
       "scenario": "a legitimate repository tree whose entry count exceeds the scan COUNT cap (the CI fixture stages untracked judge copies on top of the tracked corpus)",
       "expected": "the positive self-test cases stay GREEN on a legitimate tree; a genuinely anomalous tree still refuses",
       "observed": "RED before the repair (5 positive cases failing); GREEN after, in both the in-tree and CI-shaped runs",
-      "control": "the re-based count cap (8000, ~4x the measured corpus) with the 64 MiB byte budget retained as the dominant runtime bound and the 8 MiB per-file cap unchanged",
+      "control": "the count cap re-based on main in PR #151 (8000, ~4x the measured corpus) with the 64 MiB byte budget retained; this PR carries the RED/green evidence only",
       "proof_ids": [
         "red-02.txt",
         "run-05"
@@ -60,7 +54,7 @@
       "scenario": "a required suite that cannot execute on the runner reporting a GREEN line (the false-green class the trusted exit-0 floor cannot distinguish from executed evidence)",
       "expected": "the suite states SKIPPED with its reason and never claims GREEN; the exit-0 floor is not read as acceptance evidence",
       "observed": "RED before the repair (the GREEN-labelled skip, and CI red on the same suite for the missing dependency); the explicit SKIPPED line after",
-      "control": "the explicit ARV-ACC-000 skip text plus the psql/fastapi/jwt availability probe; the suite's executed evidence stays the rig run records",
+      "control": "the explicit ARV-ACC-000 skip landed on main in PR #151; this PR's evidence records the before/after, no second code change",
       "proof_ids": [
         "red-03.txt",
         "run-06"
@@ -73,26 +67,27 @@
       "severity": "P1",
       "status": "resolved",
       "evidence": "canonical-layer RED on PR #150's head 81ea10c: isolation self-test cases 12/14/17/18/19 failing on a legitimate tree; reproduced locally in a clean clone with the workflow's anchored judge copies staged (red-02.txt)",
-      "disposition": "SCAN_COUNT_BUDGET re-based 2000 -> 8000 with the byte budget retained as the dominant bound; verified GREEN in-tree (run-05) and CI-shaped; the remote canonical-layer job is the authoritative confirmation"
+      "disposition": "fixed in PR #151 (CLAIM-106c), not in this PR — the canonical-layer job judges with MAIN's checker, so the fix had to land on main first; this PR carries the evidence and the base re-bind"
     },
     {
       "id": "SEV-2",
       "severity": "P1",
       "status": "resolved",
-      "evidence": "main 45194da harness-suites RED (run 46027167150: FAIL ARV-TG-003, ModuleNotFoundError: No module named 'fastapi'), while the same suite printed 'GREEN \u2014 degrades honestly' on the venv-less path \u2014 a false green a trusted exit-0 floor cannot distinguish from executed acceptance",
-      "disposition": "the skip now prints SKIPPED ARV-ACC-000, names the checks that did not run, and never claims GREEN (run-06); assertions and the executed path are unchanged"
+      "evidence": "main 45194da harness-suites RED (run 46027167150: FAIL ARV-TG-003, ModuleNotFoundError: No module named 'fastapi'), while the same suite printed 'GREEN — degrades honestly' on the venv-less path — a false green a trusted exit-0 floor cannot distinguish from executed acceptance",
+      "disposition": "fixed in PR #151 (CLAIM-106c), not in this PR — the skip is on main; this PR carries the transcript that proves the false green and the corrected declaration"
     }
   ],
   "not_verified": [
-    "ACC-01..18 were NOT executed in this session: no PostgreSQL rig and no fastapi/jwt/psycopg on this host; the executed-path evidence remains the session-65 rig run records (run-03)",
-    "the canonical-layer self-test's authoritative run is the remote job on this PR's head; the local runs (in-tree and CI-shaped) are preflight only",
-    "the 8000 count cap is sized against today's measured corpus (1997 tracked files); it is a re-base of an anomaly guard, not a proof about future trees",
-    "provisioning fastapi/psql in the venv-less trusted runner (so CI could EXECUTE the campaign) is NOT in this diff \u2014 a named follow-up needing its own claim",
-    "no production database, storage provider, host, tunnel or deployed service was touched by this slice"
+    "ACC-01..18 did NOT execute in this session; the evidence remains the session-65 rig record (run-03)",
+    "the remote required jobs on the final head are authoritative; the local runs were preflight on the earlier tree",
+    "the 8000 count cap is a re-base of an anomaly guard sized against today's 1997-file corpus, not a proof about future trees",
+    "provisioning fastapi/psql in the venv-less runner remains a named follow-up with its own claim",
+    "the code repairs landed in PR #151; no implementation change is made in this PR",
+    "no production database, storage, host, tunnel or deployed service was touched"
   ],
   "builder_context": "builder-local-agent-session66-takeover (opencode/deepseek-v4.1-flash-free, the owner's local machine)",
-  "reviewer_context": "reviewer-inline-verification on PR #150 (the same account; a declared distinct-context limit per ARV-SEV-007 \u2014 the D-042 reasoned review comment is the floor, not independent-model evidence)",
+  "reviewer_context": "reviewer-inline-verification on PR #150 (the same account; a declared distinct-context limit per ARV-SEV-007 — the D-042 reasoned review comment is the floor, not independent-model evidence)",
   "disposition": "PASS",
-  "review_summary": "PASS \u2014 two merge-enablement repairs plus the declaration corrections that follow from them. Both defects were proven RED before repair (red-02/red-03) and green after (run-04..06). The count-budget change re-bases an anomaly guard whose normal state had become a breach; the byte budget, per-file cap, and every scan condition are untouched. The campaign's executed path and assertions are untouched; only the not-available branch changed, from a GREEN-labelled false positive to an explicit SKIPPED line. The declaration's WS11 row and suite-floor bullet are corrected to stop claiming CI executes the campaign.",
+  "review_summary": "PASS — this PR is now the declaration artifact plus its RED/green evidence. Both defects were proven RED before repair and green after (red-02/red-03, run-04..06); the repairs themselves landed on main in PR #151 under CLAIM-106c after the live discovery that the canonical-layer job anchors MAIN's isolation checker. Merging main into this branch made the diff declaration/evidence-only; the SEV is re-bound to the new merge-base aaf48aa and the proof sheet is regenerated. CLAIM-106b's scope was narrowed accordingly and CLAIM-106's duplicate close row reconciled.",
   "sheet_section": true
 }

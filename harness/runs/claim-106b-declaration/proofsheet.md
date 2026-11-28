@@ -13,19 +13,19 @@
 - `python3 harness/tests/test_acceptance_campaign.py` -> exit 0 · output sha256 97483947a90c95b8 · 2026-11-28T05:35:31.892835+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
-- This slice now carries TWO code repairs beside the declaration artifact (session 66): tools/isolation_check.py's scan-count re-base and the acceptance campaign's explicit ARV-ACC-000 skip.
-- Not verified: (1) the campaign's ACC-01..18 were NOT executed in this session — no PostgreSQL rig, no fastapi/jwt/psycopg on this host; the campaign's executed-path evidence remains the session-65 rig run records (run-03).
-- (2) The canonical-layer self-test was verified locally in BOTH shapes (in-tree and the CI-shaped anchored copy in a clean clone), but the authoritative confirmation is the remote canonical-layer job on this PR's head.
-- (3) The 8000 count cap is sized against today's measured corpus (1997 files); it is a re-base of an anomaly guard, not a proof that no future tree can exceed it.
+- This slice is the completion-declaration artifact plus its RED/green evidence; the two code repairs it originally carried landed on main first in PR #151 / CLAIM-106c (the canonical-layer job anchors MAIN's checker, so a candidate-side change cannot take effect).
+- Not verified: (1) the campaign's ACC-01..18 were NOT executed in this session — no PostgreSQL rig, no fastapi/jwt/psycopg on this host; the campaign's executed-path evidence remains the session-65 rig run record (run-03).
+- (2) The canonical-layer self-test was verified locally in BOTH shapes (in-tree and the CI-shaped anchored copy in a clean clone), but the authoritative confirmation is the remote job on this PR's head.
+- (3) The 8000 count cap (now on main) is sized against today's measured corpus (1997 files); it is a re-base of an anomaly guard, not a proof that no future tree can exceed it.
 - (4) The venv-less harness-suites runner's own provisioning of fastapi/psql (the deferred option that would let CI EXECUTE the campaign) is NOT in this diff — it is a named follow-up needing its own claim.
 - (5) No production database, storage provider, host, tunnel or deployed service was touched by this slice.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: bb66d597a8d3cc25a90fe98a7fc56bb0207551257068388c8cd6225cc086a822
-- reviewed_diff_sha256: 3135eef632d8d9c49a6d248dd06a86c4855583310c2c2abe13a29587490ffcde
+- report sha256: f34c09c8f9edcc191cf285dfb7e8e60975217c88ff7dfddb6fb1efdd07ea7e85
+- reviewed_diff_sha256: 65db181fc1f9a65ed0524ed1df5e6446aa211c9d873805abbe51615879932ebc
 - disposition: PASS
 - findings: 2 (open P0/P1: 0)
-- not-verified entries: 5
+- not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 4565e8083390d8222ceff5ee1411233ac79a0566af8ce0cba60323fed0af3702
+- sheet sha256 (of the content above, excluding this line): 8c833141a2218c28bdd5414d6150a0b3173cf8bc9628ba4fa4d2018bf62f4e37

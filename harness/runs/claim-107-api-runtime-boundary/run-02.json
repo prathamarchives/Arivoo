@@ -1,0 +1,7 @@
+{
+  "command": "python3 tools/verify_canonical_layer.py",
+  "exit_code": 0,
+  "commit": "c0da44aab677a09a99c25aba1fd5a429821dac8c",
+  "output_sha256": "01697530e4879783d1a205fa8ea46cbb2b23be55e88382546c1f4bc05e81d556",
+  "recorded_at": "2026-11-28T06:12:44.505967+00:00"
+}

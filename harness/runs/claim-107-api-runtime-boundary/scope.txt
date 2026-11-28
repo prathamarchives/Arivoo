@@ -1,0 +1,13 @@
+# claim-107-api-runtime-boundary — Workstream 2 (the API runtime boundary)
+harness/api/cors.py INT-162/D-047 (W-2: strict CORS origin matrix; stdlib only)
+harness/api/app.py INT-162/D-047 (W-2: DB-aware readiness + real CORS middleware)
+harness/api/__main__.py INT-162/D-047 (W-2: env-derived DB readiness + the named production-DB refusal)
+harness/api/env.example.txt INT-162/D-047 (the runtime matrix documentation)
+harness/tests/test_api_runtime.py INT-162/D-047 (RED-first suite)
+harness/gate.py INT-162/D-047 (the new suite's registration — the ARV-RED-008 class)
+harness/red-records.json INT-162/D-047
+harness/runs/claim-107-api-runtime-boundary INT-162/D-047
+CLAIMS.md INT-162/D-047 (claim row + the rule-4 closes of 106b/106c)
+STATE.md INT-162/D-047 (navigation snapshot)
+context/WORKLOG.md INT-162/D-047 (session append)
+context/extracted/92-API-RUNTIME.md INT-162/D-047 (session engineering record)

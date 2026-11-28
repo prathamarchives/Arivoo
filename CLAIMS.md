@@ -15,7 +15,7 @@
 
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
-| CLAIM-108 | 66 | local agent (opencode takeover) | `slice/claim-108-runtime-lock` | `harness/api/requirements.lock`, `harness/tests/test_runtime_lock.py`, `harness/gate.py`, `harness/red-records.json`, `harness/runs/claim-108-runtime-lock`, `CLAIMS.md`, `context/WORKLOG.md` | (no new reservation — the runtime substrate rides INT-162/D-047) | 2026-11-28 | the image build caught a prose lock file that pip cannot parse; this slice makes the approved pins pip-installable with hashes, RED-first. |
+| CLAIM-109 | 66 | local agent (opencode takeover) | `slice/claim-109-deployed-acceptance` | `context/extracted/93-DEPLOYED-ACCEPTANCE.md`, `STATE.md`, `context/WORKLOG.md`, `harness/runs/claim-109-deployed-acceptance`, `CLAIMS.md` | (no new reservation — the deployment evidence rides INT-162/D-047) | 2026-11-28 | the public HTTPS/tunnel/API/MCP acceptance evidence as a repo artifact (no code); the rule-4 close of CLAIM-108. |
 
 
 
@@ -168,3 +168,4 @@ Pre-registry history (PRs #1–#35, sessions 1–19 part 1) is NOT backfilled as
 | CLAIM-106b | the completion declaration's repo artifact + the session-66 evidence corrections LANDED (PR #150 = merge `03c58ee2c6cfa3edcae4eaec6c4f278dc38cefe8`, merged 2026-11-28 under INT-145; the five checks ALL-GREEN at head `34464b5cbb5dd08bc3fac4966db1e3bbbc17c31f`; two D-042 review comments with both findings dispositioned to PR #151; the ARV-SEV-003 stale-digest repair re-validated post-commit; the branch deleted) — Workstream 11's declaration closed |
 
 | CLAIM-107 | the API runtime boundary (strict CORS, DB-aware /health/ready, fail-closed production DB declaration) LANDED (PR #152 = merge `0953b24b72992b83e142b526d923bf55f28f61f9`, merged 2026-11-28 under INT-145; the five checks ALL-GREEN at head `64da60603f888a3dc847b85dfc1576fb9b25558a`; the D-042 reasoned review posted; the branch deleted) — Workstream 2's boundary half COMPLETE; the pooled per-request executor migration named as a follow-up |
+| CLAIM-108 | the runtime dependency lock made pip-installable (21 approved pins with sha256 hashes; the image builds) LANDED (PR #153 = merge `1d3da935731b7a4b15a34b16c161f67c399187d2`, merged 2026-11-28 under INT-145; the five checks ALL-GREEN at head `8bad751d809d4609ccd4090a6133d2a7c65d26b5`; the D-042 reasoned review posted; the branch deleted) — the container image is deployable |

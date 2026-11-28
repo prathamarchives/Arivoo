@@ -1261,3 +1261,10 @@ Stage Summary:
 - Evidence: harness/runs/claim-108-runtime-lock/ (red.txt, health.txt, four run records, SEV, proof sheet).
 - Unresolved: Q18 host access, the always-on deployment, a live authenticated call. Not-verified: no tunnel/DNS/deployed endpoint; no worker process.
 - Next: PR #153's five checks + D-042 review + INT-145 merge; then the production host/tunnel slice.
+
+## Task 133 (CLAIM-109, session 66, 2026-11-28) — the deployed acceptance (public API/MCP)
+- What: with the owner's Cloudflare/R2/Supabase credentials held in a protected local file, created the dedicated `arivo` tunnel + DNS + ingress via the Cloudflare API (the three pre-existing tunnels untouched), and ran the API, worker and tunnel connector as three Docker containers on `arivo-net`. Applied migrations 0021/0022 earlier through harness/migrate.py under a dedicated arv_migrator credential (22/22 checksums verified).
+- Verified: the public endpoint answered /health/live 200, /health/ready 200 with db_ready=true, /api/v1/me 401, /api/v1/openapi.json 200, the MCP credential refusal, and the exact CORS origin; the container had already been proven against the live DB over verify-full.
+- Evidence: harness/runs/claim-109-deployed-acceptance/; context/extracted/93-DEPLOYED-ACCEPTANCE.md.
+- Unresolved: Q18 host is the owner's local machine (sleep = downtime); no test user or agent token; no R2 adapter slice; no deployed end-to-end campaign.
+- Next: authenticated acceptance + the R2 provider adapter + the pgprod per-request executor migration; the reader-repo link remains the owner's.

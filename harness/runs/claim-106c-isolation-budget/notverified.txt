@@ -1,0 +1,7 @@
+This slice changes the two merge-enabling code paths only; its evidence is confined to its own run dir so the candidate tree stays under the base judge's 2000-file cap.
+Not verified: (1) ACC-01..18 did NOT execute here — no PostgreSQL rig, no fastapi/jwt/psycopg on this host; the campaign's SKIPPED line is the honest statement, not acceptance evidence (run-02).
+(2) The authoritative confirmation of the count-budget repair is the remote canonical-layer job on this PR's head; the local self-test (run-01) and the CI-shaped reproduction in red.txt are preflight only.
+(3) The 8000 count cap is sized against the measured 1997-file corpus; it is a re-base of an anomaly guard, not a proof about future trees.
+(4) Provisioning fastapi/psql in the venv-less trusted runner (so CI could EXECUTE the campaign) is NOT in this diff — a named follow-up needing its own claim.
+(5) After this lands on main, PR #150 still needs its SEV base re-bound to the new merge-base and its proof sheet regenerated; that is the consuming slice's work, not this one's.
+(6) No production database, storage, host, tunnel or deployed service was touched by this slice.

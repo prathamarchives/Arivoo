@@ -1,0 +1,7 @@
+{
+  "command": "python3 -I tools/isolation_selftest.py",
+  "exit_code": 0,
+  "commit": "23f1b63ef4a993461d6a0323210f326f2aab4f64",
+  "output_sha256": "db0ced9ebcfb35510462809399a340a3adb16992cf9b8af3811e3951672c3790",
+  "recorded_at": "2026-11-28T05:43:01.503473+00:00"
+}

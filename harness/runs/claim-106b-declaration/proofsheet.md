@@ -21,11 +21,11 @@
 - (5) No production database, storage provider, host, tunnel or deployed service was touched by this slice.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: f34c09c8f9edcc191cf285dfb7e8e60975217c88ff7dfddb6fb1efdd07ea7e85
-- reviewed_diff_sha256: 65db181fc1f9a65ed0524ed1df5e6446aa211c9d873805abbe51615879932ebc
+- report sha256: 17d4e4a275fb29edbd5e9a9da6e90b7cf9b33ad177de0d8ab84ca5d872436ac1
+- reviewed_diff_sha256: b66971f86be1b4ea42e0778aaf3c39ccbc9e5cd0ca61a52b657d655d35533548
 - disposition: PASS
 - findings: 2 (open P0/P1: 0)
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 8c833141a2218c28bdd5414d6150a0b3173cf8bc9628ba4fa4d2018bf62f4e37
+- sheet sha256 (of the content above, excluding this line): fbdcab6993e4c2380f9454e461493ac358ae9aeae252d2d5a25aba1b18c50b19

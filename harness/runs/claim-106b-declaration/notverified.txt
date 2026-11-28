@@ -1,0 +1,6 @@
+This slice is the completion-declaration artifact plus its RED/green evidence; the two code repairs it originally carried landed on main first in PR #151 / CLAIM-106c (the canonical-layer job anchors MAIN's checker, so a candidate-side change cannot take effect).
+Not verified: (1) the campaign's ACC-01..18 were NOT executed in this session — no PostgreSQL rig, no fastapi/jwt/psycopg on this host; the campaign's executed-path evidence remains the session-65 rig run record (run-03).
+(2) The canonical-layer self-test was verified locally in BOTH shapes (in-tree and the CI-shaped anchored copy in a clean clone), but the authoritative confirmation is the remote job on this PR's head.
+(3) The 8000 count cap (now on main) is sized against today's measured corpus (1997 files); it is a re-base of an anomaly guard, not a proof that no future tree can exceed it.
+(4) The venv-less harness-suites runner's own provisioning of fastapi/psql (the deferred option that would let CI EXECUTE the campaign) is NOT in this diff — it is a named follow-up needing its own claim.
+(5) No production database, storage provider, host, tunnel or deployed service was touched by this slice.

@@ -1,0 +1,4 @@
+# claim-106b-declaration — the completion declaration (the code repairs moved to PR #151 / CLAIM-106c)
+context/completion-declaration-2026-11-27.md INT-173
+harness/runs/claim-106b-declaration INT-173 (the RED/green evidence transcript and the run records)
+CLAIMS.md INT-173 (the narrowed row + the CLAIM-106 close-row reconciliation after main advanced)

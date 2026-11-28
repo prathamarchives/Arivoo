@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-106b-declaration",
+  "base_sha": "aaf48aa206fcddebf9b0d0c2178b69337e610722",
+  "reviewed_diff_sha256": "b66971f86be1b4ea42e0778aaf3c39ccbc9e5cd0ca61a52b657d655d35533548",
+  "intent_ids": [
+    "INT-173"
+  ],
+  "requirement_ids": [
+    "SYS-11"
+  ],
+  "system_claims": [
+    "C5"
+  ],
+  "changed_components": [
+    "CLAIMS.md",
+    "context/completion-declaration-2026-11-27.md",
+    "harness/runs/claim-106b-declaration (evidence dir; excluded from the binding digest by design)"
+  ],
+  "interfaces_reviewed": [
+    "context/completion-declaration-2026-11-27.md: the WS11 row and the suite-floor bullet are corrected to stop claiming CI executes ACC-01..18; the session-66 section now names PR #151 as the home of the code repairs (the canonical-layer job anchors MAIN's checker, so a candidate-side change could not take effect here)",
+    "harness/runs/claim-106b-declaration/: the RED transcripts (red-02/red-03) and six run records remain the evidence for the two defects; their bindings were recorded at commit 184cffa and are historical, not re-executed in this re-bound slice",
+    "CLAIMS.md: CLAIM-106b's scope narrowed to the declaration + its own run dir after main advanced; CLAIM-106's duplicate close row reconciled into one (ARV-CLM-007 green); CLAIM-106c remains open on main for the landed repairs"
+  ],
+  "v_model": {
+    "component_verification": [
+      "run-05: the isolation self-test GREEN in-tree when authored (22 checker + 6 tool-contract cases); the CI-shaped variant was green in a clean clone with the anchored judges staged"
+    ],
+    "integration_verification": [
+      "run-04: verify_canonical_layer GREEN (155 intents); the red-record check GREEN over 48 test files with the typed amendment chain"
+    ],
+    "system_verification": [
+      "red-02.txt: the pre-repair CI-shaped self-test RED — cases 12/14/17/18/19; red-03.txt: the campaign's ModuleNotFoundError (CI run 46027167150)",
+      "PR #151 landed both repairs on main with all five required checks green at 7fd531d (observed live); this PR then merged main to re-bind its base"
+    ],
+    "validation": [
+      "the authoritative confirmation of THIS PR is the remote canonical-layer/harness-suites/other three jobs on the final head; local green is preflight (D-009)"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM-106b-1",
+      "scenario": "a legitimate repository tree whose entry count exceeds the scan COUNT cap (the CI fixture stages untracked judge copies on top of the tracked corpus)",
+      "expected": "the positive self-test cases stay GREEN on a legitimate tree; a genuinely anomalous tree still refuses",
+      "observed": "RED before the repair (5 positive cases failing); GREEN after, in both the in-tree and CI-shaped runs",
+      "control": "the count cap re-based on main in PR #151 (8000, ~4x the measured corpus) with the 64 MiB byte budget retained; this PR carries the RED/green evidence only",
+      "proof_ids": [
+        "red-02.txt",
+        "run-05"
+      ]
+    },
+    {
+      "id": "FM-106b-2",
+      "scenario": "a required suite that cannot execute on the runner reporting a GREEN line (the false-green class the trusted exit-0 floor cannot distinguish from executed evidence)",
+      "expected": "the suite states SKIPPED with its reason and never claims GREEN; the exit-0 floor is not read as acceptance evidence",
+      "observed": "RED before the repair (the GREEN-labelled skip, and CI red on the same suite for the missing dependency); the explicit SKIPPED line after",
+      "control": "the explicit ARV-ACC-000 skip landed on main in PR #151; this PR's evidence records the before/after, no second code change",
+      "proof_ids": [
+        "red-03.txt",
+        "run-06"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SEV-1",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "canonical-layer RED on PR #150's head 81ea10c: isolation self-test cases 12/14/17/18/19 failing on a legitimate tree; reproduced locally in a clean clone with the workflow's anchored judge copies staged (red-02.txt)",
+      "disposition": "fixed in PR #151 (CLAIM-106c), not in this PR — the canonical-layer job judges with MAIN's checker, so the fix had to land on main first; this PR carries the evidence and the base re-bind"
+    },
+    {
+      "id": "SEV-2",
+      "severity": "P1",
+      "status": "resolved",
+      "evidence": "main 45194da harness-suites RED (run 46027167150: FAIL ARV-TG-003, ModuleNotFoundError: No module named 'fastapi'), while the same suite printed 'GREEN — degrades honestly' on the venv-less path — a false green a trusted exit-0 floor cannot distinguish from executed acceptance",
+      "disposition": "fixed in PR #151 (CLAIM-106c), not in this PR — the skip is on main; this PR carries the transcript that proves the false green and the corrected declaration"
+    }
+  ],
+  "not_verified": [
+    "ACC-01..18 did NOT execute in this session; the evidence remains the session-65 rig record (run-03)",
+    "the remote required jobs on the final head are authoritative; the local runs were preflight on the earlier tree",
+    "the 8000 count cap is a re-base of an anomaly guard sized against today's 1997-file corpus, not a proof about future trees",
+    "provisioning fastapi/psql in the venv-less runner remains a named follow-up with its own claim",
+    "the code repairs landed in PR #151; no implementation change is made in this PR",
+    "no production database, storage, host, tunnel or deployed service was touched"
+  ],
+  "builder_context": "builder-local-agent-session66-takeover (opencode/deepseek-v4.1-flash-free, the owner's local machine)",
+  "reviewer_context": "reviewer-inline-verification on PR #150 (the same account; a declared distinct-context limit per ARV-SEV-007 — the D-042 reasoned review comment is the floor, not independent-model evidence)",
+  "disposition": "PASS",
+  "review_summary": "PASS — this PR is now the declaration artifact plus its RED/green evidence. Both defects were proven RED before repair and green after (red-02/red-03, run-04..06); the repairs themselves landed on main in PR #151 under CLAIM-106c after the live discovery that the canonical-layer job anchors MAIN's isolation checker. Merging main into this branch made the diff declaration/evidence-only; the SEV is re-bound to the new merge-base aaf48aa and the proof sheet is regenerated. CLAIM-106b's scope was narrowed accordingly and CLAIM-106's duplicate close row reconciled.",
+  "sheet_section": true
+}

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/tmp/arivo-ci/harness/tests/test_acceptance_campaign.py", line 258, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/tmp/arivo-ci/harness/tests/test_acceptance_campaign.py", line 69, in main
+    from harness.api.app import create_app
+  File "/tmp/arivo-ci/harness/api/app.py", line 29, in <module>
+    from fastapi import FastAPI, Request
+ModuleNotFoundError: No module named 'fastapi'
+EXIT=1

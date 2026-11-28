@@ -140,6 +140,8 @@ TESTS = ("harness/tests/test_workers.py", "harness/tests/test_acceptance_campaig
          "harness/tests/test_api_runtime.py",
          # CLAIM-108 (runtime lock): the pip-parseable lock contract
          "harness/tests/test_runtime_lock.py",
+         # CLAIM-110 (production DB path): the guarded remote user mapping
+         "harness/tests/test_remote_db_user.py",
          # CLAIM-095 (the F6 kernel follow-up; the ARV-RED-008 class: the new
          # suite's registration rides the binding commit, diff-visible)
          "harness/tests/test_kwr_bound.py")

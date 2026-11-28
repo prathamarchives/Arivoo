@@ -16,6 +16,7 @@
 | Claim | Session | Agent | Branch | Scope (globs) | INTs reserved | Opened | Notes |
 |-------|---------|-------|--------|----------------|---------------|---------|-------|
 | CLAIM-109 | 66 | local agent (opencode takeover) | `slice/claim-109-deployed-acceptance` | `context/extracted/93-DEPLOYED-ACCEPTANCE.md`, `STATE.md`, `context/WORKLOG.md`, `harness/runs/claim-109-deployed-acceptance`, `CLAIMS.md` | (no new reservation — the deployment evidence rides INT-162/D-047) | 2026-11-28 | the public HTTPS/tunnel/API/MCP acceptance evidence as a repo artifact (no code); the rule-4 close of CLAIM-108. |
+| CLAIM-110 | 66 | local agent (opencode takeover) | `slice/claim-110-remote-db-user` | `harness/adapters/pg.py`, `harness/tests/test_remote_db_user.py`, `harness/gate.py`, `harness/red-records.json`, `harness/runs/claim-110-remote-db-user`, `CLAIMS.md` | (no new reservation — the production DB path rides INT-162/D-047) | 2026-11-28 | the pooler tenant-qualified runtime user: the deployed read path refused with ENOIDENTIFIER because routes pass the bare arv_app; RED-first. |
 
 
 

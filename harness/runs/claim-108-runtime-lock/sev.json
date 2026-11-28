@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice_id": "claim-108-runtime-lock",
   "base_sha": "0953b24b72992b83e142b526d923bf55f28f61f9",
-  "reviewed_diff_sha256": "2af952a3546c7f798709860b65d59f36863d33929f055983c1515e129cf78c64",
+  "reviewed_diff_sha256": "f5523b5690a1aedd719405f36212d7ed9cc6796e65a96b8742a90cfe61eacce5",
   "intent_ids": [
     "INT-162"
   ],

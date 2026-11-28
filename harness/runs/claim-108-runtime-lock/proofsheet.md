@@ -20,11 +20,11 @@
 - - the five required checks on this PR's head are the authoritative confirmation; the local runs are preflight.
 
 ## Systems-engineering verification (LAW-30; harness/sev.py)
-- report sha256: f60be284596659a5a3dde17c9e8e3c0c296a2f2a93b2aa446e152c695bd5ac4d
-- reviewed_diff_sha256: 2af952a3546c7f798709860b65d59f36863d33929f055983c1515e129cf78c64
+- report sha256: 24cd5e2558db4a834a708145b4fed873c61ad114a13957cf7f938006c47353a9
+- reviewed_diff_sha256: f5523b5690a1aedd719405f36212d7ed9cc6796e65a96b8742a90cfe61eacce5
 - disposition: PASS
 - findings: 2 (open P0/P1: 0)
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): 1ac248e0bcc8aeea2cdbdef31d1a6fb078d385c4667906f9065e7815a769e438
+- sheet sha256 (of the content above, excluding this line): 44a3684bda19015ccb0c4670c89571f7689952c96741be3cbeb3274fde9c2c90

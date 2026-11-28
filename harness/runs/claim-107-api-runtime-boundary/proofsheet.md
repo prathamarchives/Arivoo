@@ -1,13 +1,15 @@
 # PROOF SHEET — slice claim-107-api-runtime-boundary (harness-built; never hand-edited — PRF-01, LAW-01)
 
-- commit (last run record's): c0da44aab677a09a99c25aba1fd5a429821dac8c
-- generated (last record's timestamp): 2026-11-28T06:13:18.133682+00:00
-- run records: 3
+- commit (last run record's): 359a9d9c172a83ed749c316f2810f07adcb6b425
+- generated (last record's timestamp): 2026-11-28T06:16:21.773552+00:00
+- run records: 5
 
 ## Run records (command, exit, output digest)
 - `python3 harness/tests/test_api_runtime.py` -> exit 0 · output sha256 b0bfa0c556d0c09e · 2026-11-28T06:12:44.135819+00:00
 - `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 01697530e4879783 · 2026-11-28T06:12:44.505967+00:00
 - `python3 -I tools/isolation_selftest.py` -> exit 0 · output sha256 db0ced9ebcfb3551 · 2026-11-28T06:13:18.133682+00:00
+- `python3 tools/verify_canonical_layer.py` -> exit 0 · output sha256 6209fa9178120cf4 · 2026-11-28T06:15:47.514473+00:00
+- `python3 -I tools/isolation_selftest.py` -> exit 0 · output sha256 db0ced9ebcfb3551 · 2026-11-28T06:16:21.773552+00:00
 
 ## Not verified (LAW-04 — required, never empty-by-omission)
 - This is a runtime-boundary slice, not a deployed-service slice. Not verified:
@@ -26,4 +28,4 @@
 - not-verified entries: 6
 
 ## Assembly
-- sheet sha256 (of the content above, excluding this line): b7df19b16ac7a25cc9e922a2667d848fc14148aa137d96d0bb07cccfef98c557
+- sheet sha256 (of the content above, excluding this line): 0391d0bc96df27f38d2c81ef41f4beffe4bfe580cdac2621accad1937fc1f6ac

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "slice_id": "claim-110-remote-db-user",
+  "base_sha": "745b011fb6d454eba86689d7d2138a591f28eba0",
+  "reviewed_diff_sha256": "0784923dbf2c68cced251c3e401b182c68c8dd51b4c780e9efb2844f5838a94f",
+  "intent_ids": ["INT-162"],
+  "requirement_ids": ["SYS-11"],
+  "system_claims": ["C5"],
+  "changed_components": ["harness/adapters/pg.py", "harness/tests/test_remote_db_user.py", "harness/gate.py", "harness/red-records.json", "CLAIMS.md"],
+  "interfaces_reviewed": [
+    "harness/adapters/pg.py: remote_user() maps a bare role to '<role>.<pinned ref>' ONLY when ARV_REMOTE_TARGET is set; the loopback path and already-qualified migration/admin credential are byte-identical, and the verify-full pin stays on the command",
+    "the deployed read path: routes pass user='arv_app' (correct on the rig); the Supabase pooler identifies a tenant from '<role>.<ref>', so the bare name produced ENOIDENTIFIER and the route surfaced ARV-QRY-002",
+    "the pinned CA: the container mounts the Supabase Root 2021 CA extracted from the live chain, with verify-full; the TLS pin and the loopback guard are unchanged",
+    "harness/gate.py + red-records.json: a new stdlib suite is registered (ARV-RED-008 class) with a typed red record and one disclosed test-setup amendment"
+  ],
+  "v_model": {
+    "component_verification": ["run-01: the remote-user suite exit 0 (ARV-RMT-006/007/008)"],
+    "integration_verification": ["run-02: the image rebuilds with the repaired adapter through STEP 12"],
+    "system_verification": ["probe.txt: after the fix, the public authenticated GET /api/v1/sources returned {\"rows\":[],\"more\":false,\"api_version\":1}; before it returned ARV-QRY-002 with ENOIDENTIFIER in the kernel stderr"],
+    "validation": ["run-03: canonical layer GREEN; the remote five required checks on the PR head are authoritative"]
+  },
+  "failure_modes": [
+    {"id": "FM-110-1", "scenario": "a locally-correct bare runtime role reaches the tenant-scoped pooler", "expected": "the pooler-qualified '<role>.<ref>' in remote mode only", "observed": "RED ARV-RMT-006 at the test-only commit; the deployed route returned ARV-QRY-002/ENOIDENTIFIER", "control": "remote_user() keyed on ARV_REMOTE_TARGET with a pinned ref", "proof_ids": ["red.txt", "run-01", "probe.txt"]},
+    {"id": "FM-110-2", "scenario": "the remote mapping leaks into the rig path or the migration credential", "expected": "loopback and already-qualified users unchanged", "observed": "ARV-RMT-008 GREEN; 22/22 remote migrations still verified", "control": "remote-only mapping with a dot guard", "proof_ids": ["run-01"]}
+  ],
+  "findings": [
+    {"id": "SEV-1", "severity": "P1", "status": "resolved", "evidence": "the deployed authenticated /api/v1/sources returned ARV-QRY-002; the kernel reported (ENOIDENTIFIER) no tenant identifier provided because psql used -U arv_app", "disposition": "fixed in PR: remote_user() applies '<role>.<ref>' in the guarded remote mode; the public route now returns a 200 page"}
+  ],
+  "not_verified": [
+    "no write/import/export/purge lifecycle was re-run against the deployed surface",
+    "no MCP agent credential was available",
+    "no R2 object-store I/O",
+    "the image and containers were rebuilt locally, not on a remote always-on host",
+    "the remote five checks on the PR head are authoritative"
+  ],
+  "builder_context": "builder-local-agent-session66 (opencode, the owner's local machine)",
+  "reviewer_context": "reviewer-inline-verification on this PR (the same account; a declared distinct-context limit per ARV-SEV-007 — the D-042 review comment is the floor)",
+  "disposition": "PASS",
+  "review_summary": "PASS — the production read path was genuinely broken (a bare arv_app cannot identify a tenant to Supabase's pooler), proven RED in a stdlib suite and in the deployed route, then repaired with a remote-only user mapping that leaves the rig path and the pinned verify-full/TLS guards untouched. A real authenticated public read now succeeds. No infrastructure definition or credential value entered the repo.",
+  "sheet_section": true
+}

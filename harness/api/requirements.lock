@@ -1,57 +1,57 @@
 # Arivo runtime dependency lock — Wave D (FastAPI API + production PostgreSQL adapter)
 
-LAW-08 approval note (the owner's execution authority D-047 — the runbook's §3.2
-names this exact minimum set; this note IS the required approval record):
+# LAW-08 approval note (the owner's execution authority D-047 — the runbook's §3.2
+# names this exact minimum set; this note IS the required approval record):
 
-  * fastapi 0.164.0        — the HTTP adapter boundary (§11.1)
-  * starlette 1.10.0       — fastapi's own ASGI substrate (transitive, pinned)
-  * uvicorn 0.54.0         — ASGI serving (§11.1)
-  * psycopg 3.3.9          — the production pooled PostgreSQL driver (§10)
-  * psycopg-binary 3.3.9   — the driver's compiled binary wheel
-  * psycopg-pool 3.3.3     — the driver's connection pool (§10)
-  * pyjwt 2.15.1           — asymmetric JWT verification (§8.3)
+#   * fastapi 0.164.0        — the HTTP adapter boundary (§11.1)
+#   * starlette 1.10.0       — fastapi's own ASGI substrate (transitive, pinned)
+#   * uvicorn 0.54.0         — ASGI serving (§11.1)
+#   * psycopg 3.3.9          — the production pooled PostgreSQL driver (§10)
+#   * psycopg-binary 3.3.9   — the driver's compiled binary wheel
+#   * psycopg-pool 3.3.3     — the driver's connection pool (§10)
+#   * pyjwt 2.15.1           — asymmetric JWT verification (§8.3)
 
-Transitive closure (pinned for auditability; every wheel SHA256-verified):
+# Transitive closure (pinned for auditability; every wheel SHA256-verified):
 
-  annotated-doc 0.0.7 · annotated-types 0.8.0 · anyio 4.16.0 · click 8.5.1 ·
-  h11 0.16.0 · idna 3.20 · opentelemetry-api 1.45.2 (uvicorn's optional
-  observability path) · pydantic 2.14.3 · pydantic-core 2.50.4 ·
-  typing-extensions 4.16.0 · typing-inspection 0.4.5
+#   annotated-doc 0.0.7 · annotated-types 0.8.0 · anyio 4.16.0 · click 8.5.1 ·
+#   h11 0.16.0 · idna 3.20 · opentelemetry-api 1.45.2 (uvicorn's optional
+#   observability path) · pydantic 2.14.3 · pydantic-core 2.50.4 ·
+#   typing-extensions 4.16.0 · typing-inspection 0.4.5
 
-Boundary rules (the runbook §3.2 + the repo's LAW-10):
-  HTTP-framework imports appear ONLY inside harness/api/ (the HTTP adapter
-  boundary); the DB driver ONLY inside harness/adapters/pgprod.py (the DB
-  adapter boundary); jwt ONLY inside the auth boundary module. The kernel
-  (commands.py / query.py) never imports any of them.
+# Boundary rules (the runbook §3.2 + the repo's LAW-10):
+#   HTTP-framework imports appear ONLY inside harness/api/ (the HTTP adapter
+#   boundary); the DB driver ONLY inside harness/adapters/pgprod.py (the DB
+#   adapter boundary); jwt ONLY inside the auth boundary module. The kernel
+#   (commands.py / query.py) never imports any of them.
 
-pycparser==3.12  a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e
-cffi==2.1.1  c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf
-cryptography==50.0.2  9dab55f57c74c3cad24c323bacbbd04be4705ba6eb0d92e920b1fc4837ed5079
+pycparser==3.12 --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e
+cffi==2.1.1 --hash=sha256:c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf
+cryptography==50.0.2 --hash=sha256:9dab55f57c74c3cad24c323bacbbd04be4705ba6eb0d92e920b1fc4837ed5079
 
 ## The exact pin set (name==version  sha256-of-wheel)
 
-annotated-doc==0.0.7  6bc31bbbec6dfaaedc1676dbc11dbda96fe22a2b5c400e9ebad113fec44a9dc6
-annotated-types==0.8.0  f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0
-anyio==4.16.0  c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026
-click==8.5.1  8bb5376d2006950386f8c6427613334a2acadc5f559cb80e638d00b4df957e37
-fastapi==0.164.0  6ec63b74a112a6acc22c87f29bb8cb209002050cfeb4f993b959e6caea65c468
-h11==0.16.0  63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86
-idna==3.20  ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c
-opentelemetry-api==1.45.2  2cbd737377e710ee740d261c94e93fa0f08e6d037c18f17513cc0a2d94479a34
-psycopg==3.3.9  d2d7d04a1ce6dab4f5b27316bea3b52585cafa2f2d631e5b09dd69823f5c26f6
-psycopg-binary==3.3.9  a99f0b9a19ed7a56bf5d6776456b8f15f5364db8853b0f5d184db394a45c391d
-psycopg-pool==3.3.3  9b9cd6a4fcec47a410f7e82d408540e7f77b478509e91b44c1a5457a13e5ff37
-pydantic==2.14.3  3f7b347782ab7e4cf4c798496ae3a82787d9f21ec12676a9c564355eeef8daa8
-pydantic-core==2.50.4  c81d98e27d9d9261909dcccab1ba5d6ea1c98b0bb9470e368604614fd1d36ddd
-pyjwt==2.15.1  42d59d631f7768a1028a64c7ff581a9bf7519804daf91fc5b6c56e30eec5e193
-starlette==1.10.0  478c0ab3b4ced6e82719849c118fa406f0278a3499c1a898cd15cd31bdc38ce4
-typing-extensions==4.16.0  481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8
-typing-inspection==0.4.5  bc210535442b39e1bf2805e0c7a17dfd6a4ace760c84c7f7d16245d23a6b1c39
-uvicorn==0.54.0  505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf
+annotated-doc==0.0.7 --hash=sha256:6bc31bbbec6dfaaedc1676dbc11dbda96fe22a2b5c400e9ebad113fec44a9dc6
+annotated-types==0.8.0 --hash=sha256:f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0
+anyio==4.16.0 --hash=sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026
+click==8.5.1 --hash=sha256:8bb5376d2006950386f8c6427613334a2acadc5f559cb80e638d00b4df957e37
+fastapi==0.164.0 --hash=sha256:6ec63b74a112a6acc22c87f29bb8cb209002050cfeb4f993b959e6caea65c468
+h11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86
+idna==3.20 --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c
+opentelemetry-api==1.45.2 --hash=sha256:2cbd737377e710ee740d261c94e93fa0f08e6d037c18f17513cc0a2d94479a34
+psycopg==3.3.9 --hash=sha256:d2d7d04a1ce6dab4f5b27316bea3b52585cafa2f2d631e5b09dd69823f5c26f6
+psycopg-binary==3.3.9 --hash=sha256:a99f0b9a19ed7a56bf5d6776456b8f15f5364db8853b0f5d184db394a45c391d
+psycopg-pool==3.3.3 --hash=sha256:9b9cd6a4fcec47a410f7e82d408540e7f77b478509e91b44c1a5457a13e5ff37
+pydantic==2.14.3 --hash=sha256:3f7b347782ab7e4cf4c798496ae3a82787d9f21ec12676a9c564355eeef8daa8
+pydantic-core==2.50.4 --hash=sha256:c81d98e27d9d9261909dcccab1ba5d6ea1c98b0bb9470e368604614fd1d36ddd
+pyjwt==2.15.1 --hash=sha256:42d59d631f7768a1028a64c7ff581a9bf7519804daf91fc5b6c56e30eec5e193
+starlette==1.10.0 --hash=sha256:478c0ab3b4ced6e82719849c118fa406f0278a3499c1a898cd15cd31bdc38ce4
+typing-extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8
+typing-inspection==0.4.5 --hash=sha256:bc210535442b39e1bf2805e0c7a17dfd6a4ace760c84c7f7d16245d23a6b1c39
+uvicorn==0.54.0 --hash=sha256:505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf
 
 ## Installation (deterministic)
 
-    pip install --no-deps --require-hashes -r harness/api/requirements.lock
+#     pip install --no-deps --require-hashes -r harness/api/requirements.lock
 
-(the wheels above are pure-py3-none-any or the cp312 manylinux binary; the
-runner is CPython 3.12 on ubuntu-latest — CI's own provisioning matches)
+# (the wheels above are pure-py3-none-any or the cp312 manylinux binary; the
+# runner is CPython 3.12 on ubuntu-latest — CI's own provisioning matches)
